@@ -122,6 +122,11 @@ Record of architecture and strategy decisions with reasoning.
 **Decision:** Write a planning document comparing 5-minute GitHub Actions, 1-minute VPS cron, and daemon approaches. Do not implement any infrastructure change yet.
 **Reason:** Current 6-hour cadence may miss entry points and delay resolution detection, but we have 0 resolved trades — faster cadence doesn't help until the system is validated. The memo identifies the cheapest path ($5/month Hetzner CX22) and a safe immediate improvement (reduce to 1-hour Actions, stays in free tier). Implementation deferred until cadence is proven insufficient.
 
+## D026 — Dashboard publish-path hardening + 1-hour cadence (2026-03-18)
+
+**Decision:** Five fixes: (1) status bar monitors summary.json and pipeline_report.json, (2) freshness shows oldest source mtime across all core files, (3) summary-dependent panels distinguish FAILED from EMPTY, (4) GitHub Actions cadence reduced from 6h to 1h (stays in free tier).
+**Reason:** Dashboard audit found freshness only tracked one file, status bar ignored evaluation data failures, and FAILED/EMPTY states were indistinguishable. 1-hour cadence is the cheapest safe improvement per the cadence decision memo (D025).
+
 ## D015 — Supplemental merge before save (2026-03-18)
 
 **Decision:** Move `relevant_markets_*.json` save to AFTER supplemental /markets merge.

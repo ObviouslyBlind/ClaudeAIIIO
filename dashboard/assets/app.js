@@ -34,6 +34,19 @@ function renderStateMessage(container, state, emptyMsg, failedMsg) {
     return false;
 }
 
+/** Check summary-dependent panel state. Returns true if the panel was consumed (FAILED/not loaded). */
+function checkSummaryState(container, result, panelName) {
+    if (result.state === LoadState.FAILED) {
+        container.innerHTML = `<div class="error-state">Failed to load summary data for ${escapeHtml(panelName)}.</div>`;
+        return true;
+    }
+    if (result.state !== LoadState.LOADED || !result.data) {
+        container.innerHTML = `<div class="empty-state">No ${escapeHtml(panelName)} data yet.</div>`;
+        return true;
+    }
+    return false;
+}
+
 // ---- FORMATTING HELPERS ----
 
 function escapeHtml(text) {
@@ -100,16 +113,27 @@ function initTabs() {
 
 // ---- HEADER STATS ----
 
-function renderHeaderStats(relevant, signals, ledger, meta) {
+function renderHeaderStats(relevant, signals, ledger, meta, summary, pipelineReport) {
     document.getElementById("stat-relevant").textContent =
         relevant.state === LoadState.LOADED ? relevant.data.length : "\u2014";
 
-    // Freshness from source data mtime, not browser clock
+    // Freshness: show the oldest source mtime across all core files.
+    // This way "3h ago" means the oldest file is 3h old, not the freshest.
     const freshnessEl = document.getElementById("stat-freshness");
     if (meta.state === LoadState.LOADED && meta.data.sources) {
-        const relSrc = meta.data.sources["relevant.json"];
-        if (relSrc && relSrc.modified_at) {
-            freshnessEl.textContent = formatFreshness(relSrc.modified_at);
+        const coreFiles = ["relevant.json", "signals.json", "ledger.json", "summary.json"];
+        let oldestMs = null;
+        for (const key of coreFiles) {
+            const src = meta.data.sources[key];
+            if (src && src.modified_at) {
+                const ms = new Date(src.modified_at).getTime();
+                if (!isNaN(ms) && (oldestMs === null || ms < oldestMs)) {
+                    oldestMs = ms;
+                }
+            }
+        }
+        if (oldestMs !== null) {
+            freshnessEl.textContent = formatFreshness(new Date(oldestMs).toISOString());
         } else {
             freshnessEl.textContent = "unknown";
         }
@@ -132,14 +156,19 @@ function renderHeaderStats(relevant, signals, ledger, meta) {
         document.getElementById("stat-pnl").textContent = "\u2014";
     }
 
-    // Data status bar
+    // Data status bar — monitors all core data files
     const statusBar = document.getElementById("data-status-bar");
-    const allStates = [relevant, signals, ledger];
-    const anyFailed = allStates.some(s => s.state === LoadState.FAILED);
-    const allEmpty = allStates.every(s => s.state === LoadState.EMPTY || s.state === LoadState.FAILED);
-    if (anyFailed) {
+    const coreStates = [relevant, signals, ledger];
+    const evalStates = [summary, pipelineReport];
+    const anyCoreFailed = coreStates.some(s => s.state === LoadState.FAILED);
+    const anyEvalFailed = evalStates.some(s => s && s.state === LoadState.FAILED);
+    const allEmpty = coreStates.every(s => s.state === LoadState.EMPTY || s.state === LoadState.FAILED);
+    if (anyCoreFailed) {
         statusBar.textContent = "some data failed to load";
         statusBar.className = "data-status data-status-error";
+    } else if (anyEvalFailed) {
+        statusBar.textContent = "evaluation data failed to load \u2014 breakdowns may be stale";
+        statusBar.className = "data-status data-status-warn";
     } else if (allEmpty) {
         statusBar.textContent = "no pipeline data \u2014 run fetch + signals first";
         statusBar.className = "data-status data-status-warn";
@@ -806,7 +835,8 @@ function renderPositionOutcomeLine(outcomes) {
 function renderOperatorSummary(result) {
     const container = document.getElementById("operator-summary");
     if (!container) return;
-    if (result.state !== LoadState.LOADED || !result.data.operator_summary) {
+    if (checkSummaryState(container, result, "operator summary")) return;
+    if (!result.data.operator_summary) {
         container.innerHTML = '<div class="empty-state">No operator summary yet.</div>';
         return;
     }
@@ -868,8 +898,8 @@ function renderOperatorSummary(result) {
 
 function renderBreakdownBracketSignals(result) {
     const container = document.getElementById("breakdown-bracket-signals");
-    if (result.state !== LoadState.LOADED || !result.data.breakdowns ||
-        !result.data.breakdowns.bracket_position) {
+    if (checkSummaryState(container, result, "bracket signals")) return;
+    if (!result.data.breakdowns || !result.data.breakdowns.bracket_position) {
         container.innerHTML = '<div class="empty-state">No bracket position data.</div>';
         return;
     }
@@ -902,8 +932,8 @@ function renderBreakdownBracketSignals(result) {
 
 function renderBreakdownBracketTrades(result) {
     const container = document.getElementById("breakdown-bracket-trades");
-    if (result.state !== LoadState.LOADED || !result.data.breakdowns ||
-        !result.data.breakdowns.bracket_position) {
+    if (checkSummaryState(container, result, "bracket trades")) return;
+    if (!result.data.breakdowns || !result.data.breakdowns.bracket_position) {
         container.innerHTML = '<div class="empty-state">No bracket position data.</div>';
         return;
     }
@@ -943,8 +973,8 @@ function renderBreakdownBracketTrades(result) {
 function renderPositionAssessment(result) {
     const container = document.getElementById("position-assessment");
     if (!container) return;
-    if (result.state !== LoadState.LOADED || !result.data.breakdowns ||
-        !result.data.breakdowns.bracket_position ||
+    if (checkSummaryState(container, result, "position assessment")) return;
+    if (!result.data.breakdowns || !result.data.breakdowns.bracket_position ||
         !result.data.breakdowns.bracket_position.position_assessment) {
         container.innerHTML = '<div class="empty-state">No position assessment data.</div>';
         return;
@@ -981,7 +1011,8 @@ function renderPositionAssessment(result) {
 
 function renderStrategyBProgress(result) {
     const container = document.getElementById("strategy-b-progress");
-    if (result.state !== LoadState.LOADED || !result.data.strategy_b_progress) {
+    if (checkSummaryState(container, result, "Strategy B progress")) return;
+    if (!result.data.strategy_b_progress) {
         container.innerHTML = '<div class="empty-state">No Strategy B progress data.</div>';
         return;
     }
@@ -1116,7 +1147,7 @@ async function refreshData(bustCache) {
         loadJSON("data/pipeline_report.json", bustCache),
     ]);
 
-    safeRender("header", () => renderHeaderStats(relevant, signals, ledger, meta));
+    safeRender("header", () => renderHeaderStats(relevant, signals, ledger, meta, summary, pipelineReport));
     safeRender("relevant-markets", () => renderRelevantMarkets(relevant));
     safeRender("signal-feed", () => renderSignalFeed(signals));
     safeRender("signals-full", () => renderSignalsFull(signals));
