@@ -112,6 +112,16 @@ Record of architecture and strategy decisions with reasoning.
 **Decision:** Track Strategy B readiness via 4 criteria: 10+ definitive outcomes, 2+ complete event cycles, profile differentiation, and position-matters evidence. Report progress in summary.json and dashboard.
 **Reason:** Prevents premature implementation of bracket-position-weighted trading. The checklist makes the "when" decision objective and visible rather than subjective.
 
+## D024 — Outcome reporting by bracket position (2026-03-18)
+
+**Decision:** Enhance bracket-position breakdowns to include full outcome data: wins, losses, expired, cancelled, win rate, average time to resolution, and a plain-English position assessment with recommendations.
+**Reason:** Bracket-position classification (D021) showed signal distribution, but not outcome quality. To decide whether to implement no_side@1.1 score modifiers, we need to know which positions actually win/lose after resolution. The assessment auto-generates verdicts ("outperforming", "neutral", "underperforming") and concrete recommendations ("consider reducing hot-bracket trades"). This keeps the decision evidence-based rather than speculative.
+
+## D025 — Cadence decision memo (2026-03-18)
+
+**Decision:** Write a planning document comparing 5-minute GitHub Actions, 1-minute VPS cron, and daemon approaches. Do not implement any infrastructure change yet.
+**Reason:** Current 6-hour cadence may miss entry points and delay resolution detection, but we have 0 resolved trades — faster cadence doesn't help until the system is validated. The memo identifies the cheapest path ($5/month Hetzner CX22) and a safe immediate improvement (reduce to 1-hour Actions, stays in free tier). Implementation deferred until cadence is proven insufficient.
+
 ## D015 — Supplemental merge before save (2026-03-18)
 
 **Decision:** Move `relevant_markets_*.json` save to AFTER supplemental /markets merge.
