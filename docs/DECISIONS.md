@@ -31,3 +31,23 @@ Record of architecture and strategy decisions with reasoning.
 
 **Decision:** Signals are TRADE, WATCH, or SKIP. Each includes a score (0-100) and list of reasons.
 **Reason:** Binary trade/no-trade misses the nuance of markets that may become tradeable. WATCH lets us track promising setups. Logged reasons make every decision auditable.
+
+## D007 — Events endpoint for discovery (2026-03-18)
+
+**Decision:** Use the Gamma `/events` endpoint as primary market discovery, not `/markets`.
+**Reason:** Bracket/count posting markets (negRisk grouped markets) do not appear on the `/markets` endpoint at all — confirmed by paginating 10,000 markets. They are only accessible via `/events`. Discovery priority: (1) direct known URLs, (2) exact slug lookup, (3) known pattern generation, (4) events pagination fallback, (5) `/markets` supplemental.
+
+## D008 — Source hierarchy (2026-03-18)
+
+**Decision:** Strict source hierarchy for discovery, validation, and cross-checking. See `docs/SOURCE_HIERARCHY.md`.
+**Reason:** Multiple sources exist with different reliability and access characteristics. XTracker is official resolution source but client-rendered. trumpstruth.org and muskmeter.live are accessible proxies for count estimation.
+
+## D009 — Dual-layer classification (2026-03-18)
+
+**Decision:** Classify at event-title level (primary), validate against bracket-question text (audit). Log disagreements, use event-level as primary.
+**Reason:** Event titles are more reliable for classification. Bracket questions are validation. Logging disagreements catches edge cases without breaking the pipeline.
+
+## D010 — Classifier plural posting keywords (2026-03-18)
+
+**Decision:** Changed `\btweet\b` to `\btweets?\b` and `\bpost\b` to `\bposts?\b` in POSTING_KEYWORDS.
+**Reason:** Real event titles use plural forms ("Elon Musk # tweets", "Trump # Truth Social posts"). The singular-only regex missed these. The `?` quantifier handles both forms.

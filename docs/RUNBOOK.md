@@ -14,8 +14,13 @@ How to run, test, and inspect the system.
 # Install dependencies
 pip install -r requirements.txt
 
-# Fetch markets
+# Fetch markets (events-first discovery)
 python scripts/fetch_markets.py
+# Discovery priority:
+#   1. Direct known URLs (from config/known_event_patterns.json)
+#   2. Exact event slug lookup
+#   3. Events pagination fallback (scans ~6000 events)
+#   4. /markets supplemental fallback
 
 # Run signal analysis
 python scripts/run_signals.py
@@ -28,6 +33,17 @@ python scripts/export_dashboard.py
 
 # Then open dashboard/index.html in a browser
 ```
+
+## Known-slug registry
+
+Static config at `polymarket_timer_bot/config/known_event_patterns.json`.
+
+To add a new market:
+1. Get the event URL from Polymarket (e.g. `https://polymarket.com/event/elon-musk-of-tweets-march-19-march-21`)
+2. Add the URL to `direct_urls` and the slug to `exact_slugs`
+3. Re-run `python scripts/fetch_markets.py`
+
+The slug is the path segment after `/event/` in the URL.
 
 ## How to test
 

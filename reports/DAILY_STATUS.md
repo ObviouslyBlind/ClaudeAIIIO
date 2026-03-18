@@ -2,37 +2,37 @@
 
 ## 2026-03-18 (latest)
 
-**Current status:** Phase 7 evaluation complete. Critical discovery bug found. Awaiting approval for fix.
+**Current status:** Discovery fix implemented and validated. System now finds live posting-count markets.
 
 ### What exists
-- Market ingestion, signal engine, paper-trade ledger, dashboard — all built and tested
-- 42 tests passing
+- Market ingestion with events-first discovery (5-layer priority)
+- Signal engine, paper-trade ledger, dashboard — all built and tested
+- 70 tests passing
 - Static dashboard (open `dashboard/index.html` in a browser)
 - All outputs labeled SIMULATED / PAPER TRADING ONLY
 
 ### Completed this session
-- Merged docs-status-sync branch into main
-- Full repo audit: code, docs, branches, data files
-- Phase 7 evaluation completed — revised (see reports/EVALUATION.md)
-- **CRITICAL FINDING:** Active posting-count markets exist on Polymarket but are invisible to the system
-  - Musk 48h tweet market (10 brackets, ends Mar 21) — OPEN
-  - Trump weekly Truth Social market (11 brackets, ends Mar 24) — OPEN
-  - Musk monthly tweet market (51 brackets) — partially OPEN
-- Root cause: system uses `/markets` API endpoint, but bracket/negRisk markets only exist on `/events` endpoint
-- Verified by paginating 10,000 markets — zero bracket markets found on `/markets`
-- Classifier confirmed working (4/4 real market questions correctly classified)
-- Signal engine confirmed working (produces correct signals on real market data)
-- Paper-trade integrity confirmed
-- Source hierarchy defined (XTracker, trumpstruth.org, muskmeter.live)
-- Implementation plan written — awaiting approval
+- Phase 7 evaluation: found discovery bug (bracket markets invisible to `/markets` endpoint)
+- Discovery fix implemented:
+  - Events endpoint support (`fetch_event_by_slug`, `fetch_events_paginated`)
+  - `MarketFamily` dataclass for grouped bracket markets
+  - Known-slug registry (`config/known_event_patterns.json`)
+  - Dual-layer classification (event-level + bracket validation)
+  - Fixed classifier regex for plural forms (tweets, posts)
+  - Updated `fetch_markets.py` with 5-layer discovery priority
+- Live validation results:
+  - 11 event families discovered (2 from known slugs + 9 from pagination)
+  - 290 bracket markets found and classified
+  - 10 TRADE signals generated from real live data
+  - All known example markets discovered, parsed, classified, and evaluated
+- 29 new tests added (70 total, all passing)
+- Docs updated: DECISIONS (D007-D010), RUNBOOK, SOURCE_HIERARCHY, TODO
 
-### Next (pending approval)
-- Add events-endpoint discovery to polymarket.py
-- Add event pagination with client-side keyword filtering
-- Add known slug pattern registry for direct lookup
-- Add event-aware fields to Market model
-- Run pipeline against live active markets
+### Next
 - Delete stale branches (master, docs-cleanup, docs-status-sync)
+- Resolve Q004 (market resolution timing)
+- XTracker data extraction (client-rendered, no API found)
+- Auto-generate date-based slugs from series patterns
 
 ### Blockers
-- Discovery fix requires code changes — stopped for approval per CLAUDE.md rules
+- None

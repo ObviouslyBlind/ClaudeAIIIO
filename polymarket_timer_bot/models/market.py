@@ -101,3 +101,43 @@ class Market:
             "yes_price": self.yes_price,
             "hours_until_expiry": self.hours_until_expiry,
         }
+
+
+@dataclass
+class MarketFamily:
+    """A grouped event containing bracket sub-markets (e.g. tweet-count ranges).
+
+    Preserves parent event identity and links all child bracket markets.
+    """
+
+    event_id: str
+    event_slug: str
+    event_title: str
+    end_date: Optional[datetime]
+    resolution_source: str
+    series_slug: str
+    neg_risk_market_id: str
+    active: bool
+    closed: bool
+    brackets: list[Market] = field(default_factory=list)
+
+    # Classification (event-level)
+    market_type: str = ""
+    is_timer_market: bool = False
+
+    def to_dict(self) -> dict:
+        return {
+            "event_id": self.event_id,
+            "event_slug": self.event_slug,
+            "event_title": self.event_title,
+            "end_date": self.end_date.isoformat() if self.end_date else None,
+            "resolution_source": self.resolution_source,
+            "series_slug": self.series_slug,
+            "neg_risk_market_id": self.neg_risk_market_id,
+            "active": self.active,
+            "closed": self.closed,
+            "market_type": self.market_type,
+            "is_timer_market": self.is_timer_market,
+            "bracket_count": len(self.brackets),
+            "brackets": [m.to_dict() for m in self.brackets],
+        }

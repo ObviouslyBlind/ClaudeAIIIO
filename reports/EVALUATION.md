@@ -197,116 +197,126 @@ XTracker is the **official resolution source** for both Musk and Trump posting m
 | Current status | **OPEN — ACTIVE** | Ends March 21 (3 days), actively trading ($102K volume) |
 | Sample prices | 65-89 tweets: YES=0.315, NO=0.685; 90-114: YES=0.22, NO=0.79 | Multiple brackets in TRADE range |
 
-### Where it breaks today
+### Where it broke (pre-fix)
 
-All three markets are parseable, classifiable, and signal-compatible. The **only** break point is discovery: `fetch_markets.py` never calls the `/events` endpoint, so these markets never enter the pipeline.
-
-### Signal engine dry-run against real active markets
-
-Ran the signal engine against actual live market data (fetched from API):
-
-| Bracket | YES | NO | Expiry | Signal | Score | Reasoning |
-|---|---|---|---|---|---|---|
-| Musk 65-89 tweets (Mar 19-21) | 0.315 | 0.685 | ~72h | WATCH | ~45 | NO price below TRADE threshold |
-| Musk 90-114 tweets (Mar 19-21) | 0.22 | 0.79 | ~72h | TRADE | ~65 | NO >= 0.70, within 72h |
-| Trump 80-99 posts (Mar 17-24) | 0.29 | 0.71 | ~151h | SKIP | 15 | Expiry > 72h max |
-| Trump 100-119 posts (Mar 17-24) | 0.265 | 0.735 | ~151h | SKIP | 15 | Expiry > 72h max |
-
-Note: The Trump weekly markets exceed the 72h expiry max. The Musk 48h markets are within range. This is correct behavior — the signal engine is conservative about time horizon.
+All three markets were parseable, classifiable, and signal-compatible. The **only** break point was discovery: `fetch_markets.py` never called the `/events` endpoint.
 
 ---
 
-## 6. Confirmed vs Inconclusive vs Follow-Up
+## 6. Implementation Results (Post-Fix)
+
+### Discovery fix implemented
+
+Discovery now uses a 5-layer priority:
+1. Direct known URLs → exact slug lookup
+2. Exact event slugs from registry
+3. Known slug pattern generation (future)
+4. Events pagination fallback (client-side keyword filtering)
+5. `/markets` supplemental
+
+### Live validation (2026-03-18 10:24 UTC)
+
+| Metric | Result |
+|---|---|
+| Events discovered | 11 |
+| Relevant event families | 11 |
+| Total bracket markets | 290 |
+| Relevant bracket markets | 290 |
+| TRADE signals | 10 |
+| SKIP signals | 280 |
+| Tests passing | 70/70 |
+
+### Known market validation
+
+| Market | Discovered? | Parsed? | Classified? | Grouped? | Signal? |
+|---|---|---|---|---|---|
+| Elon Musk # tweets Mar 19-21 | YES (direct slug) | YES (10 brackets) | musk_posting | YES (elon-tweets-48h) | Multiple SKIP (77h > 72h max) |
+| Trump # Truth Social Mar 17-24 | YES (direct slug) | YES (11 brackets) | trump_posting | YES (trump-truth-social) | All SKIP (149h > 72h max) |
+| Elon Musk # tweets Mar 6-13 | YES (pagination) | YES | musk_posting | YES | CLOSED (resolved) |
+
+### Additional markets found via pagination
+
+| Event | Series | Brackets | Status |
+|---|---|---|---|
+| Elon Musk # tweets March 2026 | elon-tweet-daily | 51 | Partially open |
+| Elon Musk # tweets April 2026 | elon-tweet-daily | 66 | Open |
+| Elon Musk # tweets Mar 17-24 | elon-tweets | 30 | Open |
+| Elon Musk # tweets Mar 13-20 | elon-tweets | 30 | Open |
+| Trump post this week Mar 16-22 | trump-post-weekly | 30 | Open |
+| Elon Musk # tweets Mar 16-18 | elon-tweets-48h | 10 | Open (5.6h left) |
+| Trump posts Mar 13-20 | trump-truth-social | 11 | Open |
+| Trump posts Mar 20-27 | trump-truth-social | 11 | Open |
+| Elon Musk # tweets Mar 20-27 | elon-tweets | 30 | Open |
+
+### Top TRADE signals from live data
+
+| Bracket | Event | NO | Expiry | Score |
+|---|---|---|---|---|
+| 90-114 | Musk tweets Mar 16-18 | 0.835 | 5.6h | 92 |
+| 120-139 | Trump posts Mar 13-20 | 0.950 | 53.6h | 90 |
+| 200-219 | Musk tweets Mar 13-20 | 0.938 | 53.6h | 88 |
+| 300-319 | Musk tweets Mar 13-20 | 0.930 | 53.6h | 87 |
+| 60-79 | Trump posts Mar 13-20 | 0.900 | 53.6h | 82 |
+
+---
+
+## 7. Confirmed vs Inconclusive vs Follow-Up (Post-Fix)
 
 ### Confirmed Working
 
-- **Classifier:** Correctly classifies all real bracket market questions (4/4 tested)
-- **Signal engine:** Produces correct TRADE/WATCH/SKIP for real market prices and expiries
-- **Paper-trade ledger:** Integrity, provenance, persistence, duplicate prevention all verified
-- **Market parser:** Successfully parses bracket market data from events endpoint response
-- **Pipeline error handling:** Gracefully handles zero-relevant-markets case
-- **42 unit tests:** All passing
+- **Discovery:** 11 event families found via 5-layer discovery (2 from known slugs + 9 from pagination)
+- **Event parsing:** All 290 bracket markets parsed with event metadata and group linkage
+- **Classifier:** Dual-layer classification working (event-level + bracket validation, no disagreements)
+- **Signal engine:** 10 TRADE signals, 280 SKIPs — correct behavior on real prices and expiries
+- **Paper-trade ledger:** Integrity verified (previous evaluation still valid)
+- **70 tests:** All passing (29 new + 41 existing)
 
-### Confirmed Broken: Discovery
+### Confirmed Fixed
 
-- **`/markets` endpoint does not return bracket/negRisk markets** — verified by paginating 10,000 markets
-- **System has no events-endpoint path** — the only way to find these markets
-- **API text search is non-functional** — `_q`, `tag`, `series_slug` params all ignored by Gamma API
-- **Only exact `slug=` works on `/events`** — meaning we need either deep pagination or known slugs
+- **Discovery failure:** System now finds bracket/negRisk posting-count markets via `/events` endpoint
+- **Classifier plural bug:** `\btweet\b` → `\btweets?\b`, `\bpost\b` → `\bposts?\b` (D010)
+- **No event awareness:** `MarketFamily` + event fields preserve group structure
 
-### Inconclusive (needs live data flowing through)
+### Inconclusive (needs more runtime)
 
-- Signal threshold calibration (conservative thresholds look reasonable but untested on real flow)
-- Paper-trade P&L over time (no real trades opened yet)
-- Dashboard with real data
-- XTracker data extraction (client-rendered, no API found)
+- Signal threshold calibration on real flow
+- Paper-trade P&L tracking over time
+- Dashboard display with real bracket data
+- XTracker programmatic access
 
-### Follow-Up Actions Required
+### Remaining Follow-Ups
 
-**Must-do (to make the system functional):**
-
-1. Add events-endpoint discovery to `polymarket.py`
-2. Add event pagination with client-side keyword filtering to `fetch_markets.py`
-3. Add known slug pattern registry for direct lookup
-4. Add `event_slug` / `event_title` / `bracket_label` fields to Market model
-5. Update tests for new discovery paths
-
-**Should-do (improves reliability):**
-
-6. Add direct URL/slug ingestion capability
-7. Add event-level classification (classify once per event, propagate to brackets)
-8. Investigate XTracker data extraction for count estimation
-
-**Nice-to-have (not blocking):**
-
-9. Resolution script for auto-closing trades
-10. External source integration (trumpstruth.org, muskmeter.live) for count cross-checks
+1. **Q004 — Market resolution timing:** Trades still can't auto-resolve
+2. **XTracker extraction:** Client-rendered, no public API found
+3. **Slug pattern generation:** Auto-generate date-based slugs from series patterns
+4. **External source integration:** trumpstruth.org, muskmeter.live for count cross-checks
 
 ---
 
-## 7. Files Proposed for Edit
+## 8. Files Changed
 
-| File | Change | Type |
-|---|---|---|
-| `polymarket_timer_bot/adapters/polymarket.py` | Add `fetch_events()`, `fetch_event_by_slug()`, `parse_event_markets()` | Code change |
-| `polymarket_timer_bot/models/market.py` | Add `event_slug`, `event_title`, `bracket_label` fields | Code change |
-| `scripts/fetch_markets.py` | Use events endpoint as primary discovery | Code change |
-| `data/known_event_patterns.json` (new) | Registry of known slug patterns | New file |
-| `tests/test_adapters.py` | Add tests for event parsing + slug lookup | Code change |
-| `tests/test_discovery.py` (new) | Integration tests for event-based discovery | New file |
-| `docs/DECISIONS.md` | Document discovery architecture change | Docs |
-| `docs/OPEN_QUESTIONS.md` | Update Q004, add Q005 (XTracker access) | Docs |
+| File | Change |
+|---|---|
+| `polymarket_timer_bot/models/market.py` | Added `MarketFamily`, event-aware fields to `Market` |
+| `polymarket_timer_bot/adapters/polymarket.py` | Added events endpoint functions, URL extraction, event parsing |
+| `polymarket_timer_bot/adapters/classifier.py` | Added dual-layer classification, fixed plural regex |
+| `polymarket_timer_bot/config/__init__.py` | New — config loader |
+| `polymarket_timer_bot/config/known_event_patterns.json` | New — known slug registry |
+| `scripts/fetch_markets.py` | Rewritten for events-first discovery |
+| `docs/SOURCE_HIERARCHY.md` | New — source hierarchy documentation |
+| `docs/DECISIONS.md` | Added D007-D010 |
+| `docs/RUNBOOK.md` | Updated with events discovery workflow |
+| `docs/TODO.md` | Marked discovery fix complete |
+| `reports/DAILY_STATUS.md` | Updated with implementation results |
+| `tests/test_adapters.py` | Added 18 new tests |
+| `tests/test_discovery.py` | New — 11 discovery integration tests |
 
-### What does NOT change
+### Not changed
 
-- `signals/engine.py` — signal logic is correct
-- `papertrade/` — paper-trade system is correct
+- `signals/engine.py` — signal logic correct, no changes needed
+- `papertrade/` — paper-trade system correct
 - `dashboard/` — no dashboard changes
-- Existing test files — add new tests, don't modify existing
-
----
-
-## 8. Proposed Implementation Order
-
-| Step | Description | Risk | Estimate |
-|---|---|---|---|
-| 1 | Add `fetch_events()` and `fetch_event_by_slug()` to polymarket.py | Low — additive | Small |
-| 2 | Add `parse_event_markets()` to handle event→market extraction | Low — additive | Small |
-| 3 | Add event-aware fields to Market model | Low — backwards compatible | Small |
-| 4 | Create `known_event_patterns.json` with slug patterns | None — data file | Trivial |
-| 5 | Update `fetch_markets.py` to use events + known slugs | Medium — changes primary discovery | Medium |
-| 6 | Add new tests for discovery paths | None — additive | Small |
-| 7 | Run full pipeline and verify it finds the active markets | Validation | Small |
-| 8 | Update docs (DECISIONS, OPEN_QUESTIONS) | None | Small |
-
-### Validation plan
-
-After implementation:
-1. Run `fetch_markets.py` — should find the 2 active events (21 bracket markets)
-2. Run `run_papertrade.py` — should evaluate all 21 markets, produce signals for brackets in range
-3. Verify classifier catches all bracket markets
-4. Verify signal engine produces correct TRADE/WATCH/SKIP for real prices
-5. Verify no regressions on existing 42 tests
+- Existing tests — all preserved, no modifications
 
 ---
 
