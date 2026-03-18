@@ -78,16 +78,26 @@ The pipeline runs automatically via GitHub Actions every 6 hours (00:00, 06:00, 
 
 ### Alerting
 
-Three alert channels:
+Four alert conditions are checked each pipeline run:
 
-1. **Pipeline report** — `reports/pipeline_report.json` shows per-step success/failure
-2. **GitHub Actions summary** — each run writes evaluation summary to the Actions job summary
-3. **GitHub email notifications** — GitHub sends email on workflow failure (enabled by default in Settings → Notifications)
+| Condition | Level | Meaning |
+|---|---|---|
+| Zero relevant markets found | WARNING | Fetch may have failed or no Musk/Trump markets are active |
+| Open trades exist | INFO | Confirms the system is actively trading |
+| Trades resolved | INFO | Shows wins/losses from closed markets |
+| Zero signals evaluated | WARNING | Pipeline may have no input data |
+
+Three delivery channels:
+
+1. **Dashboard Evaluation tab** — alert banners rendered at top, auto-refreshes every 60s
+2. **`reports/pipeline_report.json`** — machine-readable per-step status
+3. **GitHub Actions** — job summary with full evaluation data; email on workflow failure (Settings → Notifications)
 
 To check pipeline health:
-- Dashboard Evaluation tab shows latest summary and pipeline status
+- Dashboard Evaluation tab shows alerts, breakdowns, and pipeline status
 - `https://github.com/ObviouslyBlind/ClaudeAIIIO/actions` shows all runs
 - `reports/pipeline_report.json` has machine-readable step results
+- `reports/evaluation_summary.json` has full summary with alerts
 
 ---
 

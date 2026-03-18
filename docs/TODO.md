@@ -39,16 +39,18 @@
 - [x] Evaluation summary — generate_summary.py + Evaluation dashboard tab
 - [x] Pipeline alerting — report JSON + Actions summary + failure emails
 - [x] Dashboard Evaluation tab — per-profile metrics, pipeline status
+- [x] Evaluation breakdowns — by subject, event family, expiry window, skip reason
+- [x] Realized vs unrealized PnL in summary and dashboard
+- [x] Trade breakdowns — by subject and event family with PnL
+- [x] Alert flags — zero markets, new trades, resolutions, no signals
 
 ## Current phase: Baseline evaluation + operational monitoring
 
 - [ ] Wait for real market resolutions (need closed markets with winners)
-- [ ] Gather first comparative evidence (signal counts, trade counts, P&L)
 - [ ] End-to-end resolution test with real closed markets
-- [ ] Record findings in evaluation template
 - [ ] Assess whether NO-side strategy differentiates across profiles (Q005)
-- [ ] Decide on Strategy B candidate based on evidence
-- [ ] Add first real count-aware input (see Q006 / SOURCE_HIERARCHY.md)
+- [ ] Decide on Strategy B candidate based on evidence (see threshold criteria below)
+- [ ] Add bracket-position-awareness to signal engine (Q013 — smallest useful first step)
 
 ## Next (after baseline evaluation)
 

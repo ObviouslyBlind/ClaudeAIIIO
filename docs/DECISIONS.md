@@ -87,6 +87,16 @@ Record of architecture and strategy decisions with reasoning.
 **Decision:** Three alert paths: (1) `pipeline_report.json` for machine-readable step status, (2) GitHub Actions job summary for human review, (3) GitHub's built-in email notifications on workflow failure.
 **Reason:** No external services needed. GitHub's notification system already handles failure alerting. The report JSON enables dashboard rendering of pipeline health.
 
+## D019 — Evaluation breakdowns by subject, event, expiry, skip reason (2026-03-18)
+
+**Decision:** Add dimensional breakdowns to `summary.json`: signals by subject (musk/trump), by event family, by expiry window (0-12h/12-24h/24-48h/48-72h/72h+), and by skip reason (price_too_high, market_closed, expiry_too_far, etc.). Add trade breakdowns by subject and event family with realized PnL and unrealized exposure.
+**Reason:** Per-profile totals tell you how much is happening, but not where edge exists. Breakdowns answer: "Which subject drives more trades?", "Which events are tradeable?", "What expiry window produces trades?", "Why are signals being skipped?" These are the questions needed to evaluate whether Strategy B adds value and where count-aware inputs would help most.
+
+## D020 — Alert flags in summary (2026-03-18)
+
+**Decision:** `generate_summary.py` produces `alerts` array with structured alert objects (`{level, message}`). Four alert conditions: zero relevant markets, open trades count, trade resolutions, and zero signals evaluated. Rendered as colored banners in the Evaluation tab.
+**Reason:** Minimal operational visibility without external services. Alerts appear in the dashboard (visible on auto-refresh), in the pipeline CLI output, and in the GitHub Actions job summary. Three channels, zero infrastructure.
+
 ## D015 — Supplemental merge before save (2026-03-18)
 
 **Decision:** Move `relevant_markets_*.json` save to AFTER supplemental /markets merge.

@@ -528,15 +528,15 @@ function renderEvaluationSummary(result) {
             <td style="color: var(--red)">${t.losses || 0}</td>
             <td style="color: var(--text-dim)">${t.expired || 0}</td>
             <td>${t.win_rate_pct || 0}%</td>
-            <td class="${pnlCls}">${formatPnl(pnl)}</td>
-            <td>$${(t.open_exposure || 0).toFixed(0)}</td>
+            <td class="${pnlCls}">${formatPnl(t.realized_pnl || 0)}</td>
+            <td>$${(t.unrealized_exposure || t.open_exposure || 0).toFixed(0)}</td>
             <td style="color: var(--text-dim)">${avgRes}</td>
         </tr>`;
     }).join("");
 
     // Totals row (null-safe)
-    const totPnl = totals.total_pnl || 0;
-    const totPnlCls = totPnl >= 0 ? "pnl-positive" : "pnl-negative";
+    const totRealizedPnl = totals.realized_pnl || totals.total_pnl || 0;
+    const totPnlCls = totRealizedPnl >= 0 ? "pnl-positive" : "pnl-negative";
 
     const html = `
         <div class="eval-freshness">
@@ -547,7 +547,7 @@ function renderEvaluationSummary(result) {
                 <th>profile</th>
                 <th>trade</th><th>watch</th><th>skip</th>
                 <th>trades</th><th>open</th><th>won</th><th>lost</th><th>exp</th>
-                <th>win%</th><th>p&amp;l</th><th>exposure</th><th>avg res</th>
+                <th>win%</th><th>realized p&amp;l</th><th>exposure</th><th>avg res</th>
             </tr></thead>
             <tbody>
                 ${profileRows}
@@ -560,8 +560,8 @@ function renderEvaluationSummary(result) {
                     <td style="color: var(--red)">${totals.losses || 0}</td>
                     <td>\u2014</td>
                     <td>${totals.win_rate_pct || 0}%</td>
-                    <td class="${totPnlCls}">${formatPnl(totPnl)}</td>
-                    <td>$${(totals.open_exposure || 0).toFixed(0)}</td>
+                    <td class="${totPnlCls}">${formatPnl(totRealizedPnl)}</td>
+                    <td>$${(totals.unrealized_exposure || totals.open_exposure || 0).toFixed(0)}</td>
                     <td>\u2014</td>
                 </tr>
             </tbody>
@@ -605,6 +605,182 @@ function renderPipelineStatus(result) {
             <thead><tr><th>step</th><th>status</th></tr></thead>
             <tbody>${stepRows}</tbody>
         </table>`;
+}
+
+// ---- ALERTS ----
+
+function renderAlerts(result) {
+    const container = document.getElementById("eval-alerts");
+    if (!container) return;
+    if (result.state !== LoadState.LOADED || !result.data.alerts || result.data.alerts.length === 0) {
+        container.innerHTML = "";
+        return;
+    }
+
+    const alerts = result.data.alerts;
+    container.innerHTML = alerts.map(a => {
+        const cls = a.level === "error" ? "alert-error" :
+                    a.level === "warning" ? "alert-warning" : "alert-info";
+        return `<div class="alert ${cls}">${escapeHtml(a.level.toUpperCase())}: ${escapeHtml(a.message)}</div>`;
+    }).join("");
+}
+
+// ---- BREAKDOWNS ----
+
+function renderBreakdownSubject(result) {
+    const container = document.getElementById("breakdown-subject");
+    if (result.state !== LoadState.LOADED || !result.data.breakdowns) {
+        container.innerHTML = '<div class="empty-state">No breakdown data.</div>';
+        return;
+    }
+    const data = result.data.breakdowns.signals.by_subject || {};
+    if (Object.keys(data).length === 0) {
+        container.innerHTML = '<div class="empty-state">No signal data by subject.</div>';
+        return;
+    }
+    const rows = Object.entries(data).map(([subj, counts]) => {
+        const total = (counts.trade || 0) + (counts.watch || 0) + (counts.skip || 0);
+        return `<tr>
+            <td>${escapeHtml(subj)}</td>
+            <td style="color: var(--green-bright)">${counts.trade || 0}</td>
+            <td>${counts.watch || 0}</td>
+            <td style="color: var(--text-dim)">${counts.skip || 0}</td>
+            <td>${total}</td>
+        </tr>`;
+    }).join("");
+    container.innerHTML = `<table>
+        <thead><tr><th>subject</th><th>trade</th><th>watch</th><th>skip</th><th>total</th></tr></thead>
+        <tbody>${rows}</tbody></table>`;
+}
+
+function renderBreakdownSkipReason(result) {
+    const container = document.getElementById("breakdown-skip-reason");
+    if (result.state !== LoadState.LOADED || !result.data.breakdowns) {
+        container.innerHTML = '<div class="empty-state">No breakdown data.</div>';
+        return;
+    }
+    const data = result.data.breakdowns.signals.by_skip_reason || {};
+    if (Object.keys(data).length === 0) {
+        container.innerHTML = '<div class="empty-state">No skip reasons recorded.</div>';
+        return;
+    }
+    const rows = Object.entries(data).map(([reason, count]) =>
+        `<tr><td>${escapeHtml(reason.replace(/_/g, " "))}</td><td>${count}</td></tr>`
+    ).join("");
+    container.innerHTML = `<table>
+        <thead><tr><th>reason</th><th>count</th></tr></thead>
+        <tbody>${rows}</tbody></table>`;
+}
+
+function renderBreakdownExpiry(result) {
+    const container = document.getElementById("breakdown-expiry");
+    if (result.state !== LoadState.LOADED || !result.data.breakdowns) {
+        container.innerHTML = '<div class="empty-state">No breakdown data.</div>';
+        return;
+    }
+    const data = result.data.breakdowns.signals.by_expiry || {};
+    if (Object.keys(data).length === 0) {
+        container.innerHTML = '<div class="empty-state">No expiry data.</div>';
+        return;
+    }
+    const rows = Object.entries(data).map(([bucket, counts]) =>
+        `<tr>
+            <td>${escapeHtml(bucket)}</td>
+            <td style="color: var(--green-bright)">${counts.trade || 0}</td>
+            <td>${counts.watch || 0}</td>
+            <td style="color: var(--text-dim)">${counts.skip || 0}</td>
+        </tr>`
+    ).join("");
+    container.innerHTML = `<table>
+        <thead><tr><th>expiry window</th><th>trade</th><th>watch</th><th>skip</th></tr></thead>
+        <tbody>${rows}</tbody></table>`;
+}
+
+function renderBreakdownTradesSubject(result) {
+    const container = document.getElementById("breakdown-trades-subject");
+    if (result.state !== LoadState.LOADED || !result.data.breakdowns) {
+        container.innerHTML = '<div class="empty-state">No breakdown data.</div>';
+        return;
+    }
+    const data = result.data.breakdowns.trades.by_subject || {};
+    if (Object.keys(data).length === 0) {
+        container.innerHTML = '<div class="empty-state">No trades by subject.</div>';
+        return;
+    }
+    const rows = Object.entries(data).map(([subj, s]) => {
+        const rpnl = s.realized_pnl || 0;
+        const pnlCls = rpnl >= 0 ? "pnl-positive" : "pnl-negative";
+        return `<tr>
+            <td>${escapeHtml(subj)}</td>
+            <td>${s.total || 0}</td>
+            <td style="color: var(--blue)">${s.open || 0}</td>
+            <td style="color: var(--green-bright)">${s.won || 0}</td>
+            <td style="color: var(--red)">${s.lost || 0}</td>
+            <td style="color: var(--text-dim)">${s.expired || 0}</td>
+            <td class="${pnlCls}">${formatPnl(rpnl)}</td>
+            <td>$${(s.unrealized_exposure || 0).toFixed(0)}</td>
+        </tr>`;
+    }).join("");
+    container.innerHTML = `<table>
+        <thead><tr><th>subject</th><th>trades</th><th>open</th><th>won</th><th>lost</th><th>exp</th><th>realized p&amp;l</th><th>exposure</th></tr></thead>
+        <tbody>${rows}</tbody></table>`;
+}
+
+function renderBreakdownEvent(result) {
+    const container = document.getElementById("breakdown-event");
+    if (result.state !== LoadState.LOADED || !result.data.breakdowns) {
+        container.innerHTML = '<div class="empty-state">No breakdown data.</div>';
+        return;
+    }
+    const data = result.data.breakdowns.signals.by_event || {};
+    if (Object.keys(data).length === 0) {
+        container.innerHTML = '<div class="empty-state">No event data.</div>';
+        return;
+    }
+    const rows = Object.entries(data).map(([slug, counts]) => {
+        const total = (counts.trade || 0) + (counts.watch || 0) + (counts.skip || 0);
+        const title = counts.event_title || slug;
+        return `<tr>
+            <td title="${escapeHtml(slug)}">${escapeHtml(title.length > 60 ? title.slice(0, 57) + "..." : title)}</td>
+            <td style="color: var(--green-bright)">${counts.trade || 0}</td>
+            <td>${counts.watch || 0}</td>
+            <td style="color: var(--text-dim)">${counts.skip || 0}</td>
+            <td>${total}</td>
+        </tr>`;
+    }).join("");
+    container.innerHTML = `<table>
+        <thead><tr><th>event</th><th>trade</th><th>watch</th><th>skip</th><th>total</th></tr></thead>
+        <tbody>${rows}</tbody></table>`;
+}
+
+function renderBreakdownTradesEvent(result) {
+    const container = document.getElementById("breakdown-trades-event");
+    if (result.state !== LoadState.LOADED || !result.data.breakdowns) {
+        container.innerHTML = '<div class="empty-state">No breakdown data.</div>';
+        return;
+    }
+    const data = result.data.breakdowns.trades.by_event || {};
+    if (Object.keys(data).length === 0) {
+        container.innerHTML = '<div class="empty-state">No trades by event.</div>';
+        return;
+    }
+    const rows = Object.entries(data).map(([slug, s]) => {
+        const rpnl = s.realized_pnl || 0;
+        const pnlCls = rpnl >= 0 ? "pnl-positive" : "pnl-negative";
+        const title = s.event_title || slug;
+        return `<tr>
+            <td title="${escapeHtml(slug)}">${escapeHtml(title.length > 50 ? title.slice(0, 47) + "..." : title)}</td>
+            <td>${s.total || 0}</td>
+            <td style="color: var(--blue)">${s.open || 0}</td>
+            <td style="color: var(--green-bright)">${s.won || 0}</td>
+            <td style="color: var(--red)">${s.lost || 0}</td>
+            <td class="${pnlCls}">${formatPnl(rpnl)}</td>
+            <td>$${(s.unrealized_exposure || 0).toFixed(0)}</td>
+        </tr>`;
+    }).join("");
+    container.innerHTML = `<table>
+        <thead><tr><th>event</th><th>trades</th><th>open</th><th>won</th><th>lost</th><th>realized p&amp;l</th><th>exposure</th></tr></thead>
+        <tbody>${rows}</tbody></table>`;
 }
 
 // ---- PER-PROFILE LEDGER COMPARISON ----
@@ -715,6 +891,13 @@ async function refreshData(bustCache) {
     safeRender("runs-table", () => renderRunHistory(runs));
     safeRender("all-markets", () => renderAllMarkets(relevant));
     safeRender("evaluation-summary", () => renderEvaluationSummary(summary));
+    safeRender("eval-alerts", () => renderAlerts(summary));
+    safeRender("breakdown-subject", () => renderBreakdownSubject(summary));
+    safeRender("breakdown-skip-reason", () => renderBreakdownSkipReason(summary));
+    safeRender("breakdown-expiry", () => renderBreakdownExpiry(summary));
+    safeRender("breakdown-trades-subject", () => renderBreakdownTradesSubject(summary));
+    safeRender("breakdown-event", () => renderBreakdownEvent(summary));
+    safeRender("breakdown-trades-event", () => renderBreakdownTradesEvent(summary));
     safeRender("pipeline-status", () => renderPipelineStatus(pipelineReport));
 
     // Per-profile ledger comparison (re-render cleanly)
