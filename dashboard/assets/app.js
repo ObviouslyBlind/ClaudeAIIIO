@@ -5,9 +5,12 @@
 
 const LoadState = { LOADING: "loading", LOADED: "loaded", EMPTY: "empty", FAILED: "failed" };
 
-async function loadJSON(path) {
+const REFRESH_INTERVAL_MS = 60000; // 60 seconds
+
+async function loadJSON(path, bustCache) {
     try {
-        const resp = await fetch(path);
+        const url = bustCache ? path + "?_t=" + Date.now() : path;
+        const resp = await fetch(url);
         if (!resp.ok) return { state: LoadState.FAILED, data: null, error: `HTTP ${resp.status}` };
         const data = await resp.json();
         if (data === null || (Array.isArray(data) && data.length === 0)) {
@@ -494,11 +497,11 @@ function renderAllMarkets(result) {
 
 // ---- PER-PROFILE LEDGER COMPARISON ----
 
-async function loadPerProfileLedgers(meta) {
+async function loadPerProfileLedgers(meta, bustCache) {
     if (meta.state !== LoadState.LOADED || !meta.data.ledger_files) return [];
     const results = [];
     for (const filename of meta.data.ledger_files) {
-        const result = await loadJSON("data/" + filename);
+        const result = await loadJSON("data/" + filename, bustCache);
         if (result.state === LoadState.LOADED) {
             // Extract profile from filename: ledger_no_side_moderate.json → no_side / moderate
             const match = filename.match(/^ledger_(.+)_(.+)\.json$/);
@@ -553,26 +556,41 @@ function renderProfileComparison(profileLedgers, container) {
     container.insertAdjacentHTML("beforeend", html);
 }
 
-// ---- MAIN ----
+// ---- SAFE RENDER HELPER ----
 
-async function init() {
-    initTabs();
+function safeRender(name, fn) {
+    try { fn(); } catch (e) {
+        console.error(`Render ${name} failed:`, e);
+        const el = document.getElementById(name);
+        if (el) el.innerHTML = `<div class="error-state">Render error in ${name}: ${escapeHtml(String(e))}</div>`;
+    }
+}
 
+// ---- PAGE REFRESH INDICATOR ----
+// Shows when the browser last re-fetched data. NOT data freshness (that comes from meta.json).
+
+function updatePageRefreshIndicator() {
+    const el = document.getElementById("page-refresh-time");
+    if (el) {
+        const now = new Date();
+        const hh = String(now.getHours()).padStart(2, "0");
+        const mm = String(now.getMinutes()).padStart(2, "0");
+        const ss = String(now.getSeconds()).padStart(2, "0");
+        el.textContent = hh + ":" + mm + ":" + ss;
+    }
+}
+
+// ---- DATA REFRESH ----
+// Loads all data files and re-renders. Called on init and every REFRESH_INTERVAL_MS.
+
+async function refreshData(bustCache) {
     const [relevant, signals, ledger, runs, meta] = await Promise.all([
-        loadJSON("data/relevant.json"),
-        loadJSON("data/signals.json"),
-        loadJSON("data/ledger.json"),
-        loadJSON("data/runs.json"),
-        loadJSON("data/meta.json"),
+        loadJSON("data/relevant.json", bustCache),
+        loadJSON("data/signals.json", bustCache),
+        loadJSON("data/ledger.json", bustCache),
+        loadJSON("data/runs.json", bustCache),
+        loadJSON("data/meta.json", bustCache),
     ]);
-
-    const safeRender = (name, fn) => {
-        try { fn(); } catch (e) {
-            console.error(`Render ${name} failed:`, e);
-            const el = document.getElementById(name);
-            if (el) el.innerHTML = `<div class="error-state">Render error in ${name}: ${escapeHtml(String(e))}</div>`;
-        }
-    };
 
     safeRender("header", () => renderHeaderStats(relevant, signals, ledger, meta));
     safeRender("relevant-markets", () => renderRelevantMarkets(relevant));
@@ -583,11 +601,35 @@ async function init() {
     safeRender("runs-table", () => renderRunHistory(runs));
     safeRender("all-markets", () => renderAllMarkets(relevant));
 
-    // Load per-profile ledgers for comparative view
-    const profileLedgers = await loadPerProfileLedgers(meta);
-    if (profileLedgers.length > 1) {
-        renderProfileComparison(profileLedgers, document.getElementById("tab-ledger"));
+    // Per-profile ledger comparison (re-render cleanly)
+    const profileContainer = document.getElementById("tab-ledger");
+    const oldComparison = profileContainer.querySelector(".panel:last-child");
+    if (oldComparison && oldComparison.querySelector("h2") &&
+        oldComparison.querySelector("h2").textContent.includes("Per-Profile")) {
+        oldComparison.remove();
     }
+    const profileLedgers = await loadPerProfileLedgers(meta, bustCache);
+    if (profileLedgers.length > 1) {
+        renderProfileComparison(profileLedgers, profileContainer);
+    }
+
+    updatePageRefreshIndicator();
+}
+
+// ---- MAIN ----
+
+async function init() {
+    initTabs();
+
+    // First load — no cache bust needed (fresh page load)
+    await refreshData(false);
+
+    // Auto-refresh every 60s with cache busting
+    setInterval(() => {
+        refreshData(true).catch(err => {
+            console.error("Auto-refresh failed:", err);
+        });
+    }, REFRESH_INTERVAL_MS);
 }
 
 init().catch(err => {
@@ -597,10 +639,9 @@ init().catch(err => {
         bar.textContent = "JS error: " + String(err);
         bar.className = "data-status data-status-error";
     }
-    // Try to render whatever loaded successfully
     document.querySelectorAll(".empty-state").forEach(el => {
         if (el.textContent === "Loading...") {
-            el.textContent = "Failed to render — check console. Error: " + String(err);
+            el.textContent = "Failed to render \u2014 check console. Error: " + String(err);
         }
     });
 });
