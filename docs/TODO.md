@@ -47,6 +47,10 @@
 - [x] Bracket-position-aware analysis — hot/adjacent/tail classification without changing trading logic
 - [x] Operator summary panel — compact at-a-glance metrics on Evaluation tab
 - [x] Strategy B evidence threshold checklist — 4 criteria tracked in summary.json + dashboard
+- [x] Track A — Full outcome reporting by bracket position (wins/losses/expired/cancelled/win rate/avg resolution per position)
+- [x] Track A — Position assessment with auto-generated verdicts and recommendations
+- [x] Track A — Enhanced Strategy B criteria (profile differentiation + position-matters now data-driven)
+- [x] Track B — Cadence decision memo (docs/DECISION_CADENCE.md)
 
 ## Current phase: Baseline evaluation + operational monitoring
 

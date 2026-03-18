@@ -185,17 +185,23 @@ def build_family_lookup(data_dir):
 
 
 def build_bracket_position_breakdowns(data_dir, families_lookup):
-    """Build signal and trade breakdowns by bracket position (hot/adjacent/tail)."""
+    """Build signal and trade breakdowns by bracket position (hot/adjacent/tail).
+
+    Includes full outcome reporting: wins, losses, expired, cancelled,
+    win rate, avg resolution time, realized PnL per position.
+    """
     signals_dir = os.path.join(data_dir, "signals")
     ledger_dir = os.path.join(data_dir, "ledger")
 
     # Signal breakdowns by position
     by_position_signals = defaultdict(lambda: {"trade": 0, "watch": 0, "skip": 0})
-    # Trade breakdowns by position
+    # Trade breakdowns by position — full outcome fields
     by_position_trades = defaultdict(lambda: {
-        "total": 0, "open": 0, "won": 0, "lost": 0, "expired": 0,
+        "total": 0, "open": 0, "won": 0, "lost": 0, "expired": 0, "cancelled": 0,
         "realized_pnl": 0.0, "unrealized_exposure": 0.0,
     })
+    # Resolution hours by position (for avg calculation)
+    resolution_hours_by_pos = defaultdict(list)
 
     # Process signals
     for profile_id in PROFILES:
@@ -254,29 +260,141 @@ def build_bracket_position_breakdowns(data_dir, families_lookup):
             elif status == "EXPIRED":
                 by_position_trades[position]["expired"] += 1
                 by_position_trades[position]["realized_pnl"] += pnl
+            elif status == "CANCELLED":
+                by_position_trades[position]["cancelled"] += 1
 
-    # Round floats
+            # Track resolution time for closed trades
+            if status in ("WON", "LOST", "EXPIRED"):
+                entry_time = t.get("entry_time")
+                exit_time = t.get("exit_time")
+                if entry_time and exit_time:
+                    h = parse_hours(entry_time, exit_time)
+                    if h is not None and h > 0:
+                        resolution_hours_by_pos[position].append(h)
+
+    # Compute win rate and avg resolution per position
     for k in by_position_trades:
-        by_position_trades[k]["realized_pnl"] = round(by_position_trades[k]["realized_pnl"], 2)
-        by_position_trades[k]["unrealized_exposure"] = round(by_position_trades[k]["unrealized_exposure"], 2)
+        d = by_position_trades[k]
+        d["realized_pnl"] = round(d["realized_pnl"], 2)
+        d["unrealized_exposure"] = round(d["unrealized_exposure"], 2)
+        definitive = d["won"] + d["lost"]
+        d["win_rate_pct"] = round((d["won"] / definitive * 100) if definitive else 0.0, 1)
+        d["definitive_outcomes"] = definitive
+        hours = resolution_hours_by_pos.get(k, [])
+        d["avg_hours_to_resolution"] = (
+            round(sum(hours) / len(hours), 1) if len(hours) >= 2 else None
+        )
 
     # Sort in logical order: hot, adjacent, tail, unknown
     position_order = ["hot", "adjacent", "tail", "unknown"]
+
+    trades_by_pos = {
+        k: dict(by_position_trades[k])
+        for k in position_order if k in by_position_trades
+    }
+
+    # Build position assessment narrative
+    assessment = build_position_assessment(trades_by_pos)
 
     return {
         "signals_by_position": {
             k: dict(by_position_signals[k])
             for k in position_order if k in by_position_signals
         },
-        "trades_by_position": {
-            k: dict(by_position_trades[k])
-            for k in position_order if k in by_position_trades
-        },
+        "trades_by_position": trades_by_pos,
         "families_analyzed": len(families_lookup),
+        "position_assessment": assessment,
     }
 
 
-def build_strategy_b_progress(totals, families_lookup):
+def build_position_assessment(trades_by_pos):
+    """Generate a plain-English assessment of bracket-position outcomes.
+
+    Reports whether adjacent/tail/hot trades are outperforming or underperforming,
+    and whether allocation should shift. Returns a dict of assessments.
+    """
+    total_definitive = sum(
+        v.get("definitive_outcomes", 0) for v in trades_by_pos.values()
+    )
+
+    if total_definitive < 3:
+        return {
+            "status": "insufficient_data",
+            "summary": (
+                f"Only {total_definitive} definitive outcome(s) across all positions. "
+                "Need at least 3 to assess performance differences."
+            ),
+            "adjacent": "insufficient data",
+            "tail": "insufficient data",
+            "hot": "insufficient data",
+        }
+
+    assessments = {}
+    for pos in ["hot", "adjacent", "tail"]:
+        stats = trades_by_pos.get(pos)
+        if not stats or stats.get("definitive_outcomes", 0) == 0:
+            assessments[pos] = "no resolved trades yet"
+            continue
+
+        d = stats["definitive_outcomes"]
+        wr = stats["win_rate_pct"]
+        rpnl = stats["realized_pnl"]
+        total = stats["total"]
+
+        if wr >= 70:
+            verdict = "outperforming"
+        elif wr >= 40:
+            verdict = "neutral"
+        else:
+            verdict = "underperforming"
+
+        assessments[pos] = (
+            f"{verdict} — {d} outcomes, {wr}% win rate, "
+            f"${rpnl:.2f} realized PnL, {total} total trades"
+        )
+
+    # Build recommendation lines
+    recs = []
+    hot_d = trades_by_pos.get("hot", {}).get("definitive_outcomes", 0)
+    adj_d = trades_by_pos.get("adjacent", {}).get("definitive_outcomes", 0)
+    tail_d = trades_by_pos.get("tail", {}).get("definitive_outcomes", 0)
+
+    if adj_d >= 3:
+        adj_wr = trades_by_pos["adjacent"]["win_rate_pct"]
+        if adj_wr < 50:
+            recs.append("Adjacent brackets underperforming — consider tightening thresholds.")
+        elif adj_wr >= 70:
+            recs.append("Adjacent brackets outperforming — current allocation looks justified.")
+
+    if tail_d >= 3:
+        tail_wr = trades_by_pos["tail"]["win_rate_pct"]
+        if tail_wr >= 70:
+            recs.append("Tail brackets show strong win rate — consider increasing allocation.")
+        elif tail_wr < 50:
+            recs.append("Tail brackets underperforming — thin margins may not justify risk.")
+
+    if hot_d >= 3:
+        hot_wr = trades_by_pos["hot"]["win_rate_pct"]
+        if hot_wr < 50:
+            recs.append("Hot-bracket trades underperforming — consider reducing or eliminating.")
+        elif hot_wr >= 70:
+            recs.append("Hot-bracket trades performing well — unexpected, warrants investigation.")
+
+    if not recs:
+        recs.append("Not enough resolved trades per position to make allocation recommendations.")
+
+    return {
+        "status": "has_data" if total_definitive >= 3 else "insufficient_data",
+        "summary": f"{total_definitive} definitive outcomes across positions.",
+        "hot": assessments.get("hot", "no data"),
+        "adjacent": assessments.get("adjacent", "no data"),
+        "tail": assessments.get("tail", "no data"),
+        "recommendations": recs,
+    }
+
+
+def build_strategy_b_progress(totals, families_lookup, bracket_breakdowns=None,
+                              profiles=None):
     """Report progress toward Strategy B evidence threshold.
 
     Threshold (from Q012 / user message 3):
@@ -286,6 +404,43 @@ def build_strategy_b_progress(totals, families_lookup):
       - Position-matters evidence (hot vs tail have different outcomes)
     """
     definitive = totals["wins"] + totals["losses"]
+
+    # Check profile differentiation if we have enough data
+    profile_diff_status = "insufficient data"
+    profile_diff_met = False
+    if profiles and definitive >= 5:
+        win_rates = []
+        for p in profiles:
+            pd = p["trades"]
+            p_def = pd["wins"] + pd["losses"]
+            if p_def >= 2:
+                win_rates.append(pd["win_rate_pct"])
+        if len(win_rates) >= 2:
+            spread = max(win_rates) - min(win_rates)
+            if spread >= 10:
+                profile_diff_status = f"spread={spread:.0f}pp"
+                profile_diff_met = True
+            else:
+                profile_diff_status = f"spread={spread:.0f}pp (need 10pp+)"
+
+    # Check position-matters evidence
+    position_status = "insufficient data"
+    position_met = False
+    if bracket_breakdowns:
+        tpos = bracket_breakdowns.get("trades_by_position", {})
+        hot_d = tpos.get("hot", {}).get("definitive_outcomes", 0)
+        tail_d = tpos.get("tail", {}).get("definitive_outcomes", 0)
+        if hot_d >= 2 and tail_d >= 2:
+            hot_wr = tpos["hot"].get("win_rate_pct", 0)
+            tail_wr = tpos["tail"].get("win_rate_pct", 0)
+            diff = abs(hot_wr - tail_wr)
+            if diff >= 15:
+                position_status = f"hot={hot_wr}% vs tail={tail_wr}% (diff={diff:.0f}pp)"
+                position_met = True
+            else:
+                position_status = f"hot={hot_wr}% vs tail={tail_wr}% (diff={diff:.0f}pp, need 15pp+)"
+        elif hot_d + tail_d > 0:
+            position_status = f"hot={hot_d} tail={tail_d} outcomes (need 2+ each)"
 
     criteria = [
         {
@@ -302,15 +457,15 @@ def build_strategy_b_progress(totals, families_lookup):
         },
         {
             "criterion": "Profile differentiation observed",
-            "current": "insufficient data" if definitive < 5 else "pending analysis",
-            "target": "profiles differ on win rate",
-            "met": False,
+            "current": profile_diff_status,
+            "target": "10pp+ win rate spread across profiles",
+            "met": profile_diff_met,
         },
         {
             "criterion": "Position-matters evidence",
-            "current": "insufficient data" if definitive < 5 else "pending analysis",
-            "target": "hot vs tail differ on outcomes",
-            "met": False,
+            "current": position_status,
+            "target": "15pp+ win rate diff between hot and tail",
+            "met": position_met,
         },
     ]
 
@@ -651,12 +806,27 @@ def main():
     bracket_breakdowns = build_bracket_position_breakdowns(data_dir, families_lookup)
 
     # Build Strategy B progress
-    strategy_b = build_strategy_b_progress(totals, families_lookup)
+    strategy_b = build_strategy_b_progress(
+        totals, families_lookup,
+        bracket_breakdowns=bracket_breakdowns,
+        profiles=profiles,
+    )
 
     # Build alerts
     alerts = build_alerts(data_dir, profiles, totals)
 
     # Build compact operator summary
+    position_outcomes = {}
+    for pos in ["hot", "adjacent", "tail"]:
+        tpos = bracket_breakdowns["trades_by_position"].get(pos, {})
+        position_outcomes[pos] = {
+            "trades": tpos.get("total", 0),
+            "won": tpos.get("won", 0),
+            "lost": tpos.get("lost", 0),
+            "win_rate_pct": tpos.get("win_rate_pct", 0),
+            "realized_pnl": tpos.get("realized_pnl", 0),
+        }
+
     operator_summary = {
         "total_families": len(families_lookup),
         "total_brackets_evaluated": totals["signals_evaluated"],
@@ -670,6 +840,8 @@ def main():
             k: bracket_breakdowns["signals_by_position"].get(k, {}).get("trade", 0)
             for k in ["hot", "adjacent", "tail"]
         },
+        "position_outcomes": position_outcomes,
+        "position_verdict": bracket_breakdowns["position_assessment"].get("summary", ""),
     }
 
     summary = {
@@ -740,12 +912,27 @@ def main():
     for pos, counts in bracket_breakdowns["signals_by_position"].items():
         print(f"    {pos}: {counts.get('trade',0)}T / {counts.get('watch',0)}W / {counts.get('skip',0)}S")
 
-    print(f"\n  TRADES BY BRACKET POSITION")
+    print(f"\n  OUTCOME BY BRACKET POSITION")
     for pos, stats in bracket_breakdowns["trades_by_position"].items():
         rpnl = stats.get("realized_pnl", 0)
+        wr = stats.get("win_rate_pct", 0)
+        avg_res = stats.get("avg_hours_to_resolution")
+        avg_str = f"{avg_res}h" if avg_res else "n/a"
         print(f"    {pos}: {stats['total']} trades ({stats['open']} open, "
-              f"{stats.get('won',0)}W/{stats.get('lost',0)}L) "
-              f"realized=${rpnl:.2f} exposure=${stats.get('unrealized_exposure',0):.2f}")
+              f"{stats.get('won',0)}W/{stats.get('lost',0)}L/"
+              f"{stats.get('expired',0)}E/{stats.get('cancelled',0)}C) "
+              f"win={wr}% realized=${rpnl:.2f} "
+              f"exposure=${stats.get('unrealized_exposure',0):.2f} "
+              f"avg_res={avg_str}")
+
+    # Position assessment
+    assessment = bracket_breakdowns.get("position_assessment", {})
+    print(f"\n  POSITION ASSESSMENT")
+    print(f"    {assessment.get('summary', 'No assessment available.')}")
+    for pos in ["hot", "adjacent", "tail"]:
+        print(f"    {pos}: {assessment.get(pos, 'no data')}")
+    for rec in assessment.get("recommendations", []):
+        print(f"    >> {rec}")
 
     print(f"\n  STRATEGY B PROGRESS")
     print(f"    Status: {strategy_b['recommendation']}")
