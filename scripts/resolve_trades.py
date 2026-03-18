@@ -23,6 +23,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from polymarket_timer_bot.models.market import Market
 from polymarket_timer_bot.papertrade.ledger import Ledger
 from polymarket_timer_bot.papertrade.models import WON, LOST, EXPIRED, PROVENANCE
+from polymarket_timer_bot.runs import RunStore
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
@@ -147,6 +148,38 @@ def main():
         print(f"  {name}: {s['total_trades']} trades, {s['open_trades']} open, "
               f"win_rate={s['win_rate_pct']}%, P&L=${s['total_pnl']:.2f}")
     print(f"{'='*60}")
+
+    # Update run records with resolution stats
+    runs_dir = os.path.join(data_dir, "runs")
+    store = RunStore(runs_dir)
+    runs = store.load_all()
+    updated_runs = 0
+    for run in runs:
+        if not run.ledger_file:
+            continue
+        lpath = os.path.join(ledger_dir, run.ledger_file)
+        if not os.path.exists(lpath):
+            continue
+        ledger = Ledger(lpath)
+        s = ledger.summary()
+        changed = False
+        for attr, val in [
+            ("trades_resolved", s["closed_trades"]),
+            ("trades_won", s["wins"]),
+            ("trades_lost", s["losses"]),
+            ("trades_open", s["open_trades"]),
+            ("total_pnl", s["total_pnl"]),
+            ("open_exposure", s["open_exposure"]),
+        ]:
+            if getattr(run, attr) != val:
+                setattr(run, attr, val)
+                changed = True
+        if changed:
+            store.save_run(run)
+            updated_runs += 1
+
+    if updated_runs:
+        print(f"\nUpdated {updated_runs} run records with resolution stats.")
 
 
 if __name__ == "__main__":

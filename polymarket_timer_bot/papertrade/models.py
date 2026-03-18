@@ -4,11 +4,12 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Optional
 
-# Trade statuses
-OPEN = "OPEN"
-WON = "WON"
-LOST = "LOST"
-EXPIRED = "EXPIRED"
+# Trade statuses — explicit lifecycle
+OPEN = "OPEN"          # Trade opened, market still active
+WON = "WON"            # Market closed, NO token won (event didn't happen)
+LOST = "LOST"          # Market closed, YES token won (event happened)
+EXPIRED = "EXPIRED"    # Market closed, no winner info available
+CANCELLED = "CANCELLED"  # Trade invalidated (e.g. market removed, data error)
 
 # Data provenance
 PROVENANCE = "SIMULATED"

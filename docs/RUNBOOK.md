@@ -79,6 +79,7 @@ run_papertrade.py --profile <X>
 resolve_trades.py
   ← reads relevant_markets_*.json + all ledger_*.json files
   → updates ledger files                     (closes trades: WON/LOST/EXPIRED)
+  → updates data/runs/index.json             (resolution stats: won/lost/open/P&L)
 
 export_dashboard.py
   ← reads latest from all data dirs

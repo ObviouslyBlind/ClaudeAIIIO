@@ -489,6 +489,66 @@ function renderAllMarkets(result) {
     }
 }
 
+// ---- PER-PROFILE LEDGER COMPARISON ----
+
+async function loadPerProfileLedgers(meta) {
+    if (meta.state !== LoadState.LOADED || !meta.data.ledger_files) return [];
+    const results = [];
+    for (const filename of meta.data.ledger_files) {
+        const result = await loadJSON("data/" + filename);
+        if (result.state === LoadState.LOADED) {
+            // Extract profile from filename: ledger_no_side_moderate.json → no_side / moderate
+            const match = filename.match(/^ledger_(.+)_(.+)\.json$/);
+            const strategyId = match ? match[1] : "unknown";
+            const profileId = match ? match[2] : "unknown";
+            results.push({ filename, strategyId, profileId, data: result.data });
+        }
+    }
+    return results;
+}
+
+function renderProfileComparison(profileLedgers, container) {
+    if (!profileLedgers.length) return;
+
+    const rows = profileLedgers.map(pl => {
+        const open = pl.data.filter(t => t.status === "OPEN");
+        const closed = pl.data.filter(t => t.status !== "OPEN");
+        const wins = closed.filter(t => t.status === "WON").length;
+        const losses = closed.filter(t => t.status === "LOST").length;
+        const totalPnl = closed.reduce((s, t) => s + (t.pnl || 0), 0);
+        const winRate = closed.length > 0 ? (wins / closed.length * 100).toFixed(0) + "%" : "\u2014";
+        const pnlCls = totalPnl >= 0 ? "pnl-positive" : "pnl-negative";
+        return `<tr>
+            <td>${escapeHtml(pl.strategyId)}</td>
+            <td><span class="profile-tag profile-${escapeHtml(pl.profileId)}">${escapeHtml(pl.profileId)}</span></td>
+            <td>${pl.data.length}</td>
+            <td style="color: var(--blue)">${open.length}</td>
+            <td style="color: var(--green-bright)">${wins}</td>
+            <td style="color: var(--red)">${losses}</td>
+            <td>${winRate}</td>
+            <td class="${pnlCls}">${formatPnl(totalPnl)}</td>
+            <td>$${open.reduce((s, t) => s + t.stake, 0).toFixed(0)}</td>
+        </tr>`;
+    }).join("");
+
+    const html = `
+        <div class="panel" style="margin-top: 16px;">
+            <div class="panel-header">
+                <h2>Per-Profile Ledger Comparison</h2>
+                <span class="provenance-badge">simulated</span>
+            </div>
+            <table>
+                <thead><tr>
+                    <th>strategy</th><th>profile</th><th>trades</th><th>open</th>
+                    <th>won</th><th>lost</th><th>win%</th><th>p&amp;l</th><th>exposure</th>
+                </tr></thead>
+                <tbody>${rows}</tbody>
+            </table>
+        </div>`;
+
+    container.insertAdjacentHTML("beforeend", html);
+}
+
 // ---- MAIN ----
 
 async function init() {
@@ -510,6 +570,12 @@ async function init() {
     renderLedgerFull(ledger);
     renderRunHistory(runs);
     renderAllMarkets(relevant);
+
+    // Load per-profile ledgers for comparative view
+    const profileLedgers = await loadPerProfileLedgers(meta);
+    if (profileLedgers.length > 1) {
+        renderProfileComparison(profileLedgers, document.getElementById("tab-ledger"));
+    }
 }
 
 init();
