@@ -26,7 +26,8 @@ def main():
     os.makedirs(dash_data, exist_ok=True)
 
     exports = {
-        "markets.json": find_latest_file(os.path.join(data_dir, "normalized"), "all_markets_"),
+        "markets.json": find_latest_file(os.path.join(data_dir, "normalized"), "relevant_markets_"),
+        "families.json": find_latest_file(os.path.join(data_dir, "normalized"), "families_"),
         "relevant.json": find_latest_file(os.path.join(data_dir, "normalized"), "relevant_markets_"),
         "signals.json": find_latest_file(os.path.join(data_dir, "signals"), "signals_"),
         "ledger.json": os.path.join(data_dir, "ledger", "ledger.json"),

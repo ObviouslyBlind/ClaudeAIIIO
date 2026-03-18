@@ -14,7 +14,7 @@ How to run, test, and inspect the system.
 # Install dependencies
 pip install -r requirements.txt
 
-# Fetch markets (events-first discovery)
+# 1. Fetch markets (events-first discovery)
 python scripts/fetch_markets.py
 # Discovery priority:
 #   1. Direct known URLs (from config/known_event_patterns.json)
@@ -22,16 +22,47 @@ python scripts/fetch_markets.py
 #   3. Events pagination fallback (scans ~6000 events)
 #   4. /markets supplemental fallback
 
-# Run signal analysis
+# 2. Run signal analysis (reads from data/normalized/relevant_markets_*.json)
 python scripts/run_signals.py
 
-# Execute paper trades (reads signals, opens trades, updates ledger)
+# 3. Open paper trades for TRADE signals
 python scripts/run_papertrade.py
 
-# Export data for dashboard
+# 4. Resolve closed markets (checks winner status, updates P&L)
+python scripts/resolve_trades.py
+
+# 5. Export data for dashboard
 python scripts/export_dashboard.py
 
-# Then open dashboard/index.html in a browser
+# 6. View dashboard (one command)
+python scripts/serve_dashboard.py
+# Opens at http://localhost:8000 — exports data automatically first
+# Custom port: python scripts/serve_dashboard.py 3000
+# Skip export:  python scripts/serve_dashboard.py --no-export
+```
+
+## Pipeline data flow
+
+```
+fetch_markets.py
+  → data/normalized/relevant_markets_*.json  (classified bracket markets with event context)
+  → data/normalized/families_*.json          (MarketFamily groupings)
+
+run_signals.py
+  ← reads relevant_markets_*.json
+  → data/signals/signals_*.json              (TRADE/WATCH/SKIP with scores)
+
+run_papertrade.py
+  ← reads relevant_markets_*.json
+  → data/ledger/ledger.json                  (open trades with event context)
+
+resolve_trades.py
+  ← reads relevant_markets_*.json + ledger.json
+  → updates ledger.json                      (closes trades: WON/LOST/EXPIRED)
+
+export_dashboard.py
+  ← reads latest from all data dirs
+  → dashboard/data/*.json                    (for HTML dashboard)
 ```
 
 ## Known-slug registry
@@ -50,6 +81,7 @@ The slug is the path segment after `/event/` in the URL.
 ```bash
 pip install pytest
 python -m pytest tests/ -v
+# Currently 78 tests (models, adapters, classifier, discovery, signals, papertrade, resolution)
 ```
 
 ## How to inspect outputs
@@ -61,15 +93,12 @@ After running the pipeline:
 ls -t data/raw/
 ls -t data/normalized/
 
-# Count markets in the latest fetch
-python -c "import json, glob; f=sorted(glob.glob('data/normalized/all_markets_*.json'))[-1]; print(len(json.load(open(f))), 'markets in', f)"
-
-# Show relevant (Musk/Trump) markets from the latest fetch
+# Show relevant markets from the latest fetch
 python -c "
 import json, glob
 f = sorted(glob.glob('data/normalized/relevant_markets_*.json'))[-1]
 for m in json.load(open(f)):
-    print(m['question'][:80], '|', m.get('market_type', ''))
+    print(m['bracket_label'], '|', m['question'][:70], '|', m.get('market_type', ''))
 "
 
 # View signal results
@@ -77,7 +106,7 @@ python -c "
 import json, glob
 f = sorted(glob.glob('data/signals/signals_*.json'))[-1]
 for s in json.load(open(f)):
-    print(s['action'], s['score'], s['market']['question'][:60])
+    print(s['signal'], s['score'], s['bracket_label'], s['question'][:50])
 "
 
 # View the paper-trade ledger
@@ -85,7 +114,8 @@ python -c "
 import json
 ledger = json.load(open('data/ledger/ledger.json'))
 for t in ledger:
-    print(t['status'], t['side'], t['question'][:60])
+    label = t.get('bracket_label', '')
+    print(t['status'], f'[{label}]', t['question'][:50], f'P&L={t.get(\"pnl\", \"open\")}')
 "
 
 # View dashboard data

@@ -81,6 +81,9 @@ class Ledger:
             stake=stake,
             signal_score=signal.score,
             signal_reasons=signal.reasons,
+            event_slug=signal.market.event_slug,
+            event_title=signal.market.event_title,
+            bracket_label=signal.market.bracket_label,
         )
 
         self.trades.append(trade)

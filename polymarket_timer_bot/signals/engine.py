@@ -47,6 +47,9 @@ class SignalResult:
             "yes_price": self.market.yes_price,
             "hours_until_expiry": self.market.hours_until_expiry,
             "market_type": self.market.market_type,
+            "event_slug": self.market.event_slug,
+            "event_title": self.market.event_title,
+            "bracket_label": self.market.bracket_label,
             "timestamp": self.timestamp,
         }
 

@@ -2,7 +2,6 @@
 
 import json
 import logging
-import re
 from datetime import datetime
 from typing import Optional
 from urllib.parse import urlparse

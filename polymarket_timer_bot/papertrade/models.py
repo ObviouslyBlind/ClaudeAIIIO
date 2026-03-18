@@ -37,6 +37,11 @@ class PaperTrade:
     exit_time: Optional[str] = None
     exit_no_price: Optional[float] = None
 
+    # Event context (preserved from discovery)
+    event_slug: str = ""
+    event_title: str = ""
+    bracket_label: str = ""
+
     # Provenance
     provenance: str = PROVENANCE
 
@@ -65,6 +70,9 @@ class PaperTrade:
             "condition_id": self.condition_id,
             "question": self.question,
             "market_type": self.market_type,
+            "event_slug": self.event_slug,
+            "event_title": self.event_title,
+            "bracket_label": self.bracket_label,
             "entry_time": self.entry_time,
             "entry_no_price": self.entry_no_price,
             "stake": self.stake,
@@ -93,5 +101,8 @@ class PaperTrade:
             status=d.get("status", OPEN),
             exit_time=d.get("exit_time"),
             exit_no_price=d.get("exit_no_price"),
+            event_slug=d.get("event_slug", ""),
+            event_title=d.get("event_title", ""),
+            bracket_label=d.get("bracket_label", ""),
             provenance=d.get("provenance", PROVENANCE),
         )

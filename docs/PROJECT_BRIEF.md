@@ -2,19 +2,27 @@
 
 ## What we're building
 
-A paper-trading bot that watches Polymarket prediction markets about Elon Musk and Donald Trump posting activity. It only considers NO-side bets. It does not trade real money.
+A paper-trading bot that watches Polymarket prediction markets about Elon Musk and Donald Trump posting activity. It evaluates NO-side bets on bracket/count markets (e.g. "Will Musk post 65-89 tweets?"). It does not trade real money.
 
 ## Why NO-only
 
-Many "will X post Y by Z date?" markets expire without the event happening. Betting NO on well-chosen markets can have a statistical edge — but we need data to confirm this before risking anything.
+In bracket events, exactly one bracket resolves YES and the rest resolve NO (worth $1). Betting NO on brackets that are unlikely to hit can have a statistical edge — but we need data to confirm this before risking anything.
+
+## Market structure
+
+Markets are grouped as **events** with multiple **bracket** sub-markets. Example:
+- Event: "Elon Musk # tweets March 19 - March 21, 2026?"
+- Brackets: "<40", "40-64", "65-89", "90-114", "115-139", "140-164", "165-199", "200+"
+
+Each bracket is a binary YES/NO market. Exactly one bracket resolves YES; all others resolve NO.
 
 ## What v1 delivers
 
-1. **Market ingestion** — fetch and classify relevant Polymarket markets
-2. **Signal logic** — simple rules that output TRADE / WATCH / SKIP with reasons
-3. **Paper trading** — track hypothetical bets with a fake ledger
-4. **Analytics** — honest performance analysis, clearly labeled as simulated
-5. **Dashboard** — simple HTML view of current state and results
+1. **Market ingestion** — events-first discovery with bracket market parsing
+2. **Signal logic** — rule-based TRADE / WATCH / SKIP with scoring
+3. **Paper trading** — simulated ledger with entry/exit tracking
+4. **Trade resolution** — automatic resolution when markets close
+5. **Dashboard** — HTML viewer of signals, trades, and market state
 
 ## What v1 does NOT do
 
@@ -22,7 +30,7 @@ Many "will X post Y by Z date?" markets expire without the event happening. Bett
 - No wallet or key management
 - No autonomous decisions
 - No markets beyond Musk/Trump posting
-- No bracket or count markets (binary timer markets only in v1)
+- No external count estimation (relies on market prices as probability proxy)
 
 ## Success criteria
 
@@ -30,3 +38,7 @@ Many "will X post Y by Z date?" markets expire without the event happening. Bett
 - Honest performance tracking (no inflated metrics)
 - Clear separation of concerns
 - Easy to inspect and verify at every step
+
+## Open strategic questions
+
+See [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) for questions that need human judgment before expanding scope.

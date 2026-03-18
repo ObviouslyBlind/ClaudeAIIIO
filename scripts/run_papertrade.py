@@ -1,4 +1,8 @@
-"""Open paper trades for TRADE signals and display ledger status."""
+"""Open paper trades for TRADE signals and display ledger status.
+
+Reads from data/normalized/relevant_markets_*.json (events-based output)
+which already contains classified, event-enriched Market dicts.
+"""
 
 import glob
 import json
@@ -8,8 +12,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from polymarket_timer_bot.adapters.polymarket import parse_markets
-from polymarket_timer_bot.adapters.classifier import classify_markets, filter_relevant
+from polymarket_timer_bot.models.market import Market
 from polymarket_timer_bot.signals.engine import evaluate_markets, TRADE
 from polymarket_timer_bot.papertrade.ledger import Ledger
 from polymarket_timer_bot.papertrade.models import PROVENANCE
@@ -27,26 +30,24 @@ def find_latest_file(directory: str, prefix: str) -> str | None:
 
 def main():
     data_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
-    raw_dir = os.path.join(data_dir, "raw")
+    norm_dir = os.path.join(data_dir, "normalized")
     ledger_dir = os.path.join(data_dir, "ledger")
 
-    # Find latest raw data
-    latest = find_latest_file(raw_dir, "markets_")
+    # Read events-based relevant markets (already classified, with event context)
+    latest = find_latest_file(norm_dir, "relevant_markets_")
     if not latest:
-        print("No market data found. Run fetch_markets.py first.")
+        print("No relevant market data found. Run fetch_markets.py first.")
         return
 
-    logger.info("Loading markets from %s", latest)
+    logger.info("Loading relevant markets from %s", latest)
     with open(latest) as f:
-        raw_markets = json.load(f)
+        raw_dicts = json.load(f)
 
-    # Parse, classify, filter, evaluate
-    markets = parse_markets(raw_markets)
-    markets = classify_markets(markets)
-    relevant = filter_relevant(markets)
-    results = evaluate_markets(relevant)
+    # Deserialize into Market objects (preserves event_slug, bracket_label, etc.)
+    markets = [Market.from_dict(d) for d in raw_dicts]
 
-    # Filter to TRADE signals only
+    # Evaluate and filter to TRADE signals
+    results = evaluate_markets(markets)
     trade_signals = [r for r in results if r.signal == TRADE]
 
     # Open ledger
@@ -66,7 +67,7 @@ def main():
     print(f"\n{'='*60}")
     print(f"PAPER TRADE SUMMARY [{PROVENANCE}]")
     print(f"{'='*60}")
-    print(f"Markets evaluated:   {len(relevant)}")
+    print(f"Markets evaluated:   {len(markets)}")
     print(f"TRADE signals:       {len(trade_signals)}")
     print(f"New trades opened:   {new_trades}")
     print(f"{'='*60}")
@@ -83,8 +84,10 @@ def main():
     if open_trades:
         print(f"\n--- Open Trades [{PROVENANCE}] ---")
         for t in open_trades:
-            print(f"  [{t.trade_id}] {t.question[:60]}")
-            print(f"    Entry NO={t.entry_no_price:.2f}  stake=${t.stake:.0f}  score={t.signal_score:.0f}")
+            label = f" [{t.bracket_label}]" if t.bracket_label else ""
+            event = f" ({t.event_slug})" if t.event_slug else ""
+            print(f"  [{t.trade_id}] {t.question[:60]}{label}")
+            print(f"    Entry NO={t.entry_no_price:.2f}  stake=${t.stake:.0f}  score={t.signal_score:.0f}{event}")
             print()
     else:
         print(f"\nNo open trades.")

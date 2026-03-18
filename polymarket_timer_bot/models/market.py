@@ -67,6 +67,47 @@ class Market:
         delta = self.end_date - datetime.utcnow()
         return delta.total_seconds() / 3600
 
+    @classmethod
+    def from_dict(cls, d: dict) -> "Market":
+        """Reconstruct a Market from a dict (inverse of to_dict)."""
+        end_date = None
+        if d.get("end_date"):
+            try:
+                end_date = datetime.fromisoformat(d["end_date"])
+            except (ValueError, TypeError):
+                pass
+
+        tokens = []
+        for t in d.get("tokens", []):
+            tokens.append(Token(
+                token_id=t.get("token_id", ""),
+                outcome=t.get("outcome", ""),
+                price=float(t.get("price", 0)),
+                winner=t.get("winner"),
+            ))
+
+        return cls(
+            condition_id=d.get("condition_id", ""),
+            question=d.get("question", ""),
+            slug=d.get("slug", ""),
+            end_date=end_date,
+            active=d.get("active", False),
+            closed=d.get("closed", False),
+            tokens=tokens,
+            description=d.get("description", ""),
+            category=d.get("category", ""),
+            volume=float(d.get("volume", 0) or 0),
+            liquidity=float(d.get("liquidity", 0) or 0),
+            event_slug=d.get("event_slug", ""),
+            event_title=d.get("event_title", ""),
+            event_id=d.get("event_id", ""),
+            bracket_label=d.get("bracket_label", ""),
+            neg_risk_market_id=d.get("neg_risk_market_id", ""),
+            resolution_source=d.get("resolution_source", ""),
+            market_type=d.get("market_type", ""),
+            is_timer_market=d.get("is_timer_market", False),
+        )
+
     def to_dict(self) -> dict:
         """Convert to a plain dict for JSON serialization."""
         return {
