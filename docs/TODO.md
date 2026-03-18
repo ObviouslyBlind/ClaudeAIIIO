@@ -30,6 +30,10 @@
 - [x] Dashboard run history shows won/lost/expired columns
 - [x] Ledger summary includes expired + cancelled counts
 - [x] Win rate calculation excludes expired/cancelled (only definitive outcomes)
+- [x] Dashboard error handling — each render section wrapped in try/catch with visible errors
+- [x] Dashboard auto-refresh — 60s client-side reload with cache busting
+- [x] .nojekyll added to dashboard for GitHub Pages compatibility
+- [x] Unused imports cleaned up (DEFAULT_CONFIG in scripts)
 
 ## Current phase: Baseline evaluation
 

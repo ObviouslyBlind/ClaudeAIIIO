@@ -21,7 +21,6 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from polymarket_timer_bot.models.market import Market
 from polymarket_timer_bot.signals.engine import evaluate_markets, TRADE
 from polymarket_timer_bot.signals.strategy import (
-    DEFAULT_CONFIG,
     STRATEGIES,
     PROFILES,
     StrategyConfig,

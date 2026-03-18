@@ -34,7 +34,8 @@ git push
 ```
 
 GitHub will automatically re-deploy the dashboard within ~1 minute.
-Refresh the URL to see the new data.
+The dashboard auto-refreshes every 60 seconds in the browser (with cache busting),
+so new data will appear without a manual page reload.
 
 ### If the dashboard looks wrong or outdated
 
