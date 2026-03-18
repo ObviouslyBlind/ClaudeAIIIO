@@ -494,7 +494,7 @@ tr:hover td {
 .pnl-positive { color: var(--green-bright); font-weight: 600; }
 .pnl-negative { color: var(--red); font-weight: 600; }
 
-/* ---- EMPTY STATE ---- */
+/* ---- EMPTY / ERROR STATE ---- */
 
 .empty-state {
     text-align: center;
@@ -503,6 +503,77 @@ tr:hover td {
     font-size: 12px;
     font-variant: small-caps;
     letter-spacing: 2px;
+}
+
+.error-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--red);
+    font-size: 12px;
+    font-variant: small-caps;
+    letter-spacing: 2px;
+    background: rgba(192, 57, 43, 0.05);
+    border: 1px solid rgba(192, 57, 43, 0.2);
+}
+
+/* ---- DATA STATUS BAR ---- */
+
+.data-status {
+    margin-left: auto;
+    font-size: 10px;
+    letter-spacing: 1px;
+}
+
+.data-status-error { color: var(--red); }
+.data-status-warn { color: var(--accent-amber); }
+
+/* ---- BRACKET / PROFILE TAGS ---- */
+
+.bracket-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--accent-gold);
+    background: rgba(200, 168, 78, 0.1);
+    border: 1px solid rgba(200, 168, 78, 0.2);
+    padding: 1px 6px;
+    margin-left: 4px;
+    vertical-align: middle;
+}
+
+.profile-tag {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 700;
+    font-variant: small-caps;
+    letter-spacing: 1px;
+    padding: 2px 6px;
+}
+
+.profile-conservative {
+    color: var(--blue);
+    background: rgba(74, 127, 165, 0.15);
+    border: 1px solid rgba(74, 127, 165, 0.3);
+}
+
+.profile-moderate {
+    color: var(--accent-gold);
+    background: rgba(200, 168, 78, 0.15);
+    border: 1px solid rgba(200, 168, 78, 0.3);
+}
+
+.profile-aggressive {
+    color: var(--red);
+    background: rgba(192, 57, 43, 0.15);
+    border: 1px solid rgba(192, 57, 43, 0.3);
+}
+
+.signal-profile {
+    font-size: 9px;
+    font-variant: small-caps;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    margin-left: 4px;
 }
 
 /* ---- SCROLLBAR ---- */

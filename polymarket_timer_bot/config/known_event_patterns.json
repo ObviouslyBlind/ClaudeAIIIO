@@ -1,0 +1,40 @@
+{
+  "_comment": "Known event slug patterns for Musk/Trump posting-count markets. Static config — not runtime data.",
+
+  "direct_urls": [
+    "https://polymarket.com/event/elon-musk-of-tweets-march-19-march-21",
+    "https://polymarket.com/event/donald-trump-of-truth-social-posts-march-17-march-24"
+  ],
+
+  "exact_slugs": [
+    "elon-musk-of-tweets-march-19-march-21",
+    "donald-trump-of-truth-social-posts-march-17-march-24"
+  ],
+
+  "series": [
+    {
+      "series_slug": "elon-tweets-48h",
+      "slug_prefix": "elon-musk-of-tweets-",
+      "person": "musk",
+      "description": "Elon Musk 48-hour tweet count brackets"
+    },
+    {
+      "series_slug": "elon-tweet-daily",
+      "slug_prefix": "elon-musk-of-tweets-",
+      "person": "musk",
+      "description": "Elon Musk monthly tweet count brackets"
+    },
+    {
+      "series_slug": "trump-truth-social",
+      "slug_prefix": "donald-trump-of-truth-social-posts-",
+      "person": "trump",
+      "description": "Donald Trump weekly Truth Social post count brackets"
+    }
+  ],
+
+  "resolution_sources": {
+    "musk": "https://xtracker.polymarket.com/user/elonmusk",
+    "trump_xtracker": "https://xtracker.polymarket.com/user/realDonaldTrump",
+    "trump_truth_social": "https://truthsocial.com/@realDonaldTrump"
+  }
+}

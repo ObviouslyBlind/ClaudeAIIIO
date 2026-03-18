@@ -1,23 +1,42 @@
 # Open Questions
 
-Issues we haven't resolved yet.
-
-## Q001 — Which Polymarket API endpoints to use?
-
-Polymarket has a public API. Need to confirm which endpoints return active markets, pricing, and resolution data. Research needed in Phase 3.
-
-## Q002 — How to classify "posting" markets?
-
-Markets may be phrased differently ("Will Elon tweet...", "Will Musk post...", "Number of Trump posts..."). Need a classification approach. Some may be bracket/count markets rather than simple binary timers.
-
-## Q003 — What NO price threshold makes a trade attractive?
-
-If NO is priced at 95 cents, the upside is tiny. What's the minimum edge worth taking? Needs analysis in Phase 4.
-
 ## Q004 — How to handle market resolution timing?
 
-Markets resolve at specific times. Need to understand how resolution works and when we can confirm outcomes for the paper ledger.
+Markets resolve at specific times. `resolve_trades.py` checks market closed/winner status from the latest `relevant_markets_*.json`. Resolution depends on having fresh market data — you must run `fetch_markets.py` to get current state before resolving. Fully automated polling is deferred.
 
-## Q005 — Dashboard hosting approach?
+**Assumption made:** resolution checks the `closed` flag and `token.winner` fields from the Polymarket API. If neither is set, market is treated as EXPIRED at last known NO price. This may not match actual resolution if API data is stale.
 
-Simple local HTML file? Local dev server? Decision deferred to Phase 6.
+## Q005 — Does the NO-side strategy apply correctly to bracket markets?
+
+In a bracket event, exactly one bracket resolves YES and the rest resolve NO. The signal engine was designed for binary "will X happen by date?" markets. Whether the same thresholds and scoring apply to bracket markets is **unvalidated**. A score of 92 for a bracket with NO=0.835 may or may not represent real edge.
+
+**Status:** The multi-profile system now enables comparative testing. Run conservative/moderate/aggressive on the same data to see how thresholds affect signal count and (eventually) win rate. Still needs real resolution data to validate.
+
+## Q006 — Where is the source-of-truth for current tweet/post count?
+
+The signal engine evaluates whether to bet NO on a bracket but doesn't know the current count. It relies only on market prices as a probability proxy. XTracker is the official resolution source but is client-rendered with no public API. Is price-only sufficient, or do we need count estimation?
+
+## Q007 — What is the intended deployment model?
+
+Currently: manual CLI execution. No scheduling, no cron, no containerization. The 6-script pipeline (fetch → signals → papertrade → resolve → export → serve) works manually. If continuous monitoring is needed, infrastructure decisions are required.
+
+## Q008 — Should the dashboard show bracket grouping or flat markets?
+
+With 290 bracket markets across 11 events, flat rendering is readable but loses family context. The dashboard currently renders individual markets. `families.json` is exported but not yet rendered as grouped views.
+
+## Q009 — Is events pagination depth (6000 events) sufficient?
+
+Current pagination fetches up to 6000 events, found 11 relevant. If Polymarket adds more markets or relevant events fall outside this window, they'll be missed. Offset ordering is not documented by the API.
+
+## Q010 — What strategies beyond no_side should be tested?
+
+The architecture supports multiple strategies (via `STRATEGIES` registry in `strategy.py`). Currently only `no_side@1.0` exists. Potential future strategies:
+- Bracket-specific: weight by bracket position (tail vs center)
+- Volume-weighted: factor in market liquidity
+- Momentum: consider price movement direction
+
+No commitment to build these yet. Depends on validation results from Q005.
+
+## Resolved
+
+- Q001–Q003: Resolved during Phases 3-6 (not documented at time of resolution)

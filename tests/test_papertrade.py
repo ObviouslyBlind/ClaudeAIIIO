@@ -21,6 +21,9 @@ def _make_signal(
     condition_id: str = "test-123",
     no_price: float = 0.80,
     question: str = "Will Elon tweet by Friday?",
+    event_slug: str = "elon-tweets-march-19",
+    event_title: str = "Elon Musk # tweets March 19",
+    bracket_label: str = "65-89",
 ) -> SignalResult:
     market = Market(
         condition_id=condition_id,
@@ -35,6 +38,9 @@ def _make_signal(
         ],
         market_type="musk_posting",
         is_timer_market=True,
+        event_slug=event_slug,
+        event_title=event_title,
+        bracket_label=bracket_label,
     )
     return SignalResult(
         market=market,
@@ -155,6 +161,27 @@ def test_ledger_open_trade():
         assert trade.stake == 100.0
         assert trade.provenance == PROVENANCE
         assert len(ledger.trades) == 1
+
+
+def test_ledger_open_trade_preserves_event_context():
+    """Event context (event_slug, bracket_label) should flow from signal to trade."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        ledger = Ledger(os.path.join(tmpdir, "ledger.json"))
+        signal = _make_signal(
+            event_slug="elon-tweets-march-19",
+            event_title="Elon Musk # tweets March 19",
+            bracket_label="65-89",
+        )
+        trade = ledger.open_trade(signal)
+        assert trade.event_slug == "elon-tweets-march-19"
+        assert trade.event_title == "Elon Musk # tweets March 19"
+        assert trade.bracket_label == "65-89"
+
+        # Verify persistence roundtrip
+        ledger2 = Ledger(os.path.join(tmpdir, "ledger.json"))
+        t2 = ledger2.trades[0]
+        assert t2.event_slug == "elon-tweets-march-19"
+        assert t2.bracket_label == "65-89"
 
 
 def test_ledger_no_duplicate():

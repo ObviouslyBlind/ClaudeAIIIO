@@ -1,22 +1,47 @@
 # Daily Status
 
-## 2026-03-18
+## 2026-03-18 (latest)
 
-**Phase:** 6 — Dashboard (complete, merged to main)
-**Status:** Phases 1-6 merged to main. Phase 7 (evaluation) next.
+**Current status:** Pipeline end-to-end operational with multi-strategy comparative testing support.
 
-### Completed today
-- Phases 1-6 completed and merged to main
-- Glint Terminal-style dark dashboard (IBM Plex Mono/Sans, amber/cream palette)
-- Tabbed layout: Overview, Signal Output, Trade Ledger, All Markets
-- Market cards with YES/NO probability bars
-- All views labeled SIMULATED and PAPER TRADING ONLY
-- export_dashboard.py copies latest data into dashboard/data/
-- Static file — open in browser, no server needed
-- 42 tests passing
+### What exists
+- Market ingestion with events-first discovery (5-layer priority)
+- Parameterized signal engine (strategy + profile separation)
+- Per-profile paper trading with separate ledgers
+- Trade resolution (WON / LOST / EXPIRED)
+- Durable run history (data/runs/)
+- Dashboard with error/empty state distinction, source-based freshness, Run History tab
+- 95 tests passing
+- All outputs labeled SIMULATED
 
-### Next steps
-- Phase 7 (evaluation)
+### Architecture
+- **Strategy** defines signal logic variant (currently: `no_side@1.0`)
+- **Profile** controls risk parameters (conservative / moderate / aggressive)
+- Each run is attributable: strategy + profile + input snapshot + timestamps
+- Per-profile ledger files prevent cross-contamination
+- Dashboard shows comparative results across strategy+profile combinations
+
+### Completed this session
+- Fixed pipeline break: run_signals.py and run_papertrade.py now read events-based output
+- Fixed supplemental merge: relevant_markets_*.json includes all sources
+- Added Market.from_dict() for JSON deserialization
+- Built Strategy + Profile model with 3 built-in profiles
+- Parameterized signal engine (evaluate accepts StrategyConfig)
+- Per-profile signal files and ledger files
+- RunRecord + RunStore for durable run history
+- resolve_trades.py handles all ledger files
+- Dashboard hardened: error vs empty states, source-based freshness, safe rendering
+- Dashboard Run History tab for comparative viewing
+- export_dashboard.py writes meta.json with file freshness
+- serve_dashboard.py for one-command access
+- 95 tests (17 new: strategy parameterization, run store, resolution)
+- All docs updated to match implementation
+
+### Next
+- Run comparative test: conservative vs moderate vs aggressive on real data
+- Wait for market resolutions to validate P&L
+- Dashboard family grouping
+- Consider additional strategies (after validation)
 
 ### Blockers
 - None

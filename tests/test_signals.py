@@ -171,6 +171,9 @@ def test_evaluate_markets_sorted_by_score():
 
 def test_signal_result_to_dict():
     m = _make_market()
+    m.event_slug = "elon-tweets-march-19"
+    m.bracket_label = "65-89"
+    m.event_title = "Elon Musk # tweets"
     r = evaluate(m)
     d = r.to_dict()
     assert "signal" in d
@@ -178,3 +181,8 @@ def test_signal_result_to_dict():
     assert "score" in d
     assert "no_price" in d
     assert "timestamp" in d
+    assert d["event_slug"] == "elon-tweets-march-19"
+    assert d["bracket_label"] == "65-89"
+    assert d["event_title"] == "Elon Musk # tweets"
+    assert d["strategy_id"] == "no_side"
+    assert d["profile_id"] == "moderate"

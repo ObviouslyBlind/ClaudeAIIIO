@@ -1,10 +1,20 @@
-"""Signal engine: evaluates markets and outputs TRADE / WATCH / SKIP."""
+"""Signal engine: evaluates markets and outputs TRADE / WATCH / SKIP.
+
+Accepts an optional StrategyConfig to parameterize thresholds.
+Without one, uses DEFAULT_CONFIG (original Phase 4 thresholds).
+"""
 
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime
+from typing import Optional
 
 from polymarket_timer_bot.models.market import Market
+from polymarket_timer_bot.signals.strategy import (
+    DEFAULT_CONFIG,
+    Profile,
+    StrategyConfig,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -12,14 +22,6 @@ logger = logging.getLogger(__name__)
 TRADE = "TRADE"
 WATCH = "WATCH"
 SKIP = "SKIP"
-
-# Thresholds
-MAX_HOURS_TO_EXPIRY = 72  # 3 days
-NO_PRICE_MIN = 0.50  # Below this, NO side is too risky
-NO_PRICE_MAX = 0.95  # Above this, not enough upside
-NO_PRICE_TRADE_MIN = 0.70  # Minimum NO price to consider a TRADE
-MIXED_EVIDENCE_LOW = 0.40  # YES price range indicating uncertainty
-MIXED_EVIDENCE_HIGH = 0.60
 
 
 @dataclass
@@ -31,6 +33,8 @@ class SignalResult:
     reasons: list[str] = field(default_factory=list)
     score: float = 0.0  # 0-100, higher = stronger signal
     timestamp: str = ""
+    strategy_id: str = ""
+    profile_id: str = ""
 
     def __post_init__(self):
         if not self.timestamp:
@@ -47,34 +51,54 @@ class SignalResult:
             "yes_price": self.market.yes_price,
             "hours_until_expiry": self.market.hours_until_expiry,
             "market_type": self.market.market_type,
+            "event_slug": self.market.event_slug,
+            "event_title": self.market.event_title,
+            "bracket_label": self.market.bracket_label,
+            "strategy_id": self.strategy_id,
+            "profile_id": self.profile_id,
             "timestamp": self.timestamp,
         }
 
 
-def evaluate(market: Market) -> SignalResult:
-    """Evaluate a single market and return a signal with reasoning."""
+def evaluate(
+    market: Market,
+    config: Optional[StrategyConfig] = None,
+) -> SignalResult:
+    """Evaluate a single market and return a signal with reasoning.
+
+    Uses config thresholds if provided, otherwise DEFAULT_CONFIG.
+    """
+    if config is None:
+        config = DEFAULT_CONFIG
+    p = config.profile
     reasons = []
     score = 50.0  # Start neutral
+
+    def _result(signal, score=0.0):
+        return SignalResult(
+            market=market, signal=signal, reasons=reasons,
+            score=max(0.0, min(100.0, score)),
+            strategy_id=config.strategy.strategy_id,
+            profile_id=config.profile.profile_id,
+        )
 
     # --- Hard SKIPs ---
 
     if market.closed:
-        return SignalResult(market=market, signal=SKIP, reasons=["Market is closed."])
+        reasons.append("Market is closed.")
+        return _result(SKIP)
 
     if not market.active:
-        return SignalResult(market=market, signal=SKIP, reasons=["Market is inactive."])
+        reasons.append("Market is inactive.")
+        return _result(SKIP)
 
     if not market.market_type:
-        return SignalResult(
-            market=market, signal=SKIP,
-            reasons=["Not a Musk/Trump posting market."],
-        )
+        reasons.append("Not a Musk/Trump posting market.")
+        return _result(SKIP)
 
     if not market.is_timer_market:
-        return SignalResult(
-            market=market, signal=SKIP,
-            reasons=["Not a timer-style market (no deadline)."],
-        )
+        reasons.append("Not a timer-style market (no deadline).")
+        return _result(SKIP)
 
     # --- Price checks ---
 
@@ -82,28 +106,26 @@ def evaluate(market: Market) -> SignalResult:
     yes_price = market.yes_price
 
     if no_price is None:
-        return SignalResult(
-            market=market, signal=SKIP,
-            reasons=["No NO token price available."],
-        )
+        reasons.append("No NO token price available.")
+        return _result(SKIP)
 
-    if no_price > NO_PRICE_MAX:
-        reasons.append(f"NO price {no_price:.2f} > {NO_PRICE_MAX} — not enough upside.")
-        return SignalResult(market=market, signal=SKIP, reasons=reasons, score=10)
+    if no_price > p.no_price_max:
+        reasons.append(f"NO price {no_price:.2f} > {p.no_price_max} — not enough upside.")
+        return _result(SKIP, 10)
 
-    if no_price < NO_PRICE_MIN:
+    if no_price < p.no_price_min:
         reasons.append(
-            f"NO price {no_price:.2f} < {NO_PRICE_MIN} — market thinks event is likely."
+            f"NO price {no_price:.2f} < {p.no_price_min} — market thinks event is likely."
         )
-        return SignalResult(market=market, signal=SKIP, reasons=reasons, score=10)
+        return _result(SKIP, 10)
 
     # Mixed evidence check
-    if yes_price is not None and MIXED_EVIDENCE_LOW <= yes_price <= MIXED_EVIDENCE_HIGH:
+    if yes_price is not None and p.mixed_evidence_low <= yes_price <= p.mixed_evidence_high:
         reasons.append(
             f"YES price {yes_price:.2f} is in the mixed-evidence zone "
-            f"({MIXED_EVIDENCE_LOW}-{MIXED_EVIDENCE_HIGH}). Too uncertain."
+            f"({p.mixed_evidence_low}-{p.mixed_evidence_high}). Too uncertain."
         )
-        return SignalResult(market=market, signal=SKIP, reasons=reasons, score=20)
+        return _result(SKIP, 20)
 
     # --- Expiry checks ---
 
@@ -111,31 +133,28 @@ def evaluate(market: Market) -> SignalResult:
 
     if hours_left is None:
         reasons.append("No expiry date — cannot assess time risk.")
-        return SignalResult(market=market, signal=WATCH, reasons=reasons, score=30)
+        return _result(WATCH, 30)
 
     if hours_left <= 0:
         reasons.append("Market has expired.")
-        return SignalResult(market=market, signal=SKIP, reasons=reasons, score=0)
+        return _result(SKIP, 0)
 
-    if hours_left > MAX_HOURS_TO_EXPIRY:
+    if hours_left > p.max_hours_to_expiry:
         reasons.append(
-            f"Expiry in {hours_left:.1f}h — exceeds {MAX_HOURS_TO_EXPIRY}h max."
+            f"Expiry in {hours_left:.1f}h — exceeds {p.max_hours_to_expiry}h max."
         )
-        return SignalResult(market=market, signal=SKIP, reasons=reasons, score=15)
+        return _result(SKIP, 15)
 
     # --- Scoring for viable markets ---
 
-    # Higher NO price = more upside
-    if no_price >= NO_PRICE_TRADE_MIN:
-        price_score = ((no_price - NO_PRICE_TRADE_MIN) / (NO_PRICE_MAX - NO_PRICE_TRADE_MIN)) * 40
+    if no_price >= p.no_price_trade_min:
+        price_score = ((no_price - p.no_price_trade_min) / (p.no_price_max - p.no_price_trade_min)) * 40
         score += price_score
         reasons.append(f"NO price {no_price:.2f} — good upside potential.")
     else:
-        # WATCH zone: 0.50 - 0.70
         score -= 10
         reasons.append(f"NO price {no_price:.2f} — moderate, worth watching.")
 
-    # Closer to expiry without the event = stronger NO signal
     if hours_left <= 12:
         score += 20
         reasons.append(f"Only {hours_left:.1f}h until expiry — time pressure favors NO.")
@@ -150,24 +169,30 @@ def evaluate(market: Market) -> SignalResult:
 
     # --- Final decision ---
 
-    if no_price >= NO_PRICE_TRADE_MIN and hours_left <= MAX_HOURS_TO_EXPIRY:
+    if no_price >= p.no_price_trade_min and hours_left <= p.max_hours_to_expiry:
         signal = TRADE
         reasons.append("TRADE: NO price and expiry both favorable.")
     else:
         signal = WATCH
         reasons.append("WATCH: conditions not strong enough for a trade yet.")
 
-    return SignalResult(market=market, signal=signal, reasons=reasons, score=max(0, min(100, score)))
+    return _result(signal, score)
 
 
-def evaluate_markets(markets: list[Market]) -> list[SignalResult]:
+def evaluate_markets(
+    markets: list[Market],
+    config: Optional[StrategyConfig] = None,
+) -> list[SignalResult]:
     """Evaluate a list of markets and return results sorted by score."""
+    if config is None:
+        config = DEFAULT_CONFIG
     results = []
     for market in markets:
-        result = evaluate(market)
+        result = evaluate(market, config)
         results.append(result)
         logger.info(
-            "[%s] %s (score=%.0f) — %s",
+            "[%s|%s] %s (score=%.0f) — %s",
+            config.strategy.strategy_id,
             result.signal,
             market.question[:60],
             result.score,
