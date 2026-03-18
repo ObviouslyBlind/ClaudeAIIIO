@@ -2,6 +2,12 @@
 
 Paper-trading bot that monitors Polymarket bracket/count markets for Elon Musk tweets and Donald Trump Truth Social posts, evaluating NO-side opportunities with configurable strategies and risk profiles.
 
+## Live dashboard
+
+**https://obviouslyblind.github.io/ClaudeAIIIO/**
+
+Opens in any browser, on any device. Auto-updates within ~1 minute when new data is pushed to main.
+
 ## Status
 
 **Current phase: Baseline evaluation** — running Strategy A (`no_side@1.0`) across three risk profiles to gather comparative evidence before expanding.
