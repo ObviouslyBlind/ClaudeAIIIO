@@ -21,3 +21,13 @@ Record of architecture and strategy decisions with reasoning.
 
 **Decision:** Only consider markets expiring within 3 days.
 **Reason:** Shorter timeframes reduce exposure and align with the low-drawdown priority.
+
+## D005 — Signal thresholds (2026-03-18)
+
+**Decision:** NO price must be between 0.50 and 0.95. TRADE requires NO >= 0.70 within 72h expiry. YES price 0.40-0.60 = mixed evidence = SKIP.
+**Reason:** Below 0.50, the market thinks the event is likely (risky for NO). Above 0.95, the upside is too small. The 0.70 trade threshold ensures meaningful edge. Mixed evidence zone prevents betting on coin flips.
+
+## D006 — Three-tier signal output (2026-03-18)
+
+**Decision:** Signals are TRADE, WATCH, or SKIP. Each includes a score (0-100) and list of reasons.
+**Reason:** Binary trade/no-trade misses the nuance of markets that may become tradeable. WATCH lets us track promising setups. Logged reasons make every decision auditable.

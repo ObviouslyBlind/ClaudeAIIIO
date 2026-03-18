@@ -21,9 +21,10 @@
 - [ ] Get approval to proceed to Phase 4
 
 ## Phase 4 — Signal logic
-- [ ] Design signal rules
-- [ ] Implement TRADE / WATCH / SKIP logic
-- [ ] Log reasoning for each decision
+- [x] Design signal rules
+- [x] Implement TRADE / WATCH / SKIP logic
+- [x] Log reasoning for each decision
+- [ ] Get approval to proceed to Phase 5
 
 ## Phase 5 — Paper trading
 - [ ] Build paper-trade ledger
