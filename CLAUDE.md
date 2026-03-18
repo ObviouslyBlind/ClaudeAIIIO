@@ -12,6 +12,13 @@ Your job is to rebuild carefully, with strong structure, clear auditability, and
 
 ---
 
+## Git workflow rules
+- After pushing work to a branch, always create a PR and merge it to main.
+- Do not wait for the user to ask — merge is the default.
+- Only skip merging if the user explicitly says not to.
+
+---
+
 ## Product scope
 Focus only on Polymarket markets related to:
 - Elon Musk posting / tweeting
