@@ -2,20 +2,20 @@
 
 ## 2026-03-18
 
-**Phase:** 3 — Market ingestion (complete)
-**Status:** API adapter, classifier, and fetch script working. Awaiting approval for Phase 4.
+**Phase:** 6 — Dashboard (complete)
+**Status:** Dashboard built. Awaiting approval for Phase 7.
 
 ### Completed today
-- Phases 1-3 completed
-- Polymarket Gamma API adapter built and tested against live API
-- Market classifier built (Musk posting, Trump posting detection)
-- Fetch script fetches 500 markets, parses all, classifies, saves to data/
-- 17 tests passing
-- No Musk/Trump posting markets active right now (expected — they come and go)
-- 16 Trump/Musk markets found but correctly filtered out (elections, not posting)
+- Phases 1-6 completed
+- HTML/CSS/JS dashboard with dark theme, stat cards, tables
+- Sections: stats overview, relevant markets, signal output, paper trade ledger
+- All views labeled SIMULATED and PAPER TRADING ONLY
+- export_dashboard.py copies latest data into dashboard/data/
+- Static file — open in browser, no server needed
+- 42 tests passing
 
 ### Next steps
-- Approval to proceed to Phase 4 (signal logic — TRADE / WATCH / SKIP rules)
+- Approval to proceed to Phase 7 (evaluation)
 
 ### Blockers
 - None

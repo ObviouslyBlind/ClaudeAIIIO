@@ -18,22 +18,25 @@
 - [x] Classify market types
 - [x] Store raw and normalized data
 - [x] Document inspection workflow
-- [ ] Get approval to proceed to Phase 4
+- [x] Get approval to proceed to Phase 4
 
 ## Phase 4 — Signal logic
-- [ ] Design signal rules
-- [ ] Implement TRADE / WATCH / SKIP logic
-- [ ] Log reasoning for each decision
+- [x] Design signal rules
+- [x] Implement TRADE / WATCH / SKIP logic
+- [x] Log reasoning for each decision
+- [x] Get approval to proceed to Phase 5
 
 ## Phase 5 — Paper trading
-- [ ] Build paper-trade ledger
-- [ ] Separate simulation from forward tracking
-- [ ] Label data provenance
+- [x] Build paper-trade ledger
+- [x] Separate simulation from forward tracking
+- [x] Label data provenance
+- [x] Get approval to proceed to Phase 6
 
 ## Phase 6 — Dashboard
-- [ ] Build HTML/CSS/JS dashboard
-- [ ] Load data files cleanly
-- [ ] Label mode and provenance
+- [x] Build HTML/CSS/JS dashboard
+- [x] Load data files cleanly
+- [x] Label mode and provenance
+- [ ] Get approval to proceed to Phase 7
 
 ## Phase 7 — Evaluation
 - [ ] Analyze performance honestly

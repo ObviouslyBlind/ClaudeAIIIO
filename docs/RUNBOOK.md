@@ -1,10 +1,10 @@
 # Runbook
 
-How to run, test, and inspect the system. Will be filled in as we build each phase.
+How to run, test, and inspect the system. Updated as each phase is built.
 
 ## Prerequisites
 
-- Python 3.10+ (planned)
+- Python 3.10+
 - No API keys required for v1 (Polymarket public API)
 - No wallet or secrets needed
 
@@ -14,14 +14,19 @@ How to run, test, and inspect the system. Will be filled in as we build each pha
 # Install dependencies
 pip install -r requirements.txt
 
-# Fetch markets (placeholder — Phase 3)
+# Fetch markets
 python scripts/fetch_markets.py
 
-# Run signal analysis (placeholder — Phase 4)
+# Run signal analysis
 python scripts/run_signals.py
 
-# Execute paper trades (placeholder — Phase 5)
+# Execute paper trades (reads signals, opens trades, updates ledger)
 python scripts/run_papertrade.py
+
+# Export data for dashboard
+python scripts/export_dashboard.py
+
+# Then open dashboard/index.html in a browser
 ```
 
 ## How to test
@@ -38,6 +43,8 @@ After running `python scripts/fetch_markets.py`:
 - **Raw data:** `data/raw/markets_YYYYMMDD_HHMMSS.json` — unmodified API response
 - **All markets:** `data/normalized/all_markets_YYYYMMDD_HHMMSS.json` — parsed with classification
 - **Relevant only:** `data/normalized/relevant_markets_YYYYMMDD_HHMMSS.json` — Musk/Trump posting markets
+- **Signal results:** `data/signals/signals_YYYYMMDD_HHMMSS.json` — TRADE/WATCH/SKIP output from `run_signals.py`
+- **Ledger:** `data/ledger/ledger.json` — all paper trades (SIMULATED), persists across runs
 
 Quick inspection:
 ```bash
