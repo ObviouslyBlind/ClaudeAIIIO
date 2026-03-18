@@ -1,43 +1,17 @@
 # TODO
 
-## Phase 1 — Clean planning
-- [x] Explain the project in simple English
-- [x] Propose repo structure
-- [x] Define what v1 will and will not do
-- [x] Create docs skeleton
-- [x] Get approval to proceed to Phase 2
+## Completed
 
-## Phase 2 — Project skeleton
-- [x] Create folder structure
-- [x] Create placeholder files for scripts, tests
-- [x] Define local run workflow
-- [x] Get approval to proceed to Phase 3
+- [x] Phase 1 — Clean planning
+- [x] Phase 2 — Project skeleton
+- [x] Phase 3 — Market ingestion
+- [x] Phase 4 — Signal logic
+- [x] Phase 5 — Paper trading
+- [x] Phase 6 — Dashboard
 
-## Phase 3 — Market ingestion
-- [x] Build Polymarket API adapter
-- [x] Classify market types
-- [x] Store raw and normalized data
-- [x] Document inspection workflow
-- [x] Get approval to proceed to Phase 4
+## Next
 
-## Phase 4 — Signal logic
-- [x] Design signal rules
-- [x] Implement TRADE / WATCH / SKIP logic
-- [x] Log reasoning for each decision
-- [x] Get approval to proceed to Phase 5
-
-## Phase 5 — Paper trading
-- [x] Build paper-trade ledger
-- [x] Separate simulation from forward tracking
-- [x] Label data provenance
-- [x] Get approval to proceed to Phase 6
-
-## Phase 6 — Dashboard
-- [x] Build HTML/CSS/JS dashboard
-- [x] Load data files cleanly
-- [x] Label mode and provenance
-- [ ] Get approval to proceed to Phase 7
-
-## Phase 7 — Evaluation
+### Phase 7 — Evaluation
 - [ ] Analyze performance honestly
 - [ ] Recommend changes
+- [ ] Resolve Q004 (market resolution timing)
