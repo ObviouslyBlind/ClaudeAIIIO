@@ -5,12 +5,12 @@
 - [x] Propose repo structure
 - [x] Define what v1 will and will not do
 - [x] Create docs skeleton
-- [ ] Get approval to proceed to Phase 2
+- [x] Get approval to proceed to Phase 2
 
 ## Phase 2 — Project skeleton
-- [ ] Create folder structure
-- [ ] Create placeholder files for scripts, tests
-- [ ] Define local run workflow
+- [x] Create folder structure
+- [x] Create placeholder files for scripts, tests
+- [x] Define local run workflow
 - [ ] Get approval to proceed to Phase 3
 
 ## Phase 3 — Market ingestion
