@@ -19,7 +19,11 @@
 - [x] Per-profile ledgers — each strategy+profile gets own ledger file
 - [x] Dashboard hardening — error vs empty states, source-based freshness, safe rendering
 - [x] Dashboard comparative — Run History tab with strategy/profile comparison table
+- [x] resolve_trades.py updates run records with resolution stats
+- [x] Per-profile ledger comparison in dashboard
+- [x] CANCELLED trade state for invalidation
 - [x] Docs aligned with actual implementation
+- [x] PROJECT_REVIEW.md updated to reflect verified state (was stale)
 
 ## Next
 
@@ -41,3 +45,4 @@
 - [ ] Build analytics module (currently empty placeholder)
 - [ ] Data file cleanup / rotation
 - [ ] Automated scheduling / polling (Q007)
+- [ ] Conditions for automatic CANCELLED status (Q011)
