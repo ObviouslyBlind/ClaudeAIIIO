@@ -21,17 +21,29 @@
 - [x] Dashboard comparative — Run History tab with strategy/profile comparison table
 - [x] resolve_trades.py updates run records with resolution stats
 - [x] Per-profile ledger comparison in dashboard
-- [x] CANCELLED trade state for invalidation
+- [x] Trade lifecycle documented (OPEN → WON/LOST/EXPIRED/CANCELLED)
 - [x] Docs aligned with actual implementation
-- [x] PROJECT_REVIEW.md updated to reflect verified state (was stale)
+- [x] PROJECT_REVIEW.md updated to reflect verified state
+- [x] Extract find_latest_file() into shared utility (polymarket_timer_bot/utils.py)
+- [x] Baseline test protocol documented (docs/BASELINE_TEST_PROTOCOL.md)
+- [x] Evaluation template created (docs/EVALUATION_TEMPLATE.md)
+- [x] Dashboard run history shows won/lost/expired columns
+- [x] Ledger summary includes expired + cancelled counts
+- [x] Win rate calculation excludes expired/cancelled (only definitive outcomes)
 
-## Next
+## Current phase: Baseline evaluation
 
-- [ ] Run comparative test: conservative vs moderate vs aggressive on real data (Q005)
+- [ ] Run baseline protocol: Strategy A × 3 profiles on real market data
+- [ ] Gather first comparative evidence (signal counts, trade counts, P&L)
 - [ ] End-to-end resolution test with real closed markets
+- [ ] Record findings in evaluation template
+- [ ] Assess whether NO-side strategy differentiates across profiles (Q005)
+- [ ] Decide on Strategy B candidate based on evidence
+
+## Next (after baseline evaluation)
+
+- [ ] Implement Strategy B (bracket-position-weighted — see OPEN_QUESTIONS Q012)
 - [ ] Dashboard family grouping (Q008) — render families.json as grouped view
-- [ ] Add more strategies to STRATEGIES registry (Q010) — only after validation
-- [ ] Extract find_latest_file() into shared utility (duplicated in scripts)
 - [ ] Add pyproject.toml to eliminate sys.path hacks
 - [ ] Replace datetime.utcnow() with timezone-aware
 

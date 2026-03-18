@@ -19,14 +19,10 @@ from datetime import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from polymarket_timer_bot.utils import find_latest_file
+
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
-
-
-def find_latest_file(directory: str, prefix: str) -> str | None:
-    pattern = os.path.join(directory, f"{prefix}*.json")
-    files = sorted(glob.glob(pattern))
-    return files[-1] if files else None
 
 
 def file_mtime_iso(path: str) -> str | None:

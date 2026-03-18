@@ -13,6 +13,8 @@ from polymarket_timer_bot.papertrade.models import (
     WON,
     LOST,
     EXPIRED,
+    CANCELLED,
+    TERMINAL_STATES,
     PROVENANCE,
 )
 from polymarket_timer_bot.signals.engine import SignalResult
@@ -139,10 +141,15 @@ class Ledger:
         closed_trades = self.get_closed_trades()
         wins = [t for t in closed_trades if t.status == WON]
         losses = [t for t in closed_trades if t.status == LOST]
+        expired = [t for t in closed_trades if t.status == EXPIRED]
+        cancelled = [t for t in closed_trades if t.status == CANCELLED]
+
+        # Win rate excludes cancelled/expired — only counts definitive outcomes
+        definitive = len(wins) + len(losses)
+        win_rate = (len(wins) / definitive * 100) if definitive else 0.0
 
         total_pnl = sum(t.pnl for t in closed_trades if t.pnl is not None)
         total_staked = sum(t.stake for t in closed_trades)
-        win_rate = (len(wins) / len(closed_trades) * 100) if closed_trades else 0.0
 
         return {
             "provenance": PROVENANCE,
@@ -151,6 +158,8 @@ class Ledger:
             "closed_trades": len(closed_trades),
             "wins": len(wins),
             "losses": len(losses),
+            "expired": len(expired),
+            "cancelled": len(cancelled),
             "win_rate_pct": round(win_rate, 1),
             "total_pnl": round(total_pnl, 2),
             "total_staked": round(total_staked, 2),
