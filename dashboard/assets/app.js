@@ -566,14 +566,22 @@ async function init() {
         loadJSON("data/meta.json"),
     ]);
 
-    renderHeaderStats(relevant, signals, ledger, meta);
-    renderRelevantMarkets(relevant);
-    renderSignalFeed(signals);
-    renderSignalsFull(signals);
-    renderLedgerSummary(ledger);
-    renderLedgerFull(ledger);
-    renderRunHistory(runs);
-    renderAllMarkets(relevant);
+    const safeRender = (name, fn) => {
+        try { fn(); } catch (e) {
+            console.error(`Render ${name} failed:`, e);
+            const el = document.getElementById(name);
+            if (el) el.innerHTML = `<div class="error-state">Render error in ${name}: ${escapeHtml(String(e))}</div>`;
+        }
+    };
+
+    safeRender("header", () => renderHeaderStats(relevant, signals, ledger, meta));
+    safeRender("relevant-markets", () => renderRelevantMarkets(relevant));
+    safeRender("signal-feed", () => renderSignalFeed(signals));
+    safeRender("signals-full", () => renderSignalsFull(signals));
+    safeRender("ledger-summary", () => renderLedgerSummary(ledger));
+    safeRender("ledger-full", () => renderLedgerFull(ledger));
+    safeRender("runs-table", () => renderRunHistory(runs));
+    safeRender("all-markets", () => renderAllMarkets(relevant));
 
     // Load per-profile ledgers for comparative view
     const profileLedgers = await loadPerProfileLedgers(meta);
@@ -582,4 +590,17 @@ async function init() {
     }
 }
 
-init();
+init().catch(err => {
+    console.error("Dashboard init failed:", err);
+    const bar = document.getElementById("data-status-bar");
+    if (bar) {
+        bar.textContent = "JS error: " + String(err);
+        bar.className = "data-status data-status-error";
+    }
+    // Try to render whatever loaded successfully
+    document.querySelectorAll(".empty-state").forEach(el => {
+        if (el.textContent === "Loading...") {
+            el.textContent = "Failed to render — check console. Error: " + String(err);
+        }
+    });
+});
