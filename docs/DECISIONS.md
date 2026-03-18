@@ -72,6 +72,21 @@ Record of architecture and strategy decisions with reasoning.
 **Decision:** Dashboard shows data freshness based on source file modification time (from meta.json), not browser clock.
 **Reason:** Browser time creates false freshness — dashboard would show "just updated" even if data is hours old. Source file mtime is the honest signal. meta.json is written by export_dashboard.py with actual file mtimes.
 
+## D016 — Automated pipeline via GitHub Actions (2026-03-18)
+
+**Decision:** Run the full pipeline (fetch → signals × 3 → papertrade × 3 → resolve → summary → export) every 6 hours via GitHub Actions cron. Commits updated data directly to main.
+**Reason:** 3-day expiry markets don't need minute-level freshness. 6-hour cycles (4x/day) balance data freshness with API politeness and commit noise. GitHub Actions is free for public repos and requires zero infrastructure.
+
+## D017 — Evaluation summary layer (2026-03-18)
+
+**Decision:** `generate_summary.py` produces `summary.json` with per-profile signal counts, trade stats, win rate (definitive only), PnL, exposure, and average resolution time. Rendered in a new Evaluation dashboard tab.
+**Reason:** Operational visibility requires at-a-glance comparison across profiles without reading raw ledger JSON. The summary is generated fresh each pipeline run and exported alongside other dashboard data.
+
+## D018 — Pipeline alerting via three channels (2026-03-18)
+
+**Decision:** Three alert paths: (1) `pipeline_report.json` for machine-readable step status, (2) GitHub Actions job summary for human review, (3) GitHub's built-in email notifications on workflow failure.
+**Reason:** No external services needed. GitHub's notification system already handles failure alerting. The report JSON enables dashboard rendering of pipeline health.
+
 ## D015 — Supplemental merge before save (2026-03-18)
 
 **Decision:** Move `relevant_markets_*.json` save to AFTER supplemental /markets merge.

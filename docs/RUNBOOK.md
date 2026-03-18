@@ -54,6 +54,43 @@ After that, the workflow handles everything automatically.
 
 ---
 
+## Automated pipeline
+
+The pipeline runs automatically via GitHub Actions every 6 hours (00:00, 06:00, 12:00, 18:00 UTC).
+
+**What it does:**
+1. Fetches latest markets from Polymarket
+2. Runs signals for all 3 profiles (conservative, moderate, aggressive)
+3. Opens paper trades for all 3 profiles
+4. Resolves any closed trades
+5. Generates evaluation summary
+6. Exports dashboard data
+7. Commits and pushes updated data to main
+8. Dashboard auto-deploys via GitHub Pages within ~1 minute
+
+**Manual trigger:** Go to Actions tab → "Automated Pipeline" → "Run workflow".
+
+**Local manual run:**
+```bash
+./scripts/run_pipeline.sh              # full pipeline
+./scripts/run_pipeline.sh --no-fetch   # skip fetch, reuse latest data
+```
+
+### Alerting
+
+Three alert channels:
+
+1. **Pipeline report** — `reports/pipeline_report.json` shows per-step success/failure
+2. **GitHub Actions summary** — each run writes evaluation summary to the Actions job summary
+3. **GitHub email notifications** — GitHub sends email on workflow failure (enabled by default in Settings → Notifications)
+
+To check pipeline health:
+- Dashboard Evaluation tab shows latest summary and pipeline status
+- `https://github.com/ObviouslyBlind/ClaudeAIIIO/actions` shows all runs
+- `reports/pipeline_report.json` has machine-readable step results
+
+---
+
 ## Prerequisites
 
 - Python 3.10+
@@ -133,10 +170,21 @@ resolve_trades.py
   → updates ledger files                     (closes trades: WON/LOST/EXPIRED)
   → updates data/runs/index.json             (resolution stats: won/lost/open/P&L)
 
+generate_summary.py
+  ← reads data/signals/ + data/ledger/
+  → dashboard/data/summary.json              (evaluation metrics)
+  → reports/evaluation_summary.json          (same data for reports)
+
 export_dashboard.py
   ← reads latest from all data dirs
   → dashboard/data/*.json                    (for HTML dashboard)
+  → dashboard/data/summary.json              (evaluation summary)
+  → dashboard/data/pipeline_report.json      (automation status)
   → dashboard/data/meta.json                 (source file freshness metadata)
+
+run_pipeline.sh (orchestrator)
+  ← runs all above scripts in order, for all 3 profiles
+  → reports/pipeline_report.json             (per-step success/failure)
 ```
 
 ## Data directories
