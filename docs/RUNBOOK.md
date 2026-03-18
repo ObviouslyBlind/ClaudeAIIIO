@@ -22,6 +22,11 @@ python scripts/run_signals.py
 
 # Execute paper trades (reads signals, opens trades, updates ledger)
 python scripts/run_papertrade.py
+
+# Export data for dashboard
+python scripts/export_dashboard.py
+
+# Then open dashboard/index.html in a browser
 ```
 
 ## How to test

@@ -30,12 +30,13 @@
 - [x] Build paper-trade ledger
 - [x] Separate simulation from forward tracking
 - [x] Label data provenance
-- [ ] Get approval to proceed to Phase 6
+- [x] Get approval to proceed to Phase 6
 
 ## Phase 6 — Dashboard
-- [ ] Build HTML/CSS/JS dashboard
-- [ ] Load data files cleanly
-- [ ] Label mode and provenance
+- [x] Build HTML/CSS/JS dashboard
+- [x] Load data files cleanly
+- [x] Label mode and provenance
+- [ ] Get approval to proceed to Phase 7
 
 ## Phase 7 — Evaluation
 - [ ] Analyze performance honestly
