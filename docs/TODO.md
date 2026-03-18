@@ -24,12 +24,13 @@
 - [x] Design signal rules
 - [x] Implement TRADE / WATCH / SKIP logic
 - [x] Log reasoning for each decision
-- [ ] Get approval to proceed to Phase 5
+- [x] Get approval to proceed to Phase 5
 
 ## Phase 5 — Paper trading
-- [ ] Build paper-trade ledger
-- [ ] Separate simulation from forward tracking
-- [ ] Label data provenance
+- [x] Build paper-trade ledger
+- [x] Separate simulation from forward tracking
+- [x] Label data provenance
+- [ ] Get approval to proceed to Phase 6
 
 ## Phase 6 — Dashboard
 - [ ] Build HTML/CSS/JS dashboard

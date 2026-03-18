@@ -20,7 +20,7 @@ python scripts/fetch_markets.py
 # Run signal analysis
 python scripts/run_signals.py
 
-# Execute paper trades (placeholder — Phase 5)
+# Execute paper trades (reads signals, opens trades, updates ledger)
 python scripts/run_papertrade.py
 ```
 
@@ -39,6 +39,7 @@ After running `python scripts/fetch_markets.py`:
 - **All markets:** `data/normalized/all_markets_YYYYMMDD_HHMMSS.json` — parsed with classification
 - **Relevant only:** `data/normalized/relevant_markets_YYYYMMDD_HHMMSS.json` — Musk/Trump posting markets
 - **Signal results:** `data/signals/signals_YYYYMMDD_HHMMSS.json` — TRADE/WATCH/SKIP output from `run_signals.py`
+- **Ledger:** `data/ledger/ledger.json` — all paper trades (SIMULATED), persists across runs
 
 Quick inspection:
 ```bash

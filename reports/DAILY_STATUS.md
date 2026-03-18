@@ -2,19 +2,20 @@
 
 ## 2026-03-18
 
-**Phase:** 4 — Signal logic (complete)
-**Status:** Signal engine built with TRADE/WATCH/SKIP output. Awaiting approval for Phase 5.
+**Phase:** 5 — Paper trading (complete)
+**Status:** Paper trade ledger built. Awaiting approval for Phase 6.
 
 ### Completed today
-- Phases 1-4 completed
-- Signal engine with scored output (0-100) and logged reasoning
-- Rules: NO price 0.50-0.95, TRADE >= 0.70, mixed evidence zone, 72h max expiry
-- Time pressure scoring (closer to expiry = stronger NO signal)
-- 32 tests passing
-- run_signals.py loads latest data and evaluates
+- Phases 1-5 completed
+- Paper trade ledger with open/close/summary, persisted to JSON
+- PaperTrade model with P&L calculation, provenance labeling
+- Duplicate trade prevention, persistence across reloads
+- All output labeled SIMULATED
+- 42 tests passing (11 new paper trade tests)
+- run_papertrade.py reads signals, opens trades, displays summary
 
 ### Next steps
-- Approval to proceed to Phase 5 (paper trading ledger)
+- Approval to proceed to Phase 6 (dashboard)
 
 ### Blockers
 - None
