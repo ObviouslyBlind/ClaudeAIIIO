@@ -33,4 +33,24 @@ python -m pytest tests/ -v
 
 ## How to inspect outputs
 
-_Not yet implemented. Will be added in Phase 3._
+After running `python scripts/fetch_markets.py`:
+
+- **Raw data:** `data/raw/markets_YYYYMMDD_HHMMSS.json` — unmodified API response
+- **All markets:** `data/normalized/all_markets_YYYYMMDD_HHMMSS.json` — parsed with classification
+- **Relevant only:** `data/normalized/relevant_markets_YYYYMMDD_HHMMSS.json` — Musk/Trump posting markets
+
+Quick inspection:
+```bash
+# Count markets
+python -c "import json; d=json.load(open('data/normalized/all_markets_YYYYMMDD_HHMMSS.json')); print(len(d))"
+
+# Find Trump/Musk markets
+python -c "
+import json
+with open('data/normalized/all_markets_YYYYMMDD_HHMMSS.json') as f:
+    for m in json.load(f):
+        q = m['question'].lower()
+        if 'trump' in q or 'musk' in q or 'elon' in q:
+            print(m['question'][:80], '|', m['market_type'])
+"
+```

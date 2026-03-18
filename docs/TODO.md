@@ -11,13 +11,14 @@
 - [x] Create folder structure
 - [x] Create placeholder files for scripts, tests
 - [x] Define local run workflow
-- [ ] Get approval to proceed to Phase 3
+- [x] Get approval to proceed to Phase 3
 
 ## Phase 3 — Market ingestion
-- [ ] Build Polymarket API adapter
-- [ ] Classify market types
-- [ ] Store raw and normalized data
-- [ ] Document inspection workflow
+- [x] Build Polymarket API adapter
+- [x] Classify market types
+- [x] Store raw and normalized data
+- [x] Document inspection workflow
+- [ ] Get approval to proceed to Phase 4
 
 ## Phase 4 — Signal logic
 - [ ] Design signal rules
