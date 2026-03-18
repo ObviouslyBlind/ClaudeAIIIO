@@ -4,6 +4,8 @@ Paper-trading bot that monitors Polymarket bracket/count markets for Elon Musk t
 
 ## Status
 
+**Current phase: Baseline evaluation** — running Strategy A (`no_side@1.0`) across three risk profiles to gather comparative evidence before expanding.
+
 End-to-end pipeline operational: fetch → signals → papertrade → resolve → dashboard.
 Supports multi-strategy comparative testing (conservative / moderate / aggressive profiles).
 
@@ -71,8 +73,10 @@ The dashboard shows comparative results across combinations.
 ## Project docs
 
 - [Project Brief](docs/PROJECT_BRIEF.md)
+- [Baseline Test Protocol](docs/BASELINE_TEST_PROTOCOL.md) — how to run the evaluation
+- [Evaluation Template](docs/EVALUATION_TEMPLATE.md) — record findings per cycle
+- [Runbook](docs/RUNBOOK.md)
 - [Decisions Log](docs/DECISIONS.md)
 - [Open Questions](docs/OPEN_QUESTIONS.md)
 - [TODO](docs/TODO.md)
-- [Runbook](docs/RUNBOOK.md)
 - [Source Hierarchy](docs/SOURCE_HIERARCHY.md)
