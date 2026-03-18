@@ -109,10 +109,7 @@ run_step "resolve_trades" python "$SCRIPT_DIR/resolve_trades.py"
 # Step 5: Generate evaluation summary
 run_step "generate_summary" python "$SCRIPT_DIR/generate_summary.py"
 
-# Step 6: Export dashboard data
-run_step "export_dashboard" python "$SCRIPT_DIR/export_dashboard.py"
-
-# --- Report ---
+# --- Write pipeline report BEFORE export so export can include it ---
 
 PIPELINE_END=$(timestamp)
 PIPELINE_STATUS="success"
@@ -120,44 +117,42 @@ if [ $ERRORS -gt 0 ]; then
     PIPELINE_STATUS="partial_failure"
 fi
 
-# Build JSON report
-{
-    echo "{"
-    echo "  \"pipeline_start\": \"$PIPELINE_START\","
-    echo "  \"pipeline_end\": \"$PIPELINE_END\","
-    echo "  \"status\": \"$PIPELINE_STATUS\","
-    echo "  \"errors\": $ERRORS,"
-    echo "  \"steps\": {"
-    first=true
-    for key in "${!STEP_STATUS[@]}"; do
-        if [ "$first" = true ]; then
-            first=false
-        else
-            echo ","
-        fi
-        printf "    \"%s\": \"%s\"" "$key" "${STEP_STATUS[$key]}"
-    done
-    echo ""
-    echo "  },"
+write_report() {
+    python3 -c "
+import json, sys, glob, os
+steps = json.loads(sys.argv[1])
+ledgers = sorted(glob.glob(os.path.join(sys.argv[6], 'data/ledger/ledger*.json')))
+report = {
+    'pipeline_start': sys.argv[2],
+    'pipeline_end': sys.argv[3],
+    'status': sys.argv[4],
+    'errors': int(sys.argv[5]),
+    'steps': steps,
+    'ledger_summary': [{'file': os.path.basename(f)} for f in ledgers]
+}
+with open(sys.argv[7], 'w') as f:
+    json.dump(report, f, indent=2)
+" "$1" "$PIPELINE_START" "$PIPELINE_END" "$PIPELINE_STATUS" "$ERRORS" "$ROOT_DIR" "$REPORT_FILE"
+}
 
-    # Collect trade summary from ledgers
-    echo "  \"ledger_summary\": ["
-    first_ledger=true
-    for lf in "$ROOT_DIR"/data/ledger/ledger*.json; do
-        if [ -f "$lf" ]; then
-            if [ "$first_ledger" = true ]; then
-                first_ledger=false
-            else
-                echo ","
-            fi
-            name=$(basename "$lf")
-            printf "    {\"file\": \"%s\"}" "$name"
-        fi
-    done
-    echo ""
-    echo "  ]"
-    echo "}"
-} > "$REPORT_FILE"
+# Build steps JSON from associative array
+STEPS_JSON="{"
+first=true
+for key in "${!STEP_STATUS[@]}"; do
+    if [ "$first" = true ]; then
+        first=false
+    else
+        STEPS_JSON+=","
+    fi
+    STEPS_JSON+="\"$key\":\"${STEP_STATUS[$key]}\""
+done
+STEPS_JSON+="}"
+
+write_report "$STEPS_JSON"
+log "Pipeline report written to $REPORT_FILE"
+
+# Step 6: Export dashboard data (now includes pipeline report)
+run_step "export_dashboard" python "$SCRIPT_DIR/export_dashboard.py"
 
 log ""
 log "═══════════════════════════════════════════════"

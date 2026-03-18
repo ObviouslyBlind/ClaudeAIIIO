@@ -31,10 +31,9 @@ jobs:
         run: |
           chmod +x scripts/run_pipeline.sh
           scripts/run_pipeline.sh 2>&1 | tee pipeline_output.txt
-          echo "exit_code=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
-        continue-on-error: true
 
       - name: Commit and push updated data
+        if: success()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -49,12 +48,31 @@ jobs:
             TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M UTC")
             git commit -m "Automated pipeline run: $TIMESTAMP
 
-          Pipeline status: ${{ steps.pipeline.outcome }}
+          Triggered by: ${{ github.event_name }}"
+            git push origin main
+          fi
+
+      - name: Commit partial data on partial failure
+        if: failure()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Only commit reports (not potentially corrupt data)
+          git add reports/pipeline_report.json || true
+
+          if git diff --cached --quiet; then
+            echo "No report to commit"
+          else
+            TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M UTC")
+            git commit -m "Pipeline FAILED: $TIMESTAMP — see report for details
+
           Triggered by: ${{ github.event_name }}"
             git push origin main
           fi
 
       - name: Pipeline status summary
+        if: always()
         run: |
           echo "## Pipeline Report" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
@@ -74,9 +92,3 @@ jobs:
             cat reports/evaluation_summary.json >> "$GITHUB_STEP_SUMMARY"
             echo '```' >> "$GITHUB_STEP_SUMMARY"
           fi
-
-      - name: Fail if pipeline had critical errors
-        if: steps.pipeline.outcome == 'failure'
-        run: |
-          echo "Pipeline failed — check logs above"
-          exit 1

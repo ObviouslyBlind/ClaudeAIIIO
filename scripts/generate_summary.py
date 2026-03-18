@@ -15,13 +15,8 @@ import glob
 import json
 import logging
 import os
-import re
 import sys
-from datetime import datetime
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from polymarket_timer_bot.utils import find_latest_file
+from datetime import datetime, timezone
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
@@ -73,8 +68,9 @@ def build_profile_summary(profile_id, data_dir):
         except Exception as e:
             logger.warning("Failed to read signal file %s: %s", latest_signal, e)
 
-    # Find ledger for this profile (strategy is no_side for now)
-    ledger_path = os.path.join(ledger_dir, f"ledger_no_side_{profile_id}.json")
+    # Find ledger for this profile — glob for any strategy, not just no_side
+    ledger_matches = sorted(glob.glob(os.path.join(ledger_dir, f"ledger_*_{profile_id}.json")))
+    ledger_path = ledger_matches[-1] if ledger_matches else None
     trade_stats = {
         "total_trades": 0,
         "open_trades": 0,
@@ -88,7 +84,7 @@ def build_profile_summary(profile_id, data_dir):
         "avg_hours_to_resolution": None,
     }
 
-    if os.path.exists(ledger_path):
+    if ledger_path and os.path.exists(ledger_path):
         try:
             with open(ledger_path) as f:
                 trades = json.load(f)
@@ -167,7 +163,7 @@ def main():
     overall_win_rate = (total_wins / definitive * 100) if definitive else 0.0
 
     summary = {
-        "generated_at": datetime.utcnow().isoformat() + "Z",
+        "generated_at": datetime.now(timezone.utc).isoformat(),
         "provenance": "SIMULATED",
         "profiles": profiles,
         "totals": {

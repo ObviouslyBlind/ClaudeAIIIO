@@ -422,25 +422,28 @@ function renderRunHistory(result) {
     }
 
     const rows = runs.slice().reverse().map(r => {
-        const pnlCls = r.total_pnl >= 0 ? "pnl-positive" : "pnl-negative";
-        const winRate = (r.trades_won + r.trades_lost) > 0
-            ? ((r.trades_won / (r.trades_won + r.trades_lost)) * 100).toFixed(0) + "%"
+        const runPnl = r.total_pnl || 0;
+        const pnlCls = runPnl >= 0 ? "pnl-positive" : "pnl-negative";
+        const won = r.trades_won || 0;
+        const lost = r.trades_lost || 0;
+        const winRate = (won + lost) > 0
+            ? ((won / (won + lost)) * 100).toFixed(0) + "%"
             : "\u2014";
         return `<tr>
             <td style="color: var(--text-dim); font-size: 10px;">${escapeHtml(r.run_id)}</td>
             <td>${escapeHtml(r.strategy_id)}@${escapeHtml(r.strategy_version)}</td>
             <td><span class="profile-tag profile-${escapeHtml(r.profile_id)}">${escapeHtml(r.profile_id)}</span></td>
-            <td>${r.markets_evaluated}</td>
-            <td style="color: var(--green-bright)">${r.signals_trade}</td>
-            <td>${r.signals_watch}</td>
-            <td>${r.trades_opened}</td>
-            <td>${r.trades_open}</td>
-            <td style="color: var(--green-bright)">${r.trades_won || 0}</td>
-            <td style="color: var(--red)">${r.trades_lost || 0}</td>
+            <td>${r.markets_evaluated || 0}</td>
+            <td style="color: var(--green-bright)">${r.signals_trade || 0}</td>
+            <td>${r.signals_watch || 0}</td>
+            <td>${r.trades_opened || 0}</td>
+            <td>${r.trades_open || 0}</td>
+            <td style="color: var(--green-bright)">${won}</td>
+            <td style="color: var(--red)">${lost}</td>
             <td style="color: var(--text-dim)">${r.trades_expired || 0}</td>
             <td>${winRate}</td>
-            <td class="${pnlCls}">${formatPnl(r.total_pnl)}</td>
-            <td>$${r.open_exposure.toFixed(0)}</td>
+            <td class="${pnlCls}">${formatPnl(runPnl)}</td>
+            <td>$${(r.open_exposure || 0).toFixed(0)}</td>
             <td style="color: var(--text-dim); font-size: 10px;">${escapeHtml(r.created_at || "")}</td>
         </tr>`;
     }).join("");
@@ -509,29 +512,31 @@ function renderEvaluationSummary(result) {
 
     // Per-profile table
     const profileRows = profiles.map(p => {
-        const s = p.signals;
-        const t = p.trades;
-        const pnlCls = t.total_pnl >= 0 ? "pnl-positive" : "pnl-negative";
-        const avgRes = t.avg_hours_to_resolution !== null ? t.avg_hours_to_resolution + "h" : "\u2014";
+        const s = p.signals || {};
+        const t = p.trades || {};
+        const pnl = t.total_pnl || 0;
+        const pnlCls = pnl >= 0 ? "pnl-positive" : "pnl-negative";
+        const avgRes = t.avg_hours_to_resolution != null ? t.avg_hours_to_resolution + "h" : "\u2014";
         return `<tr>
             <td><span class="profile-tag profile-${escapeHtml(p.profile_id)}">${escapeHtml(p.profile_id)}</span></td>
-            <td style="color: var(--green-bright)">${s.trade}</td>
-            <td>${s.watch}</td>
-            <td style="color: var(--text-dim)">${s.skip}</td>
-            <td>${t.total_trades}</td>
-            <td style="color: var(--blue)">${t.open_trades}</td>
-            <td style="color: var(--green-bright)">${t.wins}</td>
-            <td style="color: var(--red)">${t.losses}</td>
-            <td style="color: var(--text-dim)">${t.expired}</td>
-            <td>${t.win_rate_pct}%</td>
-            <td class="${pnlCls}">${formatPnl(t.total_pnl)}</td>
-            <td>$${t.open_exposure.toFixed(0)}</td>
+            <td style="color: var(--green-bright)">${s.trade || 0}</td>
+            <td>${s.watch || 0}</td>
+            <td style="color: var(--text-dim)">${s.skip || 0}</td>
+            <td>${t.total_trades || 0}</td>
+            <td style="color: var(--blue)">${t.open_trades || 0}</td>
+            <td style="color: var(--green-bright)">${t.wins || 0}</td>
+            <td style="color: var(--red)">${t.losses || 0}</td>
+            <td style="color: var(--text-dim)">${t.expired || 0}</td>
+            <td>${t.win_rate_pct || 0}%</td>
+            <td class="${pnlCls}">${formatPnl(pnl)}</td>
+            <td>$${(t.open_exposure || 0).toFixed(0)}</td>
             <td style="color: var(--text-dim)">${avgRes}</td>
         </tr>`;
     }).join("");
 
-    // Totals row
-    const totPnlCls = totals.total_pnl >= 0 ? "pnl-positive" : "pnl-negative";
+    // Totals row (null-safe)
+    const totPnl = totals.total_pnl || 0;
+    const totPnlCls = totPnl >= 0 ? "pnl-positive" : "pnl-negative";
 
     const html = `
         <div class="eval-freshness">
@@ -549,14 +554,14 @@ function renderEvaluationSummary(result) {
                 <tr class="totals-row">
                     <td><strong>TOTAL</strong></td>
                     <td colspan="3">${totals.signals_evaluated || 0} signals</td>
-                    <td>${totals.total_trades}</td>
-                    <td style="color: var(--blue)">${totals.open_trades}</td>
-                    <td style="color: var(--green-bright)">${totals.wins}</td>
-                    <td style="color: var(--red)">${totals.losses}</td>
+                    <td>${totals.total_trades || 0}</td>
+                    <td style="color: var(--blue)">${totals.open_trades || 0}</td>
+                    <td style="color: var(--green-bright)">${totals.wins || 0}</td>
+                    <td style="color: var(--red)">${totals.losses || 0}</td>
                     <td>\u2014</td>
-                    <td>${totals.win_rate_pct}%</td>
-                    <td class="${totPnlCls}">${formatPnl(totals.total_pnl)}</td>
-                    <td>$${totals.open_exposure.toFixed(0)}</td>
+                    <td>${totals.win_rate_pct || 0}%</td>
+                    <td class="${totPnlCls}">${formatPnl(totPnl)}</td>
+                    <td>$${(totals.open_exposure || 0).toFixed(0)}</td>
                     <td>\u2014</td>
                 </tr>
             </tbody>
