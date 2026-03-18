@@ -97,6 +97,21 @@ Record of architecture and strategy decisions with reasoning.
 **Decision:** `generate_summary.py` produces `alerts` array with structured alert objects (`{level, message}`). Four alert conditions: zero relevant markets, open trades count, trade resolutions, and zero signals evaluated. Rendered as colored banners in the Evaluation tab.
 **Reason:** Minimal operational visibility without external services. Alerts appear in the dashboard (visible on auto-refresh), in the pipeline CLI output, and in the GitHub Actions job summary. Three channels, zero infrastructure.
 
+## D021 — Bracket-position-aware analysis (2026-03-18)
+
+**Decision:** Add bracket-position classification (hot/adjacent/tail) to evaluation breakdowns and operator summary. Do NOT change trading logic yet.
+**Reason:** Before modifying the signal engine, we need to measure whether edge differs by bracket position. The classification uses sibling bracket YES prices within each event family — the bracket with the highest YES price is "hot" (market consensus), ±1 is "adjacent", and everything else is "tail". Early data shows most trades concentrate in adjacent brackets (12/21), with tail brackets heavily skipped (748 SKIPs vs 5 TRADEs). Once resolution data accumulates, this will reveal whether position predicts win rate.
+
+## D022 — Operator summary panel (2026-03-18)
+
+**Decision:** Add a compact operator summary to the top of the Evaluation tab showing key metrics at a glance: families, brackets evaluated, active trades, outcomes, win rate, PnL, exposure, position coverage, and Strategy B status.
+**Reason:** Operators need a single-glance view without reading breakdown tables. The operator summary is the first thing visible on the Evaluation tab and includes a one-line Strategy B status.
+
+## D023 — Strategy B evidence threshold checklist (2026-03-18)
+
+**Decision:** Track Strategy B readiness via 4 criteria: 10+ definitive outcomes, 2+ complete event cycles, profile differentiation, and position-matters evidence. Report progress in summary.json and dashboard.
+**Reason:** Prevents premature implementation of bracket-position-weighted trading. The checklist makes the "when" decision objective and visible rather than subjective.
+
 ## D015 — Supplemental merge before save (2026-03-18)
 
 **Decision:** Move `relevant_markets_*.json` save to AFTER supplemental /markets merge.

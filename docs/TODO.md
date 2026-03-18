@@ -44,13 +44,17 @@
 - [x] Trade breakdowns — by subject and event family with PnL
 - [x] Alert flags — zero markets, new trades, resolutions, no signals
 
+- [x] Bracket-position-aware analysis — hot/adjacent/tail classification without changing trading logic
+- [x] Operator summary panel — compact at-a-glance metrics on Evaluation tab
+- [x] Strategy B evidence threshold checklist — 4 criteria tracked in summary.json + dashboard
+
 ## Current phase: Baseline evaluation + operational monitoring
 
 - [ ] Wait for real market resolutions (need closed markets with winners)
 - [ ] End-to-end resolution test with real closed markets
 - [ ] Assess whether NO-side strategy differentiates across profiles (Q005)
 - [ ] Decide on Strategy B candidate based on evidence (see threshold criteria below)
-- [ ] Add bracket-position-awareness to signal engine (Q013 — smallest useful first step)
+- [ ] Smallest signal-engine change: add bracket-position as a score modifier (see recommendation below)
 
 ## Next (after baseline evaluation)
 

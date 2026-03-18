@@ -647,3 +647,34 @@ tr:hover td {
     border-left: 3px solid var(--red, #c8503c);
     color: var(--red);
 }
+
+/* Operator Summary */
+.operator-summary-panel {
+    border-left: 3px solid var(--accent-gold);
+}
+
+.operator-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+}
+
+.op-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.op-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-dim);
+}
+
+.op-value {
+    font-size: 18px;
+    font-weight: 600;
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--text-primary);
+}

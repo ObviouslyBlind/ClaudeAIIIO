@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-18T20:27:32.628249+00:00",
+  "generated_at": "2026-03-18T23:17:01.605107+00:00",
   "provenance": "SIMULATED",
   "profiles": [
     {
@@ -86,6 +86,21 @@
     "unrealized_exposure": 2950.0,
     "total_pnl": 0,
     "open_exposure": 2950.0
+  },
+  "operator_summary": {
+    "total_families": 10,
+    "total_brackets_evaluated": 840,
+    "active_trades": 21,
+    "realized_pnl": 0,
+    "unrealized_exposure": 2950.0,
+    "definitive_outcomes": 0,
+    "win_rate_pct": 0.0,
+    "strategy_b_status": "DEFER \u2014 need more resolution data",
+    "position_coverage": {
+      "hot": 3,
+      "adjacent": 12,
+      "tail": 5
+    }
   },
   "breakdowns": {
     "signals": {
@@ -241,7 +256,88 @@
           "event_title": "Elon Musk # tweets March 19 - March 21, 2026?"
         }
       }
+    },
+    "bracket_position": {
+      "signals_by_position": {
+        "hot": {
+          "trade": 3,
+          "watch": 2,
+          "skip": 25
+        },
+        "adjacent": {
+          "trade": 12,
+          "watch": 2,
+          "skip": 43
+        },
+        "tail": {
+          "trade": 5,
+          "watch": 0,
+          "skip": 748
+        }
+      },
+      "trades_by_position": {
+        "hot": {
+          "total": 3,
+          "open": 3,
+          "won": 0,
+          "lost": 0,
+          "expired": 0,
+          "realized_pnl": 0.0,
+          "unrealized_exposure": 500.0
+        },
+        "adjacent": {
+          "total": 13,
+          "open": 13,
+          "won": 0,
+          "lost": 0,
+          "expired": 0,
+          "realized_pnl": 0.0,
+          "unrealized_exposure": 1800.0
+        },
+        "tail": {
+          "total": 5,
+          "open": 5,
+          "won": 0,
+          "lost": 0,
+          "expired": 0,
+          "realized_pnl": 0.0,
+          "unrealized_exposure": 650.0
+        }
+      },
+      "families_analyzed": 10
     }
+  },
+  "strategy_b_progress": {
+    "ready": false,
+    "criteria_met": 0,
+    "criteria_total": 4,
+    "criteria": [
+      {
+        "criterion": "10+ definitive outcomes",
+        "current": 0,
+        "target": 10,
+        "met": false
+      },
+      {
+        "criterion": "2+ complete event cycles",
+        "current": 0,
+        "target": 2,
+        "met": false
+      },
+      {
+        "criterion": "Profile differentiation observed",
+        "current": "insufficient data",
+        "target": "profiles differ on win rate",
+        "met": false
+      },
+      {
+        "criterion": "Position-matters evidence",
+        "current": "insufficient data",
+        "target": "hot vs tail differ on outcomes",
+        "met": false
+      }
+    ],
+    "recommendation": "DEFER \u2014 need more resolution data"
   },
   "alerts": [
     {
