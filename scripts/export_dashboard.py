@@ -15,7 +15,7 @@ import logging
 import os
 import shutil
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -29,7 +29,7 @@ def file_mtime_iso(path: str) -> str | None:
     """Return the file's modification time as ISO string, or None."""
     if path and os.path.exists(path):
         mtime = os.path.getmtime(path)
-        return datetime.utcfromtimestamp(mtime).isoformat() + "Z"
+        return datetime.fromtimestamp(mtime, tz=timezone.utc).isoformat()
     return None
 
 
@@ -39,7 +39,7 @@ def main():
     dash_data = os.path.join(root, "dashboard", "data")
     os.makedirs(dash_data, exist_ok=True)
 
-    meta = {"exported_at": datetime.utcnow().isoformat() + "Z", "sources": {}}
+    meta = {"exported_at": datetime.now(timezone.utc).isoformat(), "sources": {}}
 
     # --- Single-file exports ---
     single_exports = {
