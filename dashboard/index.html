@@ -3,24 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Polymarket NO-Only Timer Bot</title>
+    <title>SENTINEL — Polymarket Intelligence</title>
     <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
-    <h1>Polymarket NO-Only Timer Bot</h1>
-    <div class="subtitle">PAPER TRADING ONLY <span class="provenance-badge">SIMULATED</span></div>
-    <div class="timestamp" id="last-updated"></div>
 
-    <div class="stats" id="stats"></div>
+    <!-- HEADER -->
+    <header class="header">
+        <div class="header-left">
+            <div class="header-label">polymarket intelligence</div>
+            <h1 class="header-title">SENTINEL</h1>
+            <div class="header-sub">no-side timer surveillance</div>
+        </div>
+        <div class="header-right">
+            <div class="header-stat">
+                <span class="header-stat-label">markets scanned</span>
+                <span class="header-stat-value" id="stat-markets">—</span>
+            </div>
+            <div class="header-stat">
+                <span class="header-stat-label">relevant</span>
+                <span class="header-stat-value accent" id="stat-relevant">—</span>
+            </div>
+            <div class="header-stat">
+                <span class="header-stat-label">open trades</span>
+                <span class="header-stat-value" id="stat-open">—</span>
+            </div>
+            <div class="header-stat">
+                <span class="header-stat-label">p&l (sim)</span>
+                <span class="header-stat-value" id="stat-pnl">—</span>
+            </div>
+            <div class="header-stat">
+                <span class="header-stat-label">updated</span>
+                <span class="header-stat-value dim" id="stat-updated">—</span>
+            </div>
+        </div>
+    </header>
 
-    <h2>Relevant Markets (Musk / Trump Posting)</h2>
-    <div id="relevant-markets"><div class="empty-state">Loading...</div></div>
+    <!-- MODE BAR -->
+    <div class="mode-bar">
+        <span class="mode-dot"></span>
+        <span class="mode-label">paper trading</span>
+        <span class="provenance-badge">simulated</span>
+    </div>
 
-    <h2>Signal Output</h2>
-    <div id="signals"><div class="empty-state">Loading...</div></div>
+    <!-- TABS -->
+    <nav class="tabs">
+        <button class="tab active" data-tab="overview">overview</button>
+        <button class="tab" data-tab="signals">signal output</button>
+        <button class="tab" data-tab="ledger">trade ledger</button>
+        <button class="tab" data-tab="all-markets">all markets</button>
+    </nav>
 
-    <h2>Paper Trade Ledger <span class="provenance-badge">SIMULATED</span></h2>
-    <div id="ledger"><div class="empty-state">Loading...</div></div>
+    <!-- OVERVIEW TAB -->
+    <div class="tab-content active" id="tab-overview">
+        <div class="two-col">
+            <!-- LEFT: Signal Feed -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>Signal Feed</h2>
+                    <span class="panel-source">source: gamma-api.polymarket.com</span>
+                </div>
+                <div id="signal-feed"><div class="empty-state">No signals to display.</div></div>
+            </div>
+
+            <!-- RIGHT: Relevant Markets -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>Relevant Markets</h2>
+                    <span class="panel-source">musk / trump posting · live odds</span>
+                </div>
+                <div id="relevant-markets"><div class="empty-state">No relevant markets right now.</div></div>
+            </div>
+        </div>
+
+        <!-- LEDGER SUMMARY -->
+        <div class="panel">
+            <div class="panel-header">
+                <h2>Paper Ledger</h2>
+                <span class="provenance-badge">simulated</span>
+            </div>
+            <div id="ledger-summary"><div class="empty-state">No trades recorded yet.</div></div>
+        </div>
+    </div>
+
+    <!-- SIGNALS TAB -->
+    <div class="tab-content" id="tab-signals">
+        <div class="panel">
+            <div class="panel-header">
+                <h2>All Signals</h2>
+                <span class="panel-source">trade / watch / skip</span>
+            </div>
+            <div id="signals-full"><div class="empty-state">No signals generated yet.</div></div>
+        </div>
+    </div>
+
+    <!-- LEDGER TAB -->
+    <div class="tab-content" id="tab-ledger">
+        <div class="panel">
+            <div class="panel-header">
+                <h2>Trade Ledger</h2>
+                <span class="provenance-badge">simulated</span>
+            </div>
+            <div id="ledger-full"><div class="empty-state">No trades recorded yet.</div></div>
+        </div>
+    </div>
+
+    <!-- ALL MARKETS TAB -->
+    <div class="tab-content" id="tab-all-markets">
+        <div class="panel">
+            <div class="panel-header">
+                <h2>All Scanned Markets</h2>
+                <span class="panel-source" id="markets-count"></span>
+            </div>
+            <div id="all-markets"><div class="empty-state">Loading...</div></div>
+        </div>
+    </div>
 
     <script src="assets/app.js"></script>
 </body>
