@@ -2,37 +2,46 @@
 
 ## 2026-03-18 (latest)
 
-**Current status:** Discovery fix implemented and validated. System now finds live posting-count markets.
+**Current status:** Pipeline end-to-end operational with multi-strategy comparative testing support.
 
 ### What exists
 - Market ingestion with events-first discovery (5-layer priority)
-- Signal engine, paper-trade ledger, dashboard — all built and tested
-- 70 tests passing
-- Static dashboard (open `dashboard/index.html` in a browser)
-- All outputs labeled SIMULATED / PAPER TRADING ONLY
+- Parameterized signal engine (strategy + profile separation)
+- Per-profile paper trading with separate ledgers
+- Trade resolution (WON / LOST / EXPIRED)
+- Durable run history (data/runs/)
+- Dashboard with error/empty state distinction, source-based freshness, Run History tab
+- 95 tests passing
+- All outputs labeled SIMULATED
+
+### Architecture
+- **Strategy** defines signal logic variant (currently: `no_side@1.0`)
+- **Profile** controls risk parameters (conservative / moderate / aggressive)
+- Each run is attributable: strategy + profile + input snapshot + timestamps
+- Per-profile ledger files prevent cross-contamination
+- Dashboard shows comparative results across strategy+profile combinations
 
 ### Completed this session
-- Phase 7 evaluation: found discovery bug (bracket markets invisible to `/markets` endpoint)
-- Discovery fix implemented:
-  - Events endpoint support (`fetch_event_by_slug`, `fetch_events_paginated`)
-  - `MarketFamily` dataclass for grouped bracket markets
-  - Known-slug registry (`config/known_event_patterns.json`)
-  - Dual-layer classification (event-level + bracket validation)
-  - Fixed classifier regex for plural forms (tweets, posts)
-  - Updated `fetch_markets.py` with 5-layer discovery priority
-- Live validation results:
-  - 11 event families discovered (2 from known slugs + 9 from pagination)
-  - 290 bracket markets found and classified
-  - 10 TRADE signals generated from real live data
-  - All known example markets discovered, parsed, classified, and evaluated
-- 29 new tests added (70 total, all passing)
-- Docs updated: DECISIONS (D007-D010), RUNBOOK, SOURCE_HIERARCHY, TODO
+- Fixed pipeline break: run_signals.py and run_papertrade.py now read events-based output
+- Fixed supplemental merge: relevant_markets_*.json includes all sources
+- Added Market.from_dict() for JSON deserialization
+- Built Strategy + Profile model with 3 built-in profiles
+- Parameterized signal engine (evaluate accepts StrategyConfig)
+- Per-profile signal files and ledger files
+- RunRecord + RunStore for durable run history
+- resolve_trades.py handles all ledger files
+- Dashboard hardened: error vs empty states, source-based freshness, safe rendering
+- Dashboard Run History tab for comparative viewing
+- export_dashboard.py writes meta.json with file freshness
+- serve_dashboard.py for one-command access
+- 95 tests (17 new: strategy parameterization, run store, resolution)
+- All docs updated to match implementation
 
 ### Next
-- Delete stale branches (master, docs-cleanup, docs-status-sync)
-- Resolve Q004 (market resolution timing)
-- XTracker data extraction (client-rendered, no API found)
-- Auto-generate date-based slugs from series patterns
+- Run comparative test: conservative vs moderate vs aggressive on real data
+- Wait for market resolutions to validate P&L
+- Dashboard family grouping
+- Consider additional strategies (after validation)
 
 ### Blockers
 - None

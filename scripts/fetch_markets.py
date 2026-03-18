@@ -20,7 +20,6 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from polymarket_timer_bot.adapters.polymarket import (
     extract_slug_from_url,
     fetch_all_active_markets,
-    fetch_event_by_slug,
     fetch_events_by_slugs,
     fetch_events_paginated,
     parse_event_markets,
@@ -71,7 +70,6 @@ def discover_events() -> list[dict]:
 
     # Priority 2: Exact event slug lookup
     exact_slugs = get_exact_slugs()
-    # Filter out slugs already fetched via URLs
     remaining_slugs = [s for s in exact_slugs if not any(
         str(evt.get("slug", "")) == s for evt in all_events
     )]
@@ -79,8 +77,7 @@ def discover_events() -> list[dict]:
         events = fetch_events_by_slugs(remaining_slugs)
         _add(events, "exact_slugs")
 
-    # Priority 3: Known recurring slug/pattern generation
-    # (Currently same as exact_slugs. Future: generate date-based candidates.)
+    # Priority 3: Known recurring slug/pattern generation (future)
 
     # Priority 4: Events pagination fallback discovery
     logger.info("Running fallback events pagination for new market discovery...")
@@ -91,7 +88,6 @@ def discover_events() -> list[dict]:
 
 
 def main():
-    # Create output directories
     project_root = os.path.dirname(os.path.dirname(__file__))
     raw_dir = os.path.join(project_root, "data", "raw")
     norm_dir = os.path.join(project_root, "data", "normalized")
@@ -129,12 +125,9 @@ def main():
     with open(families_path, "w") as f:
         json.dump([fam.to_dict() for fam in relevant_families], f, indent=2, default=str)
 
-    # Save individual relevant bracket markets (for signal engine compatibility)
-    relevant_path = os.path.join(norm_dir, f"relevant_markets_{timestamp}.json")
-    with open(relevant_path, "w") as f:
-        json.dump([m.to_dict() for m in relevant_bracket_markets], f, indent=2, default=str)
-
-    # --- Supplemental /markets fetch (kept for completeness) ---
+    # --- Supplemental /markets fetch ---
+    # The /markets endpoint doesn't return bracket/negRisk markets, but may
+    # catch standalone binary timer markets not in events. Merge before saving.
     logger.info("Supplemental /markets fetch...")
     raw_markets = fetch_all_active_markets(max_pages=5, page_size=100)
 
@@ -146,17 +139,19 @@ def main():
     markets = classify_markets(markets)
     supplemental_relevant = filter_relevant(markets)
 
-    # Merge supplemental relevant markets (deduplicate by condition_id)
+    # Merge supplemental into relevant_bracket_markets (deduplicate by condition_id)
+    supplemental_added = 0
     seen_cids = {m.condition_id for m in relevant_bracket_markets}
     for m in supplemental_relevant:
         if m.condition_id not in seen_cids:
             relevant_bracket_markets.append(m)
             seen_cids.add(m.condition_id)
+            supplemental_added += 1
 
-    # Save all normalized markets
-    all_norm_path = os.path.join(norm_dir, f"all_markets_{timestamp}.json")
-    with open(all_norm_path, "w") as f:
-        json.dump([m.to_dict() for m in markets], f, indent=2, default=str)
+    # Save relevant markets AFTER merge — this is the file the pipeline reads
+    relevant_path = os.path.join(norm_dir, f"relevant_markets_{timestamp}.json")
+    with open(relevant_path, "w") as f:
+        json.dump([m.to_dict() for m in relevant_bracket_markets], f, indent=2, default=str)
 
     # --- Print summary ---
     print(f"\n{'='*60}")
@@ -167,7 +162,7 @@ def main():
     print(f"Bracket markets (total):  {len(all_bracket_markets)}")
     print(f"Bracket markets (relevant): {len(relevant_bracket_markets)}")
     print(f"Supplemental /markets:    {len(raw_markets)}")
-    print(f"Supplemental relevant:    {len(supplemental_relevant)}")
+    print(f"Supplemental relevant:    {len(supplemental_relevant)} ({supplemental_added} new)")
     print(f"{'='*60}")
 
     if relevant_families:
@@ -195,7 +190,6 @@ def main():
     print(f"  Families:        {families_path}")
     print(f"  Relevant:        {relevant_path}")
     print(f"  Markets raw:     {raw_markets_path}")
-    print(f"  All normalized:  {all_norm_path}")
 
 
 if __name__ == "__main__":

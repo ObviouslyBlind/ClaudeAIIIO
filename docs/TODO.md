@@ -9,20 +9,27 @@
 - [x] Phase 5 — Paper trading
 - [x] Phase 6 — Dashboard
 - [x] Phase 7 — Evaluation (discovery fix, events-first ingestion)
-- [x] Pipeline fix — run_signals.py and run_papertrade.py now read events-based output
-- [x] Event context preservation — event_slug, bracket_label, event_title flow through signal → trade → ledger
+- [x] Pipeline fix — events-based markets flow through signals → papertrade → resolution
+- [x] Event context preservation — event_slug, bracket_label, event_title preserved end-to-end
 - [x] Trade resolution — resolve_trades.py checks market closed/winner status
-- [x] Market.from_dict() — enables JSON → Market deserialization for pipeline
-- [x] Docs updated — README, PROJECT_BRIEF, OPEN_QUESTIONS match implementation
+- [x] Market.from_dict() — JSON → Market deserialization for pipeline
+- [x] Fix supplemental merge — relevant_markets_*.json now includes supplemental markets
+- [x] Strategy + Profile architecture — parameterized engine, 3 built-in profiles
+- [x] Run history — durable RunRecord storage in data/runs/
+- [x] Per-profile ledgers — each strategy+profile gets own ledger file
+- [x] Dashboard hardening — error vs empty states, source-based freshness, safe rendering
+- [x] Dashboard comparative — Run History tab with strategy/profile comparison table
+- [x] Docs aligned with actual implementation
 
 ## Next
 
-- [ ] Validate NO-side strategy on bracket markets with real resolution data (Q005)
-- [ ] End-to-end pipeline test with real data through resolution
-- [ ] Dashboard bracket/family grouping (Q008)
-- [ ] Export families.json to dashboard
-- [ ] Extract find_latest_file() into shared utility (duplicated 4x in scripts)
+- [ ] Run comparative test: conservative vs moderate vs aggressive on real data (Q005)
+- [ ] End-to-end resolution test with real closed markets
+- [ ] Dashboard family grouping (Q008) — render families.json as grouped view
+- [ ] Add more strategies to STRATEGIES registry (Q010) — only after validation
+- [ ] Extract find_latest_file() into shared utility (duplicated in scripts)
 - [ ] Add pyproject.toml to eliminate sys.path hacks
+- [ ] Replace datetime.utcnow() with timezone-aware
 
 ## Deferred
 
@@ -30,7 +37,7 @@
 - [ ] External source integration (trumpstruth.org, muskmeter.live)
 - [ ] Auto-generate date-based slugs from series patterns
 - [ ] Rate limiting / retry on API calls
-- [ ] Replace datetime.utcnow() with timezone-aware
 - [ ] Add linting/type checking config
 - [ ] Build analytics module (currently empty placeholder)
 - [ ] Data file cleanup / rotation
+- [ ] Automated scheduling / polling (Q007)

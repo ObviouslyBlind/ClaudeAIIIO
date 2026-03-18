@@ -6,8 +6,10 @@ Checks each open trade's market for resolution status:
   - If the market is closed but no winner info → EXPIRED (exit at last known NO price)
   - If the market is still open → no action
 
-Reads market state from data/normalized/relevant_markets_*.json.
-Falls back to fetching individual markets from the API if not found locally.
+Resolves ALL ledger files in data/ledger/ (one per strategy+profile combo).
+
+Usage:
+    python scripts/resolve_trades.py
 """
 
 import glob
@@ -27,7 +29,6 @@ logger = logging.getLogger(__name__)
 
 
 def find_latest_file(directory: str, prefix: str) -> str | None:
-    """Find the most recent file matching a prefix in a directory."""
     pattern = os.path.join(directory, f"{prefix}*.json")
     files = sorted(glob.glob(pattern))
     return files[-1] if files else None
@@ -70,7 +71,6 @@ def resolve_market(market: Market) -> tuple[str, float] | None:
                 return (LOST, 0.00)
 
     # Market is closed but no winner info — treat as expired
-    # Use last known NO price as exit price (conservative)
     exit_price = market.no_price if market.no_price is not None else 0.50
     return (EXPIRED, exit_price)
 
@@ -78,73 +78,75 @@ def resolve_market(market: Market) -> tuple[str, float] | None:
 def main():
     data_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
     ledger_dir = os.path.join(data_dir, "ledger")
-    ledger_path = os.path.join(ledger_dir, "ledger.json")
 
-    if not os.path.exists(ledger_path):
-        print("No ledger found. Run run_papertrade.py first to open trades.")
-        return
+    # Find all ledger files
+    ledger_pattern = os.path.join(ledger_dir, "ledger*.json")
+    ledger_files = sorted(glob.glob(ledger_pattern))
 
-    ledger = Ledger(ledger_path)
-    open_trades = ledger.get_open_trades()
-
-    if not open_trades:
-        print("No open trades to resolve.")
+    if not ledger_files:
+        print("No ledger files found. Run run_papertrade.py first to open trades.")
         return
 
     # Load current market data
     market_index = load_market_index(data_dir)
 
-    resolved = 0
-    not_found = 0
-    still_open = 0
-
     print(f"\n{'='*60}")
     print(f"TRADE RESOLUTION [{PROVENANCE}]")
     print(f"{'='*60}")
-    print(f"Open trades to check: {len(open_trades)}")
+    print(f"Ledger files found:   {len(ledger_files)}")
     print(f"Markets in index:     {len(market_index)}")
     print(f"{'='*60}")
 
-    for trade in open_trades:
-        market = market_index.get(trade.condition_id)
-        if market is None:
-            not_found += 1
-            logger.info("Market not in index: %s (%s)", trade.condition_id, trade.question[:40])
+    for ledger_path in ledger_files:
+        ledger_name = os.path.basename(ledger_path)
+        ledger = Ledger(ledger_path)
+        open_trades = ledger.get_open_trades()
+
+        if not open_trades:
+            print(f"\n  [{ledger_name}] No open trades.")
             continue
 
-        result = resolve_market(market)
-        if result is None:
-            still_open += 1
-            continue
+        print(f"\n  [{ledger_name}] {len(open_trades)} open trades to check:")
 
-        status, exit_price = result
-        closed_trade = ledger.close_trade(trade.trade_id, exit_no_price=exit_price, status=status)
-        if closed_trade:
-            resolved += 1
-            label = f" [{closed_trade.bracket_label}]" if closed_trade.bracket_label else ""
-            print(f"  RESOLVED: {closed_trade.question[:50]}{label}")
-            print(f"    {status} | Entry NO={closed_trade.entry_no_price:.2f} → Exit NO={exit_price:.2f} | P&L=${closed_trade.pnl:.2f}")
-            print()
+        resolved = 0
+        not_found = 0
+        still_open = 0
 
+        for trade in open_trades:
+            market = market_index.get(trade.condition_id)
+            if market is None:
+                not_found += 1
+                continue
+
+            result = resolve_market(market)
+            if result is None:
+                still_open += 1
+                continue
+
+            status, exit_price = result
+            closed_trade = ledger.close_trade(trade.trade_id, exit_no_price=exit_price, status=status)
+            if closed_trade:
+                resolved += 1
+                label = f" [{closed_trade.bracket_label}]" if closed_trade.bracket_label else ""
+                print(f"    RESOLVED: {closed_trade.question[:50]}{label}")
+                print(f"      {status} | Entry NO={closed_trade.entry_no_price:.2f} → Exit NO={exit_price:.2f} | P&L=${closed_trade.pnl:.2f}")
+
+        print(f"    → resolved={resolved}  still_open={still_open}  not_in_data={not_found}")
+
+        if not_found > 0:
+            print(f"    Note: {not_found} trades had no matching market. Run fetch_markets.py first.")
+
+    # Overall summary across all ledgers
+    print(f"\n{'='*60}")
+    print(f"OVERALL LEDGER SUMMARY [{PROVENANCE}]")
     print(f"{'='*60}")
-    print(f"Resolved:     {resolved}")
-    print(f"Still open:   {still_open}")
-    print(f"Not in data:  {not_found}")
+    for ledger_path in ledger_files:
+        ledger = Ledger(ledger_path)
+        s = ledger.summary()
+        name = os.path.basename(ledger_path)
+        print(f"  {name}: {s['total_trades']} trades, {s['open_trades']} open, "
+              f"win_rate={s['win_rate_pct']}%, P&L=${s['total_pnl']:.2f}")
     print(f"{'='*60}")
-
-    if not_found > 0:
-        print(f"\nNote: {not_found} trades had no matching market in the latest data.")
-        print(f"Run fetch_markets.py to get fresh data, then re-run this script.")
-
-    # Show updated summary
-    summary = ledger.summary()
-    print(f"\nLedger summary [{PROVENANCE}]:")
-    print(f"  Total trades:   {summary['total_trades']}")
-    print(f"  Open:           {summary['open_trades']}")
-    print(f"  Closed:         {summary['closed_trades']}")
-    print(f"  Win rate:       {summary['win_rate_pct']}%")
-    print(f"  Total P&L:      ${summary['total_pnl']:.2f}")
-    print(f"\nLedger: {ledger_path}")
 
 
 if __name__ == "__main__":

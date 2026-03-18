@@ -184,3 +184,5 @@ def test_signal_result_to_dict():
     assert d["event_slug"] == "elon-tweets-march-19"
     assert d["bracket_label"] == "65-89"
     assert d["event_title"] == "Elon Musk # tweets"
+    assert d["strategy_id"] == "no_side"
+    assert d["profile_id"] == "moderate"

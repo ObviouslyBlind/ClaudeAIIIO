@@ -17,11 +17,7 @@
         </div>
         <div class="header-right">
             <div class="header-stat">
-                <span class="header-stat-label">markets scanned</span>
-                <span class="header-stat-value" id="stat-markets">—</span>
-            </div>
-            <div class="header-stat">
-                <span class="header-stat-label">relevant</span>
+                <span class="header-stat-label">relevant markets</span>
                 <span class="header-stat-value accent" id="stat-relevant">—</span>
             </div>
             <div class="header-stat">
@@ -29,12 +25,12 @@
                 <span class="header-stat-value" id="stat-open">—</span>
             </div>
             <div class="header-stat">
-                <span class="header-stat-label">p&l (sim)</span>
+                <span class="header-stat-label">p&amp;l (sim)</span>
                 <span class="header-stat-value" id="stat-pnl">—</span>
             </div>
             <div class="header-stat">
-                <span class="header-stat-label">updated</span>
-                <span class="header-stat-value dim" id="stat-updated">—</span>
+                <span class="header-stat-label">data freshness</span>
+                <span class="header-stat-value dim" id="stat-freshness">unknown</span>
             </div>
         </div>
     </header>
@@ -44,6 +40,7 @@
         <span class="mode-dot"></span>
         <span class="mode-label">paper trading</span>
         <span class="provenance-badge">simulated</span>
+        <span class="data-status" id="data-status-bar"></span>
     </div>
 
     <!-- TABS -->
@@ -51,6 +48,7 @@
         <button class="tab active" data-tab="overview">overview</button>
         <button class="tab" data-tab="signals">signal output</button>
         <button class="tab" data-tab="ledger">trade ledger</button>
+        <button class="tab" data-tab="runs">run history</button>
         <button class="tab" data-tab="all-markets">all markets</button>
     </nav>
 
@@ -63,7 +61,7 @@
                     <h2>Signal Feed</h2>
                     <span class="panel-source">source: gamma-api.polymarket.com</span>
                 </div>
-                <div id="signal-feed"><div class="empty-state">No signals to display.</div></div>
+                <div id="signal-feed"><div class="empty-state">Loading...</div></div>
             </div>
 
             <!-- RIGHT: Relevant Markets -->
@@ -72,7 +70,7 @@
                     <h2>Relevant Markets</h2>
                     <span class="panel-source">musk / trump posting · live odds</span>
                 </div>
-                <div id="relevant-markets"><div class="empty-state">No relevant markets right now.</div></div>
+                <div id="relevant-markets"><div class="empty-state">Loading...</div></div>
             </div>
         </div>
 
@@ -82,7 +80,7 @@
                 <h2>Paper Ledger</h2>
                 <span class="provenance-badge">simulated</span>
             </div>
-            <div id="ledger-summary"><div class="empty-state">No trades recorded yet.</div></div>
+            <div id="ledger-summary"><div class="empty-state">Loading...</div></div>
         </div>
     </div>
 
@@ -91,9 +89,9 @@
         <div class="panel">
             <div class="panel-header">
                 <h2>All Signals</h2>
-                <span class="panel-source">trade / watch / skip</span>
+                <span class="panel-source" id="signals-strategy-label"></span>
             </div>
-            <div id="signals-full"><div class="empty-state">No signals generated yet.</div></div>
+            <div id="signals-full"><div class="empty-state">Loading...</div></div>
         </div>
     </div>
 
@@ -104,7 +102,18 @@
                 <h2>Trade Ledger</h2>
                 <span class="provenance-badge">simulated</span>
             </div>
-            <div id="ledger-full"><div class="empty-state">No trades recorded yet.</div></div>
+            <div id="ledger-full"><div class="empty-state">Loading...</div></div>
+        </div>
+    </div>
+
+    <!-- RUNS TAB -->
+    <div class="tab-content" id="tab-runs">
+        <div class="panel">
+            <div class="panel-header">
+                <h2>Run History</h2>
+                <span class="panel-source">strategy + profile comparison</span>
+            </div>
+            <div id="runs-table"><div class="empty-state">Loading...</div></div>
         </div>
     </div>
 
@@ -112,7 +121,7 @@
     <div class="tab-content" id="tab-all-markets">
         <div class="panel">
             <div class="panel-header">
-                <h2>All Scanned Markets</h2>
+                <h2>All Relevant Markets</h2>
                 <span class="panel-source" id="markets-count"></span>
             </div>
             <div id="all-markets"><div class="empty-state">Loading...</div></div>
