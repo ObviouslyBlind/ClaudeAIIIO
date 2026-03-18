@@ -16,9 +16,9 @@ In a bracket event, exactly one bracket resolves YES and the rest resolve NO. Th
 
 The signal engine evaluates whether to bet NO on a bracket but doesn't know the current count. It relies only on market prices as a probability proxy. XTracker is the official resolution source but is client-rendered with no public API. Is price-only sufficient, or do we need count estimation?
 
-## Q007 — What is the intended deployment model?
+## Q007 — What is the intended deployment model? [RESOLVED]
 
-Currently: manual CLI execution. No scheduling, no cron, no containerization. The 6-script pipeline (fetch → signals → papertrade → resolve → export → serve) works manually. If continuous monitoring is needed, infrastructure decisions are required.
+**Resolved:** GitHub Actions cron (every 6 hours). `run_pipeline.sh` orchestrates the full cycle. Actions commits updated data to main, which triggers dashboard redeployment. See D016.
 
 ## Q008 — Should the dashboard show bracket grouping or flat markets?
 
@@ -66,6 +66,25 @@ A bracket-position-weighted strategy would:
 
 **Architecture fit:** The `STRATEGIES` registry in `strategy.py` already supports multiple strategies. A new `bracket_weight` strategy would implement `evaluate()` with position-aware logic and register alongside `no_side`.
 
+## Q013 — What is the best first step for count-aware inputs?
+
+**Recommendation: Scrape current bracket price distribution from the event family as a proxy for implied count range.**
+
+Right now the signal engine evaluates each bracket independently. But in a bracket event, the price distribution across all brackets contains information about the market's collective estimate of where the final count will land. The bracket with the highest YES price (lowest NO price) represents the market's mode estimate.
+
+A useful first step that requires NO external data source:
+1. In `evaluate()`, pass the full `MarketFamily` (or at least sibling bracket prices) alongside each `Market`
+2. Identify the "hot bracket" (highest YES price) as the market-implied most likely outcome
+3. Score brackets relative to their distance from the hot bracket:
+   - Far from hot bracket → tail bracket → higher confidence for NO
+   - Adjacent to hot bracket → risk zone → reduce score or apply tighter thresholds
+   - IS the hot bracket → center → likely SKIP or very aggressive only
+
+This uses data we already have (bracket prices within the family) and doesn't require XTracker, trumpstruth.org, or any external scraping. It's the minimal useful count-awareness.
+
+**After this works:** The next step would be to compare the implied count range against an external count source (trumpstruth.org or muskmeter.live) to detect pricing errors where the market disagrees with actual count data.
+
 ## Resolved
 
 - Q001–Q003: Resolved during Phases 3-6 (not documented at time of resolution)
+- Q007: Resolved — GitHub Actions automation (D016)

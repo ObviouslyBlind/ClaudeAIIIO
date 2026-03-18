@@ -35,14 +35,20 @@
 - [x] .nojekyll added to dashboard for GitHub Pages compatibility
 - [x] Unused imports cleaned up (DEFAULT_CONFIG in scripts)
 
-## Current phase: Baseline evaluation
+- [x] Pipeline automation — run_pipeline.sh + GitHub Actions (every 6h)
+- [x] Evaluation summary — generate_summary.py + Evaluation dashboard tab
+- [x] Pipeline alerting — report JSON + Actions summary + failure emails
+- [x] Dashboard Evaluation tab — per-profile metrics, pipeline status
 
-- [ ] Run baseline protocol: Strategy A × 3 profiles on real market data
+## Current phase: Baseline evaluation + operational monitoring
+
+- [ ] Wait for real market resolutions (need closed markets with winners)
 - [ ] Gather first comparative evidence (signal counts, trade counts, P&L)
 - [ ] End-to-end resolution test with real closed markets
 - [ ] Record findings in evaluation template
 - [ ] Assess whether NO-side strategy differentiates across profiles (Q005)
 - [ ] Decide on Strategy B candidate based on evidence
+- [ ] Add first real count-aware input (see Q006 / SOURCE_HIERARCHY.md)
 
 ## Next (after baseline evaluation)
 
@@ -60,5 +66,4 @@
 - [ ] Add linting/type checking config
 - [ ] Build analytics module (currently empty placeholder)
 - [ ] Data file cleanup / rotation
-- [ ] Automated scheduling / polling (Q007)
 - [ ] Conditions for automatic CANCELLED status (Q011)

@@ -124,6 +124,39 @@ def main():
             json.dump([], f)
         meta["sources"]["runs.json"] = {"status": "missing"}
 
+    # --- Summary (from generate_summary.py) ---
+    summary_src = os.path.join(dash_data, "summary.json")
+    if not os.path.exists(summary_src):
+        # Try reports/ as fallback
+        reports_summary = os.path.join(root, "reports", "evaluation_summary.json")
+        if os.path.exists(reports_summary):
+            shutil.copy2(reports_summary, summary_src)
+            meta["sources"]["summary.json"] = {
+                "source_file": "reports/evaluation_summary.json",
+                "modified_at": file_mtime_iso(reports_summary),
+                "status": "loaded",
+            }
+            logger.info("Exported summary from reports/evaluation_summary.json")
+        else:
+            meta["sources"]["summary.json"] = {"status": "missing"}
+    else:
+        meta["sources"]["summary.json"] = {
+            "source_file": "summary.json",
+            "modified_at": file_mtime_iso(summary_src),
+            "status": "loaded",
+        }
+
+    # --- Pipeline report (from run_pipeline.sh) ---
+    pipeline_report = os.path.join(root, "reports", "pipeline_report.json")
+    if os.path.exists(pipeline_report):
+        shutil.copy2(pipeline_report, os.path.join(dash_data, "pipeline_report.json"))
+        meta["sources"]["pipeline_report.json"] = {
+            "source_file": "reports/pipeline_report.json",
+            "modified_at": file_mtime_iso(pipeline_report),
+            "status": "loaded",
+        }
+        logger.info("Exported pipeline_report.json")
+
     # --- Write meta.json for dashboard freshness ---
     meta["signal_files"] = exported_signals
     meta["ledger_files"] = exported_ledgers
@@ -136,6 +169,8 @@ def main():
     print(f"  Signal files:     {len(exported_signals)}")
     print(f"  Ledger files:     {len(exported_ledgers)}")
     print(f"  Run history:      {'loaded' if os.path.exists(runs_index) else 'missing'}")
+    print(f"  Summary:          {'loaded' if os.path.exists(os.path.join(dash_data, 'summary.json')) else 'missing'}")
+    print(f"  Pipeline report:  {'loaded' if os.path.exists(pipeline_report) else 'missing'}")
     print(f"  Meta:             meta.json")
     print(f"\nOpen dashboard/index.html via serve_dashboard.py to view.")
 

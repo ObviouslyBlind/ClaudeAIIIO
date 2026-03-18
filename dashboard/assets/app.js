@@ -495,6 +495,113 @@ function renderAllMarkets(result) {
     }
 }
 
+// ---- EVALUATION SUMMARY ----
+
+function renderEvaluationSummary(result) {
+    const container = document.getElementById("evaluation-summary");
+    if (renderStateMessage(container, result.state,
+        "No evaluation summary yet. Run generate_summary.py.",
+        "Failed to load evaluation summary.")) return;
+
+    const data = result.data;
+    const profiles = data.profiles || [];
+    const totals = data.totals || {};
+
+    // Per-profile table
+    const profileRows = profiles.map(p => {
+        const s = p.signals;
+        const t = p.trades;
+        const pnlCls = t.total_pnl >= 0 ? "pnl-positive" : "pnl-negative";
+        const avgRes = t.avg_hours_to_resolution !== null ? t.avg_hours_to_resolution + "h" : "\u2014";
+        return `<tr>
+            <td><span class="profile-tag profile-${escapeHtml(p.profile_id)}">${escapeHtml(p.profile_id)}</span></td>
+            <td style="color: var(--green-bright)">${s.trade}</td>
+            <td>${s.watch}</td>
+            <td style="color: var(--text-dim)">${s.skip}</td>
+            <td>${t.total_trades}</td>
+            <td style="color: var(--blue)">${t.open_trades}</td>
+            <td style="color: var(--green-bright)">${t.wins}</td>
+            <td style="color: var(--red)">${t.losses}</td>
+            <td style="color: var(--text-dim)">${t.expired}</td>
+            <td>${t.win_rate_pct}%</td>
+            <td class="${pnlCls}">${formatPnl(t.total_pnl)}</td>
+            <td>$${t.open_exposure.toFixed(0)}</td>
+            <td style="color: var(--text-dim)">${avgRes}</td>
+        </tr>`;
+    }).join("");
+
+    // Totals row
+    const totPnlCls = totals.total_pnl >= 0 ? "pnl-positive" : "pnl-negative";
+
+    const html = `
+        <div class="eval-freshness">
+            Generated: ${escapeHtml(formatFreshness(data.generated_at))}
+        </div>
+        <table>
+            <thead><tr>
+                <th>profile</th>
+                <th>trade</th><th>watch</th><th>skip</th>
+                <th>trades</th><th>open</th><th>won</th><th>lost</th><th>exp</th>
+                <th>win%</th><th>p&amp;l</th><th>exposure</th><th>avg res</th>
+            </tr></thead>
+            <tbody>
+                ${profileRows}
+                <tr class="totals-row">
+                    <td><strong>TOTAL</strong></td>
+                    <td colspan="3">${totals.signals_evaluated || 0} signals</td>
+                    <td>${totals.total_trades}</td>
+                    <td style="color: var(--blue)">${totals.open_trades}</td>
+                    <td style="color: var(--green-bright)">${totals.wins}</td>
+                    <td style="color: var(--red)">${totals.losses}</td>
+                    <td>\u2014</td>
+                    <td>${totals.win_rate_pct}%</td>
+                    <td class="${totPnlCls}">${formatPnl(totals.total_pnl)}</td>
+                    <td>$${totals.open_exposure.toFixed(0)}</td>
+                    <td>\u2014</td>
+                </tr>
+            </tbody>
+        </table>`;
+
+    container.innerHTML = html;
+}
+
+function renderPipelineStatus(result) {
+    const container = document.getElementById("pipeline-status");
+    if (renderStateMessage(container, result.state,
+        "No pipeline report yet. Run run_pipeline.sh or wait for automation.",
+        "Failed to load pipeline report.")) return;
+
+    const data = result.data;
+    const statusCls = data.status === "success" ? "pnl-positive" :
+                      data.status === "partial_failure" ? "pnl-negative" : "error-state";
+
+    const steps = data.steps || {};
+    const stepRows = Object.entries(steps).map(([name, status]) => {
+        const cls = status === "success" ? "status-won" :
+                    status === "failed" ? "status-lost" :
+                    status === "skipped" ? "status-expired" : "";
+        return `<tr>
+            <td>${escapeHtml(name)}</td>
+            <td class="${cls}">${escapeHtml(status)}</td>
+        </tr>`;
+    }).join("");
+
+    container.innerHTML = `
+        <div class="pipeline-header">
+            <span class="${statusCls}">${escapeHtml(data.status || "unknown")}</span>
+            <span style="color: var(--text-dim); margin-left: 12px;">
+                ${escapeHtml(data.pipeline_start || "")} \u2192 ${escapeHtml(data.pipeline_end || "")}
+            </span>
+            <span style="color: var(--text-dim); margin-left: 12px;">
+                ${data.errors || 0} error(s)
+            </span>
+        </div>
+        <table style="margin-top: 8px;">
+            <thead><tr><th>step</th><th>status</th></tr></thead>
+            <tbody>${stepRows}</tbody>
+        </table>`;
+}
+
 // ---- PER-PROFILE LEDGER COMPARISON ----
 
 async function loadPerProfileLedgers(meta, bustCache) {
@@ -584,12 +691,14 @@ function updatePageRefreshIndicator() {
 // Loads all data files and re-renders. Called on init and every REFRESH_INTERVAL_MS.
 
 async function refreshData(bustCache) {
-    const [relevant, signals, ledger, runs, meta] = await Promise.all([
+    const [relevant, signals, ledger, runs, meta, summary, pipelineReport] = await Promise.all([
         loadJSON("data/relevant.json", bustCache),
         loadJSON("data/signals.json", bustCache),
         loadJSON("data/ledger.json", bustCache),
         loadJSON("data/runs.json", bustCache),
         loadJSON("data/meta.json", bustCache),
+        loadJSON("data/summary.json", bustCache),
+        loadJSON("data/pipeline_report.json", bustCache),
     ]);
 
     safeRender("header", () => renderHeaderStats(relevant, signals, ledger, meta));
@@ -600,6 +709,8 @@ async function refreshData(bustCache) {
     safeRender("ledger-full", () => renderLedgerFull(ledger));
     safeRender("runs-table", () => renderRunHistory(runs));
     safeRender("all-markets", () => renderAllMarkets(relevant));
+    safeRender("evaluation-summary", () => renderEvaluationSummary(summary));
+    safeRender("pipeline-status", () => renderPipelineStatus(pipelineReport));
 
     // Per-profile ledger comparison (re-render cleanly)
     const profileContainer = document.getElementById("tab-ledger");
