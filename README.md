@@ -4,7 +4,7 @@ Paper-trading bot that monitors Polymarket prediction markets related to Elon Mu
 
 ## Status
 
-**Phase 5 — Paper trading** (complete, awaiting approval for Phase 6)
+**Phase 6 — Dashboard** (complete, awaiting approval for Phase 7)
 
 ## Scope (v1)
 
