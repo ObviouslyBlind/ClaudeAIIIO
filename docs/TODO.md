@@ -7,7 +7,7 @@
 - [x] Phase 3 — Market ingestion
 - [x] Phase 4 — Signal logic
 - [x] Phase 5 — Paper trading
-- [x] Phase 6 — Dashboard
+- [x] Phase 6 — Dashboard (approved to proceed to Phase 7)
 
 ## Next
 
