@@ -21,8 +21,6 @@ from polymarket_timer_bot.signals.engine import SignalResult
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_STAKE = 100.0  # Simulated dollars per trade
-
 
 class Ledger:
     """Paper trading ledger backed by a JSON file."""
@@ -53,7 +51,7 @@ class Ledger:
     def open_trade(
         self,
         signal: SignalResult,
-        stake: float = DEFAULT_STAKE,
+        stake: float = 100.0,
     ) -> Optional[PaperTrade]:
         """Open a new paper trade from a signal result.
 
