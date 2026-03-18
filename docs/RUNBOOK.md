@@ -2,6 +2,57 @@
 
 How to run, test, and inspect the system.
 
+## Live dashboard (public URL)
+
+**https://obviouslyblind.github.io/ClaudeAIIIO/**
+
+The dashboard is hosted on GitHub Pages. It updates automatically within about
+1 minute every time code is pushed to the `main` branch.
+
+### Viewing the dashboard
+
+Just open the link above in any browser. No login, no setup.
+
+### Updating the data (what you need to do after running the pipeline)
+
+After you run the pipeline locally:
+
+```bash
+python scripts/fetch_markets.py       # get latest markets
+python scripts/run_signals.py         # analyze them
+python scripts/run_papertrade.py      # open paper trades
+python scripts/resolve_trades.py      # close any finished trades
+python scripts/export_dashboard.py    # copy data into dashboard/data/
+```
+
+Then commit and push the updated data files:
+
+```bash
+git add dashboard/data/
+git commit -m "Update dashboard data"
+git push
+```
+
+GitHub will automatically re-deploy the dashboard within ~1 minute.
+Refresh the URL to see the new data.
+
+### If the dashboard looks wrong or outdated
+
+1. Check https://github.com/ObviouslyBlind/ClaudeAIIIO/actions — look for the
+   "Deploy Dashboard to GitHub Pages" workflow. If it shows a red X, something
+   went wrong. Click it to see the error.
+2. To trigger a fresh deploy manually: go to the Actions tab → "Deploy Dashboard
+   to GitHub Pages" → click "Run workflow".
+3. If `dashboard/data/` files look empty, re-run `export_dashboard.py` and push.
+
+### First-time setup note
+
+GitHub Pages must be enabled in the repository settings once:
+Settings → Pages → Source: Deploy from a branch → Branch: `gh-pages` → Save.
+After that, the workflow handles everything automatically.
+
+---
+
 ## Prerequisites
 
 - Python 3.10+
