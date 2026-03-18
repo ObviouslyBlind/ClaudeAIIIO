@@ -2,8 +2,7 @@
 
 ## 2026-03-18
 
-**Phase:** 6 — Dashboard (complete, merged to main)
-**Status:** Phases 1-6 merged to main. Phase 7 (evaluation) next.
+**Status:** Phases 1–6 complete. Awaiting approval for Phase 7 (evaluation).
 
 ### Completed today
 - Phases 1-6 completed and merged to main

@@ -2,22 +2,13 @@
 
 Issues we haven't resolved yet.
 
-## Q001 — Which Polymarket API endpoints to use?
+## Resolved
 
-Polymarket has a public API. Need to confirm which endpoints return active markets, pricing, and resolution data. Research needed in Phase 3.
+- **Q001 — Which Polymarket API endpoints to use?** Resolved in Phase 3. Using the public gamma API (`/markets`).
+- **Q002 — How to classify "posting" markets?** Resolved in Phase 3. Keyword classifier in `adapters/classifier.py` handles phrasing variants and separates binary timer markets from bracket/count markets.
+- **Q003 — What NO price threshold makes a trade attractive?** Resolved in Phase 4. NO >= 0.70 = TRADE, 0.50–0.70 = WATCH, below 0.50 or above 0.95 = SKIP. See D005 in DECISIONS.md.
+- **Q005 — Dashboard hosting approach?** Resolved in Phase 6. Static HTML file, no server needed.
 
-## Q002 — How to classify "posting" markets?
+## Still open
 
-Markets may be phrased differently ("Will Elon tweet...", "Will Musk post...", "Number of Trump posts..."). Need a classification approach. Some may be bracket/count markets rather than simple binary timers.
-
-## Q003 — What NO price threshold makes a trade attractive?
-
-If NO is priced at 95 cents, the upside is tiny. What's the minimum edge worth taking? Needs analysis in Phase 4.
-
-## Q004 — How to handle market resolution timing?
-
-Markets resolve at specific times. Need to understand how resolution works and when we can confirm outcomes for the paper ledger.
-
-## Q005 — Dashboard hosting approach?
-
-Simple local HTML file? Local dev server? Decision deferred to Phase 6.
+- **Q004 — How to handle market resolution timing?** Markets resolve at specific times. Paper ledger tracks open/closed state but does not auto-resolve. Manual or future automation needed in Phase 7.
