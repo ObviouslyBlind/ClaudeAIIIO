@@ -84,6 +84,29 @@ This uses data we already have (bracket prices within the family) and doesn't re
 
 **After this works:** The next step would be to compare the implied count range against an external count source (trumpstruth.org or muskmeter.live) to detect pricing errors where the market disagrees with actual count data.
 
+## Q014 — What is the smallest useful signal-engine change?
+
+**Recommendation: Add bracket-position as a score modifier (not a filter).**
+
+Current state: The signal engine (`engine.py`) evaluates every bracket identically. The `evaluate()` function scores based on NO price and expiry only. But early bracket-position data (D021) shows:
+
+- **Adjacent brackets** get 12/20 TRADE signals — these are the "near the action" brackets where the NO price is moderate (0.70-0.85) and risk is highest
+- **Hot brackets** get 3/20 TRADE signals — these are the market's consensus picks, with lower NO prices
+- **Tail brackets** get only 5/20 TRADE signals — these have very high NO prices (0.95+) but thin margins
+
+**Proposed change** (when evidence threshold is met):
+1. Pass `MarketFamily` or sibling prices to `evaluate()`
+2. Classify the bracket's position (hot/adjacent/tail)
+3. Apply a score adjustment:
+   - Tail: +5 points (higher confidence for NO)
+   - Adjacent: -10 points (higher risk — near the action)
+   - Hot: -20 points (market thinks this bracket wins)
+4. Do NOT change the TRADE/WATCH/SKIP thresholds — only adjust the score that feeds into them
+
+This is additive, not structural. It doesn't require a new strategy — it's a refinement of `no_side@1.0` that could become `no_side@1.1`.
+
+**When to implement:** After at least 2 of 4 Strategy B criteria are met (see `strategy_b_progress` in summary.json). Current progress: 0/4.
+
 ## Resolved
 
 - Q001–Q003: Resolved during Phases 3-6 (not documented at time of resolution)

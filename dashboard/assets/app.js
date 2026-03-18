@@ -783,6 +783,173 @@ function renderBreakdownTradesEvent(result) {
         <tbody>${rows}</tbody></table>`;
 }
 
+// ---- OPERATOR SUMMARY ----
+
+function renderOperatorSummary(result) {
+    const container = document.getElementById("operator-summary");
+    if (!container) return;
+    if (result.state !== LoadState.LOADED || !result.data.operator_summary) {
+        container.innerHTML = '<div class="empty-state">No operator summary yet.</div>';
+        return;
+    }
+
+    const op = result.data.operator_summary;
+    const posCoverage = op.position_coverage || {};
+    const rpnl = op.realized_pnl || 0;
+    const pnlCls = rpnl >= 0 ? "pnl-positive" : "pnl-negative";
+
+    container.innerHTML = `
+        <div class="operator-grid">
+            <div class="op-stat">
+                <span class="op-label">families</span>
+                <span class="op-value">${op.total_families || 0}</span>
+            </div>
+            <div class="op-stat">
+                <span class="op-label">brackets evaluated</span>
+                <span class="op-value">${op.total_brackets_evaluated || 0}</span>
+            </div>
+            <div class="op-stat">
+                <span class="op-label">active trades</span>
+                <span class="op-value" style="color: var(--blue)">${op.active_trades || 0}</span>
+            </div>
+            <div class="op-stat">
+                <span class="op-label">definitive outcomes</span>
+                <span class="op-value">${op.definitive_outcomes || 0}</span>
+            </div>
+            <div class="op-stat">
+                <span class="op-label">win rate</span>
+                <span class="op-value">${op.win_rate_pct || 0}%</span>
+            </div>
+            <div class="op-stat">
+                <span class="op-label">realized p&amp;l</span>
+                <span class="op-value ${pnlCls}">${formatPnl(rpnl)}</span>
+            </div>
+            <div class="op-stat">
+                <span class="op-label">exposure</span>
+                <span class="op-value">$${(op.unrealized_exposure || 0).toFixed(0)}</span>
+            </div>
+            <div class="op-stat">
+                <span class="op-label">trades by position</span>
+                <span class="op-value" style="font-size: 12px">
+                    <span style="color: var(--red)">${posCoverage.hot || 0} hot</span>
+                    <span style="color: var(--accent-gold)"> ${posCoverage.adjacent || 0} adj</span>
+                    <span style="color: var(--green-bright)"> ${posCoverage.tail || 0} tail</span>
+                </span>
+            </div>
+        </div>
+        <div class="op-strategy-b" style="margin-top: 8px; color: var(--text-dim); font-size: 12px;">
+            Strategy B: ${escapeHtml(op.strategy_b_status || "unknown")}
+        </div>`;
+}
+
+// ---- BRACKET POSITION BREAKDOWNS ----
+
+function renderBreakdownBracketSignals(result) {
+    const container = document.getElementById("breakdown-bracket-signals");
+    if (result.state !== LoadState.LOADED || !result.data.breakdowns ||
+        !result.data.breakdowns.bracket_position) {
+        container.innerHTML = '<div class="empty-state">No bracket position data.</div>';
+        return;
+    }
+    const data = result.data.breakdowns.bracket_position.signals_by_position || {};
+    if (Object.keys(data).length === 0) {
+        container.innerHTML = '<div class="empty-state">No bracket position data.</div>';
+        return;
+    }
+    const positionColors = { hot: "var(--red)", adjacent: "var(--accent-gold)", tail: "var(--green-bright)" };
+    const rows = Object.entries(data).map(([pos, counts]) => {
+        const total = (counts.trade || 0) + (counts.watch || 0) + (counts.skip || 0);
+        const color = positionColors[pos] || "var(--text-dim)";
+        return `<tr>
+            <td style="color: ${color}; font-weight: 600">${escapeHtml(pos)}</td>
+            <td style="color: var(--green-bright)">${counts.trade || 0}</td>
+            <td>${counts.watch || 0}</td>
+            <td style="color: var(--text-dim)">${counts.skip || 0}</td>
+            <td>${total}</td>
+        </tr>`;
+    }).join("");
+    container.innerHTML = `
+        <p style="color: var(--text-dim); font-size: 11px; margin: 0 0 8px 0;">
+            ${result.data.breakdowns.bracket_position.families_analyzed || 0} families analyzed
+        </p>
+        <table>
+            <thead><tr><th>position</th><th>trade</th><th>watch</th><th>skip</th><th>total</th></tr></thead>
+            <tbody>${rows}</tbody>
+        </table>`;
+}
+
+function renderBreakdownBracketTrades(result) {
+    const container = document.getElementById("breakdown-bracket-trades");
+    if (result.state !== LoadState.LOADED || !result.data.breakdowns ||
+        !result.data.breakdowns.bracket_position) {
+        container.innerHTML = '<div class="empty-state">No bracket position data.</div>';
+        return;
+    }
+    const data = result.data.breakdowns.bracket_position.trades_by_position || {};
+    if (Object.keys(data).length === 0) {
+        container.innerHTML = '<div class="empty-state">No trades by bracket position.</div>';
+        return;
+    }
+    const positionColors = { hot: "var(--red)", adjacent: "var(--accent-gold)", tail: "var(--green-bright)" };
+    const rows = Object.entries(data).map(([pos, s]) => {
+        const rpnl = s.realized_pnl || 0;
+        const pnlCls = rpnl >= 0 ? "pnl-positive" : "pnl-negative";
+        const color = positionColors[pos] || "var(--text-dim)";
+        return `<tr>
+            <td style="color: ${color}; font-weight: 600">${escapeHtml(pos)}</td>
+            <td>${s.total || 0}</td>
+            <td style="color: var(--blue)">${s.open || 0}</td>
+            <td style="color: var(--green-bright)">${s.won || 0}</td>
+            <td style="color: var(--red)">${s.lost || 0}</td>
+            <td class="${pnlCls}">${formatPnl(rpnl)}</td>
+            <td>$${(s.unrealized_exposure || 0).toFixed(0)}</td>
+        </tr>`;
+    }).join("");
+    container.innerHTML = `<table>
+        <thead><tr><th>position</th><th>trades</th><th>open</th><th>won</th><th>lost</th><th>realized p&amp;l</th><th>exposure</th></tr></thead>
+        <tbody>${rows}</tbody></table>`;
+}
+
+// ---- STRATEGY B PROGRESS ----
+
+function renderStrategyBProgress(result) {
+    const container = document.getElementById("strategy-b-progress");
+    if (result.state !== LoadState.LOADED || !result.data.strategy_b_progress) {
+        container.innerHTML = '<div class="empty-state">No Strategy B progress data.</div>';
+        return;
+    }
+
+    const sb = result.data.strategy_b_progress;
+    const criteria = sb.criteria || [];
+
+    const criteriaRows = criteria.map(c => {
+        const icon = c.met ? "&#9745;" : "&#9744;";
+        const cls = c.met ? "status-won" : "";
+        return `<tr>
+            <td class="${cls}">${icon}</td>
+            <td>${escapeHtml(c.criterion)}</td>
+            <td style="color: var(--text-dim)">${escapeHtml(String(c.current))}</td>
+            <td style="color: var(--text-dim)">${escapeHtml(String(c.target))}</td>
+        </tr>`;
+    }).join("");
+
+    const readyCls = sb.ready ? "status-won" : "status-expired";
+
+    container.innerHTML = `
+        <div style="margin-bottom: 8px;">
+            <span class="${readyCls}" style="font-weight: 600;">
+                ${sb.criteria_met}/${sb.criteria_total} criteria met
+            </span>
+            <span style="color: var(--text-dim); margin-left: 12px;">
+                ${escapeHtml(sb.recommendation)}
+            </span>
+        </div>
+        <table>
+            <thead><tr><th></th><th>criterion</th><th>current</th><th>target</th></tr></thead>
+            <tbody>${criteriaRows}</tbody>
+        </table>`;
+}
+
 // ---- PER-PROFILE LEDGER COMPARISON ----
 
 async function loadPerProfileLedgers(meta, bustCache) {
@@ -890,6 +1057,7 @@ async function refreshData(bustCache) {
     safeRender("ledger-full", () => renderLedgerFull(ledger));
     safeRender("runs-table", () => renderRunHistory(runs));
     safeRender("all-markets", () => renderAllMarkets(relevant));
+    safeRender("operator-summary", () => renderOperatorSummary(summary));
     safeRender("evaluation-summary", () => renderEvaluationSummary(summary));
     safeRender("eval-alerts", () => renderAlerts(summary));
     safeRender("breakdown-subject", () => renderBreakdownSubject(summary));
@@ -898,6 +1066,9 @@ async function refreshData(bustCache) {
     safeRender("breakdown-trades-subject", () => renderBreakdownTradesSubject(summary));
     safeRender("breakdown-event", () => renderBreakdownEvent(summary));
     safeRender("breakdown-trades-event", () => renderBreakdownTradesEvent(summary));
+    safeRender("breakdown-bracket-signals", () => renderBreakdownBracketSignals(summary));
+    safeRender("breakdown-bracket-trades", () => renderBreakdownBracketTrades(summary));
+    safeRender("strategy-b-progress", () => renderStrategyBProgress(summary));
     safeRender("pipeline-status", () => renderPipelineStatus(pipelineReport));
 
     // Per-profile ledger comparison (re-render cleanly)
