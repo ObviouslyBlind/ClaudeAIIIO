@@ -1,6 +1,6 @@
 # Runbook
 
-How to run, test, and inspect the system. Updated as each phase is built.
+How to run, test, and inspect the system.
 
 ## Prerequisites
 
@@ -38,26 +38,40 @@ python -m pytest tests/ -v
 
 ## How to inspect outputs
 
-After running `python scripts/fetch_markets.py`:
+After running the pipeline:
 
-- **Raw data:** `data/raw/markets_YYYYMMDD_HHMMSS.json` — unmodified API response
-- **All markets:** `data/normalized/all_markets_YYYYMMDD_HHMMSS.json` — parsed with classification
-- **Relevant only:** `data/normalized/relevant_markets_YYYYMMDD_HHMMSS.json` — Musk/Trump posting markets
-- **Signal results:** `data/signals/signals_YYYYMMDD_HHMMSS.json` — TRADE/WATCH/SKIP output from `run_signals.py`
-- **Ledger:** `data/ledger/ledger.json` — all paper trades (SIMULATED), persists across runs
-
-Quick inspection:
 ```bash
-# Count markets
-python -c "import json; d=json.load(open('data/normalized/all_markets_YYYYMMDD_HHMMSS.json')); print(len(d))"
+# List fetched market files (most recent first)
+ls -t data/raw/
+ls -t data/normalized/
 
-# Find Trump/Musk markets
+# Count markets in the latest fetch
+python -c "import json, glob; f=sorted(glob.glob('data/normalized/all_markets_*.json'))[-1]; print(len(json.load(open(f))), 'markets in', f)"
+
+# Show relevant (Musk/Trump) markets from the latest fetch
+python -c "
+import json, glob
+f = sorted(glob.glob('data/normalized/relevant_markets_*.json'))[-1]
+for m in json.load(open(f)):
+    print(m['question'][:80], '|', m.get('market_type', ''))
+"
+
+# View signal results
+python -c "
+import json, glob
+f = sorted(glob.glob('data/signals/signals_*.json'))[-1]
+for s in json.load(open(f)):
+    print(s['action'], s['score'], s['market']['question'][:60])
+"
+
+# View the paper-trade ledger
 python -c "
 import json
-with open('data/normalized/all_markets_YYYYMMDD_HHMMSS.json') as f:
-    for m in json.load(f):
-        q = m['question'].lower()
-        if 'trump' in q or 'musk' in q or 'elon' in q:
-            print(m['question'][:80], '|', m['market_type'])
+ledger = json.load(open('data/ledger/ledger.json'))
+for t in ledger:
+    print(t['status'], t['side'], t['question'][:60])
 "
+
+# View dashboard data
+ls dashboard/data/
 ```

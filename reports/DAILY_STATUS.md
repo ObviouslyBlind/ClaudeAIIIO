@@ -2,20 +2,16 @@
 
 ## 2026-03-18
 
-**Status:** Phases 1–6 complete. Awaiting approval for Phase 7 (evaluation).
+**Current status:** Phases 1–6 are complete. Phase 7 (evaluation) is next.
 
-### Completed today
-- Phases 1-6 completed and merged to main
-- Glint Terminal-style dark dashboard (IBM Plex Mono/Sans, amber/cream palette)
-- Tabbed layout: Overview, Signal Output, Trade Ledger, All Markets
-- Market cards with YES/NO probability bars
-- All views labeled SIMULATED and PAPER TRADING ONLY
-- export_dashboard.py copies latest data into dashboard/data/
-- Static file — open in browser, no server needed
+### What exists
+- Market ingestion, signal engine, paper-trade ledger, dashboard — all built and tested
 - 42 tests passing
+- Static dashboard (open `dashboard/index.html` in a browser)
+- All outputs labeled SIMULATED / PAPER TRADING ONLY
 
-### Next steps
-- Phase 7 (evaluation)
+### Next
+- Phase 7: evaluation and performance analysis
 
 ### Blockers
 - None
