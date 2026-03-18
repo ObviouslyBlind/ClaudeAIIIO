@@ -31,6 +31,14 @@ class Market:
     volume: float = 0.0
     liquidity: float = 0.0
 
+    # Event/group fields (set during event-based ingestion)
+    event_slug: str = ""  # Parent event slug (e.g. "elon-musk-of-tweets-march-19-march-21")
+    event_title: str = ""  # Parent event title (e.g. "Elon Musk # tweets March 19 - March 21, 2026?")
+    event_id: str = ""  # Polymarket event ID
+    bracket_label: str = ""  # Bracket label (e.g. "65-89", "<40", "200+")
+    neg_risk_market_id: str = ""  # Shared neg-risk group ID linking all brackets in an event
+    resolution_source: str = ""  # Official resolution source URL
+
     # Classification fields (set by classifier)
     market_type: str = ""  # "musk_posting", "trump_posting", or ""
     is_timer_market: bool = False  # True if it's a "will X happen by date?" market
@@ -81,6 +89,12 @@ class Market:
             "category": self.category,
             "volume": self.volume,
             "liquidity": self.liquidity,
+            "event_slug": self.event_slug,
+            "event_title": self.event_title,
+            "event_id": self.event_id,
+            "bracket_label": self.bracket_label,
+            "neg_risk_market_id": self.neg_risk_market_id,
+            "resolution_source": self.resolution_source,
             "market_type": self.market_type,
             "is_timer_market": self.is_timer_market,
             "no_price": self.no_price,
