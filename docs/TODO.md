@@ -12,6 +12,10 @@
 ## Next
 
 ### Phase 7 — Evaluation
-- [ ] Analyze performance honestly
-- [ ] Recommend changes
-- [ ] Resolve Q004 (market resolution timing)
+- [x] End-to-end pipeline test (all 4 scripts, fresh data)
+- [x] Classifier coverage audit (confirmed true market absence)
+- [x] Signal logic validation (dry-run with synthetic markets)
+- [x] Paper-trade integrity verification
+- [x] Evaluation report written (reports/EVALUATION.md)
+- [ ] Resolve Q004 (market resolution timing — deferred, needs live data)
+- [ ] Increase API page depth or add filtered queries (potential gap identified)
