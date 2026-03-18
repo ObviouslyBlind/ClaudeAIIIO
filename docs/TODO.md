@@ -18,7 +18,7 @@
 - [x] Classify market types
 - [x] Store raw and normalized data
 - [x] Document inspection workflow
-- [ ] Get approval to proceed to Phase 4
+- [x] Get approval to proceed to Phase 4
 
 ## Phase 4 — Signal logic
 - [x] Design signal rules
