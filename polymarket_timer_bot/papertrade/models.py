@@ -5,11 +5,27 @@ from datetime import datetime
 from typing import Optional
 
 # Trade statuses — explicit lifecycle
-OPEN = "OPEN"          # Trade opened, market still active
-WON = "WON"            # Market closed, NO token won (event didn't happen)
-LOST = "LOST"          # Market closed, YES token won (event happened)
-EXPIRED = "EXPIRED"    # Market closed, no winner info available
-CANCELLED = "CANCELLED"  # Trade invalidated (e.g. market removed, data error)
+#
+# Lifecycle:
+#   OPEN → WON      (market closed, NO token won — event didn't happen)
+#   OPEN → LOST     (market closed, YES token won — event happened)
+#   OPEN → EXPIRED  (market closed, no winner info from API)
+#   OPEN → CANCELLED (manual only — market removed, data error, etc.)
+#
+# CANCELLED is defined but not set automatically by any code path.
+# It exists for manual corrections. If automated cancellation triggers
+# are identified, they should be added to resolve_trades.py.
+#
+# Terminal states: WON, LOST, EXPIRED, CANCELLED (cannot reopen)
+# Only OPEN trades can be closed/resolved.
+OPEN = "OPEN"
+WON = "WON"
+LOST = "LOST"
+EXPIRED = "EXPIRED"
+CANCELLED = "CANCELLED"
+
+# All terminal states (trade is done, has P&L or is invalidated)
+TERMINAL_STATES = {WON, LOST, EXPIRED, CANCELLED}
 
 # Data provenance
 PROVENANCE = "SIMULATED"
@@ -31,8 +47,8 @@ class PaperTrade:
     signal_score: float
     signal_reasons: list[str] = field(default_factory=list)
 
-    # Status
-    status: str = OPEN  # OPEN, WON, LOST, EXPIRED
+    # Status — see lifecycle comment at top of file
+    status: str = OPEN  # OPEN → WON / LOST / EXPIRED / CANCELLED
 
     # Exit (filled on resolution)
     exit_time: Optional[str] = None

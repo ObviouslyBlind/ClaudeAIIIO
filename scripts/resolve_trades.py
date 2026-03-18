@@ -24,15 +24,10 @@ from polymarket_timer_bot.models.market import Market
 from polymarket_timer_bot.papertrade.ledger import Ledger
 from polymarket_timer_bot.papertrade.models import WON, LOST, EXPIRED, PROVENANCE
 from polymarket_timer_bot.runs import RunStore
+from polymarket_timer_bot.utils import find_latest_file
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
-
-
-def find_latest_file(directory: str, prefix: str) -> str | None:
-    pattern = os.path.join(directory, f"{prefix}*.json")
-    files = sorted(glob.glob(pattern))
-    return files[-1] if files else None
 
 
 def load_market_index(data_dir: str) -> dict[str, Market]:

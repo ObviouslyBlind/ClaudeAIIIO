@@ -10,7 +10,6 @@ Usage:
 """
 
 import argparse
-import glob
 import json
 import logging
 import os
@@ -27,15 +26,10 @@ from polymarket_timer_bot.signals.strategy import (
     StrategyConfig,
 )
 from polymarket_timer_bot.runs import RunRecord, RunStore, create_run_id
+from polymarket_timer_bot.utils import find_latest_file
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
-
-
-def find_latest_file(directory: str, prefix: str) -> str | None:
-    pattern = os.path.join(directory, f"{prefix}*.json")
-    files = sorted(glob.glob(pattern))
-    return files[-1] if files else None
 
 
 def parse_args():

@@ -295,7 +295,8 @@ function renderLedgerSummary(result) {
     const losses = closed.filter(t => t.status === "LOST").length;
     const expired = closed.filter(t => t.status === "EXPIRED").length;
     const totalPnl = closed.reduce((sum, t) => sum + (t.pnl || 0), 0);
-    const winRate = closed.length > 0 ? (wins / closed.length * 100) : 0;
+    const definitive = wins + losses;
+    const winRate = definitive > 0 ? (wins / definitive * 100) : 0;
     const exposure = open.reduce((sum, t) => sum + t.stake, 0);
 
     const statsHtml = `
@@ -429,9 +430,11 @@ function renderRunHistory(result) {
             <td>${r.markets_evaluated}</td>
             <td style="color: var(--green-bright)">${r.signals_trade}</td>
             <td>${r.signals_watch}</td>
-            <td>${r.signals_skip}</td>
             <td>${r.trades_opened}</td>
             <td>${r.trades_open}</td>
+            <td style="color: var(--green-bright)">${r.trades_won || 0}</td>
+            <td style="color: var(--red)">${r.trades_lost || 0}</td>
+            <td style="color: var(--text-dim)">${r.trades_expired || 0}</td>
             <td>${winRate}</td>
             <td class="${pnlCls}">${formatPnl(r.total_pnl)}</td>
             <td>$${r.open_exposure.toFixed(0)}</td>
@@ -443,8 +446,8 @@ function renderRunHistory(result) {
         <table>
             <thead><tr>
                 <th>run id</th><th>strategy</th><th>profile</th><th>markets</th>
-                <th>trade</th><th>watch</th><th>skip</th>
-                <th>opened</th><th>open</th><th>win%</th><th>p&amp;l</th><th>exposure</th><th>created</th>
+                <th>trade</th><th>watch</th>
+                <th>opened</th><th>open</th><th>won</th><th>lost</th><th>exp</th><th>win%</th><th>p&amp;l</th><th>exposure</th><th>created</th>
             </tr></thead>
             <tbody>${rows}</tbody>
         </table>`;
@@ -516,7 +519,8 @@ function renderProfileComparison(profileLedgers, container) {
         const wins = closed.filter(t => t.status === "WON").length;
         const losses = closed.filter(t => t.status === "LOST").length;
         const totalPnl = closed.reduce((s, t) => s + (t.pnl || 0), 0);
-        const winRate = closed.length > 0 ? (wins / closed.length * 100).toFixed(0) + "%" : "\u2014";
+        const definitive = wins + losses;
+        const winRate = definitive > 0 ? (wins / definitive * 100).toFixed(0) + "%" : "\u2014";
         const pnlCls = totalPnl >= 0 ? "pnl-positive" : "pnl-negative";
         return `<tr>
             <td>${escapeHtml(pl.strategyId)}</td>
