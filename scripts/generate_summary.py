@@ -18,6 +18,8 @@ import sys
 from collections import defaultdict
 from datetime import datetime, timezone
 
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
 
@@ -761,6 +763,192 @@ def build_alerts(data_dir, profiles, totals):
     return alerts
 
 
+def build_research_strategy_summaries(data_dir, families_lookup):
+    """Build summaries for research strategies (non-baseline).
+
+    Reads signal and ledger files for family_guarded_no and family_mispricing_scan.
+    """
+    signals_dir = os.path.join(data_dir, "signals")
+    ledger_dir = os.path.join(data_dir, "ledger")
+
+    research = {}
+
+    # --- family_guarded_no ---
+    fg_signal_files = sorted(glob.glob(
+        os.path.join(signals_dir, "signals_*_family_guarded_no_*.json")
+    ))
+    fg_signals = {"trade": 0, "watch": 0, "skip": 0, "total": 0}
+    if fg_signal_files:
+        try:
+            with open(fg_signal_files[-1]) as f:
+                sig_data = json.load(f)
+            results = sig_data.get("results", [])
+            fg_signals["total"] = len(results)
+            for r in results:
+                sig = r.get("signal", "").upper()
+                if sig in ("TRADE", "WATCH", "SKIP"):
+                    fg_signals[sig.lower()] += 1
+        except Exception:
+            pass
+
+    fg_ledger = os.path.join(ledger_dir, "ledger_family_guarded_no_moderate.json")
+    fg_trades = {
+        "total_trades": 0, "open_trades": 0, "wins": 0, "losses": 0,
+        "win_rate_pct": 0.0, "realized_pnl": 0.0, "open_exposure": 0.0,
+    }
+    if os.path.exists(fg_ledger):
+        try:
+            with open(fg_ledger) as f:
+                trades = json.load(f)
+            open_t = [t for t in trades if t.get("status") == "OPEN"]
+            wins = [t for t in trades if t.get("status") == "WON"]
+            losses = [t for t in trades if t.get("status") == "LOST"]
+            definitive = len(wins) + len(losses)
+            fg_trades = {
+                "total_trades": len(trades),
+                "open_trades": len(open_t),
+                "wins": len(wins),
+                "losses": len(losses),
+                "win_rate_pct": round((len(wins) / definitive * 100) if definitive else 0, 1),
+                "realized_pnl": round(sum(t.get("pnl", 0) or 0 for t in trades if t.get("status") != "OPEN"), 2),
+                "open_exposure": round(sum(t.get("stake", 0) for t in open_t), 2),
+            }
+        except Exception:
+            pass
+
+    # Concentration analysis for family_guarded_no
+    fg_concentration = {}
+    if os.path.exists(fg_ledger):
+        try:
+            with open(fg_ledger) as f:
+                trades = json.load(f)
+            by_family = defaultdict(list)
+            for t in trades:
+                if t.get("status") == "OPEN":
+                    by_family[t.get("event_slug", "unknown")].append(t)
+            fg_concentration = {
+                slug: {
+                    "open_trades": len(ts),
+                    "open_exposure": round(sum(t.get("stake", 0) for t in ts), 2),
+                }
+                for slug, ts in sorted(by_family.items(), key=lambda x: -len(x[1]))
+            }
+        except Exception:
+            pass
+
+    research["family_guarded_no@0.1"] = {
+        "status": "active",
+        "engine": "family_guarded",
+        "signals": fg_signals,
+        "trades": fg_trades,
+        "family_risk_config": {
+            "max_open_trades_per_family": 3,
+            "max_open_exposure_per_family": 500.0,
+            "max_open_trades_per_position_per_family": 1,
+            "one_trade_per_family": False,
+        },
+        "concentration_by_family": fg_concentration,
+        "provenance": "SIMULATED",
+    }
+
+    # --- family_mispricing_scan ---
+    fms_signal_files = sorted(glob.glob(
+        os.path.join(signals_dir, "signals_*_family_mispricing_scan_*.json")
+    ))
+    fms_diagnostics = []
+    fms_signals = {"trade": 0, "watch": 0, "skip": 0, "total": 0}
+    if fms_signal_files:
+        try:
+            with open(fms_signal_files[-1]) as f:
+                sig_data = json.load(f)
+            results = sig_data.get("results", [])
+            fms_signals["total"] = len(results)
+            for r in results:
+                sig = r.get("signal", "").upper()
+                if sig in ("TRADE", "WATCH", "SKIP"):
+                    fms_signals[sig.lower()] += 1
+            fms_diagnostics = sig_data.get("family_diagnostics", [])
+        except Exception:
+            pass
+
+    research["family_mispricing_scan@0.1"] = {
+        "status": "diagnostic_only",
+        "engine": "family_mispricing",
+        "signals": fms_signals,
+        "trades": {"note": "DIAGNOSTIC ONLY — no trades generated in v0.1"},
+        "family_diagnostics": fms_diagnostics,
+        "provenance": "SIMULATED",
+    }
+
+    return research
+
+
+def build_count_model_estimates(data_dir, families_lookup):
+    """Build count-model fair value estimates for posting-count families.
+
+    Uses the simple rate-based estimator from analytics/count_model.py.
+    """
+    try:
+        from polymarket_timer_bot.analytics.count_model import (
+            estimate_family, get_default_rate,
+        )
+    except ImportError:
+        return {"error": "count_model module not available"}
+
+    norm_dir = os.path.join(data_dir, "normalized")
+    family_files = sorted(glob.glob(os.path.join(norm_dir, "families_*.json")))
+    if not family_files:
+        return {"families": [], "model_version": "rate_baseline_v0.1"}
+
+    try:
+        with open(family_files[-1]) as f:
+            families = json.load(f)
+    except Exception:
+        return {"families": [], "model_version": "rate_baseline_v0.1"}
+
+    estimates = []
+    for fam in families:
+        slug = fam.get("event_slug", "")
+        title = fam.get("event_title", "")
+        market_type = fam.get("market_type", "")
+        brackets = fam.get("brackets", [])
+        end_date_str = fam.get("end_date")
+
+        if not brackets or len(brackets) < 2:
+            continue
+        if not market_type:
+            continue
+
+        # Compute hours remaining
+        hours_remaining = None
+        if end_date_str:
+            try:
+                from datetime import datetime
+                for fmt in ["%Y-%m-%dT%H:%M:%SZ", "%Y-%m-%dT%H:%M:%S.%f",
+                            "%Y-%m-%dT%H:%M:%S%z", "%Y-%m-%dT%H:%M:%S"]:
+                    try:
+                        end_dt = datetime.strptime(end_date_str, fmt)
+                        hours_remaining = (end_dt - datetime.utcnow()).total_seconds() / 3600
+                        break
+                    except ValueError:
+                        continue
+            except Exception:
+                pass
+
+        if hours_remaining is None or hours_remaining <= 0:
+            continue
+
+        rate = get_default_rate(market_type)
+        result = estimate_family(slug, title, brackets, rate, hours_remaining)
+        estimates.append(result.to_dict())
+
+    return {
+        "families": estimates,
+        "model_version": "rate_baseline_v0.1",
+        "provenance": "SIMULATED",
+    }
+
+
 def main():
     root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     data_dir = os.path.join(root, "data")
@@ -923,6 +1111,30 @@ def main():
         "reasons": readiness_reasons,
     }
 
+    # Build concentration analysis for baseline (no_side)
+    baseline_concentration_by_family = {}
+    ledger_dir = os.path.join(data_dir, "ledger")
+    for pid in PROFILES:
+        lpath = os.path.join(ledger_dir, f"ledger_no_side_{pid}.json")
+        if os.path.exists(lpath):
+            try:
+                with open(lpath) as f:
+                    trades = json.load(f)
+                for t in trades:
+                    if t.get("status") == "OPEN":
+                        slug = t.get("event_slug", "unknown")
+                        if slug not in baseline_concentration_by_family:
+                            baseline_concentration_by_family[slug] = {"open_trades": 0, "open_exposure": 0}
+                        baseline_concentration_by_family[slug]["open_trades"] += 1
+                        baseline_concentration_by_family[slug]["open_exposure"] += t.get("stake", 0)
+            except Exception:
+                pass
+    # Round exposure
+    for k in baseline_concentration_by_family:
+        baseline_concentration_by_family[k]["open_exposure"] = round(
+            baseline_concentration_by_family[k]["open_exposure"], 2
+        )
+
     operator_summary = {
         "total_families": len(families_lookup),
         "total_brackets_evaluated": totals["signals_evaluated"],
@@ -938,9 +1150,16 @@ def main():
         },
         "position_outcomes": position_outcomes,
         "position_verdict": bracket_breakdowns["position_assessment"].get("summary", ""),
+        "baseline_concentration_by_family": baseline_concentration_by_family,
         "ops_status": ops_status,
         "readiness_gate": readiness_gate,
     }
+
+    # Build research strategy summaries
+    research_strategies = build_research_strategy_summaries(data_dir, families_lookup)
+
+    # Build count-model estimates if families available
+    count_model_estimates = build_count_model_estimates(data_dir, families_lookup)
 
     summary = {
         "generated_at": generated_at_iso,
@@ -956,6 +1175,8 @@ def main():
             "bracket_position": bracket_breakdowns,
         },
         "strategy_b_progress": strategy_b,
+        "research_strategies": research_strategies,
+        "count_model_estimates": count_model_estimates,
         "alerts": alerts,
     }
 
