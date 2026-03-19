@@ -153,9 +153,9 @@ def main():
             with open(summary_src) as f:
                 summary_data = json.load(f)
             if "ops_status" in summary_data:
-                summary_data["ops_status"]["last_successful_export_at"] = export_time
+                summary_data["ops_status"]["last_export_at"] = export_time
             if "operator_summary" in summary_data and "ops_status" in summary_data.get("operator_summary", {}):
-                summary_data["operator_summary"]["ops_status"]["last_successful_export_at"] = export_time
+                summary_data["operator_summary"]["ops_status"]["last_export_at"] = export_time
             with open(summary_src, "w") as f:
                 json.dump(summary_data, f, indent=2)
         except Exception as e:

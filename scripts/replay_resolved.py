@@ -1,11 +1,22 @@
-"""Replay resolved bracket families through all strategies for historical evidence.
+"""Replay resolved bracket families through all strategies.
 
-Fetches closed posting-count bracket families from Polymarket, reconstructs
-what each strategy would have signaled, and records simulated trade outcomes
-in separate replay ledgers.
+This is a SYNTHETIC SMOKE TEST of the replay harness, NOT valid
+strategy evidence. Current limitations:
 
-This does NOT modify live paper-trading ledgers.
-All output is labeled REPLAY_BACKFILL.
+  HINDSIGHT LEAK: Synthetic prices are anchored on the actual winning
+  bracket (known only after resolution). This guarantees 100% win rate
+  for NO-side strategies on adjacent brackets, since the distribution
+  is centered on the winner. This tests harness plumbing only — it
+  does NOT validate strategy edge.
+
+  NO REAL PRICES: The Polymarket API does not return pre-resolution
+  prices for resolved events. All prices are synthesized from a
+  count-model distribution anchored on the resolution outcome.
+
+When real historical prices become available, replay results should
+be split into REAL_HISTORICAL_REPLAY vs SYNTHETIC_SMOKE_TEST.
+
+All output is labeled SYNTHETIC_SMOKE_TEST.
 
 Usage:
     python scripts/replay_resolved.py
@@ -41,7 +52,7 @@ from polymarket_timer_bot.analytics.count_model import (
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
 
-PROVENANCE = "REPLAY_BACKFILL"
+PROVENANCE = "SYNTHETIC_SMOKE_TEST"
 
 # Known resolved bracket families to replay
 # These are CLOSED events with clear winners from the Polymarket API.
@@ -174,22 +185,23 @@ def extract_pre_resolution_prices(raw_event, expected_type="musk_posting"):
 
 
 def _synthesize_prices_from_count_model(brackets, raw_event, expected_type):
-    """Synthesize realistic pre-resolution prices for replay.
+    """Synthesize prices for harness smoke-testing ONLY.
 
-    The API only has terminal 0/1 prices for resolved events. We need
-    realistic mid-event prices to test signal thresholds.
+    WARNING — HINDSIGHT LEAK:
+    This function uses the actual resolution outcome to anchor the
+    price distribution. The winning bracket is used to derive the
+    "observed count so far", which centers the distribution on the
+    actual answer. This means:
+      - Adjacent brackets always get tradeable NO prices
+      - Those adjacent brackets always resolve NO (they didn't win)
+      - 100% win rate is GUARANTEED by construction
+      - This is NOT evidence of strategy quality
 
-    Strategy: Simulate being ~48 hours before expiry. At that point,
-    most of the event's posting activity has already occurred, so we
-    use a distribution centered on what the actual final count would
-    suggest. This creates a realistic price surface with:
-    - High YES near the winning bracket
-    - Moderate YES for adjacent brackets
-    - Low YES (high NO) for tail brackets — our trading targets
+    This is acceptable for smoke-testing the replay harness (does
+    the pipeline run, do signals fire, do trades score correctly?)
+    but MUST NOT be cited as backtest evidence.
 
-    The resolution data tells us which bracket actually won, so we
-    center our synthetic distribution there with moderate remaining
-    uncertainty (~48 hours of posting).
+    For real backtesting, we need actual pre-resolution market prices.
     """
     import math
 
@@ -413,7 +425,8 @@ def main():
     family_summaries = []
 
     print(f"\n{'='*80}")
-    print(f"HISTORICAL REPLAY — {PROVENANCE}")
+    print(f"REPLAY HARNESS SMOKE TEST — {PROVENANCE}")
+    print(f"⚠  Synthetic prices anchored on resolution — NOT valid edge evidence")
     print(f"{'='*80}")
 
     for family_info in RESOLVED_FAMILIES:
@@ -488,7 +501,8 @@ def main():
 
     # Aggregate results
     print(f"\n{'='*80}")
-    print(f"REPLAY AGGREGATE SUMMARY [{PROVENANCE}]")
+    print(f"REPLAY AGGREGATE — {PROVENANCE} (NOT valid backtest evidence)")
+    print(f"⚠  100% win rate is an artifact of hindsight-anchored synthetic prices")
     print(f"{'='*80}")
 
     by_strategy = defaultdict(lambda: {"trades": 0, "wins": 0, "losses": 0, "pnl": 0, "families": set()})
@@ -517,6 +531,13 @@ def main():
     replay_data = {
         "generated_at": datetime.utcnow().isoformat(),
         "provenance": PROVENANCE,
+        "hindsight_warning": (
+            "Synthetic prices are anchored on the actual winning bracket. "
+            "100% win rate is an artifact of this construction, not evidence "
+            "of strategy edge. This data validates harness plumbing only."
+        ),
+        "price_source": "synthetic_anchored_on_resolution",
+        "evidence_grade": "SMOKE_TEST_ONLY",
         "families_replayed": len(family_summaries),
         "total_replay_trades": len(all_trades),
         "family_summaries": family_summaries,
