@@ -1180,7 +1180,7 @@ function updatePageRefreshIndicator() {
 // Loads all data files and re-renders. Called on init and every REFRESH_INTERVAL_MS.
 
 async function refreshData(bustCache) {
-    const [relevant, signals, ledger, runs, meta, summary, pipelineReport] = await Promise.all([
+    const [relevant, signals, ledger, runs, meta, summary, pipelineReport, validation] = await Promise.all([
         loadJSON("data/relevant.json", bustCache),
         loadJSON("data/signals.json", bustCache),
         loadJSON("data/ledger.json", bustCache),
@@ -1188,6 +1188,7 @@ async function refreshData(bustCache) {
         loadJSON("data/meta.json", bustCache),
         loadJSON("data/summary.json", bustCache),
         loadJSON("data/pipeline_report.json", bustCache),
+        loadJSON("data/statistical_validation.json", bustCache),
     ]);
 
     safeRender("header", () => renderHeaderStats(relevant, signals, ledger, meta, summary, pipelineReport));
@@ -1212,6 +1213,7 @@ async function refreshData(bustCache) {
     safeRender("position-assessment", () => renderPositionAssessment(summary));
     safeRender("strategy-b-progress", () => renderStrategyBProgress(summary));
     safeRender("pipeline-status", () => renderPipelineStatus(pipelineReport));
+    safeRender("validation-summary", () => renderValidationSummary(validation));
 
     // Per-profile ledger comparison (re-render cleanly)
     const profileContainer = document.getElementById("tab-ledger");
@@ -1226,6 +1228,117 @@ async function refreshData(bustCache) {
     }
 
     updatePageRefreshIndicator();
+}
+
+// ---- STATISTICAL VALIDATION ----
+
+function renderValidationSummary(valData) {
+    const container = document.getElementById("validation-summary");
+    if (!container) return;
+
+    if (!valData || !valData.strategies) {
+        container.innerHTML = '<div class="empty-state">No statistical validation data. Run: python scripts/run_statistical_validation.py</div>';
+        return;
+    }
+
+    const strategies = valData.strategies;
+    const labels = Object.keys(strategies).sort();
+
+    let html = '';
+
+    // Sample size warning
+    if (valData.sample_size_note) {
+        html += `<div class="alert alert-warning" style="margin-bottom:12px;padding:8px 12px;background:#2a2000;border:1px solid #665500;border-radius:4px;font-size:12px;color:#ccaa44;">${valData.sample_size_note}</div>`;
+    }
+
+    html += `<div style="font-size:12px;color:#888;margin-bottom:8px;">Source: ${valData.source || 'unknown'} · ${valData.total_real_trades || 0} trades · Bootstrap N=${(valData.bootstrap_simulations || 0).toLocaleString()} · MC paths=${(valData.monte_carlo_paths || 0).toLocaleString()}</div>`;
+
+    // Summary table
+    html += '<table class="data-table"><thead><tr>';
+    html += '<th>Strategy</th><th>N</th><th>WR</th><th>95% CI</th><th>CI &gt; 50%?</th>';
+    html += '<th>EV/trade</th><th>Sharpe</th><th>P(loss)</th><th>Worst Path</th><th>Verdict</th>';
+    html += '</tr></thead><tbody>';
+
+    for (const label of labels) {
+        const s = strategies[label];
+        const bs = s.bootstrap;
+        const mc = s.monte_carlo;
+        const exp = s.expectancy;
+
+        const verdictClass = s.overall_label === 'potential_edge' ? 'positive'
+            : s.overall_label === 'no_edge' ? 'negative' : 'neutral';
+        const verdictDisplay = s.overall_label.replace(/_/g, ' ').toUpperCase();
+
+        html += '<tr>';
+        html += `<td style="font-family:monospace;font-size:11px">${label}</td>`;
+        html += `<td>${s.n_trades}${s.sample_size_warning ? ' ⚠' : ''}</td>`;
+        html += `<td>${(bs.observed_win_rate * 100).toFixed(0)}%</td>`;
+        html += `<td>[${(bs.ci_95_low * 100).toFixed(0)}%, ${(bs.ci_95_high * 100).toFixed(0)}%]</td>`;
+        html += `<td class="${bs['ci_excludes_0.5'] ? 'positive' : 'negative'}">${bs['ci_excludes_0.5'] ? 'YES' : 'NO'}</td>`;
+        html += `<td class="${exp.ev_per_trade > 0 ? 'positive' : 'negative'}">$${exp.ev_per_trade.toFixed(2)}</td>`;
+        html += `<td>${exp.sharpe_like.toFixed(2)}</td>`;
+        html += `<td>${(mc.prob_of_loss * 100).toFixed(0)}%</td>`;
+        html += `<td>$${mc.worst_path_pnl.toFixed(0)}</td>`;
+        html += `<td class="${verdictClass}" style="font-weight:600">${verdictDisplay}</td>`;
+        html += '</tr>';
+    }
+
+    html += '</tbody></table>';
+    container.innerHTML = html;
+
+    // Detailed cards per strategy
+    const detailContainer = document.getElementById("validation-strategies");
+    if (!detailContainer) return;
+
+    let detailHtml = '';
+    for (const label of labels) {
+        const s = strategies[label];
+        const bs = s.bootstrap;
+        const mc = s.monte_carlo;
+        const exp = s.expectancy;
+
+        detailHtml += `<div class="panel" style="margin-top:12px;">`;
+        detailHtml += `<div class="panel-header"><h2 style="font-size:14px;font-family:monospace">${label}</h2>`;
+        detailHtml += `<span class="provenance-badge">${s.overall_label.replace(/_/g, ' ')}</span></div>`;
+
+        detailHtml += '<div class="two-col" style="gap:12px">';
+
+        // Bootstrap
+        detailHtml += '<div style="padding:8px">';
+        detailHtml += '<h3 style="font-size:12px;color:#888;margin-bottom:6px">Bootstrap Win Rate CI</h3>';
+        detailHtml += `<div style="font-size:12px">Observed: <strong>${(bs.observed_win_rate * 100).toFixed(1)}%</strong></div>`;
+        detailHtml += `<div style="font-size:12px">Mean: ${(bs.mean_win_rate * 100).toFixed(1)}%</div>`;
+        detailHtml += `<div style="font-size:12px">95% CI: <strong>[${(bs.ci_95_low * 100).toFixed(1)}%, ${(bs.ci_95_high * 100).toFixed(1)}%]</strong></div>`;
+        detailHtml += `<div style="font-size:12px">CI excludes 50%: <span class="${bs['ci_excludes_0.5'] ? 'positive' : 'negative'}">${bs['ci_excludes_0.5'] ? 'YES' : 'NO'}</span></div>`;
+        detailHtml += '</div>';
+
+        // Monte Carlo
+        detailHtml += '<div style="padding:8px">';
+        detailHtml += '<h3 style="font-size:12px;color:#888;margin-bottom:6px">Monte Carlo Paths</h3>';
+        detailHtml += `<div style="font-size:12px">Median PnL: <strong>$${mc.median_final_pnl.toFixed(2)}</strong></div>`;
+        detailHtml += `<div style="font-size:12px">5th-95th: [$${mc.pnl_5th_percentile.toFixed(0)}, $${mc.pnl_95th_percentile.toFixed(0)}]</div>`;
+        detailHtml += `<div style="font-size:12px">P(loss): <strong>${(mc.prob_of_loss * 100).toFixed(1)}%</strong></div>`;
+        detailHtml += `<div style="font-size:12px">Median max DD: $${mc.median_max_drawdown.toFixed(0)}</div>`;
+        detailHtml += `<div style="font-size:12px">95th DD: $${mc.max_drawdown_95th.toFixed(0)}</div>`;
+        detailHtml += '</div>';
+
+        detailHtml += '</div>';
+
+        // Expectancy row
+        detailHtml += '<div style="padding:8px 8px 4px">';
+        detailHtml += '<h3 style="font-size:12px;color:#888;margin-bottom:6px">Expectancy</h3>';
+        detailHtml += `<div style="font-size:12px;display:flex;gap:24px;flex-wrap:wrap">`;
+        detailHtml += `<span>EV/trade: <strong>$${exp.ev_per_trade.toFixed(2)}</strong></span>`;
+        detailHtml += `<span>Std dev: $${exp.std_dev.toFixed(2)}</span>`;
+        detailHtml += `<span>Sharpe: ${exp.sharpe_like.toFixed(3)}</span>`;
+        detailHtml += `<span>Avg win: $${exp.avg_win_size.toFixed(2)}</span>`;
+        detailHtml += `<span>Avg loss: $${exp.avg_loss_size.toFixed(2)}</span>`;
+        detailHtml += `<span>W/L ratio: ${exp.win_loss_ratio === Infinity ? '∞' : exp.win_loss_ratio.toFixed(2)}</span>`;
+        detailHtml += '</div></div>';
+
+        detailHtml += '</div>';
+    }
+    detailContainer.innerHTML = detailHtml;
 }
 
 // ---- MAIN ----
