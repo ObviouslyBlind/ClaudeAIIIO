@@ -827,6 +827,102 @@ def main():
             "realized_pnl": tpos.get("realized_pnl", 0),
         }
 
+    # Build operator observability block
+    now_utc = datetime.now(timezone.utc)
+    generated_at_iso = now_utc.isoformat()
+
+    # Compute freshness from pipeline report if available
+    pipeline_report_path = os.path.join(root, "reports", "pipeline_report.json")
+    last_pipeline_end = None
+    if os.path.exists(pipeline_report_path):
+        try:
+            with open(pipeline_report_path) as f:
+                pr = json.load(f)
+            last_pipeline_end = pr.get("pipeline_end")
+        except Exception:
+            pass
+
+    expected_cadence_minutes = 60
+    freshness_age_minutes = None
+    freshness_status = "unknown"
+    if last_pipeline_end:
+        try:
+            for fmt in ["%Y-%m-%dT%H:%M:%SZ", "%Y-%m-%dT%H:%M:%S.%f%z",
+                        "%Y-%m-%dT%H:%M:%S%z", "%Y-%m-%dT%H:%M:%S.%f"]:
+                try:
+                    pipeline_dt = datetime.strptime(last_pipeline_end, fmt)
+                    if pipeline_dt.tzinfo is None:
+                        pipeline_dt = pipeline_dt.replace(tzinfo=timezone.utc)
+                    freshness_age_minutes = round(
+                        (now_utc - pipeline_dt).total_seconds() / 60
+                    )
+                    break
+                except ValueError:
+                    continue
+            if freshness_age_minutes is not None:
+                if freshness_age_minutes <= expected_cadence_minutes * 1.5:
+                    freshness_status = "fresh"
+                elif freshness_age_minutes <= expected_cadence_minutes * 3:
+                    freshness_status = "stale"
+                else:
+                    freshness_status = "stale"
+        except Exception:
+            pass
+
+    # Definitive outcomes by bracket position
+    definitive_by_position = {}
+    for pos in ["hot", "adjacent", "tail"]:
+        tpos = bracket_breakdowns["trades_by_position"].get(pos, {})
+        definitive_by_position[pos] = tpos.get("definitive_outcomes", 0)
+
+    ops_status = {
+        "last_successful_pipeline_run_at": last_pipeline_end,
+        "last_successful_summary_generated_at": generated_at_iso,
+        "last_successful_export_at": None,  # filled by export_dashboard.py
+        "expected_cadence_minutes": expected_cadence_minutes,
+        "freshness_status": freshness_status,
+        "freshness_age_minutes": freshness_age_minutes,
+        "definitive_outcomes_total": totals["wins"] + totals["losses"],
+        "definitive_outcomes_by_position": definitive_by_position,
+    }
+
+    # Build strategy readiness gate
+    readiness_reasons = []
+    total_definitive = totals["wins"] + totals["losses"]
+    if total_definitive < 10:
+        readiness_reasons.append(
+            f"insufficient definitive outcomes ({total_definitive}/10)"
+        )
+    # Event cycle coverage: we don't track resolved families yet
+    readiness_reasons.append("insufficient event-cycle coverage (0/2 tracked)")
+    # Profile differentiation
+    if strategy_b.get("criteria"):
+        for c in strategy_b["criteria"]:
+            if c["criterion"] == "Profile differentiation observed" and not c["met"]:
+                readiness_reasons.append(
+                    f"insufficient profile differentiation ({c['current']})"
+                )
+            if c["criterion"] == "Position-matters evidence" and not c["met"]:
+                readiness_reasons.append(
+                    f"insufficient position spread ({c['current']})"
+                )
+
+    position_strategy_ready = len(readiness_reasons) == 0
+
+    # Human-readable evidence label
+    if total_definitive == 0:
+        evidence_label = "no evidence yet"
+    elif not position_strategy_ready:
+        evidence_label = "some evidence exists, not enough to act"
+    else:
+        evidence_label = "enough evidence to consider Strategy B planning"
+
+    readiness_gate = {
+        "position_strategy_ready": position_strategy_ready,
+        "evidence_label": evidence_label,
+        "reasons": readiness_reasons,
+    }
+
     operator_summary = {
         "total_families": len(families_lookup),
         "total_brackets_evaluated": totals["signals_evaluated"],
@@ -842,11 +938,15 @@ def main():
         },
         "position_outcomes": position_outcomes,
         "position_verdict": bracket_breakdowns["position_assessment"].get("summary", ""),
+        "ops_status": ops_status,
+        "readiness_gate": readiness_gate,
     }
 
     summary = {
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": generated_at_iso,
         "provenance": "SIMULATED",
+        "ops_status": ops_status,
+        "readiness_gate": readiness_gate,
         "profiles": profiles,
         "totals": totals,
         "operator_summary": operator_summary,

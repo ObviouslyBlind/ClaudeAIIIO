@@ -146,6 +146,21 @@ def main():
             "status": "loaded",
         }
 
+    # Stamp export time into summary's ops_status if present
+    export_time = datetime.now(timezone.utc).isoformat()
+    if os.path.exists(summary_src):
+        try:
+            with open(summary_src) as f:
+                summary_data = json.load(f)
+            if "ops_status" in summary_data:
+                summary_data["ops_status"]["last_successful_export_at"] = export_time
+            if "operator_summary" in summary_data and "ops_status" in summary_data.get("operator_summary", {}):
+                summary_data["operator_summary"]["ops_status"]["last_successful_export_at"] = export_time
+            with open(summary_src, "w") as f:
+                json.dump(summary_data, f, indent=2)
+        except Exception as e:
+            logger.warning("Could not stamp export time into summary: %s", e)
+
     # --- Pipeline report (from run_pipeline.sh) ---
     pipeline_report = os.path.join(root, "reports", "pipeline_report.json")
     if os.path.exists(pipeline_report):
