@@ -1,22 +1,21 @@
 """Replay resolved bracket families through all strategies.
 
-This is a SYNTHETIC SMOKE TEST of the replay harness, NOT valid
-strategy evidence. Current limitations:
+Two replay paths, clearly separated:
 
-  HINDSIGHT LEAK: Synthetic prices are anchored on the actual winning
-  bracket (known only after resolution). This guarantees 100% win rate
-  for NO-side strategies on adjacent brackets, since the distribution
-  is centered on the winner. This tests harness plumbing only — it
-  does NOT validate strategy edge.
+  REAL_HISTORICAL_REPLAY:
+    Uses actual pre-resolution prices from the Polymarket CLOB API
+    (prices-history endpoint with interval=all). Snapshots price at
+    ~24h before event expiry. No hindsight leak. May have partial
+    coverage (some brackets have no trading history). This is real
+    backtest evidence.
 
-  NO REAL PRICES: The Polymarket API does not return pre-resolution
-  prices for resolved events. All prices are synthesized from a
-  count-model distribution anchored on the resolution outcome.
+  SYNTHETIC_SMOKE_TEST:
+    Fallback for families where real prices are unavailable.
+    Uses synthesized prices anchored on the actual winning bracket.
+    Has hindsight leak (100% win rate guaranteed by construction).
+    Validates harness plumbing only — NOT strategy evidence.
 
-When real historical prices become available, replay results should
-be split into REAL_HISTORICAL_REPLAY vs SYNTHETIC_SMOKE_TEST.
-
-All output is labeled SYNTHETIC_SMOKE_TEST.
+Results are NEVER mixed in the same aggregate table.
 
 Usage:
     python scripts/replay_resolved.py
@@ -120,6 +119,120 @@ def extract_resolution(raw_event):
             "won_yes": yes_p > 0.5,
         }
     return resolution
+
+
+CLOB_BASE = "https://clob.polymarket.com"
+
+
+def fetch_real_historical_prices(raw_event, hours_before_expiry=24):
+    """Fetch REAL pre-resolution prices from the Polymarket CLOB API.
+
+    Uses the prices-history endpoint with interval=all to get the full
+    price history for each bracket's YES token. Snapshots the price at
+    the specified number of hours before the event's end date.
+
+    Returns:
+        (brackets, coverage_meta) where coverage_meta is a dict with
+        coverage stats if real prices were found, or (None, None) if not.
+    """
+    end_date_str = raw_event.get("endDate", "")
+    if not end_date_str:
+        return None, None
+
+    try:
+        from datetime import datetime as dt
+        end_dt = dt.fromisoformat(end_date_str.replace("Z", "+00:00"))
+        end_ts = end_dt.timestamp()
+    except (ValueError, TypeError):
+        return None, None
+
+    target_ts = end_ts - (hours_before_expiry * 3600)
+
+    brackets = []
+    real_count = 0
+    missing_count = 0
+    total_count = 0
+    snapshot_offsets = []  # actual hours before expiry for each real snapshot
+
+    for m in raw_event.get("markets", []):
+        group_title = m.get("groupItemTitle", "")
+        total_count += 1
+
+        # Get CLOB token IDs
+        clob_ids_raw = m.get("clobTokenIds")
+        if isinstance(clob_ids_raw, str):
+            try:
+                clob_ids = json.loads(clob_ids_raw)
+            except (json.JSONDecodeError, TypeError):
+                clob_ids = []
+        else:
+            clob_ids = clob_ids_raw or []
+
+        yes_token_id = clob_ids[0] if clob_ids else None
+        yes_price = None
+        no_price = None
+        actual_snapshot_ts = None
+
+        if yes_token_id:
+            try:
+                resp = requests.get(
+                    f"{CLOB_BASE}/prices-history",
+                    params={"market": yes_token_id, "interval": "all", "fidelity": 60},
+                    timeout=15,
+                )
+                if resp.status_code == 200:
+                    history = resp.json().get("history", [])
+                    if history:
+                        # Find closest price point to target timestamp
+                        closest = min(history, key=lambda h: abs(h["t"] - target_ts))
+                        # Only use if within 6 hours of target
+                        if abs(closest["t"] - target_ts) < 6 * 3600:
+                            yes_price = closest["p"]
+                            no_price = round(1.0 - yes_price, 4)
+                            actual_snapshot_ts = closest["t"]
+                            real_count += 1
+                            # How many hours before expiry was this snapshot?
+                            hours_offset = (end_ts - closest["t"]) / 3600
+                            snapshot_offsets.append(hours_offset)
+            except Exception as e:
+                logger.debug("CLOB history fetch failed for %s: %s", group_title, e)
+
+        if yes_price is None:
+            missing_count += 1
+
+        brackets.append({
+            "condition_id": m.get("conditionId", m.get("condition_id", "")),
+            "bracket_label": group_title,
+            "yes_price": yes_price if yes_price is not None else 0,
+            "no_price": no_price if no_price is not None else 0,
+            "question": m.get("question", ""),
+            "price_source": "real_historical" if yes_price is not None else "missing",
+            "snapshot_ts": actual_snapshot_ts,
+        })
+
+    if real_count == 0:
+        return None, None
+
+    coverage_pct = round(real_count / total_count * 100, 1)
+    avg_hours_before = round(sum(snapshot_offsets) / len(snapshot_offsets), 1) if snapshot_offsets else 0
+
+    coverage_meta = {
+        "price_source": "real_historical",
+        "snapshot_method": f"clob_prices_history_{hours_before_expiry}h_before_expiry",
+        "target_hours_before_expiry": hours_before_expiry,
+        "avg_actual_hours_before_expiry": avg_hours_before,
+        "brackets_total": total_count,
+        "brackets_with_real_prices": real_count,
+        "brackets_missing": missing_count,
+        "coverage_pct": coverage_pct,
+    }
+
+    logger.info(
+        "Fetched real historical prices for %d/%d brackets (%.1f%% coverage, avg %.1fh before expiry)",
+        real_count, total_count, coverage_pct, avg_hours_before,
+    )
+
+    return brackets, coverage_meta
 
 
 def extract_pre_resolution_prices(raw_event, expected_type="musk_posting"):
@@ -395,7 +508,7 @@ def run_replay_for_strategy(strategy_id, profile_id, markets, family_brackets, r
                 "pnl": pnl,
                 "status": status,
                 "reasons": r.reasons,
-                "provenance": PROVENANCE,
+                "provenance": "tagged_at_collection_time",
             })
 
     return trades
@@ -414,19 +527,22 @@ def main():
     os.makedirs(replay_dir, exist_ok=True)
 
     # Strategy configs to replay
+    # Only existing strategies — no new strategy ideas in this pass
     strategy_configs = [
         ("no_side", "conservative"),
         ("no_side", "moderate"),
         ("no_side", "aggressive"),
         ("family_guarded_no", "moderate"),
+        ("family_mispricing_scan", "moderate"),  # diagnostic-only, no TRADE signals
     ]
 
-    all_trades = []
-    family_summaries = []
+    all_real_trades = []
+    all_synthetic_trades = []
+    real_family_summaries = []
+    synthetic_family_summaries = []
 
     print(f"\n{'='*80}")
-    print(f"REPLAY HARNESS SMOKE TEST — {PROVENANCE}")
-    print(f"⚠  Synthetic prices anchored on resolution — NOT valid edge evidence")
+    print(f"REPLAY — trying real historical prices first, synthetic fallback")
     print(f"{'='*80}")
 
     for family_info in RESOLVED_FAMILIES:
@@ -446,13 +562,21 @@ def main():
         print(f"  Brackets: {len(resolution)}")
         print(f"  Winning bracket: {winning_bracket}")
 
-        # Get pre-resolution prices (synthesized if only terminal available)
-        pre_res_brackets, all_terminal = extract_pre_resolution_prices(
-            raw_event, expected_type=family_info.get("expected_type", "musk_posting")
-        )
-
-        if all_terminal:
-            print(f"  Prices synthesized via count model (no historical prices in API).")
+        # Try REAL historical prices first (no hindsight leak)
+        real_brackets, coverage_meta = fetch_real_historical_prices(raw_event)
+        if real_brackets:
+            cm = coverage_meta
+            print(f"  ✓ Real historical prices: {cm['brackets_with_real_prices']}/{cm['brackets_total']} brackets ({cm['coverage_pct']:.0f}%), avg {cm['avg_actual_hours_before_expiry']:.1f}h before expiry")
+            price_source = "real_historical"
+            pre_res_brackets = real_brackets
+        else:
+            # Fallback to synthetic (has hindsight leak)
+            pre_res_brackets, all_terminal = extract_pre_resolution_prices(
+                raw_event, expected_type=family_info.get("expected_type", "musk_posting")
+            )
+            price_source = "synthetic_anchored"
+            coverage_meta = None
+            print(f"  ⚠ Synthetic prices (hindsight-anchored, smoke test only)")
 
         # Reconstruct markets
         markets, sim_now = reconstruct_family_for_signals(raw_event, pre_res_brackets)
@@ -469,7 +593,8 @@ def main():
             "bracket_count": len(resolution),
             "winning_bracket": winning_bracket,
             "end_date": raw_event.get("endDate", ""),
-            "prices_synthetic": all_terminal,
+            "price_source": price_source,
+            "coverage": coverage_meta,
             "strategy_results": {},
         }
 
@@ -477,7 +602,15 @@ def main():
             trades = run_replay_for_strategy(
                 strategy_id, profile_id, markets, family_brackets, resolution
             )
-            all_trades.extend(trades)
+            # Tag each trade with the price source and provenance
+            for t in trades:
+                t["price_source"] = price_source
+                t["provenance"] = "REAL_HISTORICAL_REPLAY" if price_source == "real_historical" else "SYNTHETIC_SMOKE_TEST"
+
+            if price_source == "real_historical":
+                all_real_trades.extend(trades)
+            else:
+                all_synthetic_trades.extend(trades)
 
             wins = [t for t in trades if t["status"] == "WON"]
             losses = [t for t in trades if t["status"] == "LOST"]
@@ -497,62 +630,156 @@ def main():
             else:
                 print(f"  {label:45s} → 0 trades (all filtered)")
 
-        family_summaries.append(family_result)
-
-    # Aggregate results
-    print(f"\n{'='*80}")
-    print(f"REPLAY AGGREGATE — {PROVENANCE} (NOT valid backtest evidence)")
-    print(f"⚠  100% win rate is an artifact of hindsight-anchored synthetic prices")
-    print(f"{'='*80}")
-
-    by_strategy = defaultdict(lambda: {"trades": 0, "wins": 0, "losses": 0, "pnl": 0, "families": set()})
-    for t in all_trades:
-        label = f"{t['strategy_id']}@{t['strategy_version']}/{t['profile_id']}"
-        by_strategy[label]["trades"] += 1
-        by_strategy[label]["families"].add(t["event_slug"])
-        if t["status"] == "WON":
-            by_strategy[label]["wins"] += 1
+        if price_source == "real_historical":
+            real_family_summaries.append(family_result)
         else:
-            by_strategy[label]["losses"] += 1
-        by_strategy[label]["pnl"] += t["pnl"]
+            synthetic_family_summaries.append(family_result)
 
-    print(f"\n{'Strategy':<45} {'Trades':>6} {'W':>4} {'L':>4} {'WR%':>6} {'PnL$':>8} {'Fam':>4}")
-    print("-" * 80)
-    for label, stats in sorted(by_strategy.items()):
-        definitive = stats["wins"] + stats["losses"]
-        wr = (stats["wins"] / definitive * 100) if definitive else 0
-        print(f"{label:<45} {stats['trades']:>6} {stats['wins']:>4} {stats['losses']:>4} {wr:>5.1f}% {stats['pnl']:>8.2f} {len(stats['families']):>4}")
+    # --- Aggregate and print results separately ---
+    def _aggregate(trades):
+        by_strat = defaultdict(lambda: {
+            "trades": 0, "wins": 0, "losses": 0, "pnl": 0,
+            "families": set(), "entry_prices": [], "family_trade_counts": defaultdict(int),
+        })
+        for t in trades:
+            label = f"{t['strategy_id']}@{t['strategy_version']}/{t['profile_id']}"
+            s = by_strat[label]
+            s["trades"] += 1
+            s["families"].add(t["event_slug"])
+            s["entry_prices"].append(t["entry_no_price"])
+            s["family_trade_counts"][t["event_slug"]] += 1
+            if t["status"] == "WON":
+                s["wins"] += 1
+            else:
+                s["losses"] += 1
+            s["pnl"] += t["pnl"]
+        return by_strat
+
+    def _print_aggregate(title, trades, family_summaries, warning=None):
+        by_strat = _aggregate(trades)
+        print(f"\n{'='*80}")
+        print(f"{title}")
+        if warning:
+            print(f"⚠  {warning}")
+        print(f"{'='*80}")
+
+        # Coverage report
+        if family_summaries:
+            print(f"\n  Coverage:")
+            for fs in family_summaries:
+                cm = fs.get("coverage")
+                if cm:
+                    print(f"    {fs['event_slug']}: {cm['brackets_with_real_prices']}/{cm['brackets_total']} brackets, avg {cm['avg_actual_hours_before_expiry']:.1f}h before expiry")
+                else:
+                    print(f"    {fs['event_slug']}: synthetic (no real prices)")
+
+        print(f"\n{'Strategy':<40} {'Trades':>5} {'W':>3} {'L':>3} {'WR%':>6} {'PnL$':>8} {'Fam':>3} {'AvgEntry':>8} {'MaxFamConc':>10}")
+        print("-" * 90)
+        for label, stats in sorted(by_strat.items()):
+            definitive = stats["wins"] + stats["losses"]
+            wr = (stats["wins"] / definitive * 100) if definitive else 0
+            avg_entry = sum(stats["entry_prices"]) / len(stats["entry_prices"]) if stats["entry_prices"] else 0
+            max_fam_conc = max(stats["family_trade_counts"].values()) / stats["trades"] * 100 if stats["trades"] else 0
+            print(f"{label:<40} {stats['trades']:>5} {stats['wins']:>3} {stats['losses']:>3} {wr:>5.1f}% {stats['pnl']:>8.2f} {len(stats['families']):>3} {avg_entry:>7.3f}¢ {max_fam_conc:>9.0f}%")
+        return by_strat
+
+    real_agg = {}
+    synthetic_agg = {}
+
+    if all_real_trades:
+        real_agg = _print_aggregate(
+            f"REAL HISTORICAL REPLAY — {len(real_family_summaries)} families",
+            all_real_trades,
+            real_family_summaries,
+        )
+
+    if all_synthetic_trades:
+        synthetic_agg = _print_aggregate(
+            f"SYNTHETIC SMOKE TEST — {len(synthetic_family_summaries)} families",
+            all_synthetic_trades,
+            synthetic_family_summaries,
+            warning="100% win rate is an artifact of hindsight-anchored synthetic prices",
+        )
+
+    if not all_real_trades and not all_synthetic_trades:
+        print("\nNo replay trades generated.")
 
     if args.dry_run:
         print(f"\n  [DRY RUN] No files written.")
         return
 
-    # Save replay results
-    replay_data = {
-        "generated_at": datetime.utcnow().isoformat(),
-        "provenance": PROVENANCE,
-        "hindsight_warning": (
-            "Synthetic prices are anchored on the actual winning bracket. "
-            "100% win rate is an artifact of this construction, not evidence "
-            "of strategy edge. This data validates harness plumbing only."
-        ),
-        "price_source": "synthetic_anchored_on_resolution",
-        "evidence_grade": "SMOKE_TEST_ONLY",
-        "families_replayed": len(family_summaries),
-        "total_replay_trades": len(all_trades),
-        "family_summaries": family_summaries,
-        "aggregate_by_strategy": {
-            label: {
+    # --- Build structured output with clear separation ---
+    def _agg_to_dict(agg):
+        result = {}
+        for label, s in sorted(agg.items()):
+            avg_entry = round(sum(s["entry_prices"]) / len(s["entry_prices"]), 4) if s["entry_prices"] else 0
+            max_fam = max(s["family_trade_counts"].values()) if s["family_trade_counts"] else 0
+            max_fam_conc = round(max_fam / s["trades"] * 100, 1) if s["trades"] else 0
+            result[label] = {
                 "trades": s["trades"],
                 "wins": s["wins"],
                 "losses": s["losses"],
-                "win_rate_pct": round((s["wins"] / (s["wins"] + s["losses"]) * 100) if (s["wins"] + s["losses"]) else 0, 1),
+                "win_rate_pct": round((s["wins"] / (s["wins"] + s["losses"]) * 100)
+                                     if (s["wins"] + s["losses"]) else 0, 1),
                 "pnl": round(s["pnl"], 2),
                 "families_traded": len(s["families"]),
+                "avg_entry_no_price": avg_entry,
+                "max_family_concentration_pct": max_fam_conc,
             }
-            for label, s in sorted(by_strategy.items())
+        return result
+
+    replay_data = {
+        "generated_at": datetime.utcnow().isoformat(),
+        # --- REAL HISTORICAL REPLAY (no hindsight leak) ---
+        "real_historical": {
+            "provenance": "REAL_HISTORICAL_REPLAY",
+            "evidence_grade": "REAL_BACKTEST" if all_real_trades else "NO_DATA",
+            "price_source": "clob_prices_history_24h_before_expiry",
+            "snapshot_method": "closest hourly sample to 24h before event endDate",
+            "families_requested": len(RESOLVED_FAMILIES),
+            "families_usable": len(real_family_summaries),
+            "families_skipped": len(RESOLVED_FAMILIES) - len(real_family_summaries) - len(synthetic_family_summaries),
+            "families_fell_to_synthetic": len(synthetic_family_summaries),
+            "coverage_by_family": [
+                {
+                    "event_slug": fs["event_slug"],
+                    **(fs["coverage"] or {})
+                }
+                for fs in real_family_summaries
+            ],
+            "total_trades": len(all_real_trades),
+            "includes_real_losses": any(t["status"] == "LOST" for t in all_real_trades),
+            "family_summaries": real_family_summaries,
+            "aggregate_by_strategy": _agg_to_dict(real_agg),
+            "trades": all_real_trades,
         },
-        "trades": all_trades,
+        # --- SYNTHETIC SMOKE TEST (has hindsight leak) ---
+        "synthetic_smoke_test": {
+            "provenance": "SYNTHETIC_SMOKE_TEST",
+            "evidence_grade": "SMOKE_TEST_ONLY",
+            "price_source": "synthetic_anchored_on_resolution",
+            "hindsight_warning": (
+                "Synthetic prices are anchored on the actual winning bracket. "
+                "100% win rate is an artifact of this construction, not evidence "
+                "of strategy edge. This data validates harness plumbing only."
+            ),
+            "families_replayed": len(synthetic_family_summaries),
+            "total_trades": len(all_synthetic_trades),
+            "family_summaries": synthetic_family_summaries,
+            "aggregate_by_strategy": _agg_to_dict(synthetic_agg),
+            "trades": all_synthetic_trades,
+        },
+        # --- Top-level summary for backward compat ---
+        "provenance": "MIXED" if (all_real_trades and all_synthetic_trades)
+                      else ("REAL_HISTORICAL_REPLAY" if all_real_trades
+                            else "SYNTHETIC_SMOKE_TEST"),
+        "evidence_grade": "REAL_BACKTEST" if all_real_trades else "SMOKE_TEST_ONLY",
+        "families_replayed": len(real_family_summaries) + len(synthetic_family_summaries),
+        "total_replay_trades": len(all_real_trades) + len(all_synthetic_trades),
+        "real_trade_count": len(all_real_trades),
+        "synthetic_trade_count": len(all_synthetic_trades),
+        # Backward compat: aggregate_by_strategy uses real if available, else synthetic
+        "aggregate_by_strategy": _agg_to_dict(real_agg) if real_agg else _agg_to_dict(synthetic_agg),
     }
 
     replay_path = os.path.join(replay_dir, "replay_results.json")

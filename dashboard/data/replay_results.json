@@ -1,1033 +1,1611 @@
 {
-  "generated_at": "2026-03-19T13:22:28.207823",
-  "provenance": "SYNTHETIC_SMOKE_TEST",
-  "hindsight_warning": "Synthetic prices are anchored on the actual winning bracket. 100% win rate is an artifact of this construction, not evidence of strategy edge. This data validates harness plumbing only.",
-  "price_source": "synthetic_anchored_on_resolution",
-  "evidence_grade": "SMOKE_TEST_ONLY",
+  "generated_at": "2026-03-19T13:39:21.232315",
+  "real_historical": {
+    "provenance": "REAL_HISTORICAL_REPLAY",
+    "evidence_grade": "REAL_BACKTEST",
+    "price_source": "clob_prices_history_24h_before_expiry",
+    "snapshot_method": "closest hourly sample to 24h before event endDate",
+    "families_requested": 5,
+    "families_usable": 4,
+    "families_skipped": 0,
+    "families_fell_to_synthetic": 1,
+    "coverage_by_family": [
+      {
+        "event_slug": "elon-musk-of-tweets-february-13-february-20",
+        "price_source": "real_historical",
+        "snapshot_method": "clob_prices_history_24h_before_expiry",
+        "target_hours_before_expiry": 24,
+        "avg_actual_hours_before_expiry": 24.0,
+        "brackets_total": 30,
+        "brackets_with_real_prices": 18,
+        "brackets_missing": 12,
+        "coverage_pct": 60.0
+      },
+      {
+        "event_slug": "elon-musk-of-tweets-march-3-march-10",
+        "price_source": "real_historical",
+        "snapshot_method": "clob_prices_history_24h_before_expiry",
+        "target_hours_before_expiry": 24,
+        "avg_actual_hours_before_expiry": 24.3,
+        "brackets_total": 30,
+        "brackets_with_real_prices": 17,
+        "brackets_missing": 13,
+        "coverage_pct": 56.7
+      },
+      {
+        "event_slug": "elon-musk-of-tweets-march-6-march-13",
+        "price_source": "real_historical",
+        "snapshot_method": "clob_prices_history_24h_before_expiry",
+        "target_hours_before_expiry": 24,
+        "avg_actual_hours_before_expiry": 24.3,
+        "brackets_total": 30,
+        "brackets_with_real_prices": 17,
+        "brackets_missing": 13,
+        "coverage_pct": 56.7
+      },
+      {
+        "event_slug": "donald-trump-of-truth-social-posts-march-6-march-13",
+        "price_source": "real_historical",
+        "snapshot_method": "clob_prices_history_24h_before_expiry",
+        "target_hours_before_expiry": 24,
+        "avg_actual_hours_before_expiry": 24.0,
+        "brackets_total": 11,
+        "brackets_with_real_prices": 8,
+        "brackets_missing": 3,
+        "coverage_pct": 72.7
+      }
+    ],
+    "total_trades": 36,
+    "includes_real_losses": true,
+    "family_summaries": [
+      {
+        "event_slug": "elon-musk-of-tweets-february-13-february-20",
+        "event_title": "Elon Musk # tweets February 13 - February 20, 2026?",
+        "bracket_count": 30,
+        "winning_bracket": "300-319",
+        "end_date": "2026-02-20T17:00:00Z",
+        "price_source": "real_historical",
+        "coverage": {
+          "price_source": "real_historical",
+          "snapshot_method": "clob_prices_history_24h_before_expiry",
+          "target_hours_before_expiry": 24,
+          "avg_actual_hours_before_expiry": 24.0,
+          "brackets_total": 30,
+          "brackets_with_real_prices": 18,
+          "brackets_missing": 12,
+          "coverage_pct": 60.0
+        },
+        "strategy_results": {
+          "no_side@1.0/conservative": {
+            "trades": 2,
+            "wins": 2,
+            "losses": 0,
+            "pnl": 10.09,
+            "brackets_traded": [
+              "320-339",
+              "260-279"
+            ]
+          },
+          "no_side@1.0/moderate": {
+            "trades": 3,
+            "wins": 2,
+            "losses": 1,
+            "pnl": -79.84,
+            "brackets_traded": [
+              "320-339",
+              "260-279",
+              "300-319"
+            ]
+          },
+          "no_side@1.0/aggressive": {
+            "trades": 3,
+            "wins": 2,
+            "losses": 1,
+            "pnl": -159.68,
+            "brackets_traded": [
+              "320-339",
+              "260-279",
+              "300-319"
+            ]
+          },
+          "family_guarded_no@0.1/moderate": {
+            "trades": 2,
+            "wins": 2,
+            "losses": 0,
+            "pnl": 20.16,
+            "brackets_traded": [
+              "320-339",
+              "260-279"
+            ]
+          },
+          "family_mispricing_scan@0.1/moderate": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "pnl": 0,
+            "brackets_traded": []
+          }
+        }
+      },
+      {
+        "event_slug": "elon-musk-of-tweets-march-3-march-10",
+        "event_title": "Elon Musk # tweets March 3 - March 10, 2026?",
+        "bracket_count": 30,
+        "winning_bracket": "340-359",
+        "end_date": "2026-03-10T16:00:00Z",
+        "price_source": "real_historical",
+        "coverage": {
+          "price_source": "real_historical",
+          "snapshot_method": "clob_prices_history_24h_before_expiry",
+          "target_hours_before_expiry": 24,
+          "avg_actual_hours_before_expiry": 24.3,
+          "brackets_total": 30,
+          "brackets_with_real_prices": 17,
+          "brackets_missing": 13,
+          "coverage_pct": 56.7
+        },
+        "strategy_results": {
+          "no_side@1.0/conservative": {
+            "trades": 1,
+            "wins": 1,
+            "losses": 0,
+            "pnl": 5.52,
+            "brackets_traded": [
+              "360-379"
+            ]
+          },
+          "no_side@1.0/moderate": {
+            "trades": 3,
+            "wins": 2,
+            "losses": 1,
+            "pnl": -61.15,
+            "brackets_traded": [
+              "360-379",
+              "300-319",
+              "340-359"
+            ]
+          },
+          "no_side@1.0/aggressive": {
+            "trades": 4,
+            "wins": 3,
+            "losses": 1,
+            "pnl": 8.27,
+            "brackets_traded": [
+              "360-379",
+              "300-319",
+              "340-359",
+              "320-339"
+            ]
+          },
+          "family_guarded_no@0.1/moderate": {
+            "trades": 1,
+            "wins": 1,
+            "losses": 0,
+            "pnl": 11.05,
+            "brackets_traded": [
+              "360-379"
+            ]
+          },
+          "family_mispricing_scan@0.1/moderate": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "pnl": 0,
+            "brackets_traded": []
+          }
+        }
+      },
+      {
+        "event_slug": "elon-musk-of-tweets-march-6-march-13",
+        "event_title": "Elon Musk # tweets March 6 - March 13, 2026?",
+        "bracket_count": 30,
+        "winning_bracket": "360-379",
+        "end_date": "2026-03-13T16:00:00Z",
+        "price_source": "real_historical",
+        "coverage": {
+          "price_source": "real_historical",
+          "snapshot_method": "clob_prices_history_24h_before_expiry",
+          "target_hours_before_expiry": 24,
+          "avg_actual_hours_before_expiry": 24.3,
+          "brackets_total": 30,
+          "brackets_with_real_prices": 17,
+          "brackets_missing": 13,
+          "coverage_pct": 56.7
+        },
+        "strategy_results": {
+          "no_side@1.0/conservative": {
+            "trades": 1,
+            "wins": 1,
+            "losses": 0,
+            "pnl": 4.14,
+            "brackets_traded": [
+              "400-419"
+            ]
+          },
+          "no_side@1.0/moderate": {
+            "trades": 3,
+            "wins": 3,
+            "losses": 0,
+            "pnl": 70.24,
+            "brackets_traded": [
+              "400-419",
+              "340-359",
+              "380-399"
+            ]
+          },
+          "no_side@1.0/aggressive": {
+            "trades": 4,
+            "wins": 3,
+            "losses": 1,
+            "pnl": -59.53,
+            "brackets_traded": [
+              "400-419",
+              "340-359",
+              "380-399",
+              "360-379"
+            ]
+          },
+          "family_guarded_no@0.1/moderate": {
+            "trades": 1,
+            "wins": 1,
+            "losses": 0,
+            "pnl": 8.28,
+            "brackets_traded": [
+              "400-419"
+            ]
+          },
+          "family_mispricing_scan@0.1/moderate": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "pnl": 0,
+            "brackets_traded": []
+          }
+        }
+      },
+      {
+        "event_slug": "donald-trump-of-truth-social-posts-march-6-march-13",
+        "event_title": "Donald Trump # Truth Social posts March 6 - March 13, 2026?",
+        "bracket_count": 11,
+        "winning_bracket": "80-99",
+        "end_date": "2026-03-13T16:00:00Z",
+        "price_source": "real_historical",
+        "coverage": {
+          "price_source": "real_historical",
+          "snapshot_method": "clob_prices_history_24h_before_expiry",
+          "target_hours_before_expiry": 24,
+          "avg_actual_hours_before_expiry": 24.0,
+          "brackets_total": 11,
+          "brackets_with_real_prices": 8,
+          "brackets_missing": 3,
+          "coverage_pct": 72.7
+        },
+        "strategy_results": {
+          "no_side@1.0/conservative": {
+            "trades": 2,
+            "wins": 2,
+            "losses": 0,
+            "pnl": 17.75,
+            "brackets_traded": [
+              "120-139",
+              "100-119"
+            ]
+          },
+          "no_side@1.0/moderate": {
+            "trades": 2,
+            "wins": 2,
+            "losses": 0,
+            "pnl": 35.5,
+            "brackets_traded": [
+              "120-139",
+              "100-119"
+            ]
+          },
+          "no_side@1.0/aggressive": {
+            "trades": 2,
+            "wins": 2,
+            "losses": 0,
+            "pnl": 70.99,
+            "brackets_traded": [
+              "120-139",
+              "100-119"
+            ]
+          },
+          "family_guarded_no@0.1/moderate": {
+            "trades": 2,
+            "wins": 2,
+            "losses": 0,
+            "pnl": 35.5,
+            "brackets_traded": [
+              "120-139",
+              "100-119"
+            ]
+          },
+          "family_mispricing_scan@0.1/moderate": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "pnl": 0,
+            "brackets_traded": []
+          }
+        }
+      }
+    ],
+    "aggregate_by_strategy": {
+      "family_guarded_no@0.1/moderate": {
+        "trades": 6,
+        "wins": 6,
+        "losses": 0,
+        "win_rate_pct": 100.0,
+        "pnl": 74.99,
+        "families_traded": 4,
+        "avg_entry_no_price": 0.8911,
+        "max_family_concentration_pct": 33.3
+      },
+      "no_side@1.0/aggressive": {
+        "trades": 13,
+        "wins": 10,
+        "losses": 3,
+        "win_rate_pct": 76.9,
+        "pnl": -139.95,
+        "families_traded": 4,
+        "avg_entry_no_price": 0.7999,
+        "max_family_concentration_pct": 30.8
+      },
+      "no_side@1.0/conservative": {
+        "trades": 6,
+        "wins": 6,
+        "losses": 0,
+        "win_rate_pct": 100.0,
+        "pnl": 37.5,
+        "families_traded": 4,
+        "avg_entry_no_price": 0.8911,
+        "max_family_concentration_pct": 33.3
+      },
+      "no_side@1.0/moderate": {
+        "trades": 11,
+        "wins": 9,
+        "losses": 2,
+        "win_rate_pct": 81.8,
+        "pnl": -35.25,
+        "families_traded": 4,
+        "avg_entry_no_price": 0.835,
+        "max_family_concentration_pct": 27.3
+      }
+    },
+    "trades": [
+      {
+        "strategy_id": "no_side",
+        "strategy_version": "1.0",
+        "profile_id": "conservative",
+        "event_slug": "elon-musk-of-tweets-february-13-february-20",
+        "event_title": "Elon Musk # tweets February 13 - February 20, 2026?",
+        "bracket_label": "320-339",
+        "condition_id": "0xd6544bb4119990c95f46bf155efccadc9cb5453961f4c644cf874d074bc10533",
+        "question": "Will Elon Musk post 320-339 tweets from February 13 to February 20, 2026?",
+        "signal": "TRADE",
+        "score": 93.60000000000002,
+        "entry_no_price": 0.926,
+        "exit_no_price": 1.0,
+        "stake": 50.0,
+        "pnl": 4.0,
+        "status": "WON",
+        "reasons": [
+          "NO price 0.93 \u2014 good upside potential.",
+          "24.0h until expiry \u2014 approaching deadline.",
+          "TRADE: NO price and expiry both favorable."
+        ],
+        "provenance": "REAL_HISTORICAL_REPLAY",
+        "price_source": "real_historical"
+      },
+      {
+        "strategy_id": "no_side",
+        "strategy_version": "1.0",
+        "profile_id": "conservative",
+        "event_slug": "elon-musk-of-tweets-february-13-february-20",
+        "event_title": "Elon Musk # tweets February 13 - February 20, 2026?",
+        "bracket_label": "260-279",
+        "condition_id": "0xdef7e4ce6b94668eaf51785afb6978740cb24bb7cce67880615d37b00ef7d5ba",
+        "question": "Will Elon Musk post 260-279 tweets from February 13 to February 20, 2026?",
+        "signal": "TRADE",
+        "score": 84.39999999999999,
+        "entry_no_price": 0.8915,
+        "exit_no_price": 1.0,
+        "stake": 50.0,
+        "pnl": 6.09,
+        "status": "WON",
+        "reasons": [
+          "NO price 0.89 \u2014 good upside potential.",
+          "24.0h until expiry \u2014 approaching deadline.",
+          "TRADE: NO price and expiry both favorable."
+        ],
+        "provenance": "REAL_HISTORICAL_REPLAY",
+        "price_source": "real_historical"
+      },
+      {
+        "strategy_id": "no_side",
+        "strategy_version": "1.0",
+        "profile_id": "moderate",
+        "event_slug": "elon-musk-of-tweets-february-13-february-20",
+        "event_title": "Elon Musk # tweets February 13 - February 20, 2026?",
+        "bracket_label": "320-339",
+        "condition_id": "0xd6544bb4119990c95f46bf155efccadc9cb5453961f4c644cf874d074bc10533",
+        "question": "Will Elon Musk post 320-339 tweets from February 13 to February 20, 2026?",
+        "signal": "TRADE",
+        "score": 96.16000000000001,
+        "entry_no_price": 0.926,
+        "exit_no_price": 1.0,
+        "stake": 100.0,
+        "pnl": 7.99,
+        "status": "WON",
+        "reasons": [
+          "NO price 0.93 \u2014 good upside potential.",
+          "24.0h until expiry \u2014 approaching deadline.",
+          "TRADE: NO price and expiry both favorable."
+        ],
+        "provenance": "REAL_HISTORICAL_REPLAY",
+        "price_source": "real_historical"
+      },
+      {
+        "strategy_id": "no_side",
+        "strategy_version": "1.0",
+        "profile_id": "moderate",
+        "event_slug": "elon-musk-of-tweets-february-13-february-20",
+        "event_title": "Elon Musk # tweets February 13 - February 20, 2026?",
+        "bracket_label": "260-279",
+        "condition_id": "0xdef7e4ce6b94668eaf51785afb6978740cb24bb7cce67880615d37b00ef7d5ba",
+        "question": "Will Elon Musk post 260-279 tweets from February 13 to February 20, 2026?",
+        "signal": "TRADE",
+        "score": 90.64,
+        "entry_no_price": 0.8915,
+        "exit_no_price": 1.0,
+        "stake": 100.0,
+        "pnl": 12.17,
+        "status": "WON",
+        "reasons": [
+          "NO price 0.89 \u2014 good upside potential.",
+          "24.0h until expiry \u2014 approaching deadline.",
+          "TRADE: NO price and expiry both favorable."
+        ],
+        "provenance": "REAL_HISTORICAL_REPLAY",
+        "price_source": "real_historical"
+      },
+      {
+        "strategy_id": "no_side",
+        "strategy_version": "1.0",
+        "profile_id": "moderate",
+        "event_slug": "elon-musk-of-tweets-february-13-february-20",
+        "event_title": "Elon Musk # tweets February 13 - February 20, 2026?",
+        "bracket_label": "300-319",
+        "condition_id": "0x1f14be72544e1f15d1ff65f1086a2418bdb595902d091ed48590ff791893b331",
+        "question": "Will Elon Musk post 300-319 tweets from February 13 to February 20, 2026?",
+        "signal": "TRADE",
+        "score": 69.60000000000001,
+        "entry_no_price": 0.76,
+        "exit_no_price": 0.0,
+        "stake": 100.0,
+        "pnl": -100.0,
+        "status": "LOST",
+        "reasons": [
+          "NO price 0.76 \u2014 good upside potential.",
+          "24.0h until expiry \u2014 approaching deadline.",
+          "TRADE: NO price and expiry both favorable."
+        ],
+        "provenance": "REAL_HISTORICAL_REPLAY",
+        "price_source": "real_historical"
+      },
+      {
+        "strategy_id": "no_side",
+        "strategy_version": "1.0",
+        "profile_id": "aggressive",
+        "event_slug": "elon-musk-of-tweets-february-13-february-20",
+        "event_title": "Elon Musk # tweets February 13 - February 20, 2026?",
+        "bracket_label": "320-339",
+        "condition_id": "0xd6544bb4119990c95f46bf155efccadc9cb5453961f4c644cf874d074bc10533",
+        "question": "Will Elon Musk post 320-339 tweets from February 13 to February 20, 2026?",
+        "signal": "TRADE",
+        "score": 97.25714285714287,
+        "entry_no_price": 0.926,
+        "exit_no_price": 1.0,
+        "stake": 200.0,
+        "pnl": 15.98,
+        "status": "WON",
+        "reasons": [
+          "NO price 0.93 \u2014 good upside potential.",
+          "24.0h until expiry \u2014 approaching deadline.",
+          "TRADE: NO price and expiry both favorable."
+        ],
+        "provenance": "REAL_HISTORICAL_REPLAY",
+        "price_source": "real_historical"
+      },
+      {
+        "strategy_id": "no_side",
+        "strategy_version": "1.0",
+        "profile_id": "aggressive",
+        "event_slug": "elon-musk-of-tweets-february-13-february-20",
+        "event_title": "Elon Musk # tweets February 13 - February 20, 2026?",
+        "bracket_label": "260-279",
+        "condition_id": "0xdef7e4ce6b94668eaf51785afb6978740cb24bb7cce67880615d37b00ef7d5ba",
+        "question": "Will Elon Musk post 260-279 tweets from February 13 to February 20, 2026?",
+        "signal": "TRADE",
+        "score": 93.31428571428572,
+        "entry_no_price": 0.8915,
+        "exit_no_price": 1.0,
+        "stake": 200.0,
+        "pnl": 24.34,
+        "status": "WON",
+        "reasons": [
+          "NO price 0.89 \u2014 good upside potential.",
+          "24.0h until expiry \u2014 approaching deadline.",
+          "TRADE: NO price and expiry both favorable."
+        ],
+        "provenance": "REAL_HISTORICAL_REPLAY",
+        "price_source": "real_historical"
+      },
+      {
+        "strategy_id": "no_side",
+        "strategy_version": "1.0",
+        "profile_id": "aggressive",
+        "event_slug": "elon-musk-of-tweets-february-13-february-20",
+        "event_title": "Elon Musk # tweets February 13 - February 20, 2026?",
+        "bracket_label": "300-319",
+        "condition_id": "0x1f14be72544e1f15d1ff65f1086a2418bdb595902d091ed48590ff791893b331",
+        "question": "Will Elon Musk post 300-319 tweets from February 13 to February 20, 2026?",
+        "signal": "TRADE",
+        "score": 78.28571428571429,
+        "entry_no_price": 0.76,
+        "exit_no_price": 0.0,
+        "stake": 200.0,
+        "pnl": -200.0,
+        "status": "LOST",
+        "reasons": [
+          "NO price 0.76 \u2014 good upside potential.",
+          "24.0h until expiry \u2014 approaching deadline.",
+          "TRADE: NO price and expiry both favorable."
+        ],
+        "provenance": "REAL_HISTORICAL_REPLAY",
+        "price_source": "real_historical"
+      },
+      {
+        "strategy_id": "family_guarded_no",
+        "strategy_version": "0.1",
+        "profile_id": "moderate",
+        "event_slug": "elon-musk-of-tweets-february-13-february-20",
+        "event_title": "Elon Musk # tweets February 13 - February 20, 2026?",
+        "bracket_label": "320-339",
+        "condition_id": "0xd6544bb4119990c95f46bf155efccadc9cb5453961f4c644cf874d074bc10533",
+        "question": "Will Elon Musk post 320-339 tweets from February 13 to February 20, 2026?",
+        "signal": "TRADE",
+        "score": 96.80000000000001,
+        "entry_no_price": 0.926,
+        "exit_no_price": 1.0,
+        "stake": 100.0,
+        "pnl": 7.99,
+        "status": "WON",
+        "reasons": [
+          "position=tail",
+          "Position threshold for tail: NO >= 0.65",
+          "NO price 0.93 \u2014 above tail threshold.",
+          "24.0h until expiry \u2014 approaching deadline.",
+          "TRADE: NO price and expiry favorable for tail position."
+        ],
+        "provenance": "REAL_HISTORICAL_REPLAY",
+        "price_source": "real_historical"
+      },
+      {
+        "strategy_id": "family_guarded_no",
+        "strategy_version": "0.1",
+        "profile_id": "moderate",
+        "event_slug": "elon-musk-of-tweets-february-13-february-20",
+        "event_title": "Elon Musk # tweets February 13 - February 20, 2026?",
+        "bracket_label": "260-279",
+        "condition_id": "0xdef7e4ce6b94668eaf51785afb6978740cb24bb7cce67880615d37b00ef7d5ba",
+        "question": "Will Elon Musk post 260-279 tweets from February 13 to February 20, 2026?",
+        "signal": "TRADE",
+        "score": 84.39999999999999,
+        "entry_no_price": 0.8915,
+        "exit_no_price": 1.0,
+        "stake": 100.0,
+        "pnl": 12.17,
+        "status": "WON",
+        "reasons": [
+          "position=adjacent",
+          "Position threshold for adjacent: NO >= 0.80",
+          "NO price 0.89 \u2014 above adjacent threshold.",
+          "24.0h until expiry \u2014 approaching deadline.",
+          "TRADE: NO price and expiry favorable for adjacent position."
+        ],
+        "provenance": "REAL_HISTORICAL_REPLAY",
+        "price_source": "real_historical"
+      },
+      {
+        "strategy_id": "no_side",
+        "strategy_version": "1.0",
+        "profile_id": "conservative",
+        "event_slug": "elon-musk-of-tweets-march-3-march-10",
+        "event_title": "Elon Musk # tweets March 3 - March 10, 2026?",
+        "bracket_label": "360-379",
+        "condition_id": "0x7a0317189d04b35c0607ccf0dc926e620dfda297d4e80c35e909b91f28205d96",
+        "question": "Will Elon Musk post 360-379 tweets from March 3 to March 10, 2026?",
+        "signal": "TRADE",
+        "score": 86.8,
+        "entry_no_price": 0.9005,
+        "exit_no_price": 1.0,
+        "stake": 50.0,
+        "pnl": 5.52,
+        "status": "WON",
+        "reasons": [
+          "NO price 0.90 \u2014 good upside potential.",
+          "24.0h until expiry \u2014 approaching deadline.",
+          "TRADE: NO price and expiry both favorable."
+        ],
+        "provenance": "REAL_HISTORICAL_REPLAY",
+        "price_source": "real_historical"
+      },
+      {
+        "strategy_id": "no_side",
+        "strategy_version": "1.0",
+        "profile_id": "moderate",
+        "event_slug": "elon-musk-of-tweets-march-3-march-10",
+        "event_title": "Elon Musk # tweets March 3 - March 10, 2026?",
+        "bracket_label": "360-379",
+        "condition_id": "0x7a0317189d04b35c0607ccf0dc926e620dfda297d4e80c35e909b91f28205d96",
+        "question": "Will Elon Musk post 360-379 tweets from March 3 to March 10, 2026?",
+        "signal": "TRADE",
+        "score": 92.08,
+        "entry_no_price": 0.9005,
+        "exit_no_price": 1.0,
+        "stake": 100.0,
+        "pnl": 11.05,
+        "status": "WON",
+        "reasons": [
+          "NO price 0.90 \u2014 good upside potential.",
+          "24.0h until expiry \u2014 approaching deadline.",
+          "TRADE: NO price and expiry both favorable."
+        ],
+        "provenance": "REAL_HISTORICAL_REPLAY",
+        "price_source": "real_historical"
+      },
+      {
+        "strategy_id": "no_side",
+        "strategy_version": "1.0",
+        "profile_id": "moderate",
+        "event_slug": "elon-musk-of-tweets-march-3-march-10",
+        "event_title": "Elon Musk # tweets March 3 - March 10, 2026?",
+        "bracket_label": "300-319",
+        "condition_id": "0x4cdaabb943a6efa3b64b391857b2f6b7c11b6b7cf341f4147e802109fcbfef91",
+        "question": "Will Elon Musk post 300-319 tweets from March 3 to March 10, 2026?",
+        "signal": "TRADE",
+        "score": 73.2,
+        "entry_no_price": 0.7825,
+        "exit_no_price": 1.0,
+        "stake": 100.0,
+        "pnl": 27.8,
+        "status": "WON",
+        "reasons": [
+          "NO price 0.78 \u2014 good upside potential.",
+          "24.0h until expiry \u2014 approaching deadline.",
+          "TRADE: NO price and expiry both favorable."
+        ],
+        "provenance": "REAL_HISTORICAL_REPLAY",
+        "price_source": "real_historical"
+      },
+      {
+        "strategy_id": "no_side",
+        "strategy_version": "1.0",
+        "profile_id": "moderate",
+        "event_slug": "elon-musk-of-tweets-march-3-march-10",
+        "event_title": "Elon Musk # tweets March 3 - March 10, 2026?",
+        "bracket_label": "340-359",
+        "condition_id": "0x8e849b8ae6d1efcd56fcdbf122652a8489c01229767ce1abdbfa67d425b670a8",
+        "question": "Will Elon Musk post 340-359 tweets from March 3 to March 10, 2026?",
+        "signal": "TRADE",
+        "score": 71.12,
+        "entry_no_price": 0.7695,
+        "exit_no_price": 0.0,
+        "stake": 100.0,
+        "pnl": -100.0,
+        "status": "LOST",
+        "reasons": [
+          "NO price 0.77 \u2014 good upside potential.",
+          "24.0h until expiry \u2014 approaching deadline.",
+          "TRADE: NO price and expiry both favorable."
+        ],
+        "provenance": "REAL_HISTORICAL_REPLAY",
+        "price_source": "real_historical"
+      },
+      {
+        "strategy_id": "no_side",
+        "strategy_version": "1.0",
+        "profile_id": "aggressive",
+        "event_slug": "elon-musk-of-tweets-march-3-march-10",
+        "event_title": "Elon Musk # tweets March 3 - March 10, 2026?",
+        "bracket_label": "360-379",
+        "condition_id": "0x7a0317189d04b35c0607ccf0dc926e620dfda297d4e80c35e909b91f28205d96",
+        "question": "Will Elon Musk post 360-379 tweets from March 3 to March 10, 2026?",
+        "signal": "TRADE",
+        "score": 94.34285714285714,
+        "entry_no_price": 0.9005,
+        "exit_no_price": 1.0,
+        "stake": 200.0,
+        "pnl": 22.1,
+        "status": "WON",
+        "reasons": [
+          "NO price 0.90 \u2014 good upside potential.",
+          "24.0h until expiry \u2014 approaching deadline.",
+          "TRADE: NO price and expiry both favorable."
+        ],
+        "provenance": "REAL_HISTORICAL_REPLAY",
+        "price_source": "real_historical"
+      },
+      {
+        "strategy_id": "no_side",
+        "strategy_version": "1.0",
+        "profile_id": "aggressive",
+        "event_slug": "elon-musk-of-tweets-march-3-march-10",
+        "event_title": "Elon Musk # tweets March 3 - March 10, 2026?",
+        "bracket_label": "300-319",
+        "condition_id": "0x4cdaabb943a6efa3b64b391857b2f6b7c11b6b7cf341f4147e802109fcbfef91",
+        "question": "Will Elon Musk post 300-319 tweets from March 3 to March 10, 2026?",
+        "signal": "TRADE",
+        "score": 80.85714285714286,
+        "entry_no_price": 0.7825,
+        "exit_no_price": 1.0,
+        "stake": 200.0,
+        "pnl": 55.59,
+        "status": "WON",
+        "reasons": [
+          "NO price 0.78 \u2014 good upside potential.",
+          "24.0h until expiry \u2014 approaching deadline.",
+          "TRADE: NO price and expiry both favorable."
+        ],
+        "provenance": "REAL_HISTORICAL_REPLAY",
+        "price_source": "real_historical"
+      },
+      {
+        "strategy_id": "no_side",
+        "strategy_version": "1.0",
+        "profile_id": "aggressive",
+        "event_slug": "elon-musk-of-tweets-march-3-march-10",
+        "event_title": "Elon Musk # tweets March 3 - March 10, 2026?",
+        "bracket_label": "340-359",
+        "condition_id": "0x8e849b8ae6d1efcd56fcdbf122652a8489c01229767ce1abdbfa67d425b670a8",
+        "question": "Will Elon Musk post 340-359 tweets from March 3 to March 10, 2026?",
+        "signal": "TRADE",
+        "score": 79.37142857142857,
+        "entry_no_price": 0.7695,
+        "exit_no_price": 0.0,
+        "stake": 200.0,
+        "pnl": -200.0,
+        "status": "LOST",
+        "reasons": [
+          "NO price 0.77 \u2014 good upside potential.",
+          "24.0h until expiry \u2014 approaching deadline.",
+          "TRADE: NO price and expiry both favorable."
+        ],
+        "provenance": "REAL_HISTORICAL_REPLAY",
+        "price_source": "real_historical"
+      },
+      {
+        "strategy_id": "no_side",
+        "strategy_version": "1.0",
+        "profile_id": "aggressive",
+        "event_slug": "elon-musk-of-tweets-march-3-march-10",
+        "event_title": "Elon Musk # tweets March 3 - March 10, 2026?",
+        "bracket_label": "320-339",
+        "condition_id": "0xe975cd782188ca5750299cdc32108ac3b7a2987e3aa37162780ccd2ce176f72a",
+        "question": "Will Elon Musk post 320-339 tweets from March 3 to March 10, 2026?",
+        "signal": "TRADE",
+        "score": 60.57142857142857,
+        "entry_no_price": 0.605,
+        "exit_no_price": 1.0,
+        "stake": 200.0,
+        "pnl": 130.58,
+        "status": "WON",
+        "reasons": [
+          "NO price 0.60 \u2014 good upside potential.",
+          "24.0h until expiry \u2014 approaching deadline.",
+          "TRADE: NO price and expiry both favorable."
+        ],
+        "provenance": "REAL_HISTORICAL_REPLAY",
+        "price_source": "real_historical"
+      },
+      {
+        "strategy_id": "family_guarded_no",
+        "strategy_version": "0.1",
+        "profile_id": "moderate",
+        "event_slug": "elon-musk-of-tweets-march-3-march-10",
+        "event_title": "Elon Musk # tweets March 3 - March 10, 2026?",
+        "bracket_label": "360-379",
+        "condition_id": "0x7a0317189d04b35c0607ccf0dc926e620dfda297d4e80c35e909b91f28205d96",
+        "question": "Will Elon Musk post 360-379 tweets from March 3 to March 10, 2026?",
+        "signal": "TRADE",
+        "score": 93.4,
+        "entry_no_price": 0.9005,
+        "exit_no_price": 1.0,
+        "stake": 100.0,
+        "pnl": 11.05,
+        "status": "WON",
+        "reasons": [
+          "position=tail",
+          "Position threshold for tail: NO >= 0.65",
+          "NO price 0.90 \u2014 above tail threshold.",
+          "24.0h until expiry \u2014 approaching deadline.",
+          "TRADE: NO price and expiry favorable for tail position."
+        ],
+        "provenance": "REAL_HISTORICAL_REPLAY",
+        "price_source": "real_historical"
+      },
+      {
+        "strategy_id": "no_side",
+        "strategy_version": "1.0",
+        "profile_id": "conservative",
+        "event_slug": "elon-musk-of-tweets-march-6-march-13",
+        "event_title": "Elon Musk # tweets March 6 - March 13, 2026?",
+        "bracket_label": "400-419",
+        "condition_id": "0x2c258139c85e5860a14c2d40b7020c432812828ff791a526e2482c39d71b0752",
+        "question": "Will Elon Musk post 400-419 tweets from March 6 to March 13, 2026?",
+        "signal": "TRADE",
+        "score": 92.93333333333334,
+        "entry_no_price": 0.9235,
+        "exit_no_price": 1.0,
+        "stake": 50.0,
+        "pnl": 4.14,
+        "status": "WON",
+        "reasons": [
+          "NO price 0.92 \u2014 good upside potential.",
+          "24.0h until expiry \u2014 approaching deadline.",
+          "TRADE: NO price and expiry both favorable."
+        ],
+        "provenance": "REAL_HISTORICAL_REPLAY",
+        "price_source": "real_historical"
+      },
+      {
+        "strategy_id": "no_side",
+        "strategy_version": "1.0",
+        "profile_id": "moderate",
+        "event_slug": "elon-musk-of-tweets-march-6-march-13",
+        "event_title": "Elon Musk # tweets March 6 - March 13, 2026?",
+        "bracket_label": "400-419",
+        "condition_id": "0x2c258139c85e5860a14c2d40b7020c432812828ff791a526e2482c39d71b0752",
+        "question": "Will Elon Musk post 400-419 tweets from March 6 to March 13, 2026?",
+        "signal": "TRADE",
+        "score": 95.76,
+        "entry_no_price": 0.9235,
+        "exit_no_price": 1.0,
+        "stake": 100.0,
+        "pnl": 8.28,
+        "status": "WON",
+        "reasons": [
+          "NO price 0.92 \u2014 good upside potential.",
+          "24.0h until expiry \u2014 approaching deadline.",
+          "TRADE: NO price and expiry both favorable."
+        ],
+        "provenance": "REAL_HISTORICAL_REPLAY",
+        "price_source": "real_historical"
+      },
+      {
+        "strategy_id": "no_side",
+        "strategy_version": "1.0",
+        "profile_id": "moderate",
+        "event_slug": "elon-musk-of-tweets-march-6-march-13",
+        "event_title": "Elon Musk # tweets March 6 - March 13, 2026?",
+        "bracket_label": "340-359",
+        "condition_id": "0x23182cf066e5f6e63579c6928ee496f24b19cf2ac9da701b2539fe7e220e05bd",
+        "question": "Will Elon Musk post 340-359 tweets from March 6 to March 13, 2026?",
+        "signal": "TRADE",
+        "score": 70.16,
+        "entry_no_price": 0.7635,
+        "exit_no_price": 1.0,
+        "stake": 100.0,
+        "pnl": 30.98,
+        "status": "WON",
+        "reasons": [
+          "NO price 0.76 \u2014 good upside potential.",
+          "24.0h until expiry \u2014 approaching deadline.",
+          "TRADE: NO price and expiry both favorable."
+        ],
+        "provenance": "REAL_HISTORICAL_REPLAY",
+        "price_source": "real_historical"
+      },
+      {
+        "strategy_id": "no_side",
+        "strategy_version": "1.0",
+        "profile_id": "moderate",
+        "event_slug": "elon-musk-of-tweets-march-6-march-13",
+        "event_title": "Elon Musk # tweets March 6 - March 13, 2026?",
+        "bracket_label": "380-399",
+        "condition_id": "0xa6880c17f894783ba6140debfe730805b210ca2c587b265d35ef7976ebea1788",
+        "question": "Will Elon Musk post 380-399 tweets from March 6 to March 13, 2026?",
+        "signal": "TRADE",
+        "score": 70.16,
+        "entry_no_price": 0.7635,
+        "exit_no_price": 1.0,
+        "stake": 100.0,
+        "pnl": 30.98,
+        "status": "WON",
+        "reasons": [
+          "NO price 0.76 \u2014 good upside potential.",
+          "24.0h until expiry \u2014 approaching deadline.",
+          "TRADE: NO price and expiry both favorable."
+        ],
+        "provenance": "REAL_HISTORICAL_REPLAY",
+        "price_source": "real_historical"
+      },
+      {
+        "strategy_id": "no_side",
+        "strategy_version": "1.0",
+        "profile_id": "aggressive",
+        "event_slug": "elon-musk-of-tweets-march-6-march-13",
+        "event_title": "Elon Musk # tweets March 6 - March 13, 2026?",
+        "bracket_label": "400-419",
+        "condition_id": "0x2c258139c85e5860a14c2d40b7020c432812828ff791a526e2482c39d71b0752",
+        "question": "Will Elon Musk post 400-419 tweets from March 6 to March 13, 2026?",
+        "signal": "TRADE",
+        "score": 96.97142857142858,
+        "entry_no_price": 0.9235,
+        "exit_no_price": 1.0,
+        "stake": 200.0,
+        "pnl": 16.57,
+        "status": "WON",
+        "reasons": [
+          "NO price 0.92 \u2014 good upside potential.",
+          "24.0h until expiry \u2014 approaching deadline.",
+          "TRADE: NO price and expiry both favorable."
+        ],
+        "provenance": "REAL_HISTORICAL_REPLAY",
+        "price_source": "real_historical"
+      },
+      {
+        "strategy_id": "no_side",
+        "strategy_version": "1.0",
+        "profile_id": "aggressive",
+        "event_slug": "elon-musk-of-tweets-march-6-march-13",
+        "event_title": "Elon Musk # tweets March 6 - March 13, 2026?",
+        "bracket_label": "340-359",
+        "condition_id": "0x23182cf066e5f6e63579c6928ee496f24b19cf2ac9da701b2539fe7e220e05bd",
+        "question": "Will Elon Musk post 340-359 tweets from March 6 to March 13, 2026?",
+        "signal": "TRADE",
+        "score": 78.68571428571428,
+        "entry_no_price": 0.7635,
+        "exit_no_price": 1.0,
+        "stake": 200.0,
+        "pnl": 61.95,
+        "status": "WON",
+        "reasons": [
+          "NO price 0.76 \u2014 good upside potential.",
+          "24.0h until expiry \u2014 approaching deadline.",
+          "TRADE: NO price and expiry both favorable."
+        ],
+        "provenance": "REAL_HISTORICAL_REPLAY",
+        "price_source": "real_historical"
+      },
+      {
+        "strategy_id": "no_side",
+        "strategy_version": "1.0",
+        "profile_id": "aggressive",
+        "event_slug": "elon-musk-of-tweets-march-6-march-13",
+        "event_title": "Elon Musk # tweets March 6 - March 13, 2026?",
+        "bracket_label": "380-399",
+        "condition_id": "0xa6880c17f894783ba6140debfe730805b210ca2c587b265d35ef7976ebea1788",
+        "question": "Will Elon Musk post 380-399 tweets from March 6 to March 13, 2026?",
+        "signal": "TRADE",
+        "score": 78.68571428571428,
+        "entry_no_price": 0.7635,
+        "exit_no_price": 1.0,
+        "stake": 200.0,
+        "pnl": 61.95,
+        "status": "WON",
+        "reasons": [
+          "NO price 0.76 \u2014 good upside potential.",
+          "24.0h until expiry \u2014 approaching deadline.",
+          "TRADE: NO price and expiry both favorable."
+        ],
+        "provenance": "REAL_HISTORICAL_REPLAY",
+        "price_source": "real_historical"
+      },
+      {
+        "strategy_id": "no_side",
+        "strategy_version": "1.0",
+        "profile_id": "aggressive",
+        "event_slug": "elon-musk-of-tweets-march-6-march-13",
+        "event_title": "Elon Musk # tweets March 6 - March 13, 2026?",
+        "bracket_label": "360-379",
+        "condition_id": "0x777809ed6f165bae0a60cc94957299627fa2ac4a5e9815e13cd02384ebc46490",
+        "question": "Will Elon Musk post 360-379 tweets from March 6 to March 13, 2026?",
+        "signal": "TRADE",
+        "score": 60.91428571428572,
+        "entry_no_price": 0.608,
+        "exit_no_price": 0.0,
+        "stake": 200.0,
+        "pnl": -200.0,
+        "status": "LOST",
+        "reasons": [
+          "NO price 0.61 \u2014 good upside potential.",
+          "24.0h until expiry \u2014 approaching deadline.",
+          "TRADE: NO price and expiry both favorable."
+        ],
+        "provenance": "REAL_HISTORICAL_REPLAY",
+        "price_source": "real_historical"
+      },
+      {
+        "strategy_id": "family_guarded_no",
+        "strategy_version": "0.1",
+        "profile_id": "moderate",
+        "event_slug": "elon-musk-of-tweets-march-6-march-13",
+        "event_title": "Elon Musk # tweets March 6 - March 13, 2026?",
+        "bracket_label": "400-419",
+        "condition_id": "0x2c258139c85e5860a14c2d40b7020c432812828ff791a526e2482c39d71b0752",
+        "question": "Will Elon Musk post 400-419 tweets from March 6 to March 13, 2026?",
+        "signal": "TRADE",
+        "score": 96.46666666666667,
+        "entry_no_price": 0.9235,
+        "exit_no_price": 1.0,
+        "stake": 100.0,
+        "pnl": 8.28,
+        "status": "WON",
+        "reasons": [
+          "position=tail",
+          "Position threshold for tail: NO >= 0.65",
+          "NO price 0.92 \u2014 above tail threshold.",
+          "24.0h until expiry \u2014 approaching deadline.",
+          "TRADE: NO price and expiry favorable for tail position."
+        ],
+        "provenance": "REAL_HISTORICAL_REPLAY",
+        "price_source": "real_historical"
+      },
+      {
+        "strategy_id": "no_side",
+        "strategy_version": "1.0",
+        "profile_id": "conservative",
+        "event_slug": "donald-trump-of-truth-social-posts-march-6-march-13",
+        "event_title": "Donald Trump # Truth Social posts March 6 - March 13, 2026?",
+        "bracket_label": "120-139",
+        "condition_id": "0x9e26437e5c1e173b03ec6334b680cb6e8c047f65d97e9643c48cabf6380aa1dd",
+        "question": "Will Donald Trump post 120-139 Truth Social posts from March 6 to March 13, 2026?",
+        "signal": "TRADE",
+        "score": 88.00000000000001,
+        "entry_no_price": 0.905,
+        "exit_no_price": 1.0,
+        "stake": 50.0,
+        "pnl": 5.25,
+        "status": "WON",
+        "reasons": [
+          "NO price 0.91 \u2014 good upside potential.",
+          "24.0h until expiry \u2014 approaching deadline.",
+          "TRADE: NO price and expiry both favorable."
+        ],
+        "provenance": "REAL_HISTORICAL_REPLAY",
+        "price_source": "real_historical"
+      },
+      {
+        "strategy_id": "no_side",
+        "strategy_version": "1.0",
+        "profile_id": "conservative",
+        "event_slug": "donald-trump-of-truth-social-posts-march-6-march-13",
+        "event_title": "Donald Trump # Truth Social posts March 6 - March 13, 2026?",
+        "bracket_label": "100-119",
+        "condition_id": "0xbd80c44477af52d41bd501bd42b0be22fa7997525ec2594f54a1600cacc972b9",
+        "question": "Will Donald Trump post 100-119 Truth Social posts from March 6 to March 13, 2026?",
+        "signal": "TRADE",
+        "score": 60.0,
+        "entry_no_price": 0.8,
+        "exit_no_price": 1.0,
+        "stake": 50.0,
+        "pnl": 12.5,
+        "status": "WON",
+        "reasons": [
+          "NO price 0.80 \u2014 good upside potential.",
+          "24.0h until expiry \u2014 approaching deadline.",
+          "TRADE: NO price and expiry both favorable."
+        ],
+        "provenance": "REAL_HISTORICAL_REPLAY",
+        "price_source": "real_historical"
+      },
+      {
+        "strategy_id": "no_side",
+        "strategy_version": "1.0",
+        "profile_id": "moderate",
+        "event_slug": "donald-trump-of-truth-social-posts-march-6-march-13",
+        "event_title": "Donald Trump # Truth Social posts March 6 - March 13, 2026?",
+        "bracket_label": "120-139",
+        "condition_id": "0x9e26437e5c1e173b03ec6334b680cb6e8c047f65d97e9643c48cabf6380aa1dd",
+        "question": "Will Donald Trump post 120-139 Truth Social posts from March 6 to March 13, 2026?",
+        "signal": "TRADE",
+        "score": 92.80000000000001,
+        "entry_no_price": 0.905,
+        "exit_no_price": 1.0,
+        "stake": 100.0,
+        "pnl": 10.5,
+        "status": "WON",
+        "reasons": [
+          "NO price 0.91 \u2014 good upside potential.",
+          "24.0h until expiry \u2014 approaching deadline.",
+          "TRADE: NO price and expiry both favorable."
+        ],
+        "provenance": "REAL_HISTORICAL_REPLAY",
+        "price_source": "real_historical"
+      },
+      {
+        "strategy_id": "no_side",
+        "strategy_version": "1.0",
+        "profile_id": "moderate",
+        "event_slug": "donald-trump-of-truth-social-posts-march-6-march-13",
+        "event_title": "Donald Trump # Truth Social posts March 6 - March 13, 2026?",
+        "bracket_label": "100-119",
+        "condition_id": "0xbd80c44477af52d41bd501bd42b0be22fa7997525ec2594f54a1600cacc972b9",
+        "question": "Will Donald Trump post 100-119 Truth Social posts from March 6 to March 13, 2026?",
+        "signal": "TRADE",
+        "score": 76.00000000000001,
+        "entry_no_price": 0.8,
+        "exit_no_price": 1.0,
+        "stake": 100.0,
+        "pnl": 25.0,
+        "status": "WON",
+        "reasons": [
+          "NO price 0.80 \u2014 good upside potential.",
+          "24.0h until expiry \u2014 approaching deadline.",
+          "TRADE: NO price and expiry both favorable."
+        ],
+        "provenance": "REAL_HISTORICAL_REPLAY",
+        "price_source": "real_historical"
+      },
+      {
+        "strategy_id": "no_side",
+        "strategy_version": "1.0",
+        "profile_id": "aggressive",
+        "event_slug": "donald-trump-of-truth-social-posts-march-6-march-13",
+        "event_title": "Donald Trump # Truth Social posts March 6 - March 13, 2026?",
+        "bracket_label": "120-139",
+        "condition_id": "0x9e26437e5c1e173b03ec6334b680cb6e8c047f65d97e9643c48cabf6380aa1dd",
+        "question": "Will Donald Trump post 120-139 Truth Social posts from March 6 to March 13, 2026?",
+        "signal": "TRADE",
+        "score": 94.85714285714286,
+        "entry_no_price": 0.905,
+        "exit_no_price": 1.0,
+        "stake": 200.0,
+        "pnl": 20.99,
+        "status": "WON",
+        "reasons": [
+          "NO price 0.91 \u2014 good upside potential.",
+          "24.0h until expiry \u2014 approaching deadline.",
+          "TRADE: NO price and expiry both favorable."
+        ],
+        "provenance": "REAL_HISTORICAL_REPLAY",
+        "price_source": "real_historical"
+      },
+      {
+        "strategy_id": "no_side",
+        "strategy_version": "1.0",
+        "profile_id": "aggressive",
+        "event_slug": "donald-trump-of-truth-social-posts-march-6-march-13",
+        "event_title": "Donald Trump # Truth Social posts March 6 - March 13, 2026?",
+        "bracket_label": "100-119",
+        "condition_id": "0xbd80c44477af52d41bd501bd42b0be22fa7997525ec2594f54a1600cacc972b9",
+        "question": "Will Donald Trump post 100-119 Truth Social posts from March 6 to March 13, 2026?",
+        "signal": "TRADE",
+        "score": 82.85714285714286,
+        "entry_no_price": 0.8,
+        "exit_no_price": 1.0,
+        "stake": 200.0,
+        "pnl": 50.0,
+        "status": "WON",
+        "reasons": [
+          "NO price 0.80 \u2014 good upside potential.",
+          "24.0h until expiry \u2014 approaching deadline.",
+          "TRADE: NO price and expiry both favorable."
+        ],
+        "provenance": "REAL_HISTORICAL_REPLAY",
+        "price_source": "real_historical"
+      },
+      {
+        "strategy_id": "family_guarded_no",
+        "strategy_version": "0.1",
+        "profile_id": "moderate",
+        "event_slug": "donald-trump-of-truth-social-posts-march-6-march-13",
+        "event_title": "Donald Trump # Truth Social posts March 6 - March 13, 2026?",
+        "bracket_label": "120-139",
+        "condition_id": "0x9e26437e5c1e173b03ec6334b680cb6e8c047f65d97e9643c48cabf6380aa1dd",
+        "question": "Will Donald Trump post 120-139 Truth Social posts from March 6 to March 13, 2026?",
+        "signal": "TRADE",
+        "score": 94.0,
+        "entry_no_price": 0.905,
+        "exit_no_price": 1.0,
+        "stake": 100.0,
+        "pnl": 10.5,
+        "status": "WON",
+        "reasons": [
+          "position=tail",
+          "Position threshold for tail: NO >= 0.65",
+          "NO price 0.91 \u2014 above tail threshold.",
+          "24.0h until expiry \u2014 approaching deadline.",
+          "TRADE: NO price and expiry favorable for tail position."
+        ],
+        "provenance": "REAL_HISTORICAL_REPLAY",
+        "price_source": "real_historical"
+      },
+      {
+        "strategy_id": "family_guarded_no",
+        "strategy_version": "0.1",
+        "profile_id": "moderate",
+        "event_slug": "donald-trump-of-truth-social-posts-march-6-march-13",
+        "event_title": "Donald Trump # Truth Social posts March 6 - March 13, 2026?",
+        "bracket_label": "100-119",
+        "condition_id": "0xbd80c44477af52d41bd501bd42b0be22fa7997525ec2594f54a1600cacc972b9",
+        "question": "Will Donald Trump post 100-119 Truth Social posts from March 6 to March 13, 2026?",
+        "signal": "TRADE",
+        "score": 60.0,
+        "entry_no_price": 0.8,
+        "exit_no_price": 1.0,
+        "stake": 100.0,
+        "pnl": 25.0,
+        "status": "WON",
+        "reasons": [
+          "position=adjacent",
+          "Position threshold for adjacent: NO >= 0.80",
+          "NO price 0.80 \u2014 above adjacent threshold.",
+          "24.0h until expiry \u2014 approaching deadline.",
+          "TRADE: NO price and expiry favorable for adjacent position."
+        ],
+        "provenance": "REAL_HISTORICAL_REPLAY",
+        "price_source": "real_historical"
+      }
+    ]
+  },
+  "synthetic_smoke_test": {
+    "provenance": "SYNTHETIC_SMOKE_TEST",
+    "evidence_grade": "SMOKE_TEST_ONLY",
+    "price_source": "synthetic_anchored_on_resolution",
+    "hindsight_warning": "Synthetic prices are anchored on the actual winning bracket. 100% win rate is an artifact of this construction, not evidence of strategy edge. This data validates harness plumbing only.",
+    "families_replayed": 1,
+    "total_trades": 8,
+    "family_summaries": [
+      {
+        "event_slug": "elon-musk-of-tweets-february-10-february-17",
+        "event_title": "Elon Musk # tweets February 10 - February 17, 2026?",
+        "bracket_count": 30,
+        "winning_bracket": "240-259",
+        "end_date": "2026-02-17T17:00:00Z",
+        "price_source": "synthetic_anchored",
+        "coverage": null,
+        "strategy_results": {
+          "no_side@1.0/conservative": {
+            "trades": 2,
+            "wins": 2,
+            "losses": 0,
+            "pnl": 19.76,
+            "brackets_traded": [
+              "220-239",
+              "260-279"
+            ]
+          },
+          "no_side@1.0/moderate": {
+            "trades": 2,
+            "wins": 2,
+            "losses": 0,
+            "pnl": 39.52,
+            "brackets_traded": [
+              "220-239",
+              "260-279"
+            ]
+          },
+          "no_side@1.0/aggressive": {
+            "trades": 2,
+            "wins": 2,
+            "losses": 0,
+            "pnl": 79.04,
+            "brackets_traded": [
+              "220-239",
+              "260-279"
+            ]
+          },
+          "family_guarded_no@0.1/moderate": {
+            "trades": 2,
+            "wins": 2,
+            "losses": 0,
+            "pnl": 39.52,
+            "brackets_traded": [
+              "220-239",
+              "260-279"
+            ]
+          },
+          "family_mispricing_scan@0.1/moderate": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "pnl": 0,
+            "brackets_traded": []
+          }
+        }
+      }
+    ],
+    "aggregate_by_strategy": {
+      "family_guarded_no@0.1/moderate": {
+        "trades": 2,
+        "wins": 2,
+        "losses": 0,
+        "win_rate_pct": 100.0,
+        "pnl": 39.52,
+        "families_traded": 1,
+        "avg_entry_no_price": 0.835,
+        "max_family_concentration_pct": 100.0
+      },
+      "no_side@1.0/aggressive": {
+        "trades": 2,
+        "wins": 2,
+        "losses": 0,
+        "win_rate_pct": 100.0,
+        "pnl": 79.04,
+        "families_traded": 1,
+        "avg_entry_no_price": 0.835,
+        "max_family_concentration_pct": 100.0
+      },
+      "no_side@1.0/conservative": {
+        "trades": 2,
+        "wins": 2,
+        "losses": 0,
+        "win_rate_pct": 100.0,
+        "pnl": 19.76,
+        "families_traded": 1,
+        "avg_entry_no_price": 0.835,
+        "max_family_concentration_pct": 100.0
+      },
+      "no_side@1.0/moderate": {
+        "trades": 2,
+        "wins": 2,
+        "losses": 0,
+        "win_rate_pct": 100.0,
+        "pnl": 39.52,
+        "families_traded": 1,
+        "avg_entry_no_price": 0.835,
+        "max_family_concentration_pct": 100.0
+      }
+    },
+    "trades": [
+      {
+        "strategy_id": "no_side",
+        "strategy_version": "1.0",
+        "profile_id": "conservative",
+        "event_slug": "elon-musk-of-tweets-february-10-february-17",
+        "event_title": "Elon Musk # tweets February 10 - February 17, 2026?",
+        "bracket_label": "220-239",
+        "condition_id": "0x8be5e2483a67e35acdf7dd73473818b57cbe5b1d9a7f1e68953f6ef8d10cede2",
+        "question": "Will Elon Musk post 220-239 tweets from February 10 to February 17, 2026?",
+        "signal": "TRADE",
+        "score": 69.33333333333331,
+        "entry_no_price": 0.835,
+        "exit_no_price": 1.0,
+        "stake": 50.0,
+        "pnl": 9.88,
+        "status": "WON",
+        "reasons": [
+          "NO price 0.83 \u2014 good upside potential.",
+          "24.0h until expiry \u2014 approaching deadline.",
+          "TRADE: NO price and expiry both favorable."
+        ],
+        "provenance": "SYNTHETIC_SMOKE_TEST",
+        "price_source": "synthetic_anchored"
+      },
+      {
+        "strategy_id": "no_side",
+        "strategy_version": "1.0",
+        "profile_id": "conservative",
+        "event_slug": "elon-musk-of-tweets-february-10-february-17",
+        "event_title": "Elon Musk # tweets February 10 - February 17, 2026?",
+        "bracket_label": "260-279",
+        "condition_id": "0x6c1ca8f5007f4f9ae14ecfbf490d616501952ec828face21cd5896d123769f2d",
+        "question": "Will Elon Musk post 260-279 tweets from February 10 to February 17, 2026?",
+        "signal": "TRADE",
+        "score": 69.33333333333331,
+        "entry_no_price": 0.835,
+        "exit_no_price": 1.0,
+        "stake": 50.0,
+        "pnl": 9.88,
+        "status": "WON",
+        "reasons": [
+          "NO price 0.83 \u2014 good upside potential.",
+          "24.0h until expiry \u2014 approaching deadline.",
+          "TRADE: NO price and expiry both favorable."
+        ],
+        "provenance": "SYNTHETIC_SMOKE_TEST",
+        "price_source": "synthetic_anchored"
+      },
+      {
+        "strategy_id": "no_side",
+        "strategy_version": "1.0",
+        "profile_id": "moderate",
+        "event_slug": "elon-musk-of-tweets-february-10-february-17",
+        "event_title": "Elon Musk # tweets February 10 - February 17, 2026?",
+        "bracket_label": "220-239",
+        "condition_id": "0x8be5e2483a67e35acdf7dd73473818b57cbe5b1d9a7f1e68953f6ef8d10cede2",
+        "question": "Will Elon Musk post 220-239 tweets from February 10 to February 17, 2026?",
+        "signal": "TRADE",
+        "score": 81.6,
+        "entry_no_price": 0.835,
+        "exit_no_price": 1.0,
+        "stake": 100.0,
+        "pnl": 19.76,
+        "status": "WON",
+        "reasons": [
+          "NO price 0.83 \u2014 good upside potential.",
+          "24.0h until expiry \u2014 approaching deadline.",
+          "TRADE: NO price and expiry both favorable."
+        ],
+        "provenance": "SYNTHETIC_SMOKE_TEST",
+        "price_source": "synthetic_anchored"
+      },
+      {
+        "strategy_id": "no_side",
+        "strategy_version": "1.0",
+        "profile_id": "moderate",
+        "event_slug": "elon-musk-of-tweets-february-10-february-17",
+        "event_title": "Elon Musk # tweets February 10 - February 17, 2026?",
+        "bracket_label": "260-279",
+        "condition_id": "0x6c1ca8f5007f4f9ae14ecfbf490d616501952ec828face21cd5896d123769f2d",
+        "question": "Will Elon Musk post 260-279 tweets from February 10 to February 17, 2026?",
+        "signal": "TRADE",
+        "score": 81.6,
+        "entry_no_price": 0.835,
+        "exit_no_price": 1.0,
+        "stake": 100.0,
+        "pnl": 19.76,
+        "status": "WON",
+        "reasons": [
+          "NO price 0.83 \u2014 good upside potential.",
+          "24.0h until expiry \u2014 approaching deadline.",
+          "TRADE: NO price and expiry both favorable."
+        ],
+        "provenance": "SYNTHETIC_SMOKE_TEST",
+        "price_source": "synthetic_anchored"
+      },
+      {
+        "strategy_id": "no_side",
+        "strategy_version": "1.0",
+        "profile_id": "aggressive",
+        "event_slug": "elon-musk-of-tweets-february-10-february-17",
+        "event_title": "Elon Musk # tweets February 10 - February 17, 2026?",
+        "bracket_label": "220-239",
+        "condition_id": "0x8be5e2483a67e35acdf7dd73473818b57cbe5b1d9a7f1e68953f6ef8d10cede2",
+        "question": "Will Elon Musk post 220-239 tweets from February 10 to February 17, 2026?",
+        "signal": "TRADE",
+        "score": 86.85714285714286,
+        "entry_no_price": 0.835,
+        "exit_no_price": 1.0,
+        "stake": 200.0,
+        "pnl": 39.52,
+        "status": "WON",
+        "reasons": [
+          "NO price 0.83 \u2014 good upside potential.",
+          "24.0h until expiry \u2014 approaching deadline.",
+          "TRADE: NO price and expiry both favorable."
+        ],
+        "provenance": "SYNTHETIC_SMOKE_TEST",
+        "price_source": "synthetic_anchored"
+      },
+      {
+        "strategy_id": "no_side",
+        "strategy_version": "1.0",
+        "profile_id": "aggressive",
+        "event_slug": "elon-musk-of-tweets-february-10-february-17",
+        "event_title": "Elon Musk # tweets February 10 - February 17, 2026?",
+        "bracket_label": "260-279",
+        "condition_id": "0x6c1ca8f5007f4f9ae14ecfbf490d616501952ec828face21cd5896d123769f2d",
+        "question": "Will Elon Musk post 260-279 tweets from February 10 to February 17, 2026?",
+        "signal": "TRADE",
+        "score": 86.85714285714286,
+        "entry_no_price": 0.835,
+        "exit_no_price": 1.0,
+        "stake": 200.0,
+        "pnl": 39.52,
+        "status": "WON",
+        "reasons": [
+          "NO price 0.83 \u2014 good upside potential.",
+          "24.0h until expiry \u2014 approaching deadline.",
+          "TRADE: NO price and expiry both favorable."
+        ],
+        "provenance": "SYNTHETIC_SMOKE_TEST",
+        "price_source": "synthetic_anchored"
+      },
+      {
+        "strategy_id": "family_guarded_no",
+        "strategy_version": "0.1",
+        "profile_id": "moderate",
+        "event_slug": "elon-musk-of-tweets-february-10-february-17",
+        "event_title": "Elon Musk # tweets February 10 - February 17, 2026?",
+        "bracket_label": "220-239",
+        "condition_id": "0x8be5e2483a67e35acdf7dd73473818b57cbe5b1d9a7f1e68953f6ef8d10cede2",
+        "question": "Will Elon Musk post 220-239 tweets from February 10 to February 17, 2026?",
+        "signal": "TRADE",
+        "score": 69.33333333333331,
+        "entry_no_price": 0.835,
+        "exit_no_price": 1.0,
+        "stake": 100.0,
+        "pnl": 19.76,
+        "status": "WON",
+        "reasons": [
+          "position=adjacent",
+          "Position threshold for adjacent: NO >= 0.80",
+          "NO price 0.83 \u2014 above adjacent threshold.",
+          "24.0h until expiry \u2014 approaching deadline.",
+          "TRADE: NO price and expiry favorable for adjacent position."
+        ],
+        "provenance": "SYNTHETIC_SMOKE_TEST",
+        "price_source": "synthetic_anchored"
+      },
+      {
+        "strategy_id": "family_guarded_no",
+        "strategy_version": "0.1",
+        "profile_id": "moderate",
+        "event_slug": "elon-musk-of-tweets-february-10-february-17",
+        "event_title": "Elon Musk # tweets February 10 - February 17, 2026?",
+        "bracket_label": "260-279",
+        "condition_id": "0x6c1ca8f5007f4f9ae14ecfbf490d616501952ec828face21cd5896d123769f2d",
+        "question": "Will Elon Musk post 260-279 tweets from February 10 to February 17, 2026?",
+        "signal": "TRADE",
+        "score": 69.33333333333331,
+        "entry_no_price": 0.835,
+        "exit_no_price": 1.0,
+        "stake": 100.0,
+        "pnl": 19.76,
+        "status": "WON",
+        "reasons": [
+          "position=adjacent",
+          "Position threshold for adjacent: NO >= 0.80",
+          "NO price 0.83 \u2014 above adjacent threshold.",
+          "24.0h until expiry \u2014 approaching deadline.",
+          "TRADE: NO price and expiry favorable for adjacent position."
+        ],
+        "provenance": "SYNTHETIC_SMOKE_TEST",
+        "price_source": "synthetic_anchored"
+      }
+    ]
+  },
+  "provenance": "MIXED",
+  "evidence_grade": "REAL_BACKTEST",
   "families_replayed": 5,
-  "total_replay_trades": 32,
-  "family_summaries": [
-    {
-      "event_slug": "elon-musk-of-tweets-february-10-february-17",
-      "event_title": "Elon Musk # tweets February 10 - February 17, 2026?",
-      "bracket_count": 30,
-      "winning_bracket": "240-259",
-      "end_date": "2026-02-17T17:00:00Z",
-      "prices_synthetic": true,
-      "strategy_results": {
-        "no_side@1.0/conservative": {
-          "trades": 2,
-          "wins": 2,
-          "losses": 0,
-          "pnl": 19.76,
-          "brackets_traded": [
-            "220-239",
-            "260-279"
-          ]
-        },
-        "no_side@1.0/moderate": {
-          "trades": 2,
-          "wins": 2,
-          "losses": 0,
-          "pnl": 39.52,
-          "brackets_traded": [
-            "220-239",
-            "260-279"
-          ]
-        },
-        "no_side@1.0/aggressive": {
-          "trades": 2,
-          "wins": 2,
-          "losses": 0,
-          "pnl": 79.04,
-          "brackets_traded": [
-            "220-239",
-            "260-279"
-          ]
-        },
-        "family_guarded_no@0.1/moderate": {
-          "trades": 2,
-          "wins": 2,
-          "losses": 0,
-          "pnl": 39.52,
-          "brackets_traded": [
-            "220-239",
-            "260-279"
-          ]
-        }
-      }
-    },
-    {
-      "event_slug": "elon-musk-of-tweets-february-13-february-20",
-      "event_title": "Elon Musk # tweets February 13 - February 20, 2026?",
-      "bracket_count": 30,
-      "winning_bracket": "300-319",
-      "end_date": "2026-02-20T17:00:00Z",
-      "prices_synthetic": true,
-      "strategy_results": {
-        "no_side@1.0/conservative": {
-          "trades": 2,
-          "wins": 2,
-          "losses": 0,
-          "pnl": 23.16,
-          "brackets_traded": [
-            "280-299",
-            "320-339"
-          ]
-        },
-        "no_side@1.0/moderate": {
-          "trades": 2,
-          "wins": 2,
-          "losses": 0,
-          "pnl": 46.34,
-          "brackets_traded": [
-            "280-299",
-            "320-339"
-          ]
-        },
-        "no_side@1.0/aggressive": {
-          "trades": 2,
-          "wins": 2,
-          "losses": 0,
-          "pnl": 92.68,
-          "brackets_traded": [
-            "280-299",
-            "320-339"
-          ]
-        },
-        "family_guarded_no@0.1/moderate": {
-          "trades": 2,
-          "wins": 2,
-          "losses": 0,
-          "pnl": 46.34,
-          "brackets_traded": [
-            "280-299",
-            "320-339"
-          ]
-        }
-      }
-    },
-    {
-      "event_slug": "elon-musk-of-tweets-march-3-march-10",
-      "event_title": "Elon Musk # tweets March 3 - March 10, 2026?",
-      "bracket_count": 30,
-      "winning_bracket": "340-359",
-      "end_date": "2026-03-10T16:00:00Z",
-      "prices_synthetic": true,
-      "strategy_results": {
-        "no_side@1.0/conservative": {
-          "trades": 0,
-          "wins": 0,
-          "losses": 0,
-          "pnl": 0,
-          "brackets_traded": []
-        },
-        "no_side@1.0/moderate": {
-          "trades": 2,
-          "wins": 2,
-          "losses": 0,
-          "pnl": 50.1,
-          "brackets_traded": [
-            "320-339",
-            "360-379"
-          ]
-        },
-        "no_side@1.0/aggressive": {
-          "trades": 2,
-          "wins": 2,
-          "losses": 0,
-          "pnl": 100.18,
-          "brackets_traded": [
-            "320-339",
-            "360-379"
-          ]
-        },
-        "family_guarded_no@0.1/moderate": {
-          "trades": 0,
-          "wins": 0,
-          "losses": 0,
-          "pnl": 0,
-          "brackets_traded": []
-        }
-      }
-    },
-    {
-      "event_slug": "elon-musk-of-tweets-march-6-march-13",
-      "event_title": "Elon Musk # tweets March 6 - March 13, 2026?",
-      "bracket_count": 30,
-      "winning_bracket": "360-379",
-      "end_date": "2026-03-13T16:00:00Z",
-      "prices_synthetic": true,
-      "strategy_results": {
-        "no_side@1.0/conservative": {
-          "trades": 0,
-          "wins": 0,
-          "losses": 0,
-          "pnl": 0,
-          "brackets_traded": []
-        },
-        "no_side@1.0/moderate": {
-          "trades": 2,
-          "wins": 2,
-          "losses": 0,
-          "pnl": 51.66,
-          "brackets_traded": [
-            "340-359",
-            "380-399"
-          ]
-        },
-        "no_side@1.0/aggressive": {
-          "trades": 2,
-          "wins": 2,
-          "losses": 0,
-          "pnl": 103.34,
-          "brackets_traded": [
-            "340-359",
-            "380-399"
-          ]
-        },
-        "family_guarded_no@0.1/moderate": {
-          "trades": 0,
-          "wins": 0,
-          "losses": 0,
-          "pnl": 0,
-          "brackets_traded": []
-        }
-      }
-    },
-    {
-      "event_slug": "donald-trump-of-truth-social-posts-march-6-march-13",
-      "event_title": "Donald Trump # Truth Social posts March 6 - March 13, 2026?",
-      "bracket_count": 11,
-      "winning_bracket": "80-99",
-      "end_date": "2026-03-13T16:00:00Z",
-      "prices_synthetic": true,
-      "strategy_results": {
-        "no_side@1.0/conservative": {
-          "trades": 2,
-          "wins": 2,
-          "losses": 0,
-          "pnl": 5.66,
-          "brackets_traded": [
-            "60-79",
-            "100-119"
-          ]
-        },
-        "no_side@1.0/moderate": {
-          "trades": 2,
-          "wins": 2,
-          "losses": 0,
-          "pnl": 11.32,
-          "brackets_traded": [
-            "60-79",
-            "100-119"
-          ]
-        },
-        "no_side@1.0/aggressive": {
-          "trades": 2,
-          "wins": 2,
-          "losses": 0,
-          "pnl": 22.66,
-          "brackets_traded": [
-            "60-79",
-            "100-119"
-          ]
-        },
-        "family_guarded_no@0.1/moderate": {
-          "trades": 2,
-          "wins": 2,
-          "losses": 0,
-          "pnl": 11.32,
-          "brackets_traded": [
-            "60-79",
-            "100-119"
-          ]
-        }
-      }
-    }
-  ],
+  "total_replay_trades": 44,
+  "real_trade_count": 36,
+  "synthetic_trade_count": 8,
   "aggregate_by_strategy": {
     "family_guarded_no@0.1/moderate": {
       "trades": 6,
       "wins": 6,
       "losses": 0,
       "win_rate_pct": 100.0,
-      "pnl": 97.18,
-      "families_traded": 3
+      "pnl": 74.99,
+      "families_traded": 4,
+      "avg_entry_no_price": 0.8911,
+      "max_family_concentration_pct": 33.3
     },
     "no_side@1.0/aggressive": {
-      "trades": 10,
+      "trades": 13,
       "wins": 10,
-      "losses": 0,
-      "win_rate_pct": 100.0,
-      "pnl": 397.9,
-      "families_traded": 5
+      "losses": 3,
+      "win_rate_pct": 76.9,
+      "pnl": -139.95,
+      "families_traded": 4,
+      "avg_entry_no_price": 0.7999,
+      "max_family_concentration_pct": 30.8
     },
     "no_side@1.0/conservative": {
       "trades": 6,
       "wins": 6,
       "losses": 0,
       "win_rate_pct": 100.0,
-      "pnl": 48.58,
-      "families_traded": 3
+      "pnl": 37.5,
+      "families_traded": 4,
+      "avg_entry_no_price": 0.8911,
+      "max_family_concentration_pct": 33.3
     },
     "no_side@1.0/moderate": {
-      "trades": 10,
-      "wins": 10,
-      "losses": 0,
-      "win_rate_pct": 100.0,
-      "pnl": 198.94,
-      "families_traded": 5
+      "trades": 11,
+      "wins": 9,
+      "losses": 2,
+      "win_rate_pct": 81.8,
+      "pnl": -35.25,
+      "families_traded": 4,
+      "avg_entry_no_price": 0.835,
+      "max_family_concentration_pct": 27.3
     }
-  },
-  "trades": [
-    {
-      "strategy_id": "no_side",
-      "strategy_version": "1.0",
-      "profile_id": "conservative",
-      "event_slug": "elon-musk-of-tweets-february-10-february-17",
-      "event_title": "Elon Musk # tweets February 10 - February 17, 2026?",
-      "bracket_label": "220-239",
-      "condition_id": "0x8be5e2483a67e35acdf7dd73473818b57cbe5b1d9a7f1e68953f6ef8d10cede2",
-      "question": "Will Elon Musk post 220-239 tweets from February 10 to February 17, 2026?",
-      "signal": "TRADE",
-      "score": 69.33333333333331,
-      "entry_no_price": 0.835,
-      "exit_no_price": 1.0,
-      "stake": 50.0,
-      "pnl": 9.88,
-      "status": "WON",
-      "reasons": [
-        "NO price 0.83 \u2014 good upside potential.",
-        "24.0h until expiry \u2014 approaching deadline.",
-        "TRADE: NO price and expiry both favorable."
-      ],
-      "provenance": "SYNTHETIC_SMOKE_TEST"
-    },
-    {
-      "strategy_id": "no_side",
-      "strategy_version": "1.0",
-      "profile_id": "conservative",
-      "event_slug": "elon-musk-of-tweets-february-10-february-17",
-      "event_title": "Elon Musk # tweets February 10 - February 17, 2026?",
-      "bracket_label": "260-279",
-      "condition_id": "0x6c1ca8f5007f4f9ae14ecfbf490d616501952ec828face21cd5896d123769f2d",
-      "question": "Will Elon Musk post 260-279 tweets from February 10 to February 17, 2026?",
-      "signal": "TRADE",
-      "score": 69.33333333333331,
-      "entry_no_price": 0.835,
-      "exit_no_price": 1.0,
-      "stake": 50.0,
-      "pnl": 9.88,
-      "status": "WON",
-      "reasons": [
-        "NO price 0.83 \u2014 good upside potential.",
-        "24.0h until expiry \u2014 approaching deadline.",
-        "TRADE: NO price and expiry both favorable."
-      ],
-      "provenance": "SYNTHETIC_SMOKE_TEST"
-    },
-    {
-      "strategy_id": "no_side",
-      "strategy_version": "1.0",
-      "profile_id": "moderate",
-      "event_slug": "elon-musk-of-tweets-february-10-february-17",
-      "event_title": "Elon Musk # tweets February 10 - February 17, 2026?",
-      "bracket_label": "220-239",
-      "condition_id": "0x8be5e2483a67e35acdf7dd73473818b57cbe5b1d9a7f1e68953f6ef8d10cede2",
-      "question": "Will Elon Musk post 220-239 tweets from February 10 to February 17, 2026?",
-      "signal": "TRADE",
-      "score": 81.6,
-      "entry_no_price": 0.835,
-      "exit_no_price": 1.0,
-      "stake": 100.0,
-      "pnl": 19.76,
-      "status": "WON",
-      "reasons": [
-        "NO price 0.83 \u2014 good upside potential.",
-        "24.0h until expiry \u2014 approaching deadline.",
-        "TRADE: NO price and expiry both favorable."
-      ],
-      "provenance": "SYNTHETIC_SMOKE_TEST"
-    },
-    {
-      "strategy_id": "no_side",
-      "strategy_version": "1.0",
-      "profile_id": "moderate",
-      "event_slug": "elon-musk-of-tweets-february-10-february-17",
-      "event_title": "Elon Musk # tweets February 10 - February 17, 2026?",
-      "bracket_label": "260-279",
-      "condition_id": "0x6c1ca8f5007f4f9ae14ecfbf490d616501952ec828face21cd5896d123769f2d",
-      "question": "Will Elon Musk post 260-279 tweets from February 10 to February 17, 2026?",
-      "signal": "TRADE",
-      "score": 81.6,
-      "entry_no_price": 0.835,
-      "exit_no_price": 1.0,
-      "stake": 100.0,
-      "pnl": 19.76,
-      "status": "WON",
-      "reasons": [
-        "NO price 0.83 \u2014 good upside potential.",
-        "24.0h until expiry \u2014 approaching deadline.",
-        "TRADE: NO price and expiry both favorable."
-      ],
-      "provenance": "SYNTHETIC_SMOKE_TEST"
-    },
-    {
-      "strategy_id": "no_side",
-      "strategy_version": "1.0",
-      "profile_id": "aggressive",
-      "event_slug": "elon-musk-of-tweets-february-10-february-17",
-      "event_title": "Elon Musk # tweets February 10 - February 17, 2026?",
-      "bracket_label": "220-239",
-      "condition_id": "0x8be5e2483a67e35acdf7dd73473818b57cbe5b1d9a7f1e68953f6ef8d10cede2",
-      "question": "Will Elon Musk post 220-239 tweets from February 10 to February 17, 2026?",
-      "signal": "TRADE",
-      "score": 86.85714285714286,
-      "entry_no_price": 0.835,
-      "exit_no_price": 1.0,
-      "stake": 200.0,
-      "pnl": 39.52,
-      "status": "WON",
-      "reasons": [
-        "NO price 0.83 \u2014 good upside potential.",
-        "24.0h until expiry \u2014 approaching deadline.",
-        "TRADE: NO price and expiry both favorable."
-      ],
-      "provenance": "SYNTHETIC_SMOKE_TEST"
-    },
-    {
-      "strategy_id": "no_side",
-      "strategy_version": "1.0",
-      "profile_id": "aggressive",
-      "event_slug": "elon-musk-of-tweets-february-10-february-17",
-      "event_title": "Elon Musk # tweets February 10 - February 17, 2026?",
-      "bracket_label": "260-279",
-      "condition_id": "0x6c1ca8f5007f4f9ae14ecfbf490d616501952ec828face21cd5896d123769f2d",
-      "question": "Will Elon Musk post 260-279 tweets from February 10 to February 17, 2026?",
-      "signal": "TRADE",
-      "score": 86.85714285714286,
-      "entry_no_price": 0.835,
-      "exit_no_price": 1.0,
-      "stake": 200.0,
-      "pnl": 39.52,
-      "status": "WON",
-      "reasons": [
-        "NO price 0.83 \u2014 good upside potential.",
-        "24.0h until expiry \u2014 approaching deadline.",
-        "TRADE: NO price and expiry both favorable."
-      ],
-      "provenance": "SYNTHETIC_SMOKE_TEST"
-    },
-    {
-      "strategy_id": "family_guarded_no",
-      "strategy_version": "0.1",
-      "profile_id": "moderate",
-      "event_slug": "elon-musk-of-tweets-february-10-february-17",
-      "event_title": "Elon Musk # tweets February 10 - February 17, 2026?",
-      "bracket_label": "220-239",
-      "condition_id": "0x8be5e2483a67e35acdf7dd73473818b57cbe5b1d9a7f1e68953f6ef8d10cede2",
-      "question": "Will Elon Musk post 220-239 tweets from February 10 to February 17, 2026?",
-      "signal": "TRADE",
-      "score": 69.33333333333331,
-      "entry_no_price": 0.835,
-      "exit_no_price": 1.0,
-      "stake": 100.0,
-      "pnl": 19.76,
-      "status": "WON",
-      "reasons": [
-        "position=adjacent",
-        "Position threshold for adjacent: NO >= 0.80",
-        "NO price 0.83 \u2014 above adjacent threshold.",
-        "24.0h until expiry \u2014 approaching deadline.",
-        "TRADE: NO price and expiry favorable for adjacent position."
-      ],
-      "provenance": "SYNTHETIC_SMOKE_TEST"
-    },
-    {
-      "strategy_id": "family_guarded_no",
-      "strategy_version": "0.1",
-      "profile_id": "moderate",
-      "event_slug": "elon-musk-of-tweets-february-10-february-17",
-      "event_title": "Elon Musk # tweets February 10 - February 17, 2026?",
-      "bracket_label": "260-279",
-      "condition_id": "0x6c1ca8f5007f4f9ae14ecfbf490d616501952ec828face21cd5896d123769f2d",
-      "question": "Will Elon Musk post 260-279 tweets from February 10 to February 17, 2026?",
-      "signal": "TRADE",
-      "score": 69.33333333333331,
-      "entry_no_price": 0.835,
-      "exit_no_price": 1.0,
-      "stake": 100.0,
-      "pnl": 19.76,
-      "status": "WON",
-      "reasons": [
-        "position=adjacent",
-        "Position threshold for adjacent: NO >= 0.80",
-        "NO price 0.83 \u2014 above adjacent threshold.",
-        "24.0h until expiry \u2014 approaching deadline.",
-        "TRADE: NO price and expiry favorable for adjacent position."
-      ],
-      "provenance": "SYNTHETIC_SMOKE_TEST"
-    },
-    {
-      "strategy_id": "no_side",
-      "strategy_version": "1.0",
-      "profile_id": "conservative",
-      "event_slug": "elon-musk-of-tweets-february-13-february-20",
-      "event_title": "Elon Musk # tweets February 13 - February 20, 2026?",
-      "bracket_label": "280-299",
-      "condition_id": "0xb482d8783530f5e158b18b3ea0cc5e457337aa8f131cee54777bbd64982f5142",
-      "question": "Will Elon Musk post 280-299 tweets from February 13 to February 20, 2026?",
-      "signal": "TRADE",
-      "score": 63.17333333333331,
-      "entry_no_price": 0.8119,
-      "exit_no_price": 1.0,
-      "stake": 50.0,
-      "pnl": 11.58,
-      "status": "WON",
-      "reasons": [
-        "NO price 0.81 \u2014 good upside potential.",
-        "24.0h until expiry \u2014 approaching deadline.",
-        "TRADE: NO price and expiry both favorable."
-      ],
-      "provenance": "SYNTHETIC_SMOKE_TEST"
-    },
-    {
-      "strategy_id": "no_side",
-      "strategy_version": "1.0",
-      "profile_id": "conservative",
-      "event_slug": "elon-musk-of-tweets-february-13-february-20",
-      "event_title": "Elon Musk # tweets February 13 - February 20, 2026?",
-      "bracket_label": "320-339",
-      "condition_id": "0xd6544bb4119990c95f46bf155efccadc9cb5453961f4c644cf874d074bc10533",
-      "question": "Will Elon Musk post 320-339 tweets from February 13 to February 20, 2026?",
-      "signal": "TRADE",
-      "score": 63.17333333333331,
-      "entry_no_price": 0.8119,
-      "exit_no_price": 1.0,
-      "stake": 50.0,
-      "pnl": 11.58,
-      "status": "WON",
-      "reasons": [
-        "NO price 0.81 \u2014 good upside potential.",
-        "24.0h until expiry \u2014 approaching deadline.",
-        "TRADE: NO price and expiry both favorable."
-      ],
-      "provenance": "SYNTHETIC_SMOKE_TEST"
-    },
-    {
-      "strategy_id": "no_side",
-      "strategy_version": "1.0",
-      "profile_id": "moderate",
-      "event_slug": "elon-musk-of-tweets-february-13-february-20",
-      "event_title": "Elon Musk # tweets February 13 - February 20, 2026?",
-      "bracket_label": "280-299",
-      "condition_id": "0xb482d8783530f5e158b18b3ea0cc5e457337aa8f131cee54777bbd64982f5142",
-      "question": "Will Elon Musk post 280-299 tweets from February 13 to February 20, 2026?",
-      "signal": "TRADE",
-      "score": 77.904,
-      "entry_no_price": 0.8119,
-      "exit_no_price": 1.0,
-      "stake": 100.0,
-      "pnl": 23.17,
-      "status": "WON",
-      "reasons": [
-        "NO price 0.81 \u2014 good upside potential.",
-        "24.0h until expiry \u2014 approaching deadline.",
-        "TRADE: NO price and expiry both favorable."
-      ],
-      "provenance": "SYNTHETIC_SMOKE_TEST"
-    },
-    {
-      "strategy_id": "no_side",
-      "strategy_version": "1.0",
-      "profile_id": "moderate",
-      "event_slug": "elon-musk-of-tweets-february-13-february-20",
-      "event_title": "Elon Musk # tweets February 13 - February 20, 2026?",
-      "bracket_label": "320-339",
-      "condition_id": "0xd6544bb4119990c95f46bf155efccadc9cb5453961f4c644cf874d074bc10533",
-      "question": "Will Elon Musk post 320-339 tweets from February 13 to February 20, 2026?",
-      "signal": "TRADE",
-      "score": 77.904,
-      "entry_no_price": 0.8119,
-      "exit_no_price": 1.0,
-      "stake": 100.0,
-      "pnl": 23.17,
-      "status": "WON",
-      "reasons": [
-        "NO price 0.81 \u2014 good upside potential.",
-        "24.0h until expiry \u2014 approaching deadline.",
-        "TRADE: NO price and expiry both favorable."
-      ],
-      "provenance": "SYNTHETIC_SMOKE_TEST"
-    },
-    {
-      "strategy_id": "no_side",
-      "strategy_version": "1.0",
-      "profile_id": "aggressive",
-      "event_slug": "elon-musk-of-tweets-february-13-february-20",
-      "event_title": "Elon Musk # tweets February 13 - February 20, 2026?",
-      "bracket_label": "280-299",
-      "condition_id": "0xb482d8783530f5e158b18b3ea0cc5e457337aa8f131cee54777bbd64982f5142",
-      "question": "Will Elon Musk post 280-299 tweets from February 13 to February 20, 2026?",
-      "signal": "TRADE",
-      "score": 84.21714285714286,
-      "entry_no_price": 0.8119,
-      "exit_no_price": 1.0,
-      "stake": 200.0,
-      "pnl": 46.34,
-      "status": "WON",
-      "reasons": [
-        "NO price 0.81 \u2014 good upside potential.",
-        "24.0h until expiry \u2014 approaching deadline.",
-        "TRADE: NO price and expiry both favorable."
-      ],
-      "provenance": "SYNTHETIC_SMOKE_TEST"
-    },
-    {
-      "strategy_id": "no_side",
-      "strategy_version": "1.0",
-      "profile_id": "aggressive",
-      "event_slug": "elon-musk-of-tweets-february-13-february-20",
-      "event_title": "Elon Musk # tweets February 13 - February 20, 2026?",
-      "bracket_label": "320-339",
-      "condition_id": "0xd6544bb4119990c95f46bf155efccadc9cb5453961f4c644cf874d074bc10533",
-      "question": "Will Elon Musk post 320-339 tweets from February 13 to February 20, 2026?",
-      "signal": "TRADE",
-      "score": 84.21714285714286,
-      "entry_no_price": 0.8119,
-      "exit_no_price": 1.0,
-      "stake": 200.0,
-      "pnl": 46.34,
-      "status": "WON",
-      "reasons": [
-        "NO price 0.81 \u2014 good upside potential.",
-        "24.0h until expiry \u2014 approaching deadline.",
-        "TRADE: NO price and expiry both favorable."
-      ],
-      "provenance": "SYNTHETIC_SMOKE_TEST"
-    },
-    {
-      "strategy_id": "family_guarded_no",
-      "strategy_version": "0.1",
-      "profile_id": "moderate",
-      "event_slug": "elon-musk-of-tweets-february-13-february-20",
-      "event_title": "Elon Musk # tweets February 13 - February 20, 2026?",
-      "bracket_label": "280-299",
-      "condition_id": "0xb482d8783530f5e158b18b3ea0cc5e457337aa8f131cee54777bbd64982f5142",
-      "question": "Will Elon Musk post 280-299 tweets from February 13 to February 20, 2026?",
-      "signal": "TRADE",
-      "score": 63.17333333333331,
-      "entry_no_price": 0.8119,
-      "exit_no_price": 1.0,
-      "stake": 100.0,
-      "pnl": 23.17,
-      "status": "WON",
-      "reasons": [
-        "position=adjacent",
-        "Position threshold for adjacent: NO >= 0.80",
-        "NO price 0.81 \u2014 above adjacent threshold.",
-        "24.0h until expiry \u2014 approaching deadline.",
-        "TRADE: NO price and expiry favorable for adjacent position."
-      ],
-      "provenance": "SYNTHETIC_SMOKE_TEST"
-    },
-    {
-      "strategy_id": "family_guarded_no",
-      "strategy_version": "0.1",
-      "profile_id": "moderate",
-      "event_slug": "elon-musk-of-tweets-february-13-february-20",
-      "event_title": "Elon Musk # tweets February 13 - February 20, 2026?",
-      "bracket_label": "320-339",
-      "condition_id": "0xd6544bb4119990c95f46bf155efccadc9cb5453961f4c644cf874d074bc10533",
-      "question": "Will Elon Musk post 320-339 tweets from February 13 to February 20, 2026?",
-      "signal": "TRADE",
-      "score": 63.17333333333331,
-      "entry_no_price": 0.8119,
-      "exit_no_price": 1.0,
-      "stake": 100.0,
-      "pnl": 23.17,
-      "status": "WON",
-      "reasons": [
-        "position=adjacent",
-        "Position threshold for adjacent: NO >= 0.80",
-        "NO price 0.81 \u2014 above adjacent threshold.",
-        "24.0h until expiry \u2014 approaching deadline.",
-        "TRADE: NO price and expiry favorable for adjacent position."
-      ],
-      "provenance": "SYNTHETIC_SMOKE_TEST"
-    },
-    {
-      "strategy_id": "no_side",
-      "strategy_version": "1.0",
-      "profile_id": "moderate",
-      "event_slug": "elon-musk-of-tweets-march-3-march-10",
-      "event_title": "Elon Musk # tweets March 3 - March 10, 2026?",
-      "bracket_label": "320-339",
-      "condition_id": "0xe975cd782188ca5750299cdc32108ac3b7a2987e3aa37162780ccd2ce176f72a",
-      "question": "Will Elon Musk post 320-339 tweets from March 3 to March 10, 2026?",
-      "signal": "TRADE",
-      "score": 75.952,
-      "entry_no_price": 0.7997,
-      "exit_no_price": 1.0,
-      "stake": 100.0,
-      "pnl": 25.05,
-      "status": "WON",
-      "reasons": [
-        "NO price 0.80 \u2014 good upside potential.",
-        "24.0h until expiry \u2014 approaching deadline.",
-        "TRADE: NO price and expiry both favorable."
-      ],
-      "provenance": "SYNTHETIC_SMOKE_TEST"
-    },
-    {
-      "strategy_id": "no_side",
-      "strategy_version": "1.0",
-      "profile_id": "moderate",
-      "event_slug": "elon-musk-of-tweets-march-3-march-10",
-      "event_title": "Elon Musk # tweets March 3 - March 10, 2026?",
-      "bracket_label": "360-379",
-      "condition_id": "0x7a0317189d04b35c0607ccf0dc926e620dfda297d4e80c35e909b91f28205d96",
-      "question": "Will Elon Musk post 360-379 tweets from March 3 to March 10, 2026?",
-      "signal": "TRADE",
-      "score": 75.952,
-      "entry_no_price": 0.7997,
-      "exit_no_price": 1.0,
-      "stake": 100.0,
-      "pnl": 25.05,
-      "status": "WON",
-      "reasons": [
-        "NO price 0.80 \u2014 good upside potential.",
-        "24.0h until expiry \u2014 approaching deadline.",
-        "TRADE: NO price and expiry both favorable."
-      ],
-      "provenance": "SYNTHETIC_SMOKE_TEST"
-    },
-    {
-      "strategy_id": "no_side",
-      "strategy_version": "1.0",
-      "profile_id": "aggressive",
-      "event_slug": "elon-musk-of-tweets-march-3-march-10",
-      "event_title": "Elon Musk # tweets March 3 - March 10, 2026?",
-      "bracket_label": "320-339",
-      "condition_id": "0xe975cd782188ca5750299cdc32108ac3b7a2987e3aa37162780ccd2ce176f72a",
-      "question": "Will Elon Musk post 320-339 tweets from March 3 to March 10, 2026?",
-      "signal": "TRADE",
-      "score": 82.82285714285715,
-      "entry_no_price": 0.7997,
-      "exit_no_price": 1.0,
-      "stake": 200.0,
-      "pnl": 50.09,
-      "status": "WON",
-      "reasons": [
-        "NO price 0.80 \u2014 good upside potential.",
-        "24.0h until expiry \u2014 approaching deadline.",
-        "TRADE: NO price and expiry both favorable."
-      ],
-      "provenance": "SYNTHETIC_SMOKE_TEST"
-    },
-    {
-      "strategy_id": "no_side",
-      "strategy_version": "1.0",
-      "profile_id": "aggressive",
-      "event_slug": "elon-musk-of-tweets-march-3-march-10",
-      "event_title": "Elon Musk # tweets March 3 - March 10, 2026?",
-      "bracket_label": "360-379",
-      "condition_id": "0x7a0317189d04b35c0607ccf0dc926e620dfda297d4e80c35e909b91f28205d96",
-      "question": "Will Elon Musk post 360-379 tweets from March 3 to March 10, 2026?",
-      "signal": "TRADE",
-      "score": 82.82285714285715,
-      "entry_no_price": 0.7997,
-      "exit_no_price": 1.0,
-      "stake": 200.0,
-      "pnl": 50.09,
-      "status": "WON",
-      "reasons": [
-        "NO price 0.80 \u2014 good upside potential.",
-        "24.0h until expiry \u2014 approaching deadline.",
-        "TRADE: NO price and expiry both favorable."
-      ],
-      "provenance": "SYNTHETIC_SMOKE_TEST"
-    },
-    {
-      "strategy_id": "no_side",
-      "strategy_version": "1.0",
-      "profile_id": "moderate",
-      "event_slug": "elon-musk-of-tweets-march-6-march-13",
-      "event_title": "Elon Musk # tweets March 6 - March 13, 2026?",
-      "bracket_label": "340-359",
-      "condition_id": "0x23182cf066e5f6e63579c6928ee496f24b19cf2ac9da701b2539fe7e220e05bd",
-      "question": "Will Elon Musk post 340-359 tweets from March 6 to March 13, 2026?",
-      "signal": "TRADE",
-      "score": 75.152,
-      "entry_no_price": 0.7947,
-      "exit_no_price": 1.0,
-      "stake": 100.0,
-      "pnl": 25.83,
-      "status": "WON",
-      "reasons": [
-        "NO price 0.79 \u2014 good upside potential.",
-        "24.0h until expiry \u2014 approaching deadline.",
-        "TRADE: NO price and expiry both favorable."
-      ],
-      "provenance": "SYNTHETIC_SMOKE_TEST"
-    },
-    {
-      "strategy_id": "no_side",
-      "strategy_version": "1.0",
-      "profile_id": "moderate",
-      "event_slug": "elon-musk-of-tweets-march-6-march-13",
-      "event_title": "Elon Musk # tweets March 6 - March 13, 2026?",
-      "bracket_label": "380-399",
-      "condition_id": "0xa6880c17f894783ba6140debfe730805b210ca2c587b265d35ef7976ebea1788",
-      "question": "Will Elon Musk post 380-399 tweets from March 6 to March 13, 2026?",
-      "signal": "TRADE",
-      "score": 75.152,
-      "entry_no_price": 0.7947,
-      "exit_no_price": 1.0,
-      "stake": 100.0,
-      "pnl": 25.83,
-      "status": "WON",
-      "reasons": [
-        "NO price 0.79 \u2014 good upside potential.",
-        "24.0h until expiry \u2014 approaching deadline.",
-        "TRADE: NO price and expiry both favorable."
-      ],
-      "provenance": "SYNTHETIC_SMOKE_TEST"
-    },
-    {
-      "strategy_id": "no_side",
-      "strategy_version": "1.0",
-      "profile_id": "aggressive",
-      "event_slug": "elon-musk-of-tweets-march-6-march-13",
-      "event_title": "Elon Musk # tweets March 6 - March 13, 2026?",
-      "bracket_label": "340-359",
-      "condition_id": "0x23182cf066e5f6e63579c6928ee496f24b19cf2ac9da701b2539fe7e220e05bd",
-      "question": "Will Elon Musk post 340-359 tweets from March 6 to March 13, 2026?",
-      "signal": "TRADE",
-      "score": 82.25142857142856,
-      "entry_no_price": 0.7947,
-      "exit_no_price": 1.0,
-      "stake": 200.0,
-      "pnl": 51.67,
-      "status": "WON",
-      "reasons": [
-        "NO price 0.79 \u2014 good upside potential.",
-        "24.0h until expiry \u2014 approaching deadline.",
-        "TRADE: NO price and expiry both favorable."
-      ],
-      "provenance": "SYNTHETIC_SMOKE_TEST"
-    },
-    {
-      "strategy_id": "no_side",
-      "strategy_version": "1.0",
-      "profile_id": "aggressive",
-      "event_slug": "elon-musk-of-tweets-march-6-march-13",
-      "event_title": "Elon Musk # tweets March 6 - March 13, 2026?",
-      "bracket_label": "380-399",
-      "condition_id": "0xa6880c17f894783ba6140debfe730805b210ca2c587b265d35ef7976ebea1788",
-      "question": "Will Elon Musk post 380-399 tweets from March 6 to March 13, 2026?",
-      "signal": "TRADE",
-      "score": 82.25142857142856,
-      "entry_no_price": 0.7947,
-      "exit_no_price": 1.0,
-      "stake": 200.0,
-      "pnl": 51.67,
-      "status": "WON",
-      "reasons": [
-        "NO price 0.79 \u2014 good upside potential.",
-        "24.0h until expiry \u2014 approaching deadline.",
-        "TRADE: NO price and expiry both favorable."
-      ],
-      "provenance": "SYNTHETIC_SMOKE_TEST"
-    },
-    {
-      "strategy_id": "no_side",
-      "strategy_version": "1.0",
-      "profile_id": "conservative",
-      "event_slug": "donald-trump-of-truth-social-posts-march-6-march-13",
-      "event_title": "Donald Trump # Truth Social posts March 6 - March 13, 2026?",
-      "bracket_label": "60-79",
-      "condition_id": "0x2f3242c0fe8bd5bc6401412ca64854cade1d855fe2b0d5dc5d4df7c2ea0a5edd",
-      "question": "Will Donald Trump post 60-79 Truth Social posts from March 6 to March 13, 2026?",
-      "signal": "TRADE",
-      "score": 99.04000000000002,
-      "entry_no_price": 0.9464,
-      "exit_no_price": 1.0,
-      "stake": 50.0,
-      "pnl": 2.83,
-      "status": "WON",
-      "reasons": [
-        "NO price 0.95 \u2014 good upside potential.",
-        "24.0h until expiry \u2014 approaching deadline.",
-        "TRADE: NO price and expiry both favorable."
-      ],
-      "provenance": "SYNTHETIC_SMOKE_TEST"
-    },
-    {
-      "strategy_id": "no_side",
-      "strategy_version": "1.0",
-      "profile_id": "conservative",
-      "event_slug": "donald-trump-of-truth-social-posts-march-6-march-13",
-      "event_title": "Donald Trump # Truth Social posts March 6 - March 13, 2026?",
-      "bracket_label": "100-119",
-      "condition_id": "0xbd80c44477af52d41bd501bd42b0be22fa7997525ec2594f54a1600cacc972b9",
-      "question": "Will Donald Trump post 100-119 Truth Social posts from March 6 to March 13, 2026?",
-      "signal": "TRADE",
-      "score": 99.04000000000002,
-      "entry_no_price": 0.9464,
-      "exit_no_price": 1.0,
-      "stake": 50.0,
-      "pnl": 2.83,
-      "status": "WON",
-      "reasons": [
-        "NO price 0.95 \u2014 good upside potential.",
-        "24.0h until expiry \u2014 approaching deadline.",
-        "TRADE: NO price and expiry both favorable."
-      ],
-      "provenance": "SYNTHETIC_SMOKE_TEST"
-    },
-    {
-      "strategy_id": "no_side",
-      "strategy_version": "1.0",
-      "profile_id": "moderate",
-      "event_slug": "donald-trump-of-truth-social-posts-march-6-march-13",
-      "event_title": "Donald Trump # Truth Social posts March 6 - March 13, 2026?",
-      "bracket_label": "60-79",
-      "condition_id": "0x2f3242c0fe8bd5bc6401412ca64854cade1d855fe2b0d5dc5d4df7c2ea0a5edd",
-      "question": "Will Donald Trump post 60-79 Truth Social posts from March 6 to March 13, 2026?",
-      "signal": "TRADE",
-      "score": 99.424,
-      "entry_no_price": 0.9464,
-      "exit_no_price": 1.0,
-      "stake": 100.0,
-      "pnl": 5.66,
-      "status": "WON",
-      "reasons": [
-        "NO price 0.95 \u2014 good upside potential.",
-        "24.0h until expiry \u2014 approaching deadline.",
-        "TRADE: NO price and expiry both favorable."
-      ],
-      "provenance": "SYNTHETIC_SMOKE_TEST"
-    },
-    {
-      "strategy_id": "no_side",
-      "strategy_version": "1.0",
-      "profile_id": "moderate",
-      "event_slug": "donald-trump-of-truth-social-posts-march-6-march-13",
-      "event_title": "Donald Trump # Truth Social posts March 6 - March 13, 2026?",
-      "bracket_label": "100-119",
-      "condition_id": "0xbd80c44477af52d41bd501bd42b0be22fa7997525ec2594f54a1600cacc972b9",
-      "question": "Will Donald Trump post 100-119 Truth Social posts from March 6 to March 13, 2026?",
-      "signal": "TRADE",
-      "score": 99.424,
-      "entry_no_price": 0.9464,
-      "exit_no_price": 1.0,
-      "stake": 100.0,
-      "pnl": 5.66,
-      "status": "WON",
-      "reasons": [
-        "NO price 0.95 \u2014 good upside potential.",
-        "24.0h until expiry \u2014 approaching deadline.",
-        "TRADE: NO price and expiry both favorable."
-      ],
-      "provenance": "SYNTHETIC_SMOKE_TEST"
-    },
-    {
-      "strategy_id": "no_side",
-      "strategy_version": "1.0",
-      "profile_id": "aggressive",
-      "event_slug": "donald-trump-of-truth-social-posts-march-6-march-13",
-      "event_title": "Donald Trump # Truth Social posts March 6 - March 13, 2026?",
-      "bracket_label": "60-79",
-      "condition_id": "0x2f3242c0fe8bd5bc6401412ca64854cade1d855fe2b0d5dc5d4df7c2ea0a5edd",
-      "question": "Will Donald Trump post 60-79 Truth Social posts from March 6 to March 13, 2026?",
-      "signal": "TRADE",
-      "score": 99.58857142857144,
-      "entry_no_price": 0.9464,
-      "exit_no_price": 1.0,
-      "stake": 200.0,
-      "pnl": 11.33,
-      "status": "WON",
-      "reasons": [
-        "NO price 0.95 \u2014 good upside potential.",
-        "24.0h until expiry \u2014 approaching deadline.",
-        "TRADE: NO price and expiry both favorable."
-      ],
-      "provenance": "SYNTHETIC_SMOKE_TEST"
-    },
-    {
-      "strategy_id": "no_side",
-      "strategy_version": "1.0",
-      "profile_id": "aggressive",
-      "event_slug": "donald-trump-of-truth-social-posts-march-6-march-13",
-      "event_title": "Donald Trump # Truth Social posts March 6 - March 13, 2026?",
-      "bracket_label": "100-119",
-      "condition_id": "0xbd80c44477af52d41bd501bd42b0be22fa7997525ec2594f54a1600cacc972b9",
-      "question": "Will Donald Trump post 100-119 Truth Social posts from March 6 to March 13, 2026?",
-      "signal": "TRADE",
-      "score": 99.58857142857144,
-      "entry_no_price": 0.9464,
-      "exit_no_price": 1.0,
-      "stake": 200.0,
-      "pnl": 11.33,
-      "status": "WON",
-      "reasons": [
-        "NO price 0.95 \u2014 good upside potential.",
-        "24.0h until expiry \u2014 approaching deadline.",
-        "TRADE: NO price and expiry both favorable."
-      ],
-      "provenance": "SYNTHETIC_SMOKE_TEST"
-    },
-    {
-      "strategy_id": "family_guarded_no",
-      "strategy_version": "0.1",
-      "profile_id": "moderate",
-      "event_slug": "donald-trump-of-truth-social-posts-march-6-march-13",
-      "event_title": "Donald Trump # Truth Social posts March 6 - March 13, 2026?",
-      "bracket_label": "60-79",
-      "condition_id": "0x2f3242c0fe8bd5bc6401412ca64854cade1d855fe2b0d5dc5d4df7c2ea0a5edd",
-      "question": "Will Donald Trump post 60-79 Truth Social posts from March 6 to March 13, 2026?",
-      "signal": "TRADE",
-      "score": 99.04000000000002,
-      "entry_no_price": 0.9464,
-      "exit_no_price": 1.0,
-      "stake": 100.0,
-      "pnl": 5.66,
-      "status": "WON",
-      "reasons": [
-        "position=adjacent",
-        "Position threshold for adjacent: NO >= 0.80",
-        "NO price 0.95 \u2014 above adjacent threshold.",
-        "24.0h until expiry \u2014 approaching deadline.",
-        "TRADE: NO price and expiry favorable for adjacent position."
-      ],
-      "provenance": "SYNTHETIC_SMOKE_TEST"
-    },
-    {
-      "strategy_id": "family_guarded_no",
-      "strategy_version": "0.1",
-      "profile_id": "moderate",
-      "event_slug": "donald-trump-of-truth-social-posts-march-6-march-13",
-      "event_title": "Donald Trump # Truth Social posts March 6 - March 13, 2026?",
-      "bracket_label": "100-119",
-      "condition_id": "0xbd80c44477af52d41bd501bd42b0be22fa7997525ec2594f54a1600cacc972b9",
-      "question": "Will Donald Trump post 100-119 Truth Social posts from March 6 to March 13, 2026?",
-      "signal": "TRADE",
-      "score": 99.04000000000002,
-      "entry_no_price": 0.9464,
-      "exit_no_price": 1.0,
-      "stake": 100.0,
-      "pnl": 5.66,
-      "status": "WON",
-      "reasons": [
-        "position=adjacent",
-        "Position threshold for adjacent: NO >= 0.80",
-        "NO price 0.95 \u2014 above adjacent threshold.",
-        "24.0h until expiry \u2014 approaching deadline.",
-        "TRADE: NO price and expiry favorable for adjacent position."
-      ],
-      "provenance": "SYNTHETIC_SMOKE_TEST"
-    }
-  ]
+  }
 }
