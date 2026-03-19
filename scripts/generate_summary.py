@@ -949,6 +949,139 @@ def build_count_model_estimates(data_dir, families_lookup):
     }
 
 
+def build_strategy_comparison(data_dir, families_lookup):
+    """Build per-strategy+profile comparison metrics.
+
+    For each strategy+profile combo, computes:
+    - total trades opened, open/closed counts
+    - open exposure, realized pnl
+    - win rate, max family concentration %
+    - max position concentration %
+    - average stake, average time to resolution
+    - unique families traded
+    - risk blocks triggered (from logs, approximate)
+    - simple risk-adjusted research score
+    """
+    ledger_dir = os.path.join(data_dir, "ledger")
+    ledger_files = sorted(glob.glob(os.path.join(ledger_dir, "ledger_*.json")))
+
+    strategies = {}
+
+    for lf in ledger_files:
+        # Parse strategy+profile from filename: ledger_{strategy}_{profile}.json
+        basename = os.path.basename(lf).replace("ledger_", "").replace(".json", "")
+        parts = basename.rsplit("_", 1)
+        if len(parts) != 2:
+            continue
+        strategy_id, profile_id = parts
+        label = f"{strategy_id}/{profile_id}"
+
+        try:
+            with open(lf) as f:
+                trades = json.load(f)
+        except Exception:
+            continue
+
+        open_trades = [t for t in trades if t.get("status") == "OPEN"]
+        closed_trades = [t for t in trades if t.get("status") != "OPEN"]
+        wins = [t for t in closed_trades if t.get("status") == "WON"]
+        losses = [t for t in closed_trades if t.get("status") == "LOST"]
+        expired = [t for t in closed_trades if t.get("status") == "EXPIRED"]
+
+        definitive = len(wins) + len(losses)
+        win_rate = (len(wins) / definitive * 100) if definitive else 0.0
+        realized_pnl = sum(t.get("pnl", 0) or 0 for t in closed_trades)
+        open_exposure = sum(t.get("stake", 0) for t in open_trades)
+
+        # Family concentration
+        by_family = defaultdict(float)
+        for t in open_trades:
+            by_family[t.get("event_slug", "unknown")] += t.get("stake", 0)
+        max_family_exposure = max(by_family.values()) if by_family else 0
+        max_family_pct = round(
+            (max_family_exposure / open_exposure * 100) if open_exposure > 0 else 0, 1
+        )
+
+        # Position concentration
+        by_position = defaultdict(int)
+        for t in open_trades:
+            slug = t.get("event_slug", "")
+            bracket = t.get("bracket_label", "")
+            family = families_lookup.get(slug, [])
+            pos = classify_bracket_position(bracket, family) if family else "unknown"
+            by_position[pos] += 1
+        max_position_count = max(by_position.values()) if by_position else 0
+        total_open = len(open_trades)
+        max_position_pct = round(
+            (max_position_count / total_open * 100) if total_open > 0 else 0, 1
+        )
+
+        # Average stake
+        all_stakes = [t.get("stake", 0) for t in trades if t.get("stake")]
+        avg_stake = round(sum(all_stakes) / len(all_stakes), 2) if all_stakes else 0
+
+        # Average time to resolution
+        resolution_hours = []
+        for t in closed_trades:
+            entry = t.get("entry_time")
+            exit_t = t.get("exit_time")
+            if entry and exit_t:
+                h = parse_hours(entry, exit_t)
+                if h is not None and h > 0:
+                    resolution_hours.append(h)
+        avg_resolution = (
+            round(sum(resolution_hours) / len(resolution_hours), 1)
+            if resolution_hours else None
+        )
+
+        # Unique families
+        unique_families = set(t.get("event_slug", "") for t in trades if t.get("event_slug"))
+
+        # Risk-adjusted research score
+        # Simple formula: win_rate * (1 - max_family_pct/100) * min(definitive, 10) / 10
+        # Rewards: high win rate, low concentration, more data
+        evidence_factor = min(definitive, 10) / 10.0
+        concentration_penalty = 1.0 - (max_family_pct / 100.0)
+        risk_adj_score = round(win_rate * concentration_penalty * evidence_factor, 1)
+
+        strategies[label] = {
+            "strategy_id": strategy_id,
+            "profile_id": profile_id,
+            "total_trades": len(trades),
+            "open_trades": total_open,
+            "closed_trades": len(closed_trades),
+            "wins": len(wins),
+            "losses": len(losses),
+            "expired": len(expired),
+            "win_rate_pct": round(win_rate, 1),
+            "realized_pnl": round(realized_pnl, 2),
+            "open_exposure": round(open_exposure, 2),
+            "max_family_concentration_pct": max_family_pct,
+            "max_position_concentration_pct": max_position_pct,
+            "position_breakdown": dict(by_position),
+            "avg_stake": avg_stake,
+            "avg_hours_to_resolution": avg_resolution,
+            "unique_families_traded": len(unique_families),
+            "definitive_outcomes": definitive,
+            "risk_adjusted_score": risk_adj_score,
+            "provenance": "SIMULATED",
+        }
+
+    return strategies
+
+
+def load_replay_results(data_dir):
+    """Load replay results if available."""
+    replay_path = os.path.join(data_dir, "replay", "replay_results.json")
+    if not os.path.exists(replay_path):
+        return None
+    try:
+        with open(replay_path) as f:
+            return json.load(f)
+    except Exception:
+        return None
+
+
 def main():
     root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     data_dir = os.path.join(root, "data")
@@ -1161,6 +1294,12 @@ def main():
     # Build count-model estimates if families available
     count_model_estimates = build_count_model_estimates(data_dir, families_lookup)
 
+    # Build strategy comparison (Track 2: per-strategy metrics)
+    strategy_comparison = build_strategy_comparison(data_dir, families_lookup)
+
+    # Load replay results if available (Track 3: historical evidence)
+    replay_results = load_replay_results(data_dir)
+
     summary = {
         "generated_at": generated_at_iso,
         "provenance": "SIMULATED",
@@ -1176,6 +1315,8 @@ def main():
         },
         "strategy_b_progress": strategy_b,
         "research_strategies": research_strategies,
+        "strategy_comparison": strategy_comparison,
+        "replay_backfill": replay_results,
         "count_model_estimates": count_model_estimates,
         "alerts": alerts,
     }
@@ -1261,6 +1402,31 @@ def main():
     for c in strategy_b["criteria"]:
         mark = "[x]" if c["met"] else "[ ]"
         print(f"    {mark} {c['criterion']} (current: {c['current']}, target: {c['target']})")
+
+    # Print strategy comparison
+    if strategy_comparison:
+        print(f"\n  STRATEGY COMPARISON")
+        print(f"    {'Strategy':<35} {'Trades':>6} {'Open':>5} {'W':>3} {'L':>3} {'WR%':>6} "
+              f"{'PnL$':>8} {'Exp$':>7} {'MaxFam%':>8} {'RiskAdj':>8}")
+        print(f"    {'-'*90}")
+        for label, s in sorted(strategy_comparison.items()):
+            print(f"    {label:<35} {s['total_trades']:>6} {s['open_trades']:>5} "
+                  f"{s['wins']:>3} {s['losses']:>3} {s['win_rate_pct']:>5.1f}% "
+                  f"{s['realized_pnl']:>8.2f} {s['open_exposure']:>7.2f} "
+                  f"{s['max_family_concentration_pct']:>7.1f}% {s['risk_adjusted_score']:>8.1f}")
+
+    # Print replay summary
+    if replay_results:
+        print(f"\n  REPLAY BACKFILL [{replay_results.get('provenance', 'REPLAY_BACKFILL')}]")
+        print(f"    Families replayed: {replay_results.get('families_replayed', 0)}")
+        print(f"    Total replay trades: {replay_results.get('total_replay_trades', 0)}")
+        agg = replay_results.get("aggregate_by_strategy", {})
+        if agg:
+            print(f"    {'Strategy':<40} {'Trades':>6} {'W':>3} {'L':>3} {'WR%':>6} {'PnL$':>8}")
+            print(f"    {'-'*70}")
+            for label, s in sorted(agg.items()):
+                print(f"    {label:<40} {s['trades']:>6} {s['wins']:>3} "
+                      f"{s['losses']:>3} {s['win_rate_pct']:>5.1f}% {s['pnl']:>8.2f}")
 
     # Print alerts
     if alerts:
