@@ -71,6 +71,14 @@ jobs:
             git push origin main
           fi
 
+      - name: Deploy dashboard to GitHub Pages
+        if: success()
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: dashboard
+          branch: gh-pages
+          clean: true
+
       - name: Pipeline status summary
         if: always()
         run: |
