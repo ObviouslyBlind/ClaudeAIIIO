@@ -1152,43 +1152,70 @@ def main():
     now_utc = datetime.now(timezone.utc)
     generated_at_iso = now_utc.isoformat()
 
-    # Compute freshness from pipeline report if available
+    # --- Three distinct operator timestamps ---
+    # 1. last_pipeline_completed_at: from pipeline_report.json (written by
+    #    run_pipeline.sh AFTER this script runs, so within a pipeline context
+    #    this shows the PREVIOUS pipeline's timestamp — see note below)
+    # 2. last_summary_generated_at: set right now
+    # 3. last_export_at: stamped later by export_dashboard.py
+    #
+    # NOTE: When generate_summary.py runs inside the pipeline, pipeline_report.json
+    # has NOT yet been updated for the current run (it's written after this step).
+    # So last_pipeline_completed_at always reflects the PREVIOUS pipeline run.
+    # Freshness should be based on summary generation time, not pipeline report.
     pipeline_report_path = os.path.join(root, "reports", "pipeline_report.json")
     last_pipeline_end = None
+    pipeline_status = None
     if os.path.exists(pipeline_report_path):
         try:
             with open(pipeline_report_path) as f:
                 pr = json.load(f)
             last_pipeline_end = pr.get("pipeline_end")
+            pipeline_status = pr.get("status")
         except Exception:
             pass
 
     expected_cadence_minutes = 60
-    freshness_age_minutes = None
-    freshness_status = "unknown"
-    if last_pipeline_end:
+
+    # Freshness is based on SUMMARY generation time (which IS accurate),
+    # not the pipeline report (which lags by one cycle during pipeline runs).
+    # The most reliable signal: how old is the data we're summarizing?
+    # Use the newest signal file's mtime as the data freshness anchor.
+    data_freshness_anchor = generated_at_iso
+    signals_dir = os.path.join(data_dir, "signals")
+    newest_signal = sorted(glob.glob(os.path.join(signals_dir, "signals_*.json")))
+    if newest_signal:
         try:
-            for fmt in ["%Y-%m-%dT%H:%M:%SZ", "%Y-%m-%dT%H:%M:%S.%f%z",
-                        "%Y-%m-%dT%H:%M:%S%z", "%Y-%m-%dT%H:%M:%S.%f"]:
-                try:
-                    pipeline_dt = datetime.strptime(last_pipeline_end, fmt)
-                    if pipeline_dt.tzinfo is None:
-                        pipeline_dt = pipeline_dt.replace(tzinfo=timezone.utc)
-                    freshness_age_minutes = round(
-                        (now_utc - pipeline_dt).total_seconds() / 60
-                    )
-                    break
-                except ValueError:
-                    continue
-            if freshness_age_minutes is not None:
-                if freshness_age_minutes <= expected_cadence_minutes * 1.5:
-                    freshness_status = "fresh"
-                elif freshness_age_minutes <= expected_cadence_minutes * 3:
-                    freshness_status = "stale"
-                else:
-                    freshness_status = "stale"
+            sig_mtime = os.path.getmtime(newest_signal[-1])
+            sig_dt = datetime.fromtimestamp(sig_mtime, tz=timezone.utc)
+            data_freshness_anchor = sig_dt.isoformat()
         except Exception:
             pass
+
+    freshness_age_minutes = None
+    freshness_status = "unknown"
+    try:
+        for fmt in ["%Y-%m-%dT%H:%M:%S.%f%z", "%Y-%m-%dT%H:%M:%S%z",
+                    "%Y-%m-%dT%H:%M:%S.%f", "%Y-%m-%dT%H:%M:%SZ"]:
+            try:
+                anchor_dt = datetime.fromisoformat(data_freshness_anchor)
+                if anchor_dt.tzinfo is None:
+                    anchor_dt = anchor_dt.replace(tzinfo=timezone.utc)
+                freshness_age_minutes = round(
+                    (now_utc - anchor_dt).total_seconds() / 60
+                )
+                break
+            except (ValueError, TypeError):
+                continue
+        if freshness_age_minutes is not None:
+            if freshness_age_minutes <= expected_cadence_minutes * 1.5:
+                freshness_status = "fresh"
+            elif freshness_age_minutes <= expected_cadence_minutes * 3:
+                freshness_status = "stale"
+            else:
+                freshness_status = "stale"
+    except Exception:
+        pass
 
     # Definitive outcomes by bracket position
     definitive_by_position = {}
@@ -1197,14 +1224,24 @@ def main():
         definitive_by_position[pos] = tpos.get("definitive_outcomes", 0)
 
     ops_status = {
-        "last_successful_pipeline_run_at": last_pipeline_end,
-        "last_successful_summary_generated_at": generated_at_iso,
-        "last_successful_export_at": None,  # filled by export_dashboard.py
+        # Three distinct timestamps — never confuse them
+        "last_pipeline_completed_at": last_pipeline_end,
+        "last_pipeline_status": pipeline_status,
+        "last_summary_generated_at": generated_at_iso,
+        "last_export_at": None,  # filled by export_dashboard.py
+        # Freshness is based on actual data age (signal file mtime)
+        "data_freshness_anchor": data_freshness_anchor,
+        "freshness_based_on": "newest_signal_file_mtime",
         "expected_cadence_minutes": expected_cadence_minutes,
         "freshness_status": freshness_status,
         "freshness_age_minutes": freshness_age_minutes,
         "definitive_outcomes_total": totals["wins"] + totals["losses"],
         "definitive_outcomes_by_position": definitive_by_position,
+        "note": (
+            "last_pipeline_completed_at may lag by one cycle when summary "
+            "runs inside the pipeline (report written after summary step). "
+            "Freshness is based on data_freshness_anchor instead."
+        ),
     }
 
     # Build strategy readiness gate
@@ -1417,7 +1454,12 @@ def main():
 
     # Print replay summary
     if replay_results:
-        print(f"\n  REPLAY BACKFILL [{replay_results.get('provenance', 'REPLAY_BACKFILL')}]")
+        evidence_grade = replay_results.get("evidence_grade", "UNKNOWN")
+        provenance = replay_results.get("provenance", "UNKNOWN")
+        print(f"\n  REPLAY [{provenance}] — evidence grade: {evidence_grade}")
+        warning = replay_results.get("hindsight_warning")
+        if warning:
+            print(f"    ⚠  {warning}")
         print(f"    Families replayed: {replay_results.get('families_replayed', 0)}")
         print(f"    Total replay trades: {replay_results.get('total_replay_trades', 0)}")
         agg = replay_results.get("aggregate_by_strategy", {})
