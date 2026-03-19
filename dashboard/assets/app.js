@@ -832,6 +832,35 @@ function renderPositionOutcomeLine(outcomes) {
     </div>`;
 }
 
+function renderOpsStatus(ops) {
+    if (!ops) return "";
+    const freshCls = ops.freshness_status === "fresh" ? "status-won" :
+                     ops.freshness_status === "stale" ? "status-lost" : "status-expired";
+    const ageStr = ops.freshness_age_minutes != null ? ops.freshness_age_minutes + "m" : "?";
+    const pipelineTime = ops.last_successful_pipeline_run_at
+        ? formatFreshness(ops.last_successful_pipeline_run_at)
+        : "never";
+    const byPos = ops.definitive_outcomes_by_position || {};
+    return `<div style="margin-top: 8px; padding: 6px 8px; background: rgba(255,255,255,0.03); border-radius: 4px; font-size: 11px; color: var(--text-dim);">
+        <span style="margin-right: 12px;">pipeline: ${escapeHtml(pipelineTime)}</span>
+        <span style="margin-right: 12px;">freshness: <span class="${freshCls}">${escapeHtml(ops.freshness_status || "unknown")}</span> (${escapeHtml(ageStr)})</span>
+        <span style="margin-right: 12px;">cadence: ${ops.expected_cadence_minutes || "?"}m</span>
+        <span>outcomes: ${ops.definitive_outcomes_total || 0} total (hot:${byPos.hot || 0} adj:${byPos.adjacent || 0} tail:${byPos.tail || 0})</span>
+    </div>`;
+}
+
+function renderReadinessGate(gate) {
+    if (!gate) return "";
+    const readyCls = gate.position_strategy_ready ? "status-won" : "status-expired";
+    const reasons = (gate.reasons || []).map(r =>
+        `<span style="display: inline-block; margin: 1px 6px 1px 0; padding: 1px 5px; background: rgba(255,255,255,0.05); border-radius: 3px; font-size: 10px;">${escapeHtml(r)}</span>`
+    ).join("");
+    return `<div style="margin-top: 4px; font-size: 11px; color: var(--text-dim);">
+        readiness: <span class="${readyCls}">${escapeHtml(gate.evidence_label || "unknown")}</span>
+        ${reasons ? '<div style="margin-top: 3px;">' + reasons + '</div>' : ''}
+    </div>`;
+}
+
 function renderOperatorSummary(result) {
     const container = document.getElementById("operator-summary");
     if (!container) return;
@@ -891,7 +920,9 @@ function renderOperatorSummary(result) {
         </div>
         <div style="margin-top: 2px; color: var(--text-dim); font-size: 11px; font-style: italic;">
             ${escapeHtml(op.position_verdict || "")}
-        </div>`;
+        </div>
+        ${renderOpsStatus(op.ops_status)}
+        ${renderReadinessGate(op.readiness_gate)}`;
 }
 
 // ---- BRACKET POSITION BREAKDOWNS ----

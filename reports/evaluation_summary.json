@@ -1,13 +1,37 @@
 {
-  "generated_at": "2026-03-19T08:00:37.914266+00:00",
+  "generated_at": "2026-03-19T08:34:39.945215+00:00",
   "provenance": "SIMULATED",
+  "ops_status": {
+    "last_successful_pipeline_run_at": "2026-03-19T08:00:37Z",
+    "last_successful_summary_generated_at": "2026-03-19T08:34:39.945215+00:00",
+    "last_successful_export_at": null,
+    "expected_cadence_minutes": 60,
+    "freshness_status": "fresh",
+    "freshness_age_minutes": 34,
+    "definitive_outcomes_total": 0,
+    "definitive_outcomes_by_position": {
+      "hot": 0,
+      "adjacent": 0,
+      "tail": 0
+    }
+  },
+  "readiness_gate": {
+    "position_strategy_ready": false,
+    "evidence_label": "no evidence yet",
+    "reasons": [
+      "insufficient definitive outcomes (0/10)",
+      "insufficient event-cycle coverage (0/2 tracked)",
+      "insufficient profile differentiation (insufficient data)",
+      "insufficient position spread (insufficient data)"
+    ]
+  },
   "profiles": [
     {
       "profile_id": "conservative",
       "signals": {
         "trade": 3,
-        "watch": 3,
-        "skip": 274,
+        "watch": 2,
+        "skip": 275,
         "total": 280
       },
       "trades": {
@@ -29,23 +53,23 @@
     {
       "profile_id": "moderate",
       "signals": {
-        "trade": 13,
-        "watch": 7,
-        "skip": 260,
+        "trade": 8,
+        "watch": 1,
+        "skip": 271,
         "total": 280
       },
       "trades": {
-        "total_trades": 13,
-        "open_trades": 13,
+        "total_trades": 8,
+        "open_trades": 8,
         "wins": 0,
         "losses": 0,
         "expired": 0,
         "cancelled": 0,
         "win_rate_pct": 0.0,
         "realized_pnl": 0,
-        "unrealized_exposure": 1300.0,
+        "unrealized_exposure": 800.0,
         "total_pnl": 0,
-        "open_exposure": 1300.0,
+        "open_exposure": 800.0,
         "avg_hours_to_resolution": null
       },
       "provenance": "SIMULATED"
@@ -53,23 +77,23 @@
     {
       "profile_id": "aggressive",
       "signals": {
-        "trade": 20,
-        "watch": 6,
-        "skip": 254,
+        "trade": 9,
+        "watch": 1,
+        "skip": 270,
         "total": 280
       },
       "trades": {
-        "total_trades": 20,
-        "open_trades": 20,
+        "total_trades": 10,
+        "open_trades": 10,
         "wins": 0,
         "losses": 0,
         "expired": 0,
         "cancelled": 0,
         "win_rate_pct": 0.0,
         "realized_pnl": 0,
-        "unrealized_exposure": 4000.0,
+        "unrealized_exposure": 2000.0,
         "total_pnl": 0,
-        "open_exposure": 4000.0,
+        "open_exposure": 2000.0,
         "avg_hours_to_resolution": null
       },
       "provenance": "SIMULATED"
@@ -77,74 +101,98 @@
   ],
   "totals": {
     "signals_evaluated": 840,
-    "total_trades": 36,
-    "open_trades": 36,
+    "total_trades": 21,
+    "open_trades": 21,
     "wins": 0,
     "losses": 0,
     "win_rate_pct": 0.0,
     "realized_pnl": 0,
-    "unrealized_exposure": 5450.0,
+    "unrealized_exposure": 2950.0,
     "total_pnl": 0,
-    "open_exposure": 5450.0
+    "open_exposure": 2950.0
   },
   "operator_summary": {
     "total_families": 10,
     "total_brackets_evaluated": 840,
-    "active_trades": 36,
+    "active_trades": 21,
     "realized_pnl": 0,
-    "unrealized_exposure": 5450.0,
+    "unrealized_exposure": 2950.0,
     "definitive_outcomes": 0,
     "win_rate_pct": 0.0,
     "strategy_b_status": "DEFER \u2014 need more resolution data",
     "position_coverage": {
-      "hot": 2,
-      "adjacent": 14,
-      "tail": 20
+      "hot": 3,
+      "adjacent": 12,
+      "tail": 5
     },
     "position_outcomes": {
       "hot": {
-        "trades": 2,
+        "trades": 3,
         "won": 0,
         "lost": 0,
         "win_rate_pct": 0.0,
         "realized_pnl": 0.0
       },
       "adjacent": {
-        "trades": 14,
+        "trades": 13,
         "won": 0,
         "lost": 0,
         "win_rate_pct": 0.0,
         "realized_pnl": 0.0
       },
       "tail": {
-        "trades": 20,
+        "trades": 5,
         "won": 0,
         "lost": 0,
         "win_rate_pct": 0.0,
         "realized_pnl": 0.0
       }
     },
-    "position_verdict": "Only 0 definitive outcome(s) across all positions. Need at least 3 to assess performance differences."
+    "position_verdict": "Only 0 definitive outcome(s) across all positions. Need at least 3 to assess performance differences.",
+    "ops_status": {
+      "last_successful_pipeline_run_at": "2026-03-19T08:00:37Z",
+      "last_successful_summary_generated_at": "2026-03-19T08:34:39.945215+00:00",
+      "last_successful_export_at": null,
+      "expected_cadence_minutes": 60,
+      "freshness_status": "fresh",
+      "freshness_age_minutes": 34,
+      "definitive_outcomes_total": 0,
+      "definitive_outcomes_by_position": {
+        "hot": 0,
+        "adjacent": 0,
+        "tail": 0
+      }
+    },
+    "readiness_gate": {
+      "position_strategy_ready": false,
+      "evidence_label": "no evidence yet",
+      "reasons": [
+        "insufficient definitive outcomes (0/10)",
+        "insufficient event-cycle coverage (0/2 tracked)",
+        "insufficient profile differentiation (insufficient data)",
+        "insufficient position spread (insufficient data)"
+      ]
+    }
   },
   "breakdowns": {
     "signals": {
       "by_subject": {
         "musk": {
-          "trade": 15,
-          "watch": 5,
+          "trade": 17,
+          "watch": 3,
           "skip": 631
         },
         "trump": {
-          "trade": 21,
-          "watch": 11,
-          "skip": 157
+          "trade": 3,
+          "watch": 1,
+          "skip": 185
         }
       },
       "by_event": {
         "donald-trump-of-truth-social-posts-march-13-march-20": {
-          "trade": 4,
-          "watch": 2,
-          "skip": 27,
+          "trade": 3,
+          "watch": 1,
+          "skip": 29,
           "event_title": "Donald Trump # Truth Social posts March 13 - March 20, 2026?"
         },
         "donald-trump-of-truth-social-posts-march-17-march-24": {
@@ -166,8 +214,8 @@
           "event_title": "Elon Musk musk # tweets in April 2026?"
         },
         "elon-musk-of-tweets-march-13-march-20": {
-          "trade": 8,
-          "watch": 4,
+          "trade": 10,
+          "watch": 2,
           "skip": 78,
           "event_title": "Elon Musk # tweets March 13 - March 20, 2026?"
         },
@@ -196,56 +244,56 @@
           "event_title": "Elon Musk musk # tweets in March 2026?"
         },
         "what-will-trump-post-this-week-march-16-march-22": {
-          "trade": 17,
-          "watch": 9,
-          "skip": 64,
+          "trade": 0,
+          "watch": 0,
+          "skip": 90,
           "event_title": "What will Trump post this week? (March 16 - March 22)"
         }
       },
       "by_expiry": {
         "24-48h": {
-          "trade": 12,
-          "watch": 6,
-          "skip": 105
+          "trade": 13,
+          "watch": 3,
+          "skip": 107
         },
         "48-72h": {
-          "trade": 24,
-          "watch": 10,
-          "skip": 86
+          "trade": 7,
+          "watch": 1,
+          "skip": 22
         },
         "72h+": {
           "trade": 0,
           "watch": 0,
-          "skip": 597
+          "skip": 687
         }
       },
       "by_skip_reason": {
-        "price_too_high": 447,
-        "market_closed": 177,
-        "expiry_too_far": 124,
-        "price_too_low": 22,
-        "mixed_evidence": 18
+        "price_too_high": 450,
+        "market_closed": 162,
+        "expiry_too_far": 152,
+        "price_too_low": 30,
+        "mixed_evidence": 22
       }
     },
     "trades": {
       "by_subject": {
         "musk": {
-          "total": 15,
-          "open": 15,
+          "total": 17,
+          "open": 17,
           "won": 0,
           "lost": 0,
           "expired": 0,
           "realized_pnl": 0.0,
-          "unrealized_exposure": 2200.0
+          "unrealized_exposure": 2400.0
         },
         "trump": {
-          "total": 21,
-          "open": 21,
+          "total": 4,
+          "open": 4,
           "won": 0,
           "lost": 0,
           "expired": 0,
           "realized_pnl": 0.0,
-          "unrealized_exposure": 3250.0
+          "unrealized_exposure": 550.0
         }
       },
       "by_event": {
@@ -260,13 +308,13 @@
           "event_title": "Donald Trump # Truth Social posts March 13 - March 20, 2026?"
         },
         "elon-musk-of-tweets-march-13-march-20": {
-          "total": 8,
-          "open": 8,
+          "total": 10,
+          "open": 10,
           "won": 0,
           "lost": 0,
           "expired": 0,
           "realized_pnl": 0.0,
-          "unrealized_exposure": 1100.0,
+          "unrealized_exposure": 1300.0,
           "event_title": "Elon Musk # tweets March 13 - March 20, 2026?"
         },
         "elon-musk-of-tweets-march-19-march-21": {
@@ -278,73 +326,63 @@
           "realized_pnl": 0.0,
           "unrealized_exposure": 1100.0,
           "event_title": "Elon Musk # tweets March 19 - March 21, 2026?"
-        },
-        "what-will-trump-post-this-week-march-16-march-22": {
-          "total": 17,
-          "open": 17,
-          "won": 0,
-          "lost": 0,
-          "expired": 0,
-          "realized_pnl": 0.0,
-          "unrealized_exposure": 2700.0,
-          "event_title": "What will Trump post this week? (March 16 - March 22)"
         }
       }
     },
     "bracket_position": {
       "signals_by_position": {
         "hot": {
-          "trade": 2,
-          "watch": 3,
+          "trade": 3,
+          "watch": 2,
           "skip": 25
         },
         "adjacent": {
-          "trade": 14,
-          "watch": 4,
-          "skip": 39
+          "trade": 12,
+          "watch": 2,
+          "skip": 43
         },
         "tail": {
-          "trade": 20,
-          "watch": 9,
-          "skip": 724
+          "trade": 5,
+          "watch": 0,
+          "skip": 748
         }
       },
       "trades_by_position": {
         "hot": {
-          "total": 2,
-          "open": 2,
+          "total": 3,
+          "open": 3,
           "won": 0,
           "lost": 0,
           "expired": 0,
           "cancelled": 0,
           "realized_pnl": 0.0,
-          "unrealized_exposure": 400.0,
+          "unrealized_exposure": 500.0,
           "win_rate_pct": 0.0,
           "definitive_outcomes": 0,
           "avg_hours_to_resolution": null
         },
         "adjacent": {
-          "total": 14,
-          "open": 14,
+          "total": 13,
+          "open": 13,
           "won": 0,
           "lost": 0,
           "expired": 0,
           "cancelled": 0,
           "realized_pnl": 0.0,
-          "unrealized_exposure": 2000.0,
+          "unrealized_exposure": 1800.0,
           "win_rate_pct": 0.0,
           "definitive_outcomes": 0,
           "avg_hours_to_resolution": null
         },
         "tail": {
-          "total": 20,
-          "open": 20,
+          "total": 5,
+          "open": 5,
           "won": 0,
           "lost": 0,
           "expired": 0,
           "cancelled": 0,
           "realized_pnl": 0.0,
-          "unrealized_exposure": 3050.0,
+          "unrealized_exposure": 650.0,
           "win_rate_pct": 0.0,
           "definitive_outcomes": 0,
           "avg_hours_to_resolution": null
@@ -395,7 +433,7 @@
   "alerts": [
     {
       "level": "info",
-      "message": "36 open trades across all profiles"
+      "message": "21 open trades across all profiles"
     }
   ]
 }
