@@ -93,15 +93,22 @@ REOF
     fi
 fi
 
-# Step 2: Signals for all profiles
+# Step 2: Signals for all profiles (baseline no_side@1.0)
 for profile in $PROFILES; do
     run_step "signals_$profile" python "$SCRIPT_DIR/run_signals.py" --profile "$profile"
 done
 
-# Step 3: Paper trades for all profiles
+# Step 2b: Signals for research strategies
+run_step "signals_family_guarded" python "$SCRIPT_DIR/run_signals.py" --strategy family_guarded_no --profile moderate
+run_step "signals_family_mispricing" python "$SCRIPT_DIR/run_signals.py" --strategy family_mispricing_scan --profile moderate
+
+# Step 3: Paper trades for all profiles (baseline no_side@1.0)
 for profile in $PROFILES; do
     run_step "papertrade_$profile" python "$SCRIPT_DIR/run_papertrade.py" --profile "$profile"
 done
+
+# Step 3b: Paper trades for family_guarded_no (research)
+run_step "papertrade_family_guarded" python "$SCRIPT_DIR/run_papertrade.py" --strategy family_guarded_no --profile moderate
 
 # Step 4: Resolve trades
 run_step "resolve_trades" python "$SCRIPT_DIR/resolve_trades.py"
