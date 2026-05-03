@@ -4,578 +4,530 @@
     "strategy_version": "1.0",
     "strategy_description": "Original NO-side timer strategy: bet NO on bracket markets where event is unlikely by deadline.",
     "engine": "default",
-    "profile_id": "moderate",
-    "profile_description": "Balanced: standard thresholds from Phase 4.",
-    "no_price_min": 0.5,
+    "profile_id": "conservative",
+    "profile_description": "Low risk: high NO price required, short expiry, small stakes.",
+    "no_price_min": 0.6,
     "no_price_max": 0.95,
-    "no_price_trade_min": 0.7,
-    "mixed_evidence_low": 0.4,
-    "mixed_evidence_high": 0.6,
-    "max_hours_to_expiry": 72.0,
-    "default_stake": 100.0
+    "no_price_trade_min": 0.8,
+    "mixed_evidence_low": 0.35,
+    "mixed_evidence_high": 0.65,
+    "max_hours_to_expiry": 48.0,
+    "default_stake": 50.0
   },
   "input_file": "relevant_markets_20260503_140606.json",
   "results": [
-    {
-      "condition_id": "0x5f39a4f640df37a3d154bd520b380b1f73f917bd640e5579a81752b2e36426d6",
-      "question": "Will Donald Trump post 100-119 Truth Social posts from April 28 to May 5, 2026?",
-      "signal": "TRADE",
-      "reasons": [
-        "NO price 0.89 \u2014 good upside potential.",
-        "49.9h until expiry \u2014 within 3-day limit.",
-        "TRADE: NO price and expiry both favorable."
-      ],
-      "score": 80.4,
-      "no_price": 0.89,
-      "yes_price": 0.11,
-      "hours_until_expiry": 49.894772859444444,
-      "market_type": "trump_posting",
-      "event_slug": "donald-trump-of-truth-social-posts-april-28-may-5",
-      "event_title": "Donald Trump # Truth Social posts April 28 - May 5, 2026?",
-      "bracket_label": "100-119",
-      "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.812533"
-    },
-    {
-      "condition_id": "0xa547e27597ac4a46b1b8d40abc3351097850c4b831fd0744f519de21686f2043",
-      "question": "Will Elon Musk post 180-199 tweets from April 28 to May 5, 2026?",
-      "signal": "TRADE",
-      "reasons": [
-        "NO price 0.87 \u2014 good upside potential.",
-        "49.9h until expiry \u2014 within 3-day limit.",
-        "TRADE: NO price and expiry both favorable."
-      ],
-      "score": 77.04,
-      "no_price": 0.869,
-      "yes_price": 0.131,
-      "hours_until_expiry": 49.8947728575,
-      "market_type": "musk_posting",
-      "event_slug": "elon-musk-of-tweets-april-28-may-5",
-      "event_title": "Elon Musk # tweets April 28 - May 5, 2026?",
-      "bracket_label": "180-199",
-      "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.814363"
-    },
-    {
-      "condition_id": "0xf7c0303b0dd61a800a83276a711506dc6b056104f2141d49e9b915324ac9d454",
-      "question": "Will Elon Musk post 120-139 tweets from April 28 to May 5, 2026?",
-      "signal": "TRADE",
-      "reasons": [
-        "NO price 0.87 \u2014 good upside potential.",
-        "49.9h until expiry \u2014 within 3-day limit.",
-        "TRADE: NO price and expiry both favorable."
-      ],
-      "score": 76.72,
-      "no_price": 0.867,
-      "yes_price": 0.133,
-      "hours_until_expiry": 49.894772855,
-      "market_type": "musk_posting",
-      "event_slug": "elon-musk-of-tweets-april-28-may-5",
-      "event_title": "Elon Musk # tweets April 28 - May 5, 2026?",
-      "bracket_label": "120-139",
-      "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.814725"
-    },
-    {
-      "condition_id": "0xceb15a71b42a083307de719b1333ca7746927bf7aedd223ce97277adfbe77c0d",
-      "question": "Will Donald Trump post 60-79 Truth Social posts from April 28 to May 5, 2026?",
-      "signal": "TRADE",
-      "reasons": [
-        "NO price 0.72 \u2014 good upside potential.",
-        "49.9h until expiry \u2014 within 3-day limit.",
-        "TRADE: NO price and expiry both favorable."
-      ],
-      "score": 53.76000000000001,
-      "no_price": 0.7235,
-      "yes_price": 0.2765,
-      "hours_until_expiry": 49.89477285416667,
-      "market_type": "trump_posting",
-      "event_slug": "donald-trump-of-truth-social-posts-april-28-may-5",
-      "event_title": "Donald Trump # Truth Social posts April 28 - May 5, 2026?",
-      "bracket_label": "60-79",
-      "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.812829"
-    },
-    {
-      "condition_id": "0x4245fa4925d9c7244d40c6dbdd7b55545ed4bd15f6659fbce48300b42d466fe6",
-      "question": "Will Elon Musk post 160-179 tweets from April 28 to May 5, 2026?",
-      "signal": "TRADE",
-      "reasons": [
-        "NO price 0.72 \u2014 good upside potential.",
-        "49.9h until expiry \u2014 within 3-day limit.",
-        "TRADE: NO price and expiry both favorable."
-      ],
-      "score": 52.72,
-      "no_price": 0.717,
-      "yes_price": 0.283,
-      "hours_until_expiry": 49.894772853333336,
-      "market_type": "musk_posting",
-      "event_slug": "elon-musk-of-tweets-april-28-may-5",
-      "event_title": "Elon Musk # tweets April 28 - May 5, 2026?",
-      "bracket_label": "160-179",
-      "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.814874"
-    },
-    {
-      "condition_id": "0x3f74d8b0e01a81b9a3fa270d419c64ddfe8a1d36aaa724126075b04706138a82",
-      "question": "Will Trump post \"Hell\" on Truth Social this week?",
-      "signal": "SKIP",
-      "reasons": [
-        "YES price 0.43 is in the mixed-evidence zone (0.4-0.6). Too uncertain."
-      ],
-      "score": 20,
-      "no_price": 0.57,
-      "yes_price": 0.43,
-      "hours_until_expiry": -14.1052271475,
-      "market_type": "trump_posting",
-      "event_slug": "what-will-trump-post-this-week-april-27-may-3",
-      "event_title": "What will Trump post this week? (April 27 - May 3)",
-      "bracket_label": "Hell",
-      "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.811171"
-    },
-    {
-      "condition_id": "0x3b48166faf44ba7768769cb56c9559e7075d2e8fbf2204829625b226fd420f3c",
-      "question": "Will Elon Musk post 140-159 tweets from April 28 to May 5, 2026?",
-      "signal": "SKIP",
-      "reasons": [
-        "YES price 0.41 is in the mixed-evidence zone (0.4-0.6). Too uncertain."
-      ],
-      "score": 20,
-      "no_price": 0.5885,
-      "yes_price": 0.4115,
-      "hours_until_expiry": 49.894772851666666,
-      "market_type": "musk_posting",
-      "event_slug": "elon-musk-of-tweets-april-28-may-5",
-      "event_title": "Elon Musk # tweets April 28 - May 5, 2026?",
-      "bracket_label": "140-159",
-      "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.814796"
-    },
     {
       "condition_id": "0xf2b24f5d11c1e419de1405d295b6d383eef9d432d6609c9e69113aadde709b37",
       "question": "Will Elon Musk post 760-779 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
-        "Expiry in 685.9h \u2014 exceeds 72.0h max."
+        "Expiry in 685.9h \u2014 exceeds 48.0h max."
       ],
       "score": 15,
       "no_price": 0.948,
       "yes_price": 0.052,
-      "hours_until_expiry": 685.8947728508333,
+      "hours_until_expiry": 685.8947982061111,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "760-779",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.809713"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.719672"
     },
     {
       "condition_id": "0x11a78aebb5a769ff8ac6b2cb61b4d5138c4de9aa6e398197ab9d1d37a3886db9",
       "question": "Will Elon Musk post 800-839 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
-        "Expiry in 685.9h \u2014 exceeds 72.0h max."
+        "Expiry in 685.9h \u2014 exceeds 48.0h max."
       ],
       "score": 15,
       "no_price": 0.9415,
       "yes_price": 0.0585,
-      "hours_until_expiry": 685.8947728500001,
+      "hours_until_expiry": 685.8947982036111,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "800-839",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.809818"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.719780"
     },
     {
       "condition_id": "0xa5144cd6a61ad9fe20f4a095a2548cd8e5e3d30f3c378843b451f804a1e10cd9",
       "question": "Will Elon Musk post 840-879 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
-        "Expiry in 685.9h \u2014 exceeds 72.0h max."
+        "Expiry in 685.9h \u2014 exceeds 48.0h max."
       ],
       "score": 15,
       "no_price": 0.938,
       "yes_price": 0.062,
-      "hours_until_expiry": 685.8947728494445,
+      "hours_until_expiry": 685.8947982019445,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "840-879",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.809871"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.719836"
     },
     {
       "condition_id": "0x0259d891dd9a812dcabac2d1eca28de01d92980d4116f1f1c6d89083f57e6801",
       "question": "Will Elon Musk post 880-919 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
-        "Expiry in 685.9h \u2014 exceeds 72.0h max."
+        "Expiry in 685.9h \u2014 exceeds 48.0h max."
       ],
       "score": 15,
       "no_price": 0.929,
       "yes_price": 0.071,
-      "hours_until_expiry": 685.8947728486111,
+      "hours_until_expiry": 685.8947981994444,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "880-919",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.809926"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.719895"
     },
     {
       "condition_id": "0xda7e6bec00eb62d8a4cd40c2dec6c8fdf0dca05eb38f6adc09d40f20cd37d5d0",
       "question": "Will Elon Musk post 920-959 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
-        "Expiry in 685.9h \u2014 exceeds 72.0h max."
+        "Expiry in 685.9h \u2014 exceeds 48.0h max."
       ],
       "score": 15,
       "no_price": 0.937,
       "yes_price": 0.063,
-      "hours_until_expiry": 685.8947728480555,
+      "hours_until_expiry": 685.8947981980556,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "920-959",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.809980"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.719951"
     },
     {
       "condition_id": "0xc1650829f01af35069bd4a10ad606b1bbca1682aa5d2f4aa5f6fe668a0b8ed0d",
       "question": "Will Elon Musk post 960-999 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
-        "Expiry in 685.9h \u2014 exceeds 72.0h max."
+        "Expiry in 685.9h \u2014 exceeds 48.0h max."
       ],
       "score": 15,
       "no_price": 0.913,
       "yes_price": 0.087,
-      "hours_until_expiry": 685.8947728466667,
+      "hours_until_expiry": 685.8947981966667,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "960-999",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.810033"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.720007"
     },
     {
       "condition_id": "0xb4ea0b4f5d1cdbb304e97a13f98ff4ff29177cc19fc63837b8e1af1674559777",
       "question": "Will Elon Musk post 1000-1039 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
-        "Expiry in 685.9h \u2014 exceeds 72.0h max."
+        "Expiry in 685.9h \u2014 exceeds 48.0h max."
       ],
       "score": 15,
       "no_price": 0.946,
       "yes_price": 0.054,
-      "hours_until_expiry": 685.8947728458332,
+      "hours_until_expiry": 685.8947981955556,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "1000-1039",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.810083"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.720066"
     },
     {
       "condition_id": "0xae04c6c44d78799ea3f43cc65111c72a9ca2ab4fa45806f58cf808070fb400b3",
       "question": "Will Elon Musk post 1040-1079 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
-        "Expiry in 685.9h \u2014 exceeds 72.0h max."
+        "Expiry in 685.9h \u2014 exceeds 48.0h max."
       ],
       "score": 15,
       "no_price": 0.9395,
       "yes_price": 0.0605,
-      "hours_until_expiry": 685.8947728452778,
+      "hours_until_expiry": 685.8947981941666,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "1040-1079",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.810158"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.720120"
     },
     {
       "condition_id": "0x46dbccb9e4fc23b0b59332c8debb45d3f79fc19797bc6d399333f8b1e00a3111",
       "question": "Will Elon Musk post 1080-1119 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
-        "Expiry in 685.9h \u2014 exceeds 72.0h max."
+        "Expiry in 685.9h \u2014 exceeds 48.0h max."
       ],
       "score": 15,
       "no_price": 0.946,
       "yes_price": 0.054,
-      "hours_until_expiry": 685.8947728444444,
+      "hours_until_expiry": 685.8947981930555,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "1080-1119",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.810215"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.720213"
     },
     {
       "condition_id": "0x0f29557c8b41eb66af089878e3e79b9c4339c2dcace4729cf52aea6e21bec3d6",
       "question": "Will Elon Musk post 1120-1159 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
-        "Expiry in 685.9h \u2014 exceeds 72.0h max."
+        "Expiry in 685.9h \u2014 exceeds 48.0h max."
       ],
       "score": 15,
       "no_price": 0.9495,
       "yes_price": 0.0505,
-      "hours_until_expiry": 685.8947728438889,
+      "hours_until_expiry": 685.8947981916667,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "1120-1159",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.810267"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.720269"
+    },
+    {
+      "condition_id": "0x5f39a4f640df37a3d154bd520b380b1f73f917bd640e5579a81752b2e36426d6",
+      "question": "Will Donald Trump post 100-119 Truth Social posts from April 28 to May 5, 2026?",
+      "signal": "SKIP",
+      "reasons": [
+        "Expiry in 49.9h \u2014 exceeds 48.0h max."
+      ],
+      "score": 15,
+      "no_price": 0.89,
+      "yes_price": 0.11,
+      "hours_until_expiry": 49.89479819027778,
+      "market_type": "trump_posting",
+      "event_slug": "donald-trump-of-truth-social-posts-april-28-may-5",
+      "event_title": "Donald Trump # Truth Social posts April 28 - May 5, 2026?",
+      "bracket_label": "100-119",
+      "strategy_id": "no_side",
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.722647"
+    },
+    {
+      "condition_id": "0xceb15a71b42a083307de719b1333ca7746927bf7aedd223ce97277adfbe77c0d",
+      "question": "Will Donald Trump post 60-79 Truth Social posts from April 28 to May 5, 2026?",
+      "signal": "SKIP",
+      "reasons": [
+        "Expiry in 49.9h \u2014 exceeds 48.0h max."
+      ],
+      "score": 15,
+      "no_price": 0.7235,
+      "yes_price": 0.2765,
+      "hours_until_expiry": 49.89479818916667,
+      "market_type": "trump_posting",
+      "event_slug": "donald-trump-of-truth-social-posts-april-28-may-5",
+      "event_title": "Donald Trump # Truth Social posts April 28 - May 5, 2026?",
+      "bracket_label": "60-79",
+      "strategy_id": "no_side",
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.722916"
+    },
+    {
+      "condition_id": "0xa547e27597ac4a46b1b8d40abc3351097850c4b831fd0744f519de21686f2043",
+      "question": "Will Elon Musk post 180-199 tweets from April 28 to May 5, 2026?",
+      "signal": "SKIP",
+      "reasons": [
+        "Expiry in 49.9h \u2014 exceeds 48.0h max."
+      ],
+      "score": 15,
+      "no_price": 0.869,
+      "yes_price": 0.131,
+      "hours_until_expiry": 49.89479818777778,
+      "market_type": "musk_posting",
+      "event_slug": "elon-musk-of-tweets-april-28-may-5",
+      "event_title": "Elon Musk # tweets April 28 - May 5, 2026?",
+      "bracket_label": "180-199",
+      "strategy_id": "no_side",
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.723956"
+    },
+    {
+      "condition_id": "0xf7c0303b0dd61a800a83276a711506dc6b056104f2141d49e9b915324ac9d454",
+      "question": "Will Elon Musk post 120-139 tweets from April 28 to May 5, 2026?",
+      "signal": "SKIP",
+      "reasons": [
+        "Expiry in 49.9h \u2014 exceeds 48.0h max."
+      ],
+      "score": 15,
+      "no_price": 0.867,
+      "yes_price": 0.133,
+      "hours_until_expiry": 49.89479818555556,
+      "market_type": "musk_posting",
+      "event_slug": "elon-musk-of-tweets-april-28-may-5",
+      "event_title": "Elon Musk # tweets April 28 - May 5, 2026?",
+      "bracket_label": "120-139",
+      "strategy_id": "no_side",
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.724251"
+    },
+    {
+      "condition_id": "0x4245fa4925d9c7244d40c6dbdd7b55545ed4bd15f6659fbce48300b42d466fe6",
+      "question": "Will Elon Musk post 160-179 tweets from April 28 to May 5, 2026?",
+      "signal": "SKIP",
+      "reasons": [
+        "Expiry in 49.9h \u2014 exceeds 48.0h max."
+      ],
+      "score": 15,
+      "no_price": 0.717,
+      "yes_price": 0.283,
+      "hours_until_expiry": 49.89479818416667,
+      "market_type": "musk_posting",
+      "event_slug": "elon-musk-of-tweets-april-28-may-5",
+      "event_title": "Elon Musk # tweets April 28 - May 5, 2026?",
+      "bracket_label": "160-179",
+      "strategy_id": "no_side",
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.724357"
     },
     {
       "condition_id": "0x62da72344f4f9eae7b05a0b8c59e33a61c8fa879237d6b2946b0922136804621",
       "question": "Will Donald Trump post 60-79 Truth Social posts from May 1 to May 8, 2026?",
       "signal": "SKIP",
       "reasons": [
-        "Expiry in 121.9h \u2014 exceeds 72.0h max."
+        "Expiry in 121.9h \u2014 exceeds 48.0h max."
       ],
       "score": 15,
       "no_price": 0.925,
       "yes_price": 0.075,
-      "hours_until_expiry": 121.89477284305556,
+      "hours_until_expiry": 121.89479818305556,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-may-1-may-8",
       "event_title": "Donald Trump # Truth Social posts May 1 - May 8, 2026?",
       "bracket_label": "60-79",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.815086"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.724509"
     },
     {
       "condition_id": "0xf8e22371e68fba617a262df549c022f884d7f629969f074de2f3c1ea102dfa3c",
       "question": "Will Donald Trump post 160-179 Truth Social posts from May 1 to May 8, 2026?",
       "signal": "SKIP",
       "reasons": [
-        "Expiry in 121.9h \u2014 exceeds 72.0h max."
+        "Expiry in 121.9h \u2014 exceeds 48.0h max."
       ],
       "score": 15,
       "no_price": 0.94,
       "yes_price": 0.06,
-      "hours_until_expiry": 121.89477284222222,
+      "hours_until_expiry": 121.89479818194445,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-may-1-may-8",
       "event_title": "Donald Trump # Truth Social posts May 1 - May 8, 2026?",
       "bracket_label": "160-179",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.815187"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.724561"
     },
     {
       "condition_id": "0x49197e04df364c41d6d4fa3d752e1854ac320cd2e5414c7ff9e6e8a879c671d8",
       "question": "Will Donald Trump post 80-99 Truth Social posts from May 1 to May 8, 2026?",
       "signal": "SKIP",
       "reasons": [
-        "Expiry in 121.9h \u2014 exceeds 72.0h max."
+        "Expiry in 121.9h \u2014 exceeds 48.0h max."
       ],
       "score": 15,
       "no_price": 0.76,
       "yes_price": 0.24,
-      "hours_until_expiry": 121.89477284166666,
+      "hours_until_expiry": 121.89479818055555,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-may-1-may-8",
       "event_title": "Donald Trump # Truth Social posts May 1 - May 8, 2026?",
       "bracket_label": "80-99",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.815410"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.724723"
     },
     {
       "condition_id": "0xfeeea1ab9a007d8e679b882f07209b812f72379d181923d8456164e04001fbd2",
       "question": "Will Donald Trump post 100-119 Truth Social posts from May 1 to May 8, 2026?",
       "signal": "SKIP",
       "reasons": [
-        "Expiry in 121.9h \u2014 exceeds 72.0h max."
+        "Expiry in 121.9h \u2014 exceeds 48.0h max."
       ],
       "score": 15,
       "no_price": 0.67,
       "yes_price": 0.33,
-      "hours_until_expiry": 121.89477284083334,
+      "hours_until_expiry": 121.89479817944445,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-may-1-may-8",
       "event_title": "Donald Trump # Truth Social posts May 1 - May 8, 2026?",
       "bracket_label": "100-119",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.815482"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.724783"
     },
     {
       "condition_id": "0x21b9766200e349be4850258a3e6801633501d202a0313d1163654ec2d280a9d1",
       "question": "Will Donald Trump post 120-139 Truth Social posts from May 1 to May 8, 2026?",
       "signal": "SKIP",
       "reasons": [
-        "Expiry in 121.9h \u2014 exceeds 72.0h max."
+        "Expiry in 121.9h \u2014 exceeds 48.0h max."
       ],
       "score": 15,
       "no_price": 0.8,
       "yes_price": 0.2,
-      "hours_until_expiry": 121.89477284,
+      "hours_until_expiry": 121.89479817805557,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-may-1-may-8",
       "event_title": "Donald Trump # Truth Social posts May 1 - May 8, 2026?",
       "bracket_label": "120-139",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.815554"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.724843"
     },
     {
       "condition_id": "0xb12e14abb107747c07fb66de3505834278416856afd8f007539715120b019b05",
       "question": "Will Donald Trump post 140-159 Truth Social posts from May 1 to May 8, 2026?",
       "signal": "SKIP",
       "reasons": [
-        "Expiry in 121.9h \u2014 exceeds 72.0h max."
+        "Expiry in 121.9h \u2014 exceeds 48.0h max."
       ],
       "score": 15,
       "no_price": 0.9,
       "yes_price": 0.1,
-      "hours_until_expiry": 121.8947728388889,
+      "hours_until_expiry": 121.89479817666667,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-may-1-may-8",
       "event_title": "Donald Trump # Truth Social posts May 1 - May 8, 2026?",
       "bracket_label": "140-159",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.815645"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.724905"
     },
     {
       "condition_id": "0x481ac9e80ce8f1ae728a7018423a31f9c70739368fbe6c9d53c2992480904518",
       "question": "Will Elon Musk post 140-159 tweets from May 1 to May 8, 2026?",
       "signal": "SKIP",
       "reasons": [
-        "Expiry in 121.9h \u2014 exceeds 72.0h max."
+        "Expiry in 121.9h \u2014 exceeds 48.0h max."
       ],
       "score": 15,
       "no_price": 0.8865,
       "yes_price": 0.1135,
-      "hours_until_expiry": 121.89477283833334,
+      "hours_until_expiry": 121.89479817555556,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-1-may-8",
       "event_title": "Elon Musk # tweets May 1 - May 8, 2026?",
       "bracket_label": "140-159",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.816365"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.725443"
     },
     {
       "condition_id": "0xa390a85e67d73fab31acf4af1ec3fea1102b3e745b1e9fceaa9d4b6e875aadaa",
       "question": "Will Elon Musk post 160-179 tweets from May 1 to May 8, 2026?",
       "signal": "SKIP",
       "reasons": [
-        "Expiry in 121.9h \u2014 exceeds 72.0h max."
+        "Expiry in 121.9h \u2014 exceeds 48.0h max."
       ],
       "score": 15,
       "no_price": 0.825,
       "yes_price": 0.175,
-      "hours_until_expiry": 121.89477283694445,
+      "hours_until_expiry": 121.89479817416667,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-1-may-8",
       "event_title": "Elon Musk # tweets May 1 - May 8, 2026?",
       "bracket_label": "160-179",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.816438"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.725496"
     },
     {
       "condition_id": "0x9f29ba2beeaa7e62beddf427bba222460da61c8b055b100daa629aa278bd0085",
       "question": "Will Elon Musk post 180-199 tweets from May 1 to May 8, 2026?",
       "signal": "SKIP",
       "reasons": [
-        "Expiry in 121.9h \u2014 exceeds 72.0h max."
+        "Expiry in 121.9h \u2014 exceeds 48.0h max."
       ],
       "score": 15,
       "no_price": 0.785,
       "yes_price": 0.215,
-      "hours_until_expiry": 121.8947728363889,
+      "hours_until_expiry": 121.89479817194444,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-1-may-8",
       "event_title": "Elon Musk # tweets May 1 - May 8, 2026?",
       "bracket_label": "180-199",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.816516"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.725551"
     },
     {
       "condition_id": "0x0b72b8f5021419eeee56662e29198d4491c7326e5b44838b8c26e7e7190e191a",
       "question": "Will Elon Musk post 200-219 tweets from May 1 to May 8, 2026?",
       "signal": "SKIP",
       "reasons": [
-        "Expiry in 121.9h \u2014 exceeds 72.0h max."
+        "Expiry in 121.9h \u2014 exceeds 48.0h max."
       ],
       "score": 15,
       "no_price": 0.835,
       "yes_price": 0.165,
-      "hours_until_expiry": 121.89477283555556,
+      "hours_until_expiry": 121.89479817083334,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-1-may-8",
       "event_title": "Elon Musk # tweets May 1 - May 8, 2026?",
       "bracket_label": "200-219",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.816588"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.725604"
     },
     {
       "condition_id": "0x44c2e1b9c81cf7246051c51bd483af5a69c3dc83dc69572ec4315677339917cb",
       "question": "Will Elon Musk post 220-239 tweets from May 1 to May 8, 2026?",
       "signal": "SKIP",
       "reasons": [
-        "Expiry in 121.9h \u2014 exceeds 72.0h max."
+        "Expiry in 121.9h \u2014 exceeds 48.0h max."
       ],
       "score": 15,
       "no_price": 0.885,
       "yes_price": 0.115,
-      "hours_until_expiry": 121.89477283472223,
+      "hours_until_expiry": 121.89479816944446,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-1-may-8",
       "event_title": "Elon Musk # tweets May 1 - May 8, 2026?",
       "bracket_label": "220-239",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.816661"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.725656"
     },
     {
       "condition_id": "0x1a23e019dd1a5e08c0f7f9929975f8bc6fdb7996952f4696e3c243fbedb266fb",
       "question": "Will Elon Musk post 240-259 tweets from May 1 to May 8, 2026?",
       "signal": "SKIP",
       "reasons": [
-        "Expiry in 121.9h \u2014 exceeds 72.0h max."
+        "Expiry in 121.9h \u2014 exceeds 48.0h max."
       ],
       "score": 15,
       "no_price": 0.935,
       "yes_price": 0.065,
-      "hours_until_expiry": 121.89477283416667,
+      "hours_until_expiry": 121.89479816833334,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-1-may-8",
       "event_title": "Elon Musk # tweets May 1 - May 8, 2026?",
       "bracket_label": "240-259",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.816731"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.725711"
     },
     {
       "condition_id": "0xfba91477deea0cc4cf2f2695becc5a7d637f9f6e1c4dbb39c82162a6e0f2f971",
@@ -587,14 +539,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 685.8947728333334,
+      "hours_until_expiry": 685.8947981669445,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "<20",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.807764"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.717647"
     },
     {
       "condition_id": "0x85adb18de18a54b30636b086107b58e6717c5d791de8bbf1fc31fa5f381bea4e",
@@ -606,14 +558,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 685.8947728327778,
+      "hours_until_expiry": 685.8947981655555,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "20-39",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.807818"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.717703"
     },
     {
       "condition_id": "0x3bec995b2bb4e0600e30f267786ab630185ed0914df62566e7de6d949d37f415",
@@ -625,14 +577,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 685.8947728319445,
+      "hours_until_expiry": 685.8947981644444,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "40-59",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.807869"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.717758"
     },
     {
       "condition_id": "0x396e4611e9641897ed5fa0e46c67ad5f6c9bb77ced9416e2c9d99b292c8875a9",
@@ -644,14 +596,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 685.8947728308333,
+      "hours_until_expiry": 685.8947981630555,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "60-79",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.807918"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.717811"
     },
     {
       "condition_id": "0x472bf7f342a0d46d673dad3b87abbe5af0282b2153d29abc69d7c098af3dfc3b",
@@ -663,14 +615,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 685.89477283,
+      "hours_until_expiry": 685.8947981619444,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "80-99",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.807971"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.717866"
     },
     {
       "condition_id": "0xc2321f879afe45ea2fb996273a1c3bfd2049cef379ddf8b9a1da1d8939ffd11b",
@@ -682,14 +634,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 685.8947728291666,
+      "hours_until_expiry": 685.8947981605556,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "100-119",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.808021"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.717925"
     },
     {
       "condition_id": "0x07ddedc4f9d7ec1789259d350f1f33f1a98ae54b9bd8188ebfb9b7ec46a1a93d",
@@ -701,14 +653,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 685.894772828611,
+      "hours_until_expiry": 685.894798158611,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "120-139",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.808070"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.717978"
     },
     {
       "condition_id": "0x0a5b62a5d21675b5c448ec3a352f9f01ea2d1b2752d0d7d9799e21d17d37620b",
@@ -720,14 +672,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 685.8947728277777,
+      "hours_until_expiry": 685.8947981575,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "140-159",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.808117"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.718028"
     },
     {
       "condition_id": "0xc04727a94df7620252435d8487d484cd05aad2fe13c5c9a7a5ac3d00ad6317f9",
@@ -739,14 +691,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 685.8947728272223,
+      "hours_until_expiry": 685.8947981561112,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "160-179",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.808201"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.718078"
     },
     {
       "condition_id": "0xc9bafacce5b7aec44a8ec03c7f9226d83e858767ee5aaae4a3f34b3a5d022cbb",
@@ -758,14 +710,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 685.8947728263889,
+      "hours_until_expiry": 685.894798155,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "180-199",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.808252"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.718155"
     },
     {
       "condition_id": "0xfdb07f2c671c5ba1998dd0368a79d0c9116d4f736623cc04f1f1ec345f350dfd",
@@ -777,14 +729,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 685.8947728258333,
+      "hours_until_expiry": 685.8947981536112,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "200-219",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.808300"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.718213"
     },
     {
       "condition_id": "0x78a507b95c11d1d5584f2ae598fdf2eaf28b9b5a8c489e9b1a5cc8320ad98578",
@@ -796,14 +748,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 685.894772825,
+      "hours_until_expiry": 685.8947981525,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "220-239",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.808349"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.718264"
     },
     {
       "condition_id": "0x07855533ce53147b49030f2a5a4c21dc28568a5051f043cc40c8b315dd578247",
@@ -815,14 +767,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 685.8947728244444,
+      "hours_until_expiry": 685.894798151389,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "240-259",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.808396"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.718317"
     },
     {
       "condition_id": "0x30bbfb85504afb84ebc8df95b5c3fafdf4f10acbdb559324f845f2d36546a49a",
@@ -834,14 +786,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 685.8947728230556,
+      "hours_until_expiry": 685.8947981499999,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "260-279",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.808444"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.718369"
     },
     {
       "condition_id": "0x16863a860ebd5107a212d354c462b7ba4bc41519f293061b66732a41a8983e7c",
@@ -853,14 +805,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 685.8947728225,
+      "hours_until_expiry": 685.8947981488889,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "280-299",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.808491"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.718417"
     },
     {
       "condition_id": "0x1476145c6ad696a0990d2f6cd644dddba5816fd1ce71b2f3b64fa96f9bd4a0dc",
@@ -872,14 +824,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 685.8947728219445,
+      "hours_until_expiry": 685.8947981475,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "300-319",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.808538"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.718468"
     },
     {
       "condition_id": "0x241bb96d4f5c6cbe1feea06bc207d3d46098610aab7d686e6471bc6ffb8cb8ed",
@@ -891,14 +843,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 685.894772821111,
+      "hours_until_expiry": 685.8947981458333,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "320-339",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.808585"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.718517"
     },
     {
       "condition_id": "0x8eb3ba04de5764e68f885539ffe080b5bb2463b0891d6d3a258eb6711880fc6e",
@@ -910,14 +862,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 685.8947728205555,
+      "hours_until_expiry": 685.8947981444445,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "340-359",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.808637"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.718577"
     },
     {
       "condition_id": "0x43f1d3b85f15badea5783b15b5b7ecfce570d9fd69d1bdb443c98970348ed4a2",
@@ -929,14 +881,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 685.8947728197222,
+      "hours_until_expiry": 685.8947981433333,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "360-379",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.808684"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.718629"
     },
     {
       "condition_id": "0x5c6fa0ad36e2cd26c13e2f0da3308e2590de227bb521318c398b5cc1f51b1cb9",
@@ -948,14 +900,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 685.8947728191666,
+      "hours_until_expiry": 685.8947981419444,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "380-399",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.808740"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.718680"
     },
     {
       "condition_id": "0xb20fa5295cce0818033b6e4f13d755619687a1d88bea143459c7ae9bb3e9c418",
@@ -967,14 +919,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 685.8947728183334,
+      "hours_until_expiry": 685.8947981408332,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "400-419",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.808787"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.718730"
     },
     {
       "condition_id": "0xc84a5619fed7f3d02f49386201c35cd809505cf107930f804ad12eb28b3299ec",
@@ -986,14 +938,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 685.8947728177778,
+      "hours_until_expiry": 685.8947981394444,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "420-439",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.808834"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.718778"
     },
     {
       "condition_id": "0x240ce702de07025c32418a4246c76d84a5b2fd56f53b364abf2e2f3517065ebb",
@@ -1005,14 +957,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 685.8947728169444,
+      "hours_until_expiry": 685.8947981383334,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "440-459",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.808882"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.718828"
     },
     {
       "condition_id": "0xc1181fc293e47c5f997307072f1d1f263f6ff7aa403bed183a983c31f66e1d1d",
@@ -1024,14 +976,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 685.8947728158333,
+      "hours_until_expiry": 685.8947981369445,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "460-479",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.808928"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.718879"
     },
     {
       "condition_id": "0xb056eb9583a49d44ca6535d75097640bf5edbbf77a4721771ba85a7a8b7f89aa",
@@ -1043,14 +995,14 @@
       "score": 10,
       "no_price": 0.996,
       "yes_price": 0.004,
-      "hours_until_expiry": 685.894772815,
+      "hours_until_expiry": 685.8947981358334,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "480-499",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.808980"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.718926"
     },
     {
       "condition_id": "0x32fb584834c92d943a7654a6cf8789b9b97f5028dc1544dfb904ee1f185b00d2",
@@ -1062,14 +1014,14 @@
       "score": 10,
       "no_price": 0.996,
       "yes_price": 0.004,
-      "hours_until_expiry": 685.8947728144444,
+      "hours_until_expiry": 685.8947981347222,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "500-519",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.809028"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.718977"
     },
     {
       "condition_id": "0xfa6425f9ba44d6b18023e4500543bac417166e4ab12c2d5c2da5ddb5fabd5a06",
@@ -1081,14 +1033,14 @@
       "score": 10,
       "no_price": 0.9945,
       "yes_price": 0.0055,
-      "hours_until_expiry": 685.8947728136111,
+      "hours_until_expiry": 685.8947981327777,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "520-539",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.809081"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.719027"
     },
     {
       "condition_id": "0x97a5f1cc5d39cde5824ba583df8abc4f75c3429e3c7fd4d7dc14fe8698004151",
@@ -1100,14 +1052,14 @@
       "score": 10,
       "no_price": 0.9935,
       "yes_price": 0.0065,
-      "hours_until_expiry": 685.8947728130555,
+      "hours_until_expiry": 685.8947981316666,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "540-559",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.809159"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.719076"
     },
     {
       "condition_id": "0x808cce76bd50d5e98878017b1ee998ab1b2415d198c91f26991fef8f51017de4",
@@ -1119,14 +1071,14 @@
       "score": 10,
       "no_price": 0.99,
       "yes_price": 0.01,
-      "hours_until_expiry": 685.8947728122222,
+      "hours_until_expiry": 685.8947981302778,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "560-579",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.809215"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.719147"
     },
     {
       "condition_id": "0xb717d9839c9162925b4f405ce5106195e55dc6e1098df9ac66b2c15b664458ec",
@@ -1138,14 +1090,14 @@
       "score": 10,
       "no_price": 0.99,
       "yes_price": 0.01,
-      "hours_until_expiry": 685.8947728113889,
+      "hours_until_expiry": 685.8947981291667,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "580-599",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.809264"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.719207"
     },
     {
       "condition_id": "0x41ed003f987683151eee0b52a1ef3c408225a390786620602f6d179f2df32fb7",
@@ -1157,14 +1109,14 @@
       "score": 10,
       "no_price": 0.9685,
       "yes_price": 0.0315,
-      "hours_until_expiry": 685.8947728108333,
+      "hours_until_expiry": 685.8947981277778,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "600-619",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.809312"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.719259"
     },
     {
       "condition_id": "0x0fb7dabe04257b707acf5fb9c1d91920a9f6a37fa8ccbf3e588930643ea38bb7",
@@ -1176,14 +1128,14 @@
       "score": 10,
       "no_price": 0.965,
       "yes_price": 0.035,
-      "hours_until_expiry": 685.89477281,
+      "hours_until_expiry": 685.8947981266667,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "620-639",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.809362"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.719310"
     },
     {
       "condition_id": "0xab086d9aa51ae37e419c8f221f864efec092c0b795957da0b1e9562a46392878",
@@ -1195,14 +1147,14 @@
       "score": 10,
       "no_price": 0.9715,
       "yes_price": 0.0285,
-      "hours_until_expiry": 685.8947728094445,
+      "hours_until_expiry": 685.8947981252777,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "640-659",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.809410"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.719363"
     },
     {
       "condition_id": "0x9e9870ea4af5f0cb8a225aecfdec5f36b7fc9823391aef66fe07a2267e2eb6fa",
@@ -1214,14 +1166,14 @@
       "score": 10,
       "no_price": 0.966,
       "yes_price": 0.034,
-      "hours_until_expiry": 685.8947728083333,
+      "hours_until_expiry": 685.8947981241666,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "660-679",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.809457"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.719414"
     },
     {
       "condition_id": "0xd825250ce2c6446b5537befa6b7e1cde94b5d0bda86b0951463e7c948bdeb1e5",
@@ -1233,14 +1185,14 @@
       "score": 10,
       "no_price": 0.969,
       "yes_price": 0.031,
-      "hours_until_expiry": 685.8947728075001,
+      "hours_until_expiry": 685.8947981230555,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "680-699",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.809503"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.719462"
     },
     {
       "condition_id": "0x75592d2622130664344647231e5b8c103893438631c39b5340161240df8940d2",
@@ -1252,14 +1204,14 @@
       "score": 10,
       "no_price": 0.963,
       "yes_price": 0.037,
-      "hours_until_expiry": 685.8947728069445,
+      "hours_until_expiry": 685.8947981216667,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "700-719",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.809552"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.719517"
     },
     {
       "condition_id": "0xe4320a403538a2781ec2115bc866d9d2522075c80be111d822fed779121901c7",
@@ -1271,14 +1223,14 @@
       "score": 10,
       "no_price": 0.956,
       "yes_price": 0.044,
-      "hours_until_expiry": 685.8947728061111,
+      "hours_until_expiry": 685.89479812,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "720-739",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.809600"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.719568"
     },
     {
       "condition_id": "0x187cacb4f8c5fa9431b8abafe271db19a3f064fe6fa32e3b0d894170b09d1c2d",
@@ -1290,14 +1242,14 @@
       "score": 10,
       "no_price": 0.951,
       "yes_price": 0.049,
-      "hours_until_expiry": 685.8947728055555,
+      "hours_until_expiry": 685.8947981186111,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "740-759",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.809653"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.719617"
     },
     {
       "condition_id": "0x204594f80ea51049f285bf770c43864b1f966d12c308cefa4d26c2a8f9f64196",
@@ -1309,14 +1261,14 @@
       "score": 10,
       "no_price": 0.963,
       "yes_price": 0.037,
-      "hours_until_expiry": 685.8947728047223,
+      "hours_until_expiry": 685.8947981172222,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "780-799",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.809764"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.719724"
     },
     {
       "condition_id": "0x2089a75814ea1885faaa9ac9687627035967f780e362dcddfb5438fb842040e4",
@@ -1328,14 +1280,14 @@
       "score": 10,
       "no_price": 0.9545,
       "yes_price": 0.0455,
-      "hours_until_expiry": 685.8947728041667,
+      "hours_until_expiry": 685.894798116111,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "1160-1199",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.810316"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.720319"
     },
     {
       "condition_id": "0xfba701c86ac18bd4146c803f304290c881d1e89ff69307d359538ee6d519e611",
@@ -1347,14 +1299,14 @@
       "score": 10,
       "no_price": 0.9665,
       "yes_price": 0.0335,
-      "hours_until_expiry": 685.8947728033332,
+      "hours_until_expiry": 685.8947981147222,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "1200-1239",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.810363"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.720370"
     },
     {
       "condition_id": "0x77132e624d83299c8d2b3f00dc524cb5e2d740a46488338db0a1b27bc8172ca7",
@@ -1366,14 +1318,14 @@
       "score": 10,
       "no_price": 0.966,
       "yes_price": 0.034,
-      "hours_until_expiry": 685.8947728027778,
+      "hours_until_expiry": 685.8947981136112,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "1240-1279",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.810411"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.720426"
     },
     {
       "condition_id": "0x1802354c139a09231f1c9aea759d5a52b8476af3bce72c29bacd8b69e238734c",
@@ -1385,14 +1337,14 @@
       "score": 10,
       "no_price": 0.9655,
       "yes_price": 0.0345,
-      "hours_until_expiry": 685.8947728022222,
+      "hours_until_expiry": 685.8947981125,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "1280-1319",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.810458"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.720484"
     },
     {
       "condition_id": "0x43f22f2765ed31f7f53bc29e916640f47fe1b9396a91a5ec5b77e40b39889321",
@@ -1404,14 +1356,14 @@
       "score": 10,
       "no_price": 0.9815,
       "yes_price": 0.0185,
-      "hours_until_expiry": 685.8947728008334,
+      "hours_until_expiry": 685.8947981111112,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "1320-1359",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.810505"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.720540"
     },
     {
       "condition_id": "0x1e5933ab0cdbc89baeb135ea71444d8503279d3cf052d563fac1e3aee6372b76",
@@ -1423,14 +1375,14 @@
       "score": 10,
       "no_price": 0.9825,
       "yes_price": 0.0175,
-      "hours_until_expiry": 685.8947728002778,
+      "hours_until_expiry": 685.89479811,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "1360-1399",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.810568"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.720593"
     },
     {
       "condition_id": "0x964d895e4f821a1b28cb4037c916deed74df33f8de63dfa9fb957b0b900efe3a",
@@ -1442,14 +1394,14 @@
       "score": 10,
       "no_price": 0.9715,
       "yes_price": 0.0285,
-      "hours_until_expiry": 685.8947727994445,
+      "hours_until_expiry": 685.8947981086111,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "1400-1439",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.810615"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.720643"
     },
     {
       "condition_id": "0x8b8802585a8bb89846db569d51369d5cc2896e32fc6b7fce4237b7b2971d219a",
@@ -1461,14 +1413,14 @@
       "score": 10,
       "no_price": 0.988,
       "yes_price": 0.012,
-      "hours_until_expiry": 685.8947727988889,
+      "hours_until_expiry": 685.8947981066667,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "1440-1479",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.810663"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.720692"
     },
     {
       "condition_id": "0xc7ae6dcfbe1eaadfa335e936ecf9dae26904c65e0e45b43e92a5c4b0367546db",
@@ -1480,14 +1432,14 @@
       "score": 10,
       "no_price": 0.9795,
       "yes_price": 0.0205,
-      "hours_until_expiry": 685.8947727980556,
+      "hours_until_expiry": 685.8947981055555,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "1480-1519",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.810710"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.720743"
     },
     {
       "condition_id": "0xa455ffadd4eff9e49f7a13e20ba81323ebc6d85709a5de9293441731973dae9c",
@@ -1499,14 +1451,14 @@
       "score": 10,
       "no_price": 0.993,
       "yes_price": 0.007,
-      "hours_until_expiry": 685.8947727972222,
+      "hours_until_expiry": 685.8947981044445,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "1520-1559",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.810757"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.720792"
     },
     {
       "condition_id": "0x8580236fe3cfa72751707758b27cefade240606aae9d2a26971b86aee6dfdf65",
@@ -1518,14 +1470,14 @@
       "score": 10,
       "no_price": 0.9895,
       "yes_price": 0.0105,
-      "hours_until_expiry": 685.8947727966666,
+      "hours_until_expiry": 685.8947981030556,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "1560-1599",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.810802"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.720844"
     },
     {
       "condition_id": "0x59d6e547245788c7fb811eb63bb63e91bed65d8da1efbd4ef936926a71998d1e",
@@ -1537,14 +1489,14 @@
       "score": 10,
       "no_price": 0.9925,
       "yes_price": 0.0075,
-      "hours_until_expiry": 685.8947727958333,
+      "hours_until_expiry": 685.8947981016667,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "1600-1679",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.810850"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.720893"
     },
     {
       "condition_id": "0x476d19717ac51e9323b7930425f17f631b7edb7142ebf45fee22d57b0d7ef8b1",
@@ -1556,14 +1508,14 @@
       "score": 10,
       "no_price": 0.9935,
       "yes_price": 0.0065,
-      "hours_until_expiry": 685.8947727952777,
+      "hours_until_expiry": 685.8947981005555,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "1680-1759",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.810897"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.720944"
     },
     {
       "condition_id": "0x7d25c4f9ab29ee54958b342288be04f330a7ad02ccb1bad53f695f4434f44570",
@@ -1575,14 +1527,14 @@
       "score": 10,
       "no_price": 0.9985,
       "yes_price": 0.0015,
-      "hours_until_expiry": 685.8947727944444,
+      "hours_until_expiry": 685.8947980994444,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "1760-1839",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.810944"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.720995"
     },
     {
       "condition_id": "0x9eecb36e2570ce77f39bd79747dfcd0ae533e072fdfb2d10f174f23264d87c2e",
@@ -1594,14 +1546,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 685.8947727933333,
+      "hours_until_expiry": 685.8947980980556,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "1840-1919",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.810991"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.721043"
     },
     {
       "condition_id": "0x5bf0baa07047a4775f87ee54fb79fa03c4b1235254a5350adb288c18a1f47401",
@@ -1613,14 +1565,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 685.8947727927778,
+      "hours_until_expiry": 685.8947980969444,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "1920-1999",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.811038"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.721093"
     },
     {
       "condition_id": "0x4d7130ae6dd22cc177904f0611688f398e5db89f988b5f3b897c8fc2ab0985e7",
@@ -1632,14 +1584,33 @@
       "score": 10,
       "no_price": 0.9985,
       "yes_price": 0.0015,
-      "hours_until_expiry": 685.8947727919445,
+      "hours_until_expiry": 685.8947980955556,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "2000+",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.811084"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.721172"
+    },
+    {
+      "condition_id": "0x3f74d8b0e01a81b9a3fa270d419c64ddfe8a1d36aaa724126075b04706138a82",
+      "question": "Will Trump post \"Hell\" on Truth Social this week?",
+      "signal": "SKIP",
+      "reasons": [
+        "NO price 0.57 < 0.6 \u2014 market thinks event is likely."
+      ],
+      "score": 10,
+      "no_price": 0.57,
+      "yes_price": 0.43,
+      "hours_until_expiry": -14.10520190638889,
+      "market_type": "trump_posting",
+      "event_slug": "what-will-trump-post-this-week-april-27-may-3",
+      "event_title": "What will Trump post this week? (April 27 - May 3)",
+      "bracket_label": "Hell",
+      "strategy_id": "no_side",
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.721237"
     },
     {
       "condition_id": "0x8730e1eb7a53c8ae47f700f8233851cab23f1a8fd0ddd80bcbc15155ebbf5a84",
@@ -1651,14 +1622,14 @@
       "score": 10,
       "no_price": 0.9635,
       "yes_price": 0.0365,
-      "hours_until_expiry": -14.10522720861111,
+      "hours_until_expiry": -14.105201907777777,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-april-27-may-3",
       "event_title": "What will Trump post this week? (April 27 - May 3)",
       "bracket_label": "I love King / I love the King",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.811228"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.721289"
     },
     {
       "condition_id": "0xb38b863868bd492a30fa0475fb597716795ea4b6289e953ce3e34e65a70d8bca",
@@ -1670,14 +1641,14 @@
       "score": 10,
       "no_price": 0.9695,
       "yes_price": 0.0305,
-      "hours_until_expiry": -14.105227209444443,
+      "hours_until_expiry": -14.105201908888889,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-april-27-may-3",
       "event_title": "What will Trump post this week? (April 27 - May 3)",
       "bracket_label": "Franklin Graham",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.811293"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.721347"
     },
     {
       "condition_id": "0x6791a1398544122f9e1a8aad4c1664dd776cdc83b0631bf1673556bba64c3540",
@@ -1689,14 +1660,14 @@
       "score": 10,
       "no_price": 0.955,
       "yes_price": 0.045,
-      "hours_until_expiry": -14.105227210277777,
+      "hours_until_expiry": -14.105201910277778,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-april-27-may-3",
       "event_title": "What will Trump post this week? (April 27 - May 3)",
       "bracket_label": "Crypto / Bitcoin",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.811548"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.721621"
     },
     {
       "condition_id": "0x9b41d9f0966e2a937ed5e96fb3d0a8c11b291b3ff6adcf8c918f3ce0201dd583",
@@ -1708,14 +1679,14 @@
       "score": 10,
       "no_price": 0.9825,
       "yes_price": 0.0175,
-      "hours_until_expiry": -14.10522721138889,
+      "hours_until_expiry": -14.105201911944445,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-april-27-may-3",
       "event_title": "What will Trump post this week? (April 27 - May 3)",
       "bracket_label": "Elon / Musk",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.811732"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.721814"
     },
     {
       "condition_id": "0xbcb1b9b0402c50793b3860d6848ccd6c8e1c2e6ac66281ec935eba0b7ef395ba",
@@ -1727,14 +1698,14 @@
       "score": 10,
       "no_price": 0.959,
       "yes_price": 0.041,
-      "hours_until_expiry": -14.105227212222223,
+      "hours_until_expiry": -14.105201913333332,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-april-27-may-3",
       "event_title": "What will Trump post this week? (April 27 - May 3)",
       "bracket_label": "UFO",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.811971"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.722063"
     },
     {
       "condition_id": "0x9ac09c4f0cbbe4d545e8543d6b7e73c4aefe35d8e1b204fb4fd651c5bc4a54ff",
@@ -1746,14 +1717,14 @@
       "score": 10,
       "no_price": 0.9555,
       "yes_price": 0.0445,
-      "hours_until_expiry": -14.105227212777779,
+      "hours_until_expiry": -14.105201914444445,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-april-27-may-3",
       "event_title": "What will Trump post this week? (April 27 - May 3)",
       "bracket_label": "Triumphal Arc / Triumphal Arch",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.812070"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.722194"
     },
     {
       "condition_id": "0x3e8868d4b43f66d6cd763321d7dea74fc6bad6b89b01582e85e430f643a04e42",
@@ -1765,14 +1736,14 @@
       "score": 10,
       "no_price": 0.9525,
       "yes_price": 0.0475,
-      "hours_until_expiry": -14.105227213611112,
+      "hours_until_expiry": -14.105201916111112,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-april-27-may-3",
       "event_title": "What will Trump post this week? (April 27 - May 3)",
       "bracket_label": "Blockade",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.812249"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.722350"
     },
     {
       "condition_id": "0xb31ad33d444ba1aa851add555cbeeb7dc17f723db01ef8c304048ecf2f1ed095",
@@ -1784,14 +1755,14 @@
       "score": 10,
       "no_price": 0.985,
       "yes_price": 0.015,
-      "hours_until_expiry": 49.89477278527778,
+      "hours_until_expiry": 49.89479808277778,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-april-28-may-5",
       "event_title": "Donald Trump # Truth Social posts April 28 - May 5, 2026?",
       "bracket_label": "120-139",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.812341"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.722448"
     },
     {
       "condition_id": "0x865239dae71127c6b494da4e60d23f8c6c689da4442216046c1dcad24e3ada80",
@@ -1803,14 +1774,14 @@
       "score": 10,
       "no_price": 0.997,
       "yes_price": 0.003,
-      "hours_until_expiry": 49.89477278444445,
+      "hours_until_expiry": 49.894798081666664,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-april-28-may-5",
       "event_title": "Donald Trump # Truth Social posts April 28 - May 5, 2026?",
       "bracket_label": "140-159",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.812389"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.722498"
     },
     {
       "condition_id": "0x5c2a88c77e388c6e9da59d2eaa670147bcdac3778c1f2f54112cb7559fee0ed6",
@@ -1822,14 +1793,14 @@
       "score": 10,
       "no_price": 0.996,
       "yes_price": 0.004,
-      "hours_until_expiry": 49.89477278388889,
+      "hours_until_expiry": 49.89479807972222,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-april-28-may-5",
       "event_title": "Donald Trump # Truth Social posts April 28 - May 5, 2026?",
       "bracket_label": "40-59",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.812479"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.722593"
     },
     {
       "condition_id": "0x6af4407ad69ce8f5ecd3507c36d5005dc4f2e46e00433cf1fa7c4a753b165e3b",
@@ -1841,14 +1812,14 @@
       "score": 10,
       "no_price": 0.989,
       "yes_price": 0.011,
-      "hours_until_expiry": 49.89477278305556,
+      "hours_until_expiry": 49.89479807833333,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-april-28-may-5",
       "event_title": "Donald Trump # Truth Social posts April 28 - May 5, 2026?",
       "bracket_label": "160-179",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.812597"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.722705"
     },
     {
       "condition_id": "0x6037bf186c0552f0d91b9db7ac5a2edbafe346ba1054957b2b36ea1bdd781947",
@@ -1860,14 +1831,14 @@
       "score": 10,
       "no_price": 0.9965,
       "yes_price": 0.0035,
-      "hours_until_expiry": 49.894772782222226,
+      "hours_until_expiry": 49.89479807722222,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-april-28-may-5",
       "event_title": "Donald Trump # Truth Social posts April 28 - May 5, 2026?",
       "bracket_label": "180-199",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.812691"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.722803"
     },
     {
       "condition_id": "0x39ac1c482d552d0bf73406712967d056ce713acb9c0eeb7e26640819bb7c3bbd",
@@ -1879,33 +1850,33 @@
       "score": 10,
       "no_price": 0.994,
       "yes_price": 0.006,
-      "hours_until_expiry": 49.89477278166667,
+      "hours_until_expiry": 49.89479807611111,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-april-28-may-5",
       "event_title": "Donald Trump # Truth Social posts April 28 - May 5, 2026?",
       "bracket_label": "200+",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.812740"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.722854"
     },
     {
       "condition_id": "0xca73c3d8226d8ccc2c3dc78f26b02cc7aa1a0d17669d6dd54aae67ae6689c827",
       "question": "Will Donald Trump post 80-99 Truth Social posts from April 28 to May 5, 2026?",
       "signal": "SKIP",
       "reasons": [
-        "NO price 0.41 < 0.5 \u2014 market thinks event is likely."
+        "NO price 0.41 < 0.6 \u2014 market thinks event is likely."
       ],
       "score": 10,
       "no_price": 0.41,
       "yes_price": 0.59,
-      "hours_until_expiry": 49.894772780833335,
+      "hours_until_expiry": 49.89479807472222,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-april-28-may-5",
       "event_title": "Donald Trump # Truth Social posts April 28 - May 5, 2026?",
       "bracket_label": "80-99",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.812912"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.722982"
     },
     {
       "condition_id": "0x77e9a762636b1ca81032a0e4132a21b824740259cd227edaaf5cb5fbfeeaf282",
@@ -1917,14 +1888,14 @@
       "score": 10,
       "no_price": 0.985,
       "yes_price": 0.015,
-      "hours_until_expiry": 49.89477278027778,
+      "hours_until_expiry": 49.894798073611106,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-april-28-may-5",
       "event_title": "Elon Musk # tweets April 28 - May 5, 2026?",
       "bracket_label": "220-239",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.813152"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.723149"
     },
     {
       "condition_id": "0xd43e0ccd024abad71ae75cb626f45c8a24d0b7e859c30b332ff4af36a52ef075",
@@ -1936,14 +1907,14 @@
       "score": 10,
       "no_price": 0.9935,
       "yes_price": 0.0065,
-      "hours_until_expiry": 49.894772779444445,
+      "hours_until_expiry": 49.89479807222222,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-april-28-may-5",
       "event_title": "Elon Musk # tweets April 28 - May 5, 2026?",
       "bracket_label": "240-259",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.813225"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.723210"
     },
     {
       "condition_id": "0x9100fa24ed1ed1bff37d33e25679621c2c174531419c3561d817e1300182c96f",
@@ -1955,14 +1926,14 @@
       "score": 10,
       "no_price": 0.9965,
       "yes_price": 0.0035,
-      "hours_until_expiry": 49.89477277888889,
+      "hours_until_expiry": 49.89479807111111,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-april-28-may-5",
       "event_title": "Elon Musk # tweets April 28 - May 5, 2026?",
       "bracket_label": "260-279",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.813302"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.723262"
     },
     {
       "condition_id": "0xc07048c39ab974a9b9dbb92f0c2da02d8e787858f04bb3cd00c6b47c13b42449",
@@ -1974,14 +1945,14 @@
       "score": 10,
       "no_price": 0.9985,
       "yes_price": 0.0015,
-      "hours_until_expiry": 49.894772777499995,
+      "hours_until_expiry": 49.89479806972222,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-april-28-may-5",
       "event_title": "Elon Musk # tweets April 28 - May 5, 2026?",
       "bracket_label": "280-299",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.813375"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.723311"
     },
     {
       "condition_id": "0xcbe4d674ecc799e68d014c1242a34bb8d8a82aa39ebd92f7088f1ed4e260391f",
@@ -1993,14 +1964,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 49.89477277694445,
+      "hours_until_expiry": 49.89479806861111,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-april-28-may-5",
       "event_title": "Elon Musk # tweets April 28 - May 5, 2026?",
       "bracket_label": "300-319",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.813446"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.723362"
     },
     {
       "condition_id": "0x493a2edf13d052c850809062e4d91d83b196a728e662d062a760a122befe5085",
@@ -2012,14 +1983,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 49.89477277611112,
+      "hours_until_expiry": 49.89479806666667,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-april-28-may-5",
       "event_title": "Elon Musk # tweets April 28 - May 5, 2026?",
       "bracket_label": "320-339",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.813536"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.723412"
     },
     {
       "condition_id": "0x8a4c0a61e88cd13cc2203068daa2d3dc0fcf5eecebba5baf9442aeaf2196935b",
@@ -2031,14 +2002,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 49.89477277555555,
+      "hours_until_expiry": 49.894798064722224,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-april-28-may-5",
       "event_title": "Elon Musk # tweets April 28 - May 5, 2026?",
       "bracket_label": "340-359",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.813625"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.723461"
     },
     {
       "condition_id": "0xbb181a465b64258bae6bb7720f499809442616aec07327cad14db560766e360c",
@@ -2050,14 +2021,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 49.89477277472222,
+      "hours_until_expiry": 49.89479806333333,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-april-28-may-5",
       "event_title": "Elon Musk # tweets April 28 - May 5, 2026?",
       "bracket_label": "360-379",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.813699"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.723511"
     },
     {
       "condition_id": "0xd7d918f14cba4744e7a0529125997b0794dd68da1cc1fa368dfba1a58eacebae",
@@ -2069,14 +2040,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 49.89477277416666,
+      "hours_until_expiry": 49.89479806194444,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-april-28-may-5",
       "event_title": "Elon Musk # tweets April 28 - May 5, 2026?",
       "bracket_label": "380-399",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.813768"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.723561"
     },
     {
       "condition_id": "0x66f3b4847b4a0e33e8a894a1166466b5eb25b0a1b07c130967090d8bde1996d0",
@@ -2088,14 +2059,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 49.89477277333333,
+      "hours_until_expiry": 49.89479806083333,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-april-28-may-5",
       "event_title": "Elon Musk # tweets April 28 - May 5, 2026?",
       "bracket_label": "400-419",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.813838"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.723611"
     },
     {
       "condition_id": "0x1893535948bb45a03a1612cac2276572a92b95f1a1cc8dae6a901a749082d472",
@@ -2107,14 +2078,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 49.89477277277778,
+      "hours_until_expiry": 49.89479805944445,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-april-28-may-5",
       "event_title": "Elon Musk # tweets April 28 - May 5, 2026?",
       "bracket_label": "420-439",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.813905"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.723655"
     },
     {
       "condition_id": "0x178c829978e43158e86d5d07aafab51db7c6031d93a8d86a98348f1f94bdcfbe",
@@ -2126,14 +2097,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 49.89477277194444,
+      "hours_until_expiry": 49.894798058333336,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-april-28-may-5",
       "event_title": "Elon Musk # tweets April 28 - May 5, 2026?",
       "bracket_label": "440-459",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.813973"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.723704"
     },
     {
       "condition_id": "0x749eabede8a6c91f9e3ee0dd0f94be563e1eaad6cc30aa1c96fb1d344bb0687c",
@@ -2145,14 +2116,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 49.89477277138889,
+      "hours_until_expiry": 49.894798056944445,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-april-28-may-5",
       "event_title": "Elon Musk # tweets April 28 - May 5, 2026?",
       "bracket_label": "460-479",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.814048"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.723753"
     },
     {
       "condition_id": "0xade83102a5f12a0b9538b43e9315085a2185f5e3f105578fa45d7d77d9723790",
@@ -2164,14 +2135,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 49.894772769999996,
+      "hours_until_expiry": 49.894798055833334,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-april-28-may-5",
       "event_title": "Elon Musk # tweets April 28 - May 5, 2026?",
       "bracket_label": "480-499",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.814117"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.723802"
     },
     {
       "condition_id": "0xd05810e34f55a86f80877c871bb87cddb5b8ca2a2be40e396a9f90d9b4f759c5",
@@ -2183,14 +2154,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 49.894772769444444,
+      "hours_until_expiry": 49.89479805444445,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-april-28-may-5",
       "event_title": "Elon Musk # tweets April 28 - May 5, 2026?",
       "bracket_label": "500+",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.814210"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.723849"
     },
     {
       "condition_id": "0x0400f3cacf95fda2f45792bfaadb3c926b975b4d72e8632ad15ba6ab940466d4",
@@ -2202,14 +2173,14 @@
       "score": 10,
       "no_price": 0.9555,
       "yes_price": 0.0445,
-      "hours_until_expiry": 49.89477276861111,
+      "hours_until_expiry": 49.89479805277778,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-april-28-may-5",
       "event_title": "Elon Musk # tweets April 28 - May 5, 2026?",
       "bracket_label": "200-219",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.814439"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.724011"
     },
     {
       "condition_id": "0xef4e2a882d8f7d8b94deeba438655d4194a9dd148af322a6aa10817f784d3c37",
@@ -2221,14 +2192,33 @@
       "score": 10,
       "no_price": 0.9975,
       "yes_price": 0.0025,
-      "hours_until_expiry": 49.89477276777777,
+      "hours_until_expiry": 49.89479805138888,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-april-28-may-5",
       "event_title": "Elon Musk # tweets April 28 - May 5, 2026?",
       "bracket_label": "100-119",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.814647"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.724191"
+    },
+    {
+      "condition_id": "0x3b48166faf44ba7768769cb56c9559e7075d2e8fbf2204829625b226fd420f3c",
+      "question": "Will Elon Musk post 140-159 tweets from April 28 to May 5, 2026?",
+      "signal": "SKIP",
+      "reasons": [
+        "NO price 0.59 < 0.6 \u2014 market thinks event is likely."
+      ],
+      "score": 10,
+      "no_price": 0.5885,
+      "yes_price": 0.4115,
+      "hours_until_expiry": 49.894798050000006,
+      "market_type": "musk_posting",
+      "event_slug": "elon-musk-of-tweets-april-28-may-5",
+      "event_title": "Elon Musk # tweets April 28 - May 5, 2026?",
+      "bracket_label": "140-159",
+      "strategy_id": "no_side",
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.724302"
     },
     {
       "condition_id": "0x05fe75cab2d9afe76a8ca9b4d0107363d9fa828d42e239c1e65f555ae003da59",
@@ -2240,14 +2230,14 @@
       "score": 10,
       "no_price": 0.998,
       "yes_price": 0.002,
-      "hours_until_expiry": 121.89477276722222,
+      "hours_until_expiry": 121.89479804888889,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-may-1-may-8",
       "event_title": "Donald Trump # Truth Social posts May 1 - May 8, 2026?",
       "bracket_label": "20-39",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.815005"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.724454"
     },
     {
       "condition_id": "0xfe942aa540b17ac68fb4e11f14ab3049652c3753bec5e8e7183493c41e7b29de",
@@ -2259,14 +2249,14 @@
       "score": 10,
       "no_price": 0.964,
       "yes_price": 0.036,
-      "hours_until_expiry": 121.8947727663889,
+      "hours_until_expiry": 121.8947980475,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-may-1-may-8",
       "event_title": "Donald Trump # Truth Social posts May 1 - May 8, 2026?",
       "bracket_label": "180-199",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.815260"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.724619"
     },
     {
       "condition_id": "0x02a30f9d1ab039aa0984afe4f3893c1004bc4428027cff194aba72a062789428",
@@ -2278,14 +2268,14 @@
       "score": 10,
       "no_price": 0.9835,
       "yes_price": 0.0165,
-      "hours_until_expiry": 121.89477276527778,
+      "hours_until_expiry": 121.8947980463889,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-may-1-may-8",
       "event_title": "Donald Trump # Truth Social posts May 1 - May 8, 2026?",
       "bracket_label": "40-59",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.815331"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.724671"
     },
     {
       "condition_id": "0x8dc9b6986053674e6b7fed4001b65115f9a4d1014161fccf4d2e208343538921",
@@ -2297,14 +2287,14 @@
       "score": 10,
       "no_price": 0.983,
       "yes_price": 0.017,
-      "hours_until_expiry": 121.89477276444445,
+      "hours_until_expiry": 121.894798045,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-may-1-may-8",
       "event_title": "Donald Trump # Truth Social posts May 1 - May 8, 2026?",
       "bracket_label": "200+",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.815717"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.724957"
     },
     {
       "condition_id": "0xed9348ccbb2c1f0e8424c2923d8a32820ef8533fcec3f60e0b27f9f31a86aeea",
@@ -2316,14 +2306,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 121.89477276361112,
+      "hours_until_expiry": 121.8947980438889,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-1-may-8",
       "event_title": "Elon Musk # tweets May 1 - May 8, 2026?",
       "bracket_label": "40-59",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.815918"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.725099"
     },
     {
       "condition_id": "0xee3330c4a0ab510785a90861fd77cba0c2ad8b32acc7f1e102391bbce56d50f0",
@@ -2335,14 +2325,14 @@
       "score": 10,
       "no_price": 0.9975,
       "yes_price": 0.0025,
-      "hours_until_expiry": 121.89477276277779,
+      "hours_until_expiry": 121.8947980425,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-1-may-8",
       "event_title": "Elon Musk # tweets May 1 - May 8, 2026?",
       "bracket_label": "60-79",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.815987"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.725177"
     },
     {
       "condition_id": "0x5eab88d12569684a1dbc69592f9ba6199d8dfcd9cc36934ca70c06fa5db08538",
@@ -2354,14 +2344,14 @@
       "score": 10,
       "no_price": 0.9975,
       "yes_price": 0.0025,
-      "hours_until_expiry": 121.89477276166667,
+      "hours_until_expiry": 121.8947980413889,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-1-may-8",
       "event_title": "Elon Musk # tweets May 1 - May 8, 2026?",
       "bracket_label": "80-99",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.816055"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.725232"
     },
     {
       "condition_id": "0xf8f99ac8a0e88100938ed8f7e22eabb75cd3006e1bd870dccf623c043952a6e8",
@@ -2373,14 +2363,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 121.8947727611111,
+      "hours_until_expiry": 121.89479803944445,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-1-may-8",
       "event_title": "Elon Musk # tweets May 1 - May 8, 2026?",
       "bracket_label": "500+",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.816143"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.725283"
     },
     {
       "condition_id": "0xcf9e4142cf865daaa041243188cc7197fa9bfc2bb67df9e124d9e0ee3fba8f65",
@@ -2392,14 +2382,14 @@
       "score": 10,
       "no_price": 0.988,
       "yes_price": 0.012,
-      "hours_until_expiry": 121.89477276027779,
+      "hours_until_expiry": 121.89479803833333,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-1-may-8",
       "event_title": "Elon Musk # tweets May 1 - May 8, 2026?",
       "bracket_label": "100-119",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.816211"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.725331"
     },
     {
       "condition_id": "0x2b50f46860795f7d9dd122314a643e29b5e8c8466a9f4ad28238990aba9be236",
@@ -2411,14 +2401,14 @@
       "score": 10,
       "no_price": 0.9535,
       "yes_price": 0.0465,
-      "hours_until_expiry": 121.89477275944444,
+      "hours_until_expiry": 121.89479803694445,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-1-may-8",
       "event_title": "Elon Musk # tweets May 1 - May 8, 2026?",
       "bracket_label": "120-139",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.816290"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.725387"
     },
     {
       "condition_id": "0x1a19e7edbfa5df051758de9590b3fd4e4f60977e84edf299bb9e597af63bf5a8",
@@ -2430,14 +2420,14 @@
       "score": 10,
       "no_price": 0.957,
       "yes_price": 0.043,
-      "hours_until_expiry": 121.89477275861113,
+      "hours_until_expiry": 121.89479803583335,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-1-may-8",
       "event_title": "Elon Musk # tweets May 1 - May 8, 2026?",
       "bracket_label": "260-279",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.816798"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.725760"
     },
     {
       "condition_id": "0x6e1b036b3ece151ed116949044809614eab3f0666be56d5d0839a4cb8405cfd7",
@@ -2449,14 +2439,14 @@
       "score": 10,
       "no_price": 0.9775,
       "yes_price": 0.0225,
-      "hours_until_expiry": 121.89477275805555,
+      "hours_until_expiry": 121.89479803444443,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-1-may-8",
       "event_title": "Elon Musk # tweets May 1 - May 8, 2026?",
       "bracket_label": "280-299",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.816868"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.725819"
     },
     {
       "condition_id": "0x7506d9094c353c7f5d8d07716c754269963633c3e923fa23bfb6d8d44bcf1b0e",
@@ -2468,14 +2458,14 @@
       "score": 10,
       "no_price": 0.987,
       "yes_price": 0.013,
-      "hours_until_expiry": 121.89477275722221,
+      "hours_until_expiry": 121.89479803333334,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-1-may-8",
       "event_title": "Elon Musk # tweets May 1 - May 8, 2026?",
       "bracket_label": "300-319",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.816937"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.725869"
     },
     {
       "condition_id": "0xae7822be79860169c16020cf7099795ea21b02656d60342d1177f886045faf58",
@@ -2487,14 +2477,14 @@
       "score": 10,
       "no_price": 0.9905,
       "yes_price": 0.0095,
-      "hours_until_expiry": 121.89477275666665,
+      "hours_until_expiry": 121.89479803194443,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-1-may-8",
       "event_title": "Elon Musk # tweets May 1 - May 8, 2026?",
       "bracket_label": "320-339",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.817003"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.725921"
     },
     {
       "condition_id": "0x04d2ab2b81dc96a101ee7dfacc5e0b51a9d00296e21653b9b8c80cca2cc0d338",
@@ -2506,14 +2496,14 @@
       "score": 10,
       "no_price": 0.9905,
       "yes_price": 0.0095,
-      "hours_until_expiry": 121.89477275611111,
+      "hours_until_expiry": 121.89479803083333,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-1-may-8",
       "event_title": "Elon Musk # tweets May 1 - May 8, 2026?",
       "bracket_label": "340-359",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.817072"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.725971"
     },
     {
       "condition_id": "0xf3d276fd89dd884a8507c3ae63b9ff809b72d3475debd7d8dc3897e1bde811ab",
@@ -2525,14 +2515,14 @@
       "score": 10,
       "no_price": 0.9955,
       "yes_price": 0.0045,
-      "hours_until_expiry": 121.89477275527777,
+      "hours_until_expiry": 121.89479802972221,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-1-may-8",
       "event_title": "Elon Musk # tweets May 1 - May 8, 2026?",
       "bracket_label": "360-379",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.817159"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.726021"
     },
     {
       "condition_id": "0x3053c697d57efb66584d4f86e37b937e7775d86addb43efc98fee62139cc6e99",
@@ -2544,14 +2534,14 @@
       "score": 10,
       "no_price": 0.9975,
       "yes_price": 0.0025,
-      "hours_until_expiry": 121.89477275416667,
+      "hours_until_expiry": 121.89479802833333,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-1-may-8",
       "event_title": "Elon Musk # tweets May 1 - May 8, 2026?",
       "bracket_label": "380-399",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.817227"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.726068"
     },
     {
       "condition_id": "0x5a0f89b969f2d335181e03e5c2d2381a99c089e3e55ba89f0e6a9f8ad5ba7530",
@@ -2563,14 +2553,14 @@
       "score": 10,
       "no_price": 0.9985,
       "yes_price": 0.0015,
-      "hours_until_expiry": 121.89477275333333,
+      "hours_until_expiry": 121.89479802666666,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-1-may-8",
       "event_title": "Elon Musk # tweets May 1 - May 8, 2026?",
       "bracket_label": "400-419",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.817296"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.726119"
     },
     {
       "condition_id": "0x563400c7e9088e8f0542449cfb1442b2968972b7982d3498d7d231a70fa20dc3",
@@ -2582,14 +2572,14 @@
       "score": 10,
       "no_price": 0.9985,
       "yes_price": 0.0015,
-      "hours_until_expiry": 121.89477275277777,
+      "hours_until_expiry": 121.89479802527777,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-1-may-8",
       "event_title": "Elon Musk # tweets May 1 - May 8, 2026?",
       "bracket_label": "420-439",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.817364"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.726200"
     },
     {
       "condition_id": "0x43c5a90d7860fc5edbd9ecafbbadde211c7357868fdb7bdfe9d052ebd3047abe",
@@ -2601,14 +2591,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 121.89477275194444,
+      "hours_until_expiry": 121.89479802388888,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-1-may-8",
       "event_title": "Elon Musk # tweets May 1 - May 8, 2026?",
       "bracket_label": "440-459",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.817433"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.726250"
     },
     {
       "condition_id": "0x417e1aae3950beb9df0a3833bbb19244b566fdf8b8393a96f6058cf84c51bc24",
@@ -2620,14 +2610,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 121.89477275138889,
+      "hours_until_expiry": 121.89479802277778,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-1-may-8",
       "event_title": "Elon Musk # tweets May 1 - May 8, 2026?",
       "bracket_label": "460-479",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.817502"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.726302"
     },
     {
       "condition_id": "0x01df9f96539cd578bd14b64507bd25f54b8cb8c8c4324df2e637ff07f794c7ac",
@@ -2639,14 +2629,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 121.89477275055555,
+      "hours_until_expiry": 121.89479801527777,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-1-may-8",
       "event_title": "Elon Musk # tweets May 1 - May 8, 2026?",
       "bracket_label": "480-499",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.817576"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.726351"
     },
     {
       "condition_id": "0x02cb83794f5c64731b73a1d5f8d0d3b21858773d29526bb1f837918fa9f3dc15",
@@ -2658,14 +2648,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1030.1052272499999,
+      "hours_until_expiry": -1030.105201986389,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-march-19-march-21",
       "event_title": "Elon Musk # tweets March 19 - March 21, 2026?",
       "bracket_label": "<40",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.806701"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.716512"
     },
     {
       "condition_id": "0x3f98f4506374a11b5d4deacf051e3b6192ec58e0f2036d18edb03d5b3985d3a3",
@@ -2677,14 +2667,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1030.1052272508334,
+      "hours_until_expiry": -1030.1052019880556,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-march-19-march-21",
       "event_title": "Elon Musk # tweets March 19 - March 21, 2026?",
       "bracket_label": "40-64",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.806800"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.716613"
     },
     {
       "condition_id": "0x47e3bb0616a698b284145759f805bea5c760acf889e66da0506937698b417c95",
@@ -2696,14 +2686,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1030.1052272516665,
+      "hours_until_expiry": -1030.1052019891667,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-march-19-march-21",
       "event_title": "Elon Musk # tweets March 19 - March 21, 2026?",
       "bracket_label": "65-89",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.806861"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.716676"
     },
     {
       "condition_id": "0x53d9bfa100ba711e08bcca20564890da16531a4ef3092efd88449bbbe8fbf19c",
@@ -2715,14 +2705,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1030.1052272525,
+      "hours_until_expiry": -1030.1052019905555,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-march-19-march-21",
       "event_title": "Elon Musk # tweets March 19 - March 21, 2026?",
       "bracket_label": "90-114",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.806912"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.716733"
     },
     {
       "condition_id": "0xfb2eec2e72db2cdd9d3813d59b0d5766c10ea3873d422b19fc428fbed27a20f9",
@@ -2734,14 +2724,14 @@
       "score": 0.0,
       "no_price": 0.0,
       "yes_price": 1.0,
-      "hours_until_expiry": -1030.1052272536112,
+      "hours_until_expiry": -1030.1052019916667,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-march-19-march-21",
       "event_title": "Elon Musk # tweets March 19 - March 21, 2026?",
       "bracket_label": "115-139",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.806960"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.716784"
     },
     {
       "condition_id": "0x1f9057f191479f1fc34c3539c3fff9deadb30440c68cbdbdc60e2f66f6448a88",
@@ -2753,14 +2743,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1030.1052272544443,
+      "hours_until_expiry": -1030.1052019952779,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-march-19-march-21",
       "event_title": "Elon Musk # tweets March 19 - March 21, 2026?",
       "bracket_label": "140-164",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.807013"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.716834"
     },
     {
       "condition_id": "0x0d0f9c7ff9ec578157fb56c2d7cba7b9d6f32b2bc112ebc49b75e185ea510f63",
@@ -2772,14 +2762,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1030.105227255,
+      "hours_until_expiry": -1030.105201996389,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-march-19-march-21",
       "event_title": "Elon Musk # tweets March 19 - March 21, 2026?",
       "bracket_label": "165-189",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.807061"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.716889"
     },
     {
       "condition_id": "0x03b5078ec7b3aeeb46d206037277dfef675fbc3d4c4b7cf37464193778ab6208",
@@ -2791,14 +2781,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1030.1052272622223,
+      "hours_until_expiry": -1030.1052019977778,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-march-19-march-21",
       "event_title": "Elon Musk # tweets March 19 - March 21, 2026?",
       "bracket_label": "190-214",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.807106"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.716939"
     },
     {
       "condition_id": "0x8d1517cf62d2234f03be8d5fa4188ef00f504d78147de77cf012e4787c83c171",
@@ -2810,14 +2800,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1030.1052272641666,
+      "hours_until_expiry": -1030.105201998889,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-march-19-march-21",
       "event_title": "Elon Musk # tweets March 19 - March 21, 2026?",
       "bracket_label": "215-239",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.807184"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.716984"
     },
     {
       "condition_id": "0xea8bf021ab22f94aeb33ee3b4aac74863b3e72a91a304fb476ba04639ba52c7d",
@@ -2829,14 +2819,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1030.1052272650002,
+      "hours_until_expiry": -1030.105202,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-march-19-march-21",
       "event_title": "Elon Musk # tweets March 19 - March 21, 2026?",
       "bracket_label": "240+",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.807234"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.717031"
     },
     {
       "condition_id": "0x7290b1aa1bf5b262bd60abd03564601131dbcfd500a6206a97da914cdcac1403",
@@ -2848,14 +2838,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -958.1052272658334,
+      "hours_until_expiry": -958.1052020013889,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-march-17-march-24",
       "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?",
       "bracket_label": "<20",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.807278"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.717079"
     },
     {
       "condition_id": "0xdc3f1159806894cb57c514544395d61899c8d9b69e2a9ae42810a60ee04b9ce1",
@@ -2867,14 +2857,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -958.1052272666666,
+      "hours_until_expiry": -958.1052020027778,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-march-17-march-24",
       "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?",
       "bracket_label": "40-59",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.807318"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.717161"
     },
     {
       "condition_id": "0xbafc6b93f7eab35ca46eac426c8e66700d3182d26c976865d1f9c1932b790daf",
@@ -2886,14 +2876,14 @@
       "score": 0.0,
       "no_price": 0.0,
       "yes_price": 1.0,
-      "hours_until_expiry": -958.1052272675,
+      "hours_until_expiry": -958.1052020047222,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-march-17-march-24",
       "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?",
       "bracket_label": "80-99",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.807366"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.717221"
     },
     {
       "condition_id": "0x92c74e9ab5383ddb3b7350e515beeecdc905078c58bc46d926d655fc9c1cbf43",
@@ -2905,14 +2895,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -958.1052272688888,
+      "hours_until_expiry": -958.1052020061111,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-march-17-march-24",
       "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?",
       "bracket_label": "120-139",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.807414"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.717272"
     },
     {
       "condition_id": "0xe2d9fbd3898231df8eb62c2f0af39e2a80528719d40acad6b6a4e03d84ab321a",
@@ -2924,14 +2914,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -958.1052272702779,
+      "hours_until_expiry": -958.1052020072221,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-march-17-march-24",
       "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?",
       "bracket_label": "160-179",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.807460"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.717320"
     },
     {
       "condition_id": "0x6a9af49e4d04d69c1d8be844267ddc798af37aec44c1ad06d09c16fb19c0846e",
@@ -2943,14 +2933,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -958.1052272708333,
+      "hours_until_expiry": -958.1052020091666,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-march-17-march-24",
       "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?",
       "bracket_label": "200+",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.807503"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.717366"
     },
     {
       "condition_id": "0x4e2d1b6e2e794c8b7009ff51d581fc719b8561868330cab0103c0e06906e2200",
@@ -2962,14 +2952,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -958.1052272716666,
+      "hours_until_expiry": -958.1052020102778,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-march-17-march-24",
       "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?",
       "bracket_label": "20-39",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.807543"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.717411"
     },
     {
       "condition_id": "0x5048059030b1b6f73783f63ebe091a7a8d1c2a62cdcacfc6c05d12595609cb36",
@@ -2981,14 +2971,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -958.1052272722222,
+      "hours_until_expiry": -958.1052020116666,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-march-17-march-24",
       "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?",
       "bracket_label": "60-79",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.807585"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.717457"
     },
     {
       "condition_id": "0xc5a605a47cade5cb82d4eb37a3d3aab9d18a68060c78bd9ca379410675799384",
@@ -3000,14 +2990,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -958.1052272730556,
+      "hours_until_expiry": -958.1052020127778,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-march-17-march-24",
       "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?",
       "bracket_label": "100-119",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.807623"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.717503"
     },
     {
       "condition_id": "0x80b37fac9896d0867c76aa2b70d8781e014ebe09ff0a3cbe649e3454bf51a461",
@@ -3019,14 +3009,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -958.1052272736111,
+      "hours_until_expiry": -958.1052020138889,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-march-17-march-24",
       "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?",
       "bracket_label": "140-159",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.807666"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.717547"
     },
     {
       "condition_id": "0xdee27a3b55df80a6ba16b88c9c9c2ba5df2893c7d56c0b2244c66979ac4063ad",
@@ -3038,14 +3028,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -958.1052272744445,
+      "hours_until_expiry": -958.1052020152778,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-march-17-march-24",
       "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?",
       "bracket_label": "180-199",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.807709"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.717592"
     },
     {
       "condition_id": "0x94dcd92d35fa81adacec9ec708338069c8135d7fd64225716c5592a9091ca0bb",
@@ -3057,14 +3047,14 @@
       "score": 0.0,
       "no_price": 0.9035,
       "yes_price": 0.0965,
-      "hours_until_expiry": -14.105227274999999,
+      "hours_until_expiry": -14.105202016388889,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-april-27-may-3",
       "event_title": "What will Trump post this week? (April 27 - May 3)",
       "bracket_label": "Trust Trump / Trust in Trump",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.811348"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.721408"
     },
     {
       "condition_id": "0xcb57385c7debbbd1b009b907e666a86adc51d00c87fbd9983af149ae367e5f23",
@@ -3076,14 +3066,14 @@
       "score": 0.0,
       "no_price": 0.7755,
       "yes_price": 0.2245,
-      "hours_until_expiry": -14.105227275833332,
+      "hours_until_expiry": -14.105202017777778,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-april-27-may-3",
       "event_title": "What will Trump post this week? (April 27 - May 3)",
       "bracket_label": "Prince Harry",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.811400"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.721463"
     },
     {
       "condition_id": "0x455f0044389da67a25c6bd49f8490fd7eda1ce0df09b3ec3ce473f7eb1081baa",
@@ -3095,14 +3085,14 @@
       "score": 0.0,
       "no_price": 0.77,
       "yes_price": 0.23,
-      "hours_until_expiry": -14.105227276388888,
+      "hours_until_expiry": -14.105202018888889,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-april-27-may-3",
       "event_title": "What will Trump post this week? (April 27 - May 3)",
       "bracket_label": "AI / Artificial Intelligence",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.811450"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.721517"
     },
     {
       "condition_id": "0x72f69744b423622470a516793311e9d9dc29d02b00836b0d1fc957b6afba01a4",
@@ -3114,14 +3104,14 @@
       "score": 0.0,
       "no_price": 0.8675,
       "yes_price": 0.1325,
-      "hours_until_expiry": -14.105227277777779,
+      "hours_until_expiry": -14.105202019999998,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-april-27-may-3",
       "event_title": "What will Trump post this week? (April 27 - May 3)",
       "bracket_label": "Free Tina Peters",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.811500"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.721571"
     },
     {
       "condition_id": "0x2e6d7ba733a074556f3bf198883453874230ecaf0141d7e1813c7d8d9a0930af",
@@ -3133,14 +3123,14 @@
       "score": 0.0,
       "no_price": 0.0,
       "yes_price": 1.0,
-      "hours_until_expiry": -14.105227278333334,
+      "hours_until_expiry": -14.105202021944445,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-april-27-may-3",
       "event_title": "What will Trump post this week? (April 27 - May 3)",
       "bracket_label": "Midterm",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.811593"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.721667"
     },
     {
       "condition_id": "0xe55f680d00538aec9bc253012023467db0fb7529332f75e38217daafda40f437",
@@ -3152,14 +3142,14 @@
       "score": 0.0,
       "no_price": 0.0,
       "yes_price": 1.0,
-      "hours_until_expiry": -14.105227279166668,
+      "hours_until_expiry": -14.105202023333334,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-april-27-may-3",
       "event_title": "What will Trump post this week? (April 27 - May 3)",
       "bracket_label": "Hoax / Scam",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.811636"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.721714"
     },
     {
       "condition_id": "0xe65c106aa601e254aaa51c2897d1d99be0d0f753f642422656e6aa1db940f6ac",
@@ -3171,14 +3161,14 @@
       "score": 0.0,
       "no_price": 0.885,
       "yes_price": 0.115,
-      "hours_until_expiry": -14.105227279722222,
+      "hours_until_expiry": -14.105202024444445,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-april-27-may-3",
       "event_title": "What will Trump post this week? (April 27 - May 3)",
       "bracket_label": "Ammo / Ammunition",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.811685"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.721765"
     },
     {
       "condition_id": "0x46c4681dd5d72854cf467f43379d747a9c8e3a6aeccde48b90a377f12bb321d1",
@@ -3190,14 +3180,14 @@
       "score": 0.0,
       "no_price": 0.0,
       "yes_price": 1.0,
-      "hours_until_expiry": -14.105227280555555,
+      "hours_until_expiry": -14.105202025555556,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-april-27-may-3",
       "event_title": "What will Trump post this week? (April 27 - May 3)",
       "bracket_label": "Book",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.811778"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.721862"
     },
     {
       "condition_id": "0x27d7806482b5b70d1de4315f56d614f89ef6f302dc65dd668e3ac220a7053414",
@@ -3209,14 +3199,14 @@
       "score": 0.0,
       "no_price": 0.895,
       "yes_price": 0.105,
-      "hours_until_expiry": -14.10522728111111,
+      "hours_until_expiry": -14.105202026944443,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-april-27-may-3",
       "event_title": "What will Trump post this week? (April 27 - May 3)",
       "bracket_label": "Make Iran Great Again / MIGA",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.811827"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.721912"
     },
     {
       "condition_id": "0x932570ae5de8fb7916c67f82daa17e16a468d3c1bd46ad309712f3673e351c6b",
@@ -3228,14 +3218,14 @@
       "score": 0.0,
       "no_price": 0.925,
       "yes_price": 0.075,
-      "hours_until_expiry": -14.105227281944444,
+      "hours_until_expiry": -14.105202028333332,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-april-27-may-3",
       "event_title": "What will Trump post this week? (April 27 - May 3)",
       "bracket_label": "POTUS",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.811876"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.721963"
     },
     {
       "condition_id": "0x461576596b01a0c6a97a86199a518149e426934750f9f2dfca5bb125fe724459",
@@ -3247,14 +3237,14 @@
       "score": 0.0,
       "no_price": 0.715,
       "yes_price": 0.285,
-      "hours_until_expiry": -14.1052272825,
+      "hours_until_expiry": -14.105202029444445,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-april-27-may-3",
       "event_title": "What will Trump post this week? (April 27 - May 3)",
       "bracket_label": "TrumpRX",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.811924"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.722012"
     },
     {
       "condition_id": "0x5263c577e0439bcfd3c9d5fb878927c7fdcc80e9ad28b56aad59b9f253651b11",
@@ -3266,14 +3256,14 @@
       "score": 0.0,
       "no_price": 0.895,
       "yes_price": 0.105,
-      "hours_until_expiry": -14.105227283333333,
+      "hours_until_expiry": -14.105202030833334,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-april-27-may-3",
       "event_title": "What will Trump post this week? (April 27 - May 3)",
       "bracket_label": "Third rate",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.812022"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.722115"
     },
     {
       "condition_id": "0xe5858ea29dbed9382d8964a725c233e4354d816923b77e7d271b8fbe31905659",
@@ -3285,14 +3275,14 @@
       "score": 0.0,
       "no_price": 0.925,
       "yes_price": 0.075,
-      "hours_until_expiry": -14.105227284166666,
+      "hours_until_expiry": -14.105202031944444,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-april-27-may-3",
       "event_title": "What will Trump post this week? (April 27 - May 3)",
       "bracket_label": "Landslide",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.812120"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.722249"
     },
     {
       "condition_id": "0x83be60d17b14122ff4182ad362e7cfbcca5a775af5a7b0974b6205b97375f4f2",
@@ -3304,14 +3294,14 @@
       "score": 0.0,
       "no_price": 0.66,
       "yes_price": 0.34,
-      "hours_until_expiry": -14.105227286388889,
+      "hours_until_expiry": -14.105202033055555,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-april-27-may-3",
       "event_title": "What will Trump post this week? (April 27 - May 3)",
       "bracket_label": "Prosecute / Prosecution",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.812199"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.722301"
     },
     {
       "condition_id": "0x33ec9ec088599e9dc1bc6835a2beee8cef0044695fce31436f36997ba05c8919",
@@ -3323,14 +3313,14 @@
       "score": 0.0,
       "no_price": 0.0,
       "yes_price": 1.0,
-      "hours_until_expiry": -14.105227286944444,
+      "hours_until_expiry": -14.105202035277777,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-april-27-may-3",
       "event_title": "What will Trump post this week? (April 27 - May 3)",
       "bracket_label": "Poll / Polling",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.812294"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.722397"
     },
     {
       "condition_id": "0x004eea5c260d56c6f159d3d0999164d3b3d1936d2ef5ad07261983a5e48fcad2",
@@ -3342,14 +3332,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 49.89477271222223,
+      "hours_until_expiry": 49.89479796361111,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-april-28-may-5",
       "event_title": "Donald Trump # Truth Social posts April 28 - May 5, 2026?",
       "bracket_label": "20-39",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.812433"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.722543"
     },
     {
       "condition_id": "0x9cba5c04b98645efa85d3aa7da81aece1c52dcb09e6c52fe0bd94a0bfa81999c",
@@ -3361,14 +3351,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 49.894772711388896,
+      "hours_until_expiry": 49.89479796222222,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-april-28-may-5",
       "event_title": "Donald Trump # Truth Social posts April 28 - May 5, 2026?",
       "bracket_label": "<20",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.812643"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.722753"
     },
     {
       "condition_id": "0x98079a9d4be0578c58d28c10e2606ddcd8c16557e65d8588e2d1166cf329ffeb",
@@ -3380,14 +3370,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 49.89477271055555,
+      "hours_until_expiry": 49.89479796111111,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-april-28-may-5",
       "event_title": "Elon Musk # tweets April 28 - May 5, 2026?",
       "bracket_label": "40-59",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.812985"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.723032"
     },
     {
       "condition_id": "0xa167ff84c205ab5c4dd87d76275475d9102b51c8900b83b470eb658cc9badb21",
@@ -3399,14 +3389,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 49.89477270972222,
+      "hours_until_expiry": 49.894797959722226,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-april-28-may-5",
       "event_title": "Elon Musk # tweets April 28 - May 5, 2026?",
       "bracket_label": "60-79",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.813055"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.723076"
     },
     {
       "condition_id": "0x2868b294ed1d9ae9258c73818030d52ef4766fe0f80749987849be05ac2de01c",
@@ -3418,14 +3408,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 49.894772709166666,
+      "hours_until_expiry": 49.894797958611115,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-april-28-may-5",
       "event_title": "Elon Musk # tweets April 28 - May 5, 2026?",
       "bracket_label": "<20",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.814279"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.723901"
     },
     {
       "condition_id": "0x5628a83fa0270c9ea3c4b705781e9128a73c635ca5fb7be3af3e5b2af5f600fe",
@@ -3437,14 +3427,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 49.89477270833333,
+      "hours_until_expiry": 49.894797957222224,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-april-28-may-5",
       "event_title": "Elon Musk # tweets April 28 - May 5, 2026?",
       "bracket_label": "20-39",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.814506"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.724058"
     },
     {
       "condition_id": "0x712f94c76cb071172033809329a169823db2fe0b3bf02843add78e17bba3ccbf",
@@ -3456,14 +3446,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 49.894772707777776,
+      "hours_until_expiry": 49.89479795611111,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-april-28-may-5",
       "event_title": "Elon Musk # tweets April 28 - May 5, 2026?",
       "bracket_label": "80-99",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.814570"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.724103"
     },
     {
       "condition_id": "0x42570209926a6357030a332cac73e5b07a47bf6d09919aa8254295d090475db6",
@@ -3475,14 +3465,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 121.89477270694445,
+      "hours_until_expiry": 121.894797955,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-may-1-may-8",
       "event_title": "Donald Trump # Truth Social posts May 1 - May 8, 2026?",
       "bracket_label": "<20",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.814936"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.724403"
     },
     {
       "condition_id": "0xe99384c2535b4031d5643d726169e2b6478114ed7469e0c662acd9dbda3901e6",
@@ -3494,14 +3484,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 121.89477270583333,
+      "hours_until_expiry": 121.8947979536111,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-1-may-8",
       "event_title": "Elon Musk # tweets May 1 - May 8, 2026?",
       "bracket_label": "<20",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.815781"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.725006"
     },
     {
       "condition_id": "0x8b65daa5f7dff3ab6f0aba01ae443bd665feb6ff8cc42b04c0c17549aff0b102",
@@ -3513,14 +3503,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 121.89477270500001,
+      "hours_until_expiry": 121.89479795166666,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-1-may-8",
       "event_title": "Elon Musk # tweets May 1 - May 8, 2026?",
       "bracket_label": "20-39",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-03T14:06:18.815847"
+      "profile_id": "conservative",
+      "timestamp": "2026-05-03T14:06:18.725052"
     }
   ]
 }
