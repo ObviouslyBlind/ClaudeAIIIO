@@ -1,18 +1,22 @@
 {
   "strategy": {
-    "strategy_id": "no_side",
-    "strategy_version": "1.0",
-    "strategy_description": "Original NO-side timer strategy: bet NO on bracket markets where event is unlikely by deadline.",
-    "engine": "default",
+    "strategy_id": "family_guarded_no",
+    "strategy_version": "0.1",
+    "strategy_description": "Stricter NO-side with family-level risk controls and position-aware thresholds. Research strategy \u2014 paper only.",
+    "engine": "family_guarded",
     "profile_id": "moderate",
-    "profile_description": "Balanced: standard thresholds from Phase 4.",
+    "profile_description": "Family-guarded moderate: tail-friendly, adjacent-strict, hot-blocked.",
     "no_price_min": 0.5,
     "no_price_max": 0.95,
     "no_price_trade_min": 0.7,
     "mixed_evidence_low": 0.4,
     "mixed_evidence_high": 0.6,
     "max_hours_to_expiry": 72.0,
-    "default_stake": 100.0
+    "default_stake": 100.0,
+    "tail_no_price_trade_min": 0.65,
+    "adjacent_no_price_trade_min": 0.8,
+    "hot_no_price_trade_min": 0.92,
+    "hot_allowed": false
   },
   "input_file": "relevant_markets_20260522_021431.json",
   "results": [
@@ -21,2975 +25,3145 @@
       "question": "Will Trump post \"Six Seven\" on Truth Social this week?",
       "signal": "TRADE",
       "reasons": [
-        "NO price 0.77 \u2014 good upside potential.",
+        "position=tail",
+        "Position threshold for tail: NO >= 0.65",
+        "NO price 0.77 \u2014 above tail threshold.",
         "45.8h until expiry \u2014 within 2-day window.",
-        "TRADE: NO price and expiry both favorable."
+        "TRADE: NO price and expiry favorable for tail position."
       ],
-      "score": 66.20000000000002,
+      "score": 71.0,
       "no_price": 0.77,
       "yes_price": 0.23,
-      "hours_until_expiry": 45.751929088333334,
+      "hours_until_expiry": 45.751888664999996,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-may-24",
       "event_title": "What will Trump post this week? (May 24)",
       "bracket_label": "Six Seven",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.054385"
+      "timestamp": "2026-05-22T02:14:53.198151"
     },
     {
       "condition_id": "0xf23c8556ad27eaeec41bcdace10f73cb965443f627ac408da9f8c70f3ad43530",
       "question": "Will Trump post \"Autopen\" on Truth Social this week?",
       "signal": "TRADE",
       "reasons": [
-        "NO price 0.73 \u2014 good upside potential.",
+        "position=tail",
+        "Position threshold for tail: NO >= 0.65",
+        "NO price 0.73 \u2014 above tail threshold.",
         "45.8h until expiry \u2014 within 2-day window.",
-        "TRADE: NO price and expiry both favorable."
+        "TRADE: NO price and expiry favorable for tail position."
       ],
-      "score": 60.60000000000001,
+      "score": 66.33333333333333,
       "no_price": 0.735,
       "yes_price": 0.265,
-      "hours_until_expiry": 45.751929086666664,
+      "hours_until_expiry": 45.75188866333333,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-may-24",
       "event_title": "What will Trump post this week? (May 24)",
       "bracket_label": "Autopen",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.054710"
+      "timestamp": "2026-05-22T02:14:53.199078"
+    },
+    {
+      "condition_id": "0xab38bfabe2994e2f55b70b3cca635997984863fb908ae3283b148e5dd766a303",
+      "question": "Will Trump post \"Shenanigan\" on Truth Social this week?",
+      "signal": "TRADE",
+      "reasons": [
+        "position=tail",
+        "Position threshold for tail: NO >= 0.65",
+        "NO price 0.69 \u2014 above tail threshold.",
+        "45.8h until expiry \u2014 within 2-day window.",
+        "TRADE: NO price and expiry favorable for tail position."
+      ],
+      "score": 60.99999999999999,
+      "no_price": 0.695,
+      "yes_price": 0.305,
+      "hours_until_expiry": 45.75188866194444,
+      "market_type": "trump_posting",
+      "event_slug": "what-will-trump-post-this-week-may-24",
+      "event_title": "What will Trump post this week? (May 24)",
+      "bracket_label": "Shenanigan",
+      "strategy_id": "family_guarded_no",
+      "profile_id": "moderate",
+      "timestamp": "2026-05-22T02:14:53.198559"
+    },
+    {
+      "condition_id": "0x855a41b0e06335e2170a6e60c9e7ff3e6a763050f7cac3e47640c3bc6a1456a7",
+      "question": "Will Trump post \"Cocaine\" on Truth Social this week?",
+      "signal": "TRADE",
+      "reasons": [
+        "position=tail",
+        "Position threshold for tail: NO >= 0.65",
+        "NO price 0.69 \u2014 above tail threshold.",
+        "45.8h until expiry \u2014 within 2-day window.",
+        "TRADE: NO price and expiry favorable for tail position."
+      ],
+      "score": 59.66666666666667,
+      "no_price": 0.685,
+      "yes_price": 0.315,
+      "hours_until_expiry": 45.75188866083333,
+      "market_type": "trump_posting",
+      "event_slug": "what-will-trump-post-this-week-may-24",
+      "event_title": "What will Trump post this week? (May 24)",
+      "bracket_label": "Cocaine",
+      "strategy_id": "family_guarded_no",
+      "profile_id": "moderate",
+      "timestamp": "2026-05-22T02:14:53.198454"
+    },
+    {
+      "condition_id": "0x42eb072d56224af96f70b086e88110418c5607420f2d500dec4c3af3eb38c1b2",
+      "question": "Will Trump post \"Peanut\" on Truth Social this week?",
+      "signal": "TRADE",
+      "reasons": [
+        "position=tail",
+        "Position threshold for tail: NO >= 0.65",
+        "NO price 0.66 \u2014 above tail threshold.",
+        "45.8h until expiry \u2014 within 2-day window.",
+        "TRADE: NO price and expiry favorable for tail position."
+      ],
+      "score": 55.666666666666664,
+      "no_price": 0.655,
+      "yes_price": 0.345,
+      "hours_until_expiry": 45.75188865972222,
+      "market_type": "trump_posting",
+      "event_slug": "what-will-trump-post-this-week-may-24",
+      "event_title": "What will Trump post this week? (May 24)",
+      "bracket_label": "Peanut",
+      "strategy_id": "family_guarded_no",
+      "profile_id": "moderate",
+      "timestamp": "2026-05-22T02:14:53.198881"
+    },
+    {
+      "condition_id": "0x72dadd54b74f263a8642508912db9d517da9cc6ab89bb68153e459ae5bd3b720",
+      "question": "Will Trump post \"Cookie\" on Truth Social this week?",
+      "signal": "TRADE",
+      "reasons": [
+        "position=tail",
+        "Position threshold for tail: NO >= 0.65",
+        "NO price 0.65 \u2014 above tail threshold.",
+        "45.8h until expiry \u2014 within 2-day window.",
+        "TRADE: NO price and expiry favorable for tail position."
+      ],
+      "score": 55.0,
+      "no_price": 0.65,
+      "yes_price": 0.35,
+      "hours_until_expiry": 45.75188865861111,
+      "market_type": "trump_posting",
+      "event_slug": "what-will-trump-post-this-week-may-24",
+      "event_title": "What will Trump post this week? (May 24)",
+      "bracket_label": "Cookie",
+      "strategy_id": "family_guarded_no",
+      "profile_id": "moderate",
+      "timestamp": "2026-05-22T02:14:53.199906"
     },
     {
       "condition_id": "0x34f162f61a90524c7970782b6b64e04969ab1d68627fcda93d065aa49ad2abfb",
       "question": "Will Elon Musk post 280-299 tweets from May 15 to May 22, 2026?",
       "signal": "WATCH",
       "reasons": [
-        "NO price 0.65 \u2014 moderate, worth watching.",
+        "position=adjacent",
+        "Position threshold for adjacent: NO >= 0.80",
+        "NO price 0.65 \u2014 below adjacent threshold (0.80). WATCH only.",
         "13.8h until expiry \u2014 approaching deadline.",
         "WATCH: conditions not strong enough for a trade yet."
       ],
       "score": 50.0,
       "no_price": 0.6475,
       "yes_price": 0.3525,
-      "hours_until_expiry": 13.751929085,
+      "hours_until_expiry": 13.751888657499999,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-15-may-22",
       "event_title": "Elon Musk # tweets May 15 - May 22, 2026?",
       "bracket_label": "280-299",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.053827"
+      "timestamp": "2026-05-22T02:14:53.196951"
     },
     {
       "condition_id": "0x49d36aebf463f0c16c85654cc1bedc7b0ee0f1bbc5ea969139061d9a2da0036e",
       "question": "Will Trump post \"Wall Street\" on Truth Social this week?",
       "signal": "WATCH",
       "reasons": [
-        "NO price 0.65 \u2014 moderate, worth watching.",
+        "position=adjacent",
+        "Position threshold for adjacent: NO >= 0.80",
+        "NO price 0.65 \u2014 below adjacent threshold (0.80). WATCH only.",
         "45.8h until expiry \u2014 within 2-day window.",
         "WATCH: conditions not strong enough for a trade yet."
       ],
       "score": 45.0,
       "no_price": 0.645,
       "yes_price": 0.355,
-      "hours_until_expiry": 45.75192908416666,
+      "hours_until_expiry": 45.751888656666665,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-may-24",
       "event_title": "What will Trump post this week? (May 24)",
       "bracket_label": "Wall Street",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.054306"
-    },
-    {
-      "condition_id": "0x855a41b0e06335e2170a6e60c9e7ff3e6a763050f7cac3e47640c3bc6a1456a7",
-      "question": "Will Trump post \"Cocaine\" on Truth Social this week?",
-      "signal": "WATCH",
-      "reasons": [
-        "NO price 0.69 \u2014 moderate, worth watching.",
-        "45.8h until expiry \u2014 within 2-day window.",
-        "WATCH: conditions not strong enough for a trade yet."
-      ],
-      "score": 45.0,
-      "no_price": 0.685,
-      "yes_price": 0.315,
-      "hours_until_expiry": 45.75192908305556,
-      "market_type": "trump_posting",
-      "event_slug": "what-will-trump-post-this-week-may-24",
-      "event_title": "What will Trump post this week? (May 24)",
-      "bracket_label": "Cocaine",
-      "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.054476"
-    },
-    {
-      "condition_id": "0xab38bfabe2994e2f55b70b3cca635997984863fb908ae3283b148e5dd766a303",
-      "question": "Will Trump post \"Shenanigan\" on Truth Social this week?",
-      "signal": "WATCH",
-      "reasons": [
-        "NO price 0.69 \u2014 moderate, worth watching.",
-        "45.8h until expiry \u2014 within 2-day window.",
-        "WATCH: conditions not strong enough for a trade yet."
-      ],
-      "score": 45.0,
-      "no_price": 0.695,
-      "yes_price": 0.305,
-      "hours_until_expiry": 45.751929081944446,
-      "market_type": "trump_posting",
-      "event_slug": "what-will-trump-post-this-week-may-24",
-      "event_title": "What will Trump post this week? (May 24)",
-      "bracket_label": "Shenanigan",
-      "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.054520"
-    },
-    {
-      "condition_id": "0x42eb072d56224af96f70b086e88110418c5607420f2d500dec4c3af3eb38c1b2",
-      "question": "Will Trump post \"Peanut\" on Truth Social this week?",
-      "signal": "WATCH",
-      "reasons": [
-        "NO price 0.66 \u2014 moderate, worth watching.",
-        "45.8h until expiry \u2014 within 2-day window.",
-        "WATCH: conditions not strong enough for a trade yet."
-      ],
-      "score": 45.0,
-      "no_price": 0.655,
-      "yes_price": 0.345,
-      "hours_until_expiry": 45.75192908111111,
-      "market_type": "trump_posting",
-      "event_slug": "what-will-trump-post-this-week-may-24",
-      "event_title": "What will Trump post this week? (May 24)",
-      "bracket_label": "Peanut",
-      "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.054625"
+      "timestamp": "2026-05-22T02:14:53.197852"
     },
     {
       "condition_id": "0xc2f9f6025cb4d5c411b24de4fc077c9b03b0eff98aecc08eebf1becc7c8bb35d",
       "question": "Will Trump post \"Treason\" or \"Treasonous\" on Truth Social this week?",
       "signal": "WATCH",
       "reasons": [
-        "NO price 0.62 \u2014 moderate, worth watching.",
+        "position=tail",
+        "Position threshold for tail: NO >= 0.65",
+        "NO price 0.62 \u2014 below tail threshold (0.65). WATCH only.",
         "45.8h until expiry \u2014 within 2-day window.",
         "WATCH: conditions not strong enough for a trade yet."
       ],
       "score": 45.0,
       "no_price": 0.625,
       "yes_price": 0.375,
-      "hours_until_expiry": 45.751929080277776,
+      "hours_until_expiry": 45.751888655555554,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-may-24",
       "event_title": "What will Trump post this week? (May 24)",
       "bracket_label": "Treason / Treasonous",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.054859"
+      "timestamp": "2026-05-22T02:14:53.199468"
     },
     {
       "condition_id": "0xc83901d2cb81083a8a216de891ac9bbcb25667b279897135d0374602a2091a03",
       "question": "Will Trump post \"Tina\" on Truth Social this week?",
       "signal": "WATCH",
       "reasons": [
-        "NO price 0.60 \u2014 moderate, worth watching.",
+        "position=tail",
+        "Position threshold for tail: NO >= 0.65",
+        "NO price 0.60 \u2014 below tail threshold (0.65). WATCH only.",
         "45.8h until expiry \u2014 within 2-day window.",
         "WATCH: conditions not strong enough for a trade yet."
       ],
       "score": 45.0,
       "no_price": 0.605,
       "yes_price": 0.395,
-      "hours_until_expiry": 45.751929079444444,
+      "hours_until_expiry": 45.75188865472222,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-may-24",
       "event_title": "What will Trump post this week? (May 24)",
       "bracket_label": "Tina",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.054905"
+      "timestamp": "2026-05-22T02:14:53.199568"
     },
     {
       "condition_id": "0x5c1e5b09e4fb4080c1bb60f7d93f28f1ded5bb9609fe483d1abcca17689dca5a",
       "question": "Will Trump post \"World Cup\" on Truth Social this week?",
       "signal": "WATCH",
       "reasons": [
-        "NO price 0.61 \u2014 moderate, worth watching.",
+        "position=tail",
+        "Position threshold for tail: NO >= 0.65",
+        "NO price 0.61 \u2014 below tail threshold (0.65). WATCH only.",
         "45.8h until expiry \u2014 within 2-day window.",
         "WATCH: conditions not strong enough for a trade yet."
       ],
       "score": 45.0,
       "no_price": 0.61,
       "yes_price": 0.39,
-      "hours_until_expiry": 45.75192907861111,
+      "hours_until_expiry": 45.75188865388889,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-may-24",
       "event_title": "What will Trump post this week? (May 24)",
       "bracket_label": "World Cup",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.054938"
+      "timestamp": "2026-05-22T02:14:53.199675"
     },
     {
       "condition_id": "0xb35d4476aba87f9d7dffbc362528baa85e0cf7a732e5bc0c5d6f6630f39c535b",
       "question": "Will Trump post \"Restaurant\" on Truth Social this week?",
       "signal": "WATCH",
       "reasons": [
-        "NO price 0.61 \u2014 moderate, worth watching.",
+        "position=tail",
+        "Position threshold for tail: NO >= 0.65",
+        "NO price 0.61 \u2014 below tail threshold (0.65). WATCH only.",
         "45.8h until expiry \u2014 within 2-day window.",
         "WATCH: conditions not strong enough for a trade yet."
       ],
       "score": 45.0,
       "no_price": 0.615,
       "yes_price": 0.385,
-      "hours_until_expiry": 45.7519290775,
+      "hours_until_expiry": 45.75188865194445,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-may-24",
       "event_title": "What will Trump post this week? (May 24)",
       "bracket_label": "Restaurant",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.054971"
-    },
-    {
-      "condition_id": "0x72dadd54b74f263a8642508912db9d517da9cc6ab89bb68153e459ae5bd3b720",
-      "question": "Will Trump post \"Cookie\" on Truth Social this week?",
-      "signal": "WATCH",
-      "reasons": [
-        "NO price 0.65 \u2014 moderate, worth watching.",
-        "45.8h until expiry \u2014 within 2-day window.",
-        "WATCH: conditions not strong enough for a trade yet."
-      ],
-      "score": 45.0,
-      "no_price": 0.65,
-      "yes_price": 0.35,
-      "hours_until_expiry": 45.75192907666667,
-      "market_type": "trump_posting",
-      "event_slug": "what-will-trump-post-this-week-may-24",
-      "event_title": "What will Trump post this week? (May 24)",
-      "bracket_label": "Cookie",
-      "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.054999"
+      "timestamp": "2026-05-22T02:14:53.199801"
     },
     {
       "condition_id": "0x36a4357f03790975476b6e0f4661f1289293e3770b87e812713f8fc9e07a9977",
       "question": "Will Trump post \"IQ\" on Truth Social this week?",
       "signal": "WATCH",
       "reasons": [
-        "NO price 0.62 \u2014 moderate, worth watching.",
+        "position=tail",
+        "Position threshold for tail: NO >= 0.65",
+        "NO price 0.62 \u2014 below tail threshold (0.65). WATCH only.",
         "45.8h until expiry \u2014 within 2-day window.",
         "WATCH: conditions not strong enough for a trade yet."
       ],
       "score": 45.0,
       "no_price": 0.62,
       "yes_price": 0.38,
-      "hours_until_expiry": 45.751929075,
+      "hours_until_expiry": 45.75188865083334,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-may-24",
       "event_title": "What will Trump post this week? (May 24)",
       "bracket_label": "IQ",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.055026"
+      "timestamp": "2026-05-22T02:14:53.200008"
     },
     {
       "condition_id": "0x722f10197c0b43df799365dde72bc9ab8288232e2071eaca7d3f02dd048689b5",
       "question": "Will Trump post \"Critic\" on Truth Social this week?",
       "signal": "WATCH",
       "reasons": [
-        "NO price 0.64 \u2014 moderate, worth watching.",
+        "position=tail",
+        "Position threshold for tail: NO >= 0.65",
+        "NO price 0.64 \u2014 below tail threshold (0.65). WATCH only.",
         "45.8h until expiry \u2014 within 2-day window.",
         "WATCH: conditions not strong enough for a trade yet."
       ],
       "score": 45.0,
       "no_price": 0.635,
       "yes_price": 0.365,
-      "hours_until_expiry": 45.75192907444445,
+      "hours_until_expiry": 45.75188865,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-may-24",
       "event_title": "What will Trump post this week? (May 24)",
       "bracket_label": "Critic",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.055053"
+      "timestamp": "2026-05-22T02:14:53.200109"
     },
     {
       "condition_id": "0xabfde500c12b879f7ad012f88f2ebf970cba282e52c23b7b0c108440038f48cd",
       "question": "Will Trump post \"Gene\" or \"Genetic\" on Truth Social this week?",
       "signal": "WATCH",
       "reasons": [
-        "NO price 0.62 \u2014 moderate, worth watching.",
+        "position=tail",
+        "Position threshold for tail: NO >= 0.65",
+        "NO price 0.62 \u2014 below tail threshold (0.65). WATCH only.",
         "45.8h until expiry \u2014 within 2-day window.",
         "WATCH: conditions not strong enough for a trade yet."
       ],
       "score": 45.0,
       "no_price": 0.62,
       "yes_price": 0.38,
-      "hours_until_expiry": 45.75192907388889,
+      "hours_until_expiry": 45.751888649166666,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-may-24",
       "event_title": "What will Trump post this week? (May 24)",
       "bracket_label": "Gene / Genetic",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.055080"
+      "timestamp": "2026-05-22T02:14:53.200210"
     },
     {
       "condition_id": "0x9f93988165ecab150c53a03066369d723fbaec9d03a33e0a2ba0de813d739e1e",
       "question": "Will Trump post \"Scam\" or \"Hoax\" on Truth Social this week?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "YES price 0.47 is in the mixed-evidence zone (0.4-0.6). Too uncertain."
       ],
       "score": 20,
       "no_price": 0.53,
       "yes_price": 0.47,
-      "hours_until_expiry": 45.751929073333336,
+      "hours_until_expiry": 45.751888648333335,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-may-24",
       "event_title": "What will Trump post this week? (May 24)",
       "bracket_label": "Scam / Hoax",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.054557"
+      "timestamp": "2026-05-22T02:14:53.198658"
     },
     {
       "condition_id": "0x24f578d3a9e36e0aebaff3b5efad283fa902c49d639be414c578ec01e279dc2d",
       "question": "Will Trump post \"Shit\" or \"Fuck\" or \"Fucked\" on Truth Social this week?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "YES price 0.48 is in the mixed-evidence zone (0.4-0.6). Too uncertain."
       ],
       "score": 20,
       "no_price": 0.52,
       "yes_price": 0.48,
-      "hours_until_expiry": 45.75192907277778,
+      "hours_until_expiry": 45.75188864722222,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-may-24",
       "event_title": "What will Trump post this week? (May 24)",
       "bracket_label": "Shit / Fuck / Fucked",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.054783"
+      "timestamp": "2026-05-22T02:14:53.199273"
     },
     {
       "condition_id": "0x26ca5f5bc7bd9ab1954e1ca76b77293cdbfe890cd5d8bb767c34332bc6c3af5c",
       "question": "Will Trump post \"Dad\" or \"Daddy\" on Truth Social this week?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "YES price 0.45 is in the mixed-evidence zone (0.4-0.6). Too uncertain."
       ],
       "score": 20,
       "no_price": 0.555,
       "yes_price": 0.445,
-      "hours_until_expiry": 45.751929072222225,
+      "hours_until_expiry": 45.75188864555556,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-may-24",
       "event_title": "What will Trump post this week? (May 24)",
       "bracket_label": "Dad / Daddy",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.055111"
+      "timestamp": "2026-05-22T02:14:53.200313"
     },
     {
       "condition_id": "0xc666e796bd741ab01847b24fc52b87f833b4878f8da57e1f2cba5519520a1887",
       "question": "Will Trump post \"Television\" or \"TV\" on Truth Social this week?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "YES price 0.49 is in the mixed-evidence zone (0.4-0.6). Too uncertain."
       ],
       "score": 20,
       "no_price": 0.505,
       "yes_price": 0.495,
-      "hours_until_expiry": 45.751929071666666,
+      "hours_until_expiry": 45.75188864472222,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-may-24",
       "event_title": "What will Trump post this week? (May 24)",
       "bracket_label": "Television / TV",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.055163"
+      "timestamp": "2026-05-22T02:14:53.200517"
     },
     {
       "condition_id": "0xffa8c83020d01f73f55712f249d32202fcaef0f26e0eed7b7b8d554228f42daa",
       "question": "Will Trump post \"Central Casting\" on Truth Social this week?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "YES price 0.49 is in the mixed-evidence zone (0.4-0.6). Too uncertain."
       ],
       "score": 20,
       "no_price": 0.5095,
       "yes_price": 0.4905,
-      "hours_until_expiry": 45.751929071111114,
+      "hours_until_expiry": 45.75188864361111,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-may-24",
       "event_title": "What will Trump post this week? (May 24)",
       "bracket_label": "Central Casting",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.055188"
+      "timestamp": "2026-05-22T02:14:53.200615"
     },
     {
       "condition_id": "0xacfa636c8eef14125087bb1932f7e5fc5d2f286861ae8afada6378c09f171ba0",
       "question": "Will Trump post \"Midterm\" on Truth Social this week?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "YES price 0.47 is in the mixed-evidence zone (0.4-0.6). Too uncertain."
       ],
       "score": 20,
       "no_price": 0.525,
       "yes_price": 0.475,
-      "hours_until_expiry": 45.75192906888889,
+      "hours_until_expiry": 45.75188864277778,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-may-24",
       "event_title": "What will Trump post this week? (May 24)",
       "bracket_label": "Midterm",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.055213"
+      "timestamp": "2026-05-22T02:14:53.200730"
     },
     {
       "condition_id": "0x204594f80ea51049f285bf770c43864b1f966d12c308cefa4d26c2a8f9f64196",
       "question": "Will Elon Musk post 780-799 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Expiry in 241.8h \u2014 exceeds 72.0h max."
       ],
       "score": 15,
       "no_price": 0.9445,
       "yes_price": 0.0555,
-      "hours_until_expiry": 241.75192906805557,
+      "hours_until_expiry": 241.7518886413889,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "780-799",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.052063"
+      "timestamp": "2026-05-22T02:14:53.193163"
     },
     {
       "condition_id": "0x11a78aebb5a769ff8ac6b2cb61b4d5138c4de9aa6e398197ab9d1d37a3886db9",
       "question": "Will Elon Musk post 800-839 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Expiry in 241.8h \u2014 exceeds 72.0h max."
       ],
       "score": 15,
       "no_price": 0.8695,
       "yes_price": 0.1305,
-      "hours_until_expiry": 241.7519290663889,
+      "hours_until_expiry": 241.75188864055556,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "800-839",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.052100"
+      "timestamp": "2026-05-22T02:14:53.193262"
     },
     {
       "condition_id": "0xa5144cd6a61ad9fe20f4a095a2548cd8e5e3d30f3c378843b451f804a1e10cd9",
       "question": "Will Elon Musk post 840-879 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=adjacent",
         "Expiry in 241.8h \u2014 exceeds 72.0h max."
       ],
       "score": 15,
       "no_price": 0.8605,
       "yes_price": 0.1395,
-      "hours_until_expiry": 241.75192906527778,
+      "hours_until_expiry": 241.75188863944445,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "840-879",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.052136"
-    },
-    {
-      "condition_id": "0x0259d891dd9a812dcabac2d1eca28de01d92980d4116f1f1c6d89083f57e6801",
-      "question": "Will Elon Musk post 880-919 tweets in May 2026?",
-      "signal": "SKIP",
-      "reasons": [
-        "Expiry in 241.8h \u2014 exceeds 72.0h max."
-      ],
-      "score": 15,
-      "no_price": 0.8355,
-      "yes_price": 0.1645,
-      "hours_until_expiry": 241.7519290641667,
-      "market_type": "musk_posting",
-      "event_slug": "elon-musk-of-tweets-may-2026",
-      "event_title": "Elon Musk musk # tweets in May 2026?",
-      "bracket_label": "880-919",
-      "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.052168"
+      "timestamp": "2026-05-22T02:14:53.193354"
     },
     {
       "condition_id": "0xda7e6bec00eb62d8a4cd40c2dec6c8fdf0dca05eb38f6adc09d40f20cd37d5d0",
       "question": "Will Elon Musk post 920-959 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=adjacent",
         "Expiry in 241.8h \u2014 exceeds 72.0h max."
       ],
       "score": 15,
       "no_price": 0.8575,
       "yes_price": 0.1425,
-      "hours_until_expiry": 241.75192906305557,
+      "hours_until_expiry": 241.75188863861112,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "920-959",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.052202"
+      "timestamp": "2026-05-22T02:14:53.193527"
     },
     {
       "condition_id": "0xc1650829f01af35069bd4a10ad606b1bbca1682aa5d2f4aa5f6fe668a0b8ed0d",
       "question": "Will Elon Musk post 960-999 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Expiry in 241.8h \u2014 exceeds 72.0h max."
       ],
       "score": 15,
       "no_price": 0.8995,
       "yes_price": 0.1005,
-      "hours_until_expiry": 241.75192906222222,
+      "hours_until_expiry": 241.7518886377778,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "960-999",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.052240"
+      "timestamp": "2026-05-22T02:14:53.193620"
     },
     {
       "condition_id": "0xb4ea0b4f5d1cdbb304e97a13f98ff4ff29177cc19fc63837b8e1af1674559777",
       "question": "Will Elon Musk post 1000-1039 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Expiry in 241.8h \u2014 exceeds 72.0h max."
       ],
       "score": 15,
       "no_price": 0.9345,
       "yes_price": 0.0655,
-      "hours_until_expiry": 241.7519290611111,
+      "hours_until_expiry": 241.75188863666668,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "1000-1039",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.052276"
+      "timestamp": "2026-05-22T02:14:53.193729"
     },
     {
       "condition_id": "0x808cce76bd50d5e98878017b1ee998ab1b2415d198c91f26991fef8f51017de4",
       "question": "Will Elon Musk post 560-579 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 1.00 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 241.75192906,
+      "hours_until_expiry": 241.75188863555556,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "560-579",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.051669"
+      "timestamp": "2026-05-22T02:14:53.192051"
     },
     {
       "condition_id": "0xb717d9839c9162925b4f405ce5106195e55dc6e1098df9ac66b2c15b664458ec",
       "question": "Will Elon Musk post 580-599 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 1.00 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 241.7519290588889,
+      "hours_until_expiry": 241.7518886347222,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "580-599",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.051728"
+      "timestamp": "2026-05-22T02:14:53.192146"
     },
     {
       "condition_id": "0x41ed003f987683151eee0b52a1ef3c408225a390786620602f6d179f2df32fb7",
       "question": "Will Elon Musk post 600-619 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 1.00 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9985,
       "yes_price": 0.0015,
-      "hours_until_expiry": 241.75192905805557,
+      "hours_until_expiry": 241.7518886338889,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "600-619",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.051766"
+      "timestamp": "2026-05-22T02:14:53.192235"
     },
     {
       "condition_id": "0x0fb7dabe04257b707acf5fb9c1d91920a9f6a37fa8ccbf3e588930643ea38bb7",
       "question": "Will Elon Musk post 620-639 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 1.00 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9975,
       "yes_price": 0.0025,
-      "hours_until_expiry": 241.75192905694445,
+      "hours_until_expiry": 241.7518886327778,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "620-639",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.051801"
+      "timestamp": "2026-05-22T02:14:53.192324"
     },
     {
       "condition_id": "0xab086d9aa51ae37e419c8f221f864efec092c0b795957da0b1e9562a46392878",
       "question": "Will Elon Musk post 640-659 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 1.00 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9975,
       "yes_price": 0.0025,
-      "hours_until_expiry": 241.75192905583336,
+      "hours_until_expiry": 241.75188863138888,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "640-659",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.051834"
+      "timestamp": "2026-05-22T02:14:53.192412"
     },
     {
       "condition_id": "0x9e9870ea4af5f0cb8a225aecfdec5f36b7fc9823391aef66fe07a2267e2eb6fa",
       "question": "Will Elon Musk post 660-679 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 1.00 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9955,
       "yes_price": 0.0045,
-      "hours_until_expiry": 241.751929055,
+      "hours_until_expiry": 241.75188863055556,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "660-679",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.051865"
+      "timestamp": "2026-05-22T02:14:53.192508"
     },
     {
       "condition_id": "0xd825250ce2c6446b5537befa6b7e1cde94b5d0bda86b0951463e7c948bdeb1e5",
       "question": "Will Elon Musk post 680-699 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 0.99 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9915,
       "yes_price": 0.0085,
-      "hours_until_expiry": 241.7519290538889,
+      "hours_until_expiry": 241.75188862944447,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "680-699",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.051897"
+      "timestamp": "2026-05-22T02:14:53.192659"
     },
     {
       "condition_id": "0x75592d2622130664344647231e5b8c103893438631c39b5340161240df8940d2",
       "question": "Will Elon Musk post 700-719 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 0.99 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9915,
       "yes_price": 0.0085,
-      "hours_until_expiry": 241.75192905277777,
+      "hours_until_expiry": 241.7518886286111,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "700-719",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.051929"
+      "timestamp": "2026-05-22T02:14:53.192785"
     },
     {
       "condition_id": "0xe4320a403538a2781ec2115bc866d9d2522075c80be111d822fed779121901c7",
       "question": "Will Elon Musk post 720-739 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 0.99 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9865,
       "yes_price": 0.0135,
-      "hours_until_expiry": 241.75192905194444,
+      "hours_until_expiry": 241.7518886277778,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "720-739",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.051960"
+      "timestamp": "2026-05-22T02:14:53.192881"
     },
     {
       "condition_id": "0x187cacb4f8c5fa9431b8abafe271db19a3f064fe6fa32e3b0d894170b09d1c2d",
       "question": "Will Elon Musk post 740-759 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 0.97 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9695,
       "yes_price": 0.0305,
-      "hours_until_expiry": 241.75192905083335,
+      "hours_until_expiry": 241.75188862666664,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "740-759",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.051991"
+      "timestamp": "2026-05-22T02:14:53.192973"
     },
     {
       "condition_id": "0xf2b24f5d11c1e419de1405d295b6d383eef9d432d6609c9e69113aadde709b37",
       "question": "Will Elon Musk post 760-779 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 0.96 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9585,
       "yes_price": 0.0415,
-      "hours_until_expiry": 241.75192905,
+      "hours_until_expiry": 241.75188862583335,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "760-779",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.052023"
+      "timestamp": "2026-05-22T02:14:53.193067"
     },
     {
       "condition_id": "0xae04c6c44d78799ea3f43cc65111c72a9ca2ab4fa45806f58cf808070fb400b3",
       "question": "Will Elon Musk post 1040-1079 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 0.96 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.956,
       "yes_price": 0.044,
-      "hours_until_expiry": 241.75192904888888,
+      "hours_until_expiry": 241.75188862500002,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "1040-1079",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.052308"
+      "timestamp": "2026-05-22T02:14:53.193821"
     },
     {
       "condition_id": "0x46dbccb9e4fc23b0b59332c8debb45d3f79fc19797bc6d399333f8b1e00a3111",
       "question": "Will Elon Musk post 1080-1119 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 0.97 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.974,
       "yes_price": 0.026,
-      "hours_until_expiry": 241.75192904805553,
+      "hours_until_expiry": 241.7518886238889,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "1080-1119",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.052340"
+      "timestamp": "2026-05-22T02:14:53.193909"
     },
     {
       "condition_id": "0x0f29557c8b41eb66af089878e3e79b9c4339c2dcace4729cf52aea6e21bec3d6",
       "question": "Will Elon Musk post 1120-1159 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 0.98 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9835,
       "yes_price": 0.0165,
-      "hours_until_expiry": 241.75192904694447,
+      "hours_until_expiry": 241.75188862305555,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "1120-1159",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.052376"
+      "timestamp": "2026-05-22T02:14:53.194001"
     },
     {
       "condition_id": "0x2089a75814ea1885faaa9ac9687627035967f780e362dcddfb5438fb842040e4",
       "question": "Will Elon Musk post 1160-1199 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 0.99 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9875,
       "yes_price": 0.0125,
-      "hours_until_expiry": 241.7519290452778,
+      "hours_until_expiry": 241.7518886213889,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "1160-1199",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.052408"
+      "timestamp": "2026-05-22T02:14:53.194090"
     },
     {
       "condition_id": "0xfba701c86ac18bd4146c803f304290c881d1e89ff69307d359538ee6d519e611",
       "question": "Will Elon Musk post 1200-1239 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 1.00 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9955,
       "yes_price": 0.0045,
-      "hours_until_expiry": 241.75192904416664,
+      "hours_until_expiry": 241.75188862055558,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "1200-1239",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.052438"
+      "timestamp": "2026-05-22T02:14:53.194177"
     },
     {
       "condition_id": "0x77132e624d83299c8d2b3f00dc524cb5e2d740a46488338db0a1b27bc8172ca7",
       "question": "Will Elon Musk post 1240-1279 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 1.00 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9975,
       "yes_price": 0.0025,
-      "hours_until_expiry": 241.75192904305558,
+      "hours_until_expiry": 241.75188861944443,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "1240-1279",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.052466"
+      "timestamp": "2026-05-22T02:14:53.194264"
     },
     {
       "condition_id": "0x1802354c139a09231f1c9aea759d5a52b8476af3bce72c29bacd8b69e238734c",
       "question": "Will Elon Musk post 1280-1319 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 1.00 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9985,
       "yes_price": 0.0015,
-      "hours_until_expiry": 241.75192904222223,
+      "hours_until_expiry": 241.7518886186111,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "1280-1319",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.052496"
+      "timestamp": "2026-05-22T02:14:53.194352"
     },
     {
       "condition_id": "0x43f22f2765ed31f7f53bc29e916640f47fe1b9396a91a5ec5b77e40b39889321",
       "question": "Will Elon Musk post 1320-1359 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 1.00 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9985,
       "yes_price": 0.0015,
-      "hours_until_expiry": 241.7519290411111,
+      "hours_until_expiry": 241.75188861777775,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "1320-1359",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.052531"
+      "timestamp": "2026-05-22T02:14:53.194439"
     },
     {
       "condition_id": "0x1e5933ab0cdbc89baeb135ea71444d8503279d3cf052d563fac1e3aee6372b76",
       "question": "Will Elon Musk post 1360-1399 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 1.00 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9985,
       "yes_price": 0.0015,
-      "hours_until_expiry": 241.75192904027776,
+      "hours_until_expiry": 241.75188861694446,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "1360-1399",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.052560"
+      "timestamp": "2026-05-22T02:14:53.194526"
     },
     {
       "condition_id": "0x964d895e4f821a1b28cb4037c916deed74df33f8de63dfa9fb957b0b900efe3a",
       "question": "Will Elon Musk post 1400-1439 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 1.00 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 241.75192903916664,
+      "hours_until_expiry": 241.75188861527778,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "1400-1439",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.052586"
+      "timestamp": "2026-05-22T02:14:53.194612"
     },
     {
       "condition_id": "0x8b8802585a8bb89846db569d51369d5cc2896e32fc6b7fce4237b7b2971d219a",
       "question": "Will Elon Musk post 1440-1479 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 1.00 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 241.75192903833334,
+      "hours_until_expiry": 241.75188861416666,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "1440-1479",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.052614"
+      "timestamp": "2026-05-22T02:14:53.194713"
     },
     {
       "condition_id": "0xc7ae6dcfbe1eaadfa335e936ecf9dae26904c65e0e45b43e92a5c4b0367546db",
       "question": "Will Elon Musk post 1480-1519 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 1.00 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 241.75192903722223,
+      "hours_until_expiry": 241.7518886133333,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "1480-1519",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.052640"
+      "timestamp": "2026-05-22T02:14:53.194805"
     },
     {
       "condition_id": "0xa455ffadd4eff9e49f7a13e20ba81323ebc6d85709a5de9293441731973dae9c",
       "question": "Will Elon Musk post 1520-1559 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 1.00 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 241.75192903638887,
+      "hours_until_expiry": 241.7518886125,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "1520-1559",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.052672"
+      "timestamp": "2026-05-22T02:14:53.194893"
     },
     {
       "condition_id": "0x8580236fe3cfa72751707758b27cefade240606aae9d2a26971b86aee6dfdf65",
       "question": "Will Elon Musk post 1560-1599 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 1.00 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 241.75192903472225,
+      "hours_until_expiry": 241.75188861083333,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "1560-1599",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.052723"
+      "timestamp": "2026-05-22T02:14:53.194981"
     },
     {
       "condition_id": "0x59d6e547245788c7fb811eb63bb63e91bed65d8da1efbd4ef936926a71998d1e",
       "question": "Will Elon Musk post 1600-1679 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 1.00 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 241.7519290336111,
+      "hours_until_expiry": 241.75188860999998,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "1600-1679",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.052758"
+      "timestamp": "2026-05-22T02:14:53.195067"
     },
     {
       "condition_id": "0x476d19717ac51e9323b7930425f17f631b7edb7142ebf45fee22d57b0d7ef8b1",
       "question": "Will Elon Musk post 1680-1759 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 1.00 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 241.7519290325,
+      "hours_until_expiry": 241.7518886088889,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "1680-1759",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.052787"
+      "timestamp": "2026-05-22T02:14:53.195155"
     },
     {
       "condition_id": "0x7d25c4f9ab29ee54958b342288be04f330a7ad02ccb1bad53f695f4434f44570",
       "question": "Will Elon Musk post 1760-1839 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 1.00 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 241.75192903166666,
+      "hours_until_expiry": 241.75188860805557,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "1760-1839",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.052818"
+      "timestamp": "2026-05-22T02:14:53.195244"
     },
     {
       "condition_id": "0x9eecb36e2570ce77f39bd79747dfcd0ae533e072fdfb2d10f174f23264d87c2e",
       "question": "Will Elon Musk post 1840-1919 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 1.00 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 241.75192903055554,
+      "hours_until_expiry": 241.7518886072222,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "1840-1919",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.052847"
+      "timestamp": "2026-05-22T02:14:53.195331"
     },
     {
       "condition_id": "0x5bf0baa07047a4775f87ee54fb79fa03c4b1235254a5350adb288c18a1f47401",
       "question": "Will Elon Musk post 1920-1999 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 1.00 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 241.75192902972222,
+      "hours_until_expiry": 241.7518886063889,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "1920-1999",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.052879"
+      "timestamp": "2026-05-22T02:14:53.195420"
     },
     {
       "condition_id": "0x4d7130ae6dd22cc177904f0611688f398e5db89f988b5f3b897c8fc2ab0985e7",
       "question": "Will Elon Musk post 2000+ tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 1.00 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 241.7519290286111,
+      "hours_until_expiry": 241.75188860555554,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "2000+",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.052907"
+      "timestamp": "2026-05-22T02:14:53.195516"
     },
     {
       "condition_id": "0xfcb2c57c5430b65bb3a17b6fac41bac809b7c0b4e01840971354ed1b70633f5b",
       "question": "Will Donald Trump post 60-79 Truth Social posts from May 15 to May 22, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 1.00 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9975,
       "yes_price": 0.0025,
-      "hours_until_expiry": 13.751929027777777,
+      "hours_until_expiry": 13.751888604444444,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-may-15-may-22",
       "event_title": "Donald Trump # Truth Social posts May 15 - May 22, 2026?",
       "bracket_label": "60-79",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.053096"
+      "timestamp": "2026-05-22T02:14:53.195931"
     },
     {
       "condition_id": "0x40d49050a9d99b65af38f17587887015ca52eeff91821faad330c6539763fac5",
       "question": "Will Donald Trump post 80-99 Truth Social posts from May 15 to May 22, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 1.00 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.998,
       "yes_price": 0.002,
-      "hours_until_expiry": 13.751929026666666,
+      "hours_until_expiry": 13.75188860361111,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-may-15-may-22",
       "event_title": "Donald Trump # Truth Social posts May 15 - May 22, 2026?",
       "bracket_label": "80-99",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.053122"
+      "timestamp": "2026-05-22T02:14:53.195968"
     },
     {
       "condition_id": "0xa9d7419a4fd7f788f54387f2849653305f546a75e2e34c4832aa3682299849fc",
       "question": "Will Donald Trump post 100-119 Truth Social posts from May 15 to May 22, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 1.00 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.999,
       "yes_price": 0.001,
-      "hours_until_expiry": 13.751929025833334,
+      "hours_until_expiry": 13.751888602777779,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-may-15-may-22",
       "event_title": "Donald Trump # Truth Social posts May 15 - May 22, 2026?",
       "bracket_label": "100-119",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.053147"
+      "timestamp": "2026-05-22T02:14:53.196013"
     },
     {
       "condition_id": "0xf523a85b48f0faedbd46939bd23119b2cd57008b9cfac34034a1bb6e8273a9fe",
       "question": "Will Donald Trump post 120-139 Truth Social posts from May 15 to May 22, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 1.00 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9985,
       "yes_price": 0.0015,
-      "hours_until_expiry": 13.751929024166667,
+      "hours_until_expiry": 13.75188860138889,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-may-15-may-22",
       "event_title": "Donald Trump # Truth Social posts May 15 - May 22, 2026?",
       "bracket_label": "120-139",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.053173"
+      "timestamp": "2026-05-22T02:14:53.196059"
     },
     {
       "condition_id": "0xf2e330c4d1591482f8bdfd50c890515e1b92a54cff4e18dda2c1d998ab55f02a",
       "question": "Will Donald Trump post 140-159 Truth Social posts from May 15 to May 22, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 1.00 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.999,
       "yes_price": 0.001,
-      "hours_until_expiry": 13.751929023055556,
+      "hours_until_expiry": 13.751888600277779,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-may-15-may-22",
       "event_title": "Donald Trump # Truth Social posts May 15 - May 22, 2026?",
       "bracket_label": "140-159",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.053201"
+      "timestamp": "2026-05-22T02:14:53.196100"
     },
     {
       "condition_id": "0x0e960484bc5345b9e73ce62431afba20aa97fd2850e566ffc94e0bbb13f1dd02",
       "question": "Will Donald Trump post 160-179 Truth Social posts from May 15 to May 22, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 1.00 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 13.751929022222221,
+      "hours_until_expiry": 13.751888599444444,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-may-15-may-22",
       "event_title": "Donald Trump # Truth Social posts May 15 - May 22, 2026?",
       "bracket_label": "160-179",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.053229"
+      "timestamp": "2026-05-22T02:14:53.196138"
     },
     {
       "condition_id": "0x1198411bfe9c2f9a2974e0c1e8d7c8d584254394a28fa3f5d89e655a368f6cc9",
       "question": "Will Donald Trump post 180-199 Truth Social posts from May 15 to May 22, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=adjacent",
         "NO price 1.00 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9985,
       "yes_price": 0.0015,
-      "hours_until_expiry": 13.75192902111111,
+      "hours_until_expiry": 13.75188859861111,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-may-15-may-22",
       "event_title": "Donald Trump # Truth Social posts May 15 - May 22, 2026?",
       "bracket_label": "180-199",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.053258"
-    },
-    {
-      "condition_id": "0x5e383b783e385df8c33d961114e8b53bf2c3e6233f0c17ab7347dbcb6caf9e5a",
-      "question": "Will Donald Trump post 200+ Truth Social posts from May 15 to May 22, 2026?",
-      "signal": "SKIP",
-      "reasons": [
-        "NO price 0.00 < 0.5 \u2014 market thinks event is likely."
-      ],
-      "score": 10,
-      "no_price": 0.0035,
-      "yes_price": 0.9965,
-      "hours_until_expiry": 13.751929020277778,
-      "market_type": "trump_posting",
-      "event_slug": "donald-trump-of-truth-social-posts-may-15-may-22",
-      "event_title": "Donald Trump # Truth Social posts May 15 - May 22, 2026?",
-      "bracket_label": "200+",
-      "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.053286"
+      "timestamp": "2026-05-22T02:14:53.196175"
     },
     {
       "condition_id": "0x9fab367768c3457938b8a0e3f2efcde1f6ad5fad4c018f4598ccc2e27a49ed0f",
       "question": "Will Elon Musk post 240-259 tweets from May 15 to May 22, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=adjacent",
         "NO price 1.00 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 13.751929019166667,
+      "hours_until_expiry": 13.751888597499999,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-15-may-22",
       "event_title": "Elon Musk # tweets May 15 - May 22, 2026?",
       "bracket_label": "240-259",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.053664"
-    },
-    {
-      "condition_id": "0x2bc15e9a7caf48d501270f72b8b6157051624f2a87e2a693ab6bc027c36d2270",
-      "question": "Will Elon Musk post 260-279 tweets from May 15 to May 22, 2026?",
-      "signal": "SKIP",
-      "reasons": [
-        "NO price 0.41 < 0.5 \u2014 market thinks event is likely."
-      ],
-      "score": 10,
-      "no_price": 0.4105,
-      "yes_price": 0.5895,
-      "hours_until_expiry": 13.751929018333334,
-      "market_type": "musk_posting",
-      "event_slug": "elon-musk-of-tweets-may-15-may-22",
-      "event_title": "Elon Musk # tweets May 15 - May 22, 2026?",
-      "bracket_label": "260-279",
-      "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.053743"
+      "timestamp": "2026-05-22T02:14:53.196844"
     },
     {
       "condition_id": "0x63099329059ec97d25b243512ac754595f49dfe54e486a26066e5a9e6e3fa01c",
       "question": "Will Elon Musk post 300-319 tweets from May 15 to May 22, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 0.96 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9585,
       "yes_price": 0.0415,
-      "hours_until_expiry": 13.751929017222222,
+      "hours_until_expiry": 13.751888596666667,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-15-may-22",
       "event_title": "Elon Musk # tweets May 15 - May 22, 2026?",
       "bracket_label": "300-319",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.053876"
+      "timestamp": "2026-05-22T02:14:53.197003"
     },
     {
       "condition_id": "0x064917719b44dba6084e5a6147b6d515b508da2efa25b25eae7ddae0cd79f175",
       "question": "Will Elon Musk post 320-339 tweets from May 15 to May 22, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 0.99 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9935,
       "yes_price": 0.0065,
-      "hours_until_expiry": 13.751929016388889,
+      "hours_until_expiry": 13.751888595833334,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-15-may-22",
       "event_title": "Elon Musk # tweets May 15 - May 22, 2026?",
       "bracket_label": "320-339",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.053913"
+      "timestamp": "2026-05-22T02:14:53.197053"
     },
     {
       "condition_id": "0x4244d7f37624dee36186b1ecdb72ee5e434adab0f2d50fc65041bbcb9368559e",
       "question": "Will Elon Musk post 340-359 tweets from May 15 to May 22, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 1.00 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9985,
       "yes_price": 0.0015,
-      "hours_until_expiry": 13.751929015555556,
+      "hours_until_expiry": 13.751888594722223,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-15-may-22",
       "event_title": "Elon Musk # tweets May 15 - May 22, 2026?",
       "bracket_label": "340-359",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.053946"
+      "timestamp": "2026-05-22T02:14:53.197102"
     },
     {
       "condition_id": "0x42456e23d12a3174f9b7d0f3df461b1bf12c93bb4804ad0b11b8eae95ff42f5b",
       "question": "Will Elon Musk post 360-379 tweets from May 15 to May 22, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 1.00 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 13.751929014166668,
+      "hours_until_expiry": 13.75188859388889,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-15-may-22",
       "event_title": "Elon Musk # tweets May 15 - May 22, 2026?",
       "bracket_label": "360-379",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.053979"
+      "timestamp": "2026-05-22T02:14:53.197156"
     },
     {
       "condition_id": "0xfdfc977367c1124e3f8462406e511f1bd28a6424cdf50be14cd4f06d756ca14e",
       "question": "Will Elon Musk post 380-399 tweets from May 15 to May 22, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 1.00 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 13.751929013333333,
+      "hours_until_expiry": 13.751888593055556,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-15-may-22",
       "event_title": "Elon Musk # tweets May 15 - May 22, 2026?",
       "bracket_label": "380-399",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.054014"
+      "timestamp": "2026-05-22T02:14:53.197211"
     },
     {
       "condition_id": "0xbe262fe628ade668276ecf516866f5a1c93f3483d98eb4de8e47e3b41fcd18bd",
       "question": "Will Elon Musk post 400-419 tweets from May 15 to May 22, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 1.00 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 13.7519290125,
+      "hours_until_expiry": 13.751888591666665,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-15-may-22",
       "event_title": "Elon Musk # tweets May 15 - May 22, 2026?",
       "bracket_label": "400-419",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.054047"
+      "timestamp": "2026-05-22T02:14:53.197263"
     },
     {
       "condition_id": "0x09dd58a5cb5beaa04f24badc400cd26acb4327762c0c90df5f05f4929d25d06b",
       "question": "Will Elon Musk post 420-439 tweets from May 15 to May 22, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 1.00 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 13.751929011666666,
+      "hours_until_expiry": 13.751888590833333,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-15-may-22",
       "event_title": "Elon Musk # tweets May 15 - May 22, 2026?",
       "bracket_label": "420-439",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.054084"
+      "timestamp": "2026-05-22T02:14:53.197316"
     },
     {
       "condition_id": "0x28819140aec1fa9faabf5f9a35299cef6742f93d48ef9d6ef28202df45e6f86e",
       "question": "Will Elon Musk post 440-459 tweets from May 15 to May 22, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 1.00 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 13.751929010555555,
+      "hours_until_expiry": 13.75188859,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-15-may-22",
       "event_title": "Elon Musk # tweets May 15 - May 22, 2026?",
       "bracket_label": "440-459",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.054117"
+      "timestamp": "2026-05-22T02:14:53.197368"
     },
     {
       "condition_id": "0x6ff17da6ff2de1bcded8b80716f446477f78bda8dd486ccac7da2929d6ebdac1",
       "question": "Will Elon Musk post 460-479 tweets from May 15 to May 22, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 1.00 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 13.751929009444444,
+      "hours_until_expiry": 13.751888589166667,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-15-may-22",
       "event_title": "Elon Musk # tweets May 15 - May 22, 2026?",
       "bracket_label": "460-479",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.054147"
+      "timestamp": "2026-05-22T02:14:53.197418"
     },
     {
       "condition_id": "0x9fa16e1a33f749edeaf0eda49b729d20d11fc8c68cced5ae6461365260b886c1",
       "question": "Will Elon Musk post 480-499 tweets from May 15 to May 22, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 1.00 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 13.751929008611112,
+      "hours_until_expiry": 13.751888588055555,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-15-may-22",
       "event_title": "Elon Musk # tweets May 15 - May 22, 2026?",
       "bracket_label": "480-499",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.054177"
+      "timestamp": "2026-05-22T02:14:53.197468"
     },
     {
       "condition_id": "0x77b6a1bba060912717c30107b947d89f7148263322958e6bf94476b2774f7536",
       "question": "Will Elon Musk post 500+ tweets from May 15 to May 22, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 1.00 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 13.751929007500001,
+      "hours_until_expiry": 13.751888587222222,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-15-may-22",
       "event_title": "Elon Musk # tweets May 15 - May 22, 2026?",
       "bracket_label": "500+",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.054213"
+      "timestamp": "2026-05-22T02:14:53.197519"
     },
     {
       "condition_id": "0x037989bc59517fd51d391b67a2c17e8c6ac2aee8eb3bea18e1b1385367aa8c09",
       "question": "Will Trump post \"Harvard\" on Truth Social this week?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 0.47 < 0.5 \u2014 market thinks event is likely."
       ],
       "score": 10,
       "no_price": 0.475,
       "yes_price": 0.525,
-      "hours_until_expiry": 45.751929006666664,
+      "hours_until_expiry": 45.751888586111114,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-may-24",
       "event_title": "What will Trump post this week? (May 24)",
       "bracket_label": "Harvard",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.054243"
+      "timestamp": "2026-05-22T02:14:53.197625"
     },
     {
       "condition_id": "0x7211c91c1ff0bf31a50cdf5f124a970693458e4a03899039e136c581e6f28ae8",
       "question": "Will Trump post \"Gun\" on Truth Social this week?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 0.47 < 0.5 \u2014 market thinks event is likely."
       ],
       "score": 10,
       "no_price": 0.47,
       "yes_price": 0.53,
-      "hours_until_expiry": 45.75192900583333,
+      "hours_until_expiry": 45.751888585277776,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-may-24",
       "event_title": "What will Trump post this week? (May 24)",
       "bracket_label": "Gun",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.054270"
+      "timestamp": "2026-05-22T02:14:53.197739"
     },
     {
       "condition_id": "0xea61b365e841d869f684613f253bcf93b90991df9d97e940106f6c196bdb2c48",
       "question": "Will Trump post \"Cuba\" on Truth Social this week?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 0.35 < 0.5 \u2014 market thinks event is likely."
       ],
       "score": 10,
       "no_price": 0.35,
       "yes_price": 0.65,
-      "hours_until_expiry": 45.75192900444445,
+      "hours_until_expiry": 45.751888584444444,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-may-24",
       "event_title": "What will Trump post this week? (May 24)",
       "bracket_label": "Cuba",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.055137"
+      "timestamp": "2026-05-22T02:14:53.200417"
+    },
+    {
+      "condition_id": "0x0259d891dd9a812dcabac2d1eca28de01d92980d4116f1f1c6d89083f57e6801",
+      "question": "Will Elon Musk post 880-919 tweets in May 2026?",
+      "signal": "SKIP",
+      "reasons": [
+        "position=hot",
+        "SKIP: hot bracket blocked by family_guarded policy."
+      ],
+      "score": 5,
+      "no_price": 0.8355,
+      "yes_price": 0.1645,
+      "hours_until_expiry": 241.75188858333334,
+      "market_type": "musk_posting",
+      "event_slug": "elon-musk-of-tweets-may-2026",
+      "event_title": "Elon Musk musk # tweets in May 2026?",
+      "bracket_label": "880-919",
+      "strategy_id": "family_guarded_no",
+      "profile_id": "moderate",
+      "timestamp": "2026-05-22T02:14:53.193438"
+    },
+    {
+      "condition_id": "0x5e383b783e385df8c33d961114e8b53bf2c3e6233f0c17ab7347dbcb6caf9e5a",
+      "question": "Will Donald Trump post 200+ Truth Social posts from May 15 to May 22, 2026?",
+      "signal": "SKIP",
+      "reasons": [
+        "position=hot",
+        "SKIP: hot bracket blocked by family_guarded policy."
+      ],
+      "score": 5,
+      "no_price": 0.0035,
+      "yes_price": 0.9965,
+      "hours_until_expiry": 13.751888581944444,
+      "market_type": "trump_posting",
+      "event_slug": "donald-trump-of-truth-social-posts-may-15-may-22",
+      "event_title": "Donald Trump # Truth Social posts May 15 - May 22, 2026?",
+      "bracket_label": "200+",
+      "strategy_id": "family_guarded_no",
+      "profile_id": "moderate",
+      "timestamp": "2026-05-22T02:14:53.196210"
+    },
+    {
+      "condition_id": "0x2bc15e9a7caf48d501270f72b8b6157051624f2a87e2a693ab6bc027c36d2270",
+      "question": "Will Elon Musk post 260-279 tweets from May 15 to May 22, 2026?",
+      "signal": "SKIP",
+      "reasons": [
+        "position=hot",
+        "SKIP: hot bracket blocked by family_guarded policy."
+      ],
+      "score": 5,
+      "no_price": 0.4105,
+      "yes_price": 0.5895,
+      "hours_until_expiry": 13.75188858111111,
+      "market_type": "musk_posting",
+      "event_slug": "elon-musk-of-tweets-may-15-may-22",
+      "event_title": "Elon Musk # tweets May 15 - May 22, 2026?",
+      "bracket_label": "260-279",
+      "strategy_id": "family_guarded_no",
+      "profile_id": "moderate",
+      "timestamp": "2026-05-22T02:14:53.196893"
     },
     {
       "condition_id": "0x02cb83794f5c64731b73a1d5f8d0d3b21858773d29526bb1f837918fa9f3dc15",
       "question": "Will Elon Musk post <40 tweets from March 19 to March 21, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1474.2480709966667,
+      "hours_until_expiry": -1474.24811142,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-march-19-march-21",
       "event_title": "Elon Musk # tweets March 19 - March 21, 2026?",
       "bracket_label": "<40",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.050135"
+      "timestamp": "2026-05-22T02:14:53.188980"
     },
     {
       "condition_id": "0x3f98f4506374a11b5d4deacf051e3b6192ec58e0f2036d18edb03d5b3985d3a3",
       "question": "Will Elon Musk post 40-64 tweets from March 19 to March 21, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1474.2480709983333,
+      "hours_until_expiry": -1474.2481114211112,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-march-19-march-21",
       "event_title": "Elon Musk # tweets March 19 - March 21, 2026?",
       "bracket_label": "40-64",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.050202"
+      "timestamp": "2026-05-22T02:14:53.189055"
     },
     {
       "condition_id": "0x47e3bb0616a698b284145759f805bea5c760acf889e66da0506937698b417c95",
       "question": "Will Elon Musk post 65-89 tweets from March 19 to March 21, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1474.2480709991667,
+      "hours_until_expiry": -1474.2481114219445,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-march-19-march-21",
       "event_title": "Elon Musk # tweets March 19 - March 21, 2026?",
       "bracket_label": "65-89",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.050245"
+      "timestamp": "2026-05-22T02:14:53.189118"
     },
     {
       "condition_id": "0x53d9bfa100ba711e08bcca20564890da16531a4ef3092efd88449bbbe8fbf19c",
       "question": "Will Elon Musk post 90-114 tweets from March 19 to March 21, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=adjacent",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1474.248071,
+      "hours_until_expiry": -1474.2481114227778,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-march-19-march-21",
       "event_title": "Elon Musk # tweets March 19 - March 21, 2026?",
       "bracket_label": "90-114",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.050286"
+      "timestamp": "2026-05-22T02:14:53.189168"
     },
     {
       "condition_id": "0xfb2eec2e72db2cdd9d3813d59b0d5766c10ea3873d422b19fc428fbed27a20f9",
       "question": "Will Elon Musk post 115-139 tweets from March 19 to March 21, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=hot",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 0.0,
       "yes_price": 1.0,
-      "hours_until_expiry": -1474.2480710008335,
+      "hours_until_expiry": -1474.2481114238888,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-march-19-march-21",
       "event_title": "Elon Musk # tweets March 19 - March 21, 2026?",
       "bracket_label": "115-139",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.050322"
+      "timestamp": "2026-05-22T02:14:53.189210"
     },
     {
       "condition_id": "0x1f9057f191479f1fc34c3539c3fff9deadb30440c68cbdbdc60e2f66f6448a88",
       "question": "Will Elon Musk post 140-164 tweets from March 19 to March 21, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=adjacent",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1474.2480710019445,
+      "hours_until_expiry": -1474.248111424722,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-march-19-march-21",
       "event_title": "Elon Musk # tweets March 19 - March 21, 2026?",
       "bracket_label": "140-164",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.050354"
+      "timestamp": "2026-05-22T02:14:53.189248"
     },
     {
       "condition_id": "0x0d0f9c7ff9ec578157fb56c2d7cba7b9d6f32b2bc112ebc49b75e185ea510f63",
       "question": "Will Elon Musk post 165-189 tweets from March 19 to March 21, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1474.2480710027778,
+      "hours_until_expiry": -1474.2481114258333,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-march-19-march-21",
       "event_title": "Elon Musk # tweets March 19 - March 21, 2026?",
       "bracket_label": "165-189",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.050385"
+      "timestamp": "2026-05-22T02:14:53.189285"
     },
     {
       "condition_id": "0x03b5078ec7b3aeeb46d206037277dfef675fbc3d4c4b7cf37464193778ab6208",
       "question": "Will Elon Musk post 190-214 tweets from March 19 to March 21, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1474.248071003889,
+      "hours_until_expiry": -1474.2481114269444,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-march-19-march-21",
       "event_title": "Elon Musk # tweets March 19 - March 21, 2026?",
       "bracket_label": "190-214",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.050416"
+      "timestamp": "2026-05-22T02:14:53.189321"
     },
     {
       "condition_id": "0x8d1517cf62d2234f03be8d5fa4188ef00f504d78147de77cf012e4787c83c171",
       "question": "Will Elon Musk post 215-239 tweets from March 19 to March 21, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1474.2480710047223,
+      "hours_until_expiry": -1474.2481114283332,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-march-19-march-21",
       "event_title": "Elon Musk # tweets March 19 - March 21, 2026?",
       "bracket_label": "215-239",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.050446"
+      "timestamp": "2026-05-22T02:14:53.189361"
     },
     {
       "condition_id": "0xea8bf021ab22f94aeb33ee3b4aac74863b3e72a91a304fb476ba04639ba52c7d",
       "question": "Will Elon Musk post 240+ tweets from March 19 to March 21, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1474.248071006111,
+      "hours_until_expiry": -1474.2481114294444,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-march-19-march-21",
       "event_title": "Elon Musk # tweets March 19 - March 21, 2026?",
       "bracket_label": "240+",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.050477"
+      "timestamp": "2026-05-22T02:14:53.189398"
     },
     {
       "condition_id": "0x7290b1aa1bf5b262bd60abd03564601131dbcfd500a6206a97da914cdcac1403",
       "question": "Will Donald Trump post 0-19 Truth Social posts from March 17 to March 24, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1402.2480710072223,
+      "hours_until_expiry": -1402.2481114302777,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-march-17-march-24",
       "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?",
       "bracket_label": "<20",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.050513"
+      "timestamp": "2026-05-22T02:14:53.189436"
     },
     {
       "condition_id": "0xdc3f1159806894cb57c514544395d61899c8d9b69e2a9ae42810a60ee04b9ce1",
       "question": "Will Donald Trump post 40-59 Truth Social posts from March 17 to March 24, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1402.2480710080556,
+      "hours_until_expiry": -1402.248111431389,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-march-17-march-24",
       "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?",
       "bracket_label": "40-59",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.050544"
+      "timestamp": "2026-05-22T02:14:53.189472"
     },
     {
       "condition_id": "0xbafc6b93f7eab35ca46eac426c8e66700d3182d26c976865d1f9c1932b790daf",
       "question": "Will Donald Trump post 80-99 Truth Social posts from March 17 to March 24, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=hot",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 0.0,
       "yes_price": 1.0,
-      "hours_until_expiry": -1402.248071008889,
+      "hours_until_expiry": -1402.2481114322222,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-march-17-march-24",
       "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?",
       "bracket_label": "80-99",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.050574"
+      "timestamp": "2026-05-22T02:14:53.189508"
     },
     {
       "condition_id": "0x92c74e9ab5383ddb3b7350e515beeecdc905078c58bc46d926d655fc9c1cbf43",
       "question": "Will Donald Trump post 120-139 Truth Social posts from March 17 to March 24, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1402.2480710099999,
+      "hours_until_expiry": -1402.2481114330556,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-march-17-march-24",
       "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?",
       "bracket_label": "120-139",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.050608"
+      "timestamp": "2026-05-22T02:14:53.189543"
     },
     {
       "condition_id": "0xe2d9fbd3898231df8eb62c2f0af39e2a80528719d40acad6b6a4e03d84ab321a",
       "question": "Will Donald Trump post 160-179 Truth Social posts from March 17 to March 24, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1402.2480710108332,
+      "hours_until_expiry": -1402.2481114341667,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-march-17-march-24",
       "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?",
       "bracket_label": "160-179",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.050639"
+      "timestamp": "2026-05-22T02:14:53.189578"
     },
     {
       "condition_id": "0x6a9af49e4d04d69c1d8be844267ddc798af37aec44c1ad06d09c16fb19c0846e",
       "question": "Will Donald Trump post 200+ Truth Social posts from March 17 to March 24, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1402.2480710116668,
+      "hours_until_expiry": -1402.248111435,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-march-17-march-24",
       "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?",
       "bracket_label": "200+",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.050668"
+      "timestamp": "2026-05-22T02:14:53.189612"
     },
     {
       "condition_id": "0x4e2d1b6e2e794c8b7009ff51d581fc719b8561868330cab0103c0e06906e2200",
       "question": "Will Donald Trump post 20-39 Truth Social posts from March 17 to March 24, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1402.248071012778,
+      "hours_until_expiry": -1402.2481114358334,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-march-17-march-24",
       "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?",
       "bracket_label": "20-39",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.050716"
+      "timestamp": "2026-05-22T02:14:53.189646"
     },
     {
       "condition_id": "0x5048059030b1b6f73783f63ebe091a7a8d1c2a62cdcacfc6c05d12595609cb36",
       "question": "Will Donald Trump post 60-79 Truth Social posts from March 17 to March 24, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=adjacent",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1402.2480710136113,
+      "hours_until_expiry": -1402.2481114369446,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-march-17-march-24",
       "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?",
       "bracket_label": "60-79",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.050751"
+      "timestamp": "2026-05-22T02:14:53.189680"
     },
     {
       "condition_id": "0xc5a605a47cade5cb82d4eb37a3d3aab9d18a68060c78bd9ca379410675799384",
       "question": "Will Donald Trump post 100-119 Truth Social posts from March 17 to March 24, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=adjacent",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1402.2480710144443,
+      "hours_until_expiry": -1402.248111438611,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-march-17-march-24",
       "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?",
       "bracket_label": "100-119",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.050787"
+      "timestamp": "2026-05-22T02:14:53.189732"
     },
     {
       "condition_id": "0x80b37fac9896d0867c76aa2b70d8781e014ebe09ff0a3cbe649e3454bf51a461",
       "question": "Will Donald Trump post 140-159 Truth Social posts from March 17 to March 24, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1402.2480710169446,
+      "hours_until_expiry": -1402.2481114394445,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-march-17-march-24",
       "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?",
       "bracket_label": "140-159",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.050819"
+      "timestamp": "2026-05-22T02:14:53.189770"
     },
     {
       "condition_id": "0xdee27a3b55df80a6ba16b88c9c9c2ba5df2893c7d56c0b2244c66979ac4063ad",
       "question": "Will Donald Trump post 180-199 Truth Social posts from March 17 to March 24, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1402.2480710177779,
+      "hours_until_expiry": -1402.2481114402779,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-march-17-march-24",
       "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?",
       "bracket_label": "180-199",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.050849"
+      "timestamp": "2026-05-22T02:14:53.189806"
     },
     {
       "condition_id": "0xfba91477deea0cc4cf2f2695becc5a7d637f9f6e1c4dbb39c82162a6e0f2f971",
       "question": "Will Elon Musk post 0-19 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 241.7519289813889,
+      "hours_until_expiry": 241.75188855888888,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "<20",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.050880"
+      "timestamp": "2026-05-22T02:14:53.189898"
     },
     {
       "condition_id": "0x85adb18de18a54b30636b086107b58e6717c5d791de8bbf1fc31fa5f381bea4e",
       "question": "Will Elon Musk post 20-39 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 241.75192897999997,
+      "hours_until_expiry": 241.7518885577778,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "20-39",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.050910"
+      "timestamp": "2026-05-22T02:14:53.189984"
     },
     {
       "condition_id": "0x3bec995b2bb4e0600e30f267786ab630185ed0914df62566e7de6d949d37f415",
       "question": "Will Elon Musk post 40-59 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 241.75192897916668,
+      "hours_until_expiry": 241.75188855694446,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "40-59",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.050939"
+      "timestamp": "2026-05-22T02:14:53.190069"
     },
     {
       "condition_id": "0x396e4611e9641897ed5fa0e46c67ad5f6c9bb77ced9416e2c9d99b292c8875a9",
       "question": "Will Elon Musk post 60-79 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 241.75192897833335,
+      "hours_until_expiry": 241.7518885561111,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "60-79",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.050969"
+      "timestamp": "2026-05-22T02:14:53.190152"
     },
     {
       "condition_id": "0x472bf7f342a0d46d673dad3b87abbe5af0282b2153d29abc69d7c098af3dfc3b",
       "question": "Will Elon Musk post 80-99 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 241.7519289775,
+      "hours_until_expiry": 241.75188855527776,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "80-99",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.051000"
+      "timestamp": "2026-05-22T02:14:53.190238"
     },
     {
       "condition_id": "0xc2321f879afe45ea2fb996273a1c3bfd2049cef379ddf8b9a1da1d8939ffd11b",
       "question": "Will Elon Musk post 100-119 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 241.75192897666665,
+      "hours_until_expiry": 241.75188855416664,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "100-119",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.051029"
+      "timestamp": "2026-05-22T02:14:53.190322"
     },
     {
       "condition_id": "0x07ddedc4f9d7ec1789259d350f1f33f1a98ae54b9bd8188ebfb9b7ec46a1a93d",
       "question": "Will Elon Musk post 120-139 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 241.75192897583332,
+      "hours_until_expiry": 241.75188855333334,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "120-139",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.051058"
+      "timestamp": "2026-05-22T02:14:53.190405"
     },
     {
       "condition_id": "0xfdb07f2c671c5ba1998dd0368a79d0c9116d4f736623cc04f1f1ec345f350dfd",
       "question": "Will Elon Musk post 200-219 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 241.75192897500003,
+      "hours_until_expiry": 241.75188855138887,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "200-219",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.051087"
+      "timestamp": "2026-05-22T02:14:53.190485"
     },
     {
       "condition_id": "0x78a507b95c11d1d5584f2ae598fdf2eaf28b9b5a8c489e9b1a5cc8320ad98578",
       "question": "Will Elon Musk post 220-239 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 241.75192896916667,
+      "hours_until_expiry": 241.75188855055555,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "220-239",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.051115"
+      "timestamp": "2026-05-22T02:14:53.190571"
     },
     {
       "condition_id": "0x07855533ce53147b49030f2a5a4c21dc28568a5051f043cc40c8b315dd578247",
       "question": "Will Elon Musk post 240-259 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 241.75192896833332,
+      "hours_until_expiry": 241.75188854944446,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "240-259",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.051144"
+      "timestamp": "2026-05-22T02:14:53.190656"
     },
     {
       "condition_id": "0x30bbfb85504afb84ebc8df95b5c3fafdf4f10acbdb559324f845f2d36546a49a",
       "question": "Will Elon Musk post 260-279 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 241.7519289675,
+      "hours_until_expiry": 241.7518885486111,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "260-279",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.051171"
+      "timestamp": "2026-05-22T02:14:53.190754"
     },
     {
       "condition_id": "0x16863a860ebd5107a212d354c462b7ba4bc41519f293061b66732a41a8983e7c",
       "question": "Will Elon Musk post 280-299 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 241.75192896666667,
+      "hours_until_expiry": 241.75188854777778,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "280-299",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.051200"
+      "timestamp": "2026-05-22T02:14:53.190841"
     },
     {
       "condition_id": "0x1476145c6ad696a0990d2f6cd644dddba5816fd1ce71b2f3b64fa96f9bd4a0dc",
       "question": "Will Elon Musk post 300-319 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 241.75192896555555,
+      "hours_until_expiry": 241.75188854666666,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "300-319",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.051228"
+      "timestamp": "2026-05-22T02:14:53.190927"
     },
     {
       "condition_id": "0x241bb96d4f5c6cbe1feea06bc207d3d46098610aab7d686e6471bc6ffb8cb8ed",
       "question": "Will Elon Musk post 320-339 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 241.75192896472223,
+      "hours_until_expiry": 241.7518885458333,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "320-339",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.051258"
+      "timestamp": "2026-05-22T02:14:53.191012"
     },
     {
       "condition_id": "0x8eb3ba04de5764e68f885539ffe080b5bb2463b0891d6d3a258eb6711880fc6e",
       "question": "Will Elon Musk post 340-359 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 241.75192896388887,
+      "hours_until_expiry": 241.751888545,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "340-359",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.051329"
+      "timestamp": "2026-05-22T02:14:53.191096"
     },
     {
       "condition_id": "0x43f1d3b85f15badea5783b15b5b7ecfce570d9fd69d1bdb443c98970348ed4a2",
       "question": "Will Elon Musk post 360-379 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 241.75192896277775,
+      "hours_until_expiry": 241.75188854416666,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "360-379",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.051361"
+      "timestamp": "2026-05-22T02:14:53.191179"
     },
     {
       "condition_id": "0x5c6fa0ad36e2cd26c13e2f0da3308e2590de227bb521318c398b5cc1f51b1cb9",
       "question": "Will Elon Musk post 380-399 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 241.75192896166666,
+      "hours_until_expiry": 241.75188854305554,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "380-399",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.051395"
+      "timestamp": "2026-05-22T02:14:53.191264"
     },
     {
       "condition_id": "0xb20fa5295cce0818033b6e4f13d755619687a1d88bea143459c7ae9bb3e9c418",
       "question": "Will Elon Musk post 400-419 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 241.75192896083334,
+      "hours_until_expiry": 241.75188854166666,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "400-419",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.051424"
+      "timestamp": "2026-05-22T02:14:53.191348"
     },
     {
       "condition_id": "0xc84a5619fed7f3d02f49386201c35cd809505cf107930f804ad12eb28b3299ec",
       "question": "Will Elon Musk post 420-439 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 241.75192895944443,
+      "hours_until_expiry": 241.75188854055557,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "420-439",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.051453"
+      "timestamp": "2026-05-22T02:14:53.191432"
     },
     {
       "condition_id": "0x240ce702de07025c32418a4246c76d84a5b2fd56f53b364abf2e2f3517065ebb",
       "question": "Will Elon Musk post 440-459 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 241.75192895888887,
+      "hours_until_expiry": 241.75188853972222,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "440-459",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.051482"
+      "timestamp": "2026-05-22T02:14:53.191515"
     },
     {
       "condition_id": "0xc1181fc293e47c5f997307072f1d1f263f6ff7aa403bed183a983c31f66e1d1d",
       "question": "Will Elon Musk post 460-479 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 241.7519289583333,
+      "hours_until_expiry": 241.7518885388889,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "460-479",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.051510"
+      "timestamp": "2026-05-22T02:14:53.191603"
     },
     {
       "condition_id": "0xb056eb9583a49d44ca6535d75097640bf5edbbf77a4721771ba85a7a8b7f89aa",
       "question": "Will Elon Musk post 480-499 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 241.75192895777778,
+      "hours_until_expiry": 241.75188853777777,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "480-499",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.051542"
+      "timestamp": "2026-05-22T02:14:53.191685"
     },
     {
       "condition_id": "0x32fb584834c92d943a7654a6cf8789b9b97f5028dc1544dfb904ee1f185b00d2",
       "question": "Will Elon Musk post 500-519 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 241.75192895722222,
+      "hours_until_expiry": 241.75188853694442,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "500-519",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.051571"
+      "timestamp": "2026-05-22T02:14:53.191785"
     },
     {
       "condition_id": "0xfa6425f9ba44d6b18023e4500543bac417166e4ab12c2d5c2da5ddb5fabd5a06",
       "question": "Will Elon Musk post 520-539 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 241.75192895666666,
+      "hours_until_expiry": 241.75188853611112,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "520-539",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.051599"
+      "timestamp": "2026-05-22T02:14:53.191870"
     },
     {
       "condition_id": "0x97a5f1cc5d39cde5824ba583df8abc4f75c3429e3c7fd4d7dc14fe8698004151",
       "question": "Will Elon Musk post 540-559 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 241.7519289563889,
+      "hours_until_expiry": 241.751888535,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "540-559",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.051628"
+      "timestamp": "2026-05-22T02:14:53.191952"
     },
     {
       "condition_id": "0x0a5b62a5d21675b5c448ec3a352f9f01ea2d1b2752d0d7d9799e21d17d37620b",
       "question": "Will Elon Musk post 140-159 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 241.75192895555554,
+      "hours_until_expiry": 241.75188853416665,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "140-159",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.052934"
+      "timestamp": "2026-05-22T02:14:53.195600"
     },
     {
       "condition_id": "0xc04727a94df7620252435d8487d484cd05aad2fe13c5c9a7a5ac3d00ad6317f9",
       "question": "Will Elon Musk post 160-179 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 241.75192895499998,
+      "hours_until_expiry": 241.75188853333333,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "160-179",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.052960"
+      "timestamp": "2026-05-22T02:14:53.195687"
     },
     {
       "condition_id": "0xc9bafacce5b7aec44a8ec03c7f9226d83e858767ee5aaae4a3f34b3a5d022cbb",
       "question": "Will Elon Musk post 180-199 tweets in May 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 241.75192895472222,
+      "hours_until_expiry": 241.75188853166668,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-2026",
       "event_title": "Elon Musk musk # tweets in May 2026?",
       "bracket_label": "180-199",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.052986"
+      "timestamp": "2026-05-22T02:14:53.195787"
     },
     {
       "condition_id": "0x5f15b9908ee65796bf0ec590d39b4572df9ade2856340209b86ec01d5b4911b2",
       "question": "Will Donald Trump post 0-19 Truth Social posts from May 15 to May 22, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 13.751928953611111,
+      "hours_until_expiry": 13.751888530833334,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-may-15-may-22",
       "event_title": "Donald Trump # Truth Social posts May 15 - May 22, 2026?",
       "bracket_label": "<20",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.053014"
+      "timestamp": "2026-05-22T02:14:53.195823"
     },
     {
       "condition_id": "0x9c0f5b58c7ad7660a301ad7e4200f469f01929a02b419b6f0514216196df0ce2",
       "question": "Will Donald Trump post 20-39 Truth Social posts from May 15 to May 22, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 13.751928953055556,
+      "hours_until_expiry": 13.751888529722223,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-may-15-may-22",
       "event_title": "Donald Trump # Truth Social posts May 15 - May 22, 2026?",
       "bracket_label": "20-39",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.053040"
+      "timestamp": "2026-05-22T02:14:53.195858"
     },
     {
       "condition_id": "0xef7bc6a91f8f4da4adca8e14e32fe30bcc6674cb13ca2807ce1f4252a2726ac6",
       "question": "Will Donald Trump post 40-59 Truth Social posts from May 15 to May 22, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 13.7519289525,
+      "hours_until_expiry": 13.75188852888889,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-may-15-may-22",
       "event_title": "Donald Trump # Truth Social posts May 15 - May 22, 2026?",
       "bracket_label": "40-59",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.053065"
+      "timestamp": "2026-05-22T02:14:53.195893"
     },
     {
       "condition_id": "0x752b2d4580c2c40966aa6895d1cd1ed9dd3b9fea590b1be839281baf2a07a549",
       "question": "Will Elon Musk post 0-19 tweets from May 15 to May 22, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 13.751928951944445,
+      "hours_until_expiry": 13.751888528055556,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-15-may-22",
       "event_title": "Elon Musk # tweets May 15 - May 22, 2026?",
       "bracket_label": "<20",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.053315"
+      "timestamp": "2026-05-22T02:14:53.196258"
     },
     {
       "condition_id": "0x60e954a50c60f7eebcab2704603e2ed1f2446fafab4d601d2453c81c8d625481",
       "question": "Will Elon Musk post 20-39 tweets from May 15 to May 22, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 13.751928951388889,
+      "hours_until_expiry": 13.751888526944445,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-15-may-22",
       "event_title": "Elon Musk # tweets May 15 - May 22, 2026?",
       "bracket_label": "20-39",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.053342"
+      "timestamp": "2026-05-22T02:14:53.196308"
     },
     {
       "condition_id": "0xbcf3b1765099479558986f0fbdeb2e11a9235248918e3171d190ece043f54c00",
       "question": "Will Elon Musk post 40-59 tweets from May 15 to May 22, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 13.751928951111111,
+      "hours_until_expiry": 13.751888526111111,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-15-may-22",
       "event_title": "Elon Musk # tweets May 15 - May 22, 2026?",
       "bracket_label": "40-59",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.053368"
+      "timestamp": "2026-05-22T02:14:53.196354"
     },
     {
       "condition_id": "0x26554dbcf58fa11fb0ad65d045186fd4cbb0c6977988a55daec3d6a9bf3db95e",
       "question": "Will Elon Musk post 60-79 tweets from May 15 to May 22, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 13.751928950555556,
+      "hours_until_expiry": 13.751888525,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-15-may-22",
       "event_title": "Elon Musk # tweets May 15 - May 22, 2026?",
       "bracket_label": "60-79",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.053394"
+      "timestamp": "2026-05-22T02:14:53.196401"
     },
     {
       "condition_id": "0xf37e248002e969e957ed95405d4afa257bc3ab6190aea5fdf7fff135fa22a7f5",
       "question": "Will Elon Musk post 80-99 tweets from May 15 to May 22, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 13.75192895,
+      "hours_until_expiry": 13.751888524166667,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-15-may-22",
       "event_title": "Elon Musk # tweets May 15 - May 22, 2026?",
       "bracket_label": "80-99",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.053420"
+      "timestamp": "2026-05-22T02:14:53.196447"
     },
     {
       "condition_id": "0x723553e20ad850459eb8c09c024dc97029775842354b53649cc9ab148cae4ddb",
       "question": "Will Elon Musk post 100-119 tweets from May 15 to May 22, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 13.751928949444444,
+      "hours_until_expiry": 13.751888523333333,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-15-may-22",
       "event_title": "Elon Musk # tweets May 15 - May 22, 2026?",
       "bracket_label": "100-119",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.053453"
+      "timestamp": "2026-05-22T02:14:53.196493"
     },
     {
       "condition_id": "0x2b14eb27b14f709a44886018c0b325a94a4cdd3c6c6954e3a9aa21069790b536",
       "question": "Will Elon Musk post 120-139 tweets from May 15 to May 22, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 13.75192894888889,
+      "hours_until_expiry": 13.751888521944444,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-15-may-22",
       "event_title": "Elon Musk # tweets May 15 - May 22, 2026?",
       "bracket_label": "120-139",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.053480"
+      "timestamp": "2026-05-22T02:14:53.196540"
     },
     {
       "condition_id": "0x1efac3243740b140ecab201f182415e53bd997ae31a9dc82dd9f11dd800c7e1d",
       "question": "Will Elon Musk post 140-159 tweets from May 15 to May 22, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 13.751928948055557,
+      "hours_until_expiry": 13.75188852111111,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-15-may-22",
       "event_title": "Elon Musk # tweets May 15 - May 22, 2026?",
       "bracket_label": "140-159",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.053510"
+      "timestamp": "2026-05-22T02:14:53.196587"
     },
     {
       "condition_id": "0x5e68a84165ced9cd18ca75c6310205288dfd152bab8d3c291e664ca72842f583",
       "question": "Will Elon Musk post 160-179 tweets from May 15 to May 22, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 13.7519289475,
+      "hours_until_expiry": 13.75188852,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-15-may-22",
       "event_title": "Elon Musk # tweets May 15 - May 22, 2026?",
       "bracket_label": "160-179",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.053543"
+      "timestamp": "2026-05-22T02:14:53.196633"
     },
     {
       "condition_id": "0x1fd645500a28e255fc1f45ebc5ae111005f125b33c92500408644b55ffc13e38",
       "question": "Will Elon Musk post 180-199 tweets from May 15 to May 22, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 13.751928946944444,
+      "hours_until_expiry": 13.751888519166668,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-15-may-22",
       "event_title": "Elon Musk # tweets May 15 - May 22, 2026?",
       "bracket_label": "180-199",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.053572"
+      "timestamp": "2026-05-22T02:14:53.196681"
     },
     {
       "condition_id": "0x718b2af2d2b6588ed650d191bf65fe598d70f0b870761ba4a9669bc5d63db2b6",
       "question": "Will Elon Musk post 200-219 tweets from May 15 to May 22, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 13.751928946388889,
+      "hours_until_expiry": 13.751888518333335,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-15-may-22",
       "event_title": "Elon Musk # tweets May 15 - May 22, 2026?",
       "bracket_label": "200-219",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.053601"
+      "timestamp": "2026-05-22T02:14:53.196745"
     },
     {
       "condition_id": "0x885219cace5684edff9bc2647c81338ac6f6e6ab99e947dd36b17c53b7b570f8",
       "question": "Will Elon Musk post 220-239 tweets from May 15 to May 22, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 13.751928945833333,
+      "hours_until_expiry": 13.751888515555555,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-may-15-may-22",
       "event_title": "Elon Musk # tweets May 15 - May 22, 2026?",
       "bracket_label": "220-239",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.053630"
+      "timestamp": "2026-05-22T02:14:53.196794"
     },
     {
       "condition_id": "0x35598dfc20128a8f51f951ef310b51bdffbd7d79c7eacc169b8218e2dc7ac8af",
       "question": "Will Trump post \"Chair\" on Truth Social this week?",
       "signal": "SKIP",
       "reasons": [
+        "position=hot",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 0.0,
       "yes_price": 1.0,
-      "hours_until_expiry": 45.751928945,
+      "hours_until_expiry": 45.751888514722225,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-may-24",
       "event_title": "What will Trump post this week? (May 24)",
       "bracket_label": "Chair",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.054330"
+      "timestamp": "2026-05-22T02:14:53.197953"
     },
     {
       "condition_id": "0x6a371c74df150a733dd0ec805a7fdb0ad13efe5fb794f1251c839335876591ba",
       "question": "Will Trump post \"Gold\" or \"Golden\" on Truth Social this week?",
       "signal": "SKIP",
       "reasons": [
+        "position=adjacent",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 0.0,
       "yes_price": 1.0,
-      "hours_until_expiry": 45.751928944444444,
+      "hours_until_expiry": 45.751888513611114,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-may-24",
       "event_title": "What will Trump post this week? (May 24)",
       "bracket_label": "Gold / Golden",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.054351"
+      "timestamp": "2026-05-22T02:14:53.198048"
     },
     {
       "condition_id": "0x579183853d39ecb60e33aa109dca18d48ea681f3592210817ae6267cd8178217",
       "question": "Will Trump post \"Fake News\" on Truth Social this week?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 0.0,
       "yes_price": 1.0,
-      "hours_until_expiry": 45.75192894388889,
+      "hours_until_expiry": 45.75188851277778,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-may-24",
       "event_title": "What will Trump post this week? (May 24)",
       "bracket_label": "Fake News",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.054415"
+      "timestamp": "2026-05-22T02:14:53.198246"
     },
     {
       "condition_id": "0x2ea372b3b98962150d635855ff040101f8059207ea7cfdb1bd7e56d9279ae625",
       "question": "Will Trump post \"New York\" on Truth Social this week?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 0.0,
       "yes_price": 1.0,
-      "hours_until_expiry": 45.75192894333333,
+      "hours_until_expiry": 45.75188851194444,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-may-24",
       "event_title": "What will Trump post this week? (May 24)",
       "bracket_label": "New York",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.054441"
+      "timestamp": "2026-05-22T02:14:53.198347"
     },
     {
       "condition_id": "0x3741ffcedc1affcfbf865e1a79f37f244ca58c13e310f6360e55a7cde3a30237",
       "question": "Will Trump post \"Crooked\" on Truth Social this week?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 0.0,
       "yes_price": 1.0,
-      "hours_until_expiry": 45.75192894277778,
+      "hours_until_expiry": 45.75188851027778,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-may-24",
       "event_title": "What will Trump post this week? (May 24)",
       "bracket_label": "Crooked",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.054588"
+      "timestamp": "2026-05-22T02:14:53.198771"
     },
     {
       "condition_id": "0xd7b62ca9578626369da076f0d560fb5f0f11672fd9bff7b8ea3447851efc564c",
       "question": "Will Trump post \"Transgender\" on Truth Social this week?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 0.0,
       "yes_price": 1.0,
-      "hours_until_expiry": 45.75192894194444,
+      "hours_until_expiry": 45.75188850944445,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-may-24",
       "event_title": "What will Trump post this week? (May 24)",
       "bracket_label": "Transgender",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.054659"
+      "timestamp": "2026-05-22T02:14:53.198976"
     },
     {
       "condition_id": "0xc095e7adea61951debed7e34b5483c8b32826dd5514c28bdae995fd0e00d4b0a",
       "question": "Will Trump post \"Sleepy Joe\" on Truth Social this week?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 0.0,
       "yes_price": 1.0,
-      "hours_until_expiry": 45.75192894138889,
+      "hours_until_expiry": 45.75188850833334,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-may-24",
       "event_title": "What will Trump post this week? (May 24)",
       "bracket_label": "Sleepy Joe",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.054747"
+      "timestamp": "2026-05-22T02:14:53.199172"
     },
     {
       "condition_id": "0x895caf4790d23c2edb9bb14a093415de9b8e66b4f52e0c84d76254f947dc8882",
       "question": "Will Trump post \"Big\" or \"Bigger\" or \"Biggest\" on Truth Social this week?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 0.0,
       "yes_price": 1.0,
-      "hours_until_expiry": 45.75192894083333,
+      "hours_until_expiry": 45.751888507500006,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-may-24",
       "event_title": "What will Trump post this week? (May 24)",
       "bracket_label": "Big / Bigger / Biggest",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-05-22T02:14:53.054821"
+      "timestamp": "2026-05-22T02:14:53.199368"
     }
   ]
 }
