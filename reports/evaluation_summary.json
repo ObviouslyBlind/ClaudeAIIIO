@@ -1,12 +1,12 @@
 {
-  "generated_at": "2026-05-25T14:33:31.612769+00:00",
+  "generated_at": "2026-05-25T16:58:51.045512+00:00",
   "provenance": "SIMULATED",
   "ops_status": {
-    "last_pipeline_completed_at": "2026-05-25T11:42:48Z",
+    "last_pipeline_completed_at": "2026-05-25T14:33:31Z",
     "last_pipeline_status": "success",
-    "last_summary_generated_at": "2026-05-25T14:33:31.612769+00:00",
+    "last_summary_generated_at": "2026-05-25T16:58:51.045512+00:00",
     "last_export_at": null,
-    "data_freshness_anchor": "2026-05-25T14:33:30.702448+00:00",
+    "data_freshness_anchor": "2026-05-25T16:58:50.153331+00:00",
     "freshness_based_on": "newest_signal_file_mtime",
     "expected_cadence_minutes": 60,
     "freshness_status": "fresh",
@@ -33,30 +33,6 @@
     {
       "profile_id": "conservative",
       "signals": {
-        "trade": 3,
-        "watch": 1,
-        "skip": 285,
-        "total": 289
-      },
-      "trades": {
-        "total_trades": 3,
-        "open_trades": 3,
-        "wins": 0,
-        "losses": 0,
-        "expired": 0,
-        "cancelled": 0,
-        "win_rate_pct": 0.0,
-        "realized_pnl": 0,
-        "unrealized_exposure": 150.0,
-        "total_pnl": 0,
-        "open_exposure": 150.0,
-        "avg_hours_to_resolution": null
-      },
-      "provenance": "SIMULATED"
-    },
-    {
-      "profile_id": "moderate",
-      "signals": {
         "trade": 5,
         "watch": 2,
         "skip": 282,
@@ -71,9 +47,33 @@
         "cancelled": 0,
         "win_rate_pct": 0.0,
         "realized_pnl": 0,
-        "unrealized_exposure": 500.0,
+        "unrealized_exposure": 250.0,
         "total_pnl": 0,
-        "open_exposure": 500.0,
+        "open_exposure": 250.0,
+        "avg_hours_to_resolution": null
+      },
+      "provenance": "SIMULATED"
+    },
+    {
+      "profile_id": "moderate",
+      "signals": {
+        "trade": 7,
+        "watch": 0,
+        "skip": 282,
+        "total": 289
+      },
+      "trades": {
+        "total_trades": 7,
+        "open_trades": 7,
+        "wins": 0,
+        "losses": 0,
+        "expired": 0,
+        "cancelled": 0,
+        "win_rate_pct": 0.0,
+        "realized_pnl": 0,
+        "unrealized_exposure": 700.0,
+        "total_pnl": 0,
+        "open_exposure": 700.0,
         "avg_hours_to_resolution": null
       },
       "provenance": "SIMULATED"
@@ -82,8 +82,8 @@
       "profile_id": "aggressive",
       "signals": {
         "trade": 7,
-        "watch": 3,
-        "skip": 279,
+        "watch": 1,
+        "skip": 281,
         "total": 289
       },
       "trades": {
@@ -105,29 +105,29 @@
   ],
   "totals": {
     "signals_evaluated": 867,
-    "total_trades": 15,
-    "open_trades": 15,
+    "total_trades": 19,
+    "open_trades": 19,
     "wins": 0,
     "losses": 0,
     "win_rate_pct": 0.0,
     "realized_pnl": 0,
-    "unrealized_exposure": 2050.0,
+    "unrealized_exposure": 2350.0,
     "total_pnl": 0,
-    "open_exposure": 2050.0
+    "open_exposure": 2350.0
   },
   "operator_summary": {
     "total_families": 12,
     "total_brackets_evaluated": 867,
-    "active_trades": 15,
+    "active_trades": 19,
     "realized_pnl": 0,
-    "unrealized_exposure": 2050.0,
+    "unrealized_exposure": 2350.0,
     "definitive_outcomes": 0,
     "win_rate_pct": 0.0,
     "strategy_b_status": "DEFER \u2014 need more resolution data",
     "position_coverage": {
       "hot": 0,
       "adjacent": 13,
-      "tail": 2
+      "tail": 6
     },
     "position_outcomes": {
       "hot": {
@@ -138,14 +138,14 @@
         "realized_pnl": 0
       },
       "adjacent": {
-        "trades": 17,
+        "trades": 15,
         "won": 0,
         "lost": 0,
         "win_rate_pct": 0.0,
         "realized_pnl": 0.0
       },
       "tail": {
-        "trades": 3,
+        "trades": 8,
         "won": 0,
         "lost": 0,
         "win_rate_pct": 0.0,
@@ -154,29 +154,25 @@
     },
     "position_verdict": "Only 0 definitive outcome(s) across all positions. Need at least 3 to assess performance differences.",
     "baseline_concentration_by_family": {
-      "elon-musk-of-tweets-may-23-may-25": {
-        "open_trades": 3,
-        "open_exposure": 350.0
-      },
-      "elon-musk-of-tweets-may-19-may-26": {
-        "open_trades": 4,
-        "open_exposure": 550.0
+      "elon-musk-of-tweets-may-25-may-27": {
+        "open_trades": 8,
+        "open_exposure": 1000.0
       },
       "donald-trump-of-truth-social-posts-may-19-may-26": {
-        "open_trades": 3,
-        "open_exposure": 350.0
-      },
-      "elon-musk-of-tweets-may-25-may-27": {
         "open_trades": 5,
-        "open_exposure": 800.0
+        "open_exposure": 650.0
+      },
+      "elon-musk-of-tweets-may-19-may-26": {
+        "open_trades": 6,
+        "open_exposure": 700.0
       }
     },
     "ops_status": {
-      "last_pipeline_completed_at": "2026-05-25T11:42:48Z",
+      "last_pipeline_completed_at": "2026-05-25T14:33:31Z",
       "last_pipeline_status": "success",
-      "last_summary_generated_at": "2026-05-25T14:33:31.612769+00:00",
+      "last_summary_generated_at": "2026-05-25T16:58:51.045512+00:00",
       "last_export_at": null,
-      "data_freshness_anchor": "2026-05-25T14:33:30.702448+00:00",
+      "data_freshness_anchor": "2026-05-25T16:58:50.153331+00:00",
       "freshness_based_on": "newest_signal_file_mtime",
       "expected_cadence_minutes": 60,
       "freshness_status": "fresh",
@@ -204,14 +200,14 @@
     "signals": {
       "by_subject": {
         "musk": {
-          "trade": 12,
-          "watch": 5,
-          "skip": 658
+          "trade": 14,
+          "watch": 1,
+          "skip": 660
         },
         "trump": {
-          "trade": 3,
-          "watch": 1,
-          "skip": 188
+          "trade": 5,
+          "watch": 2,
+          "skip": 185
         }
       },
       "by_event": {
@@ -222,9 +218,9 @@
           "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?"
         },
         "donald-trump-of-truth-social-posts-may-19-may-26": {
-          "trade": 3,
-          "watch": 1,
-          "skip": 29,
+          "trade": 5,
+          "watch": 2,
+          "skip": 26,
           "event_title": "Donald Trump # Truth Social posts May 19 - May 26, 2026?"
         },
         "donald-trump-of-truth-social-posts-may-26-june-2": {
@@ -246,9 +242,9 @@
           "event_title": "Elon Musk # tweets March 19 - March 21, 2026?"
         },
         "elon-musk-of-tweets-may-19-may-26": {
-          "trade": 4,
-          "watch": 3,
-          "skip": 71,
+          "trade": 6,
+          "watch": 0,
+          "skip": 72,
           "event_title": "Elon Musk # tweets May 19 - May 26, 2026?"
         },
         "elon-musk-of-tweets-may-2026": {
@@ -264,15 +260,15 @@
           "event_title": "Elon Musk # tweets May 22 - May 29, 2026?"
         },
         "elon-musk-of-tweets-may-23-may-25": {
-          "trade": 3,
+          "trade": 0,
           "watch": 0,
-          "skip": 27,
+          "skip": 30,
           "event_title": "Elon Musk # tweets May 23 - May 25, 2026?"
         },
         "elon-musk-of-tweets-may-25-may-27": {
-          "trade": 5,
-          "watch": 2,
-          "skip": 23,
+          "trade": 8,
+          "watch": 1,
+          "skip": 21,
           "event_title": "Elon Musk # tweets May 25 - May 27, 2026?"
         },
         "elon-musk-of-tweets-may-26-june-2": {
@@ -292,22 +288,17 @@
         "expired": {
           "trade": 0,
           "watch": 0,
-          "skip": 156
+          "skip": 186
         },
-        "0-12h": {
-          "trade": 3,
-          "watch": 0,
-          "skip": 27
+        "12-24h": {
+          "trade": 11,
+          "watch": 2,
+          "skip": 98
         },
         "24-48h": {
-          "trade": 7,
-          "watch": 4,
-          "skip": 100
-        },
-        "48-72h": {
-          "trade": 5,
-          "watch": 2,
-          "skip": 23
+          "trade": 8,
+          "watch": 1,
+          "skip": 21
         },
         "72h+": {
           "trade": 0,
@@ -316,73 +307,63 @@
         }
       },
       "by_skip_reason": {
-        "price_too_high": 411,
+        "price_too_high": 408,
         "market_closed": 303,
-        "expiry_too_far": 120,
-        "price_too_low": 8,
-        "mixed_evidence": 4
+        "expiry_too_far": 117,
+        "price_too_low": 12,
+        "mixed_evidence": 5
       }
     },
     "trades": {
       "by_subject": {
         "musk": {
-          "total": 16,
-          "open": 16,
+          "total": 17,
+          "open": 17,
           "won": 0,
           "lost": 0,
           "expired": 0,
           "realized_pnl": 0.0,
-          "unrealized_exposure": 2100.0
+          "unrealized_exposure": 2000.0
         },
         "trump": {
-          "total": 4,
-          "open": 4,
+          "total": 6,
+          "open": 6,
           "won": 0,
           "lost": 0,
           "expired": 0,
           "realized_pnl": 0.0,
-          "unrealized_exposure": 450.0
+          "unrealized_exposure": 750.0
         }
       },
       "by_event": {
         "donald-trump-of-truth-social-posts-may-19-may-26": {
-          "total": 4,
-          "open": 4,
+          "total": 6,
+          "open": 6,
           "won": 0,
           "lost": 0,
           "expired": 0,
           "realized_pnl": 0.0,
-          "unrealized_exposure": 450.0,
+          "unrealized_exposure": 750.0,
           "event_title": "Donald Trump # Truth Social posts May 19 - May 26, 2026?"
         },
         "elon-musk-of-tweets-may-19-may-26": {
-          "total": 5,
-          "open": 5,
-          "won": 0,
-          "lost": 0,
-          "expired": 0,
-          "realized_pnl": 0.0,
-          "unrealized_exposure": 650.0,
-          "event_title": "Elon Musk # tweets May 19 - May 26, 2026?"
-        },
-        "elon-musk-of-tweets-may-23-may-25": {
-          "total": 4,
-          "open": 4,
-          "won": 0,
-          "lost": 0,
-          "expired": 0,
-          "realized_pnl": 0.0,
-          "unrealized_exposure": 450.0,
-          "event_title": "Elon Musk # tweets May 23 - May 25, 2026?"
-        },
-        "elon-musk-of-tweets-may-25-may-27": {
           "total": 7,
           "open": 7,
           "won": 0,
           "lost": 0,
           "expired": 0,
           "realized_pnl": 0.0,
-          "unrealized_exposure": 1000.0,
+          "unrealized_exposure": 800.0,
+          "event_title": "Elon Musk # tweets May 19 - May 26, 2026?"
+        },
+        "elon-musk-of-tweets-may-25-may-27": {
+          "total": 10,
+          "open": 10,
+          "won": 0,
+          "lost": 0,
+          "expired": 0,
+          "realized_pnl": 0.0,
+          "unrealized_exposure": 1200.0,
           "event_title": "Elon Musk # tweets May 25 - May 27, 2026?"
         }
       }
@@ -391,43 +372,43 @@
       "signals_by_position": {
         "hot": {
           "trade": 0,
-          "watch": 2,
-          "skip": 34
+          "watch": 0,
+          "skip": 36
         },
         "adjacent": {
           "trade": 13,
-          "watch": 4,
-          "skip": 52
+          "watch": 3,
+          "skip": 53
         },
         "tail": {
-          "trade": 2,
+          "trade": 6,
           "watch": 0,
-          "skip": 760
+          "skip": 756
         }
       },
       "trades_by_position": {
         "adjacent": {
-          "total": 17,
-          "open": 17,
+          "total": 15,
+          "open": 15,
           "won": 0,
           "lost": 0,
           "expired": 0,
           "cancelled": 0,
           "realized_pnl": 0.0,
-          "unrealized_exposure": 2150.0,
+          "unrealized_exposure": 1850.0,
           "win_rate_pct": 0.0,
           "definitive_outcomes": 0,
           "avg_hours_to_resolution": null
         },
         "tail": {
-          "total": 3,
-          "open": 3,
+          "total": 8,
+          "open": 8,
           "won": 0,
           "lost": 0,
           "expired": 0,
           "cancelled": 0,
           "realized_pnl": 0.0,
-          "unrealized_exposure": 400.0,
+          "unrealized_exposure": 900.0,
           "win_rate_pct": 0.0,
           "definitive_outcomes": 0,
           "avg_hours_to_resolution": null
@@ -486,13 +467,13 @@
         "total": 289
       },
       "trades": {
-        "total_trades": 5,
-        "open_trades": 5,
+        "total_trades": 4,
+        "open_trades": 4,
         "wins": 0,
         "losses": 0,
         "win_rate_pct": 0,
         "realized_pnl": 0,
-        "open_exposure": 500.0
+        "open_exposure": 400.0
       },
       "family_risk_config": {
         "max_open_trades_per_family": 3,
@@ -505,15 +486,11 @@
           "open_trades": 2,
           "open_exposure": 200.0
         },
-        "elon-musk-of-tweets-may-23-may-25": {
+        "donald-trump-of-truth-social-posts-may-19-may-26": {
           "open_trades": 1,
           "open_exposure": 100.0
         },
         "elon-musk-of-tweets-may-19-may-26": {
-          "open_trades": 1,
-          "open_exposure": 100.0
-        },
-        "donald-trump-of-truth-social-posts-may-19-may-26": {
           "open_trades": 1,
           "open_exposure": 100.0
         }
@@ -718,12 +695,12 @@
           "event_slug": "elon-musk-of-tweets-may-2026",
           "event_title": "Elon Musk musk # tweets in May 2026?",
           "bracket_count": 66,
-          "yes_price_sum": 1.0305,
-          "no_price_sum": 64.9695,
+          "yes_price_sum": 1.011,
+          "no_price_sum": 64.989,
           "top_bracket_label": "880-919",
-          "top_bracket_yes_price": 0.2695,
-          "top_bracket_concentration_pct": 26.2,
-          "adjacent_concentration_pct": 68.6,
+          "top_bracket_yes_price": 0.278,
+          "top_bracket_concentration_pct": 27.5,
+          "adjacent_concentration_pct": 69.5,
           "overpriced": false,
           "underpriced": false,
           "coherent": true,
@@ -997,64 +974,64 @@
             },
             {
               "bracket_label": "760-779",
+              "yes_price": 0.0055,
+              "no_price": 0.9945,
+              "position": "tail",
+              "fair_share": 0.0152
+            },
+            {
+              "bracket_label": "780-799",
               "yes_price": 0.0065,
               "no_price": 0.9935,
               "position": "tail",
               "fair_share": 0.0152
             },
             {
-              "bracket_label": "780-799",
-              "yes_price": 0.0105,
-              "no_price": 0.9895,
-              "position": "tail",
-              "fair_share": 0.0152
-            },
-            {
               "bracket_label": "800-839",
-              "yes_price": 0.075,
-              "no_price": 0.925,
+              "yes_price": 0.07,
+              "no_price": 0.93,
               "position": "tail",
               "fair_share": 0.0152
             },
             {
               "bracket_label": "840-879",
-              "yes_price": 0.2095,
-              "no_price": 0.7905,
+              "yes_price": 0.2025,
+              "no_price": 0.7975,
               "position": "adjacent",
               "fair_share": 0.0152
             },
             {
               "bracket_label": "880-919",
-              "yes_price": 0.2695,
-              "no_price": 0.7305,
+              "yes_price": 0.278,
+              "no_price": 0.722,
               "position": "hot",
               "fair_share": 0.0152
             },
             {
               "bracket_label": "920-959",
-              "yes_price": 0.2275,
-              "no_price": 0.7725,
+              "yes_price": 0.2225,
+              "no_price": 0.7775,
               "position": "adjacent",
               "fair_share": 0.0152
             },
             {
               "bracket_label": "960-999",
-              "yes_price": 0.1055,
-              "no_price": 0.8945,
+              "yes_price": 0.107,
+              "no_price": 0.893,
               "position": "tail",
               "fair_share": 0.0152
             },
             {
               "bracket_label": "1000-1039",
-              "yes_price": 0.0575,
-              "no_price": 0.9425,
+              "yes_price": 0.0515,
+              "no_price": 0.9485,
               "position": "tail",
               "fair_share": 0.0152
             },
             {
               "bracket_label": "1040-1079",
-              "yes_price": 0.0285,
-              "no_price": 0.9715,
+              "yes_price": 0.0305,
+              "no_price": 0.9695,
               "position": "tail",
               "fair_share": 0.0152
             },
@@ -1067,8 +1044,8 @@
             },
             {
               "bracket_label": "1120-1159",
-              "yes_price": 0.0095,
-              "no_price": 0.9905,
+              "yes_price": 0.006,
+              "no_price": 0.994,
               "position": "tail",
               "fair_share": 0.0152
             },
@@ -1197,12 +1174,12 @@
           "event_slug": "what-will-trump-post-this-week-may-24",
           "event_title": "What will Trump post this week? (May 24)",
           "bracket_count": 31,
-          "yes_price_sum": 11.005,
-          "no_price_sum": 19.995,
+          "yes_price_sum": 11.644,
+          "no_price_sum": 19.356,
           "top_bracket_label": "Gun",
           "top_bracket_yes_price": 1.0,
-          "top_bracket_concentration_pct": 9.1,
-          "adjacent_concentration_pct": 9.1,
+          "top_bracket_concentration_pct": 8.6,
+          "adjacent_concentration_pct": 8.6,
           "overpriced": true,
           "underpriced": false,
           "coherent": false,
@@ -1392,8 +1369,8 @@
             },
             {
               "bracket_label": "Dad / Daddy",
-              "yes_price": 0.005,
-              "no_price": 0.995,
+              "yes_price": 0.644,
+              "no_price": 0.356,
               "position": "tail",
               "fair_share": 0.0323
             },
@@ -1431,12 +1408,12 @@
           "event_slug": "elon-musk-of-tweets-may-19-may-26",
           "event_title": "Elon Musk # tweets May 19 - May 26, 2026?",
           "bracket_count": 26,
-          "yes_price_sum": 1.0255,
-          "no_price_sum": 24.9745,
+          "yes_price_sum": 1.0375,
+          "no_price_sum": 24.9625,
           "top_bracket_label": "260-279",
-          "top_bracket_yes_price": 0.555,
-          "top_bracket_concentration_pct": 54.1,
-          "adjacent_concentration_pct": 94.1,
+          "top_bracket_yes_price": 0.645,
+          "top_bracket_concentration_pct": 62.2,
+          "adjacent_concentration_pct": 96.5,
           "overpriced": false,
           "underpriced": false,
           "coherent": true,
@@ -1528,36 +1505,36 @@
             },
             {
               "bracket_label": "240-259",
-              "yes_price": 0.0855,
-              "no_price": 0.9145,
+              "yes_price": 0.1615,
+              "no_price": 0.8385,
               "position": "adjacent",
               "fair_share": 0.0385
             },
             {
               "bracket_label": "260-279",
-              "yes_price": 0.555,
-              "no_price": 0.445,
+              "yes_price": 0.645,
+              "no_price": 0.355,
               "position": "hot",
               "fair_share": 0.0385
             },
             {
               "bracket_label": "280-299",
-              "yes_price": 0.325,
-              "no_price": 0.675,
+              "yes_price": 0.195,
+              "no_price": 0.805,
               "position": "adjacent",
               "fair_share": 0.0385
             },
             {
               "bracket_label": "300-319",
-              "yes_price": 0.0445,
-              "no_price": 0.9555,
+              "yes_price": 0.0265,
+              "no_price": 0.9735,
               "position": "tail",
               "fair_share": 0.0385
             },
             {
               "bracket_label": "320-339",
-              "yes_price": 0.0095,
-              "no_price": 0.9905,
+              "yes_price": 0.0035,
+              "no_price": 0.9965,
               "position": "tail",
               "fair_share": 0.0385
             },
@@ -1630,16 +1607,16 @@
           "event_slug": "donald-trump-of-truth-social-posts-may-19-may-26",
           "event_title": "Donald Trump # Truth Social posts May 19 - May 26, 2026?",
           "bracket_count": 11,
-          "yes_price_sum": 1.096,
-          "no_price_sum": 9.904,
+          "yes_price_sum": 1.3265,
+          "no_price_sum": 9.6735,
           "top_bracket_label": "160-179",
-          "top_bracket_yes_price": 0.461,
-          "top_bracket_concentration_pct": 42.1,
-          "adjacent_concentration_pct": 94.5,
+          "top_bracket_yes_price": 0.4985,
+          "top_bracket_concentration_pct": 37.6,
+          "adjacent_concentration_pct": 90.0,
           "overpriced": true,
           "underpriced": false,
-          "coherent": true,
-          "verdict": "coherent",
+          "coherent": false,
+          "verdict": "expensive",
           "bracket_details": [
             {
               "bracket_label": "<20",
@@ -1671,8 +1648,8 @@
             },
             {
               "bracket_label": "80-99",
-              "yes_price": 0.001,
-              "no_price": 0.999,
+              "yes_price": 0.0015,
+              "no_price": 0.9985,
               "position": "tail",
               "fair_share": 0.0909
             },
@@ -1685,36 +1662,36 @@
             },
             {
               "bracket_label": "120-139",
-              "yes_price": 0.011,
-              "no_price": 0.989,
+              "yes_price": 0.0015,
+              "no_price": 0.9985,
               "position": "tail",
               "fair_share": 0.0909
             },
             {
               "bracket_label": "140-159",
-              "yes_price": 0.445,
-              "no_price": 0.555,
+              "yes_price": 0.405,
+              "no_price": 0.595,
               "position": "adjacent",
               "fair_share": 0.0909
             },
             {
               "bracket_label": "160-179",
-              "yes_price": 0.461,
-              "no_price": 0.539,
+              "yes_price": 0.4985,
+              "no_price": 0.5015,
               "position": "hot",
               "fair_share": 0.0909
             },
             {
               "bracket_label": "180-199",
-              "yes_price": 0.13,
-              "no_price": 0.87,
+              "yes_price": 0.29,
+              "no_price": 0.71,
               "position": "adjacent",
               "fair_share": 0.0909
             },
             {
               "bracket_label": "200+",
-              "yes_price": 0.045,
-              "no_price": 0.955,
+              "yes_price": 0.127,
+              "no_price": 0.873,
               "position": "tail",
               "fair_share": 0.0909
             }
@@ -1724,12 +1701,12 @@
           "event_slug": "elon-musk-of-tweets-may-23-may-25",
           "event_title": "Elon Musk # tweets May 23 - May 25, 2026?",
           "bracket_count": 10,
-          "yes_price_sum": 0.9795,
-          "no_price_sum": 9.0205,
+          "yes_price_sum": 1.0035,
+          "no_price_sum": 8.9965,
           "top_bracket_label": "40-64",
-          "top_bracket_yes_price": 0.88,
-          "top_bracket_concentration_pct": 89.8,
-          "adjacent_concentration_pct": 99.5,
+          "top_bracket_yes_price": 0.9995,
+          "top_bracket_concentration_pct": 99.6,
+          "adjacent_concentration_pct": 99.7,
           "overpriced": false,
           "underpriced": false,
           "coherent": true,
@@ -1744,22 +1721,22 @@
             },
             {
               "bracket_label": "40-64",
-              "yes_price": 0.88,
-              "no_price": 0.12,
+              "yes_price": 0.9995,
+              "no_price": 0.0005,
               "position": "hot",
               "fair_share": 0.1
             },
             {
               "bracket_label": "65-89",
-              "yes_price": 0.095,
-              "no_price": 0.905,
+              "yes_price": 0.0005,
+              "no_price": 0.9995,
               "position": "adjacent",
               "fair_share": 0.1
             },
             {
               "bracket_label": "90-114",
-              "yes_price": 0.0015,
-              "no_price": 0.9985,
+              "yes_price": 0.0005,
+              "no_price": 0.9995,
               "position": "tail",
               "fair_share": 0.1
             },
@@ -1811,12 +1788,12 @@
           "event_slug": "elon-musk-of-tweets-may-22-may-29",
           "event_title": "Elon Musk # tweets May 22 - May 29, 2026?",
           "bracket_count": 26,
-          "yes_price_sum": 1.034,
-          "no_price_sum": 24.966,
-          "top_bracket_label": "220-239",
+          "yes_price_sum": 1.039,
+          "no_price_sum": 24.961,
+          "top_bracket_label": "200-219",
           "top_bracket_yes_price": 0.195,
-          "top_bracket_concentration_pct": 18.9,
-          "adjacent_concentration_pct": 50.8,
+          "top_bracket_concentration_pct": 18.8,
+          "adjacent_concentration_pct": 52.8,
           "overpriced": false,
           "underpriced": false,
           "coherent": true,
@@ -1873,44 +1850,44 @@
             },
             {
               "bracket_label": "140-159",
-              "yes_price": 0.0095,
-              "no_price": 0.9905,
+              "yes_price": 0.0165,
+              "no_price": 0.9835,
               "position": "tail",
               "fair_share": 0.0385
             },
             {
               "bracket_label": "160-179",
-              "yes_price": 0.0745,
-              "no_price": 0.9255,
+              "yes_price": 0.0795,
+              "no_price": 0.9205,
               "position": "tail",
               "fair_share": 0.0385
             },
             {
               "bracket_label": "180-199",
-              "yes_price": 0.1475,
-              "no_price": 0.8525,
-              "position": "tail",
-              "fair_share": 0.0385
-            },
-            {
-              "bracket_label": "200-219",
-              "yes_price": 0.185,
-              "no_price": 0.815,
+              "yes_price": 0.1585,
+              "no_price": 0.8415,
               "position": "adjacent",
               "fair_share": 0.0385
             },
             {
-              "bracket_label": "220-239",
+              "bracket_label": "200-219",
               "yes_price": 0.195,
               "no_price": 0.805,
               "position": "hot",
               "fair_share": 0.0385
             },
             {
-              "bracket_label": "240-259",
-              "yes_price": 0.145,
-              "no_price": 0.855,
+              "bracket_label": "220-239",
+              "yes_price": 0.195,
+              "no_price": 0.805,
               "position": "adjacent",
+              "fair_share": 0.0385
+            },
+            {
+              "bracket_label": "240-259",
+              "yes_price": 0.135,
+              "no_price": 0.865,
+              "position": "tail",
               "fair_share": 0.0385
             },
             {
@@ -1929,43 +1906,43 @@
             },
             {
               "bracket_label": "300-319",
-              "yes_price": 0.037,
-              "no_price": 0.963,
+              "yes_price": 0.0355,
+              "no_price": 0.9645,
               "position": "tail",
               "fair_share": 0.0385
             },
             {
               "bracket_label": "320-339",
-              "yes_price": 0.023,
-              "no_price": 0.977,
+              "yes_price": 0.0205,
+              "no_price": 0.9795,
               "position": "tail",
               "fair_share": 0.0385
             },
             {
               "bracket_label": "340-359",
-              "yes_price": 0.017,
-              "no_price": 0.983,
+              "yes_price": 0.0105,
+              "no_price": 0.9895,
               "position": "tail",
               "fair_share": 0.0385
             },
             {
               "bracket_label": "360-379",
-              "yes_price": 0.0085,
-              "no_price": 0.9915,
+              "yes_price": 0.0055,
+              "no_price": 0.9945,
               "position": "tail",
               "fair_share": 0.0385
             },
             {
               "bracket_label": "380-399",
-              "yes_price": 0.0065,
-              "no_price": 0.9935,
+              "yes_price": 0.006,
+              "no_price": 0.994,
               "position": "tail",
               "fair_share": 0.0385
             },
             {
               "bracket_label": "400-419",
-              "yes_price": 0.0085,
-              "no_price": 0.9915,
+              "yes_price": 0.0045,
+              "no_price": 0.9955,
               "position": "tail",
               "fair_share": 0.0385
             },
@@ -2010,16 +1987,16 @@
           "event_slug": "donald-trump-of-truth-social-posts-may-26-june-2",
           "event_title": "Donald Trump # Truth Social posts May 26 - June 2, 2026?",
           "bracket_count": 11,
-          "yes_price_sum": 0.948,
-          "no_price_sum": 10.052,
+          "yes_price_sum": 0.8925,
+          "no_price_sum": 10.1075,
           "top_bracket_label": "160-179",
           "top_bracket_yes_price": 0.22,
-          "top_bracket_concentration_pct": 23.2,
-          "adjacent_concentration_pct": 53.3,
+          "top_bracket_concentration_pct": 24.6,
+          "adjacent_concentration_pct": 53.2,
           "overpriced": false,
           "underpriced": true,
           "coherent": false,
-          "verdict": "incoherent",
+          "verdict": "cheap",
           "bracket_details": [
             {
               "bracket_label": "<20",
@@ -2037,22 +2014,22 @@
             },
             {
               "bracket_label": "40-59",
-              "yes_price": 0.0155,
-              "no_price": 0.9845,
+              "yes_price": 0.015,
+              "no_price": 0.985,
               "position": "tail",
               "fair_share": 0.0909
             },
             {
               "bracket_label": "60-79",
-              "yes_price": 0.1005,
-              "no_price": 0.8995,
+              "yes_price": 0.0705,
+              "no_price": 0.9295,
               "position": "tail",
               "fair_share": 0.0909
             },
             {
               "bracket_label": "80-99",
-              "yes_price": 0.0155,
-              "no_price": 0.9845,
+              "yes_price": 0.0105,
+              "no_price": 0.9895,
               "position": "tail",
               "fair_share": 0.0909
             },
@@ -2065,15 +2042,15 @@
             },
             {
               "bracket_label": "120-139",
-              "yes_price": 0.125,
-              "no_price": 0.875,
+              "yes_price": 0.13,
+              "no_price": 0.87,
               "position": "tail",
               "fair_share": 0.0909
             },
             {
               "bracket_label": "140-159",
-              "yes_price": 0.21,
-              "no_price": 0.79,
+              "yes_price": 0.17,
+              "no_price": 0.83,
               "position": "adjacent",
               "fair_share": 0.0909
             },
@@ -2086,15 +2063,15 @@
             },
             {
               "bracket_label": "180-199",
-              "yes_price": 0.075,
-              "no_price": 0.925,
+              "yes_price": 0.085,
+              "no_price": 0.915,
               "position": "adjacent",
               "fair_share": 0.0909
             },
             {
               "bracket_label": "200+",
-              "yes_price": 0.13,
-              "no_price": 0.87,
+              "yes_price": 0.135,
+              "no_price": 0.865,
               "position": "tail",
               "fair_share": 0.0909
             }
@@ -2104,12 +2081,12 @@
           "event_slug": "elon-musk-of-tweets-may-26-june-2",
           "event_title": "Elon Musk # tweets May 26 - June 2, 2026?",
           "bracket_count": 26,
-          "yes_price_sum": 1.063,
-          "no_price_sum": 24.937,
+          "yes_price_sum": 1.085,
+          "no_price_sum": 24.915,
           "top_bracket_label": "220-239",
-          "top_bracket_yes_price": 0.125,
-          "top_bracket_concentration_pct": 11.8,
-          "adjacent_concentration_pct": 32.5,
+          "top_bracket_yes_price": 0.145,
+          "top_bracket_concentration_pct": 13.4,
+          "adjacent_concentration_pct": 37.3,
           "overpriced": true,
           "underpriced": false,
           "coherent": true,
@@ -2145,85 +2122,85 @@
             },
             {
               "bracket_label": "80-99",
-              "yes_price": 0.0045,
-              "no_price": 0.9955,
+              "yes_price": 0.0025,
+              "no_price": 0.9975,
               "position": "tail",
               "fair_share": 0.0385
             },
             {
               "bracket_label": "100-119",
-              "yes_price": 0.0105,
-              "no_price": 0.9895,
+              "yes_price": 0.0075,
+              "no_price": 0.9925,
               "position": "tail",
               "fair_share": 0.0385
             },
             {
               "bracket_label": "120-139",
-              "yes_price": 0.025,
-              "no_price": 0.975,
+              "yes_price": 0.0135,
+              "no_price": 0.9865,
               "position": "tail",
               "fair_share": 0.0385
             },
             {
               "bracket_label": "140-159",
-              "yes_price": 0.0345,
-              "no_price": 0.9655,
+              "yes_price": 0.0405,
+              "no_price": 0.9595,
               "position": "tail",
               "fair_share": 0.0385
             },
             {
               "bracket_label": "160-179",
-              "yes_price": 0.0565,
-              "no_price": 0.9435,
+              "yes_price": 0.0575,
+              "no_price": 0.9425,
               "position": "tail",
               "fair_share": 0.0385
             },
             {
               "bracket_label": "180-199",
-              "yes_price": 0.075,
-              "no_price": 0.925,
+              "yes_price": 0.085,
+              "no_price": 0.915,
               "position": "tail",
               "fair_share": 0.0385
             },
             {
               "bracket_label": "200-219",
-              "yes_price": 0.095,
-              "no_price": 0.905,
+              "yes_price": 0.125,
+              "no_price": 0.875,
               "position": "adjacent",
               "fair_share": 0.0385
             },
             {
               "bracket_label": "220-239",
-              "yes_price": 0.125,
-              "no_price": 0.875,
+              "yes_price": 0.145,
+              "no_price": 0.855,
               "position": "hot",
               "fair_share": 0.0385
             },
             {
               "bracket_label": "240-259",
-              "yes_price": 0.125,
-              "no_price": 0.875,
+              "yes_price": 0.135,
+              "no_price": 0.865,
               "position": "adjacent",
               "fair_share": 0.0385
             },
             {
               "bracket_label": "260-279",
-              "yes_price": 0.125,
-              "no_price": 0.875,
-              "position": "tail",
-              "fair_share": 0.0385
-            },
-            {
-              "bracket_label": "280-299",
               "yes_price": 0.115,
               "no_price": 0.885,
               "position": "tail",
               "fair_share": 0.0385
             },
             {
+              "bracket_label": "280-299",
+              "yes_price": 0.105,
+              "no_price": 0.895,
+              "position": "tail",
+              "fair_share": 0.0385
+            },
+            {
               "bracket_label": "300-319",
-              "yes_price": 0.085,
-              "no_price": 0.915,
+              "yes_price": 0.075,
+              "no_price": 0.925,
               "position": "tail",
               "fair_share": 0.0385
             },
@@ -2236,36 +2213,36 @@
             },
             {
               "bracket_label": "340-359",
-              "yes_price": 0.045,
-              "no_price": 0.955,
+              "yes_price": 0.0415,
+              "no_price": 0.9585,
               "position": "tail",
               "fair_share": 0.0385
             },
             {
               "bracket_label": "360-379",
-              "yes_price": 0.0245,
-              "no_price": 0.9755,
+              "yes_price": 0.0235,
+              "no_price": 0.9765,
               "position": "tail",
               "fair_share": 0.0385
             },
             {
               "bracket_label": "380-399",
-              "yes_price": 0.0195,
-              "no_price": 0.9805,
+              "yes_price": 0.0185,
+              "no_price": 0.9815,
               "position": "tail",
               "fair_share": 0.0385
             },
             {
               "bracket_label": "400-419",
-              "yes_price": 0.0095,
-              "no_price": 0.9905,
+              "yes_price": 0.0085,
+              "no_price": 0.9915,
               "position": "tail",
               "fair_share": 0.0385
             },
             {
               "bracket_label": "420-439",
-              "yes_price": 0.0075,
-              "no_price": 0.9925,
+              "yes_price": 0.0065,
+              "no_price": 0.9935,
               "position": "tail",
               "fair_share": 0.0385
             },
@@ -2285,8 +2262,8 @@
             },
             {
               "bracket_label": "480-499",
-              "yes_price": 0.0035,
-              "no_price": 0.9965,
+              "yes_price": 0.0025,
+              "no_price": 0.9975,
               "position": "tail",
               "fair_share": 0.0385
             },
@@ -2303,12 +2280,12 @@
           "event_slug": "elon-musk-of-tweets-may-25-may-27",
           "event_title": "Elon Musk # tweets May 25 - May 27, 2026?",
           "bracket_count": 10,
-          "yes_price_sum": 0.999,
-          "no_price_sum": 9.001,
+          "yes_price_sum": 1.02,
+          "no_price_sum": 8.98,
           "top_bracket_label": "40-64",
-          "top_bracket_yes_price": 0.445,
-          "top_bracket_concentration_pct": 44.5,
-          "adjacent_concentration_pct": 84.1,
+          "top_bracket_yes_price": 0.49,
+          "top_bracket_concentration_pct": 48.0,
+          "adjacent_concentration_pct": 91.2,
           "overpriced": false,
           "underpriced": false,
           "coherent": true,
@@ -2316,71 +2293,71 @@
           "bracket_details": [
             {
               "bracket_label": "<40",
-              "yes_price": 0.085,
-              "no_price": 0.915,
+              "yes_price": 0.155,
+              "no_price": 0.845,
               "position": "adjacent",
               "fair_share": 0.1
             },
             {
               "bracket_label": "40-64",
-              "yes_price": 0.445,
-              "no_price": 0.555,
+              "yes_price": 0.49,
+              "no_price": 0.51,
               "position": "hot",
               "fair_share": 0.1
             },
             {
               "bracket_label": "65-89",
-              "yes_price": 0.31,
-              "no_price": 0.69,
+              "yes_price": 0.285,
+              "no_price": 0.715,
               "position": "adjacent",
               "fair_share": 0.1
             },
             {
               "bracket_label": "90-114",
-              "yes_price": 0.095,
-              "no_price": 0.905,
+              "yes_price": 0.065,
+              "no_price": 0.935,
               "position": "tail",
               "fair_share": 0.1
             },
             {
               "bracket_label": "115-139",
-              "yes_price": 0.031,
-              "no_price": 0.969,
+              "yes_price": 0.0195,
+              "no_price": 0.9805,
               "position": "tail",
               "fair_share": 0.1
             },
             {
               "bracket_label": "140-164",
-              "yes_price": 0.016,
-              "no_price": 0.984,
-              "position": "tail",
-              "fair_share": 0.1
-            },
-            {
-              "bracket_label": "165-189",
-              "yes_price": 0.0055,
-              "no_price": 0.9945,
-              "position": "tail",
-              "fair_share": 0.1
-            },
-            {
-              "bracket_label": "190-214",
-              "yes_price": 0.0075,
-              "no_price": 0.9925,
-              "position": "tail",
-              "fair_share": 0.1
-            },
-            {
-              "bracket_label": "215-239",
               "yes_price": 0.0015,
               "no_price": 0.9985,
               "position": "tail",
               "fair_share": 0.1
             },
             {
+              "bracket_label": "165-189",
+              "yes_price": 0.0015,
+              "no_price": 0.9985,
+              "position": "tail",
+              "fair_share": 0.1
+            },
+            {
+              "bracket_label": "190-214",
+              "yes_price": 0.0015,
+              "no_price": 0.9985,
+              "position": "tail",
+              "fair_share": 0.1
+            },
+            {
+              "bracket_label": "215-239",
+              "yes_price": 0.0005,
+              "no_price": 0.9995,
+              "position": "tail",
+              "fair_share": 0.1
+            },
+            {
               "bracket_label": "240+",
-              "yes_price": 0.0025,
-              "no_price": 0.9975,
+              "yes_price": 0.0005,
+              "no_price": 0.9995,
               "position": "tail",
               "fair_share": 0.1
             }
@@ -2390,12 +2367,12 @@
           "event_slug": "elon-musk-of-tweets-july-2026",
           "event_title": "Elon Musk musk # tweets in July 2026?",
           "bracket_count": 51,
-          "yes_price_sum": 1.185,
-          "no_price_sum": 49.815,
+          "yes_price_sum": 1.1415,
+          "no_price_sum": 49.8585,
           "top_bracket_label": "1400+",
-          "top_bracket_yes_price": 0.13,
+          "top_bracket_yes_price": 0.125,
           "top_bracket_concentration_pct": 11.0,
-          "adjacent_concentration_pct": 14.1,
+          "adjacent_concentration_pct": 14.2,
           "overpriced": true,
           "underpriced": false,
           "coherent": false,
@@ -2403,8 +2380,8 @@
           "bracket_details": [
             {
               "bracket_label": "<20",
-              "yes_price": 0.0065,
-              "no_price": 0.9935,
+              "yes_price": 0.005,
+              "no_price": 0.995,
               "position": "tail",
               "fair_share": 0.0196
             },
@@ -2599,8 +2576,8 @@
             },
             {
               "bracket_label": "560-579",
-              "yes_price": 0.011,
-              "no_price": 0.989,
+              "yes_price": 0.0105,
+              "no_price": 0.9895,
               "position": "tail",
               "fair_share": 0.0196
             },
@@ -2641,57 +2618,57 @@
             },
             {
               "bracket_label": "760-799",
-              "yes_price": 0.031,
-              "no_price": 0.969,
+              "yes_price": 0.032,
+              "no_price": 0.968,
               "position": "tail",
               "fair_share": 0.0196
             },
             {
               "bracket_label": "800-839",
-              "yes_price": 0.0415,
-              "no_price": 0.9585,
+              "yes_price": 0.0425,
+              "no_price": 0.9575,
               "position": "tail",
               "fair_share": 0.0196
             },
             {
               "bracket_label": "840-879",
-              "yes_price": 0.0505,
-              "no_price": 0.9495,
+              "yes_price": 0.0535,
+              "no_price": 0.9465,
               "position": "tail",
               "fair_share": 0.0196
             },
             {
               "bracket_label": "880-919",
-              "yes_price": 0.0545,
-              "no_price": 0.9455,
+              "yes_price": 0.06,
+              "no_price": 0.94,
               "position": "tail",
               "fair_share": 0.0196
             },
             {
               "bracket_label": "920-959",
-              "yes_price": 0.0745,
-              "no_price": 0.9255,
+              "yes_price": 0.0625,
+              "no_price": 0.9375,
               "position": "tail",
               "fair_share": 0.0196
             },
             {
               "bracket_label": "960-999",
-              "yes_price": 0.0775,
-              "no_price": 0.9225,
+              "yes_price": 0.077,
+              "no_price": 0.923,
               "position": "tail",
               "fair_share": 0.0196
             },
             {
               "bracket_label": "1000-1039",
-              "yes_price": 0.08,
-              "no_price": 0.92,
+              "yes_price": 0.07,
+              "no_price": 0.93,
               "position": "tail",
               "fair_share": 0.0196
             },
             {
               "bracket_label": "1040-1079",
-              "yes_price": 0.08,
-              "no_price": 0.92,
+              "yes_price": 0.07,
+              "no_price": 0.93,
               "position": "tail",
               "fair_share": 0.0196
             },
@@ -2704,15 +2681,15 @@
             },
             {
               "bracket_label": "1120-1159",
-              "yes_price": 0.075,
-              "no_price": 0.925,
+              "yes_price": 0.065,
+              "no_price": 0.935,
               "position": "tail",
               "fair_share": 0.0196
             },
             {
               "bracket_label": "1160-1199",
-              "yes_price": 0.0715,
-              "no_price": 0.9285,
+              "yes_price": 0.0675,
+              "no_price": 0.9325,
               "position": "tail",
               "fair_share": 0.0196
             },
@@ -2725,8 +2702,8 @@
             },
             {
               "bracket_label": "1240-1279",
-              "yes_price": 0.0325,
-              "no_price": 0.9675,
+              "yes_price": 0.032,
+              "no_price": 0.968,
               "position": "tail",
               "fair_share": 0.0196
             },
@@ -2753,8 +2730,8 @@
             },
             {
               "bracket_label": "1400+",
-              "yes_price": 0.13,
-              "no_price": 0.87,
+              "yes_price": 0.125,
+              "no_price": 0.875,
               "position": "hot",
               "fair_share": 0.0196
             }
@@ -2768,24 +2745,24 @@
     "family_guarded_no/moderate": {
       "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "total_trades": 5,
-      "open_trades": 5,
+      "total_trades": 4,
+      "open_trades": 4,
       "closed_trades": 0,
       "wins": 0,
       "losses": 0,
       "expired": 0,
       "win_rate_pct": 0.0,
       "realized_pnl": 0,
-      "open_exposure": 500.0,
-      "max_family_concentration_pct": 40.0,
-      "max_position_concentration_pct": 80.0,
+      "open_exposure": 400.0,
+      "max_family_concentration_pct": 50.0,
+      "max_position_concentration_pct": 50.0,
       "position_breakdown": {
-        "adjacent": 4,
-        "tail": 1
+        "tail": 2,
+        "adjacent": 2
       },
       "avg_stake": 100.0,
       "avg_hours_to_resolution": null,
-      "unique_families_traded": 4,
+      "unique_families_traded": 3,
       "definitive_outcomes": 0,
       "risk_adjusted_score": 0.0,
       "provenance": "SIMULATED"
@@ -2803,14 +2780,14 @@
       "realized_pnl": 0,
       "open_exposure": 1400.0,
       "max_family_concentration_pct": 42.9,
-      "max_position_concentration_pct": 85.7,
+      "max_position_concentration_pct": 71.4,
       "position_breakdown": {
-        "adjacent": 6,
-        "tail": 1
+        "tail": 2,
+        "adjacent": 5
       },
       "avg_stake": 200.0,
       "avg_hours_to_resolution": null,
-      "unique_families_traded": 4,
+      "unique_families_traded": 3,
       "definitive_outcomes": 0,
       "risk_adjusted_score": 0.0,
       "provenance": "SIMULATED"
@@ -2818,18 +2795,19 @@
     "no_side/conservative": {
       "strategy_id": "no_side",
       "profile_id": "conservative",
-      "total_trades": 3,
-      "open_trades": 3,
+      "total_trades": 5,
+      "open_trades": 5,
       "closed_trades": 0,
       "wins": 0,
       "losses": 0,
       "expired": 0,
       "win_rate_pct": 0.0,
       "realized_pnl": 0,
-      "open_exposure": 150.0,
-      "max_family_concentration_pct": 33.3,
-      "max_position_concentration_pct": 100.0,
+      "open_exposure": 250.0,
+      "max_family_concentration_pct": 40.0,
+      "max_position_concentration_pct": 60.0,
       "position_breakdown": {
+        "tail": 2,
         "adjacent": 3
       },
       "avg_stake": 50.0,
@@ -2842,24 +2820,24 @@
     "no_side/moderate": {
       "strategy_id": "no_side",
       "profile_id": "moderate",
-      "total_trades": 5,
-      "open_trades": 5,
+      "total_trades": 7,
+      "open_trades": 7,
       "closed_trades": 0,
       "wins": 0,
       "losses": 0,
       "expired": 0,
       "win_rate_pct": 0.0,
       "realized_pnl": 0,
-      "open_exposure": 500.0,
-      "max_family_concentration_pct": 40.0,
-      "max_position_concentration_pct": 80.0,
+      "open_exposure": 700.0,
+      "max_family_concentration_pct": 42.9,
+      "max_position_concentration_pct": 71.4,
       "position_breakdown": {
-        "adjacent": 4,
-        "tail": 1
+        "tail": 2,
+        "adjacent": 5
       },
       "avg_stake": 100.0,
       "avg_hours_to_resolution": null,
-      "unique_families_traded": 4,
+      "unique_families_traded": 3,
       "definitive_outcomes": 0,
       "risk_adjusted_score": 0.0,
       "provenance": "SIMULATED"
@@ -2872,9 +2850,9 @@
         "event_slug": "elon-musk-of-tweets-may-2026",
         "event_title": "Elon Musk musk # tweets in May 2026?",
         "estimated_rate": 4.0,
-        "hours_remaining": 157.4,
-        "expected_total": 629.8,
-        "std_dev": 25.1,
+        "hours_remaining": 155.0,
+        "expected_total": 620.1,
+        "std_dev": 24.9,
         "brackets": [
           {
             "bracket_label": "<20",
@@ -3088,89 +3066,89 @@
             "bracket_label": "520-539",
             "lower": 520,
             "upper": 539,
-            "fair_probability": 0.0002,
+            "fair_probability": 0.0006,
             "market_yes_price": 0.0,
-            "edge": 0.0002
+            "edge": 0.0006
           },
           {
             "bracket_label": "540-559",
             "lower": 540,
             "upper": 559,
-            "fair_probability": 0.0024,
+            "fair_probability": 0.0069,
             "market_yes_price": 0.0,
-            "edge": 0.0024
+            "edge": 0.0069
           },
           {
             "bracket_label": "560-579",
             "lower": 560,
             "upper": 579,
-            "fair_probability": 0.02,
+            "fair_probability": 0.0441,
             "market_yes_price": 0.0,
-            "edge": 0.02
+            "edge": 0.0441
           },
           {
             "bracket_label": "580-599",
             "lower": 580,
             "upper": 599,
-            "fair_probability": 0.0913,
+            "fair_probability": 0.1527,
             "market_yes_price": 0.0,
-            "edge": 0.0913
+            "edge": 0.1527
           },
           {
             "bracket_label": "600-619",
             "lower": 600,
             "upper": 619,
-            "fair_probability": 0.2273,
+            "fair_probability": 0.2865,
             "market_yes_price": 0.0,
-            "edge": 0.2273
+            "edge": 0.2865
           },
           {
             "bracket_label": "620-639",
             "lower": 620,
             "upper": 639,
-            "fair_probability": 0.3097,
+            "fair_probability": 0.2915,
             "market_yes_price": 0.0,
-            "edge": 0.3097
+            "edge": 0.2915
           },
           {
             "bracket_label": "640-659",
             "lower": 640,
             "upper": 659,
-            "fair_probability": 0.231,
+            "fair_probability": 0.161,
             "market_yes_price": 0.0,
-            "edge": 0.231
+            "edge": 0.161
           },
           {
             "bracket_label": "660-679",
             "lower": 660,
             "upper": 679,
-            "fair_probability": 0.0943,
+            "fair_probability": 0.0482,
             "market_yes_price": 0.0,
-            "edge": 0.0943
+            "edge": 0.0482
           },
           {
             "bracket_label": "680-699",
             "lower": 680,
             "upper": 699,
-            "fair_probability": 0.021,
+            "fair_probability": 0.0078,
             "market_yes_price": 0.0005,
-            "edge": 0.0205
+            "edge": 0.0073
           },
           {
             "bracket_label": "700-719",
             "lower": 700,
             "upper": 719,
-            "fair_probability": 0.0026,
+            "fair_probability": 0.0007,
             "market_yes_price": 0.0015,
-            "edge": 0.0011
+            "edge": -0.0008
           },
           {
             "bracket_label": "720-739",
             "lower": 720,
             "upper": 739,
-            "fair_probability": 0.0002,
+            "fair_probability": 0.0,
             "market_yes_price": 0.0015,
-            "edge": -0.0013
+            "edge": -0.0015
           },
           {
             "bracket_label": "740-759",
@@ -3185,72 +3163,72 @@
             "lower": 760,
             "upper": 779,
             "fair_probability": 0.0,
-            "market_yes_price": 0.0065,
-            "edge": -0.0065
+            "market_yes_price": 0.0055,
+            "edge": -0.0055
           },
           {
             "bracket_label": "780-799",
             "lower": 780,
             "upper": 799,
             "fair_probability": 0.0,
-            "market_yes_price": 0.0105,
-            "edge": -0.0105
+            "market_yes_price": 0.0065,
+            "edge": -0.0065
           },
           {
             "bracket_label": "800-839",
             "lower": 800,
             "upper": 839,
             "fair_probability": 0.0,
-            "market_yes_price": 0.075,
-            "edge": -0.075
+            "market_yes_price": 0.07,
+            "edge": -0.07
           },
           {
             "bracket_label": "840-879",
             "lower": 840,
             "upper": 879,
             "fair_probability": 0.0,
-            "market_yes_price": 0.2095,
-            "edge": -0.2095
+            "market_yes_price": 0.2025,
+            "edge": -0.2025
           },
           {
             "bracket_label": "880-919",
             "lower": 880,
             "upper": 919,
             "fair_probability": 0.0,
-            "market_yes_price": 0.2695,
-            "edge": -0.2695
+            "market_yes_price": 0.278,
+            "edge": -0.278
           },
           {
             "bracket_label": "920-959",
             "lower": 920,
             "upper": 959,
             "fair_probability": 0.0,
-            "market_yes_price": 0.2275,
-            "edge": -0.2275
+            "market_yes_price": 0.2225,
+            "edge": -0.2225
           },
           {
             "bracket_label": "960-999",
             "lower": 960,
             "upper": 999,
             "fair_probability": 0.0,
-            "market_yes_price": 0.1055,
-            "edge": -0.1055
+            "market_yes_price": 0.107,
+            "edge": -0.107
           },
           {
             "bracket_label": "1000-1039",
             "lower": 1000,
             "upper": 1039,
             "fair_probability": 0.0,
-            "market_yes_price": 0.0575,
-            "edge": -0.0575
+            "market_yes_price": 0.0515,
+            "edge": -0.0515
           },
           {
             "bracket_label": "1040-1079",
             "lower": 1040,
             "upper": 1079,
             "fair_probability": 0.0,
-            "market_yes_price": 0.0285,
-            "edge": -0.0285
+            "market_yes_price": 0.0305,
+            "edge": -0.0305
           },
           {
             "bracket_label": "1080-1119",
@@ -3265,8 +3243,8 @@
             "lower": 1120,
             "upper": 1159,
             "fair_probability": 0.0,
-            "market_yes_price": 0.0095,
-            "edge": -0.0095
+            "market_yes_price": 0.006,
+            "edge": -0.006
           },
           {
             "bracket_label": "1160-1199",
@@ -3412,9 +3390,9 @@
         "event_slug": "elon-musk-of-tweets-may-19-may-26",
         "event_title": "Elon Musk # tweets May 19 - May 26, 2026?",
         "estimated_rate": 4.0,
-        "hours_remaining": 25.4,
-        "expected_total": 101.8,
-        "std_dev": 10.1,
+        "hours_remaining": 23.0,
+        "expected_total": 92.1,
+        "std_dev": 9.6,
         "brackets": [
           {
             "bracket_label": "<20",
@@ -3428,25 +3406,25 @@
             "bracket_label": "40-59",
             "lower": 40,
             "upper": 59,
-            "fair_probability": 0.0,
+            "fair_probability": 0.0003,
             "market_yes_price": 0.0,
-            "edge": 0.0
+            "edge": 0.0003
           },
           {
             "bracket_label": "80-99",
             "lower": 80,
             "upper": 99,
-            "fair_probability": 0.3975,
+            "fair_probability": 0.6854,
             "market_yes_price": 0.0,
-            "edge": 0.3975
+            "edge": 0.6854
           },
           {
             "bracket_label": "120-139",
             "lower": 120,
             "upper": 139,
-            "fair_probability": 0.0393,
+            "fair_probability": 0.0021,
             "market_yes_price": 0.0,
-            "edge": 0.0393
+            "edge": 0.0021
           },
           {
             "bracket_label": "160-179",
@@ -3469,24 +3447,24 @@
             "lower": 240,
             "upper": 259,
             "fair_probability": 0.0,
-            "market_yes_price": 0.0855,
-            "edge": -0.0855
+            "market_yes_price": 0.1615,
+            "edge": -0.1615
           },
           {
             "bracket_label": "280-299",
             "lower": 280,
             "upper": 299,
             "fair_probability": 0.0,
-            "market_yes_price": 0.325,
-            "edge": -0.325
+            "market_yes_price": 0.195,
+            "edge": -0.195
           },
           {
             "bracket_label": "320-339",
             "lower": 320,
             "upper": 339,
             "fair_probability": 0.0,
-            "market_yes_price": 0.0095,
-            "edge": -0.0095
+            "market_yes_price": 0.0035,
+            "edge": -0.0035
           },
           {
             "bracket_label": "360-379",
@@ -3532,25 +3510,25 @@
             "bracket_label": "60-79",
             "lower": 60,
             "upper": 79,
-            "fair_probability": 0.0136,
+            "fair_probability": 0.0946,
             "market_yes_price": 0.0,
-            "edge": 0.0136
+            "edge": 0.0946
           },
           {
             "bracket_label": "100-119",
             "lower": 100,
             "upper": 119,
-            "fair_probability": 0.5495,
+            "fair_probability": 0.2174,
             "market_yes_price": 0.0,
-            "edge": 0.5495
+            "edge": 0.2174
           },
           {
             "bracket_label": "140-159",
             "lower": 140,
             "upper": 159,
-            "fair_probability": 0.0001,
+            "fair_probability": 0.0,
             "market_yes_price": 0.0,
-            "edge": 0.0001
+            "edge": 0.0
           },
           {
             "bracket_label": "180-199",
@@ -3573,16 +3551,16 @@
             "lower": 260,
             "upper": 279,
             "fair_probability": 0.0,
-            "market_yes_price": 0.555,
-            "edge": -0.555
+            "market_yes_price": 0.645,
+            "edge": -0.645
           },
           {
             "bracket_label": "300-319",
             "lower": 300,
             "upper": 319,
             "fair_probability": 0.0,
-            "market_yes_price": 0.0445,
-            "edge": -0.0445
+            "market_yes_price": 0.0265,
+            "edge": -0.0265
           },
           {
             "bracket_label": "340-359",
@@ -3632,9 +3610,9 @@
         "event_slug": "donald-trump-of-truth-social-posts-may-19-may-26",
         "event_title": "Donald Trump # Truth Social posts May 19 - May 26, 2026?",
         "estimated_rate": 2.0,
-        "hours_remaining": 25.4,
-        "expected_total": 50.9,
-        "std_dev": 7.1,
+        "hours_remaining": 23.0,
+        "expected_total": 46.0,
+        "std_dev": 6.8,
         "brackets": [
           {
             "bracket_label": "<20",
@@ -3648,57 +3626,57 @@
             "bracket_label": "40-59",
             "lower": 40,
             "upper": 59,
-            "fair_probability": 0.8312,
+            "fair_probability": 0.8088,
             "market_yes_price": 0.001,
-            "edge": 0.8302
+            "edge": 0.8078
           },
           {
             "bracket_label": "80-99",
             "lower": 80,
             "upper": 99,
             "fair_probability": 0.0,
-            "market_yes_price": 0.001,
-            "edge": -0.001
+            "market_yes_price": 0.0015,
+            "edge": -0.0015
           },
           {
             "bracket_label": "120-139",
             "lower": 120,
             "upper": 139,
             "fair_probability": 0.0,
-            "market_yes_price": 0.011,
-            "edge": -0.011
+            "market_yes_price": 0.0015,
+            "edge": -0.0015
           },
           {
             "bracket_label": "160-179",
             "lower": 160,
             "upper": 179,
             "fair_probability": 0.0,
-            "market_yes_price": 0.461,
-            "edge": -0.461
+            "market_yes_price": 0.4985,
+            "edge": -0.4985
           },
           {
             "bracket_label": "200+",
             "lower": 200,
             "upper": null,
             "fair_probability": 0.0,
-            "market_yes_price": 0.045,
-            "edge": -0.045
+            "market_yes_price": 0.127,
+            "edge": -0.127
           },
           {
             "bracket_label": "20-39",
             "lower": 20,
             "upper": 39,
-            "fair_probability": 0.0553,
+            "fair_probability": 0.1676,
             "market_yes_price": 0.0005,
-            "edge": 0.0548
+            "edge": 0.1671
           },
           {
             "bracket_label": "60-79",
             "lower": 60,
             "upper": 79,
-            "fair_probability": 0.1135,
+            "fair_probability": 0.0236,
             "market_yes_price": 0.0005,
-            "edge": 0.113
+            "edge": 0.0231
           },
           {
             "bracket_label": "100-119",
@@ -3713,108 +3691,16 @@
             "lower": 140,
             "upper": 159,
             "fair_probability": 0.0,
-            "market_yes_price": 0.445,
-            "edge": -0.445
+            "market_yes_price": 0.405,
+            "edge": -0.405
           },
           {
             "bracket_label": "180-199",
             "lower": 180,
             "upper": 199,
             "fair_probability": 0.0,
-            "market_yes_price": 0.13,
-            "edge": -0.13
-          }
-        ],
-        "model_version": "rate_baseline_v0.1",
-        "provenance": "SIMULATED"
-      },
-      {
-        "event_slug": "elon-musk-of-tweets-may-23-may-25",
-        "event_title": "Elon Musk # tweets May 23 - May 25, 2026?",
-        "estimated_rate": 4.0,
-        "hours_remaining": 1.4,
-        "expected_total": 5.8,
-        "std_dev": 2.4,
-        "brackets": [
-          {
-            "bracket_label": "<40",
-            "lower": null,
-            "upper": 39,
-            "fair_probability": 1.0,
-            "market_yes_price": 0.0,
-            "edge": 1.0
-          },
-          {
-            "bracket_label": "40-64",
-            "lower": 40,
-            "upper": 64,
-            "fair_probability": 0.0,
-            "market_yes_price": 0.88,
-            "edge": -0.88
-          },
-          {
-            "bracket_label": "65-89",
-            "lower": 65,
-            "upper": 89,
-            "fair_probability": 0.0,
-            "market_yes_price": 0.095,
-            "edge": -0.095
-          },
-          {
-            "bracket_label": "90-114",
-            "lower": 90,
-            "upper": 114,
-            "fair_probability": 0.0,
-            "market_yes_price": 0.0015,
-            "edge": -0.0015
-          },
-          {
-            "bracket_label": "115-139",
-            "lower": 115,
-            "upper": 139,
-            "fair_probability": 0.0,
-            "market_yes_price": 0.0005,
-            "edge": -0.0005
-          },
-          {
-            "bracket_label": "140-164",
-            "lower": 140,
-            "upper": 164,
-            "fair_probability": 0.0,
-            "market_yes_price": 0.0005,
-            "edge": -0.0005
-          },
-          {
-            "bracket_label": "165-189",
-            "lower": 165,
-            "upper": 189,
-            "fair_probability": 0.0,
-            "market_yes_price": 0.0005,
-            "edge": -0.0005
-          },
-          {
-            "bracket_label": "190-214",
-            "lower": 190,
-            "upper": 214,
-            "fair_probability": 0.0,
-            "market_yes_price": 0.0005,
-            "edge": -0.0005
-          },
-          {
-            "bracket_label": "215-239",
-            "lower": 215,
-            "upper": 239,
-            "fair_probability": 0.0,
-            "market_yes_price": 0.0005,
-            "edge": -0.0005
-          },
-          {
-            "bracket_label": "240+",
-            "lower": 240,
-            "upper": null,
-            "fair_probability": 0.0,
-            "market_yes_price": 0.0005,
-            "edge": -0.0005
+            "market_yes_price": 0.29,
+            "edge": -0.29
           }
         ],
         "model_version": "rate_baseline_v0.1",
@@ -3824,9 +3710,9 @@
         "event_slug": "elon-musk-of-tweets-may-22-may-29",
         "event_title": "Elon Musk # tweets May 22 - May 29, 2026?",
         "estimated_rate": 4.0,
-        "hours_remaining": 97.4,
-        "expected_total": 389.8,
-        "std_dev": 19.7,
+        "hours_remaining": 95.0,
+        "expected_total": 380.1,
+        "std_dev": 19.5,
         "brackets": [
           {
             "bracket_label": "<20",
@@ -3889,32 +3775,32 @@
             "lower": 140,
             "upper": 159,
             "fair_probability": 0.0,
-            "market_yes_price": 0.0095,
-            "edge": -0.0095
+            "market_yes_price": 0.0165,
+            "edge": -0.0165
           },
           {
             "bracket_label": "160-179",
             "lower": 160,
             "upper": 179,
             "fair_probability": 0.0,
-            "market_yes_price": 0.0745,
-            "edge": -0.0745
+            "market_yes_price": 0.0795,
+            "edge": -0.0795
           },
           {
             "bracket_label": "180-199",
             "lower": 180,
             "upper": 199,
             "fair_probability": 0.0,
-            "market_yes_price": 0.1475,
-            "edge": -0.1475
+            "market_yes_price": 0.1585,
+            "edge": -0.1585
           },
           {
             "bracket_label": "200-219",
             "lower": 200,
             "upper": 219,
             "fair_probability": 0.0,
-            "market_yes_price": 0.185,
-            "edge": -0.185
+            "market_yes_price": 0.195,
+            "edge": -0.195
           },
           {
             "bracket_label": "220-239",
@@ -3929,8 +3815,8 @@
             "lower": 240,
             "upper": 259,
             "fair_probability": 0.0,
-            "market_yes_price": 0.145,
-            "edge": -0.145
+            "market_yes_price": 0.135,
+            "edge": -0.135
           },
           {
             "bracket_label": "260-279",
@@ -3952,73 +3838,73 @@
             "bracket_label": "300-319",
             "lower": 300,
             "upper": 319,
-            "fair_probability": 0.0002,
-            "market_yes_price": 0.037,
-            "edge": -0.0368
+            "fair_probability": 0.0009,
+            "market_yes_price": 0.0355,
+            "edge": -0.0346
           },
           {
             "bracket_label": "320-339",
             "lower": 320,
             "upper": 339,
-            "fair_probability": 0.0053,
-            "market_yes_price": 0.023,
-            "edge": -0.0177
+            "fair_probability": 0.0178,
+            "market_yes_price": 0.0205,
+            "edge": -0.0027
           },
           {
             "bracket_label": "340-359",
             "lower": 340,
             "upper": 359,
-            "fair_probability": 0.0572,
-            "market_yes_price": 0.017,
-            "edge": 0.0402
+            "fair_probability": 0.1269,
+            "market_yes_price": 0.0105,
+            "edge": 0.1164
           },
           {
             "bracket_label": "360-379",
             "lower": 360,
             "upper": 379,
-            "fair_probability": 0.2389,
-            "market_yes_price": 0.0085,
-            "edge": 0.2304
+            "fair_probability": 0.3426,
+            "market_yes_price": 0.0055,
+            "edge": 0.3371
           },
           {
             "bracket_label": "380-399",
             "lower": 380,
             "upper": 399,
-            "fair_probability": 0.3875,
-            "market_yes_price": 0.0065,
-            "edge": 0.381
+            "fair_probability": 0.3522,
+            "market_yes_price": 0.006,
+            "edge": 0.3462
           },
           {
             "bracket_label": "400-419",
             "lower": 400,
             "upper": 419,
-            "fair_probability": 0.245,
-            "market_yes_price": 0.0085,
-            "edge": 0.2365
+            "fair_probability": 0.138,
+            "market_yes_price": 0.0045,
+            "edge": 0.1335
           },
           {
             "bracket_label": "420-439",
             "lower": 420,
             "upper": 439,
-            "fair_probability": 0.0601,
+            "fair_probability": 0.0204,
             "market_yes_price": 0.0015,
-            "edge": 0.0586
+            "edge": 0.0189
           },
           {
             "bracket_label": "440-459",
             "lower": 440,
             "upper": 459,
-            "fair_probability": 0.0057,
+            "fair_probability": 0.0011,
             "market_yes_price": 0.0005,
-            "edge": 0.0052
+            "edge": 0.0006
           },
           {
             "bracket_label": "460-479",
             "lower": 460,
             "upper": 479,
-            "fair_probability": 0.0002,
+            "fair_probability": 0.0,
             "market_yes_price": 0.0005,
-            "edge": -0.0003
+            "edge": -0.0005
           },
           {
             "bracket_label": "480-499",
@@ -4044,9 +3930,9 @@
         "event_slug": "donald-trump-of-truth-social-posts-may-26-june-2",
         "event_title": "Donald Trump # Truth Social posts May 26 - June 2, 2026?",
         "estimated_rate": 2.0,
-        "hours_remaining": 193.4,
-        "expected_total": 386.9,
-        "std_dev": 19.7,
+        "hours_remaining": 191.0,
+        "expected_total": 382.0,
+        "std_dev": 19.5,
         "brackets": [
           {
             "bracket_label": "<20",
@@ -4069,24 +3955,24 @@
             "lower": 40,
             "upper": 59,
             "fair_probability": 0.0,
-            "market_yes_price": 0.0155,
-            "edge": -0.0155
+            "market_yes_price": 0.015,
+            "edge": -0.015
           },
           {
             "bracket_label": "60-79",
             "lower": 60,
             "upper": 79,
             "fair_probability": 0.0,
-            "market_yes_price": 0.1005,
-            "edge": -0.1005
+            "market_yes_price": 0.0705,
+            "edge": -0.0705
           },
           {
             "bracket_label": "80-99",
             "lower": 80,
             "upper": 99,
             "fair_probability": 0.0,
-            "market_yes_price": 0.0155,
-            "edge": -0.0155
+            "market_yes_price": 0.0105,
+            "edge": -0.0105
           },
           {
             "bracket_label": "100-119",
@@ -4101,16 +3987,16 @@
             "lower": 120,
             "upper": 139,
             "fair_probability": 0.0,
-            "market_yes_price": 0.125,
-            "edge": -0.125
+            "market_yes_price": 0.13,
+            "edge": -0.13
           },
           {
             "bracket_label": "140-159",
             "lower": 140,
             "upper": 159,
             "fair_probability": 0.0,
-            "market_yes_price": 0.21,
-            "edge": -0.21
+            "market_yes_price": 0.17,
+            "edge": -0.17
           },
           {
             "bracket_label": "160-179",
@@ -4125,16 +4011,16 @@
             "lower": 180,
             "upper": 199,
             "fair_probability": 0.0,
-            "market_yes_price": 0.075,
-            "edge": -0.075
+            "market_yes_price": 0.085,
+            "edge": -0.085
           },
           {
             "bracket_label": "200+",
             "lower": 200,
             "upper": null,
             "fair_probability": 1.0,
-            "market_yes_price": 0.13,
-            "edge": 0.87
+            "market_yes_price": 0.135,
+            "edge": 0.865
           }
         ],
         "model_version": "rate_baseline_v0.1",
@@ -4144,9 +4030,9 @@
         "event_slug": "elon-musk-of-tweets-may-26-june-2",
         "event_title": "Elon Musk # tweets May 26 - June 2, 2026?",
         "estimated_rate": 4.0,
-        "hours_remaining": 193.4,
-        "expected_total": 773.8,
-        "std_dev": 27.8,
+        "hours_remaining": 191.0,
+        "expected_total": 764.1,
+        "std_dev": 27.6,
         "brackets": [
           {
             "bracket_label": "<20",
@@ -4185,96 +4071,96 @@
             "lower": 80,
             "upper": 99,
             "fair_probability": 0.0,
-            "market_yes_price": 0.0045,
-            "edge": -0.0045
+            "market_yes_price": 0.0025,
+            "edge": -0.0025
           },
           {
             "bracket_label": "100-119",
             "lower": 100,
             "upper": 119,
             "fair_probability": 0.0,
-            "market_yes_price": 0.0105,
-            "edge": -0.0105
+            "market_yes_price": 0.0075,
+            "edge": -0.0075
           },
           {
             "bracket_label": "120-139",
             "lower": 120,
             "upper": 139,
             "fair_probability": 0.0,
-            "market_yes_price": 0.025,
-            "edge": -0.025
+            "market_yes_price": 0.0135,
+            "edge": -0.0135
           },
           {
             "bracket_label": "140-159",
             "lower": 140,
             "upper": 159,
             "fair_probability": 0.0,
-            "market_yes_price": 0.0345,
-            "edge": -0.0345
+            "market_yes_price": 0.0405,
+            "edge": -0.0405
           },
           {
             "bracket_label": "160-179",
             "lower": 160,
             "upper": 179,
             "fair_probability": 0.0,
-            "market_yes_price": 0.0565,
-            "edge": -0.0565
+            "market_yes_price": 0.0575,
+            "edge": -0.0575
           },
           {
             "bracket_label": "180-199",
             "lower": 180,
             "upper": 199,
             "fair_probability": 0.0,
-            "market_yes_price": 0.075,
-            "edge": -0.075
+            "market_yes_price": 0.085,
+            "edge": -0.085
           },
           {
             "bracket_label": "200-219",
             "lower": 200,
             "upper": 219,
             "fair_probability": 0.0,
-            "market_yes_price": 0.095,
-            "edge": -0.095
+            "market_yes_price": 0.125,
+            "edge": -0.125
           },
           {
             "bracket_label": "220-239",
             "lower": 220,
             "upper": 239,
             "fair_probability": 0.0,
-            "market_yes_price": 0.125,
-            "edge": -0.125
+            "market_yes_price": 0.145,
+            "edge": -0.145
           },
           {
             "bracket_label": "240-259",
             "lower": 240,
             "upper": 259,
             "fair_probability": 0.0,
-            "market_yes_price": 0.125,
-            "edge": -0.125
+            "market_yes_price": 0.135,
+            "edge": -0.135
           },
           {
             "bracket_label": "260-279",
             "lower": 260,
             "upper": 279,
             "fair_probability": 0.0,
-            "market_yes_price": 0.125,
-            "edge": -0.125
+            "market_yes_price": 0.115,
+            "edge": -0.115
           },
           {
             "bracket_label": "280-299",
             "lower": 280,
             "upper": 299,
             "fair_probability": 0.0,
-            "market_yes_price": 0.115,
-            "edge": -0.115
+            "market_yes_price": 0.105,
+            "edge": -0.105
           },
           {
             "bracket_label": "300-319",
             "lower": 300,
             "upper": 319,
             "fair_probability": 0.0,
-            "market_yes_price": 0.085,
-            "edge": -0.085
+            "market_yes_price": 0.075,
+            "edge": -0.075
           },
           {
             "bracket_label": "320-339",
@@ -4289,40 +4175,40 @@
             "lower": 340,
             "upper": 359,
             "fair_probability": 0.0,
-            "market_yes_price": 0.045,
-            "edge": -0.045
+            "market_yes_price": 0.0415,
+            "edge": -0.0415
           },
           {
             "bracket_label": "360-379",
             "lower": 360,
             "upper": 379,
             "fair_probability": 0.0,
-            "market_yes_price": 0.0245,
-            "edge": -0.0245
+            "market_yes_price": 0.0235,
+            "edge": -0.0235
           },
           {
             "bracket_label": "380-399",
             "lower": 380,
             "upper": 399,
             "fair_probability": 0.0,
-            "market_yes_price": 0.0195,
-            "edge": -0.0195
+            "market_yes_price": 0.0185,
+            "edge": -0.0185
           },
           {
             "bracket_label": "400-419",
             "lower": 400,
             "upper": 419,
             "fair_probability": 0.0,
-            "market_yes_price": 0.0095,
-            "edge": -0.0095
+            "market_yes_price": 0.0085,
+            "edge": -0.0085
           },
           {
             "bracket_label": "420-439",
             "lower": 420,
             "upper": 439,
             "fair_probability": 0.0,
-            "market_yes_price": 0.0075,
-            "edge": -0.0075
+            "market_yes_price": 0.0065,
+            "edge": -0.0065
           },
           {
             "bracket_label": "440-459",
@@ -4345,8 +4231,8 @@
             "lower": 480,
             "upper": 499,
             "fair_probability": 0.0,
-            "market_yes_price": 0.0035,
-            "edge": -0.0035
+            "market_yes_price": 0.0025,
+            "edge": -0.0025
           },
           {
             "bracket_label": "500+",
@@ -4364,89 +4250,89 @@
         "event_slug": "elon-musk-of-tweets-may-25-may-27",
         "event_title": "Elon Musk # tweets May 25 - May 27, 2026?",
         "estimated_rate": 4.0,
-        "hours_remaining": 49.4,
-        "expected_total": 197.8,
-        "std_dev": 14.1,
+        "hours_remaining": 47.0,
+        "expected_total": 188.1,
+        "std_dev": 13.7,
         "brackets": [
           {
             "bracket_label": "<40",
             "lower": null,
             "upper": 39,
             "fair_probability": 0.0,
-            "market_yes_price": 0.085,
-            "edge": -0.085
+            "market_yes_price": 0.155,
+            "edge": -0.155
           },
           {
             "bracket_label": "40-64",
             "lower": 40,
             "upper": 64,
             "fair_probability": 0.0,
-            "market_yes_price": 0.445,
-            "edge": -0.445
+            "market_yes_price": 0.49,
+            "edge": -0.49
           },
           {
             "bracket_label": "65-89",
             "lower": 65,
             "upper": 89,
             "fair_probability": 0.0,
-            "market_yes_price": 0.31,
-            "edge": -0.31
+            "market_yes_price": 0.285,
+            "edge": -0.285
           },
           {
             "bracket_label": "90-114",
             "lower": 90,
             "upper": 114,
             "fair_probability": 0.0,
-            "market_yes_price": 0.095,
-            "edge": -0.095
+            "market_yes_price": 0.065,
+            "edge": -0.065
           },
           {
             "bracket_label": "115-139",
             "lower": 115,
             "upper": 139,
-            "fair_probability": 0.0,
-            "market_yes_price": 0.031,
-            "edge": -0.031
+            "fair_probability": 0.0002,
+            "market_yes_price": 0.0195,
+            "edge": -0.0193
           },
           {
             "bracket_label": "140-164",
             "lower": 140,
             "upper": 164,
-            "fair_probability": 0.009,
-            "market_yes_price": 0.016,
-            "edge": -0.007
+            "fair_probability": 0.0426,
+            "market_yes_price": 0.0015,
+            "edge": 0.0411
           },
           {
             "bracket_label": "165-189",
             "lower": 165,
             "upper": 189,
-            "fair_probability": 0.2694,
-            "market_yes_price": 0.0055,
-            "edge": 0.2639
+            "fair_probability": 0.4985,
+            "market_yes_price": 0.0015,
+            "edge": 0.497
           },
           {
             "bracket_label": "190-214",
             "lower": 190,
             "upper": 214,
-            "fair_probability": 0.6046,
-            "market_yes_price": 0.0075,
-            "edge": 0.5971
+            "fair_probability": 0.4317,
+            "market_yes_price": 0.0015,
+            "edge": 0.4302
           },
           {
             "bracket_label": "215-239",
             "lower": 215,
             "upper": 239,
-            "fair_probability": 0.1155,
-            "market_yes_price": 0.0015,
-            "edge": 0.114
+            "fair_probability": 0.0269,
+            "market_yes_price": 0.0005,
+            "edge": 0.0264
           },
           {
             "bracket_label": "240+",
             "lower": 240,
             "upper": null,
-            "fair_probability": 0.0015,
-            "market_yes_price": 0.0025,
-            "edge": -0.001
+            "fair_probability": 0.0001,
+            "market_yes_price": 0.0005,
+            "edge": -0.0004
           }
         ],
         "model_version": "rate_baseline_v0.1",
@@ -4456,8 +4342,8 @@
         "event_slug": "elon-musk-of-tweets-july-2026",
         "event_title": "Elon Musk musk # tweets in July 2026?",
         "estimated_rate": 4.0,
-        "hours_remaining": 1621.4,
-        "expected_total": 6485.8,
+        "hours_remaining": 1619.0,
+        "expected_total": 6476.1,
         "std_dev": 80.5,
         "brackets": [
           {
@@ -4481,8 +4367,8 @@
             "lower": null,
             "upper": 19,
             "fair_probability": 0.0,
-            "market_yes_price": 0.0065,
-            "edge": -0.0065
+            "market_yes_price": 0.005,
+            "edge": -0.005
           },
           {
             "bracket_label": "100-119",
@@ -4601,40 +4487,40 @@
             "lower": 800,
             "upper": 839,
             "fair_probability": 0.0,
-            "market_yes_price": 0.0415,
-            "edge": -0.0415
+            "market_yes_price": 0.0425,
+            "edge": -0.0425
           },
           {
             "bracket_label": "840-879",
             "lower": 840,
             "upper": 879,
             "fair_probability": 0.0,
-            "market_yes_price": 0.0505,
-            "edge": -0.0505
+            "market_yes_price": 0.0535,
+            "edge": -0.0535
           },
           {
             "bracket_label": "1000-1039",
             "lower": 1000,
             "upper": 1039,
             "fair_probability": 0.0,
-            "market_yes_price": 0.08,
-            "edge": -0.08
+            "market_yes_price": 0.07,
+            "edge": -0.07
           },
           {
             "bracket_label": "1040-1079",
             "lower": 1040,
             "upper": 1079,
             "fair_probability": 0.0,
-            "market_yes_price": 0.08,
-            "edge": -0.08
+            "market_yes_price": 0.07,
+            "edge": -0.07
           },
           {
             "bracket_label": "1120-1159",
             "lower": 1120,
             "upper": 1159,
             "fair_probability": 0.0,
-            "market_yes_price": 0.075,
-            "edge": -0.075
+            "market_yes_price": 0.065,
+            "edge": -0.065
           },
           {
             "bracket_label": "1200-1239",
@@ -4649,8 +4535,8 @@
             "lower": 1400,
             "upper": null,
             "fair_probability": 1.0,
-            "market_yes_price": 0.13,
-            "edge": 0.87
+            "market_yes_price": 0.125,
+            "edge": 0.875
           },
           {
             "bracket_label": "60-79",
@@ -4681,16 +4567,16 @@
             "lower": 1160,
             "upper": 1199,
             "fair_probability": 0.0,
-            "market_yes_price": 0.0715,
-            "edge": -0.0715
+            "market_yes_price": 0.0675,
+            "edge": -0.0675
           },
           {
             "bracket_label": "1240-1279",
             "lower": 1240,
             "upper": 1279,
             "fair_probability": 0.0,
-            "market_yes_price": 0.0325,
-            "edge": -0.0325
+            "market_yes_price": 0.032,
+            "edge": -0.032
           },
           {
             "bracket_label": "1280-1319",
@@ -4785,8 +4671,8 @@
             "lower": 560,
             "upper": 579,
             "fair_probability": 0.0,
-            "market_yes_price": 0.011,
-            "edge": -0.011
+            "market_yes_price": 0.0105,
+            "edge": -0.0105
           },
           {
             "bracket_label": "600-639",
@@ -4809,32 +4695,32 @@
             "lower": 760,
             "upper": 799,
             "fair_probability": 0.0,
-            "market_yes_price": 0.031,
-            "edge": -0.031
+            "market_yes_price": 0.032,
+            "edge": -0.032
           },
           {
             "bracket_label": "880-919",
             "lower": 880,
             "upper": 919,
             "fair_probability": 0.0,
-            "market_yes_price": 0.0545,
-            "edge": -0.0545
+            "market_yes_price": 0.06,
+            "edge": -0.06
           },
           {
             "bracket_label": "920-959",
             "lower": 920,
             "upper": 959,
             "fair_probability": 0.0,
-            "market_yes_price": 0.0745,
-            "edge": -0.0745
+            "market_yes_price": 0.0625,
+            "edge": -0.0625
           },
           {
             "bracket_label": "960-999",
             "lower": 960,
             "upper": 999,
             "fair_probability": 0.0,
-            "market_yes_price": 0.0775,
-            "edge": -0.0775
+            "market_yes_price": 0.077,
+            "edge": -0.077
           },
           {
             "bracket_label": "1080-1119",
@@ -4879,7 +4765,7 @@
   "alerts": [
     {
       "level": "info",
-      "message": "15 open trades across all profiles"
+      "message": "19 open trades across all profiles"
     }
   ]
 }
