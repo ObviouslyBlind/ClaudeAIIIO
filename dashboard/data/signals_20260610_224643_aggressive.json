@@ -4,15 +4,15 @@
     "strategy_version": "1.0",
     "strategy_description": "Original NO-side timer strategy: bet NO on bracket markets where event is unlikely by deadline.",
     "engine": "default",
-    "profile_id": "moderate",
-    "profile_description": "Balanced: standard thresholds from Phase 4.",
-    "no_price_min": 0.5,
+    "profile_id": "aggressive",
+    "profile_description": "Higher risk: lower NO price floor, wider expiry, larger stakes.",
+    "no_price_min": 0.4,
     "no_price_max": 0.95,
-    "no_price_trade_min": 0.7,
-    "mixed_evidence_low": 0.4,
-    "mixed_evidence_high": 0.6,
+    "no_price_trade_min": 0.6,
+    "mixed_evidence_low": 0.45,
+    "mixed_evidence_high": 0.55,
     "max_hours_to_expiry": 72.0,
-    "default_stake": 100.0
+    "default_stake": 200.0
   },
   "input_file": "relevant_markets_20260610_224643.json",
   "results": [
@@ -28,14 +28,14 @@
       "score": 95.0,
       "no_price": 0.95,
       "yes_price": 0.05,
-      "hours_until_expiry": 41.21777379777778,
+      "hours_until_expiry": 41.21774818722223,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-june-5-june-12",
       "event_title": "Donald Trump # Truth Social posts June 5 - June 12, 2026?",
       "bracket_label": "180-199",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.006987"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.100250"
     },
     {
       "condition_id": "0x847fff4c90d6bd7a8ec13973be5c4b2d7052493cb2571ea156c6ed002987ab68",
@@ -46,17 +46,17 @@
         "41.2h until expiry \u2014 within 2-day window.",
         "TRADE: NO price and expiry both favorable."
       ],
-      "score": 93.16000000000001,
+      "score": 93.68571428571428,
       "no_price": 0.9385,
       "yes_price": 0.0615,
-      "hours_until_expiry": 41.21777379555556,
+      "hours_until_expiry": 41.217748185000005,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-5-june-12",
       "event_title": "Elon Musk # tweets June 5 - June 12, 2026?",
       "bracket_label": "240-259",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.007653"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.100750"
     },
     {
       "condition_id": "0x2817c558f52e4a78e76751678d02d4a18dba97851e10ab1acfbe71213a5418ea",
@@ -67,38 +67,17 @@
         "41.2h until expiry \u2014 within 2-day window.",
         "TRADE: NO price and expiry both favorable."
       ],
-      "score": 89.4,
+      "score": 91.0,
       "no_price": 0.915,
       "yes_price": 0.085,
-      "hours_until_expiry": 41.217773793333336,
+      "hours_until_expiry": 41.2177481825,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-june-5-june-12",
       "event_title": "Donald Trump # Truth Social posts June 5 - June 12, 2026?",
       "bracket_label": "160-179",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.006937"
-    },
-    {
-      "condition_id": "0x1c1640fa4ad83c7b3f6381114fe4e86295ff4a5ecde791378bce0c6a729a45f8",
-      "question": "Will Elon Musk post 90-114 tweets from June 11 to June 13, 2026?",
-      "signal": "TRADE",
-      "reasons": [
-        "NO price 0.94 \u2014 good upside potential.",
-        "65.2h until expiry \u2014 within 3-day limit.",
-        "TRADE: NO price and expiry both favorable."
-      ],
-      "score": 88.32000000000001,
-      "no_price": 0.9395,
-      "yes_price": 0.0605,
-      "hours_until_expiry": 65.21777379194444,
-      "market_type": "musk_posting",
-      "event_slug": "elon-musk-of-tweets-june-11-june-13",
-      "event_title": "Elon Musk # tweets June 11 - June 13, 2026?",
-      "bracket_label": "90-114",
-      "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.011451"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.100212"
     },
     {
       "condition_id": "0x33f2687417e26a691b0912ee28e150ee92d966bde2bf7d228a10d4f93ab18c38",
@@ -109,17 +88,38 @@
         "41.2h until expiry \u2014 within 2-day window.",
         "TRADE: NO price and expiry both favorable."
       ],
-      "score": 87.16000000000001,
+      "score": 89.4,
       "no_price": 0.901,
       "yes_price": 0.099,
-      "hours_until_expiry": 41.217773790555555,
+      "hours_until_expiry": 41.217748181111105,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-june-5-june-12",
       "event_title": "Donald Trump # Truth Social posts June 5 - June 12, 2026?",
       "bracket_label": "100-119",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.006777"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.100085"
+    },
+    {
+      "condition_id": "0x1c1640fa4ad83c7b3f6381114fe4e86295ff4a5ecde791378bce0c6a729a45f8",
+      "question": "Will Elon Musk post 90-114 tweets from June 11 to June 13, 2026?",
+      "signal": "TRADE",
+      "reasons": [
+        "NO price 0.94 \u2014 good upside potential.",
+        "65.2h until expiry \u2014 within 3-day limit.",
+        "TRADE: NO price and expiry both favorable."
+      ],
+      "score": 88.80000000000001,
+      "no_price": 0.9395,
+      "yes_price": 0.0605,
+      "hours_until_expiry": 65.21774817972222,
+      "market_type": "musk_posting",
+      "event_slug": "elon-musk-of-tweets-june-11-june-13",
+      "event_title": "Elon Musk # tweets June 11 - June 13, 2026?",
+      "bracket_label": "90-114",
+      "strategy_id": "no_side",
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.103664"
     },
     {
       "condition_id": "0xf92cb2c5a571d65f57beca481c9561f5407a7876952e88b46eba4d92793fc301",
@@ -130,17 +130,17 @@
         "65.2h until expiry \u2014 within 3-day limit.",
         "TRADE: NO price and expiry both favorable."
       ],
-      "score": 86.00000000000001,
+      "score": 87.14285714285715,
       "no_price": 0.925,
       "yes_price": 0.075,
-      "hours_until_expiry": 65.21777378888889,
+      "hours_until_expiry": 65.21774817805556,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-11-june-13",
       "event_title": "Elon Musk # tweets June 11 - June 13, 2026?",
       "bracket_label": "<40",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.011302"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.103550"
     },
     {
       "condition_id": "0xcb6b74de7eca8d28ca4203d67ce17dca5103121ca3f17c3edded8b5219a45d9d",
@@ -151,17 +151,17 @@
         "41.2h until expiry \u2014 within 2-day window.",
         "TRADE: NO price and expiry both favorable."
       ],
-      "score": 81.4,
+      "score": 85.28571428571429,
       "no_price": 0.865,
       "yes_price": 0.135,
-      "hours_until_expiry": 41.2177737875,
+      "hours_until_expiry": 41.21774817694444,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-5-june-12",
       "event_title": "Elon Musk # tweets June 5 - June 12, 2026?",
       "bracket_label": "180-199",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.007556"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.100660"
     },
     {
       "condition_id": "0x8c71969b273c9b29c5fe6083dcc8af61f24d24089df6e513b773918ec67c3d69",
@@ -172,17 +172,17 @@
         "41.2h until expiry \u2014 within 2-day window.",
         "TRADE: NO price and expiry both favorable."
       ],
-      "score": 58.920000000000016,
+      "score": 69.22857142857143,
       "no_price": 0.7245,
       "yes_price": 0.2755,
-      "hours_until_expiry": 41.21777378666667,
+      "hours_until_expiry": 41.217748175555556,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-5-june-12",
       "event_title": "Elon Musk # tweets June 5 - June 12, 2026?",
       "bracket_label": "220-239",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.007604"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.100697"
     },
     {
       "condition_id": "0x537280dc59acd4640fee9a05e440cbbfb366f7de06e2f917fa1ac17cc1b3e1cc",
@@ -193,190 +193,342 @@
         "41.2h until expiry \u2014 within 2-day window.",
         "TRADE: NO price and expiry both favorable."
       ],
-      "score": 57.400000000000006,
+      "score": 68.14285714285714,
       "no_price": 0.715,
       "yes_price": 0.285,
-      "hours_until_expiry": 41.21777378611112,
+      "hours_until_expiry": 41.217748174166665,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-june-5-june-12",
       "event_title": "Donald Trump # Truth Social posts June 5 - June 12, 2026?",
       "bracket_label": "140-159",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.006885"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.100171"
     },
     {
       "condition_id": "0x1f734d61128fa1272f73ae95bb5ed7a230d546a352f06be5908b51e5dd99cee6",
       "question": "Will Elon Musk post 65-89 tweets from June 11 to June 13, 2026?",
-      "signal": "WATCH",
+      "signal": "TRADE",
       "reasons": [
-        "NO price 0.66 \u2014 moderate, worth watching.",
+        "NO price 0.66 \u2014 good upside potential.",
         "65.2h until expiry \u2014 within 3-day limit.",
-        "WATCH: conditions not strong enough for a trade yet."
+        "TRADE: NO price and expiry both favorable."
       ],
-      "score": 40.0,
+      "score": 56.28571428571429,
       "no_price": 0.655,
       "yes_price": 0.345,
-      "hours_until_expiry": 65.21777378527777,
+      "hours_until_expiry": 65.21774817305555,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-11-june-13",
       "event_title": "Elon Musk # tweets June 11 - June 13, 2026?",
       "bracket_label": "65-89",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.011401"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.103625"
+    },
+    {
+      "condition_id": "0x2c31cfc799728a2ad8b19ec61d2e9ef452a9296ad634db6ccc3e31fcf3e67108",
+      "question": "Will Donald Trump post 120-139 Truth Social posts from June 5 to June 12, 2026?",
+      "signal": "SKIP",
+      "reasons": [
+        "YES price 0.54 is in the mixed-evidence zone (0.45-0.55). Too uncertain."
+      ],
+      "score": 20,
+      "no_price": 0.4595,
+      "yes_price": 0.5405,
+      "hours_until_expiry": 41.21774817166666,
+      "market_type": "trump_posting",
+      "event_slug": "donald-trump-of-truth-social-posts-june-5-june-12",
+      "event_title": "Donald Trump # Truth Social posts June 5 - June 12, 2026?",
+      "bracket_label": "120-139",
+      "strategy_id": "no_side",
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.100128"
+    },
+    {
+      "condition_id": "0x91843992ae831666114ea66ff8cc850eb669ca10e098315453a4667a236f6fb0",
+      "question": "Will Elon Musk post 200-219 tweets from June 5 to June 12, 2026?",
+      "signal": "SKIP",
+      "reasons": [
+        "YES price 0.51 is in the mixed-evidence zone (0.45-0.55). Too uncertain."
+      ],
+      "score": 20,
+      "no_price": 0.495,
+      "yes_price": 0.505,
+      "hours_until_expiry": 41.21774817027778,
+      "market_type": "musk_posting",
+      "event_slug": "elon-musk-of-tweets-june-5-june-12",
+      "event_title": "Elon Musk # tweets June 5 - June 12, 2026?",
+      "bracket_label": "200-219",
+      "strategy_id": "no_side",
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.100951"
+    },
+    {
+      "condition_id": "0x1cf8f38dad0571df53b37f11047822b809bf0ea2fff98df6f8aa7d1714b52813",
+      "question": "Will Trump post \"Spencer\" or \"Pratt\" on Truth Social this week?",
+      "signal": "SKIP",
+      "reasons": [
+        "YES price 0.53 is in the mixed-evidence zone (0.45-0.55). Too uncertain."
+      ],
+      "score": 20,
+      "no_price": 0.47,
+      "yes_price": 0.53,
+      "hours_until_expiry": 101.20108150166666,
+      "market_type": "trump_posting",
+      "event_slug": "what-will-trump-post-this-week-june-9-14-20260608140318641",
+      "event_title": "What will Trump post this week? (June 9 - 14)",
+      "bracket_label": "Spencer / Pratt",
+      "strategy_id": "no_side",
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.102692"
     },
     {
       "condition_id": "0x338aa531cf90f03315095fa2e062b0f4e5972dddecaaad60f63e11a98d4b9ff0",
       "question": "Will Trump post \"Sleepy Joe Biden\" on Truth Social this week?",
       "signal": "SKIP",
       "reasons": [
-        "YES price 0.45 is in the mixed-evidence zone (0.4-0.6). Too uncertain."
+        "YES price 0.45 is in the mixed-evidence zone (0.45-0.55). Too uncertain."
       ],
       "score": 20,
       "no_price": 0.55,
       "yes_price": 0.45,
-      "hours_until_expiry": 101.20110711777778,
+      "hours_until_expiry": 101.20108150027778,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-june-9-14-20260608140318641",
       "event_title": "What will Trump post this week? (June 9 - 14)",
       "bracket_label": "Sleepy Joe Biden",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.010318"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.102764"
     },
     {
       "condition_id": "0xe92d40b54b6a14c7912e37080b3a27190751c2868ce9fce843fb91849be6faf0",
       "question": "Will Trump post \"Football\" on Truth Social this week?",
       "signal": "SKIP",
       "reasons": [
-        "YES price 0.48 is in the mixed-evidence zone (0.4-0.6). Too uncertain."
+        "YES price 0.48 is in the mixed-evidence zone (0.45-0.55). Too uncertain."
       ],
       "score": 20,
       "no_price": 0.515,
       "yes_price": 0.485,
-      "hours_until_expiry": 101.20110711694444,
+      "hours_until_expiry": 101.20108149916666,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-june-9-14-20260608140318641",
       "event_title": "What will Trump post this week? (June 9 - 14)",
       "bracket_label": "Football",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.010364"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.102814"
     },
     {
       "condition_id": "0x5b11e3e8f44319ede6afa05ac9727c309667f87ff0f86707f64e1d78738a3fbc",
       "question": "Will Trump post \"CBS\" on Truth Social this week?",
       "signal": "SKIP",
       "reasons": [
-        "YES price 0.46 is in the mixed-evidence zone (0.4-0.6). Too uncertain."
+        "YES price 0.46 is in the mixed-evidence zone (0.45-0.55). Too uncertain."
       ],
       "score": 20,
       "no_price": 0.54,
       "yes_price": 0.46,
-      "hours_until_expiry": 101.20110711527778,
+      "hours_until_expiry": 101.20108149805556,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-june-9-14-20260608140318641",
       "event_title": "What will Trump post this week? (June 9 - 14)",
       "bracket_label": "CBS",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.010545"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.102983"
+    },
+    {
+      "condition_id": "0x95c05a4bc2539bdd1303e84dab838c2c4ccba085c41338fd78e59f4c82cfae94",
+      "question": "Will Trump post \"Gold\" or \"Golden\" on Truth Social this week?",
+      "signal": "SKIP",
+      "reasons": [
+        "YES price 0.51 is in the mixed-evidence zone (0.45-0.55). Too uncertain."
+      ],
+      "score": 20,
+      "no_price": 0.495,
+      "yes_price": 0.505,
+      "hours_until_expiry": 101.20108149694444,
+      "market_type": "trump_posting",
+      "event_slug": "what-will-trump-post-this-week-june-9-14-20260608140318641",
+      "event_title": "What will Trump post this week? (June 9 - 14)",
+      "bracket_label": "Gold / Golden",
+      "strategy_id": "no_side",
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.103023"
     },
     {
       "condition_id": "0xf784b43a38cae8b476edf5e82e67f49d8fbeb918716be81ca1bd4762474783f1",
       "question": "Will Trump post \"The Pope\" on Truth Social this week?",
       "signal": "SKIP",
       "reasons": [
-        "YES price 0.48 is in the mixed-evidence zone (0.4-0.6). Too uncertain."
+        "YES price 0.48 is in the mixed-evidence zone (0.45-0.55). Too uncertain."
       ],
       "score": 20,
       "no_price": 0.52,
       "yes_price": 0.48,
-      "hours_until_expiry": 101.20110711472222,
+      "hours_until_expiry": 101.20108149555556,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-june-9-14-20260608140318641",
       "event_title": "What will Trump post this week? (June 9 - 14)",
       "bracket_label": "The Pope",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.010831"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.103197"
     },
     {
       "condition_id": "0xa86454978abbc3adb1a162a24933761fbc5acc61b46e473dc1ca363130e948e9",
       "question": "Will Trump post \"Scam\" on Truth Social this week?",
       "signal": "SKIP",
       "reasons": [
-        "YES price 0.48 is in the mixed-evidence zone (0.4-0.6). Too uncertain."
+        "YES price 0.48 is in the mixed-evidence zone (0.45-0.55). Too uncertain."
       ],
       "score": 20,
       "no_price": 0.52,
       "yes_price": 0.48,
-      "hours_until_expiry": 101.20110711388888,
+      "hours_until_expiry": 101.20108149416667,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-june-9-14-20260608140318641",
       "event_title": "What will Trump post this week? (June 9 - 14)",
       "bracket_label": "Scam",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.010880"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.103232"
+    },
+    {
+      "condition_id": "0xb786eff6dbab8b30ba681dc0d66706745769034c662317fe8f7adaf141658799",
+      "question": "Will Trump post \"CIA\" or \"C.I.A.\" on Truth Social this week?",
+      "signal": "SKIP",
+      "reasons": [
+        "YES price 0.52 is in the mixed-evidence zone (0.45-0.55). Too uncertain."
+      ],
+      "score": 20,
+      "no_price": 0.48,
+      "yes_price": 0.52,
+      "hours_until_expiry": 101.20108149305555,
+      "market_type": "trump_posting",
+      "event_slug": "what-will-trump-post-this-week-june-9-14-20260608140318641",
+      "event_title": "What will Trump post this week? (June 9 - 14)",
+      "bracket_label": "CIA / C.I.A.",
+      "strategy_id": "no_side",
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.103297"
     },
     {
       "condition_id": "0xaf9dc93ec7b6bd67f8f8d0e9688327a4f4e33dbecc92024354529946e998c990",
       "question": "Will Trump post \"China\" on Truth Social this week?",
       "signal": "SKIP",
       "reasons": [
-        "YES price 0.50 is in the mixed-evidence zone (0.4-0.6). Too uncertain."
+        "YES price 0.50 is in the mixed-evidence zone (0.45-0.55). Too uncertain."
       ],
       "score": 20,
       "no_price": 0.5,
       "yes_price": 0.5,
-      "hours_until_expiry": 101.20110711305556,
+      "hours_until_expiry": 101.20108149194445,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-june-9-14-20260608140318641",
       "event_title": "What will Trump post this week? (June 9 - 14)",
       "bracket_label": "China",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.011014"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.103331"
     },
     {
-      "condition_id": "0x4bfdea89bb3a858ee9b06b4008349ea5d47019ca96b1023cf2d189b2a8d25147",
-      "question": "Will Trump post \"Cuba\" on Truth Social this week?",
+      "condition_id": "0x9ab44072a593c47af55e8ef9c525ffb9244c77afd34cb5cdda5c3f2a5ae44116",
+      "question": "Will Trump post \"Ted\" or \"Cruz\" on Truth Social this week?",
       "signal": "SKIP",
       "reasons": [
-        "YES price 0.43 is in the mixed-evidence zone (0.4-0.6). Too uncertain."
+        "YES price 0.53 is in the mixed-evidence zone (0.45-0.55). Too uncertain."
       ],
       "score": 20,
-      "no_price": 0.565,
-      "yes_price": 0.435,
-      "hours_until_expiry": 101.2011071125,
+      "no_price": 0.475,
+      "yes_price": 0.525,
+      "hours_until_expiry": 101.20108149083333,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-june-9-14-20260608140318641",
       "event_title": "What will Trump post this week? (June 9 - 14)",
-      "bracket_label": "Cuba",
+      "bracket_label": "Ted / Cruz",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.011153"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.103371"
+    },
+    {
+      "condition_id": "0xb941d6d7a336c4f8d929675e95d919fa99685daead62a4841eb015a68441ca15",
+      "question": "Will Trump post \"Wall Street\" on Truth Social this week?",
+      "signal": "SKIP",
+      "reasons": [
+        "YES price 0.53 is in the mixed-evidence zone (0.45-0.55). Too uncertain."
+      ],
+      "score": 20,
+      "no_price": 0.47,
+      "yes_price": 0.53,
+      "hours_until_expiry": 101.20108148888889,
+      "market_type": "trump_posting",
+      "event_slug": "what-will-trump-post-this-week-june-9-14-20260608140318641",
+      "event_title": "What will Trump post this week? (June 9 - 14)",
+      "bracket_label": "Wall Street",
+      "strategy_id": "no_side",
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.103406"
     },
     {
       "condition_id": "0x6fca68bd61e722811576b7c86261000b5dab55c5ab803455842482734b913615",
       "question": "Will Trump post \"NATO\" on Truth Social this week?",
       "signal": "SKIP",
       "reasons": [
-        "YES price 0.50 is in the mixed-evidence zone (0.4-0.6). Too uncertain."
+        "YES price 0.50 is in the mixed-evidence zone (0.45-0.55). Too uncertain."
       ],
       "score": 20,
       "no_price": 0.5,
       "yes_price": 0.5,
-      "hours_until_expiry": 101.20110711166666,
+      "hours_until_expiry": 101.20108148777778,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-june-9-14-20260608140318641",
       "event_title": "What will Trump post this week? (June 9 - 14)",
       "bracket_label": "NATO",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.011204"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.103476"
+    },
+    {
+      "condition_id": "0x1ab704056acc8649f97e1708473dfcfc0948e276c3cdabd394c522e207513726",
+      "question": "Will Trump post \"Ballroom\" on Truth Social this week?",
+      "signal": "SKIP",
+      "reasons": [
+        "YES price 0.51 is in the mixed-evidence zone (0.45-0.55). Too uncertain."
+      ],
+      "score": 20,
+      "no_price": 0.49,
+      "yes_price": 0.51,
+      "hours_until_expiry": 101.20108148666667,
+      "market_type": "trump_posting",
+      "event_slug": "what-will-trump-post-this-week-june-9-14-20260608140318641",
+      "event_title": "What will Trump post this week? (June 9 - 14)",
+      "bracket_label": "Ballroom",
+      "strategy_id": "no_side",
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.103512"
+    },
+    {
+      "condition_id": "0x06f0d56feb5e1ebbbe8080d8cb273f6570c714b0b01d62f55f8226276668efcb",
+      "question": "Will Elon Musk post 40-64 tweets from June 11 to June 13, 2026?",
+      "signal": "SKIP",
+      "reasons": [
+        "YES price 0.53 is in the mixed-evidence zone (0.45-0.55). Too uncertain."
+      ],
+      "score": 20,
+      "no_price": 0.475,
+      "yes_price": 0.525,
+      "hours_until_expiry": 65.21774815222223,
+      "market_type": "musk_posting",
+      "event_slug": "elon-musk-of-tweets-june-11-june-13",
+      "event_title": "Elon Musk # tweets June 11 - June 13, 2026?",
+      "bracket_label": "40-64",
+      "strategy_id": "no_side",
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.103587"
     },
     {
       "condition_id": "0x2f71e39619b61502620d0036949cc9547377c7498ef2ad9d3a1b42fe34a51099",
@@ -388,14 +540,14 @@
       "score": 15,
       "no_price": 0.865,
       "yes_price": 0.135,
-      "hours_until_expiry": 3437.217773777778,
+      "hours_until_expiry": 3437.2177481508334,
       "market_type": "musk_posting",
       "event_slug": "will-elon-musk-tweet-about-hyperliquid-by",
       "event_title": "Will Elon Musk tweet \"Hyperliquid\" by ___?",
       "bracket_label": "October 31, 2026",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.004036"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.098035"
     },
     {
       "condition_id": "0xf52464db4365608f6f135248f83cd1e98e6232bce4917e6cd7d94d911ca8f51a",
@@ -407,14 +559,14 @@
       "score": 15,
       "no_price": 0.805,
       "yes_price": 0.195,
-      "hours_until_expiry": 4902.217773776944,
+      "hours_until_expiry": 4902.21774814889,
       "market_type": "musk_posting",
       "event_slug": "will-elon-musk-tweet-about-hyperliquid-by",
       "event_title": "Will Elon Musk tweet \"Hyperliquid\" by ___?",
       "bracket_label": "December 31, 2026",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.004092"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.098078"
     },
     {
       "condition_id": "0xd5fb8ad874064360478b115db715e10997e03ec8a03c29e3d061d25c3f9418bb",
@@ -426,14 +578,14 @@
       "score": 15,
       "no_price": 0.895,
       "yes_price": 0.105,
-      "hours_until_expiry": 2693.2177737761112,
+      "hours_until_expiry": 2693.2177481475,
       "market_type": "musk_posting",
       "event_slug": "will-elon-musk-tweet-about-hyperliquid-by",
       "event_title": "Will Elon Musk tweet \"Hyperliquid\" by ___?",
       "bracket_label": "September 30, 2026",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.004199"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.098157"
     },
     {
       "condition_id": "0xf93d688a9ad0c04cab8ce8144d34da5d6e78f0c0439c8c9c86980d00797e0315",
@@ -445,14 +597,14 @@
       "score": 15,
       "no_price": 0.865,
       "yes_price": 0.135,
-      "hours_until_expiry": 4158.2177737755555,
+      "hours_until_expiry": 4158.217748146389,
       "market_type": "musk_posting",
       "event_slug": "will-elon-musk-tweet-about-hyperliquid-by",
       "event_title": "Will Elon Musk tweet \"Hyperliquid\" by ___?",
       "bracket_label": "November 30, 2026",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.004249"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.098194"
     },
     {
       "condition_id": "0x92745a1c0d7da4224206b65904fa8414456eeafe2923a0a5a90874eba1e787c4",
@@ -464,14 +616,14 @@
       "score": 15,
       "no_price": 0.9475,
       "yes_price": 0.0525,
-      "hours_until_expiry": 1229.2177737741667,
+      "hours_until_expiry": 1229.217748145,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "680-719",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.005040"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.098758"
     },
     {
       "condition_id": "0xaf74c587cc342dae2654666e68fa0b6ee89bd252a74d50908705dac987ca5b6d",
@@ -483,14 +635,14 @@
       "score": 15,
       "no_price": 0.9415,
       "yes_price": 0.0585,
-      "hours_until_expiry": 1229.2177737736113,
+      "hours_until_expiry": 1229.217748143889,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "720-759",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.005089"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.098806"
     },
     {
       "condition_id": "0xc3bf7464244ef3d1cf0f86d83e94b75f0a91d688b6a7649206056051636e63dd",
@@ -502,14 +654,14 @@
       "score": 15,
       "no_price": 0.9195,
       "yes_price": 0.0805,
-      "hours_until_expiry": 1229.2177737727777,
+      "hours_until_expiry": 1229.2177481416668,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "800-839",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.005139"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.098846"
     },
     {
       "condition_id": "0x340198737724eba2c07c1914306b96968997a8fea3c4bb3be9bd463f3d827700",
@@ -521,14 +673,14 @@
       "score": 15,
       "no_price": 0.9195,
       "yes_price": 0.0805,
-      "hours_until_expiry": 1229.2177737722222,
+      "hours_until_expiry": 1229.2177481405556,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "840-879",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.005185"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.098885"
     },
     {
       "condition_id": "0xab767cdd757f99695a227b06b80f44b1cf6171ba14394916ab952660f73f5ca4",
@@ -540,14 +692,14 @@
       "score": 15,
       "no_price": 0.9435,
       "yes_price": 0.0565,
-      "hours_until_expiry": 1229.217773771389,
+      "hours_until_expiry": 1229.2177481391666,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "1000-1039",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.005234"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.098920"
     },
     {
       "condition_id": "0x13f69aae90cac4a903afee548dafaadfbde31766794760e1e0c8cc05e9855633",
@@ -559,14 +711,14 @@
       "score": 15,
       "no_price": 0.945,
       "yes_price": 0.055,
-      "hours_until_expiry": 1229.2177737700001,
+      "hours_until_expiry": 1229.2177481380554,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "1400+",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.005426"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.099065"
     },
     {
       "condition_id": "0x5d535b219578b2d336bcad6dc14970467b39d2aafca905c1f413a596106bd382",
@@ -578,14 +730,14 @@
       "score": 15,
       "no_price": 0.9345,
       "yes_price": 0.0655,
-      "hours_until_expiry": 1229.2177737694444,
+      "hours_until_expiry": 1229.2177481366666,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "760-799",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.006374"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.099787"
     },
     {
       "condition_id": "0x2df433b59ba81cd569d0693657f7253c5e01bd13e0aeb32bd23a16d6f407c9e4",
@@ -597,14 +749,14 @@
       "score": 15,
       "no_price": 0.926,
       "yes_price": 0.074,
-      "hours_until_expiry": 1229.217773768611,
+      "hours_until_expiry": 1229.2177481355554,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "880-919",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.006421"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.099825"
     },
     {
       "condition_id": "0x11f6900b0c4059ff39018311fc661aa18d29c5a698528c0fe04b99f2fb6f9597",
@@ -616,14 +768,14 @@
       "score": 15,
       "no_price": 0.926,
       "yes_price": 0.074,
-      "hours_until_expiry": 1229.2177737680556,
+      "hours_until_expiry": 1229.2177481344445,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "920-959",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.006468"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.099861"
     },
     {
       "condition_id": "0x4126bb646fa0173b979943bf2816061f30642405a5b4b17d37f1fc21ab75e200",
@@ -635,14 +787,14 @@
       "score": 15,
       "no_price": 0.9345,
       "yes_price": 0.0655,
-      "hours_until_expiry": 1229.2177737672223,
+      "hours_until_expiry": 1229.2177481272222,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "960-999",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.006515"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.099896"
     },
     {
       "condition_id": "0xe75a1b454fc418b2ced704db331d954316317475bf1a7e5094553c8de431ae85",
@@ -654,14 +806,14 @@
       "score": 15,
       "no_price": 0.9105,
       "yes_price": 0.0895,
-      "hours_until_expiry": 137.21777376583333,
+      "hours_until_expiry": 137.21774812583334,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-june-9-june-16",
       "event_title": "Donald Trump # Truth Social posts June 9 - June 16, 2026?",
       "bracket_label": "100-119",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.008748"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.101540"
     },
     {
       "condition_id": "0x9eb567e30a6690d46464f3fa1693e3cb8ab74db891da5dd0f3447dc148675baa",
@@ -673,14 +825,14 @@
       "score": 15,
       "no_price": 0.73,
       "yes_price": 0.27,
-      "hours_until_expiry": 137.217773765,
+      "hours_until_expiry": 137.21774812444446,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-june-9-june-16",
       "event_title": "Donald Trump # Truth Social posts June 9 - June 16, 2026?",
       "bracket_label": "120-139",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.008797"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.101578"
     },
     {
       "condition_id": "0x6d6cd7e7da47bfa41dba1e369862214f413abb244dad7b5a06370086386035ba",
@@ -692,14 +844,14 @@
       "score": 15,
       "no_price": 0.7,
       "yes_price": 0.3,
-      "hours_until_expiry": 137.21777376444444,
+      "hours_until_expiry": 137.21774812277778,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-june-9-june-16",
       "event_title": "Donald Trump # Truth Social posts June 9 - June 16, 2026?",
       "bracket_label": "140-159",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.008853"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.101613"
     },
     {
       "condition_id": "0xfe1d557397e6f5496fda2b05a7292d7c2dd2757d0b102a9817638ee834f1a59d",
@@ -711,14 +863,14 @@
       "score": 15,
       "no_price": 0.835,
       "yes_price": 0.165,
-      "hours_until_expiry": 137.2177737636111,
+      "hours_until_expiry": 137.2177481213889,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-june-9-june-16",
       "event_title": "Donald Trump # Truth Social posts June 9 - June 16, 2026?",
       "bracket_label": "160-179",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.008903"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.101652"
     },
     {
       "condition_id": "0x0a22dec06dc01a30e2db0fb5daee22861a96df84d42e300542b940bfb9b33649",
@@ -730,14 +882,14 @@
       "score": 15,
       "no_price": 0.76,
       "yes_price": 0.24,
-      "hours_until_expiry": 137.21777376305556,
+      "hours_until_expiry": 137.21774812,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-june-9-june-16",
       "event_title": "Donald Trump # Truth Social posts June 9 - June 16, 2026?",
       "bracket_label": "180-199",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.008955"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.101687"
     },
     {
       "condition_id": "0x6dc71713539e1b44707ecc68e25c8b55ab2bc0385d9d0f68e7ba40f99e987770",
@@ -749,14 +901,14 @@
       "score": 15,
       "no_price": 0.715,
       "yes_price": 0.285,
-      "hours_until_expiry": 137.2177737622222,
+      "hours_until_expiry": 137.2177481188889,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-june-9-june-16",
       "event_title": "Donald Trump # Truth Social posts June 9 - June 16, 2026?",
       "bracket_label": "200+",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.009003"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.101740"
     },
     {
       "condition_id": "0x51f2c958837ef36fdb21705d16b0e78345c173fd8a77ce6cb59b52c680f0d046",
@@ -768,14 +920,14 @@
       "score": 15,
       "no_price": 0.865,
       "yes_price": 0.135,
-      "hours_until_expiry": 137.21777376138888,
+      "hours_until_expiry": 137.2177481175,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-9-june-16",
       "event_title": "Elon Musk # tweets June 9 - June 16, 2026?",
       "bracket_label": "160-179",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.009324"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.101985"
     },
     {
       "condition_id": "0xe9dce32a233b267f2980eff3855c61ecb0911c907ffc8575e1f8d4e5dbb96c32",
@@ -787,14 +939,14 @@
       "score": 15,
       "no_price": 0.795,
       "yes_price": 0.205,
-      "hours_until_expiry": 137.21777376083332,
+      "hours_until_expiry": 137.21774811611112,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-9-june-16",
       "event_title": "Elon Musk # tweets June 9 - June 16, 2026?",
       "bracket_label": "180-199",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.009372"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.102020"
     },
     {
       "condition_id": "0x8fb1eb6831ddcf55e8d912a4bded7e6bcaf04fe08f47d0818aa999573ae40339",
@@ -806,14 +958,14 @@
       "score": 15,
       "no_price": 0.915,
       "yes_price": 0.085,
-      "hours_until_expiry": 137.21777376,
+      "hours_until_expiry": 137.217748115,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-9-june-16",
       "event_title": "Elon Musk # tweets June 9 - June 16, 2026?",
       "bracket_label": "240-259",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.009419"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.102056"
     },
     {
       "condition_id": "0xc2554d01090d896bcca51bdb3d8e74a60fb0030b43ec73522975e1016823aa09",
@@ -825,14 +977,14 @@
       "score": 15,
       "no_price": 0.925,
       "yes_price": 0.075,
-      "hours_until_expiry": 137.21777375916668,
+      "hours_until_expiry": 137.2177481138889,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-9-june-16",
       "event_title": "Elon Musk # tweets June 9 - June 16, 2026?",
       "bracket_label": "140-159",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.009512"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.102125"
     },
     {
       "condition_id": "0x1bddd245057590b8f844bdff354b1be96e0047d09a207d14a3706b3c8f5ea912",
@@ -844,14 +996,14 @@
       "score": 15,
       "no_price": 0.785,
       "yes_price": 0.215,
-      "hours_until_expiry": 137.21777375777776,
+      "hours_until_expiry": 137.2177481125,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-9-june-16",
       "event_title": "Elon Musk # tweets June 9 - June 16, 2026?",
       "bracket_label": "200-219",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.009796"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.102325"
     },
     {
       "condition_id": "0xc3eb9e700705c2b60b7845f6d0327a965f099f62125f00b9ef006a21e46f9a2c",
@@ -863,14 +1015,33 @@
       "score": 15,
       "no_price": 0.835,
       "yes_price": 0.165,
-      "hours_until_expiry": 137.2177737572222,
+      "hours_until_expiry": 137.2177481113889,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-9-june-16",
       "event_title": "Elon Musk # tweets June 9 - June 16, 2026?",
       "bracket_label": "220-239",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.009841"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.102360"
+    },
+    {
+      "condition_id": "0xc50ef2d4d7dbf831c81dcdb0e930d16564220c3ad2e43b36efc396947cc2ab6e",
+      "question": "Will Trump post \"Russia\" on Truth Social this week?",
+      "signal": "SKIP",
+      "reasons": [
+        "Expiry in 101.2h \u2014 exceeds 72.0h max."
+      ],
+      "score": 15,
+      "no_price": 0.405,
+      "yes_price": 0.595,
+      "hours_until_expiry": 101.20108144277778,
+      "market_type": "trump_posting",
+      "event_slug": "what-will-trump-post-this-week-june-9-14-20260608140318641",
+      "event_title": "What will Trump post this week? (June 9 - 14)",
+      "bracket_label": "Russia",
+      "strategy_id": "no_side",
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.102867"
     },
     {
       "condition_id": "0x89d82805e6c3e9b7b57fd4012ad0af2dd792d62b25b0332ccc0f39ea37320466",
@@ -882,14 +1053,14 @@
       "score": 15,
       "no_price": 0.625,
       "yes_price": 0.375,
-      "hours_until_expiry": 101.20110708972223,
+      "hours_until_expiry": 101.20108144166666,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-june-9-14-20260608140318641",
       "event_title": "What will Trump post this week? (June 9 - 14)",
       "bracket_label": "Uranium",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.010460"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.102907"
     },
     {
       "condition_id": "0xca8ab59abc3f8f0b90334e41866efb60e3ef865aba4a8dd3660e1725e2f75af0",
@@ -901,14 +1072,71 @@
       "score": 15,
       "no_price": 0.65,
       "yes_price": 0.35,
-      "hours_until_expiry": 101.20110708916667,
+      "hours_until_expiry": 101.20108144055555,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-june-9-14-20260608140318641",
       "event_title": "What will Trump post this week? (June 9 - 14)",
       "bracket_label": "Crypto / Bitcoin",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.010503"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.102944"
+    },
+    {
+      "condition_id": "0x4fd77abfe21eef3380d860e6889f5bd7e1deb3a497ea042baf29d4f0a4e562bb",
+      "question": "Will Trump post \"Israel\" on Truth Social this week?",
+      "signal": "SKIP",
+      "reasons": [
+        "Expiry in 101.2h \u2014 exceeds 72.0h max."
+      ],
+      "score": 15,
+      "no_price": 0.425,
+      "yes_price": 0.575,
+      "hours_until_expiry": 101.20108143916667,
+      "market_type": "trump_posting",
+      "event_slug": "what-will-trump-post-this-week-june-9-14-20260608140318641",
+      "event_title": "What will Trump post this week? (June 9 - 14)",
+      "bracket_label": "Israel",
+      "strategy_id": "no_side",
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.103092"
+    },
+    {
+      "condition_id": "0x0a0d79f8e15c87960649c4590b408f92ed2d48b73da75dda6efea0a668221462",
+      "question": "Will Trump post \"Barack Hussein Obama\" on Truth Social this week?",
+      "signal": "SKIP",
+      "reasons": [
+        "Expiry in 101.2h \u2014 exceeds 72.0h max."
+      ],
+      "score": 15,
+      "no_price": 0.42,
+      "yes_price": 0.58,
+      "hours_until_expiry": 101.20108143805555,
+      "market_type": "trump_posting",
+      "event_slug": "what-will-trump-post-this-week-june-9-14-20260608140318641",
+      "event_title": "What will Trump post this week? (June 9 - 14)",
+      "bracket_label": "Barack Hussein Obama",
+      "strategy_id": "no_side",
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.103128"
+    },
+    {
+      "condition_id": "0x4bfdea89bb3a858ee9b06b4008349ea5d47019ca96b1023cf2d189b2a8d25147",
+      "question": "Will Trump post \"Cuba\" on Truth Social this week?",
+      "signal": "SKIP",
+      "reasons": [
+        "Expiry in 101.2h \u2014 exceeds 72.0h max."
+      ],
+      "score": 15,
+      "no_price": 0.565,
+      "yes_price": 0.435,
+      "hours_until_expiry": 101.20108143666667,
+      "market_type": "trump_posting",
+      "event_slug": "what-will-trump-post-this-week-june-9-14-20260608140318641",
+      "event_title": "What will Trump post this week? (June 9 - 14)",
+      "bracket_label": "Cuba",
+      "strategy_id": "no_side",
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.103443"
     },
     {
       "condition_id": "0x5e388b863928e9304e6b87be294bc56aacd33d018de55e885afd9b087cd7f45c",
@@ -920,14 +1148,14 @@
       "score": 15,
       "no_price": 0.73,
       "yes_price": 0.27,
-      "hours_until_expiry": 209.217773755,
+      "hours_until_expiry": 209.2177481013889,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-june-12-june-19",
       "event_title": "Donald Trump # Truth Social posts June 12 - June 19, 2026?",
       "bracket_label": "100-119",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.011869"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.104005"
     },
     {
       "condition_id": "0x7b26b68c2d51f01eb2e8cb95bd267d2f3944dd73dd8ab0ac8cbd3d5370e98b59",
@@ -939,14 +1167,14 @@
       "score": 15,
       "no_price": 0.615,
       "yes_price": 0.385,
-      "hours_until_expiry": 209.21777375444444,
+      "hours_until_expiry": 209.2177481,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-june-12-june-19",
       "event_title": "Donald Trump # Truth Social posts June 12 - June 19, 2026?",
       "bracket_label": "120-139",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.011913"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.104039"
     },
     {
       "condition_id": "0x06e40691a7e6ca49051f45f634bbe4d0592ca1b9a2e767f84e7972d899cf96cb",
@@ -958,14 +1186,14 @@
       "score": 15,
       "no_price": 0.645,
       "yes_price": 0.355,
-      "hours_until_expiry": 209.2177737536111,
+      "hours_until_expiry": 209.21774809861114,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-june-12-june-19",
       "event_title": "Donald Trump # Truth Social posts June 12 - June 19, 2026?",
       "bracket_label": "160-179",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.011949"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.104077"
     },
     {
       "condition_id": "0x613a0c5b64d6f1fb35e86fa4faae32094d2ee5aeec155cb1eb0574a8cb5e7e19",
@@ -977,14 +1205,14 @@
       "score": 15,
       "no_price": 0.65,
       "yes_price": 0.35,
-      "hours_until_expiry": 209.21777375305555,
+      "hours_until_expiry": 209.21774809750002,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-june-12-june-19",
       "event_title": "Donald Trump # Truth Social posts June 12 - June 19, 2026?",
       "bracket_label": "200+",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.011984"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.104112"
     },
     {
       "condition_id": "0x386e627689196a8df9dd72bc23166fb17fd3d49001c82d93008be2c10bf714cf",
@@ -996,14 +1224,14 @@
       "score": 15,
       "no_price": 0.94,
       "yes_price": 0.06,
-      "hours_until_expiry": 209.21777375222223,
+      "hours_until_expiry": 209.21774809555555,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-june-12-june-19",
       "event_title": "Donald Trump # Truth Social posts June 12 - June 19, 2026?",
       "bracket_label": "80-99",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.012115"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.104235"
     },
     {
       "condition_id": "0x20d1f41a0feb66a5adbf6d31a0d2e422dd8fe9cb69ec9b87f2e66cbe9b13d0fa",
@@ -1015,14 +1243,14 @@
       "score": 15,
       "no_price": 0.645,
       "yes_price": 0.355,
-      "hours_until_expiry": 209.21777375138888,
+      "hours_until_expiry": 209.21774809444443,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-june-12-june-19",
       "event_title": "Donald Trump # Truth Social posts June 12 - June 19, 2026?",
       "bracket_label": "140-159",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.012149"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.104266"
     },
     {
       "condition_id": "0x1431f4d53a95dd92baf12cf0b3e226d090463fbfb7c23f11693dcc4764c62605",
@@ -1034,14 +1262,14 @@
       "score": 15,
       "no_price": 0.615,
       "yes_price": 0.385,
-      "hours_until_expiry": 209.21777375027776,
+      "hours_until_expiry": 209.21774809305555,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-june-12-june-19",
       "event_title": "Donald Trump # Truth Social posts June 12 - June 19, 2026?",
       "bracket_label": "180-199",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.012183"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.104298"
     },
     {
       "condition_id": "0xd72599acf3595be26a40e545049222f9992f27281d549fb57faa394808a4d136",
@@ -1053,14 +1281,14 @@
       "score": 15,
       "no_price": 0.905,
       "yes_price": 0.095,
-      "hours_until_expiry": 209.21777374944446,
+      "hours_until_expiry": 209.2177480911111,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-12-june-19",
       "event_title": "Elon Musk # tweets June 12 - June 19, 2026?",
       "bracket_label": "160-179",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.012339"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.104446"
     },
     {
       "condition_id": "0x6622e5fc534109b78a3f2a833e1fd97c9e35ba35b8f5b0168f335921a121b0ad",
@@ -1072,14 +1300,14 @@
       "score": 15,
       "no_price": 0.835,
       "yes_price": 0.165,
-      "hours_until_expiry": 209.2177737486111,
+      "hours_until_expiry": 209.21774809000001,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-12-june-19",
       "event_title": "Elon Musk # tweets June 12 - June 19, 2026?",
       "bracket_label": "220-239",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.012374"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.104478"
     },
     {
       "condition_id": "0xd8c84f9cf35f8401e57e0b8813d061060a12c373de6e17a4c3345ef1d65aacdc",
@@ -1091,14 +1319,14 @@
       "score": 15,
       "no_price": 0.865,
       "yes_price": 0.135,
-      "hours_until_expiry": 209.21777374805555,
+      "hours_until_expiry": 209.2177480888889,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-12-june-19",
       "event_title": "Elon Musk # tweets June 12 - June 19, 2026?",
       "bracket_label": "240-259",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.012407"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.104510"
     },
     {
       "condition_id": "0x6237ee16079951c0ee9cdd84a8b401a52dacba9c01f187942bcd5d13dbadabaf",
@@ -1110,14 +1338,14 @@
       "score": 15,
       "no_price": 0.948,
       "yes_price": 0.052,
-      "hours_until_expiry": 209.21777374722222,
+      "hours_until_expiry": 209.21774808749998,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-12-june-19",
       "event_title": "Elon Musk # tweets June 12 - June 19, 2026?",
       "bracket_label": "140-159",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.012790"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.104955"
     },
     {
       "condition_id": "0xe6eda6d7f01af6d97588d836a2a34d67d2005de053bfa04662d19c33746a6964",
@@ -1129,14 +1357,14 @@
       "score": 15,
       "no_price": 0.825,
       "yes_price": 0.175,
-      "hours_until_expiry": 209.21777374666667,
+      "hours_until_expiry": 209.21774808638887,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-12-june-19",
       "event_title": "Elon Musk # tweets June 12 - June 19, 2026?",
       "bracket_label": "200-219",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.012824"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.104992"
     },
     {
       "condition_id": "0x98028dea9559c69abbcbdf82c8c3b6e586fc221dd6ac586d7ecd3e6663e8b532",
@@ -1148,14 +1376,14 @@
       "score": 15,
       "no_price": 0.895,
       "yes_price": 0.105,
-      "hours_until_expiry": 209.2177737458333,
+      "hours_until_expiry": 209.21774808527778,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-12-june-19",
       "event_title": "Elon Musk # tweets June 12 - June 19, 2026?",
       "bracket_label": "260-279",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.012858"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.105028"
     },
     {
       "condition_id": "0x5ff528cbb3a79801d024d2c3f986536616b5037fb8097281031dc92b692578f2",
@@ -1167,14 +1395,14 @@
       "score": 15,
       "no_price": 0.855,
       "yes_price": 0.145,
-      "hours_until_expiry": 209.21777374527778,
+      "hours_until_expiry": 209.21774808416666,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-12-june-19",
       "event_title": "Elon Musk # tweets June 12 - June 19, 2026?",
       "bracket_label": "180-199",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.013087"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.105266"
     },
     {
       "condition_id": "0xad842026bb8e5d689c2213aa11f0e7b57eff991b6d9f10c25a13299dfa5ce2a8",
@@ -1186,14 +1414,14 @@
       "score": 15,
       "no_price": 0.9405,
       "yes_price": 0.0595,
-      "hours_until_expiry": 485.2011070777778,
+      "hours_until_expiry": 485.20108141555556,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-tweets-in-june-2026-20260608234701516",
       "event_title": "Elon Musk # tweets in June 2026?",
       "bracket_label": "600-639",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.013247"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.105429"
     },
     {
       "condition_id": "0xce44108d514750030bad5e2de6076f9605b5cca953623823b64de9745a91635f",
@@ -1205,14 +1433,14 @@
       "score": 15,
       "no_price": 0.9145,
       "yes_price": 0.0855,
-      "hours_until_expiry": 485.2011070769444,
+      "hours_until_expiry": 485.20108141416665,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-tweets-in-june-2026-20260608234701516",
       "event_title": "Elon Musk # tweets in June 2026?",
       "bracket_label": "640-679",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.013281"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.105466"
     },
     {
       "condition_id": "0x025cf007e9388452456081e2ba1df83a34c41f44167f6631b96895ec378b12e6",
@@ -1224,14 +1452,14 @@
       "score": 15,
       "no_price": 0.943,
       "yes_price": 0.057,
-      "hours_until_expiry": 485.2011070758333,
+      "hours_until_expiry": 485.20108141305553,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-tweets-in-june-2026-20260608234701516",
       "event_title": "Elon Musk # tweets in June 2026?",
       "bracket_label": "680-719",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.013315"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.105500"
     },
     {
       "condition_id": "0x860a41cd7fd7c5b4576501750a5e1cb595e796ebbf63b70a22aaa08c90d23d63",
@@ -1243,14 +1471,14 @@
       "score": 15,
       "no_price": 0.86,
       "yes_price": 0.14,
-      "hours_until_expiry": 485.201107075,
+      "hours_until_expiry": 485.2010814119445,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-tweets-in-june-2026-20260608234701516",
       "event_title": "Elon Musk # tweets in June 2026?",
       "bracket_label": "800-839",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.013349"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.105535"
     },
     {
       "condition_id": "0x677e0014b5d3948366907fc44dc8bb702e63ba4b01cb488d768a7e856fc66ab9",
@@ -1262,14 +1490,14 @@
       "score": 15,
       "no_price": 0.85,
       "yes_price": 0.15,
-      "hours_until_expiry": 485.20110707388886,
+      "hours_until_expiry": 485.20108141055556,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-tweets-in-june-2026-20260608234701516",
       "event_title": "Elon Musk # tweets in June 2026?",
       "bracket_label": "840-879",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.013382"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.105570"
     },
     {
       "condition_id": "0x9c7453b8d428a904d5218c5fb04126333503606391ee6331ae20fdf66bd5bff1",
@@ -1281,14 +1509,14 @@
       "score": 15,
       "no_price": 0.865,
       "yes_price": 0.135,
-      "hours_until_expiry": 485.20110707305554,
+      "hours_until_expiry": 485.20108140944444,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-tweets-in-june-2026-20260608234701516",
       "event_title": "Elon Musk # tweets in June 2026?",
       "bracket_label": "1000-1039",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.013420"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.105609"
     },
     {
       "condition_id": "0x41d17f44a6923dd2d5a68f3645cffbaf284acc4239eb8dbe94e9cf71ce4f1381",
@@ -1300,14 +1528,14 @@
       "score": 15,
       "no_price": 0.9015,
       "yes_price": 0.0985,
-      "hours_until_expiry": 485.20110707249995,
+      "hours_until_expiry": 485.2010814083333,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-tweets-in-june-2026-20260608234701516",
       "event_title": "Elon Musk # tweets in June 2026?",
       "bracket_label": "1040-1079",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.013456"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.105647"
     },
     {
       "condition_id": "0xde87b07ec8d91897da457a711c08cab0d13e3b76ff65c3759325165b352b3d7c",
@@ -1319,14 +1547,14 @@
       "score": 15,
       "no_price": 0.9445,
       "yes_price": 0.0555,
-      "hours_until_expiry": 485.2011070716667,
+      "hours_until_expiry": 485.2010814069444,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-tweets-in-june-2026-20260608234701516",
       "event_title": "Elon Musk # tweets in June 2026?",
       "bracket_label": "520-539",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.013615"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.105835"
     },
     {
       "condition_id": "0x567b4de71eb9950264de4bbbe59a567c0d368c596327c88fcb07ea9804f58675",
@@ -1338,14 +1566,14 @@
       "score": 15,
       "no_price": 0.9005,
       "yes_price": 0.0995,
-      "hours_until_expiry": 485.20110707111115,
+      "hours_until_expiry": 485.2010814058333,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-tweets-in-june-2026-20260608234701516",
       "event_title": "Elon Musk # tweets in June 2026?",
       "bracket_label": "720-759",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.013649"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.105871"
     },
     {
       "condition_id": "0x988873d5418b1b6d3559f231b4f988f5263a995c9e39d81926e744889c361c12",
@@ -1357,14 +1585,14 @@
       "score": 15,
       "no_price": 0.88,
       "yes_price": 0.12,
-      "hours_until_expiry": 485.20110707027777,
+      "hours_until_expiry": 485.2010814047222,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-tweets-in-june-2026-20260608234701516",
       "event_title": "Elon Musk # tweets in June 2026?",
       "bracket_label": "920-959",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.013682"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.105906"
     },
     {
       "condition_id": "0x0f1b6bcc61a1d49126cad65ed8fa55404151dc12dbb869235c816355f50d0035",
@@ -1376,14 +1604,14 @@
       "score": 15,
       "no_price": 0.9085,
       "yes_price": 0.0915,
-      "hours_until_expiry": 485.20110706972224,
+      "hours_until_expiry": 485.2010814027778,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-tweets-in-june-2026-20260608234701516",
       "event_title": "Elon Musk # tweets in June 2026?",
       "bracket_label": "1120-1159",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.013716"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.105942"
     },
     {
       "condition_id": "0xe75552891861e579e3c52970793d97d5aa4d294199f6bc8e8ce855025f97bc49",
@@ -1395,14 +1623,14 @@
       "score": 15,
       "no_price": 0.949,
       "yes_price": 0.051,
-      "hours_until_expiry": 485.2011070688889,
+      "hours_until_expiry": 485.20108140166667,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-tweets-in-june-2026-20260608234701516",
       "event_title": "Elon Musk # tweets in June 2026?",
       "bracket_label": "540-559",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.013899"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.106074"
     },
     {
       "condition_id": "0x890fc1477df46db7c7e162703a09c6bac7ef448b4203f18e320e2c8f39603703",
@@ -1414,14 +1642,14 @@
       "score": 15,
       "no_price": 0.86,
       "yes_price": 0.14,
-      "hours_until_expiry": 485.2011070677778,
+      "hours_until_expiry": 485.20108140055555,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-tweets-in-june-2026-20260608234701516",
       "event_title": "Elon Musk # tweets in June 2026?",
       "bracket_label": "880-919",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.013936"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.106118"
     },
     {
       "condition_id": "0x1d3b01ef684f00c12e2b54ba560d5552d5f05f78f7295c398b9067a7878f38fe",
@@ -1433,14 +1661,14 @@
       "score": 15,
       "no_price": 0.9,
       "yes_price": 0.1,
-      "hours_until_expiry": 485.2011070669444,
+      "hours_until_expiry": 485.20108139916664,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-tweets-in-june-2026-20260608234701516",
       "event_title": "Elon Musk # tweets in June 2026?",
       "bracket_label": "1080-1119",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.013971"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.106155"
     },
     {
       "condition_id": "0x3a52fe9c6d0722ad2f3b6e1e123114214e8c144114939a2e5c61bf5a59637b3e",
@@ -1452,14 +1680,14 @@
       "score": 15,
       "no_price": 0.9385,
       "yes_price": 0.0615,
-      "hours_until_expiry": 485.2011070661111,
+      "hours_until_expiry": 485.2010813980555,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-tweets-in-june-2026-20260608234701516",
       "event_title": "Elon Musk # tweets in June 2026?",
       "bracket_label": "560-579",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.014006"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.106192"
     },
     {
       "condition_id": "0xbb93d9be8c844191bce8a7f2940f3a3aae4a0788d436c5303fec0dd20b60b20e",
@@ -1471,14 +1699,14 @@
       "score": 15,
       "no_price": 0.91,
       "yes_price": 0.09,
-      "hours_until_expiry": 485.20110706555556,
+      "hours_until_expiry": 485.2010813969444,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-tweets-in-june-2026-20260608234701516",
       "event_title": "Elon Musk # tweets in June 2026?",
       "bracket_label": "760-799",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.014078"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.106259"
     },
     {
       "condition_id": "0x25acdc1966cdbac648d578cb48c9e894101ddfa6e9467fa52c915ca9fffbd98a",
@@ -1490,14 +1718,14 @@
       "score": 15,
       "no_price": 0.908,
       "yes_price": 0.092,
-      "hours_until_expiry": 485.201107065,
+      "hours_until_expiry": 485.20108139583334,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-tweets-in-june-2026-20260608234701516",
       "event_title": "Elon Musk # tweets in June 2026?",
       "bracket_label": "960-999",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.014116"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.106295"
     },
     {
       "condition_id": "0x2f219b7e7d21aafdd1593f78569c890f98425fe614f8af781b49e35c3019aa9b",
@@ -1509,14 +1737,14 @@
       "score": 15,
       "no_price": 0.896,
       "yes_price": 0.104,
-      "hours_until_expiry": 485.20110706388886,
+      "hours_until_expiry": 485.2010813947222,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-tweets-in-june-2026-20260608234701516",
       "event_title": "Elon Musk # tweets in June 2026?",
       "bracket_label": "1160-1199",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.014151"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.106335"
     },
     {
       "condition_id": "0x11de17d292e277b81a6e3b1e3c45a3435e2189aa224d1ed52d8eedf943e6ed5a",
@@ -1528,14 +1756,14 @@
       "score": 10,
       "no_price": 0.97,
       "yes_price": 0.03,
-      "hours_until_expiry": 485.21777373000003,
+      "hours_until_expiry": 485.21774806,
       "market_type": "musk_posting",
       "event_slug": "will-elon-musk-tweet-about-hyperliquid-by",
       "event_title": "Will Elon Musk tweet \"Hyperliquid\" by ___?",
       "bracket_label": "June 30, 2026",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.003916"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.097941"
     },
     {
       "condition_id": "0x784aad9ba3f0aa5f8c2e6c4dc9314d8899cd147d6b289e6eb289e66a5b569082",
@@ -1547,14 +1775,14 @@
       "score": 10,
       "no_price": 0.963,
       "yes_price": 0.037,
-      "hours_until_expiry": 1973.2177737291668,
+      "hours_until_expiry": 1973.217748058611,
       "market_type": "musk_posting",
       "event_slug": "will-elon-musk-tweet-about-hyperliquid-by",
       "event_title": "Will Elon Musk tweet \"Hyperliquid\" by ___?",
       "bracket_label": "August 31, 2026",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.003972"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.097984"
     },
     {
       "condition_id": "0x0fa7b9d6d793a5d36512e2f0d09f68fb8100072d4c2dbafd42c15e3cfe40618e",
@@ -1566,14 +1794,14 @@
       "score": 10,
       "no_price": 0.9775,
       "yes_price": 0.0225,
-      "hours_until_expiry": 1229.217773728611,
+      "hours_until_expiry": 1229.2177480569446,
       "market_type": "musk_posting",
       "event_slug": "will-elon-musk-tweet-about-hyperliquid-by",
       "event_title": "Will Elon Musk tweet \"Hyperliquid\" by ___?",
       "bracket_label": "July 31, 2026",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.004144"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.098116"
     },
     {
       "condition_id": "0x8cd28d94884925044cebbc2bf8b2f4dea41cde14c69481cc2b19ff9a91b00f0a",
@@ -1585,14 +1813,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 1229.2177737277777,
+      "hours_until_expiry": 1229.2177480552778,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "20-39",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.004313"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.098235"
     },
     {
       "condition_id": "0xd2b298320227df98ca46dfa4a6c8b4eb17c2eacac83f6042571314b3656d5e70",
@@ -1604,14 +1832,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 1229.2177737255554,
+      "hours_until_expiry": 1229.2177480541666,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "40-59",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.004362"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.098270"
     },
     {
       "condition_id": "0x8d303ae8a2d4e4691ca9be7650701b944de8b1b7d5ec82b0b2c7bdbbf8a84af8",
@@ -1623,14 +1851,14 @@
       "score": 10,
       "no_price": 0.9985,
       "yes_price": 0.0015,
-      "hours_until_expiry": 1229.2177737247223,
+      "hours_until_expiry": 1229.2177480530554,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "<20",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.004410"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.098304"
     },
     {
       "condition_id": "0x55683a04edb03ceb9c9799a2ab5bd5fa4c85d1a0a986b0c7dde2504c5786391e",
@@ -1642,14 +1870,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 1229.217773723889,
+      "hours_until_expiry": 1229.2177480516666,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "100-119",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.004456"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.098336"
     },
     {
       "condition_id": "0xda3192ef21796a79395c22d938abd27a9c4e698bb4e8969bc8fcfe83c8714aff",
@@ -1661,14 +1889,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 1229.2177737233333,
+      "hours_until_expiry": 1229.2177480505554,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "120-139",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.004505"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.098370"
     },
     {
       "condition_id": "0x6b7b36cbbbddc40ef56a84f55e2d08287f0acbb1bcfbe6365a75784ad06138f9",
@@ -1680,14 +1908,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 1229.2177737225,
+      "hours_until_expiry": 1229.2177480494445,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "140-159",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.004555"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.098407"
     },
     {
       "condition_id": "0x8d389ff3690e6b7cad8500e2cb47d73997aa4c10c86ff84e50277ab405111856",
@@ -1699,14 +1927,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 1229.2177737219445,
+      "hours_until_expiry": 1229.2177480483335,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "160-179",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.004602"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.098444"
     },
     {
       "condition_id": "0x7ab527b33e781162c339237f7c8da9193297644d20e6bdf72e3abc45462ce191",
@@ -1718,14 +1946,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 1229.217773721111,
+      "hours_until_expiry": 1229.2177480472224,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "180-199",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.004647"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.098477"
     },
     {
       "condition_id": "0x4a951a467bafe58608b31267f5e9e88ccdd62801114b204fec21b863dcf7760c",
@@ -1737,14 +1965,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 1229.2177737205557,
+      "hours_until_expiry": 1229.2177480461112,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "200-219",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.004693"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.098508"
     },
     {
       "condition_id": "0xf8c812d7fdf5a8963489710763a6361d8915537f204b11cb4eb037f713050bb3",
@@ -1756,14 +1984,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 1229.2177737197223,
+      "hours_until_expiry": 1229.2177480441665,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "220-239",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.004753"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.098537"
     },
     {
       "condition_id": "0xef57a47e7396c55cdff61f7e40ffb8e15e4f51acd516acb9253f34d00dfc91ec",
@@ -1775,14 +2003,14 @@
       "score": 10,
       "no_price": 0.998,
       "yes_price": 0.002,
-      "hours_until_expiry": 1229.2177737191666,
+      "hours_until_expiry": 1229.2177480430555,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "400-419",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.004806"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.098567"
     },
     {
       "condition_id": "0x22330ea5ab8f3882062b637b43fdea1dc3a01071456618167a74e1d886e39e29",
@@ -1794,14 +2022,14 @@
       "score": 10,
       "no_price": 0.9975,
       "yes_price": 0.0025,
-      "hours_until_expiry": 1229.2177737177778,
+      "hours_until_expiry": 1229.2177480416667,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "420-439",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.004854"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.098597"
     },
     {
       "condition_id": "0xb34e61dabb319ee48e0b9f6ec6036f09d822af9acb19659037871ccc0ae71a57",
@@ -1813,14 +2041,14 @@
       "score": 10,
       "no_price": 0.9945,
       "yes_price": 0.0055,
-      "hours_until_expiry": 1229.2177737172221,
+      "hours_until_expiry": 1229.2177480405555,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "460-479",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.004898"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.098627"
     },
     {
       "condition_id": "0xb3ae9c8759c3e194476ff525d2a6087e066a5ea21f832088791479f4b7b08ea8",
@@ -1832,14 +2060,14 @@
       "score": 10,
       "no_price": 0.9945,
       "yes_price": 0.0055,
-      "hours_until_expiry": 1229.217773716389,
+      "hours_until_expiry": 1229.2177480394446,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "480-499",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.004943"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.098657"
     },
     {
       "condition_id": "0x8ba64fc3c85798cc52c3ee363f657166a527d585f555526d3e418cb5df7369cc",
@@ -1851,14 +2079,14 @@
       "score": 10,
       "no_price": 0.986,
       "yes_price": 0.014,
-      "hours_until_expiry": 1229.2177737158333,
+      "hours_until_expiry": 1229.2177480383334,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "580-599",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.004989"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.098685"
     },
     {
       "condition_id": "0x5462f42021274e9d00bd197a69c33aad459a42dd40669bf5e9eefda7fac8a69f",
@@ -1870,14 +2098,14 @@
       "score": 10,
       "no_price": 0.9545,
       "yes_price": 0.0455,
-      "hours_until_expiry": 1229.217773715,
+      "hours_until_expiry": 1229.2177480369444,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "1040-1079",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.005278"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.098954"
     },
     {
       "condition_id": "0x50ef2d959733dc491fa46523a57b385a96873a4a75a1f50f274bb77220772223",
@@ -1889,14 +2117,14 @@
       "score": 10,
       "no_price": 0.964,
       "yes_price": 0.036,
-      "hours_until_expiry": 1229.2177737144445,
+      "hours_until_expiry": 1229.2177480355554,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "1120-1159",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.005325"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.098985"
     },
     {
       "condition_id": "0xf425d3b8dcaf9e184d566ec67629cb2e8c8edfad5dc1e39b027c456158e5408a",
@@ -1908,14 +2136,14 @@
       "score": 10,
       "no_price": 0.9745,
       "yes_price": 0.0255,
-      "hours_until_expiry": 1229.217773713611,
+      "hours_until_expiry": 1229.2177480344444,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "1200-1239",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.005371"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.099018"
     },
     {
       "condition_id": "0xc61daec3aa36b8a00f5deb76a50ec9de3eec3abf0e1111ba99239dc382ace051",
@@ -1927,14 +2155,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 1229.2177737130555,
+      "hours_until_expiry": 1229.2177480330556,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "60-79",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.005473"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.099106"
     },
     {
       "condition_id": "0xbd7b7fbbbde7b04e76813b1100df103f7b028872e0276519ba3ff784f6d612a8",
@@ -1946,14 +2174,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 1229.2177737122222,
+      "hours_until_expiry": 1229.2177480313887,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "80-99",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.005523"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.099143"
     },
     {
       "condition_id": "0x6ab02a0bc9064b29995b5a61278ebcdac8cdf9e06141b453cb9173fee6420595",
@@ -1965,14 +2193,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 1229.2177737116667,
+      "hours_until_expiry": 1229.2177480302778,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "240-259",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.005569"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.099181"
     },
     {
       "condition_id": "0x9d6d795331d1b6bb76083989b8527c982007f0ce7ade2632760a8b2cc90af872",
@@ -1984,14 +2212,14 @@
       "score": 10,
       "no_price": 0.9735,
       "yes_price": 0.0265,
-      "hours_until_expiry": 1229.2177737102777,
+      "hours_until_expiry": 1229.217748028889,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "1160-1199",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.005614"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.099215"
     },
     {
       "condition_id": "0xdb91c443a6873eeeb1cec091e793cc79f9faf4d9605668dc3e1dd7fb6e6aae35",
@@ -2003,14 +2231,14 @@
       "score": 10,
       "no_price": 0.9795,
       "yes_price": 0.0205,
-      "hours_until_expiry": 1229.2177737094444,
+      "hours_until_expiry": 1229.2177480277778,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "1240-1279",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.005660"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.099256"
     },
     {
       "condition_id": "0x6beb78db18b613b9dbfe1b67144485434ca946a93356f33a8097493a440b5a62",
@@ -2022,14 +2250,14 @@
       "score": 10,
       "no_price": 0.9825,
       "yes_price": 0.0175,
-      "hours_until_expiry": 1229.217773708889,
+      "hours_until_expiry": 1229.2177480266666,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "1280-1319",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.005706"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.099294"
     },
     {
       "condition_id": "0x332ac505df1de2aef6f02ada22e1e3781b4bad3e7f273c9966453a517ecb8193",
@@ -2041,14 +2269,14 @@
       "score": 10,
       "no_price": 0.9865,
       "yes_price": 0.0135,
-      "hours_until_expiry": 1229.2177737080556,
+      "hours_until_expiry": 1229.2177480255557,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "1320-1359",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.005773"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.099327"
     },
     {
       "condition_id": "0x32ba02d65e624b8acee8b2ab94f092b40f4564d56903c11c7578cc7f7974cddb",
@@ -2060,14 +2288,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 1229.2177737074999,
+      "hours_until_expiry": 1229.2177480244445,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "260-279",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.005825"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.099362"
     },
     {
       "condition_id": "0xa7f850f533f4f3ac160e18ec5c37ac6a7b066f1212bef993602d416396bce6f0",
@@ -2079,14 +2307,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 1229.2177737066668,
+      "hours_until_expiry": 1229.2177480230555,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "280-299",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.005872"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.099399"
     },
     {
       "condition_id": "0x370c60bcb787ec7c8f7e4ee10d5cc5bc583ffab93ad2d3ff3bfbd89ba4881ec3",
@@ -2098,14 +2326,14 @@
       "score": 10,
       "no_price": 0.999,
       "yes_price": 0.001,
-      "hours_until_expiry": 1229.217773706111,
+      "hours_until_expiry": 1229.2177480219443,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "320-339",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.005918"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.099433"
     },
     {
       "condition_id": "0xad5ad5c89709bbe657790bf30dfb0856f636ef9128f7b9749b43dd135367ad15",
@@ -2117,14 +2345,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 1229.2177737052778,
+      "hours_until_expiry": 1229.2177480208334,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "340-359",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.005963"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.099465"
     },
     {
       "condition_id": "0xe0febae277767e285e5dce31d154506f038a332b905b719e8c071827f7d4b4be",
@@ -2136,14 +2364,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 1229.2177737044444,
+      "hours_until_expiry": 1229.2177480188889,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "360-379",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.006009"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.099498"
     },
     {
       "condition_id": "0x4ba74655451ad6ab85df33f2001d89220e9a0a3b5c8e28b4d473bc10895f3ae1",
@@ -2155,14 +2383,14 @@
       "score": 10,
       "no_price": 0.9985,
       "yes_price": 0.0015,
-      "hours_until_expiry": 1229.2177737038887,
+      "hours_until_expiry": 1229.2177480174998,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "380-399",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.006054"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.099531"
     },
     {
       "condition_id": "0x662fcac22723d98fba21dfa9c8c3fe7381e4c3ffb1de3421551b49e23cd6b06a",
@@ -2174,14 +2402,14 @@
       "score": 10,
       "no_price": 0.9945,
       "yes_price": 0.0055,
-      "hours_until_expiry": 1229.2177737025002,
+      "hours_until_expiry": 1229.217748016389,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "440-459",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.006099"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.099565"
     },
     {
       "condition_id": "0xaa002ed0a0ec3d018f436fc192881c622476ff53daa5187dbb27bb71e0045201",
@@ -2193,14 +2421,14 @@
       "score": 10,
       "no_price": 0.9915,
       "yes_price": 0.0085,
-      "hours_until_expiry": 1229.2177737019445,
+      "hours_until_expiry": 1229.2177480152777,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "520-539",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.006145"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.099598"
     },
     {
       "condition_id": "0xccca8e146e0ed77c0dc855ace06a511e334ef760c36bf50371de0f120e3475cb",
@@ -2212,14 +2440,14 @@
       "score": 10,
       "no_price": 0.9925,
       "yes_price": 0.0075,
-      "hours_until_expiry": 1229.217773701389,
+      "hours_until_expiry": 1229.2177480141665,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "540-559",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.006190"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.099631"
     },
     {
       "condition_id": "0xc022c456c3b3ec3195c334eed6ec1673928a349c8dfd7aa8286cb5a4487ceb1c",
@@ -2231,14 +2459,14 @@
       "score": 10,
       "no_price": 0.9915,
       "yes_price": 0.0085,
-      "hours_until_expiry": 1229.2177737005557,
+      "hours_until_expiry": 1229.217748012778,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "560-579",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.006235"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.099664"
     },
     {
       "condition_id": "0xc2eeb23d9f2a893f7913fe737cdb1b3016857a6d1f9b7220ccb09232ec8f5a19",
@@ -2250,14 +2478,14 @@
       "score": 10,
       "no_price": 0.968,
       "yes_price": 0.032,
-      "hours_until_expiry": 1229.2177737,
+      "hours_until_expiry": 1229.2177480116668,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "600-639",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.006280"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.099696"
     },
     {
       "condition_id": "0x976391d3615d41006b838d0b4ed5081cb5abd2af2ae0bd50035fafb3be490bd8",
@@ -2269,14 +2497,14 @@
       "score": 10,
       "no_price": 0.959,
       "yes_price": 0.041,
-      "hours_until_expiry": 1229.2177736991666,
+      "hours_until_expiry": 1229.217748009722,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "640-679",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.006324"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.099748"
     },
     {
       "condition_id": "0xc70fef7d249f9385a71ecdd83ffc1ce8698138dd906abc98d99816873bfb6060",
@@ -2288,14 +2516,14 @@
       "score": 10,
       "no_price": 0.957,
       "yes_price": 0.043,
-      "hours_until_expiry": 1229.217773698611,
+      "hours_until_expiry": 1229.217748008611,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "1080-1119",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.006559"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.099936"
     },
     {
       "condition_id": "0xaa215c0c9b52f313671b013940c996ef800c570f5e54a3ecc6931993a6687a43",
@@ -2307,14 +2535,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 1229.2177736977778,
+      "hours_until_expiry": 1229.2177480075,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "300-319",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.006607"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.099970"
     },
     {
       "condition_id": "0x0e418b245cd3a2ae918905f8b5f815a1a1f568ed4e72bdb2b42d418c2e2bfeb0",
@@ -2326,14 +2554,14 @@
       "score": 10,
       "no_price": 0.9945,
       "yes_price": 0.0055,
-      "hours_until_expiry": 1229.2177736972224,
+      "hours_until_expiry": 1229.2177480058333,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "500-519",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.006655"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.100004"
     },
     {
       "condition_id": "0xa71f8c9fbc376bdb50d043716f7537a48896ebd227607ab6838ed2a73b1b01e3",
@@ -2345,33 +2573,14 @@
       "score": 10,
       "no_price": 0.9895,
       "yes_price": 0.0105,
-      "hours_until_expiry": 1229.2177736963888,
+      "hours_until_expiry": 1229.2177480044443,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-july-2026",
       "event_title": "Elon Musk # tweets in July 2026?",
       "bracket_label": "1360-1399",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.006700"
-    },
-    {
-      "condition_id": "0x2c31cfc799728a2ad8b19ec61d2e9ef452a9296ad634db6ccc3e31fcf3e67108",
-      "question": "Will Donald Trump post 120-139 Truth Social posts from June 5 to June 12, 2026?",
-      "signal": "SKIP",
-      "reasons": [
-        "NO price 0.46 < 0.5 \u2014 market thinks event is likely."
-      ],
-      "score": 10,
-      "no_price": 0.4595,
-      "yes_price": 0.5405,
-      "hours_until_expiry": 41.217773695,
-      "market_type": "trump_posting",
-      "event_slug": "donald-trump-of-truth-social-posts-june-5-june-12",
-      "event_title": "Donald Trump # Truth Social posts June 5 - June 12, 2026?",
-      "bracket_label": "120-139",
-      "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.006829"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.100038"
     },
     {
       "condition_id": "0x6a93f50801235ca6ab40a43766725c76128c6b0674b5aa7713e42eacca923863",
@@ -2383,14 +2592,14 @@
       "score": 10,
       "no_price": 0.984,
       "yes_price": 0.016,
-      "hours_until_expiry": 41.217773694444446,
+      "hours_until_expiry": 41.217748003333334,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-june-5-june-12",
       "event_title": "Donald Trump # Truth Social posts June 5 - June 12, 2026?",
       "bracket_label": "200+",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.007039"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.100290"
     },
     {
       "condition_id": "0x7bc069c524527b5d86023f43487fcf487d9cf5731cd1b483a563a43c3454cd66",
@@ -2402,14 +2611,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 41.217773693611115,
+      "hours_until_expiry": 41.21774800194444,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-june-5-june-12",
       "event_title": "Donald Trump # Truth Social posts June 5 - June 12, 2026?",
       "bracket_label": "80-99",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.007257"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.100448"
     },
     {
       "condition_id": "0xcf341219b10013698804ee4baf4872bd346d74d269632360d8ec2320e299270f",
@@ -2421,14 +2630,14 @@
       "score": 10,
       "no_price": 0.9875,
       "yes_price": 0.0125,
-      "hours_until_expiry": 41.21777369277778,
+      "hours_until_expiry": 41.21774800083333,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-5-june-12",
       "event_title": "Elon Musk # tweets June 5 - June 12, 2026?",
       "bracket_label": "260-279",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.007702"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.100787"
     },
     {
       "condition_id": "0x79ebd820d04abba00bfc5df58bf4cc064674875af9700a4158a880849c20f7cf",
@@ -2440,14 +2649,14 @@
       "score": 10,
       "no_price": 0.9965,
       "yes_price": 0.0035,
-      "hours_until_expiry": 41.217773692222224,
+      "hours_until_expiry": 41.21774799944444,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-5-june-12",
       "event_title": "Elon Musk # tweets June 5 - June 12, 2026?",
       "bracket_label": "280-299",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.007766"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.100821"
     },
     {
       "condition_id": "0x040661e45185170d95b2fb6337c26a370aa02e32d43d96f1c971ff1537a15706",
@@ -2459,33 +2668,14 @@
       "score": 10,
       "no_price": 0.9955,
       "yes_price": 0.0045,
-      "hours_until_expiry": 41.21777369138889,
+      "hours_until_expiry": 41.21774799833334,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-5-june-12",
       "event_title": "Elon Musk # tweets June 5 - June 12, 2026?",
       "bracket_label": "160-179",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.007900"
-    },
-    {
-      "condition_id": "0x91843992ae831666114ea66ff8cc850eb669ca10e098315453a4667a236f6fb0",
-      "question": "Will Elon Musk post 200-219 tweets from June 5 to June 12, 2026?",
-      "signal": "SKIP",
-      "reasons": [
-        "NO price 0.49 < 0.5 \u2014 market thinks event is likely."
-      ],
-      "score": 10,
-      "no_price": 0.495,
-      "yes_price": 0.505,
-      "hours_until_expiry": 41.21777369,
-      "market_type": "musk_posting",
-      "event_slug": "elon-musk-of-tweets-june-5-june-12",
-      "event_title": "Elon Musk # tweets June 5 - June 12, 2026?",
-      "bracket_label": "200-219",
-      "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.007960"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.100911"
     },
     {
       "condition_id": "0xd6cbbb0ecc52109b35110708afacde6981adc55dd7fcdc77c44cfaace77e268b",
@@ -2497,14 +2687,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 41.21777368916667,
+      "hours_until_expiry": 41.217747996944446,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-5-june-12",
       "event_title": "Elon Musk # tweets June 5 - June 12, 2026?",
       "bracket_label": "300-319",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.008005"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.100988"
     },
     {
       "condition_id": "0x1a0ffacc5c45939334c7a70645706988252027097390321b662da92f50b01d7e",
@@ -2516,14 +2706,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 41.21777368222222,
+      "hours_until_expiry": 41.217747995833335,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-5-june-12",
       "event_title": "Elon Musk # tweets June 5 - June 12, 2026?",
       "bracket_label": "320-339",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.008051"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.101021"
     },
     {
       "condition_id": "0x56c267f27abb2432f7395138820dc65ed734445fbdba1b6d9891c869087a0433",
@@ -2535,14 +2725,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 41.217773681388884,
+      "hours_until_expiry": 41.217747994444444,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-5-june-12",
       "event_title": "Elon Musk # tweets June 5 - June 12, 2026?",
       "bracket_label": "340-359",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.008098"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.101054"
     },
     {
       "condition_id": "0xca2e6f2eb878c46ba8c15b8d49eb6ded7083b083be8f5389cbb1bb558c56a8fb",
@@ -2554,14 +2744,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 41.21777368,
+      "hours_until_expiry": 41.21774799277778,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-5-june-12",
       "event_title": "Elon Musk # tweets June 5 - June 12, 2026?",
       "bracket_label": "360-379",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.008144"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.101087"
     },
     {
       "condition_id": "0xb2cb222e29f871e3f8593187325ef7bafe2a3d7b223e8546a8088504b53550df",
@@ -2573,14 +2763,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 41.21777367944444,
+      "hours_until_expiry": 41.21774799166667,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-5-june-12",
       "event_title": "Elon Musk # tweets June 5 - June 12, 2026?",
       "bracket_label": "380-399",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.008189"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.101120"
     },
     {
       "condition_id": "0x892f3e64ae6d18a9fcc221dc1a23fcba512657481287a2392261ad3bd84946c9",
@@ -2592,14 +2782,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 41.21777367861111,
+      "hours_until_expiry": 41.21774799027778,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-5-june-12",
       "event_title": "Elon Musk # tweets June 5 - June 12, 2026?",
       "bracket_label": "400-419",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.008234"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.101153"
     },
     {
       "condition_id": "0x83c9c46bc6e51985e542a784d2a25b1bd53daf3793138fb8d7d4ec19d80dba83",
@@ -2611,14 +2801,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 41.21777367805555,
+      "hours_until_expiry": 41.21774798916667,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-5-june-12",
       "event_title": "Elon Musk # tweets June 5 - June 12, 2026?",
       "bracket_label": "420-439",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.008279"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.101185"
     },
     {
       "condition_id": "0x95dce27e006c30c39c8abcfd8fc8b4aac445bcb7d7fb7e2ab3ef37dc30a22647",
@@ -2630,14 +2820,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 41.21777367722222,
+      "hours_until_expiry": 41.21774798805556,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-5-june-12",
       "event_title": "Elon Musk # tweets June 5 - June 12, 2026?",
       "bracket_label": "440-459",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.008324"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.101218"
     },
     {
       "condition_id": "0x014d9407b9a05b23574eede658de37d578c66cd9df7819ca6d785fa25ccba8b8",
@@ -2649,14 +2839,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 41.21777367666667,
+      "hours_until_expiry": 41.21774798666667,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-5-june-12",
       "event_title": "Elon Musk # tweets June 5 - June 12, 2026?",
       "bracket_label": "460-479",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.008368"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.101252"
     },
     {
       "condition_id": "0x6e9a5120f9053641aaaaf6ada6643af3358dadda421a495e30f60f3c6f7d12e8",
@@ -2668,14 +2858,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 41.217773675833335,
+      "hours_until_expiry": 41.21774798555556,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-5-june-12",
       "event_title": "Elon Musk # tweets June 5 - June 12, 2026?",
       "bracket_label": "480-499",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.008413"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.101285"
     },
     {
       "condition_id": "0xf5e03c99ccc97c691c43ded094ab317c3f8006d12d6f5ba2f778a028f6dae493",
@@ -2687,14 +2877,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 41.217773675277776,
+      "hours_until_expiry": 41.21774798444445,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-5-june-12",
       "event_title": "Elon Musk # tweets June 5 - June 12, 2026?",
       "bracket_label": "500+",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.008464"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.101333"
     },
     {
       "condition_id": "0xcd6959782f7f2f340a2421f1a17b1047505559455ef2c303db8b7d47dd9ec54b",
@@ -2706,14 +2896,14 @@
       "score": 10,
       "no_price": 0.9985,
       "yes_price": 0.0015,
-      "hours_until_expiry": 137.21777367444443,
+      "hours_until_expiry": 137.21774798305555,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-june-9-june-16",
       "event_title": "Donald Trump # Truth Social posts June 9 - June 16, 2026?",
       "bracket_label": "40-59",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.008592"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.101429"
     },
     {
       "condition_id": "0x17b5803baf83db2b10d7db1f691e5206e6dd8727e5f265e04d124b5d171d1e8a",
@@ -2725,14 +2915,14 @@
       "score": 10,
       "no_price": 0.993,
       "yes_price": 0.007,
-      "hours_until_expiry": 137.2177736738889,
+      "hours_until_expiry": 137.21774798194446,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-june-9-june-16",
       "event_title": "Donald Trump # Truth Social posts June 9 - June 16, 2026?",
       "bracket_label": "60-79",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.008639"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.101464"
     },
     {
       "condition_id": "0x1806c9826610f24a663a0a2925fb7d979183a93de99cf7cdff3d5c7503333ed8",
@@ -2744,14 +2934,14 @@
       "score": 10,
       "no_price": 0.9545,
       "yes_price": 0.0455,
-      "hours_until_expiry": 137.2177736725,
+      "hours_until_expiry": 137.21774798,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-june-9-june-16",
       "event_title": "Donald Trump # Truth Social posts June 9 - June 16, 2026?",
       "bracket_label": "80-99",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.008685"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.101502"
     },
     {
       "condition_id": "0x16df470b4b39c9500859197d1cddb22bee0247acb54e76430c294419e0ca508a",
@@ -2763,14 +2953,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 137.21777367194446,
+      "hours_until_expiry": 137.2177479788889,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-9-june-16",
       "event_title": "Elon Musk # tweets June 9 - June 16, 2026?",
       "bracket_label": "20-39",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.009090"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.101810"
     },
     {
       "condition_id": "0x2bfdba70d58246621165379acc891ae49900c77d8f48cda17e2abd5e1ce8ef27",
@@ -2782,14 +2972,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 137.2177736711111,
+      "hours_until_expiry": 137.2177479775,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-9-june-16",
       "event_title": "Elon Musk # tweets June 9 - June 16, 2026?",
       "bracket_label": "40-59",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.009135"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.101843"
     },
     {
       "condition_id": "0x4cea45447117f96bba166b467c23f4ba8bfcdba4abd9d1be71c46882b39ac0c7",
@@ -2801,14 +2991,14 @@
       "score": 10,
       "no_price": 0.9985,
       "yes_price": 0.0015,
-      "hours_until_expiry": 137.21777367055554,
+      "hours_until_expiry": 137.21774797555557,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-9-june-16",
       "event_title": "Elon Musk # tweets June 9 - June 16, 2026?",
       "bracket_label": "60-79",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.009184"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.101881"
     },
     {
       "condition_id": "0x6cece501bb0e266a15989aedd6d1dea75cd838ed74f5b4815e5e80773af7af8e",
@@ -2820,14 +3010,14 @@
       "score": 10,
       "no_price": 0.997,
       "yes_price": 0.003,
-      "hours_until_expiry": 137.21777366972222,
+      "hours_until_expiry": 137.21774797444445,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-9-june-16",
       "event_title": "Elon Musk # tweets June 9 - June 16, 2026?",
       "bracket_label": "80-99",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.009230"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.101916"
     },
     {
       "condition_id": "0x077feb25def8f63d32712726e9a492e9cb59d5fbf60aa2bd56973bf8567491bd",
@@ -2839,14 +3029,14 @@
       "score": 10,
       "no_price": 0.9925,
       "yes_price": 0.0075,
-      "hours_until_expiry": 137.21777366916666,
+      "hours_until_expiry": 137.21774797333333,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-9-june-16",
       "event_title": "Elon Musk # tweets June 9 - June 16, 2026?",
       "bracket_label": "100-119",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.009275"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.101949"
     },
     {
       "condition_id": "0xa23fd0638e8161b058eb31d6ed89617d7d71066a49214e8f92b21c60d30b08b9",
@@ -2858,14 +3048,14 @@
       "score": 10,
       "no_price": 0.9675,
       "yes_price": 0.0325,
-      "hours_until_expiry": 137.21777366833334,
+      "hours_until_expiry": 137.21774797222224,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-9-june-16",
       "event_title": "Elon Musk # tweets June 9 - June 16, 2026?",
       "bracket_label": "120-139",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.009463"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.102089"
     },
     {
       "condition_id": "0x68c8864b5616c6c516ad044575adc3b74f09fcace1cd9735b3d8be5f663dcd15",
@@ -2877,14 +3067,14 @@
       "score": 10,
       "no_price": 0.9795,
       "yes_price": 0.0205,
-      "hours_until_expiry": 137.21777366777778,
+      "hours_until_expiry": 137.21774797111112,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-9-june-16",
       "event_title": "Elon Musk # tweets June 9 - June 16, 2026?",
       "bracket_label": "280-299",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.009556"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.102158"
     },
     {
       "condition_id": "0x7f87094c2a6bad750331bdd8683cb52bc3754b44db8f6ff6885b2fd0db0a2977",
@@ -2896,14 +3086,14 @@
       "score": 10,
       "no_price": 0.9975,
       "yes_price": 0.0025,
-      "hours_until_expiry": 137.21777366694445,
+      "hours_until_expiry": 137.21774796972224,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-9-june-16",
       "event_title": "Elon Musk # tweets June 9 - June 16, 2026?",
       "bracket_label": "380-399",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.009601"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.102190"
     },
     {
       "condition_id": "0x9a74a39d984223e39e0c96c80435a7efb8d8f718d1875a1b429b64a971bc797c",
@@ -2915,14 +3105,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 137.2177736663889,
+      "hours_until_expiry": 137.2177479686111,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-9-june-16",
       "event_title": "Elon Musk # tweets June 9 - June 16, 2026?",
       "bracket_label": "400-419",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.009646"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.102224"
     },
     {
       "condition_id": "0xc36c433dd4172e5e4510bd6dabb2bb210a15eccaa2a93c50b803e0cba8a327b6",
@@ -2934,14 +3124,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 137.217773665,
+      "hours_until_expiry": 137.21774796666665,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-9-june-16",
       "event_title": "Elon Musk # tweets June 9 - June 16, 2026?",
       "bracket_label": "420-439",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.009692"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.102257"
     },
     {
       "condition_id": "0x17dd313184544be0a4700c3dd8d6f653db30406626f4a6471b4ca367419dbc5f",
@@ -2953,14 +3143,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 137.21777366416666,
+      "hours_until_expiry": 137.21774796555556,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-9-june-16",
       "event_title": "Elon Musk # tweets June 9 - June 16, 2026?",
       "bracket_label": "440-459",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.009747"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.102290"
     },
     {
       "condition_id": "0x5bac3e0035c0f391ea4106e854fb751cc480dbff34d148ebfe6376b6b42eb1ff",
@@ -2972,14 +3162,14 @@
       "score": 10,
       "no_price": 0.9615,
       "yes_price": 0.0385,
-      "hours_until_expiry": 137.21777366361113,
+      "hours_until_expiry": 137.21774796444444,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-9-june-16",
       "event_title": "Elon Musk # tweets June 9 - June 16, 2026?",
       "bracket_label": "260-279",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.009882"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.102394"
     },
     {
       "condition_id": "0xe71f427eef9b6a76186d19856ea85433c7aea57d3b559eefae48ddc1b0ecafdb",
@@ -2991,14 +3181,14 @@
       "score": 10,
       "no_price": 0.9855,
       "yes_price": 0.0145,
-      "hours_until_expiry": 137.2177736622222,
+      "hours_until_expiry": 137.21774796333332,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-9-june-16",
       "event_title": "Elon Musk # tweets June 9 - June 16, 2026?",
       "bracket_label": "300-319",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.009935"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.102431"
     },
     {
       "condition_id": "0x3924b68e01fd09ab5d5481e7c530607c0be78514adf466fcffee10871126b615",
@@ -3010,14 +3200,14 @@
       "score": 10,
       "no_price": 0.9935,
       "yes_price": 0.0065,
-      "hours_until_expiry": 137.2177736613889,
+      "hours_until_expiry": 137.21774796194444,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-9-june-16",
       "event_title": "Elon Musk # tweets June 9 - June 16, 2026?",
       "bracket_label": "320-339",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.009977"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.102464"
     },
     {
       "condition_id": "0xd56ab4227249db2c80b24b5b520e0715da4eb3b67b6a5d7110afcd586ea7f378",
@@ -3029,14 +3219,14 @@
       "score": 10,
       "no_price": 0.9955,
       "yes_price": 0.0045,
-      "hours_until_expiry": 137.21777366083333,
+      "hours_until_expiry": 137.21774796083332,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-9-june-16",
       "event_title": "Elon Musk # tweets June 9 - June 16, 2026?",
       "bracket_label": "340-359",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.010018"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.102496"
     },
     {
       "condition_id": "0x309216e3ac2e7ba2d7983da084f58013a0d0c8b5284976175c78ae0182c8177f",
@@ -3048,14 +3238,14 @@
       "score": 10,
       "no_price": 0.9965,
       "yes_price": 0.0035,
-      "hours_until_expiry": 137.21777366,
+      "hours_until_expiry": 137.2177479597222,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-9-june-16",
       "event_title": "Elon Musk # tweets June 9 - June 16, 2026?",
       "bracket_label": "360-379",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.010059"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.102529"
     },
     {
       "condition_id": "0x3be356d2e67ea36898ad9d50d2a5bea106032c0a2fdb0005c79d539d42f4f875",
@@ -3067,14 +3257,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 137.21777365944445,
+      "hours_until_expiry": 137.2177479586111,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-9-june-16",
       "event_title": "Elon Musk # tweets June 9 - June 16, 2026?",
       "bracket_label": "460-479",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.010104"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.102559"
     },
     {
       "condition_id": "0x4eea436c359645a966614b4b74b176aaf9e5c661a83db8692249005a0e9a025d",
@@ -3086,14 +3276,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 137.21777365861112,
+      "hours_until_expiry": 137.21774795722223,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-9-june-16",
       "event_title": "Elon Musk # tweets June 9 - June 16, 2026?",
       "bracket_label": "480-499",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.010146"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.102592"
     },
     {
       "condition_id": "0x9104d5bd72e271eea7090773c643545cafb2289f2ee798458a3ef54a97f3723e",
@@ -3105,223 +3295,33 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 137.21777365805556,
+      "hours_until_expiry": 137.2177479561111,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-9-june-16",
       "event_title": "Elon Musk # tweets June 9 - June 16, 2026?",
       "bracket_label": "500+",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.010186"
-    },
-    {
-      "condition_id": "0x1cf8f38dad0571df53b37f11047822b809bf0ea2fff98df6f8aa7d1714b52813",
-      "question": "Will Trump post \"Spencer\" or \"Pratt\" on Truth Social this week?",
-      "signal": "SKIP",
-      "reasons": [
-        "NO price 0.47 < 0.5 \u2014 market thinks event is likely."
-      ],
-      "score": 10,
-      "no_price": 0.47,
-      "yes_price": 0.53,
-      "hours_until_expiry": 101.20110699,
-      "market_type": "trump_posting",
-      "event_slug": "what-will-trump-post-this-week-june-9-14-20260608140318641",
-      "event_title": "What will Trump post this week? (June 9 - 14)",
-      "bracket_label": "Spencer / Pratt",
-      "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.010271"
-    },
-    {
-      "condition_id": "0xc50ef2d4d7dbf831c81dcdb0e930d16564220c3ad2e43b36efc396947cc2ab6e",
-      "question": "Will Trump post \"Russia\" on Truth Social this week?",
-      "signal": "SKIP",
-      "reasons": [
-        "NO price 0.41 < 0.5 \u2014 market thinks event is likely."
-      ],
-      "score": 10,
-      "no_price": 0.405,
-      "yes_price": 0.595,
-      "hours_until_expiry": 101.20110698916666,
-      "market_type": "trump_posting",
-      "event_slug": "what-will-trump-post-this-week-june-9-14-20260608140318641",
-      "event_title": "What will Trump post this week? (June 9 - 14)",
-      "bracket_label": "Russia",
-      "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.010413"
-    },
-    {
-      "condition_id": "0x95c05a4bc2539bdd1303e84dab838c2c4ccba085c41338fd78e59f4c82cfae94",
-      "question": "Will Trump post \"Gold\" or \"Golden\" on Truth Social this week?",
-      "signal": "SKIP",
-      "reasons": [
-        "NO price 0.49 < 0.5 \u2014 market thinks event is likely."
-      ],
-      "score": 10,
-      "no_price": 0.495,
-      "yes_price": 0.505,
-      "hours_until_expiry": 101.2011069886111,
-      "market_type": "trump_posting",
-      "event_slug": "what-will-trump-post-this-week-june-9-14-20260608140318641",
-      "event_title": "What will Trump post this week? (June 9 - 14)",
-      "bracket_label": "Gold / Golden",
-      "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.010587"
-    },
-    {
-      "condition_id": "0x4fd77abfe21eef3380d860e6889f5bd7e1deb3a497ea042baf29d4f0a4e562bb",
-      "question": "Will Trump post \"Israel\" on Truth Social this week?",
-      "signal": "SKIP",
-      "reasons": [
-        "NO price 0.42 < 0.5 \u2014 market thinks event is likely."
-      ],
-      "score": 10,
-      "no_price": 0.425,
-      "yes_price": 0.575,
-      "hours_until_expiry": 101.20110698777778,
-      "market_type": "trump_posting",
-      "event_slug": "what-will-trump-post-this-week-june-9-14-20260608140318641",
-      "event_title": "What will Trump post this week? (June 9 - 14)",
-      "bracket_label": "Israel",
-      "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.010674"
-    },
-    {
-      "condition_id": "0x0a0d79f8e15c87960649c4590b408f92ed2d48b73da75dda6efea0a668221462",
-      "question": "Will Trump post \"Barack Hussein Obama\" on Truth Social this week?",
-      "signal": "SKIP",
-      "reasons": [
-        "NO price 0.42 < 0.5 \u2014 market thinks event is likely."
-      ],
-      "score": 10,
-      "no_price": 0.42,
-      "yes_price": 0.58,
-      "hours_until_expiry": 101.20110698722222,
-      "market_type": "trump_posting",
-      "event_slug": "what-will-trump-post-this-week-june-9-14-20260608140318641",
-      "event_title": "What will Trump post this week? (June 9 - 14)",
-      "bracket_label": "Barack Hussein Obama",
-      "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.010736"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.102624"
     },
     {
       "condition_id": "0x4eac6c005283c312ece7f97adba71bccf39154bc9af42ad8dcdc4feca4458497",
       "question": "Will Trump post \"Soccer\" on Truth Social this week?",
       "signal": "SKIP",
       "reasons": [
-        "NO price 0.36 < 0.5 \u2014 market thinks event is likely."
+        "NO price 0.36 < 0.4 \u2014 market thinks event is likely."
       ],
       "score": 10,
       "no_price": 0.365,
       "yes_price": 0.635,
-      "hours_until_expiry": 101.20110698638888,
+      "hours_until_expiry": 101.2010812875,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-june-9-14-20260608140318641",
       "event_title": "What will Trump post this week? (June 9 - 14)",
       "bracket_label": "Soccer",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.010783"
-    },
-    {
-      "condition_id": "0xb786eff6dbab8b30ba681dc0d66706745769034c662317fe8f7adaf141658799",
-      "question": "Will Trump post \"CIA\" or \"C.I.A.\" on Truth Social this week?",
-      "signal": "SKIP",
-      "reasons": [
-        "NO price 0.48 < 0.5 \u2014 market thinks event is likely."
-      ],
-      "score": 10,
-      "no_price": 0.48,
-      "yes_price": 0.52,
-      "hours_until_expiry": 101.20110698583333,
-      "market_type": "trump_posting",
-      "event_slug": "what-will-trump-post-this-week-june-9-14-20260608140318641",
-      "event_title": "What will Trump post this week? (June 9 - 14)",
-      "bracket_label": "CIA / C.I.A.",
-      "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.010968"
-    },
-    {
-      "condition_id": "0x9ab44072a593c47af55e8ef9c525ffb9244c77afd34cb5cdda5c3f2a5ae44116",
-      "question": "Will Trump post \"Ted\" or \"Cruz\" on Truth Social this week?",
-      "signal": "SKIP",
-      "reasons": [
-        "NO price 0.47 < 0.5 \u2014 market thinks event is likely."
-      ],
-      "score": 10,
-      "no_price": 0.475,
-      "yes_price": 0.525,
-      "hours_until_expiry": 101.201106985,
-      "market_type": "trump_posting",
-      "event_slug": "what-will-trump-post-this-week-june-9-14-20260608140318641",
-      "event_title": "What will Trump post this week? (June 9 - 14)",
-      "bracket_label": "Ted / Cruz",
-      "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.011060"
-    },
-    {
-      "condition_id": "0xb941d6d7a336c4f8d929675e95d919fa99685daead62a4841eb015a68441ca15",
-      "question": "Will Trump post \"Wall Street\" on Truth Social this week?",
-      "signal": "SKIP",
-      "reasons": [
-        "NO price 0.47 < 0.5 \u2014 market thinks event is likely."
-      ],
-      "score": 10,
-      "no_price": 0.47,
-      "yes_price": 0.53,
-      "hours_until_expiry": 101.20110698444444,
-      "market_type": "trump_posting",
-      "event_slug": "what-will-trump-post-this-week-june-9-14-20260608140318641",
-      "event_title": "What will Trump post this week? (June 9 - 14)",
-      "bracket_label": "Wall Street",
-      "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.011105"
-    },
-    {
-      "condition_id": "0x1ab704056acc8649f97e1708473dfcfc0948e276c3cdabd394c522e207513726",
-      "question": "Will Trump post \"Ballroom\" on Truth Social this week?",
-      "signal": "SKIP",
-      "reasons": [
-        "NO price 0.49 < 0.5 \u2014 market thinks event is likely."
-      ],
-      "score": 10,
-      "no_price": 0.49,
-      "yes_price": 0.51,
-      "hours_until_expiry": 101.20110698361111,
-      "market_type": "trump_posting",
-      "event_slug": "what-will-trump-post-this-week-june-9-14-20260608140318641",
-      "event_title": "What will Trump post this week? (June 9 - 14)",
-      "bracket_label": "Ballroom",
-      "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.011251"
-    },
-    {
-      "condition_id": "0x06f0d56feb5e1ebbbe8080d8cb273f6570c714b0b01d62f55f8226276668efcb",
-      "question": "Will Elon Musk post 40-64 tweets from June 11 to June 13, 2026?",
-      "signal": "SKIP",
-      "reasons": [
-        "NO price 0.47 < 0.5 \u2014 market thinks event is likely."
-      ],
-      "score": 10,
-      "no_price": 0.475,
-      "yes_price": 0.525,
-      "hours_until_expiry": 65.2177736488889,
-      "market_type": "musk_posting",
-      "event_slug": "elon-musk-of-tweets-june-11-june-13",
-      "event_title": "Elon Musk # tweets June 11 - June 13, 2026?",
-      "bracket_label": "40-64",
-      "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.011350"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.103161"
     },
     {
       "condition_id": "0x57ac1c964007c90c601473894818c7765159031e3f003d76485d0c57b36ae65a",
@@ -3333,14 +3333,14 @@
       "score": 10,
       "no_price": 0.9985,
       "yes_price": 0.0015,
-      "hours_until_expiry": 65.21777364833333,
+      "hours_until_expiry": 65.21774795277777,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-11-june-13",
       "event_title": "Elon Musk # tweets June 11 - June 13, 2026?",
       "bracket_label": "240+",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.011502"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.103698"
     },
     {
       "condition_id": "0x597c828a07f5e63d4451e2bdb77f79634a37a7599d84df54c65cfba4d7ee7dac",
@@ -3352,14 +3352,14 @@
       "score": 10,
       "no_price": 0.9985,
       "yes_price": 0.0015,
-      "hours_until_expiry": 65.2177736475,
+      "hours_until_expiry": 65.21774795166667,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-11-june-13",
       "event_title": "Elon Musk # tweets June 11 - June 13, 2026?",
       "bracket_label": "215-239",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.011559"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.103757"
     },
     {
       "condition_id": "0xa8126dd9c0f976ec4dbe2e1376e7350e098fab62a51afab2e6a669bb0fab7947",
@@ -3371,14 +3371,14 @@
       "score": 10,
       "no_price": 0.9965,
       "yes_price": 0.0035,
-      "hours_until_expiry": 65.21777364694445,
+      "hours_until_expiry": 65.21774795055556,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-11-june-13",
       "event_title": "Elon Musk # tweets June 11 - June 13, 2026?",
       "bracket_label": "140-164",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.011605"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.103794"
     },
     {
       "condition_id": "0xfba5bda3d9efd1d42184d83301827f9a9b1ad107956dbd400ea86ce00bc584f5",
@@ -3390,14 +3390,14 @@
       "score": 10,
       "no_price": 0.9985,
       "yes_price": 0.0015,
-      "hours_until_expiry": 65.21777364611111,
+      "hours_until_expiry": 65.21774794944444,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-11-june-13",
       "event_title": "Elon Musk # tweets June 11 - June 13, 2026?",
       "bracket_label": "165-189",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.011649"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.103829"
     },
     {
       "condition_id": "0x5353a060f69b53a68aa763d4d480118e4d942f4b3486094306f290277a55610a",
@@ -3409,14 +3409,14 @@
       "score": 10,
       "no_price": 0.9985,
       "yes_price": 0.0015,
-      "hours_until_expiry": 65.21777364527777,
+      "hours_until_expiry": 65.21774794833334,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-11-june-13",
       "event_title": "Elon Musk # tweets June 11 - June 13, 2026?",
       "bracket_label": "190-214",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.011695"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.103862"
     },
     {
       "condition_id": "0x65ec66295c58428c851f88a48adedf14edfd93b74b7d79792c2cddf519df73bf",
@@ -3428,14 +3428,14 @@
       "score": 10,
       "no_price": 0.9895,
       "yes_price": 0.0105,
-      "hours_until_expiry": 65.21777364472223,
+      "hours_until_expiry": 65.21774794722222,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-11-june-13",
       "event_title": "Elon Musk # tweets June 11 - June 13, 2026?",
       "bracket_label": "115-139",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.011815"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.103960"
     },
     {
       "condition_id": "0x242cc1f9dd7bd0ac700b663b00139fb206cc0ecc53e7e393b6e643398e00640a",
@@ -3447,14 +3447,14 @@
       "score": 10,
       "no_price": 0.994,
       "yes_price": 0.006,
-      "hours_until_expiry": 209.21777364388888,
+      "hours_until_expiry": 209.2177479461111,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-june-12-june-19",
       "event_title": "Donald Trump # Truth Social posts June 12 - June 19, 2026?",
       "bracket_label": "20-39",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.012016"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.104143"
     },
     {
       "condition_id": "0xef73e5146826f3d0f638faa1a58c63f1a1d90cd78480f46af5032c5836037700",
@@ -3466,14 +3466,14 @@
       "score": 10,
       "no_price": 0.985,
       "yes_price": 0.015,
-      "hours_until_expiry": 209.21777364333335,
+      "hours_until_expiry": 209.217747945,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-june-12-june-19",
       "event_title": "Donald Trump # Truth Social posts June 12 - June 19, 2026?",
       "bracket_label": "40-59",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.012046"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.104174"
     },
     {
       "condition_id": "0x869e13d8dcc8ffa46058431785bc06af58e523e71db0fe20fe80579db5ec8c24",
@@ -3485,14 +3485,14 @@
       "score": 10,
       "no_price": 0.977,
       "yes_price": 0.023,
-      "hours_until_expiry": 209.21777364250002,
+      "hours_until_expiry": 209.2177479436111,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-june-12-june-19",
       "event_title": "Donald Trump # Truth Social posts June 12 - June 19, 2026?",
       "bracket_label": "60-79",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.012077"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.104203"
     },
     {
       "condition_id": "0x0f2e2adbe4221d4ebeab7b7d5f928fc27526dfe447e240e02e208259f3d21859",
@@ -3504,14 +3504,14 @@
       "score": 10,
       "no_price": 0.9985,
       "yes_price": 0.0015,
-      "hours_until_expiry": 209.2177736413889,
+      "hours_until_expiry": 209.21774794194442,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-june-12-june-19",
       "event_title": "Donald Trump # Truth Social posts June 12 - June 19, 2026?",
       "bracket_label": "<20",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.012215"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.104327"
     },
     {
       "condition_id": "0xd35ccafef2367d06a25ddda34eb68ad3741903bb7e113654f7e0357a9e5bd61f",
@@ -3523,14 +3523,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 209.21777364055555,
+      "hours_until_expiry": 209.21774794055557,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-12-june-19",
       "event_title": "Elon Musk # tweets June 12 - June 19, 2026?",
       "bracket_label": "60-79",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.012246"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.104357"
     },
     {
       "condition_id": "0x30f5dc4352fb8665f56d4afcbc8ed3791c12edfdff85947217d30f46d49365c0",
@@ -3542,14 +3542,14 @@
       "score": 10,
       "no_price": 0.9895,
       "yes_price": 0.0105,
-      "hours_until_expiry": 209.21777364,
+      "hours_until_expiry": 209.21774793944445,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-12-june-19",
       "event_title": "Elon Musk # tweets June 12 - June 19, 2026?",
       "bracket_label": "100-119",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.012275"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.104386"
     },
     {
       "condition_id": "0xb9b81c62279a42dd99158af6248209ca44ffc441efc52e6bb28631ef355a448c",
@@ -3561,14 +3561,14 @@
       "score": 10,
       "no_price": 0.9735,
       "yes_price": 0.0265,
-      "hours_until_expiry": 209.2177736391667,
+      "hours_until_expiry": 209.21774793833333,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-12-june-19",
       "event_title": "Elon Musk # tweets June 12 - June 19, 2026?",
       "bracket_label": "120-139",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.012308"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.104414"
     },
     {
       "condition_id": "0xd770507330bb21859284c6194fd3f09ca1aa8c26a6fd25c8b897bf25eb986d7d",
@@ -3580,14 +3580,14 @@
       "score": 10,
       "no_price": 0.9965,
       "yes_price": 0.0035,
-      "hours_until_expiry": 209.21777363861113,
+      "hours_until_expiry": 209.21774793722224,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-12-june-19",
       "event_title": "Elon Musk # tweets June 12 - June 19, 2026?",
       "bracket_label": "380-399",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.012438"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.104539"
     },
     {
       "condition_id": "0x51ee52ef4f5a77af24348c288897919a637ec98bb5c99f09711c6ee23f83f593",
@@ -3599,14 +3599,14 @@
       "score": 10,
       "no_price": 0.9975,
       "yes_price": 0.0025,
-      "hours_until_expiry": 209.21777363777778,
+      "hours_until_expiry": 209.21774793611112,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-12-june-19",
       "event_title": "Elon Musk # tweets June 12 - June 19, 2026?",
       "bracket_label": "400-419",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.012470"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.104568"
     },
     {
       "condition_id": "0x5ebf2544daefceea4d83abd33043f3f2b415cc8d851d6dea9d93f39e72dd6aa4",
@@ -3618,14 +3618,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 209.21777363722222,
+      "hours_until_expiry": 209.2177479347222,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-12-june-19",
       "event_title": "Elon Musk # tweets June 12 - June 19, 2026?",
       "bracket_label": "480-499",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.012502"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.104598"
     },
     {
       "condition_id": "0xa92ba382a2bba0df502c82f06662be89fbd8cded0df3352384626469467f3539",
@@ -3637,14 +3637,14 @@
       "score": 10,
       "no_price": 0.9985,
       "yes_price": 0.0015,
-      "hours_until_expiry": 209.21777363638887,
+      "hours_until_expiry": 209.2177479336111,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-12-june-19",
       "event_title": "Elon Musk # tweets June 12 - June 19, 2026?",
       "bracket_label": "500+",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.012536"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.104641"
     },
     {
       "condition_id": "0x62934ac687dc3790fa736eb2e56f0bba9fdb3da50339123e17e5cdc8bd2fc6d9",
@@ -3656,14 +3656,14 @@
       "score": 10,
       "no_price": 0.9985,
       "yes_price": 0.0015,
-      "hours_until_expiry": 209.2177736358333,
+      "hours_until_expiry": 209.2177479325,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-12-june-19",
       "event_title": "Elon Musk # tweets June 12 - June 19, 2026?",
       "bracket_label": "80-99",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.012568"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.104673"
     },
     {
       "condition_id": "0x3c2301cdeca0239987e07238364cc4ae8e6c60ead57c7baa118fd7aa5bcf9fa6",
@@ -3675,14 +3675,14 @@
       "score": 10,
       "no_price": 0.955,
       "yes_price": 0.045,
-      "hours_until_expiry": 209.217773635,
+      "hours_until_expiry": 209.21774793111112,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-12-june-19",
       "event_title": "Elon Musk # tweets June 12 - June 19, 2026?",
       "bracket_label": "280-299",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.012600"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.104703"
     },
     {
       "condition_id": "0x8eb72846c7c3ea79882d7cde0dc47578d1ee1cda7fc8011a360425379af6573e",
@@ -3694,14 +3694,14 @@
       "score": 10,
       "no_price": 0.9895,
       "yes_price": 0.0105,
-      "hours_until_expiry": 209.21777363333334,
+      "hours_until_expiry": 209.21774792944444,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-12-june-19",
       "event_title": "Elon Musk # tweets June 12 - June 19, 2026?",
       "bracket_label": "340-359",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.012637"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.104798"
     },
     {
       "condition_id": "0x869732e254c5eb8f72de3f7d8fafc61218d36c5ee6479b5865a9a28bf1421e85",
@@ -3713,14 +3713,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 209.21777363277778,
+      "hours_until_expiry": 209.2177479275,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-12-june-19",
       "event_title": "Elon Musk # tweets June 12 - June 19, 2026?",
       "bracket_label": "<20",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.012671"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.104847"
     },
     {
       "condition_id": "0x61561cc517355369b19aa9ac63d8cec4f512f528047420dcb0de61e74850a092",
@@ -3732,14 +3732,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 209.21777363194443,
+      "hours_until_expiry": 209.21774792611112,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-12-june-19",
       "event_title": "Elon Musk # tweets June 12 - June 19, 2026?",
       "bracket_label": "20-39",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.012703"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.104884"
     },
     {
       "condition_id": "0x6bfa553a9ab15030f66dce5e2b240e44d39ce9b07bd3a6e2f352c9e42add1535",
@@ -3751,14 +3751,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 209.21777363138887,
+      "hours_until_expiry": 209.217747925,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-12-june-19",
       "event_title": "Elon Musk # tweets June 12 - June 19, 2026?",
       "bracket_label": "40-59",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.012753"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.104918"
     },
     {
       "condition_id": "0xfd4279f9db6b36b4cd82548da036d9fec0b77892896a081be04f45ce2838a744",
@@ -3770,14 +3770,14 @@
       "score": 10,
       "no_price": 0.974,
       "yes_price": 0.026,
-      "hours_until_expiry": 209.21777363055557,
+      "hours_until_expiry": 209.2177479238889,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-12-june-19",
       "event_title": "Elon Musk # tweets June 12 - June 19, 2026?",
       "bracket_label": "300-319",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.012890"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.105061"
     },
     {
       "condition_id": "0xd79015077c9ce5502ca9498f6cde1c2ecad51c9110f813c4577d1fd337d03006",
@@ -3789,14 +3789,14 @@
       "score": 10,
       "no_price": 0.986,
       "yes_price": 0.014,
-      "hours_until_expiry": 209.21777363,
+      "hours_until_expiry": 209.2177479227778,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-12-june-19",
       "event_title": "Elon Musk # tweets June 12 - June 19, 2026?",
       "bracket_label": "320-339",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.012921"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.105099"
     },
     {
       "condition_id": "0xae438117fa09fb03a717de04aef318409291aa6aa7ba00dbaa01b09a1736b3db",
@@ -3808,14 +3808,14 @@
       "score": 10,
       "no_price": 0.9945,
       "yes_price": 0.0055,
-      "hours_until_expiry": 209.21777362916666,
+      "hours_until_expiry": 209.21774792166667,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-12-june-19",
       "event_title": "Elon Musk # tweets June 12 - June 19, 2026?",
       "bracket_label": "360-379",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.012954"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.105133"
     },
     {
       "condition_id": "0xa48448444fc06b051b6d1c0b93cdb2fa1c80111b5d1132b5cbf2b43145230f6e",
@@ -3827,14 +3827,14 @@
       "score": 10,
       "no_price": 0.9985,
       "yes_price": 0.0015,
-      "hours_until_expiry": 209.2177736286111,
+      "hours_until_expiry": 209.2177479202778,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-12-june-19",
       "event_title": "Elon Musk # tweets June 12 - June 19, 2026?",
       "bracket_label": "420-439",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.012986"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.105166"
     },
     {
       "condition_id": "0xed0d76e540f033b07b75da11059482fa4bd2df979717c3f6b37cc43dd9840bc5",
@@ -3846,14 +3846,14 @@
       "score": 10,
       "no_price": 0.9985,
       "yes_price": 0.0015,
-      "hours_until_expiry": 209.21777362777777,
+      "hours_until_expiry": 209.21774791916667,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-12-june-19",
       "event_title": "Elon Musk # tweets June 12 - June 19, 2026?",
       "bracket_label": "440-459",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.013018"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.105197"
     },
     {
       "condition_id": "0x57e48899b2546e587e2c3e7d54f7624c25915acf443dea79d769c9d380459519",
@@ -3865,14 +3865,14 @@
       "score": 10,
       "no_price": 0.9995,
       "yes_price": 0.0005,
-      "hours_until_expiry": 209.21777362722221,
+      "hours_until_expiry": 209.21774791805555,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-12-june-19",
       "event_title": "Elon Musk # tweets June 12 - June 19, 2026?",
       "bracket_label": "460-479",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.013053"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.105230"
     },
     {
       "condition_id": "0x7ca12a79eb09b8172819495769f67fe8cfff1944b0090f7f04a08920664e20c1",
@@ -3884,14 +3884,14 @@
       "score": 10,
       "no_price": 0.9945,
       "yes_price": 0.0055,
-      "hours_until_expiry": 485.2011069591667,
+      "hours_until_expiry": 485.2010812477778,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-tweets-in-june-2026-20260608234701516",
       "event_title": "Elon Musk # tweets in June 2026?",
       "bracket_label": "<400",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.013118"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.105296"
     },
     {
       "condition_id": "0x79c7668f06795db73e768b552626b45f1778341039e0177130c58a40f1e6276d",
@@ -3903,14 +3903,14 @@
       "score": 10,
       "no_price": 0.994,
       "yes_price": 0.006,
-      "hours_until_expiry": 485.2011069586111,
+      "hours_until_expiry": 485.20108124666666,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-tweets-in-june-2026-20260608234701516",
       "event_title": "Elon Musk # tweets in June 2026?",
       "bracket_label": "400-419",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.013150"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.105328"
     },
     {
       "condition_id": "0x8f8a907382eea6a4ccb3ad91882ccc198d7a8b40d259a08498bc961c53ebd1a9",
@@ -3922,14 +3922,14 @@
       "score": 10,
       "no_price": 0.994,
       "yes_price": 0.006,
-      "hours_until_expiry": 485.20110695777777,
+      "hours_until_expiry": 485.20108124555554,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-tweets-in-june-2026-20260608234701516",
       "event_title": "Elon Musk # tweets in June 2026?",
       "bracket_label": "420-439",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.013182"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.105360"
     },
     {
       "condition_id": "0xb422db4abee7e686bbcbb19e620c31aa47263ae278b9fb7cf4da4cb43a1070b4",
@@ -3941,14 +3941,14 @@
       "score": 10,
       "no_price": 0.993,
       "yes_price": 0.007,
-      "hours_until_expiry": 485.20110695722224,
+      "hours_until_expiry": 485.2010812444444,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-tweets-in-june-2026-20260608234701516",
       "event_title": "Elon Musk # tweets in June 2026?",
       "bracket_label": "440-459",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.013213"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.105393"
     },
     {
       "condition_id": "0x10f4c41232ced8766408585ad3cea08976d5d0fe54d7c5ecc64bd8a80ce5ef02",
@@ -3960,14 +3960,14 @@
       "score": 10,
       "no_price": 0.9565,
       "yes_price": 0.0435,
-      "hours_until_expiry": 485.20110695638886,
+      "hours_until_expiry": 485.2010812430555,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-tweets-in-june-2026-20260608234701516",
       "event_title": "Elon Musk # tweets in June 2026?",
       "bracket_label": "1200-1239",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.013488"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.105679"
     },
     {
       "condition_id": "0x6eba1ba763fbc357c3dd7e3da5cd690b817c353b7957e37b12aef937b79914c2",
@@ -3979,14 +3979,14 @@
       "score": 10,
       "no_price": 0.954,
       "yes_price": 0.046,
-      "hours_until_expiry": 485.2011069558333,
+      "hours_until_expiry": 485.20108124194445,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-tweets-in-june-2026-20260608234701516",
       "event_title": "Elon Musk # tweets in June 2026?",
       "bracket_label": "1280-1319",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.013519"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.105712"
     },
     {
       "condition_id": "0x5e7795d1fdc5daabd3a181273f1c8ce43eee633b43a39a19c940886346299a2f",
@@ -3998,14 +3998,14 @@
       "score": 10,
       "no_price": 0.9805,
       "yes_price": 0.0195,
-      "hours_until_expiry": 485.201106955,
+      "hours_until_expiry": 485.20108124083333,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-tweets-in-june-2026-20260608234701516",
       "event_title": "Elon Musk # tweets in June 2026?",
       "bracket_label": "1400+",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.013551"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.105765"
     },
     {
       "condition_id": "0x7f89c5bb9aa269da788cf115a5030735f0fcdc26d9d1a9e5a7e02e2e255b8529",
@@ -4017,14 +4017,14 @@
       "score": 10,
       "no_price": 0.9575,
       "yes_price": 0.0425,
-      "hours_until_expiry": 485.2011069544444,
+      "hours_until_expiry": 485.2010812397222,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-tweets-in-june-2026-20260608234701516",
       "event_title": "Elon Musk # tweets in June 2026?",
       "bracket_label": "500-519",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.013582"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.105800"
     },
     {
       "condition_id": "0x5f2160ceff3cdaeb3280e46e35430ac05de270221a552c42a4b9e92d3860166c",
@@ -4036,14 +4036,14 @@
       "score": 10,
       "no_price": 0.955,
       "yes_price": 0.045,
-      "hours_until_expiry": 485.2011069536111,
+      "hours_until_expiry": 485.2010812386111,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-tweets-in-june-2026-20260608234701516",
       "event_title": "Elon Musk # tweets in June 2026?",
       "bracket_label": "1320-1359",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.013785"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.105975"
     },
     {
       "condition_id": "0xb5a28e800cad524c1def189767e89c93836ae30e6597304296cf6cd687ea7e6e",
@@ -4055,14 +4055,14 @@
       "score": 10,
       "no_price": 0.9945,
       "yes_price": 0.0055,
-      "hours_until_expiry": 485.20110695305556,
+      "hours_until_expiry": 485.2010812375,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-tweets-in-june-2026-20260608234701516",
       "event_title": "Elon Musk # tweets in June 2026?",
       "bracket_label": "460-479",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.013831"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.106006"
     },
     {
       "condition_id": "0x75665f4c146a4179bfa91d4cfa39c038ccfd961849aae3cb4ac6b247ffa010d0",
@@ -4074,14 +4074,14 @@
       "score": 10,
       "no_price": 0.955,
       "yes_price": 0.045,
-      "hours_until_expiry": 485.2011069516667,
+      "hours_until_expiry": 485.20108123555553,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-tweets-in-june-2026-20260608234701516",
       "event_title": "Elon Musk # tweets in June 2026?",
       "bracket_label": "480-499",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.013864"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.106039"
     },
     {
       "condition_id": "0x5dddfdc28cc8f4a56c6ffd8d04fe68e0155dc9647f77669987beaab6f38a3f3d",
@@ -4093,14 +4093,14 @@
       "score": 10,
       "no_price": 0.9605,
       "yes_price": 0.0395,
-      "hours_until_expiry": 485.2011069508333,
+      "hours_until_expiry": 485.2010812341667,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-tweets-in-june-2026-20260608234701516",
       "event_title": "Elon Musk # tweets in June 2026?",
       "bracket_label": "580-599",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.014039"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.106226"
     },
     {
       "condition_id": "0x37f07a49cc5939373114a966873238485ef84b7b836ce0fd38998f578e457aba",
@@ -4112,14 +4112,14 @@
       "score": 10,
       "no_price": 0.9545,
       "yes_price": 0.0455,
-      "hours_until_expiry": 485.2011069502778,
+      "hours_until_expiry": 485.20108123305556,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-tweets-in-june-2026-20260608234701516",
       "event_title": "Elon Musk # tweets in June 2026?",
       "bracket_label": "1240-1279",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.014183"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.106369"
     },
     {
       "condition_id": "0x20e6bc5d35a6f629e4204fe0017169c748aa0530b2d9c50acc61d95a7635bc8d",
@@ -4131,14 +4131,14 @@
       "score": 10,
       "no_price": 0.9605,
       "yes_price": 0.0395,
-      "hours_until_expiry": 485.20110694944447,
+      "hours_until_expiry": 485.20108123194444,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-tweets-in-june-2026-20260608234701516",
       "event_title": "Elon Musk # tweets in June 2026?",
       "bracket_label": "1360-1399",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.014214"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.106402"
     },
     {
       "condition_id": "0x02cb83794f5c64731b73a1d5f8d0d3b21858773d29526bb1f837918fa9f3dc15",
@@ -4150,14 +4150,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1950.7822263847222,
+      "hours_until_expiry": -1950.7822521027779,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-march-19-march-21",
       "event_title": "Elon Musk # tweets March 19 - March 21, 2026?",
       "bracket_label": "<40",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.002888"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.097160"
     },
     {
       "condition_id": "0x3f98f4506374a11b5d4deacf051e3b6192ec58e0f2036d18edb03d5b3985d3a3",
@@ -4169,14 +4169,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1950.7822263855555,
+      "hours_until_expiry": -1950.7822521044443,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-march-19-march-21",
       "event_title": "Elon Musk # tweets March 19 - March 21, 2026?",
       "bracket_label": "40-64",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.002975"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.097242"
     },
     {
       "condition_id": "0x47e3bb0616a698b284145759f805bea5c760acf889e66da0506937698b417c95",
@@ -4188,14 +4188,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1950.782226386389,
+      "hours_until_expiry": -1950.7822521058333,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-march-19-march-21",
       "event_title": "Elon Musk # tweets March 19 - March 21, 2026?",
       "bracket_label": "65-89",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.003034"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.097288"
     },
     {
       "condition_id": "0x53d9bfa100ba711e08bcca20564890da16531a4ef3092efd88449bbbe8fbf19c",
@@ -4207,14 +4207,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1950.7822263872222,
+      "hours_until_expiry": -1950.7822521069445,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-march-19-march-21",
       "event_title": "Elon Musk # tweets March 19 - March 21, 2026?",
       "bracket_label": "90-114",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.003087"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.097329"
     },
     {
       "condition_id": "0xfb2eec2e72db2cdd9d3813d59b0d5766c10ea3873d422b19fc428fbed27a20f9",
@@ -4226,14 +4226,14 @@
       "score": 0.0,
       "no_price": 0.0,
       "yes_price": 1.0,
-      "hours_until_expiry": -1950.7822263880555,
+      "hours_until_expiry": -1950.7822521083333,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-march-19-march-21",
       "event_title": "Elon Musk # tweets March 19 - March 21, 2026?",
       "bracket_label": "115-139",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.003135"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.097366"
     },
     {
       "condition_id": "0x1f9057f191479f1fc34c3539c3fff9deadb30440c68cbdbdc60e2f66f6448a88",
@@ -4245,14 +4245,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1950.7822263886112,
+      "hours_until_expiry": -1950.7822521094445,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-march-19-march-21",
       "event_title": "Elon Musk # tweets March 19 - March 21, 2026?",
       "bracket_label": "140-164",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.003181"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.097400"
     },
     {
       "condition_id": "0x0d0f9c7ff9ec578157fb56c2d7cba7b9d6f32b2bc112ebc49b75e185ea510f63",
@@ -4264,14 +4264,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1950.78222639,
+      "hours_until_expiry": -1950.782252111389,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-march-19-march-21",
       "event_title": "Elon Musk # tweets March 19 - March 21, 2026?",
       "bracket_label": "165-189",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.003225"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.097431"
     },
     {
       "condition_id": "0x03b5078ec7b3aeeb46d206037277dfef675fbc3d4c4b7cf37464193778ab6208",
@@ -4283,14 +4283,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1950.7822263908336,
+      "hours_until_expiry": -1950.7822521125,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-march-19-march-21",
       "event_title": "Elon Musk # tweets March 19 - March 21, 2026?",
       "bracket_label": "190-214",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.003269"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.097462"
     },
     {
       "condition_id": "0x8d1517cf62d2234f03be8d5fa4188ef00f504d78147de77cf012e4787c83c171",
@@ -4302,14 +4302,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1950.7822263913888,
+      "hours_until_expiry": -1950.782252113889,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-march-19-march-21",
       "event_title": "Elon Musk # tweets March 19 - March 21, 2026?",
       "bracket_label": "215-239",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.003311"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.097494"
     },
     {
       "condition_id": "0xea8bf021ab22f94aeb33ee3b4aac74863b3e72a91a304fb476ba04639ba52c7d",
@@ -4321,14 +4321,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1950.7822263922221,
+      "hours_until_expiry": -1950.7822521150001,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-march-19-march-21",
       "event_title": "Elon Musk # tweets March 19 - March 21, 2026?",
       "bracket_label": "240+",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.003360"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.097531"
     },
     {
       "condition_id": "0x7290b1aa1bf5b262bd60abd03564601131dbcfd500a6206a97da914cdcac1403",
@@ -4340,14 +4340,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1878.7822263930555,
+      "hours_until_expiry": -1878.7822521161113,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-march-17-march-24",
       "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?",
       "bracket_label": "<20",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.003406"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.097565"
     },
     {
       "condition_id": "0xdc3f1159806894cb57c514544395d61899c8d9b69e2a9ae42810a60ee04b9ce1",
@@ -4359,14 +4359,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1878.7822263936112,
+      "hours_until_expiry": -1878.7822521172222,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-march-17-march-24",
       "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?",
       "bracket_label": "40-59",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.003448"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.097596"
     },
     {
       "condition_id": "0xbafc6b93f7eab35ca46eac426c8e66700d3182d26c976865d1f9c1932b790daf",
@@ -4378,14 +4378,14 @@
       "score": 0.0,
       "no_price": 0.0,
       "yes_price": 1.0,
-      "hours_until_expiry": -1878.7822263944445,
+      "hours_until_expiry": -1878.782252118611,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-march-17-march-24",
       "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?",
       "bracket_label": "80-99",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.003494"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.097632"
     },
     {
       "condition_id": "0x92c74e9ab5383ddb3b7350e515beeecdc905078c58bc46d926d655fc9c1cbf43",
@@ -4397,14 +4397,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1878.7822263952776,
+      "hours_until_expiry": -1878.7822521197222,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-march-17-march-24",
       "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?",
       "bracket_label": "120-139",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.003537"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.097664"
     },
     {
       "condition_id": "0xe2d9fbd3898231df8eb62c2f0af39e2a80528719d40acad6b6a4e03d84ab321a",
@@ -4416,14 +4416,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1878.7822263961111,
+      "hours_until_expiry": -1878.782252121111,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-march-17-march-24",
       "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?",
       "bracket_label": "160-179",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.003578"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.097694"
     },
     {
       "condition_id": "0x6a9af49e4d04d69c1d8be844267ddc798af37aec44c1ad06d09c16fb19c0846e",
@@ -4435,14 +4435,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1878.7822263969445,
+      "hours_until_expiry": -1878.7822521222222,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-march-17-march-24",
       "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?",
       "bracket_label": "200+",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.003621"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.097741"
     },
     {
       "condition_id": "0x4e2d1b6e2e794c8b7009ff51d581fc719b8561868330cab0103c0e06906e2200",
@@ -4454,14 +4454,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1878.7822263983335,
+      "hours_until_expiry": -1878.7822521241667,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-march-17-march-24",
       "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?",
       "bracket_label": "20-39",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.003670"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.097776"
     },
     {
       "condition_id": "0x5048059030b1b6f73783f63ebe091a7a8d1c2a62cdcacfc6c05d12595609cb36",
@@ -4473,14 +4473,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1878.7822263991668,
+      "hours_until_expiry": -1878.7822521252779,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-march-17-march-24",
       "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?",
       "bracket_label": "60-79",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.003712"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.097807"
     },
     {
       "condition_id": "0xc5a605a47cade5cb82d4eb37a3d3aab9d18a68060c78bd9ca379410675799384",
@@ -4492,14 +4492,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1878.782226399722,
+      "hours_until_expiry": -1878.7822521266667,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-march-17-march-24",
       "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?",
       "bracket_label": "100-119",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.003775"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.097837"
     },
     {
       "condition_id": "0x80b37fac9896d0867c76aa2b70d8781e014ebe09ff0a3cbe649e3454bf51a461",
@@ -4511,14 +4511,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1878.7822264005556,
+      "hours_until_expiry": -1878.7822521277778,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-march-17-march-24",
       "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?",
       "bracket_label": "140-159",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.003818"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.097867"
     },
     {
       "condition_id": "0xdee27a3b55df80a6ba16b88c9c9c2ba5df2893c7d56c0b2244c66979ac4063ad",
@@ -4530,14 +4530,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1878.782226401389,
+      "hours_until_expiry": -1878.782252128889,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-march-17-march-24",
       "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?",
       "bracket_label": "180-199",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.003860"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.097896"
     },
     {
       "condition_id": "0x38207632cfe156afebaa7cbee0349d51adb9cabd72786b94632c224379a4fc38",
@@ -4549,14 +4549,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 41.21777359805556,
+      "hours_until_expiry": 41.217747869722224,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-june-5-june-12",
       "event_title": "Donald Trump # Truth Social posts June 5 - June 12, 2026?",
       "bracket_label": "<20",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.007086"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.100324"
     },
     {
       "condition_id": "0xeac689f0c8007e8dd4e56e424a345161cb34429a347d59e24f8f24dcecdf3077",
@@ -4568,14 +4568,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 41.21777359722223,
+      "hours_until_expiry": 41.21774786861111,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-june-5-june-12",
       "event_title": "Donald Trump # Truth Social posts June 5 - June 12, 2026?",
       "bracket_label": "20-39",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.007128"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.100354"
     },
     {
       "condition_id": "0x78caf9783d3a2f091e353c050966de7659906dc63b427370fb1f5fc145d10dff",
@@ -4587,14 +4587,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 41.21777359666667,
+      "hours_until_expiry": 41.2177478675,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-june-5-june-12",
       "event_title": "Donald Trump # Truth Social posts June 5 - June 12, 2026?",
       "bracket_label": "40-59",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.007170"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.100385"
     },
     {
       "condition_id": "0x8f7adda9c3990627fe32d00be8caa7b8e6a09a64e18eb51d9119a64a5d4388b2",
@@ -4606,14 +4606,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 41.217773595833336,
+      "hours_until_expiry": 41.21774786611111,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-june-5-june-12",
       "event_title": "Donald Trump # Truth Social posts June 5 - June 12, 2026?",
       "bracket_label": "60-79",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.007211"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.100416"
     },
     {
       "condition_id": "0x8b1d0de71a49f03f55708f5d401a2019101141feeb0030653da093a756f7e1d1",
@@ -4625,14 +4625,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 41.21777359527778,
+      "hours_until_expiry": 41.217747865,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-5-june-12",
       "event_title": "Elon Musk # tweets June 5 - June 12, 2026?",
       "bracket_label": "20-39",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.007299"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.100479"
     },
     {
       "condition_id": "0xbd467ee17fd93202bdc91ac8909f9f3c10e56f555a5ecf7a35a3f5235fde0a49",
@@ -4644,14 +4644,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 41.21777359388889,
+      "hours_until_expiry": 41.21774786333334,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-5-june-12",
       "event_title": "Elon Musk # tweets June 5 - June 12, 2026?",
       "bracket_label": "40-59",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.007340"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.100508"
     },
     {
       "condition_id": "0xceee2ae0cbc67a65070f578d62d519822a7c727fec60eaa7c8df6a51b515e388",
@@ -4663,14 +4663,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 41.217773593055554,
+      "hours_until_expiry": 41.217747861944446,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-5-june-12",
       "event_title": "Elon Musk # tweets June 5 - June 12, 2026?",
       "bracket_label": "100-119",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.007382"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.100538"
     },
     {
       "condition_id": "0x74f2ddd3a534164be805d241c14a2b7e6f036dd55314b9a11b5e0e775baa014c",
@@ -4682,14 +4682,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 41.2177735925,
+      "hours_until_expiry": 41.217747861111114,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-5-june-12",
       "event_title": "Elon Musk # tweets June 5 - June 12, 2026?",
       "bracket_label": "120-139",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.007423"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.100566"
     },
     {
       "condition_id": "0xc66050f8b563553994689667e0c2358b691fc2ebaf404a1393f5e0bde9238e79",
@@ -4701,14 +4701,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 41.21777359166667,
+      "hours_until_expiry": 41.21774785972222,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-5-june-12",
       "event_title": "Elon Musk # tweets June 5 - June 12, 2026?",
       "bracket_label": "140-159",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.007463"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.100595"
     },
     {
       "condition_id": "0x5fc451ca5ed4ff9c2a36bee0e7ed7c36aa3bf79c5f1f26f84b77c9fdeaaed393",
@@ -4720,14 +4720,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 41.21777359083334,
+      "hours_until_expiry": 41.21774785861111,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-5-june-12",
       "event_title": "Elon Musk # tweets June 5 - June 12, 2026?",
       "bracket_label": "<20",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.007504"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.100622"
     },
     {
       "condition_id": "0xa41d13305695eda6256f7d08f3ec83b621f6ecebce00e395c86cfb61f02b4c44",
@@ -4739,14 +4739,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 41.21777359027778,
+      "hours_until_expiry": 41.2177478575,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-5-june-12",
       "event_title": "Elon Musk # tweets June 5 - June 12, 2026?",
       "bracket_label": "60-79",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.007812"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.100851"
     },
     {
       "condition_id": "0x479fa594eed7be2802a6a96ad6fcd837f14da43d7bfd24b563b86f7405279643",
@@ -4758,14 +4758,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 41.21777358944445,
+      "hours_until_expiry": 41.21774785638889,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-5-june-12",
       "event_title": "Elon Musk # tweets June 5 - June 12, 2026?",
       "bracket_label": "80-99",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.007854"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.100880"
     },
     {
       "condition_id": "0xe5bc2d85f8a753811c9959c880d71700b22a69db18a76a91b9fd699dbf4f5ca4",
@@ -4777,14 +4777,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 137.21777358861112,
+      "hours_until_expiry": 137.21774785,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-june-9-june-16",
       "event_title": "Donald Trump # Truth Social posts June 9 - June 16, 2026?",
       "bracket_label": "<20",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.008506"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.101365"
     },
     {
       "condition_id": "0x49fe257e24a7ab23eb344137f4b5b8a66e18d86f4563a5a7c889084584201e7d",
@@ -4796,14 +4796,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 137.21777358777777,
+      "hours_until_expiry": 137.2177478488889,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-june-9-june-16",
       "event_title": "Donald Trump # Truth Social posts June 9 - June 16, 2026?",
       "bracket_label": "20-39",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.008547"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.101396"
     },
     {
       "condition_id": "0x76df2d5504a4db247cffb968201383d6acdb0f46c566ab3b0e2c5c000a6dad48",
@@ -4815,14 +4815,14 @@
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": 137.2177735872222,
+      "hours_until_expiry": 137.2177478477778,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-june-9-june-16",
       "event_title": "Elon Musk # tweets June 9 - June 16, 2026?",
       "bracket_label": "<20",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.009043"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.101776"
     },
     {
       "condition_id": "0x0b4500902c362884cb7d0d2e961e6b0d725f557f5298371decff9f657581d893",
@@ -4834,14 +4834,14 @@
       "score": 0.0,
       "no_price": 0.0,
       "yes_price": 1.0,
-      "hours_until_expiry": 101.20110691916666,
+      "hours_until_expiry": 101.20108117916666,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-june-9-14-20260608140318641",
       "event_title": "What will Trump post this week? (June 9 - 14)",
       "bracket_label": "Dumocrat / Dumbocrat / Dumacrat",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.010224"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.102653"
     },
     {
       "condition_id": "0xbf8a286c9255c9990632eb16dc8e5f80c648194d5bdba73f31b9bd85eddc3e73",
@@ -4853,14 +4853,14 @@
       "score": 0.0,
       "no_price": 0.0,
       "yes_price": 1.0,
-      "hours_until_expiry": 101.20110691833334,
+      "hours_until_expiry": 101.20108117777778,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-june-9-14-20260608140318641",
       "event_title": "What will Trump post this week? (June 9 - 14)",
       "bracket_label": "Crime",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.010630"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.103056"
     },
     {
       "condition_id": "0x21dfae5dc43daf9e0f5080341f9baa84c3a7f081be2e66a762476983989854ad",
@@ -4872,14 +4872,14 @@
       "score": 0.0,
       "no_price": 0.0,
       "yes_price": 1.0,
-      "hours_until_expiry": 101.20110691777778,
+      "hours_until_expiry": 101.20108117666666,
       "market_type": "trump_posting",
       "event_slug": "what-will-trump-post-this-week-june-9-14-20260608140318641",
       "event_title": "What will Trump post this week? (June 9 - 14)",
       "bracket_label": "Knicks",
       "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-06-10T22:46:56.010922"
+      "profile_id": "aggressive",
+      "timestamp": "2026-06-10T22:46:56.103264"
     }
   ]
 }
