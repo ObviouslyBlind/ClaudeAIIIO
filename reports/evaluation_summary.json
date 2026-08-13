@@ -1,12 +1,12 @@
 {
-  "generated_at": "2026-08-13T18:47:10.966719+00:00",
+  "generated_at": "2026-08-13T19:50:54.782487+00:00",
   "provenance": "SIMULATED",
   "ops_status": {
-    "last_pipeline_completed_at": "2026-08-13T17:49:04Z",
+    "last_pipeline_completed_at": "2026-08-13T18:47:11Z",
     "last_pipeline_status": "success",
-    "last_summary_generated_at": "2026-08-13T18:47:10.966719+00:00",
+    "last_summary_generated_at": "2026-08-13T19:50:54.782487+00:00",
     "last_export_at": null,
-    "data_freshness_anchor": "2026-08-13T18:47:10.224035+00:00",
+    "data_freshness_anchor": "2026-08-13T19:50:54.271574+00:00",
     "freshness_based_on": "newest_signal_file_mtime",
     "expected_cadence_minutes": 60,
     "freshness_status": "fresh",
@@ -35,8 +35,8 @@
       "signals": {
         "trade": 0,
         "watch": 0,
-        "skip": 21,
-        "total": 21
+        "skip": 28,
+        "total": 28
       },
       "trades": {
         "total_trades": 0,
@@ -59,8 +59,8 @@
       "signals": {
         "trade": 0,
         "watch": 0,
-        "skip": 21,
-        "total": 21
+        "skip": 28,
+        "total": 28
       },
       "trades": {
         "total_trades": 0,
@@ -83,8 +83,8 @@
       "signals": {
         "trade": 0,
         "watch": 0,
-        "skip": 21,
-        "total": 21
+        "skip": 28,
+        "total": 28
       },
       "trades": {
         "total_trades": 0,
@@ -104,7 +104,7 @@
     }
   ],
   "totals": {
-    "signals_evaluated": 63,
+    "signals_evaluated": 84,
     "total_trades": 0,
     "open_trades": 0,
     "wins": 0,
@@ -116,8 +116,8 @@
     "open_exposure": 0.0
   },
   "operator_summary": {
-    "total_families": 2,
-    "total_brackets_evaluated": 63,
+    "total_families": 3,
+    "total_brackets_evaluated": 84,
     "active_trades": 0,
     "realized_pnl": 0.0,
     "unrealized_exposure": 0.0,
@@ -155,11 +155,11 @@
     "position_verdict": "Only 0 definitive outcome(s) across all positions. Need at least 3 to assess performance differences.",
     "baseline_concentration_by_family": {},
     "ops_status": {
-      "last_pipeline_completed_at": "2026-08-13T17:49:04Z",
+      "last_pipeline_completed_at": "2026-08-13T18:47:11Z",
       "last_pipeline_status": "success",
-      "last_summary_generated_at": "2026-08-13T18:47:10.966719+00:00",
+      "last_summary_generated_at": "2026-08-13T19:50:54.782487+00:00",
       "last_export_at": null,
-      "data_freshness_anchor": "2026-08-13T18:47:10.224035+00:00",
+      "data_freshness_anchor": "2026-08-13T19:50:54.271574+00:00",
       "freshness_based_on": "newest_signal_file_mtime",
       "expected_cadence_minutes": 60,
       "freshness_status": "fresh",
@@ -189,7 +189,7 @@
         "musk": {
           "trade": 0,
           "watch": 0,
-          "skip": 30
+          "skip": 51
         },
         "trump": {
           "trade": 0,
@@ -209,17 +209,30 @@
           "watch": 0,
           "skip": 30,
           "event_title": "Elon Musk # tweets March 19 - March 21, 2026?"
+        },
+        "will-elon-musk-tweet-about-hyperliquid-by": {
+          "trade": 0,
+          "watch": 0,
+          "skip": 21,
+          "event_title": "Will Elon Musk tweet \"Hyperliquid\" by ___?"
         }
       },
       "by_expiry": {
         "expired": {
           "trade": 0,
           "watch": 0,
-          "skip": 63
+          "skip": 69
+        },
+        "72h+": {
+          "trade": 0,
+          "watch": 0,
+          "skip": 15
         }
       },
       "by_skip_reason": {
-        "market_closed": 63
+        "market_closed": 69,
+        "expiry_too_far": 9,
+        "price_too_high": 6
       }
     },
     "trades": {
@@ -231,21 +244,21 @@
         "hot": {
           "trade": 0,
           "watch": 0,
-          "skip": 6
+          "skip": 9
         },
         "adjacent": {
           "trade": 0,
           "watch": 0,
-          "skip": 12
+          "skip": 15
         },
         "tail": {
           "trade": 0,
           "watch": 0,
-          "skip": 45
+          "skip": 60
         }
       },
       "trades_by_position": {},
-      "families_analyzed": 2,
+      "families_analyzed": 3,
       "position_assessment": {
         "status": "insufficient_data",
         "summary": "Only 0 definitive outcome(s) across all positions. Need at least 3 to assess performance differences.",
@@ -294,8 +307,8 @@
       "signals": {
         "trade": 0,
         "watch": 0,
-        "skip": 21,
-        "total": 21
+        "skip": 28,
+        "total": 28
       },
       "trades": {
         "total_trades": 0,
@@ -320,9 +333,9 @@
       "engine": "family_mispricing",
       "signals": {
         "trade": 0,
-        "watch": 0,
-        "skip": 21,
-        "total": 21
+        "watch": 5,
+        "skip": 23,
+        "total": 28
       },
       "trades": {
         "note": "DIAGNOSTIC ONLY \u2014 no trades generated in v0.1"
@@ -508,6 +521,72 @@
               "fair_share": 0.0909
             }
           ]
+        },
+        {
+          "event_slug": "will-elon-musk-tweet-about-hyperliquid-by",
+          "event_title": "Will Elon Musk tweet \"Hyperliquid\" by ___?",
+          "bracket_count": 7,
+          "yes_price_sum": 0.341,
+          "no_price_sum": 6.659,
+          "top_bracket_label": "December 31, 2026",
+          "top_bracket_yes_price": 0.13,
+          "top_bracket_concentration_pct": 38.1,
+          "adjacent_concentration_pct": 66.0,
+          "overpriced": false,
+          "underpriced": true,
+          "coherent": false,
+          "verdict": "cheap",
+          "bracket_details": [
+            {
+              "bracket_label": "June 30, 2026",
+              "yes_price": 0,
+              "no_price": 1.0,
+              "position": "tail",
+              "fair_share": 0.1429
+            },
+            {
+              "bracket_label": "July 31, 2026",
+              "yes_price": 0,
+              "no_price": 1.0,
+              "position": "tail",
+              "fair_share": 0.1429
+            },
+            {
+              "bracket_label": "August 31, 2026",
+              "yes_price": 0.0175,
+              "no_price": 0.9825,
+              "position": "tail",
+              "fair_share": 0.1429
+            },
+            {
+              "bracket_label": "September 30, 2026",
+              "yes_price": 0.0335,
+              "no_price": 0.9665,
+              "position": "tail",
+              "fair_share": 0.1429
+            },
+            {
+              "bracket_label": "October 31, 2026",
+              "yes_price": 0.065,
+              "no_price": 0.935,
+              "position": "tail",
+              "fair_share": 0.1429
+            },
+            {
+              "bracket_label": "November 30, 2026",
+              "yes_price": 0.095,
+              "no_price": 0.905,
+              "position": "adjacent",
+              "fair_share": 0.1429
+            },
+            {
+              "bracket_label": "December 31, 2026",
+              "yes_price": 0.13,
+              "no_price": 0.87,
+              "position": "hot",
+              "fair_share": 0.1429
+            }
+          ]
         }
       ],
       "provenance": "SIMULATED"
@@ -516,7 +595,76 @@
   "strategy_comparison": {},
   "replay_backfill": null,
   "count_model_estimates": {
-    "families": [],
+    "families": [
+      {
+        "event_slug": "will-elon-musk-tweet-about-hyperliquid-by",
+        "event_title": "Will Elon Musk tweet \"Hyperliquid\" by ___?",
+        "estimated_rate": 4.0,
+        "hours_remaining": 3369.2,
+        "expected_total": 13476.6,
+        "std_dev": 116.1,
+        "brackets": [
+          {
+            "bracket_label": "June 30, 2026",
+            "lower": null,
+            "upper": null,
+            "fair_probability": 0.0,
+            "market_yes_price": 0.0,
+            "edge": 0.0
+          },
+          {
+            "bracket_label": "July 31, 2026",
+            "lower": null,
+            "upper": null,
+            "fair_probability": 0.0,
+            "market_yes_price": 0.0,
+            "edge": 0.0
+          },
+          {
+            "bracket_label": "August 31, 2026",
+            "lower": null,
+            "upper": null,
+            "fair_probability": 0.0,
+            "market_yes_price": 0.0175,
+            "edge": -0.0175
+          },
+          {
+            "bracket_label": "September 30, 2026",
+            "lower": null,
+            "upper": null,
+            "fair_probability": 0.0,
+            "market_yes_price": 0.0335,
+            "edge": -0.0335
+          },
+          {
+            "bracket_label": "October 31, 2026",
+            "lower": null,
+            "upper": null,
+            "fair_probability": 0.0,
+            "market_yes_price": 0.065,
+            "edge": -0.065
+          },
+          {
+            "bracket_label": "November 30, 2026",
+            "lower": null,
+            "upper": null,
+            "fair_probability": 0.0,
+            "market_yes_price": 0.095,
+            "edge": -0.095
+          },
+          {
+            "bracket_label": "December 31, 2026",
+            "lower": null,
+            "upper": null,
+            "fair_probability": 0.0,
+            "market_yes_price": 0.13,
+            "edge": -0.13
+          }
+        ],
+        "model_version": "rate_baseline_v0.1",
+        "provenance": "SIMULATED"
+      }
+    ],
     "model_version": "rate_baseline_v0.1",
     "provenance": "SIMULATED"
   },
