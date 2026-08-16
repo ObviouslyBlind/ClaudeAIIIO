@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { dressFactory, isFactoryPlot, undressFactory } from "./factory.js";
 import { dressWarehouse, isWarehousePlot, undressWarehouse } from "./warehouse.js";
+import { dressFarm, isFarmPlot, undressFarm } from "./farm.js";
 
 /** Player eye-height on the downstairs floor, metres. */
 export const DOWNSTAIRS_Y = 1.15;
@@ -441,15 +442,23 @@ export function createInterior({ scene, player, setStatus, heightAt, specOf }) {
     placePlayer("downstairs");
     if (isFactoryPlot(p)) {
       undressWarehouse(scene);
+      undressFarm(scene);
       dressFactory(scene);
       if (setStatus) setStatus("Inside factory (PAPER). Tap the door or Exit to leave.");
     } else if (isWarehousePlot(p)) {
       undressFactory(scene);
+      undressFarm(scene);
       dressWarehouse(scene);
       if (setStatus) setStatus("Inside warehouse (PAPER). Tap the door or Exit to leave.");
+    } else if (isFarmPlot(p)) {
+      undressWarehouse(scene);
+      undressFactory(scene);
+      dressFarm(scene);
+      if (setStatus) setStatus("Inside farm shed (PAPER). Tap the door or Exit to leave.");
     } else {
       undressWarehouse(scene);
       undressFactory(scene);
+      undressFarm(scene);
       if (setStatus) {
         setStatus("Inside downstairs (PAPER). Tap stairs for upstairs. Exit returns to your plot.");
       }
@@ -461,6 +470,7 @@ export function createInterior({ scene, player, setStatus, heightAt, specOf }) {
     if (!inside) return null;
     undressWarehouse(scene);
     undressFactory(scene);
+    undressFarm(scene);
     const left = plot;
     inside = false;
     group.visible = false;
