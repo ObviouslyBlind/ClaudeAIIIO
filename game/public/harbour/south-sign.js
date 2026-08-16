@@ -150,6 +150,12 @@ export function makeSouthSign(spec, helpers) {
   screw.userData.part = "screw";
   g.add(screw);
 
+  /** Tiny kraft washer on the board, offset from screw and nail. WOOD already in this file — PAPER box, not grey iron. */
+  const washer = part(0.08, 0.08, 0.02, WOOD, false);
+  washer.position.set(1.62, 1.72, 0.1);
+  washer.userData.part = "washer";
+  g.add(washer);
+
   g.position.set(wx, gy, wz);
   g.rotation.y = Math.PI + 0.42;
   return g;
