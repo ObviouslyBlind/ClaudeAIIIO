@@ -2,8 +2,9 @@ import * as THREE from "three";
 
 /**
  * PAPER farm-shed interior dress. Tools, grain sacks, kraft planter beds,
- * and dim warm light — not the house living room, warehouse crates, shop,
- * or factory. No WASD. Tap-to-walk stays in interior.js.
+ * a small wood-post scarecrow at the back of the crop beds, and dim warm
+ * light — not the house living room, warehouse crates, shop, or factory.
+ * No WASD. Tap-to-walk stays in interior.js.
  *
  * Call dressFarm(scene) when plot.kind or plot.use is "farm".
  * Idempotent: a second call only shows the existing dress.
@@ -222,6 +223,41 @@ function planterBed(len, wid, x, z, yaw = 0, seed = 0) {
   return g;
 }
 
+/**
+ * Small PAPER scarecrow: wood post + kraft / terracotta cloth boxes.
+ * Hexes already in this file (WOOD, KRAFT, WALL_SIDE_DIM, SACK, STRAW).
+ * Stands at the back of the crop beds; centre aisle stays clear.
+ */
+function scarecrow() {
+  const g = new THREE.Group();
+  g.name = "farm-scarecrow";
+  g.userData.kind = "farm-scarecrow";
+  g.userData.mode = "PAPER";
+  const y0 = 0.16;
+  const post = paperBox(0.08, 1.18, 0.08, WOOD, "farm-scarecrow");
+  post.position.y = y0 + 0.59;
+  g.add(post);
+  const bar = paperBox(0.07, 0.07, 0.56, WOOD_DARK, "farm-scarecrow");
+  bar.position.y = y0 + 0.94;
+  g.add(bar);
+  const body = paperBox(0.14, 0.32, 0.26, WALL_SIDE_DIM, "farm-scarecrow");
+  body.position.y = y0 + 0.78;
+  g.add(body);
+  const sleeveL = paperBox(0.1, 0.26, 0.1, KRAFT, "farm-scarecrow");
+  sleeveL.position.set(0, y0 + 0.84, -0.26);
+  g.add(sleeveL);
+  const sleeveR = paperBox(0.1, 0.26, 0.1, KRAFT, "farm-scarecrow");
+  sleeveR.position.set(0, y0 + 0.84, 0.26);
+  g.add(sleeveR);
+  const head = paperBox(0.16, 0.16, 0.14, SACK, "farm-scarecrow");
+  head.position.y = y0 + 1.16;
+  g.add(head);
+  const brim = paperBox(0.26, 0.05, 0.26, STRAW, "farm-scarecrow");
+  brim.position.y = y0 + 1.26;
+  g.add(brim);
+  return g;
+}
+
 function workbench(x, z) {
   const g = new THREE.Group();
   g.name = "farm-bench";
@@ -283,6 +319,9 @@ function makeFarmDress() {
   g.add(planterBed(1.42, 0.44, 2.58, -1.48, Math.PI / 2, 0));
   g.add(planterBed(1.32, 0.42, 2.64, 0.12, Math.PI / 2, 1));
   g.add(planterBed(1.05, 0.4, 2.62, 1.18, Math.PI / 2, 2));
+  const crow = scarecrow();
+  crow.position.set(2.92, 0, -2.18);
+  g.add(crow);
 
   const loftY = 2.94;
   g.add(sack(0.46, 0.56, 0.36, SACK, -2.55, loftY + 0.28, -2.35, 0.1));
@@ -364,7 +403,8 @@ function dimSceneLights(scene, farm) {
 
 /**
  * Dress an interior (or a scene that contains one) as a PAPER farm shed.
- * Hides living-room furniture, adds tools, sacks, and planter beds, warms and dims lights.
+ * Hides living-room furniture, adds tools, sacks, planter beds, and a
+ * scarecrow, warms and dims lights.
  * @param {THREE.Object3D} scene
  */
 export function dressFarm(scene) {
