@@ -320,8 +320,9 @@ function makeCounterJar(x, y, z) {
 }
 
 /**
- * Small kraft PAPER cup on the counter — cream/linen body, wood handle.
- * PAPER boxes only. Offset from the kettle, jar, receipt pad, and bell.
+ * Small kraft PAPER cup on the counter — cream/linen body, wood handle,
+ * linen saucer underneath. PAPER boxes only. Offset from the kettle, jar,
+ * receipt pad, and bell. Does not replace the cup.
  */
 function makeCounterCup(x, y, z) {
   const g = new THREE.Group();
@@ -329,13 +330,17 @@ function makeCounterCup(x, y, z) {
   g.userData.kind = "house-shop-cup";
   g.userData.mode = "PAPER";
   g.position.set(x, y, z);
+  const saucerH = 0.012;
+  const saucer = paperBox(0.18, saucerH, 0.18, LINEN, "house-shop-cup");
+  saucer.userData.part = "saucer";
+  saucer.position.set(0, saucerH / 2, 0);
   const body = paperBox(0.1, 0.1, 0.1, CREAM, "house-shop-cup");
-  body.position.set(0, 0.05, 0);
+  body.position.set(0, saucerH + 0.05, 0);
   const rim = paperBox(0.11, 0.02, 0.11, LINEN, "house-shop-cup");
-  rim.position.set(0, 0.11, 0);
+  rim.position.set(0, saucerH + 0.11, 0);
   const handle = paperBox(0.03, 0.06, 0.03, WOOD, "house-shop-cup");
-  handle.position.set(0.075, 0.06, 0);
-  g.add(body, rim, handle);
+  handle.position.set(0.075, saucerH + 0.06, 0);
+  g.add(saucer, body, rim, handle);
   return g;
 }
 
