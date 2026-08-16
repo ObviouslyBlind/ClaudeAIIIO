@@ -403,4 +403,69 @@ describe("ferry berth", () => {
     new THREE.Box3().setFromObject(fender).getSize(fenderSize);
     expect(Math.max(fenderSize.x, fenderSize.y, fenderSize.z)).toBeGreaterThan(2.4);
   });
+
+  it("sits one tiny kraft PAPER grommet on the hawser end; other PAPER parts remain", () => {
+    expect(HOME_Z).toBe(-6835);
+    const mesh = makeFerry();
+    expect(mesh.position.z).toBe(-6835);
+    const tagged: THREE.Object3D[] = [];
+    mesh.traverse((obj) => {
+      if (obj.userData?.part) tagged.push(obj);
+    });
+    const grommets = tagged.filter((o) => o.userData.part === "grommet");
+    expect(grommets.length).toBeGreaterThanOrEqual(1);
+    for (const name of [
+      "fender",
+      "bucket",
+      "oar",
+      "cleat",
+      "rail",
+      "hawser",
+      "horn",
+      "bollard",
+      "lantern",
+      "handle",
+      "smoke",
+    ]) {
+      expect(tagged.some((o) => o.userData.part === name)).toBe(true);
+    }
+
+    const grommet = grommets[0];
+    expect(grommet.userData.part).toBe("grommet");
+    expect(grommet.userData.mode).toBe("PAPER");
+    const grommetSize = new THREE.Vector3();
+    new THREE.Box3().setFromObject(grommet).getSize(grommetSize);
+    expect(grommetSize.x).toBeLessThan(0.8);
+    expect(grommetSize.y).toBeLessThan(0.5);
+    expect(grommetSize.z).toBeLessThan(0.8);
+    grommet.traverse((child) => {
+      const m = child as THREE.Mesh;
+      if (!m.isMesh) return;
+      expect(m.geometry.type).toBe("BoxGeometry");
+      const hex = (m.material as THREE.MeshLambertMaterial).color.getHex();
+      expect(HAWSER_HEXES.has(hex)).toBe(true);
+    });
+
+    const hawser = tagged.find((o) => o.userData.part === "hawser")!;
+    const dxh = grommet.position.x - hawser.position.x;
+    const dzh = grommet.position.z - hawser.position.z;
+    expect(Math.hypot(dxh, dzh)).toBeGreaterThan(0.05);
+    expect(Math.hypot(dxh, dzh)).toBeLessThan(1.5);
+
+    for (const name of ["fender", "bucket", "oar", "cleat", "rail", "horn"]) {
+      for (const other of tagged) {
+        if (other === grommet) continue;
+        if (other.userData.part !== name) continue;
+        const dx = grommet.position.x - other.position.x;
+        const dz = grommet.position.z - other.position.z;
+        expect(Math.hypot(dx, dz)).toBeGreaterThan(1.5);
+      }
+    }
+
+    const fender = tagged.find((o) => o.userData.part === "fender")!;
+    expect(fender.position.z).toBeLessThan(-5.5);
+    const fenderSize = new THREE.Vector3();
+    new THREE.Box3().setFromObject(fender).getSize(fenderSize);
+    expect(Math.max(fenderSize.x, fenderSize.y, fenderSize.z)).toBeGreaterThan(2.4);
+  });
 });
