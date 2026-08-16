@@ -59,6 +59,7 @@ describe("player PAPER visor", () => {
     expect(p.filter((k) => k === "cuff").length).toBeGreaterThanOrEqual(2);
     expect(p.filter((k) => k === "button").length).toBe(1);
     expect(p.filter((k) => k === "badge").length).toBe(1);
+    expect(p.filter((k) => k === "lanyard").length).toBe(1);
 
     const visor = figure.children.find((c) => c.userData.part === "visor") as THREE.Mesh;
     const hats = figure.children.filter((c) => c.userData.part === "hat") as THREE.Mesh[];
@@ -111,6 +112,21 @@ describe("player PAPER visor", () => {
     expect(badgeBox.parameters.width).toBeLessThan(0.12);
     expect(badgeBox.parameters.height).toBeLessThan(0.08);
     expect(badgeBox.parameters.depth).toBeLessThan(0.06);
+
+    const lanyard = figure.children.find((c) => c.userData.part === "lanyard") as THREE.Mesh;
+    expect(lanyard).toBeTruthy();
+    expect(lanyard.geometry.type).toBe("BoxGeometry");
+    expect((lanyard.material as THREE.MeshLambertMaterial).color.getHex()).toBe(KRAFT);
+    expect(lanyard.position.y).toBeGreaterThan(1.15);
+    expect(lanyard.position.y).toBeLessThan(1.45);
+    expect(lanyard.position.z).toBeGreaterThan(0.12);
+    expect(lanyard.position.x).not.toBeCloseTo(badge.position.x, 1);
+    expect(lanyard.position.x).not.toBeCloseTo(button.position.x, 1);
+    expect(lanyard.position.x).not.toBeCloseTo(pocket.position.x, 1);
+    const lanyardBox = lanyard.geometry as THREE.BoxGeometry;
+    expect(lanyardBox.parameters.width).toBeLessThan(0.08);
+    expect(lanyardBox.parameters.height).toBeLessThan(0.2);
+    expect(lanyardBox.parameters.depth).toBeLessThan(0.05);
 
     const cuffs = figure.children.filter((c) => c.userData.part === "cuff") as THREE.Mesh[];
     expect(cuffs.length).toBeGreaterThanOrEqual(2);
