@@ -434,3 +434,106 @@ describe("warehouse PAPER kraft coil", () => {
     expect(interior.userData.interiorUse).toBe("house");
   });
 });
+
+describe("warehouse PAPER kraft pallet", () => {
+  it("sits one kraft PAPER pallet on the warehouse floor", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressWarehouse(scene);
+
+    const dress = interior.getObjectByName("warehouse-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+    expect(dress!.visible).toBe(true);
+
+    const pallets: THREE.Object3D[] = [];
+    const crates: THREE.Object3D[] = [];
+    const coils: THREE.Object3D[] = [];
+    const brooms: THREE.Object3D[] = [];
+    const lanterns: THREE.Object3D[] = [];
+    const clipboards: THREE.Object3D[] = [];
+    const hooks: THREE.Object3D[] = [];
+    dress!.traverse((obj) => {
+      if (obj.userData?.kind === "warehouse-pallet" && obj.name === "warehouse-pallet") {
+        pallets.push(obj);
+      }
+      if (obj.name === "warehouse-floor-crate") crates.push(obj);
+      if (obj.userData?.kind === "warehouse-coil" && obj.name === "warehouse-coil") {
+        coils.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-broom" && obj.name === "warehouse-broom") {
+        brooms.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-lantern" && obj.name === "warehouse-lantern") {
+        lanterns.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-clipboard" && obj.name === "warehouse-clipboard") {
+        clipboards.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-hook" && obj.name === "warehouse-hook") {
+        hooks.push(obj);
+      }
+    });
+    expect(pallets.length).toBe(1);
+    expect(crates.length).toBeGreaterThanOrEqual(2);
+    expect(coils.length).toBe(1);
+    expect(brooms.length).toBe(1);
+    expect(lanterns.length).toBe(1);
+    expect(clipboards.length).toBeGreaterThanOrEqual(1);
+    expect(hooks.length).toBeGreaterThanOrEqual(1);
+
+    const pallet = pallets[0];
+    expect(pallet.userData.kind).toBe("warehouse-pallet");
+    expect(pallet.userData.mode).toBe("PAPER");
+    expect(pallet.position.y).toBe(0);
+    expect(Math.abs(pallet.position.x)).toBeLessThan(3.2);
+    expect(Math.abs(pallet.position.z)).toBeLessThan(3.0);
+    for (const crate of crates) expect(horizDist(pallet, crate)).toBeGreaterThan(1.2);
+    expect(horizDist(pallet, coils[0])).toBeGreaterThan(1.5);
+    expect(horizDist(pallet, brooms[0])).toBeGreaterThan(1.5);
+    expect(horizDist(pallet, lanterns[0])).toBeGreaterThan(1.5);
+    expect(horizDist(pallet, clipboards[0])).toBeGreaterThan(1.5);
+    expect(horizDist(pallet, hooks[0])).toBeGreaterThan(1.5);
+
+    const colors = hexes(pallet);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.every((c) => KRAFT.has(c))).toBe(true);
+    expect(colors.some((c) => c === 0x8a6238 || c === 0x7a5230 || c === 0x9a6a40)).toBe(true);
+    expect(colors.every((c) => !isGrey(c))).toBe(true);
+
+    let boxes = 0;
+    pallet.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        boxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.kind).toBe("warehouse-pallet");
+        expect(mesh.userData.mode).toBe("PAPER");
+      }
+    });
+    expect(boxes).toBeGreaterThanOrEqual(2);
+  });
+
+  it("keeps dress idempotent and hides the pallet on undress", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressWarehouse(scene);
+    dressWarehouse(scene);
+    expect(interior.children.filter((c) => c.name === "warehouse-dress").length).toBe(1);
+
+    const dressed = interior.getObjectByName("warehouse-dress")!;
+    const pallets: THREE.Object3D[] = [];
+    dressed.traverse((obj) => {
+      if (obj.name === "warehouse-pallet") pallets.push(obj);
+    });
+    expect(pallets.length).toBe(1);
+
+    undressWarehouse(scene);
+    const dress = interior.getObjectByName("warehouse-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.visible).toBe(false);
+    expect(interior.userData.interiorUse).toBe("house");
+  });
+});
