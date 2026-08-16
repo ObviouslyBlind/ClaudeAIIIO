@@ -1,6 +1,10 @@
 # Gauntlet status
 
-Mesh batch is on the branch. Critics stay one-at-a-time (shared Chrome + PAPER cash).
+Loop is live. User is the brake. Critics one-at-a-time (shared Chrome + PAPER cash). Builders may fan out. Do **not** restart play while a critic is on the page.
+
+## In flight
+
+- Interiors critic `/?g=int21` — lease cheap street lot, House, Enter, Exit.
 
 ## Held (pixel-ratified)
 
@@ -10,12 +14,16 @@ Inland spawn, tarmac, HUD, traffic-on-road, taxi overlay, ferry ticket, RMB orbi
 
 Tarmac ribbon, sedan cars, taxi cab, ferry boat, shore foam, street props, player figure, sky, water, quay clutter, building shells.
 
-## Interiors
+## Builder queue (this round)
 
-Round `/?g=int20` **BLOCKED**: inland tarmac walk only found $1,100+ lots. Cheap shore lots existed off to the sides. Fix: house-frontage street lots on that walk, NPC inland, vacant outlines a bit more visible. Retry next with a fresh `?g=`.
+| Piece | File only | Notes |
+|---|---|---|
+| dirt ribbon | `roads.js` | Field tracks: extruded brown ribbon, not box slabs. Leave paved + spawn camera. |
+| interior dress | `interior.js` | PAPER living room. Keep enter/exit, `canEnter`, door `kind=exit`. |
+| hill trees | `trees.js` | Already wired from `main.js`. Do not edit `main.js`. |
 
-## Next
+## After interiors critic
 
-1. Restart play at Cash $1000.
-2. Interiors critic on a new query (`/?g=int21`). Cheap street lot on the inland walk, House $40, Enter, Exit.
-3. Then pixel-critic new meshes one at a time.
+Fail → one fix, retry `/?g=int22`. Pass → pixel-critic meshes one at a time (`/?g=rib22`, cars, taxi, ferry, shore, props, player, sky/water, quay, shells). Then PLAN step B (statute table).
+
+`main.js` is wired. Builders do **not** edit `main.js`, `land.ts` centres, `PLAN.md`.

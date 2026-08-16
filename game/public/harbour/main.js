@@ -19,6 +19,7 @@ import { createCatalogPicker, meshForUse } from "./buildings.js";
 import { makeWater } from "./water.js";
 import { makeSky } from "./sky.js";
 import { makeStreetProps } from "./street-props.js";
+import { makeTrees } from "./trees.js";
 import { dressPlayer } from "./player.js";
 
 function ensureDockButton(id, label) {
@@ -828,6 +829,7 @@ async function boot() {
   makeShoreFoam(specOf("south"), heightAt, scene);
   makeRoads(map, { scene, specOf, heightAt });
   makeStreetProps(map, { scene, specOf, heightAt });
+  makeTrees(map, { scene, specOf, heightAt });
   makePort(specOf("north"));
   makeQuay(specOf("north"), { scene, heightAt });
   makePort(specOf("south"));
