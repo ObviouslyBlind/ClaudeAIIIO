@@ -64,6 +64,9 @@ function bootFail(err) {
 }
 
 function makeRenderer() {
+  if (globalThis.__harbourFirst && globalThis.__harbourFirst.renderer) {
+    return globalThis.__harbourFirst.renderer;
+  }
   const opts = {
     canvas,
     antialias: false,
@@ -81,23 +84,27 @@ function makeRenderer() {
   }
 }
 
+const first = globalThis.__harbourFirst;
 let renderer = null;
 try {
   renderer = makeRenderer();
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  // Shadow maps allocate extra WebGL targets. Swiftshader critics already sit at GPU-cap.
-  renderer.shadowMap.enabled = false;
+  if (!first || !first.renderer) {
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = false;
+  }
 } catch (err) {
   bootFail(err);
 }
 
-const scene = new THREE.Scene();
+const scene = (first && first.scene) || new THREE.Scene();
+if (!scene.fog) scene.fog = new THREE.Fog(0x7ec8d4, FOG_NEAR_M, FOG_FAR_M);
 scene.background = new THREE.Color(0x7ec8d4);
-scene.fog = new THREE.Fog(0x7ec8d4, FOG_NEAR_M, FOG_FAR_M);
 makeSky(scene);
 
-const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.4, CAMERA_FAR_M);
+const camera =
+  (first && first.camera) ||
+  new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.4, CAMERA_FAR_M);
 
 scene.add(new THREE.HemisphereLight(0xb8e4ff, 0xc4a574, 1.15));
 const sun = new THREE.DirectionalLight(0xfff1d0, 2.1);
@@ -880,6 +887,27 @@ function startLoop() {
   });
 }
 
+/** Sheet HUD modules used to load as 12 blocking <script type="module"> tags before main.js. */
+const SHEET_HUD = [
+  "./lease-hud.js",
+  "./develop-hud.js",
+  "./unpaid-hud.js",
+  "./spread-hud.js",
+  "./tax-hud.js",
+  "./ferry-hud.js",
+  "./taxi-hud.js",
+  "./calendar-hud.js",
+  "./goods-hud.js",
+  "./flow-hud.js",
+  "./stall-hud.js",
+  "./persist-hud.js",
+  "./cart-hud.js",
+];
+
+function loadSheetHuds() {
+  return Promise.all(SHEET_HUD.map((p) => import(p)));
+}
+
 /** Let Chrome paint so boot cannot sit on "Loading…" until every mesh exists. */
 function afterPaint() {
   return new Promise((resolve) => {
@@ -903,6 +931,7 @@ async function boot() {
   spawnAt("north");
   startLoop();
   setStatus("North port · PAPER");
+  void loadSheetHuds();
   await afterPaint();
   makeTerrain(specOf("north"));
   await afterPaint();

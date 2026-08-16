@@ -8,5 +8,7 @@ export function bustHarbourAssets(html: string, nonce = Date.now()): string {
 
 /** Stamp relative harbour imports so traffic.js is not served from a stale module cache. */
 export function bustModuleImports(js: string, nonce = Date.now()): string {
-  return js.replace(/from ["'](\.\/[^"']+\.js)(?:\?v=\d+)?["']/g, `from "$1?v=${nonce}"`);
+  return js
+    .replace(/from ["'](\.\/[^"']+\.js)(?:\?v=\d+)?["']/g, `from "$1?v=${nonce}"`)
+    .replace(/\bimport\(["'](\.\/[^"']+\.js)(?:\?v=\d+)?["']\)/g, `import("$1?v=${nonce}")`);
 }
