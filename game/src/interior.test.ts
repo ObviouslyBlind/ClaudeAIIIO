@@ -54,7 +54,7 @@ describe("owned building interiors", () => {
     expect(boxes).toBeGreaterThan(12);
   });
 
-  it("dresses PAPER rooms as a Caribbean house: windows, table, chairs, stool, lamp, clock, picture, vase, mug, bed", () => {
+  it("dresses PAPER rooms as a Caribbean house: windows, table, chairs, stool, lamp, clock, picture, vase, mug, book, napkin, bed", () => {
     const g = makeInteriorScene();
     const down = g.getObjectByName("downstairs");
     const up = g.getObjectByName("upstairs");
@@ -78,6 +78,7 @@ describe("owned building interiors", () => {
     expect(downKinds).toContain("interior-vase");
     expect(downKinds).toContain("interior-mug");
     expect(downKinds).toContain("interior-book");
+    expect(downKinds).toContain("interior-napkin");
     expect(downKinds).toContain("interior-stool");
     expect(downKinds).toContain("interior-window");
     expect(downKinds).toContain("exit");
@@ -95,6 +96,7 @@ describe("owned building interiors", () => {
     expect(upKinds).not.toContain("interior-vase");
     expect(upKinds).not.toContain("interior-mug");
     expect(upKinds).not.toContain("interior-book");
+    expect(upKinds).not.toContain("interior-napkin");
     expect(upKinds).not.toContain("interior-stool");
 
     const table = down!.getObjectByName("table");
@@ -521,5 +523,82 @@ describe("house PAPER book", () => {
     expect(clock).toBeTruthy();
     expect(clock!.userData.kind).toBe("interior-clock");
     expect(up.getObjectByName("book")).toBeFalsy();
+  });
+});
+
+const NAPKIN_HEX = new Set([0xf3efe4, 0xf7f1e6, 0xf4ead8]);
+
+describe("house PAPER napkin", () => {
+  it("puts one kraft PAPER napkin on the downstairs table, not upstairs", () => {
+    const g = makeInteriorScene();
+    const down = g.getObjectByName("downstairs")!;
+    const up = g.getObjectByName("upstairs")!;
+    const table = down.getObjectByName("table")!;
+    expect(table).toBeTruthy();
+
+    const napkins = collectKind(down, "interior-napkin");
+    expect(napkins.length).toBe(1);
+    expect(collectKind(up, "interior-napkin").length).toBe(0);
+
+    const napkin = napkins[0];
+    expect(napkin.userData.kind).toBe("interior-napkin");
+    expect(napkin.userData.mode).toBe("PAPER");
+
+    const tablePos = new THREE.Vector3();
+    table.getWorldPosition(tablePos);
+    const napkinPos = new THREE.Vector3();
+    napkin.getWorldPosition(napkinPos);
+    expect(Math.hypot(napkinPos.x - tablePos.x, napkinPos.z - tablePos.z)).toBeLessThan(0.85);
+    expect(napkinPos.y).toBeGreaterThan(0.9);
+    expect(napkinPos.y).toBeLessThan(1.2);
+
+    const mug = down.getObjectByName("mug");
+    expect(mug).toBeTruthy();
+    const mugPos = new THREE.Vector3();
+    mug!.getWorldPosition(mugPos);
+    expect(Math.hypot(napkinPos.x - mugPos.x, napkinPos.z - mugPos.z)).toBeGreaterThan(0.25);
+
+    const vase = down.getObjectByName("vase");
+    expect(vase).toBeTruthy();
+    const vasePos = new THREE.Vector3();
+    vase!.getWorldPosition(vasePos);
+    expect(Math.hypot(napkinPos.x - vasePos.x, napkinPos.z - vasePos.z)).toBeGreaterThan(0.25);
+
+    const book = down.getObjectByName("book");
+    expect(book).toBeTruthy();
+    const bookPos = new THREE.Vector3();
+    book!.getWorldPosition(bookPos);
+    expect(Math.hypot(napkinPos.x - bookPos.x, napkinPos.z - bookPos.z)).toBeGreaterThan(0.25);
+
+    const colors: number[] = [];
+    napkin.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      const mat = mesh.material as THREE.MeshLambertMaterial | undefined;
+      if (mesh.isMesh && mat?.color) {
+        const hex = mat.color.getHex();
+        colors.push(hex);
+        expect(NAPKIN_HEX.has(hex)).toBe(true);
+        if (hex !== 0xf3efe4 && hex !== 0xf7f1e6) expect(isGrey(hex)).toBe(false);
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.kind).toBe("interior-napkin");
+        expect(mesh.userData.mode).toBe("PAPER");
+      }
+    });
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.some((c) => c === 0xf3efe4)).toBe(true);
+    expect(colors.some((c) => c === 0xf7f1e6)).toBe(true);
+    expect(colors.some((c) => c === 0xf4ead8)).toBe(true);
+
+    const stool = down.getObjectByName("stool");
+    expect(stool).toBeTruthy();
+    expect(stool!.userData.kind).toBe("interior-stool");
+    expect(stool!.userData.mode).toBe("PAPER");
+    const picture = down.getObjectByName("picture");
+    expect(picture).toBeTruthy();
+    expect(picture!.userData.kind).toBe("interior-picture");
+    const clock = down.getObjectByName("clock");
+    expect(clock).toBeTruthy();
+    expect(clock!.userData.kind).toBe("interior-clock");
+    expect(up.getObjectByName("napkin")).toBeFalsy();
   });
 });
