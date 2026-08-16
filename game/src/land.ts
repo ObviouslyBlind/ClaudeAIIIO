@@ -53,25 +53,28 @@ export const ISLANDS: Record<IslandId, IslandSpec> = {
     id: "north",
     name: "North",
     cx: 0,
-    cz: -820,
+    cz: -2400,
     rx: 1000,
     rz: 580,
     peak: 92,
-    port: { x: 0, z: -310 },
-    hill: { x: -240, z: -980 },
+    port: { x: 0, z: -1890 },
+    hill: { x: -280, z: -2580 },
   },
   south: {
     id: "south",
     name: "South",
     cx: 0,
-    cz: 820,
+    cz: 2400,
     rx: 1000,
     rz: 580,
     peak: 74,
-    port: { x: 0, z: 310 },
-    hill: { x: 220, z: 980 },
+    port: { x: 0, z: 1890 },
+    hill: { x: 260, z: 2580 },
   },
 };
+
+/** Half-width of the paved carriageway plus a verge, metres. */
+export const ROAD_CLEAR = 7;
 
 export const DEVELOP_COST = 40;
 
@@ -87,9 +90,47 @@ function hash(n: number): number {
 export function roadPoint(spec: IslandSpec, t: number): { x: number; z: number } {
   const clamped = Math.max(0, Math.min(1, t));
   return {
-    x: spec.port.x + Math.sin(clamped * 5.1) * 16,
+    x: spec.port.x + Math.sin(clamped * 3.2) * 5,
     z: spec.port.z + inlandSign(spec) * (48 + clamped * 430),
   };
+}
+
+export function pavedPolyline(spec: IslandSpec): { x: number; z: number }[] {
+  const pts = [];
+  for (let i = 0; i <= 16; i++) pts.push(roadPoint(spec, i / 16));
+  return pts;
+}
+
+export function distToSegment(
+  p: { x: number; z: number },
+  a: { x: number; z: number },
+  b: { x: number; z: number },
+): number {
+  const vx = b.x - a.x;
+  const vz = b.z - a.z;
+  const len2 = vx * vx + vz * vz || 1;
+  let t = ((p.x - a.x) * vx + (p.z - a.z) * vz) / len2;
+  t = Math.max(0, Math.min(1, t));
+  return Math.hypot(p.x - (a.x + vx * t), p.z - (a.z + vz * t));
+}
+
+export function distToPaved(spec: IslandSpec, x: number, z: number): number {
+  const pts = pavedPolyline(spec);
+  let best = Infinity;
+  for (let i = 0; i < pts.length - 1; i++) {
+    best = Math.min(best, distToSegment({ x, z }, pts[i], pts[i + 1]));
+  }
+  return best;
+}
+
+function ringHitsPaved(spec: IslandSpec, ring: Ring): boolean {
+  for (const [x, z] of ring) {
+    if (distToPaved(spec, x, z) < ROAD_CLEAR) return true;
+  }
+  for (const p of pavedPolyline(spec)) {
+    if (pointInRing(p.x, p.z, ring)) return true;
+  }
+  return false;
 }
 
 function ringArea(ring: Ring): number {
@@ -164,6 +205,7 @@ function pushParcel(
   const c = ringCentroid(ring);
   if (heightAt(spec, c.x, c.z) < 0.4) return;
   if (publicQuay(spec, c.x, c.z)) return;
+  if (ringHitsPaved(spec, ring)) return;
   const area = ringArea(ring);
   if (area < 180 || area > 9000) return;
   const portDist = Math.hypot(c.x - spec.port.x, c.z - spec.port.z);
@@ -182,8 +224,9 @@ function pushParcel(
   });
 }
 
-function lotsAlongRoad(spec: IslandSpec): Parcel[] {
+function lotsAlongRoad(spec: IslandSpec): { lots: Parcel[]; dirt: Road[] } {
   const lots: Parcel[] = [];
+  const dirt: Road[] = [];
   const steps = 12;
   for (let i = 0; i < steps; i++) {
     const a = roadPoint(spec, i / steps);
@@ -193,13 +236,28 @@ function lotsAlongRoad(spec: IslandSpec): Parcel[] {
     for (const side of [-1, 1] as const) {
       const p = { x: perp.x * side, z: perp.z * side };
       const h = hash(i * 17 + side * 9 + (spec.id === "north" ? 1 : 3));
-      const street = quad(a, b, p, 7, 20 + h * 16, (h - 0.5) * 0.18);
+      const streetDepth = 18 + h * 14;
+      const street = quad(a, b, p, 12, streetDepth, (h - 0.5) * 0.08);
+      const before = lots.length;
       pushParcel(lots, spec, street, "street", lots.length);
-      const field = quad(a, b, p, 28 + h * 8, 36 + h * 22, (h - 0.4) * 0.22);
+      const fieldSetback = 12 + streetDepth + 8;
+      const field = quad(a, b, p, fieldSetback, 32 + h * 18, (h - 0.4) * 0.1);
       pushParcel(lots, spec, field, "field", lots.length);
+      if (lots.length > before + 1) {
+        const fieldPlot = lots[lots.length - 1];
+        const inner = {
+          x: (a.x + b.x) / 2 + p.x * (fieldSetback + 2),
+          z: (a.z + b.z) / 2 + p.z * (fieldSetback + 2),
+        };
+        dirt.push({
+          island: spec.id,
+          kind: "dirt",
+          points: [inner, { x: fieldPlot.x, z: fieldPlot.z }],
+        });
+      }
     }
   }
-  return lots;
+  return { lots, dirt };
 }
 
 function shoreLots(spec: IslandSpec): Parcel[] {
@@ -208,7 +266,7 @@ function shoreLots(spec: IslandSpec): Parcel[] {
   for (let i = -5; i <= 5; i++) {
     if (Math.abs(i) < 2) continue;
     const x0 = i * 28;
-    const z0 = spec.port.z + toward * 8;
+    const z0 = spec.port.z - toward * 36;
     const h = hash(40 + i + (spec.id === "north" ? 0 : 8));
     const w = 22 + h * 8;
     const d = 18 + h * 10;
@@ -223,25 +281,13 @@ function shoreLots(spec: IslandSpec): Parcel[] {
   return lots;
 }
 
-function buildRoads(spec: IslandSpec, parcels: Parcel[]): Road[] {
-  const paved = [];
-  for (let i = 0; i <= 16; i++) paved.push(roadPoint(spec, i / 16));
-  const dirt: Road[] = [];
-  for (const p of parcels.filter((x) => x.band === "field" && x.island === spec.id).slice(0, 8)) {
-    const t = Math.max(0, Math.min(1, Math.abs(p.z - spec.port.z) / 480));
-    dirt.push({
-      island: spec.id,
-      kind: "dirt",
-      points: [roadPoint(spec, t), { x: p.x, z: p.z }],
-    });
-  }
-  return [{ island: spec.id, kind: "paved", points: paved }, ...dirt];
-}
-
-export function buildPlots(): Parcel[] {
+export function createLandBoard(): LandBoard {
   const plots: Parcel[] = [];
+  const dirt: Road[] = [];
   for (const spec of Object.values(ISLANDS)) {
-    plots.push(...lotsAlongRoad(spec), ...shoreLots(spec));
+    const built = lotsAlongRoad(spec);
+    plots.push(...built.lots, ...shoreLots(spec));
+    dirt.push(...built.dirt);
   }
   const leaseable = plots.filter((p) => p.class === "by_right");
   for (const p of leaseable.slice(0, 2)) {
@@ -253,16 +299,19 @@ export function buildPlots(): Parcel[] {
     p.owner = "npc";
     p.use = p.band === "field" ? "farm" : "stall";
   }
-  return plots;
+  const roads = Object.values(ISLANDS).flatMap((spec) => [
+    { island: spec.id, kind: "paved" as const, points: pavedPolyline(spec) },
+    ...dirt.filter((d) => d.island === spec.id),
+  ]);
+  return { plots, roads };
 }
 
-export function buildRoadsForAll(plots: Parcel[]): Road[] {
-  return Object.values(ISLANDS).flatMap((spec) => buildRoads(spec, plots));
+export function buildPlots(): Parcel[] {
+  return createLandBoard().plots;
 }
 
-export function createLandBoard(): LandBoard {
-  const plots = buildPlots();
-  return { plots, roads: buildRoadsForAll(plots) };
+export function buildRoadsForAll(): Road[] {
+  return createLandBoard().roads;
 }
 
 export function getPlot(board: LandBoard, id: string): Parcel | undefined {
