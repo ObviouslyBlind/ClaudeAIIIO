@@ -13,6 +13,7 @@ import { bustHarbourAssets, bustModuleImports } from "./cache-bust.ts";
 import { confirmFerry, listFerryRoutes } from "./ferry-routes.ts";
 import { calendarHud } from "./calendar.ts";
 import { createPresence, presenceQuery } from "./presence.ts";
+import { dumpCart } from "./visitorCart.ts";
 
 const root = join(fileURLToPath(new URL(".", import.meta.url)), "..");
 const publicDir = join(root, "public");
@@ -39,6 +40,7 @@ function snapshot() {
       stock: visitor.stock,
       goods: visitor.goods,
       staffSlots: visitor.staffSlots,
+      cart: dumpCart(visitor.cart),
     },
     staffSlots: visitor.staffSlots,
     visitorOrders: listOpenOrders(visitor),
