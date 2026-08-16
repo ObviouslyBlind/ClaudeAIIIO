@@ -18,6 +18,6 @@ Forbidden bar: Capital Rift screenshots, Call of Duty, OSM.
 **Round 4:** Plots through road; cube buildings; islands too close.
 **Round 5:** Taxi HUD button. Yellow mesh pathfollows `/api/map` paved polylines only.
 **Round 6:** Ports ~8.6 km apart. Parcel fills removed. Gable shops. **Critic:** channel PASS, HUD PASS, ferry PASS. **FAIL: no visible paved road** from spawn (camera looks at quay/channel; spine runs inland). Buildings only partial (warehouse seen).
-**Round 7:** Make the paved spine unmissable from spawn. Camera must show road + quay together.
+**Round 7:** Dashed asphalt spine + side-on spawn camera (road left, quay right). **Awaiting critic** on the live page.
 
 **You are the brake.**
