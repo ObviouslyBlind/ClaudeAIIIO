@@ -400,6 +400,13 @@ export function makeFerry() {
   // PAPER hawser coil sits on the aft cream deck centreline, clear of
   // fender/bucket/oar/cleat/rail/bollard/lifering/lantern/handle/smoke.
   g.add(deckHawser(-12.0, 1.81, 0));
+  // Tiny kraft PAPER grommet on the hawser tail — existing DECK hex, not grey.
+  const grommet = part(0.06, 0.04, 0.06, DECK, false);
+  grommet.name = "grommet";
+  grommet.userData.part = "grommet";
+  grommet.userData.mode = "PAPER";
+  grommet.position.set(-11.78, 1.86, 0.18);
+  g.add(grommet);
 
   const cabin = part(16.5, 3.35, 7.6, CABIN);
   cabin.position.set(-2.4, 3.52, 0);
