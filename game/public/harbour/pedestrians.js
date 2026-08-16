@@ -193,6 +193,18 @@ function addKraftWorkGloves(figure) {
 }
 
 /**
+ * Tiny kraft PAPER lunch tin on the left hip. Original straw hex already
+ * in this file — no new grey. PAPER box only. Hat, apron, satchel, gloves,
+ * boots stay. Does not cover the coloured shirt.
+ */
+function addKraftLunchTin(figure) {
+  const tin = paperBox(0.12, 0.09, 0.14, STRAW);
+  tin.position.set(-0.38, 0.72, 0.08);
+  tin.userData.part = "tin";
+  figure.add(tin);
+}
+
+/**
  * Short kraft work-boot shafts above each shoe so dock hands read as
  * boots, not socks on boxes. Original shoe hex already in this file —
  * no new grey. PAPER boxes only. Existing shoes stay.
@@ -369,6 +381,7 @@ export function makePedestrians(map, helpers) {
       addKraftSatchel(person.mesh);
       addKraftKerchief(person.mesh);
       addKraftWorkGloves(person.mesh);
+      addKraftLunchTin(person.mesh);
       lightQuayShirt(person.mesh);
     }
     const at = samplePerson(spec, heightAt, person, along);
