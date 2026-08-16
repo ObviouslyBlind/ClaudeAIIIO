@@ -15,6 +15,14 @@ function collectBrace(root: THREE.Object3D) {
   return out;
 }
 
+function collectCap(root: THREE.Object3D) {
+  const out: THREE.Object3D[] = [];
+  root.traverse((obj) => {
+    if (obj.userData?.part === "cap") out.push(obj);
+  });
+  return out;
+}
+
 describe("north port sign", () => {
   it("keeps a kraft wood post brace on the north sign, PAPER only", () => {
     const sign = makePortSign(ISLANDS.north, { heightAt });
@@ -35,5 +43,23 @@ describe("north port sign", () => {
     }
 
     expect(makePortSign(ISLANDS.south, { heightAt })).toBeNull();
+  });
+
+  it("puts a kraft PAPER wood cap on the north sign post", () => {
+    const sign = makePortSign(ISLANDS.north, { heightAt });
+    expect(sign).not.toBeNull();
+    expect(sign!.userData.mode).toBe("PAPER");
+    expect(SIGN_LINE).toBe("North port · PAPER");
+
+    const caps = collectCap(sign!);
+    expect(caps.length).toBeGreaterThanOrEqual(1);
+    for (const c of caps) {
+      expect(c.userData.part).toBe("cap");
+      expect(c.userData.mode).toBe("PAPER");
+      const mesh = c as THREE.Mesh;
+      expect(mesh.geometry).toBeInstanceOf(THREE.BoxGeometry);
+      const mat = mesh.material as THREE.MeshLambertMaterial;
+      expect(mat.color.getHex()).toBe(WOOD);
+    }
   });
 });
