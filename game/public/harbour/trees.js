@@ -26,6 +26,17 @@ export const NORTH_PORT_PALM_OFFSETS = Object.freeze([
   Object.freeze({ along: 120, side: -1, setback: 15 }),
 ]);
 
+/**
+ * Extra PAPER palms on the south-port grass verge, inland of the quay.
+ * Mirror of north: 14–16 m off the tarmac (outside ROAD_CLEAR 11 / PAVED_CLEAR 12)
+ * and off onPublicQuay. Distinct from the d=22/52 verge loop and from
+ * NORTH_PORT_PALM_OFFSETS.
+ */
+export const SOUTH_PORT_PALM_OFFSETS = Object.freeze([
+  Object.freeze({ along: 8, side: 1, setback: 15 }),
+  Object.freeze({ along: 48, side: -1, setback: 14 }),
+]);
+
 const TRUNK = 0x8a6238;
 const TRUNK_WARM = 0x9a6a40;
 const LEAF = 0x3f7a38;
@@ -218,20 +229,24 @@ function alongPavedVerge(placed, seen, map, spec, heightAt) {
   if (!paved) return;
   const length = polylineLength(paved.points);
 
-  if (spec.id === "north") {
-    for (const extra of NORTH_PORT_PALM_OFFSETS) {
-      const along = pointAlong(paved.points, extra.along);
-      if (!along) continue;
-      const at = offsetFromCentreline(
-        along.x,
-        along.z,
-        along.qx,
-        along.qz,
-        extra.side,
-        extra.setback,
-      );
-      tryPlace(placed, seen, map, spec, heightAt, at.x, at.z, "spawn", 10);
-    }
+  const extras =
+    spec.id === "north"
+      ? NORTH_PORT_PALM_OFFSETS
+      : spec.id === "south"
+        ? SOUTH_PORT_PALM_OFFSETS
+        : [];
+  for (const extra of extras) {
+    const along = pointAlong(paved.points, extra.along);
+    if (!along) continue;
+    const at = offsetFromCentreline(
+      along.x,
+      along.z,
+      along.qx,
+      along.qz,
+      extra.side,
+      extra.setback,
+    );
+    tryPlace(placed, seen, map, spec, heightAt, at.x, at.z, "spawn", 10);
   }
 
   // A few PAPER trees on the grass strip beside the tarmac (street lots begin
