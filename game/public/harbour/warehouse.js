@@ -78,6 +78,24 @@ function crateStack(x, z, yaw, layers, y0 = 0.16, name = "crate-stack") {
   return g;
 }
 
+/** Soft kraft grain sack — squat boxes + cinch, not a strapped crate. */
+function grainSack(w, h, d, color, x, y, z, yaw = 0) {
+  const g = new THREE.Group();
+  g.name = "warehouse-sack";
+  g.userData.kind = "warehouse-sack";
+  g.userData.mode = "PAPER";
+  g.position.set(x, y, z);
+  g.rotation.y = yaw;
+  g.add(paperBox(w, h, d, color, "warehouse-sack"));
+  const cinch = paperBox(w * 0.58, 0.07, d * 0.58, STRAP, "warehouse-sack");
+  cinch.position.y = h / 2 + 0.01;
+  g.add(cinch);
+  const neck = paperBox(w * 0.44, 0.14, d * 0.44, color, "warehouse-sack");
+  neck.position.y = h / 2 + 0.1;
+  g.add(neck);
+  return g;
+}
+
 function hangingLamp(x, y, z) {
   const g = new THREE.Group();
   g.name = "warehouse-lamp";
@@ -159,6 +177,9 @@ function makeWarehouseDress() {
   g.add(crateStack(1.28, -1.48, -0.06, floorD, 0.16, "warehouse-floor-crate"));
   // Left of the enter aisle (player at 0, 1.6), clear of the door at +Z.
   g.add(crateStack(-1.92, 0.75, 0.1, pallet, 0.16));
+  // Two kraft grain sacks on/beside that pallet. Aisle at x≈0 stays open.
+  g.add(grainSack(0.42, 0.5, 0.34, WOOD_LIGHT, -2.08, 0.41, 0.28, 0.16));
+  g.add(grainSack(0.38, 0.46, 0.32, WOOD, -1.72, 0.39, 0.16, -0.2));
 
   const loftY = 2.94;
   g.add(crateStack(-2.4, -2.35, 0.08, low, loftY));
