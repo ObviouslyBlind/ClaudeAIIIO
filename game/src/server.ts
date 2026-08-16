@@ -131,7 +131,14 @@ const server = createServer(async (req, res) => {
   }
   try {
     const data = await readFile(filePath);
-    res.writeHead(200, { "content-type": types[extname(filePath)] ?? "application/octet-stream" });
+    const ext = extname(filePath);
+    const headers: Record<string, string> = {
+      "content-type": types[ext] ?? "application/octet-stream",
+    };
+    if (ext === ".js" || ext === ".css" || ext === ".html") {
+      headers["cache-control"] = "no-store";
+    }
+    res.writeHead(200, headers);
     res.end(data);
   } catch {
     res.writeHead(404);

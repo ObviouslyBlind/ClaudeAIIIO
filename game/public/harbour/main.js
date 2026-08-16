@@ -524,7 +524,7 @@ function makeParcels() {
       new THREE.LineBasicMaterial({
         color: parcelTint(p, false),
         transparent: true,
-        opacity: p.owner ? 0.5 : 0.16,
+        opacity: p.owner ? 0.45 : 0.06,
       }),
     );
     line.userData.kind = "plot-line";

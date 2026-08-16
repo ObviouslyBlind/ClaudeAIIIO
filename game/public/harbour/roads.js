@@ -18,22 +18,17 @@ export const CAMERA_FAR_M = 52000;
 /**
  * Spawn camera, metres from the player.
  *
- * Intended north offset: { x: 56, y: 54, z: -132 }
- * East of the paved spine, inland, raised. Looking at spawnLookAtOffset (channel)
- * puts (a) the black tarmac spine in the lower frame and (b) the far island on the
- * horizon — LEFT of frame on north, RIGHT on south.
- *
- * Not the old side-on { x: 58, y: 30, z: 14 } (looked west along this shore;
- * south island at +Z was off-frame). Not inland-only with no X: that stares
- * at water and loses the street.
+ * Round 9 looked at the channel from 54 m, so the island read as a beach strip.
+ * Round 10 is a third-person view from the quay looking INLAND along the tarmac
+ * toward the hill, so the landmass fills the frame.
  */
 export function spawnCameraOffset(islandId) {
-  return islandId === "north" ? { x: 56, y: 54, z: -132 } : { x: 56, y: 54, z: 132 };
+  return islandId === "north" ? { x: 20, y: 24, z: 40 } : { x: 20, y: 24, z: -40 };
 }
 
-/** Metres from the player. Toward the channel so the far shore sits on the horizon. */
+/** Metres from the player. Inland along the spine, not out to sea. */
 export function spawnLookAtOffset(islandId) {
-  return islandId === "north" ? { x: 0, y: 2, z: 240 } : { x: 0, y: 2, z: -240 };
+  return islandId === "north" ? { x: 0, y: 5, z: -120 } : { x: 0, y: 5, z: 120 };
 }
 
 function addBox(scene, w, h, d, color, x, y, z, yaw, roadKind) {
