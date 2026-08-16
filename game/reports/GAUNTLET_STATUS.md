@@ -1,24 +1,26 @@
 # Gauntlet status
 
-Loop is **not finished**. Do not pause between agent pings. User is the brake.
+Loop is **not finished**. Do not pause. User is the brake.
 
-Base harbour only. Genre-close to a persistent shard. Not a Capital Rift clone. No new politics. Critics one-at-a-time. Do **not** restart play while a critic is on the page.
+One **pixel critic** at a time (one pair of eyes). The **live harbour** already runs the rest together on `/`: water, shore foam, both quays, roads, street props, trees, cart, traffic, taxi, ferry, stalls, pedestrians, nametags, interiors, econ/nearby/cart/staff HUD, lease/develop/hire/fire/enter/exit/ferry/taxi, market + hansard.
+
+Not a Capital Rift clone. No new politics.
 
 ## Held (pixel-ratified)
 
-Inland spawn, paved ribbon, dirt ribbons, cars, yellow taxi, ferry ticket $15, RMB orbit, catalogue, lease → House → Enter → Exit, trees + cart.
+Inland spawn, paved ribbon, dirt, cars, yellow taxi, trees+cart, lease → House → Enter → Exit, ferry ticket $15, RMB orbit.
 
-## Held (code)
+## Held (code, live on the same page as the ferry)
 
-Econ HUD, stalls, nametags, warehouse/factory/shop/farm/house-shop interiors, presence + walking actors, nearby names, cart persist + HUD, pedestrians, staff hire/fire, bid/ask + sell + cancel, North/South buy/sell, upkeep on live tick, window lights, lease afford, unpaid hint, persist dump, ferry spread, buy-fills-cart.
+Shore foam, quay clutter, building shells, window lights, stalls, pedestrians, nametags, warehouse/factory/shop/farm/house-shop interiors, presence, cart, staff hire/fire, bid/ask/sell/cancel, North/South books, upkeep, persist dump, lease afford.
 
-## In flight
+## In flight (not ferry-only)
 
-Ferry hull moved to z=-6400 (was -2200, ~5 km off the north quay — critics went idle). Next pixel: `/?g=ferry30`. Calendar HUD, develop afford, player nametag, port sign, sales-tax line. Restore blob + market cancel still building.
+Pixel: ferry hull at north quay `/?g=ferry30`. Also building: calendar, develop afford, player tag, port sign, sales tax, ferry fare, persist restore, market cancel.
 
-## Next pixel queue
+## Next pixel (after ferry30, immediately, no wait)
 
-Ferry boat (close to north quay), shore foam, quay clutter, building shells, window lights, stalls, econ/nearby/spread lines, pedestrians, nametags, interiors.
+Shore foam, quay, shells+lights, stalls, econ/nearby/staff lines, pedestrians, nametags, interiors.
 
 ## Frozen
 
