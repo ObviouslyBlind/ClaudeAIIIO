@@ -1012,3 +1012,80 @@ describe("warehouse PAPER kraft clip", () => {
     expect(boxes).toBeGreaterThanOrEqual(1);
   });
 });
+
+describe("warehouse PAPER kraft stamp", () => {
+  it("sits one tiny kraft PAPER stamp on the clipboard; clip and card remain", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressWarehouse(scene);
+
+    const dress = interior.getObjectByName("warehouse-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+
+    const stamps: THREE.Object3D[] = [];
+    const clips: THREE.Object3D[] = [];
+    const cards: THREE.Object3D[] = [];
+    const pencils: THREE.Object3D[] = [];
+    const twines: THREE.Object3D[] = [];
+    const clipboards: THREE.Object3D[] = [];
+    dress!.traverse((obj) => {
+      if (obj.userData?.kind === "warehouse-stamp" && obj.name === "warehouse-stamp") {
+        stamps.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-clip" && obj.name === "warehouse-clip") {
+        clips.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-card" && obj.name === "warehouse-card") {
+        cards.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-pencil" && obj.name === "warehouse-pencil") {
+        pencils.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-twine" && obj.name === "warehouse-twine") {
+        twines.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-clipboard" && obj.name === "warehouse-clipboard") {
+        clipboards.push(obj);
+      }
+    });
+    expect(stamps.length).toBe(1);
+    expect(clips.length).toBe(1);
+    expect(cards.length).toBe(1);
+
+    const stamp = stamps[0];
+    expect(stamp.userData.kind).toBe("warehouse-stamp");
+    expect(stamp.userData.mode).toBe("PAPER");
+    expect(stamp.userData.part).toBe("stamp");
+    expect(stamp.position.y).toBeGreaterThan(1.2);
+    expect(stamp.position.y).toBeLessThan(2.4);
+    const onBack = Math.abs(stamp.position.z) > 3.0;
+    const onSide = Math.abs(stamp.position.x) > 3.5;
+    expect(onBack || onSide).toBe(true);
+    expect(horizDist(stamp, clipboards[0])).toBeLessThan(0.5);
+    expect(horizDist(stamp, cards[0])).toBeGreaterThan(1.5);
+    expect(horizDist(stamp, twines[0])).toBeGreaterThan(1.5);
+    expect(clips[0].userData.part).toBe("clip");
+    expect(cards[0].userData.part).toBe("card");
+    expect(pencils[0].userData.part).toBe("pencil");
+
+    const colors = hexes(stamp);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.every((c) => c === 0xf3efe4 || c === 0x5a3a22 || c === 0x8a6238)).toBe(true);
+    expect(colors.some((c) => c === 0x5a3a22 || c === 0x8a6238)).toBe(true);
+    expect(colors.every((c) => c === 0xf3efe4 || !isGrey(c))).toBe(true);
+
+    let boxes = 0;
+    stamp.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        boxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.kind).toBe("warehouse-stamp");
+        expect(mesh.userData.mode).toBe("PAPER");
+      }
+    });
+    expect(boxes).toBeGreaterThanOrEqual(1);
+  });
+});
