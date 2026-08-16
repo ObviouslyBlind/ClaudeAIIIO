@@ -79,7 +79,23 @@ function paperLamp() {
   brace.rotation.z = 0.7;
   brace.userData.part = "brace";
 
-  g.add(post, collar, glass, cap, brace);
+  /** Kraft hanging loop under the glass. PAPER boxes, not iron. */
+  const ring = new THREE.Group();
+  ring.name = "ring";
+  ring.userData.part = "ring";
+  ring.userData.mode = "PAPER";
+  ring.position.set(0, 2.22, 0.16);
+  const top = part(0.11, 0.03, 0.03, KRAFT, false);
+  top.position.set(0, 0.065, 0);
+  const bot = part(0.11, 0.03, 0.03, KRAFT, false);
+  bot.position.set(0, -0.065, 0);
+  const left = part(0.03, 0.13, 0.03, KRAFT, false);
+  left.position.set(-0.05, 0, 0);
+  const right = part(0.03, 0.13, 0.03, KRAFT, false);
+  right.position.set(0.05, 0, 0);
+  ring.add(top, bot, left, right);
+
+  g.add(post, collar, glass, cap, brace, ring);
   return g;
 }
 
