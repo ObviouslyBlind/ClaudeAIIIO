@@ -320,6 +320,26 @@ function makeCounterJar(x, y, z) {
 }
 
 /**
+ * Small kraft PAPER cup on the counter — cream/linen body, wood handle.
+ * PAPER boxes only. Offset from the kettle, jar, receipt pad, and bell.
+ */
+function makeCounterCup(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "house-shop-cup";
+  g.userData.kind = "house-shop-cup";
+  g.userData.mode = "PAPER";
+  g.position.set(x, y, z);
+  const body = paperBox(0.1, 0.1, 0.1, CREAM, "house-shop-cup");
+  body.position.set(0, 0.05, 0);
+  const rim = paperBox(0.11, 0.02, 0.11, LINEN, "house-shop-cup");
+  rim.position.set(0, 0.11, 0);
+  const handle = paperBox(0.03, 0.06, 0.03, WOOD, "house-shop-cup");
+  handle.position.set(0.075, 0.06, 0);
+  g.add(body, rim, handle);
+  return g;
+}
+
+/**
  * Small kraft PAPER kettle on the counter — tin body, wood handle, cream lid.
  * PAPER boxes only. Offset from the jar, receipt pad, and bell. Not a till.
  */
@@ -393,6 +413,8 @@ function makeHouseShopDress() {
   g.add(makeCounterJar(-0.28, 1.12, 0.32));
   // Kraft kettle on the counter, offset from the jar, pad, and bell so all four read.
   g.add(makeCounterKettle(-0.62, 1.12, 0.38));
+  // Kraft cup on the counter, offset from the kettle, jar, pad, and bell so all five read.
+  g.add(makeCounterCup(0.48, 1.12, 0.22));
   g.add(paperMark(-2.15, 1.62, 3.38));
 
   const rug = paperBox(1.55, 0.04, 1.25, RUG, "house-shop-rug");

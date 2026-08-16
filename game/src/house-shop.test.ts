@@ -11,7 +11,8 @@ const WOOD = 0x8a6238;
 const WOOD_TOP = 0x9a6a40;
 const TIN = 0xc4a574;
 const CREAM = 0xe8d7b8;
-const KRAFT = new Set([WOOD, WOOD_TOP, TIN, CREAM, 0x6a4428, 0xf4ead8, 0xf3efe4]);
+const LINEN = 0xf4ead8;
+const KRAFT = new Set([WOOD, WOOD_TOP, TIN, CREAM, 0x6a4428, LINEN, 0xf3efe4]);
 
 function hexes(root: THREE.Object3D) {
   const colors: number[] = [];
@@ -349,6 +350,104 @@ describe("house-shop PAPER counter kettle", () => {
     const kettle = interior.getObjectByName("house-shop-kettle");
     expect(dress).toBeTruthy();
     expect(kettle).toBeTruthy();
+    expect(dress!.visible).toBe(false);
+    expect(interior.userData.interiorUse).toBe("house");
+  });
+});
+
+describe("house-shop PAPER counter cup", () => {
+  it("sits a kraft PAPER cup on the house-shop counter", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressHouseShop(scene);
+
+    const dress = interior.getObjectByName("house-shop-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+
+    const cups: THREE.Object3D[] = [];
+    dress!.traverse((obj) => {
+      if (obj.userData?.kind === "house-shop-cup" && obj.name === "house-shop-cup") {
+        cups.push(obj);
+      }
+    });
+    expect(cups.length).toBe(1);
+
+    const cup = cups[0];
+    expect(cup.userData.kind).toBe("house-shop-cup");
+    expect(cup.userData.mode).toBe("PAPER");
+    // Counter top is ~1.12; cup sits on it, not hanging with the bell.
+    expect(cup.position.y).toBeGreaterThan(1.0);
+    expect(cup.position.y).toBeLessThan(1.25);
+    expect(Math.abs(cup.position.x)).toBeLessThan(1.2);
+    expect(cup.position.z).toBeGreaterThan(0.1);
+    expect(cup.position.z).toBeLessThan(0.9);
+
+    const kettle = dress!.getObjectByName("house-shop-kettle");
+    const jar = dress!.getObjectByName("house-shop-jar");
+    const pad = dress!.getObjectByName("house-shop-pad");
+    const bell = dress!.getObjectByName("house-shop-bell");
+    expect(kettle).toBeTruthy();
+    expect(jar).toBeTruthy();
+    expect(pad).toBeTruthy();
+    expect(bell).toBeTruthy();
+    const kettleOffset = Math.hypot(
+      cup.position.x - kettle!.position.x,
+      cup.position.z - kettle!.position.z,
+    );
+    const jarOffset = Math.hypot(
+      cup.position.x - jar!.position.x,
+      cup.position.z - jar!.position.z,
+    );
+    const padOffset = Math.hypot(
+      cup.position.x - pad!.position.x,
+      cup.position.z - pad!.position.z,
+    );
+    const bellOffset = Math.hypot(
+      cup.position.x - bell!.position.x,
+      cup.position.z - bell!.position.z,
+    );
+    expect(kettleOffset).toBeGreaterThan(0.25);
+    expect(jarOffset).toBeGreaterThan(0.25);
+    expect(padOffset).toBeGreaterThan(0.25);
+    expect(bellOffset).toBeGreaterThan(0.25);
+
+    const colors = hexes(cup);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.every((c) => c === WOOD || c === CREAM || c === LINEN)).toBe(true);
+    expect(colors.some((c) => c === WOOD)).toBe(true);
+    expect(colors.some((c) => c === CREAM || c === LINEN)).toBe(true);
+    expect(colors.every((c) => !isGrey(c))).toBe(true);
+
+    cup.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.kind).toBe("house-shop-cup");
+        expect(mesh.userData.mode).toBe("PAPER");
+      }
+    });
+  });
+
+  it("keeps dress idempotent and hides the cup on undress", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressHouseShop(scene);
+    dressHouseShop(scene);
+
+    const cups: THREE.Object3D[] = [];
+    interior.traverse((obj) => {
+      if (obj.name === "house-shop-cup") cups.push(obj);
+    });
+    expect(cups.length).toBe(1);
+
+    undressHouseShop(scene);
+    const dress = interior.getObjectByName("house-shop-dress");
+    const cup = interior.getObjectByName("house-shop-cup");
+    expect(dress).toBeTruthy();
+    expect(cup).toBeTruthy();
     expect(dress!.visible).toBe(false);
     expect(interior.userData.interiorUse).toBe("house");
   });
