@@ -762,6 +762,8 @@ async function boot() {
     getMap: () => map,
     specOf,
     heightAt,
+    getPlayer: () => player,
+    getIslandId: () => islandId,
   });
   spawnAt("north");
   setStatus("Tap a piece of land. Lease it, then develop it.");

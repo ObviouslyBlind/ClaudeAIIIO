@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { projectOnPolyline } from "./taxi.js";
 
 const CAR_COUNT = 6;
 const SPEED = 9;
@@ -71,7 +72,7 @@ const COLORS = [0xff2a1a, 0x1a6dff, 0xffe14a, 0xffffff, 0xff2a1a, 0x1a6dff];
  * PAPER NPC cars that loop the paved spline. They never leave `kind === "paved"`.
  * Start packed near the port so spawn actually sees them.
  */
-export function createTraffic({ scene, getMap, specOf, heightAt }) {
+export function createTraffic({ scene, getMap, specOf, heightAt, getPlayer, getIslandId }) {
   const cars = [];
 
   function paved(islandId) {
@@ -104,6 +105,8 @@ export function createTraffic({ scene, getMap, specOf, heightAt }) {
         along,
         dir,
         speed: SPEED * (0.85 + (i % 3) * 0.1),
+        slot: i,
+        phase: 0,
       };
       cars.push(car);
       scene.add(mesh);
@@ -115,8 +118,18 @@ export function createTraffic({ scene, getMap, specOf, heightAt }) {
   spawnIsland("south");
 
   function tick(dt) {
+    const player = getPlayer ? getPlayer() : null;
+    const here = getIslandId ? getIslandId() : null;
     for (const car of cars) {
-      car.along += car.speed * car.dir * dt;
+      const road = paved(car.islandId);
+      if (!road) continue;
+      if (player && here === car.islandId) {
+        const hit = projectOnPolyline(road.points, player.position.x, player.position.z);
+        car.phase += car.speed * dt;
+        car.along = hit.along + 28 + car.slot * 18 + (car.phase % 12);
+      } else {
+        car.along += car.speed * car.dir * dt;
+      }
       place(car);
     }
   }

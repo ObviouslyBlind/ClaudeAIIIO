@@ -59,13 +59,19 @@ describe("road node traffic", () => {
   it("puts at least three north cars inside the spawn camera frame", () => {
     const board = createLandBoard();
     const scene = { add() {} };
+    const spec = ISLANDS.north;
+    const player = {
+      position: { x: spec.port.x, y: 2, z: spec.port.z - 8 },
+    };
     const traffic = createTraffic({
       scene,
       getMap: () => board,
       specOf: (id: "north" | "south") => ISLANDS[id],
       heightAt,
+      getPlayer: () => player,
+      getIslandId: () => "north" as const,
     });
-    const spec = ISLANDS.north;
+    traffic.tick(0.2);
     const o = spawnCameraOffset("north");
     const l = spawnLookAtOffset("north");
     const px = spec.port.x;
