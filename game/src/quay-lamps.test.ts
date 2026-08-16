@@ -71,6 +71,14 @@ function collectCap(root: THREE.Object3D) {
   return out;
 }
 
+function collectPost(root: THREE.Object3D) {
+  const out: THREE.Object3D[] = [];
+  root.traverse((obj) => {
+    if (obj.userData?.part === "post") out.push(obj);
+  });
+  return out;
+}
+
 describe("quay paper lamps", () => {
   it("plants a few wooden kraft-glass posts on both timber piers", () => {
     expect(QUAY_LAMP_SPOTS.length).toBeGreaterThanOrEqual(4);
@@ -107,7 +115,19 @@ describe("quay paper lamps", () => {
       expect(colors).toContain(WOOD);
       expect(colors).toContain(WOOD_DARK);
       expect(colors).toContain(KRAFT);
+      expect(colors).toContain(GLOW);
       expect(colors).not.toContain(IRON);
+
+      const posts = collectPost(group!);
+      expect(posts.length).toBe(QUAY_LAMP_SPOTS.length);
+      for (const p of posts) {
+        const mesh = p as THREE.Mesh;
+        expect(mesh.geometry).toBeInstanceOf(THREE.BoxGeometry);
+        const geo = mesh.geometry as THREE.BoxGeometry;
+        expect(geo.parameters.height).toBeGreaterThan(24);
+        const mat = mesh.material as THREE.MeshLambertMaterial;
+        expect(mat.color.getHex()).toBe(WOOD_DARK);
+      }
 
       const glass = collectKind(group!, "quay-lamp-glass");
       expect(glass.length).toBe(QUAY_LAMP_SPOTS.length);
@@ -115,9 +135,11 @@ describe("quay paper lamps", () => {
         const mesh = pane as THREE.Mesh;
         const mat = mesh.material as THREE.MeshLambertMaterial;
         expect(mat.emissive.getHex()).toBe(GLOW);
-        expect(mat.color.getHex()).toBe(KRAFT);
+        expect(mat.color.getHex()).toBe(GLOW);
         const geo = mesh.geometry as THREE.BoxGeometry;
-        expect(Math.max(geo.parameters.width, geo.parameters.height, geo.parameters.depth)).toBeGreaterThan(7);
+        const max = Math.max(geo.parameters.width, geo.parameters.height, geo.parameters.depth);
+        expect(max).toBeGreaterThan(4);
+        expect(max).toBeLessThan(6.5);
       }
 
       const bases = collectBase(group!);
@@ -149,8 +171,8 @@ describe("quay paper lamps", () => {
       for (const r of rings) {
         expect(r.userData.part).toBe("ring");
         expect(r.userData.mode).toBe("PAPER");
-        expect(r.position.y).toBeLessThan(20);
-        expect(r.position.y).toBeGreaterThan(12);
+        expect(r.position.y).toBeLessThan(36);
+        expect(r.position.y).toBeGreaterThan(28);
         const boxes: THREE.Mesh[] = [];
         r.traverse((obj) => {
           const mesh = obj as THREE.Mesh;
@@ -184,8 +206,8 @@ describe("quay paper lamps", () => {
         expect(geo.parameters.width).toBeGreaterThan(1.5);
         expect(geo.parameters.height).toBeLessThan(0.4);
         expect(geo.parameters.depth).toBeGreaterThan(1.5);
-        expect(cup.position.y).toBeGreaterThan(13);
-        expect(cup.position.y).toBeLessThan(20);
+        expect(cup.position.y).toBeGreaterThan(30);
+        expect(cup.position.y).toBeLessThan(35);
         const mat = cup.material as THREE.MeshLambertMaterial;
         expect(mat.color.getHex()).toBe(KRAFT);
       }

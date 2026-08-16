@@ -21,10 +21,10 @@ const GLOW = 0xe8a45a;
  * deck (`|along| < 43`).
  *
  * `/g/lamps55` FAIL: 0.4 m glass, inland along.
- * `/g/lamps56` FAIL: 2.6 m glass still a speck — live spawn camera sits
- * ~130 m inland of the seaward lip (`player + {20,24,-40}`). Put lanterns
- * on the near deck AND the look-at lip, glass ~8 m so they read like the
- * north-face fender.
+ * `/g/lamps56` FAIL: 2.6 m cream glass still a speck at ~130 m.
+ * `/g/lamps57` FAIL: 8 m cream cubes read as flat white pier planks.
+ * Tall dark posts (above the 24 m spawn camera) + amber lanterns on top
+ * so they silhouette against cyan sky, not the kraft deck.
  */
 export const QUAY_LAMP_SPOTS = Object.freeze([
   Object.freeze({ side: -3.2, along: -32 }),
@@ -35,9 +35,9 @@ export const QUAY_LAMP_SPOTS = Object.freeze([
 ]);
 
 const glassMat = new THREE.MeshLambertMaterial({
-  color: KRAFT,
+  color: GLOW,
   emissive: GLOW,
-  emissiveIntensity: 1.35,
+  emissiveIntensity: 1.45,
 });
 
 function part(w, h, d, color, shadow = true) {
@@ -52,9 +52,10 @@ function part(w, h, d, color, shadow = true) {
 }
 
 /**
- * One timber post with a kraft glass box on top. No iron arm.
- * Live spawn camera is ~130 m from the seaward lip; 2.6 m glass vanished
- * (`/g/lamps56`). 8 m cream lanterns match the fender's angular size.
+ * Tall dark post + amber lantern on top. No iron arm.
+ * `/g/lamps57`: 8 m cream cubes looked like pier planks from the downward
+ * spawn look. Posts reach past camera height (24 m) so they read as
+ * verticals against cyan sky; lanterns stay amber GLOW, not kraft cream.
  */
 function paperLamp() {
   const g = new THREE.Group();
@@ -63,52 +64,52 @@ function paperLamp() {
   g.userData.dress = "quay-lamp";
   g.userData.mode = "PAPER";
 
-  const base = part(2.6, 0.36, 2.6, WOOD);
-  base.position.y = 0.18;
+  const base = part(2.8, 0.4, 2.8, WOOD);
+  base.position.y = 0.2;
   base.userData.part = "base";
 
-  const post = part(2.1, 14.2, 2.1, WOOD_DARK);
-  post.position.y = 7.28;
+  const post = part(2.4, 32, 2.4, WOOD_DARK);
+  post.position.y = 16.2;
   post.userData.part = "post";
 
-  const collar = part(2.8, 0.4, 2.8, WOOD, false);
-  collar.position.y = 14.35;
+  const collar = part(3.2, 0.45, 3.2, WOOD, false);
+  collar.position.y = 32.4;
   collar.userData.part = "collar";
 
-  const drip = part(2.2, 0.22, 2.2, KRAFT, false);
-  drip.position.y = 14.62;
+  const drip = part(2.6, 0.24, 2.6, KRAFT, false);
+  drip.position.y = 32.72;
   drip.userData.part = "drip";
 
-  const glass = new THREE.Mesh(new THREE.BoxGeometry(8.2, 10.4, 8.2), glassMat);
-  glass.position.y = 20.0;
+  const glass = new THREE.Mesh(new THREE.BoxGeometry(4.6, 4.6, 4.6), glassMat);
+  glass.position.y = 35.2;
   glass.castShadow = false;
   glass.receiveShadow = true;
   glass.userData.mode = "PAPER";
   glass.userData.part = "glass";
   glass.userData.kind = "quay-lamp-glass";
 
-  const cap = part(9.1, 0.55, 9.1, WOOD, false);
-  cap.position.y = 25.4;
+  const cap = part(5.4, 0.5, 5.4, WOOD, false);
+  cap.position.y = 37.7;
   cap.userData.part = "cap";
 
-  const brace = part(0.35, 2.4, 0.35, WOOD);
-  brace.position.set(1.15, 13.1, 0);
-  brace.rotation.z = 0.7;
+  const brace = part(0.4, 3.2, 0.4, WOOD);
+  brace.position.set(1.35, 28.4, 0);
+  brace.rotation.z = 0.55;
   brace.userData.part = "brace";
 
   const ring = new THREE.Group();
   ring.name = "ring";
   ring.userData.part = "ring";
   ring.userData.mode = "PAPER";
-  ring.position.set(0, 14.2, 1.15);
-  const top = part(0.7, 0.16, 0.16, KRAFT, false);
-  top.position.set(0, 0.36, 0);
-  const bot = part(0.7, 0.16, 0.16, KRAFT, false);
-  bot.position.set(0, -0.36, 0);
-  const left = part(0.16, 0.72, 0.16, KRAFT, false);
-  left.position.set(-0.3, 0, 0);
-  const right = part(0.16, 0.72, 0.16, KRAFT, false);
-  right.position.set(0.3, 0, 0);
+  ring.position.set(0, 32.5, 1.4);
+  const top = part(0.8, 0.18, 0.18, KRAFT, false);
+  top.position.set(0, 0.4, 0);
+  const bot = part(0.8, 0.18, 0.18, KRAFT, false);
+  bot.position.set(0, -0.4, 0);
+  const left = part(0.18, 0.8, 0.18, KRAFT, false);
+  left.position.set(-0.34, 0, 0);
+  const right = part(0.18, 0.8, 0.18, KRAFT, false);
+  right.position.set(0.34, 0, 0);
   ring.add(top, bot, left, right);
 
   g.add(base, post, collar, drip, glass, cap, brace, ring);
