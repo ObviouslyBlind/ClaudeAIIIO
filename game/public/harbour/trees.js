@@ -833,6 +833,56 @@ function plantNorthPortHusk(root) {
   nest.add(husk);
 }
 
+function markVine(mesh) {
+  mesh.userData.part = "vine";
+  mesh.userData.dress = "vine";
+  mesh.userData.provenance = "PAPER";
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+}
+
+/**
+ * One tiny kraft PAPER vine (one box) on a north-port palm —
+ * not instead of the husk, frond, leaf, coconut, or nest. Hexes
+ * already in this file: trunk kraft. Reuses the nest twig box so
+ * geometry count stays put. Unique mesh — one box — so the phone
+ * mesh budget stays tiny. Trunks, leaves, coconuts, bird, nest,
+ * egg, leaf, frond, and husk stay put.
+ */
+function plantNorthPortVine(root) {
+  let nest = null;
+  root.traverse((obj) => {
+    if (!nest && obj.userData.kind === "nest") nest = obj;
+  });
+  if (!nest) return;
+
+  let geo = null;
+  nest.traverse((obj) => {
+    if (geo) return;
+    if (obj.isMesh && obj.geometry && obj.userData.part === "nest") geo = obj.geometry;
+  });
+  if (!geo) return;
+
+  const mat = new THREE.MeshLambertMaterial({ color: TRUNK });
+  const vine = new THREE.Group();
+  vine.name = "vine";
+  vine.userData.kind = "vine";
+  vine.userData.part = "vine";
+  vine.userData.dress = "vine";
+  vine.userData.provenance = "PAPER";
+  // Sit on the palm nest, offset from husk, frond, leaf, and coconut.
+  vine.position.set(-0.05, 0.025, 0.05);
+  vine.rotation.set(0.55, -0.9, 0.3);
+
+  const box = new THREE.Mesh(geo, mat);
+  box.name = "vine-box";
+  markVine(box);
+  box.scale.set(0.35, 0.4, 0.7);
+
+  vine.add(box);
+  nest.add(vine);
+}
+
 /**
  * Low-poly PAPER trees on hills, inland slopes, and behind street lots.
  * Palms stay on the quay (makePalms). helpers: { scene, specOf, heightAt }.
@@ -858,6 +908,7 @@ export function makeTrees(map, helpers) {
   plantNorthPortLeaf(root);
   plantNorthPortFrond(root);
   plantNorthPortHusk(root);
+  plantNorthPortVine(root);
   scene.add(root);
   return root;
 }
