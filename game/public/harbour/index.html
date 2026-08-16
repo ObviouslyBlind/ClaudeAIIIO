@@ -26,12 +26,12 @@
       <p id="cash">Cash $0</p>
       <p id="calendar">PAPER · SIMULATED · Day 0 · tick 0</p>
       <p id="econ">Index — · money — · output —</p>
-      <p id="flow">Faucet — · sink — · PAPER</p>
+      <p id="flow">PAPER · SIMULATED · Faucet 0 · sink 0</p>
       <p id="spread">Ferry spread · PAPER</p>
-      <p id="tax">Sales tax 0% · PAPER</p>
+      <p id="tax">PAPER · SIMULATED · Sales tax 0%</p>
       <p id="nearby">PAPER · SIMULATED · 250 m PAPER cell · — nearby</p>
       <p id="cart">PAPER</p>
-      <p id="goods">PAPER</p>
+      <p id="goods">PAPER · SIMULATED</p>
       <p id="staff-line">Staff — · PAPER</p>
       <p id="plot-line">Tap land to inspect it</p>
       <p id="lease-hint"></p>
@@ -137,6 +137,60 @@
               calEl.textContent = "PAPER · SIMULATED · Day " + day + " · tick " + tick;
             }
             if (cartEl) cartEl.textContent = "PAPER";
+            var flowEl = document.getElementById("flow");
+            var goodsEl = document.getElementById("goods");
+            var faucet = 0;
+            var sink = 0;
+            if (d && d.hud) {
+              if (d.hud.faucet != null && isFinite(Number(d.hud.faucet))) faucet = Number(d.hud.faucet);
+              if (d.hud.sink != null && isFinite(Number(d.hud.sink))) sink = Number(d.hud.sink);
+            }
+            if (flowEl) {
+              flowEl.textContent =
+                "PAPER · SIMULATED · Faucet " +
+                faucet.toLocaleString("en-US", { maximumFractionDigits: 2 }) +
+                " · sink " +
+                sink.toLocaleString("en-US", { maximumFractionDigits: 2 });
+            }
+            if (goodsEl) {
+              var bag = d && d.visitor && (d.visitor.stock || d.visitor.goods);
+              var bits = [];
+              if (bag) {
+                for (var k in bag) {
+                  if (!Object.prototype.hasOwnProperty.call(bag, k)) continue;
+                  var qty = Number(bag[k]);
+                  if (isFinite(qty) && qty > 0) bits.push(k + " " + qty);
+                }
+              }
+              goodsEl.textContent = bits.length
+                ? bits.join(" · ") + " · PAPER · SIMULATED"
+                : "PAPER · SIMULATED";
+            }
+          })
+          .catch(function () {});
+        fetch("/api/statutes")
+          .then(function (r) {
+            return r && r.ok ? r.json() : null;
+          })
+          .then(function (d) {
+            var taxEl = document.getElementById("tax");
+            if (!taxEl) return;
+            var rate = 0;
+            var rows = d && d.statutes;
+            if (Array.isArray(rows)) {
+              for (var i = 0; i < rows.length; i++) {
+                var row = rows[i];
+                if (row && (row.id === "sales_tax" || row.id === "sales-tax")) {
+                  if (row.enabled === false) rate = 0;
+                  else if (row.sliders && row.sliders.rate != null) rate = Number(row.sliders.rate) || 0;
+                  else rate = Number(row.rate) || 0;
+                  break;
+                }
+              }
+            }
+            var pct = Math.round(rate * 10000) / 100;
+            if (!isFinite(pct) || pct <= 0) pct = 0;
+            taxEl.textContent = "PAPER · SIMULATED · Sales tax " + pct + "%";
           })
           .catch(function () {});
         // Nearby must read PAPER walkers before main.js. `/g/hud47` showed

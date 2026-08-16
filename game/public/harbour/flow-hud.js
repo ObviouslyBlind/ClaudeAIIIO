@@ -12,7 +12,7 @@ function num(v) {
 
 function fmtAmt(v) {
   const n = num(v);
-  if (n == null) return "—";
+  if (n == null) return "0";
   return n.toLocaleString("en-US", { maximumFractionDigits: 2 });
 }
 
@@ -27,7 +27,8 @@ function flowOf(data) {
 export function formatFlowLine(data) {
   const { faucet, sink } = flowOf(data);
   const mode = (data && data.mode) || "PAPER";
-  return `Faucet ${fmtAmt(faucet)} · sink ${fmtAmt(sink)} · ${mode}`;
+  const provenance = (data && data.provenance) || "SIMULATED";
+  return `${mode} · ${provenance} · Faucet ${fmtAmt(faucet)} · sink ${fmtAmt(sink)}`;
 }
 
 function ensureFlow() {
@@ -66,7 +67,8 @@ export function mountFlowHud(opts = {}) {
   }
 
   if (el) {
-    el.textContent = formatFlowLine(null);
+    const already = String(el.textContent || "");
+    if (!already.includes("PAPER")) el.textContent = formatFlowLine(null);
     if (el.setAttribute) el.setAttribute("title", "PAPER · SIMULATED");
     refresh();
     timer = setInterval(refresh, POLL_MS);

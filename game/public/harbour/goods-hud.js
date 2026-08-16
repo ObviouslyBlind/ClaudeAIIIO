@@ -53,9 +53,10 @@ function heldBits(data) {
 
 export function formatGoodsLine(data) {
   const mode = (data && data.mode) || "PAPER";
+  const provenance = (data && data.provenance) || "SIMULATED";
   const bits = heldBits(data);
-  if (!bits.length) return mode;
-  return `${bits.join(" · ")} · ${mode}`;
+  if (!bits.length) return `${mode} · ${provenance}`;
+  return `${bits.join(" · ")} · ${mode} · ${provenance}`;
 }
 
 function ensureGoods() {
@@ -92,7 +93,8 @@ export function mountGoodsHud(opts = {}) {
   }
 
   if (el) {
-    el.textContent = formatGoodsLine(null);
+    const already = String(el.textContent || "");
+    if (!already.includes("PAPER")) el.textContent = formatGoodsLine(null);
     if (el.setAttribute) el.setAttribute("title", "PAPER · SIMULATED");
     refresh();
     timer = setInterval(refresh, POLL_MS);

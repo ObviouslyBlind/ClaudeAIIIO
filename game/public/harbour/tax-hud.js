@@ -47,7 +47,8 @@ export function salesTaxRateFrom(data) {
 
 export function formatTaxLine(data) {
   const mode = (data && data.mode) || "PAPER";
-  return `Sales tax ${fmtPct(salesTaxRateFrom(data))}% · ${mode}`;
+  const provenance = (data && data.provenance) || "SIMULATED";
+  return `${mode} · ${provenance} · Sales tax ${fmtPct(salesTaxRateFrom(data))}%`;
 }
 
 function ensureTax() {
@@ -101,7 +102,8 @@ export function mountTaxHud(opts = {}) {
   }
 
   if (el) {
-    el.textContent = formatTaxLine(null);
+    const already = String(el.textContent || "");
+    if (!already.includes("PAPER")) el.textContent = formatTaxLine(null);
     if (el.setAttribute) el.setAttribute("title", "PAPER · SIMULATED");
     refresh();
     timer = setInterval(refresh, POLL_MS);
