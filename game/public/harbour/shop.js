@@ -6,9 +6,9 @@ import * as THREE from "three";
  * scale beside the till, a small kraft scale weight beside the scale, a
  * kraft wrapped parcel, a standing kraft shopping bag, a small kraft
  * receipt slip, a small kraft receipt, a small kraft ink stamp, a tiny
- * kraft coin, a tiny kraft blotter, a short wall shelf with two kraft
- * boxes, plus two shelf bays — not the house living room and not the
- * warehouse. No WASD.
+ * kraft coin, a tiny kraft blotter, a tiny kraft pencil, a short wall
+ * shelf with two kraft boxes, plus two shelf bays — not the house living
+ * room and not the warehouse. No WASD.
  * Tap-to-walk stays in interior.js.
  *
  * Call dressShop(scene) when plot.kind or plot.use is "shop" or "house_shop".
@@ -337,6 +337,28 @@ function kraftBlotter(x, y, z) {
 }
 
 /**
+ * Tiny kraft PAPER pencil on the counter: wood shaft + strap tip.
+ * Paper boxes only. Beside the till — not on the blotter, coin, receipt,
+ * or stamp. Existing hexes only.
+ */
+function kraftPencil(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "shop-pencil";
+  g.userData.kind = "shop-pencil";
+  g.userData.mode = "PAPER";
+  g.userData.part = "pencil";
+  g.position.set(x, y, z);
+  const shaft = paperBox(0.11, 0.012, 0.012, WOOD, "shop-pencil");
+  shaft.userData.part = "pencil";
+  g.add(shaft);
+  const tip = paperBox(0.018, 0.008, 0.008, STRAP, "shop-pencil");
+  tip.userData.part = "pencil";
+  tip.position.x = 0.062;
+  g.add(tip);
+  return g;
+}
+
+/**
  * Small kraft PAPER ink stamp on the counter: wood handle, strap neck,
  * coral pad. Paper boxes only. Beside the till — not on the drawer,
  * scale, weight, slip, parcel, or bag.
@@ -454,6 +476,8 @@ function makeCounter(x, z) {
   g.add(kraftCoin(0.88, topY + 0.054, 0.28));
   // Tiny kraft blotter beside the till — flat cream pad + wood board.
   g.add(kraftBlotter(-1.18, topY + 0.054, 0.26));
+  // Tiny kraft pencil beside the till — wood shaft + strap tip.
+  g.add(kraftPencil(-1.32, topY + 0.056, -0.18));
   // Two small kraft / terracotta jars beside the till. Original TIN + CORAL.
   const kraftJar = paperBox(0.12, 0.16, 0.12, TIN, "shop-goods");
   kraftJar.position.set(0.48, topY + 0.13, -0.04);
