@@ -307,6 +307,48 @@ describe("harbour PAPER pedestrians", () => {
     }
   });
 
+  it("pins a kraft PAPER hat pin on quay walkers, not verge strollers", () => {
+    const kraftPin = new Set([0xc4b496, 0xc4a574, 0x4a3220]);
+    const figure = makePaperPerson(0);
+    expect(partsOf(figure).get("pin")).toBeUndefined();
+
+    const { people } = spawn();
+    const quay = people.filter((p) => p.lane === "quay");
+    const verge = people.filter((p) => p.lane === "verge");
+    expect(quay.length).toBeGreaterThanOrEqual(4);
+
+    for (const p of quay) {
+      const parts = partsOf(p.mesh);
+      expect(parts.get("pin")).toBeGreaterThanOrEqual(1);
+      expect(parts.get("tin")).toBeGreaterThanOrEqual(1);
+      expect(parts.get("shoe")).toBe(2);
+      expect(parts.get("hat")).toBe(2);
+      expect(parts.get("apron")).toBe(1);
+      expect(parts.get("satchel")).toBe(1);
+      expect(parts.get("glove")).toBe(2);
+      expect(parts.get("boot")).toBe(2);
+      p.mesh.traverse((obj) => {
+        if (obj.userData?.part !== "pin") return;
+        const mesh = obj as THREE.Mesh;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect((mesh.material as THREE.MeshLambertMaterial).type).toBe("MeshLambertMaterial");
+        const hex = (mesh.material as THREE.MeshLambertMaterial).color.getHex();
+        expect(isGrey(hex)).toBe(false);
+        expect(kraftPin.has(hex)).toBe(true);
+        const { width, height, depth } = (mesh.geometry as THREE.BoxGeometry).parameters;
+        expect(width).toBeLessThan(0.16);
+        expect(height).toBeLessThan(0.12);
+        expect(depth).toBeLessThan(0.16);
+        expect(mesh.position.y).toBeGreaterThan(1.8);
+        expect(mesh.position.y).toBeLessThan(2.05);
+      });
+    }
+
+    for (const p of verge) {
+      expect(partsOf(p.mesh).get("pin")).toBeUndefined();
+    }
+  });
+
   it("puts kraft work-boot shafts above each shoe", () => {
     const kraftShoe = new Set([0x4a3220, 0xc4b496]);
     const figure = makePaperPerson(0);
