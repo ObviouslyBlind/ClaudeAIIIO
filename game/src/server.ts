@@ -27,6 +27,8 @@ function snapshot() {
     hud: hud(world),
     calendar: calendarHud(world.tick),
     lastPrices: world.lastPrice,
+    lastPricesSouth: world.lastPriceSouth,
+    arbSpread: world.arbSpread,
     visitor: {
       cash: visitor.cash,
       stock: visitor.stock,
