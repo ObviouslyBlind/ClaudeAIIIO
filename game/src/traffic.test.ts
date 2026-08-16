@@ -117,6 +117,7 @@ describe("road node traffic", () => {
     expect(parts.get("plate")).toBeGreaterThanOrEqual(1);
     expect(parts.get("hub")).toBe(4);
     expect(parts.get("aerial")).toBe(1);
+    expect(parts.get("wiper")).toBeGreaterThanOrEqual(2);
     expect(colors).toContain(0xc45c3a);
     expect(mast).toBe(0);
     expect(mesh.children.length).toBeGreaterThan(6);
@@ -203,6 +204,35 @@ describe("road node traffic", () => {
       expect(geo.parameters.width).toBeLessThan(0.12);
       expect(geo.parameters.depth).toBeLessThan(0.12);
       expect(aerial.position.y).toBeGreaterThan(1.5);
+    }
+  });
+
+  it("puts two thin kraft PAPER wipers on every sedan windscreen", () => {
+    const board = createLandBoard();
+    const scene = { add() {} };
+    const traffic = createTraffic({
+      scene,
+      getMap: () => board,
+      specOf: (id: "north" | "south") => ISLANDS[id],
+      heightAt,
+    });
+    expect(traffic.cars.length).toBeGreaterThan(0);
+    for (const car of traffic.cars) {
+      const wipers: THREE.Mesh[] = [];
+      car.mesh.traverse((obj: THREE.Object3D) => {
+        if (obj.userData?.part === "wiper") wipers.push(obj as THREE.Mesh);
+      });
+      expect(wipers.length).toBeGreaterThanOrEqual(2);
+      for (const wiper of wipers) {
+        const mat = wiper.material as THREE.MeshLambertMaterial;
+        expect(mat.color.getHex()).toBe(0xf4ead8);
+        const geo = wiper.geometry as THREE.BoxGeometry;
+        expect(geo.parameters.height).toBeLessThan(0.12);
+        expect(geo.parameters.depth).toBeLessThan(0.12);
+        expect(wiper.position.z).toBeGreaterThan(0.6);
+        expect(wiper.position.y).toBeGreaterThan(0.9);
+        expect(wiper.position.y).toBeLessThan(1.5);
+      }
     }
   });
 });

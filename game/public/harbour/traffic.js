@@ -46,7 +46,7 @@ function part(mesh, name) {
   return mesh;
 }
 
-/** Sedan: painted body, glass cabin, bumpers, kraft lamps, chrome side mirrors, four wheels with kraft hub boxes, short kraft roof aerial. No debug masts. */
+/** Sedan: painted body, glass cabin, bumpers, kraft lamps, chrome side mirrors, four wheels with kraft hub boxes, short kraft roof aerial, two kraft PAPER wipers. No debug masts. */
 function makeCar(color) {
   const g = new THREE.Group();
   g.frustumCulled = false;
@@ -87,6 +87,13 @@ function makeCar(color) {
   const wind = part(new THREE.Mesh(new THREE.BoxGeometry(1.78, 0.42, 0.08), glass), "glass");
   wind.position.set(0, 1.28, 0.72);
   g.add(wind);
+
+  /** Two thin kraft PAPER wipers on the windscreen — parked blades, not chrome. Same 0xf4ead8 as the aerial. */
+  for (const x of [-0.38, 0.38]) {
+    const wiper = part(new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.03, 0.04), kraft), "wiper");
+    wiper.position.set(x, 1.1, 0.78);
+    g.add(wiper);
+  }
 
   const rearGlass = part(new THREE.Mesh(new THREE.BoxGeometry(1.78, 0.42, 0.08), glass), "glass");
   rearGlass.position.set(0, 1.28, -1.12);
