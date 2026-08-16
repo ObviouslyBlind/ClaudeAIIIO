@@ -338,6 +338,30 @@ export const QUAY_LAND_SPOTS = Object.freeze([
 ]);
 
 /**
+ * Dark rubber tyre hung off the timber lip toward the water.
+ * PAPER torus + cylinder lanyard. Bollard greys already in this file —
+ * not a highway wheel, not a new grey hex.
+ */
+function fender() {
+  const g = new THREE.Group();
+  g.userData.dress = "fender";
+
+  const lanyard = cyl(0.03, 0.03, 0.38, 0x3a3d44, 6, false);
+  lanyard.position.y = -0.1;
+
+  const tyre = new THREE.Mesh(
+    new THREE.TorusGeometry(0.4, 0.14, 8, 10),
+    new THREE.MeshLambertMaterial({ color: 0x2a2d32 }),
+  );
+  tyre.position.y = -0.62;
+  tyre.castShadow = true;
+  tyre.receiveShadow = true;
+
+  g.add(lanyard, tyre);
+  return g;
+}
+
+/**
  * Extra kraft PAPER coils on the timber deck of each quay.
  * Local x is east of the port; along is toward the water from pier centre.
  * Stay on the 11 m deck, off the centre walk, short of the ferry berth.
@@ -357,6 +381,18 @@ export const LIFE_RING_SPOTS = Object.freeze([
   Object.freeze({ x: 4.95, along: -16 }),
   Object.freeze({ x: -4.95, along: 14 }),
   Object.freeze({ x: 4.95, along: 14 }),
+]);
+
+/**
+ * Rubber tyres on the seaward timber face. Local x is east of the port;
+ * along is toward the water from pier centre. Just past the 43 m lip
+ * (pier is 86 m long), still on the 11 m width.
+ */
+export const FENDER_SPOTS = Object.freeze([
+  Object.freeze({ x: -3.7, along: 43.22 }),
+  Object.freeze({ x: -1.25, along: 43.22 }),
+  Object.freeze({ x: 1.25, along: 43.22 }),
+  Object.freeze({ x: 3.7, along: 43.22 }),
 ]);
 
 export function quayWorldPoint(spec, localX, along) {
@@ -493,6 +529,13 @@ export function makeQuay(spec, helpers) {
     ring.rotation.y = spot.x > 0 ? -0.12 : 0.18;
     root.add(ring);
   }
+
+  FENDER_SPOTS.forEach((spot, i) => {
+    const tyre = fender();
+    tyre.position.set(x + spot.x, deckY, pierZ + toward * spot.along);
+    tyre.rotation.z = (i % 2 ? 1 : -1) * 0.1;
+    root.add(tyre);
+  });
 
   for (const spot of QUAY_LAND_SPOTS) {
     const at = quayWorldPoint(spec, spot.x, spot.along);

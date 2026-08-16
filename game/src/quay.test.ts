@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import * as THREE from "three";
 import { distToPaved, heightAt, ISLANDS, ROAD_CLEAR } from "./land.ts";
 import {
+  FENDER_SPOTS,
   makeQuay,
   PIER_PALM_OFFSETS,
   QUAY_DECK_SPOTS,
@@ -104,6 +105,44 @@ describe("quay harbour dressing", () => {
         expect(hit).toBe(true);
       }
       expect(hexes(root)).toContain(0xc4a06a);
+    }
+  });
+
+  it("hangs rubber tyre fenders off the seaward timber face, original bollard greys", () => {
+    expect(FENDER_SPOTS.length).toBeGreaterThanOrEqual(4);
+    for (const spot of FENDER_SPOTS) {
+      expect(Math.abs(spot.x)).toBeLessThan(5.5);
+      expect(spot.along).toBeGreaterThan(42);
+      expect(spot.along).toBeLessThan(44);
+    }
+
+    const knownGrey = new Set([0x2a2d32, 0x3a3d44]);
+    for (const id of ["north", "south"] as const) {
+      const spec = ISLANDS[id];
+      const toward = id === "north" ? 1 : -1;
+      const pierZ = spec.port.z + toward * 38;
+      const added: THREE.Object3D[] = [];
+      const scene = { add(obj: THREE.Object3D) { added.push(obj); } };
+      const root = makeQuay(spec, { scene, heightAt });
+      const fenders = collectDress(root, "fender");
+      expect(fenders.length).toBeGreaterThanOrEqual(4);
+      expect(fenders.every((f) => f.userData.dress === "fender")).toBe(true);
+
+      const colors = fenders.flatMap((f) => hexes(f));
+      expect(colors).toContain(0x2a2d32);
+      expect(colors).toContain(0x3a3d44);
+      for (const hex of colors) {
+        if (isGrey(hex)) expect(knownGrey.has(hex)).toBe(true);
+      }
+
+      for (const spot of FENDER_SPOTS) {
+        const hit = fenders.some((f) => {
+          const dx = Math.abs(f.position.x - (spec.port.x + spot.x));
+          const dz = Math.abs(f.position.z - (pierZ + toward * spot.along));
+          return dx < 0.05 && dz < 0.05;
+        });
+        expect(hit).toBe(true);
+      }
     }
   });
 });
