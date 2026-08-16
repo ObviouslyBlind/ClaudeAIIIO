@@ -85,7 +85,7 @@ function labelGood(g) {
   return String(g).replace(/_/g, " ");
 }
 
-/** Visible PAPER market stand: deck, posts, price board, striped awning, counter, crates, hanging scale, produce basket, oil lantern, melon, kraft cone, hanging fish, ground crate. */
+/** Visible PAPER market stand: deck, posts, price board, striped awning, counter, crates, hanging scale, produce basket, oil lantern, melon, kraft cone, hanging fish, ground crate, kraft price slate. */
 export function makeStallMesh(plot) {
   const g = new THREE.Group();
   g.name = "npc-stall";
@@ -320,6 +320,28 @@ export function makeStallMesh(plot) {
   lanternBase.userData.part = "lantern";
   lantern.add(lanternCord, lanternBail, lanternHood, lanternGlass, lanternPane, lanternBase);
   g.add(lantern);
+
+  // One small kraft price slate hanging on the stall front — lantern already
+  // hangs under the awning, so this is the cream ticket instead of a second
+  // lamp. Wood frame + plaster cream face. Local offset only — stall world
+  // pose stays put. PAPER boxes. Existing hexes. Melon, cone, lantern, fish,
+  // and ground crate stay put.
+  const slate = new THREE.Group();
+  slate.name = "slate";
+  slate.userData.part = "slate";
+  slate.userData.mode = "PAPER";
+  slate.userData.paper = true;
+  slate.position.set(0, 1.52, 1.30);
+  const slateCord = paperBox(0.02, 0.12, 0.02, WOOD, false);
+  slateCord.position.y = 0.22;
+  slateCord.userData.part = "slate";
+  const slateFrame = paperBox(0.28, 0.34, 0.04, WOOD, false);
+  slateFrame.userData.part = "slate";
+  const slateFace = paperBox(0.22, 0.26, 0.03, PLASTER, false);
+  slateFace.position.set(0, 0, 0.035);
+  slateFace.userData.part = "slate";
+  slate.add(slateCord, slateFrame, slateFace);
+  g.add(slate);
 
   // One small kraft hanging fish under the awning, offset from the lantern,
   // so the stall reads as a harbour stand. PAPER body + tail boxes. Harbour
