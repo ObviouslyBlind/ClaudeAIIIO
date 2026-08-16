@@ -74,7 +74,12 @@ function paperLamp() {
   cap.position.y = 2.9;
   cap.userData.part = "cap";
 
-  g.add(post, collar, glass, cap);
+  const brace = part(0.06, 0.32, 0.06, WOOD);
+  brace.position.set(0.14, 2.14, 0);
+  brace.rotation.z = 0.7;
+  brace.userData.part = "brace";
+
+  g.add(post, collar, glass, cap, brace);
   return g;
 }
 
