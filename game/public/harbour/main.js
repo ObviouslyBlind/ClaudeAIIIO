@@ -671,6 +671,12 @@ function onPointer(ev) {
   }
 }
 
+function applySnapshot(snapshot) {
+  if (!snapshot || !snapshot.plots) return;
+  map = snapshot;
+  refreshHud();
+}
+
 async function lease() {
   if (!selected) return;
   const res = await fetch("/api/lease", {
@@ -680,12 +686,12 @@ async function lease() {
   });
   const body = await res.json();
   if (!body.ok) {
+    applySnapshot(body.snapshot);
     setStatus("Could not lease: " + body.reason);
     return;
   }
-  map = body.snapshot;
+  applySnapshot(body.snapshot);
   paintParcel(map.plots.find((x) => x.id === selected));
-  refreshHud();
   setStatus("This land is yours for $" + money(body.paid) + " (PAPER). Develop it.");
 }
 
@@ -697,16 +703,16 @@ async function developAt(plotId, use) {
   });
   const body = await res.json();
   if (!body.ok) {
+    applySnapshot(body.snapshot);
     setStatus("Could not develop: " + body.reason);
     return false;
   }
-  map = body.snapshot;
+  applySnapshot(body.snapshot);
   selected = plotId;
   useFor(map.plots.find((x) => x.id === plotId));
   paintParcel(map.plots.find((x) => x.id === plotId));
   placingUse = null;
   if (catalogPicker) catalogPicker.close();
-  refreshHud();
   setStatus("Developed this land as a " + catalogLabel(use) + " (PAPER).");
   return true;
 }
@@ -721,7 +727,7 @@ function openCatalog() {
     return;
   }
   if (!canOpenCatalog()) return;
-  catalogPicker.open(map.catalog, map.visitor.cash);
+  catalogPicker.open(map.catalog && map.catalog.length ? map.catalog : null, map.visitor.cash);
   setStatus("Choose a building (PAPER). Then tap your leased land.");
 }
 
