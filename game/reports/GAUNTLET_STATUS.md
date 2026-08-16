@@ -12,7 +12,7 @@ Inland spawn, paved ribbon, dirt, cars, yellow taxi, trees+cart, lease → House
 
 ## Held (code, live on the same page as the ferry)
 
-Shore foam (denser quay dashes), quay clutter, building shells, window lights (warmer glow), stalls (awning stripes), pedestrians (cloth colours + extra quay walker), nametags (larger kraft cards), warehouse (floor crates)/factory (floor machines)/shop (counter)/farm (crop beds)/house-shop (shelves) interiors, presence, cart (crate + canvas strap), staff hire/fire, bid/ask/sell/cancel + market cancel button, North/South books, upkeep, persist dump + restore control, lease afford, player "You · PAPER" tag + satchel, north and south port signs, calendar, develop afford, ferry fare, taxi fare, sales tax, held-goods, faucet/sink, stall last-print, quay lamp posts, street verge lamps, House chimney + porch slab + shutters, deeper quay-channel water, spawn verge trees, taxi roof sign + door handles, sedan paint + mirrors, warmer sky haze, House downstairs table, extra quay coils, verge crate seats, kraft ferry-ticket stamp, ferry deck bollards.
+Shore foam (chunky kraft bars beside the pier — `/g/shore38` FAIL FOAM was 0.14 m hairlines), quay clutter, building shells, window lights (warmer glow), stalls (awning stripes + lantern), pedestrians (cloth colours + kerchief), nametags (larger kraft cards), warehouse (floor crates)/factory (floor machines)/shop (counter)/farm (crop beds)/house-shop (shelves) interiors, presence, cart (crate + canvas strap), staff hire/fire, bid/ask/sell/cancel + market cancel button, North/South books, upkeep, persist dump + restore control, lease afford, player "You · PAPER" tag + satchel, north and south port signs, calendar, develop afford, ferry fare, taxi fare, sales tax, held-goods, faucet/sink, stall last-print, quay lamp posts, street verge lamps, House chimney + porch slab + shutters, deeper quay-channel water, spawn verge trees, taxi roof sign + door handles, sedan paint + mirrors, warmer sky haze, House downstairs table + clock, extra quay coils, verge crate seats, kraft ferry-ticket stamp, ferry deck bollards, quay tyre fenders.
 
 ## Pixel ferry
 
@@ -22,13 +22,17 @@ Shore foam (denser quay dashes), quay clutter, building shells, window lights (w
 `/?g=ferry34` **FAIL BOOT**: stale tab `/?g=ferry32`.
 `/g/ferry35` **FAIL HULL**: inland look.
 `/g/ferry36` **FAIL NO ORBIT**: computerUse cannot emit trusted RMB. Do not ask later critics to orbit.
-`/g/ferry37` **PASS**: cyan sky, North port · PAPER, $1000, cream hull in the water at the north quay. Spawn looks seaward.
+`/g/ferry37` **PASS**: cyan sky, North port · PAPER, $1000, cream hull in the water at the north quay.
+
+## Pixel shore foam
+
+`/g/shore38` **FAIL FOAM**: cyan sky, pier, cream hull, but no readable kraft foam dashes (0.14 m slabs). Bars are now 0.72 m tall at `PIER_FOAM_Y=0.48` beside the pier. Next `/g/shore39`.
 
 ## In flight (not ferry-only)
 
-Pixel: kraft/cream shore foam dashes in the north-quay basin `http://localhost:8787/g/shore38`. No RMB. Close other Two Harbors tabs. Address bar must be `/g/shore38`. Do not restart play while the critic is on the page.
+Pixel: kraft/cream shore foam bars in the north-quay basin `http://localhost:8787/g/shore39`. No RMB. Close other Two Harbors tabs. Address bar must be `/g/shore39`. Do not restart play while the critic is on the page.
 
-## Next pixel (after shore38 PASS, immediately, no wait)
+## Next pixel (after shore39 PASS, immediately, no wait)
 
 Quay clutter, shells+lights, stalls, econ/nearby/staff lines, pedestrians, nametags, interiors.
 
