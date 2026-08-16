@@ -2,8 +2,8 @@ import * as THREE from "three";
 
 /**
  * PAPER factory interior dress. Workbenches, kraft machine boxes, iron
- * stock, cooler light — not the house living room, warehouse crates, shop,
- * or farm. No WASD. Tap-to-walk stays in interior.js.
+ * stock, hanging wrench, cooler light — not the house living room,
+ * warehouse crates, shop, or farm. No WASD. Tap-to-walk stays in interior.js.
  *
  * Call dressFactory(scene) when plot.kind or plot.use is "factory".
  * Idempotent: a second call only shows the existing dress.
@@ -295,6 +295,34 @@ function barRack(x, z, yaw) {
   return g;
 }
 
+/**
+ * Hanging iron open-end wrench on a wall peg. PAPER boxes only —
+ * not a mill, not a crate, not a farm rake. Reads from the enter camera.
+ */
+function hangingWrench(x, y, z, yaw = 0) {
+  const g = new THREE.Group();
+  g.name = "factory-tool";
+  g.userData.kind = "factory-tool";
+  g.userData.mode = "PAPER";
+  g.userData.part = "wrench";
+  g.position.set(x, y, z);
+  g.rotation.y = yaw;
+  const peg = paperBox(0.06, 0.06, 0.1, IRON_DARK, "factory-tool");
+  peg.position.set(0, 0.22, -0.04);
+  const handle = paperBox(0.055, 0.42, 0.05, IRON, "factory-tool");
+  handle.position.set(0, -0.08, 0);
+  const neck = paperBox(0.08, 0.06, 0.06, IRON_LIGHT, "factory-tool");
+  neck.position.set(0, 0.16, 0);
+  const jaw = paperBox(0.16, 0.08, 0.07, IRON_LIGHT, "factory-tool");
+  jaw.position.set(0.02, 0.24, 0);
+  const prongA = paperBox(0.05, 0.1, 0.06, IRON, "factory-tool");
+  prongA.position.set(0.1, 0.32, 0);
+  const prongB = paperBox(0.05, 0.08, 0.06, IRON_RUST, "factory-tool");
+  prongB.position.set(-0.04, 0.3, 0);
+  g.add(peg, handle, neck, jaw, prongA, prongB);
+  return g;
+}
+
 function hangingLamp(x, y, z) {
   const g = new THREE.Group();
   g.name = "factory-lamp";
@@ -372,6 +400,8 @@ function makeFactoryDress() {
 
   g.add(hangingLamp(-0.7, 2.18, -0.35));
   g.add(hangingLamp(1.15, 2.18, 0.45));
+  // Right wall, above the wood bench. Off the centre aisle (x≈0).
+  g.add(hangingWrench(3.28, 1.52, -2.08, 0));
   g.add(paperMark(-2.15, 1.55, 3.38));
 
   const postL = paperBox(0.14, 2.45, 0.14, IRON_DARK, "factory-prop");
