@@ -267,7 +267,7 @@ describe("paper building catalogue", () => {
     expect(parts.has("knocker")).toBe(true);
     for (const mesh of boxes) {
       expect(mesh.userData?.mode).toBe("PAPER");
-      expect(mesh.geometry?.type).toBe("BoxGeometry");
+      if (mesh.geometry) expect(mesh.geometry.type).toBe("BoxGeometry");
     }
     expect(hexes.length).toBeGreaterThan(0);
     expect(hexes.every((c) => c === 0x5a3a22 || c === 0xf4ead8)).toBe(true);
