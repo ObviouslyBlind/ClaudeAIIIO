@@ -12,7 +12,7 @@ Inland spawn, paved ribbon, dirt, cars, yellow taxi, trees+cart, lease → House
 
 ## Held (code, live on the same page as the ferry)
 
-Shore foam (denser quay dashes), quay clutter, building shells, window lights, stalls (awning stripes), pedestrians (cloth colours), nametags (larger kraft cards), warehouse/factory/shop/farm/house-shop interiors, presence, cart (crate + canvas), staff hire/fire, bid/ask/sell/cancel + market cancel button, North/South books, upkeep, persist dump + restore control, lease afford, player "You · PAPER" tag, north and south port signs, calendar, develop afford, ferry fare, taxi fare, sales tax, held-goods, faucet/sink, stall last-print, quay lamp posts, street verge lamps, House chimney, deeper quay-channel water, spawn verge trees.
+Shore foam (denser quay dashes), quay clutter, building shells, window lights, stalls (awning stripes), pedestrians (cloth colours), nametags (larger kraft cards), warehouse/factory/shop/farm/house-shop interiors, presence, cart (crate + canvas), staff hire/fire, bid/ask/sell/cancel + market cancel button, North/South books, upkeep, persist dump + restore control, lease afford, player "You · PAPER" tag, north and south port signs, calendar, develop afford, ferry fare, taxi fare, sales tax, held-goods, faucet/sink, stall last-print, quay lamp posts, street verge lamps, House chimney, deeper quay-channel water, spawn verge trees, taxi roof sign.
 
 ## Pixel ferry
 
@@ -21,7 +21,7 @@ Shore foam (denser quay dashes), quay clutter, building shells, window lights, s
 
 ## In flight (not ferry-only)
 
-Pixel: ferry hull at north quay `/?g=ferry32` (do not restart play). Also building: taxi roof lamp, sky haze, window-light warmth, traffic paint, warehouse crates, farm rows, shop counter.
+Pixel: ferry hull at north quay `/?g=ferry32` (do not restart play). Also building: sky haze, window-light warmth, traffic paint, warehouse crates, farm rows, shop counter, factory benches.
 
 ## Next pixel (after ferry32 PASS, immediately, no wait)
 
