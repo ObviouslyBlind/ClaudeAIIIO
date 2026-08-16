@@ -248,6 +248,28 @@ function makeCoffeeTable(x, z) {
   g.add(makeTableKnife(x - 0.32, topY + 0.03, z - 0.18));
   // Tiny kraft PAPER cup — offset from the knife, spoon, napkin, saucer.
   g.add(makeTableCup(x + 0.12, topY + 0.03, z + 0.18));
+  // Tiny kraft PAPER coaster — offset from the cup, knife, spoon, napkin.
+  g.add(makeTableCoaster(x + 0.42, topY + 0.03, z + 0.12));
+  return g;
+}
+
+/**
+ * Tiny kraft PAPER coaster on the living-room table — cream disc, wood ring.
+ * Offset from the cup, knife, spoon, napkin, and saucer.
+ * PAPER boxes only. No new hexes.
+ */
+function makeTableCoaster(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "house-shop-coaster";
+  g.userData.kind = "house-shop-coaster";
+  g.userData.mode = "PAPER";
+  g.userData.part = "coaster";
+  g.position.set(x, y, z);
+  const disc = paperBox(0.1, 0.01, 0.1, CREAM, "house-shop-coaster");
+  disc.position.set(0, 0.005, 0);
+  const ring = paperBox(0.06, 0.008, 0.06, WOOD, "house-shop-coaster");
+  ring.position.set(0, 0.012, 0);
+  g.add(disc, ring);
   return g;
 }
 
