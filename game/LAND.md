@@ -20,7 +20,7 @@ Mechanic we copy: you do not receive a lot from a menu. You walk the world, tap 
 Two fictional Caribbean-scale islands (~8.0 × 4.4 km each), **ports about 13.9 km apart** across a channel. Metres, origin at the channel.
 
 - **Port** is public (pier + warehouse). You cannot buy the quay.
-- **Parcels** are irregular pieces of the island: street lots along a paved spine, fields behind them, a few shore lots. They are the dirt, not a numbered card. Vacant lots draw as faint **outlines** inset from the road, not translucent slabs over the pavement.
+- **Parcels** are irregular pieces of the island: street lots along a paved spine, fields behind them, a few shore lots. They are the dirt, not a numbered card. Vacant lots draw as faint **outlines** inset from the road, not translucent slabs over the pavement. Street lots are house-frontage (not 140 m slabs). NPC farms sit inland. From the north quay, $1000 PAPER can lease a vacant street lot and still afford a house.
 - **Paved road** is a **black tarmac spline** (control `nodes`, sampled `points`) from the port inland. No kerbs or dashed centre line. **Dirt tracks** out to fields. Parcel rings are rejected if any edge comes within 11 m of the paved centreline.
 - **Traffic (PAPER):** a few NPC cars loop the paved nodes. They do not leave the tarmac.
 - **North** costs more per m². Shore costs more than street; street more than field.

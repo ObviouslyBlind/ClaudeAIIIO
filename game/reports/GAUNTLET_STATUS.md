@@ -1,28 +1,21 @@
 # Gauntlet status
 
-Ten **builders** in parallel. Critics stay one-at-a-time (shared Chrome + PAPER cash).
+Mesh batch is on the branch. Critics stay one-at-a-time (shared Chrome + PAPER cash).
 
-## File lock (do not cross)
-
-| Agent | File only |
-|---|---|
-| tarmac ribbon | `roads.js` |
-| cars | `traffic.js` |
-| taxi cab | `taxi.js` (mesh only) |
-| ferry boat | `ferry.js` |
-| shore | `shore.js` |
-| building shells | `buildings.js` |
-| street props | `street-props.js` |
-| player | `player.js` |
-| sky | `sky.js` |
-| water | `water.js` |
-
-`main.js` is wired. Builders do **not** edit `main.js`, `land.ts` centres, `PLAN.md`, or `quay.js` (harbour-kit owns it).
-
-## Held
+## Held (pixel-ratified)
 
 Inland spawn, tarmac, HUD, traffic-on-road, taxi overlay, ferry ticket, RMB orbit, catalogue.
 
-## In flight
+## Mesh batch (code shipped, not re-critic’d)
 
-Interiors critic `/?g=int20`. Harbour-kit on `quay.js`.
+Tarmac ribbon, sedan cars, taxi cab, ferry boat, shore foam, street props, player figure, sky, water, quay clutter, building shells.
+
+## Interiors
+
+Round `/?g=int20` **BLOCKED**: inland tarmac walk only found $1,100+ lots. Cheap shore lots existed off to the sides. Fix: house-frontage street lots on that walk, NPC inland, vacant outlines a bit more visible. Retry next with a fresh `?g=`.
+
+## Next
+
+1. Restart play at Cash $1000.
+2. Interiors critic on a new query (`/?g=int21`). Cheap street lot on the inland walk, House $40, Enter, Exit.
+3. Then pixel-critic new meshes one at a time.
