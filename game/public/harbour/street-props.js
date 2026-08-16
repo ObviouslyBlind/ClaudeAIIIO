@@ -162,28 +162,35 @@ function streetSign(side) {
   return g;
 }
 
-/** Wood slats, iron legs. Back faces away from the tarmac. */
-function bench(side) {
+/**
+ * Pair of kraft crate seats on the verge. Wood boxes with a lid — not iron
+ * park-bench legs, not a highway furniture kit.
+ */
+function crateSeat(_side) {
   const g = new THREE.Group();
   g.userData.kind = "street-prop";
   g.userData.prop = "bench";
-  const away = side < 0 ? 1 : -1;
+  g.userData.mode = "PAPER";
+  g.userData.part = "crate-seat";
 
-  for (const zz of [-0.62, 0.62]) {
-    const leg = part(0.1, 0.42, 0.1, IRON);
-    leg.position.set(0, 0.21, zz);
-    g.add(leg);
+  for (const zz of [-0.5, 0.5]) {
+    const body = part(0.88, 0.42, 0.78, WOOD);
+    body.userData.part = "crate";
+    body.position.set(0, 0.21, zz);
+    const lid = part(0.94, 0.07, 0.84, WOOD_LIGHT, false);
+    lid.userData.part = "seat";
+    lid.position.set(0, 0.455, zz);
+    const strap = part(0.92, 0.05, 0.1, WOOD_DARK, false);
+    strap.position.set(0, 0.3, zz);
+    const rim = part(0.9, 0.04, 0.8, WOOD_DARK, false);
+    rim.position.set(0, 0.4, zz);
+    g.add(body, lid, strap, rim);
   }
-  const seat = part(0.42, 0.07, 1.55, WOOD_LIGHT);
-  seat.position.set(0, 0.44, 0);
-  const back = part(0.07, 0.48, 1.55, WOOD);
-  back.position.set(away * 0.2, 0.7, 0);
-  g.add(seat, back);
   return g;
 }
 
 function makeProp(kind, side) {
-  if (kind === "bench") return bench(side);
+  if (kind === "bench") return crateSeat(side);
   if (kind === "sign") return streetSign(side);
   return lampPost(side);
 }
@@ -270,8 +277,21 @@ function planForIsland(island, length) {
     plan.push({ along, side: -1, kind: "lamp", setback: streetSetbackM(idx++) });
     plan.push({ along, side: 1, kind: "lamp", setback: streetSetbackM(idx++) });
   }
-  for (let along = 38, n = 0; along <= portM; along += 72, n++) {
-    plan.push({ along, side: n % 2 ? 1 : -1, kind: "bench", setback: streetSetbackM(idx++) });
+  if (island === "north") {
+    // A few kraft crate seats on the spawn verge so the inland look-at sees them.
+    for (const s of [
+      { along: 26, side: -1 },
+      { along: 26, side: 1 },
+      { along: 62, side: 1 },
+      { along: 94, side: -1 },
+      { along: 148, side: 1 },
+    ]) {
+      plan.push({ along: s.along, side: s.side, kind: "bench", setback: streetSetbackM(idx++) });
+    }
+  } else {
+    for (let along = 38, n = 0; along <= portM; along += 72, n++) {
+      plan.push({ along, side: n % 2 ? 1 : -1, kind: "bench", setback: streetSetbackM(idx++) });
+    }
   }
   for (let along = 54, n = 0; along <= portM; along += 96, n++) {
     plan.push({ along, side: n % 2 ? -1 : 1, kind: "sign", setback: streetSetbackM(idx++) });
@@ -313,7 +333,7 @@ function placeOne(map, road, spec, heightAt, slot, root) {
 }
 
 /**
- * Paper lamp posts, benches, and signs along the paved spline, on the grass verge.
+ * Paper lamp posts, kraft crate seats, and signs along the paved spline, on the grass verge.
  * North port stretch is packed first so spawn looking inland actually sees them.
  */
 export function makeStreetProps(map, helpers) {
