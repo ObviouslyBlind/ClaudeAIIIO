@@ -15,6 +15,6 @@ Loop is **autonomous**. Critic = pixels only. User should not have to list remai
 
 ## Next critic
 
-Interiors (enter owned house). Restart play first so Cash is $1,000 again. Then `/?g=int20` after the current stuck interiors run ends.
+**Interiors retry** `/?g=int20`. Round 19 FAIL: leased a $983 lot, $17 left, House is $40. Headroom guard is live — pick a lot under $500.
 
 Do not rewrite PLAN.md or island centres.
