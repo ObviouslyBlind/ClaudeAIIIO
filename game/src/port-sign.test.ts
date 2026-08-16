@@ -154,18 +154,21 @@ describe("north port sign", () => {
     expect(posts.length).toBe(2);
 
     const boardGeom = (board as THREE.Mesh).geometry as THREE.BoxGeometry;
-    expect(boardGeom.parameters.width).toBeGreaterThanOrEqual(20);
-    expect(boardGeom.parameters.height).toBeGreaterThanOrEqual(10);
+    expect(boardGeom.parameters.width).toBeGreaterThanOrEqual(8);
+    expect(boardGeom.parameters.width).toBeLessThan(16);
+    expect(boardGeom.parameters.height).toBeGreaterThanOrEqual(5);
 
     const postGeom = posts[0].geometry as THREE.BoxGeometry;
-    expect(postGeom.parameters.height).toBeGreaterThanOrEqual(28);
-    expect(postGeom.parameters.width).toBeGreaterThanOrEqual(2.5);
+    expect(postGeom.parameters.height).toBeGreaterThanOrEqual(40);
+    expect(postGeom.parameters.width).toBeGreaterThanOrEqual(4);
 
     expect(face!.position.z).toBeLessThan(0);
     expect(Math.abs(face!.rotation.y)).toBeGreaterThan(3);
 
-    /** Seaward pier lip, beside the cream ferry / look-at — not the inland apron. */
-    expect(sign!.position.z).toBeGreaterThan(-6900);
-    expect(sign!.position.x).toBeGreaterThan(10);
+    /** Port pad (across < 16, along < 90) so heightAt is land, not water. */
+    expect(sign!.position.x).toBeGreaterThan(5);
+    expect(sign!.position.x).toBeLessThan(16);
+    expect(sign!.position.z).toBeGreaterThan(-6880);
+    expect(sign!.position.y).toBeGreaterThan(1);
   });
 });
