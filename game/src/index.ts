@@ -10,6 +10,13 @@ export {
   type Visitor,
 } from "./sim.ts";
 export {
+  createStatuteCatalog,
+  salesTaxRate,
+  ferryTicketCost,
+  type Statute,
+} from "./statutes.ts";
+export { simDay, nextGeneralDay, calendarHud } from "./calendar.ts";
+export {
   createLandBoard,
   leasePlot,
   developPlot,
