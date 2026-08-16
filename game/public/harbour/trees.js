@@ -445,8 +445,9 @@ function plantInstanced(root, placed) {
 
 /**
  * A few kraft PAPER coconut boxes at the base of north-port verge palms.
- * Original wood browns only. Off the tarmac (PAVED_CLEAR). Unique meshes —
- * one small box per palm — so the phone mesh budget stays tiny.
+ * Original wood browns only. Off the tarmac (PAVED_CLEAR / ROAD_CLEAR).
+ * Unique meshes — one small box per palm plus one extra — so the phone
+ * mesh budget stays tiny.
  */
 function plantNorthPortCoconuts(root, placed, map, specOf, heightAt) {
   const sites = placed.filter((p) => p.island === "north" && p.dress === "north-port-palm");
@@ -462,21 +463,20 @@ function plantNorthPortCoconuts(root, placed, map, specOf, heightAt) {
   group.userData.kind = "coconuts";
   group.userData.provenance = "PAPER";
 
-  for (let i = 0; i < sites.length; i++) {
-    const p = sites[i];
-    const yaw = hash(i * 4.1 + p.x) * Math.PI * 2;
-    const rad = 0.38 + hash(i * 2.3) * 0.22;
+  function addNut(i, p, yawSpin) {
+    const yaw = hash(i * 4.1 + p.x) * Math.PI * 2 + yawSpin;
+    const rad = 0.38 + hash(i * 2.3 + yawSpin) * 0.22;
     let x = p.x + Math.cos(yaw) * rad;
     let z = p.z + Math.sin(yaw) * rad;
     if (distToKind(map, "north", x, z, "paved") < PAVED_CLEAR_M) {
       x = p.x;
       z = p.z;
     }
-    if (distToKind(map, "north", x, z, "paved") < PAVED_CLEAR_M) continue;
-    if (onPublicQuay(spec, x, z)) continue;
+    if (distToKind(map, "north", x, z, "paved") < PAVED_CLEAR_M) return false;
+    if (onPublicQuay(spec, x, z)) return false;
     const y = heightAt(spec, x, z);
-    if (y < WATER_MIN_M) continue;
-    const nut = new THREE.Mesh(geo, hash(i * 3) > 0.45 ? matA : matB);
+    if (y < WATER_MIN_M) return false;
+    const nut = new THREE.Mesh(geo, hash(i * 3 + yawSpin) > 0.45 ? matA : matB);
     nut.name = "coconut";
     nut.userData.part = "coconut";
     nut.userData.dress = "coconut";
@@ -486,6 +486,15 @@ function plantNorthPortCoconuts(root, placed, map, specOf, heightAt) {
     nut.position.set(x, y + 0.08, z);
     nut.rotation.y = yaw;
     group.add(nut);
+    return true;
+  }
+
+  for (let i = 0; i < sites.length; i++) {
+    addNut(i, sites[i], 0);
+  }
+  // One extra kraft PAPER box under a north-port palm (same recipe).
+  for (let i = 0; i < sites.length; i++) {
+    if (addNut(i + 17, sites[i], Math.PI * 0.62)) break;
   }
   if (group.children.length) root.add(group);
 }
