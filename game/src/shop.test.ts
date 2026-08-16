@@ -65,6 +65,16 @@ function shopScales(root: THREE.Object3D) {
   return out;
 }
 
+function shopWeights(root: THREE.Object3D) {
+  const out: THREE.Object3D[] = [];
+  root.traverse((obj) => {
+    if (obj.userData?.kind === "shop-weight" && obj.name === "shop-weight") {
+      out.push(obj);
+    }
+  });
+  return out;
+}
+
 describe("shop PAPER wrapped parcel", () => {
   it("matches shop plots only", () => {
     expect(isShopPlot({ use: "shop" })).toBe(true);
@@ -364,6 +374,94 @@ describe("shop PAPER kraft counter scale", () => {
     expect(dress).toBeTruthy();
     expect(dress!.visible).toBe(false);
     expect(shopScales(interior).length).toBe(1);
+    expect(interior.userData.interiorUse).toBe("house");
+  });
+});
+
+describe("shop PAPER kraft scale weight", () => {
+  it("puts a small kraft PAPER weight on the shop counter beside the scale", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressShop(scene);
+
+    const dress = interior.getObjectByName("shop-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+
+    const counter = dress!.getObjectByName("shop-counter");
+    expect(counter).toBeTruthy();
+    const till = counter!.getObjectByName("shop-till");
+    expect(till).toBeTruthy();
+    expect(till!.userData.kind).toBe("shop-till");
+
+    const scales = shopScales(counter!);
+    expect(scales.length).toBe(1);
+    const scale = scales[0];
+
+    const weights = shopWeights(counter!);
+    expect(weights.length).toBe(1);
+
+    const weight = weights[0];
+    expect(weight.userData.kind).toBe("shop-weight");
+    expect(weight.userData.mode).toBe("PAPER");
+    expect(weight.parent?.name).toBe("shop-counter");
+    // On the counter beside the scale — not on the pan, not replacing it.
+    expect(weight.position.y).toBeGreaterThan(1.0);
+    expect(weight.position.y).toBeLessThan(1.4);
+    expect(Math.abs(weight.position.x)).toBeLessThan(1.5);
+    expect(Math.abs(weight.position.z)).toBeLessThan(0.5);
+    const dx = weight.position.x - scale.position.x;
+    const dz = weight.position.z - scale.position.z;
+    expect(Math.hypot(dx, dz)).toBeGreaterThan(0.12);
+    expect(Math.hypot(dx, dz)).toBeLessThan(0.55);
+    expect(shopScales(weight).length).toBe(0);
+
+    expect(shopParcels(counter!).length).toBe(1);
+    expect(shopBags(counter!).length).toBe(1);
+    expect(shopDrawers(till!).length).toBe(1);
+    expect(shopScales(counter!).length).toBe(1);
+    expect(counter!.getObjectByName("shop-wall-shelf")).toBeTruthy();
+
+    const colors = hexes(weight);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.every((c) => KRAFT.has(c))).toBe(true);
+    expect(colors.some((c) => c === CREAM)).toBe(true);
+    expect(colors.some((c) => c === WOOD)).toBe(true);
+    expect(colors.some((c) => c === STRAP)).toBe(true);
+    expect(colors.every((c) => !isGrey(c))).toBe(true);
+
+    let boxes = 0;
+    weight.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        boxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.kind).toBe("shop-weight");
+        expect(mesh.userData.mode).toBe("PAPER");
+      }
+    });
+    expect(boxes).toBeGreaterThanOrEqual(2);
+  });
+
+  it("keeps dress idempotent and hides the weight on undress", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressShop(scene);
+    dressShop(scene);
+    expect(interior.children.filter((c) => c.name === "shop-dress").length).toBe(1);
+    expect(shopWeights(interior).length).toBe(1);
+    expect(shopScales(interior).length).toBe(1);
+    expect(shopDrawers(interior).length).toBe(1);
+    expect(shopParcels(interior).length).toBe(1);
+    expect(shopBags(interior).length).toBe(1);
+
+    undressShop(scene);
+    const dress = interior.getObjectByName("shop-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.visible).toBe(false);
+    expect(shopWeights(interior).length).toBe(1);
     expect(interior.userData.interiorUse).toBe("house");
   });
 });
