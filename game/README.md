@@ -1,6 +1,6 @@
 # Two Harbors
 
-Persistent browser economy + politics game. Spec: [PLAN.md](PLAN.md). Skills: [SKILLS.md](SKILLS.md).
+Persistent browser economy + politics game. Spec: [PLAN.md](PLAN.md). Backend: [BACKEND.md](BACKEND.md). Skills: [SKILLS.md](SKILLS.md).
 
 ## Now (step A)
 
