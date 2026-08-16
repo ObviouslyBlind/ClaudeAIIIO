@@ -2,8 +2,8 @@ import * as THREE from "three";
 
 /** Same cyan as spawn `scene.fog` / `scene.background` (0x7ec8d4). */
 const HORIZON = 0x7ec8d4;
-/** Deeper daylight blue at zenith — no textures, no Earth, no cloud photos. */
-const ZENITH = 0x3f96c8;
+/** Slightly deeper daylight blue at zenith — same cyan family as 0x7ec8d4, not a CSS wall. */
+const ZENITH = 0x348cbe;
 /** Original PAPER kraft (signs, lamps). A little of this warms the cyan haze. */
 const PAPER = 0xefe4c8;
 /** Mix of original cyan toward PAPER — slight, not a sunset, not a new hex. */
