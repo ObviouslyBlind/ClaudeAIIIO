@@ -8,12 +8,14 @@ import { parseLandUse } from "./buildings.ts";
 import { buyAtIsland } from "./buy.ts";
 import { sellAtIsland } from "./sell.ts";
 import { createVisitor, createWorld, hud, tick } from "./sim.ts";
+import { cancelOrder } from "./cancelOrder.ts";
 import { listOpenOrders, placeAsk, placeBid } from "./orders.ts";
 import { postStaff, staffMapSnapshot } from "./staff-http.ts";
 import { bustHarbourAssets, bustModuleImports } from "./cache-bust.ts";
 import { confirmFerry, listFerryRoutes } from "./ferry-routes.ts";
 import { calendarHud } from "./calendar.ts";
 import { createPresence, presenceQuery } from "./presence.ts";
+import { walkSeededPresence } from "./presenceWalk.ts";
 import { dumpCart } from "./visitorCart.ts";
 
 const root = join(fileURLToPath(new URL(".", import.meta.url)), "..");
@@ -25,6 +27,7 @@ const visitor = createVisitor(1_000);
 const land = createLandBoard();
 const presence = createPresence();
 setInterval(() => tick(world, visitor, land), 1000);
+setInterval(() => walkSeededPresence(presence), 1000);
 
 function snapshot() {
   return {
@@ -169,6 +172,24 @@ const server = createServer(async (req, res) => {
       world.statutes,
     );
     json(res, result.ok ? 200 : 400, { ...result, snapshot: staffMapSnapshot(land, visitor) });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/order/cancel") {
+    const body = await readJsonBody(req);
+    if (!body) {
+      json(res, 400, { ok: false, reason: "bad_json", mode: "PAPER" });
+      return;
+    }
+    const result = cancelOrder(world, visitor, body.orderId ?? body.id);
+    json(res, result.ok ? 200 : 400, { ...result, snapshot: snapshot() });
+    return;
+  }
+
+  const cancelMatch = /^\/api\/order\/([^/]+)$/.exec(url.pathname);
+  if (req.method === "DELETE" && cancelMatch) {
+    const result = cancelOrder(world, visitor, cancelMatch[1]);
+    json(res, result.ok ? 200 : 400, { ...result, snapshot: snapshot() });
     return;
   }
 

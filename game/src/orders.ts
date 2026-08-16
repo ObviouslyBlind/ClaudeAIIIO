@@ -128,6 +128,24 @@ function publicOrder(row: Resting): VisitorOrder {
   };
 }
 
+/** Resting PAPER row plus owner. Cancel uses this; it is not a live book. */
+export type RestingOrder = Resting;
+
+/** Open (unfilled) PAPER visitor order on this world, any owner. */
+export function findRestingOrder(world: PaperWorld, orderId: number): Resting | undefined {
+  return listForWorld(world).find((row) => row.id === orderId && row.qty > 1e-9);
+}
+
+/** Drop a resting PAPER row from world and owner lists. */
+export function dropRestingOrder(world: PaperWorld, order: Resting): void {
+  const worldList = listForWorld(world);
+  const wi = worldList.indexOf(order);
+  if (wi >= 0) worldList.splice(wi, 1);
+  const visList = listForVisitor(order.visitor);
+  const vi = visList.indexOf(order);
+  if (vi >= 0) visList.splice(vi, 1);
+}
+
 function parseIntent(
   intent: OrderIntent,
 ): PlaceFail | { island: BookIsland; goodId: GoodId; price: number; qty: number } {
@@ -274,4 +292,31 @@ export function listOpenOrders(visitor: PaperVisitor): VisitorOrder[] {
   return listForVisitor(visitor)
     .filter((row) => row.qty > 1e-9)
     .map(publicOrder);
+}
+
+/**
+ * Re-seat dumped PAPER open orders after shard restore.
+ * Does not escrow cash or stock again. Does not match NPC books.
+ */
+export function restoreRestingOrders(
+  world: PaperWorld,
+  visitor: PaperVisitor,
+  orders: VisitorOrder[],
+): void {
+  for (const order of orders) {
+    if (order.qty <= 1e-9) continue;
+    const row: Resting = {
+      id: order.id,
+      island: order.island,
+      goodId: order.goodId,
+      side: order.side,
+      price: order.price,
+      qty: order.qty,
+      mode: "PAPER",
+      provenance: "SIMULATED",
+      visitor,
+    };
+    register(world, visitor, row);
+    if (world.nextOrderId <= order.id) world.nextOrderId = order.id + 1;
+  }
 }
