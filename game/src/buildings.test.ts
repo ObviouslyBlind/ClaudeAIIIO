@@ -157,6 +157,49 @@ describe("paper building catalogue", () => {
     expect(chimneyHexes.every((c) => c === 0x8a6a55 || c === 0xf4ead8)).toBe(true);
   });
 
+  it("puts a tiny kraft PAPER stoop at the House door", () => {
+    const house = meshForUse("house", { area: 400 });
+    const stoops: Array<{
+      userData?: { part?: string; mode?: string };
+      material?: { color?: { getHex: () => number } };
+      geometry?: { type?: string; parameters?: { width: number; height: number; depth: number } };
+    }> = [];
+    const parts = new Set<string>();
+    house.traverse((obj: unknown) => {
+      const mesh = obj as {
+        userData?: { part?: string; mode?: string };
+        material?: { color?: { getHex: () => number } };
+        geometry?: { type?: string; parameters?: { width: number; height: number; depth: number } };
+      };
+      const part = mesh.userData?.part;
+      if (part) parts.add(part);
+      if (part === "stoop" || part === "mat") stoops.push(mesh);
+    });
+    expect(stoops.length).toBeGreaterThanOrEqual(1);
+    expect(parts.has("chimney")).toBe(true);
+    expect(parts.has("shutter")).toBe(true);
+    expect(parts.has("knocker")).toBe(true);
+    for (const mesh of stoops) {
+      expect(mesh.userData?.mode).toBe("PAPER");
+      expect(mesh.geometry?.type).toBe("BoxGeometry");
+      if (mesh.material?.color) expect(mesh.material.color.getHex()).toBe(0xf4ead8);
+      const box = mesh.geometry?.parameters;
+      if (box) {
+        expect(box.width).toBeLessThan(1.2);
+        expect(box.height).toBeLessThan(0.16);
+        expect(box.depth).toBeLessThan(0.5);
+      }
+    }
+
+    const shop = meshForUse("shop", { area: 400 });
+    let shopStoops = 0;
+    shop.traverse((obj: unknown) => {
+      const mesh = obj as { userData?: { part?: string } };
+      if (mesh.userData?.part === "stoop" || mesh.userData?.part === "mat") shopStoops += 1;
+    });
+    expect(shopStoops).toBe(0);
+  });
+
   it("puts a kraft PAPER porch slab on the House so plots read as entered from the street", () => {
     const house = meshForUse("house", { area: 400 });
     const parts: string[] = [];
