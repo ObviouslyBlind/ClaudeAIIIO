@@ -92,11 +92,12 @@ describe("player PAPER handcart", () => {
     const cart = player.getObjectByName("paper-cart")!;
     expect(cart.children.length).toBe(CART_MESH_COUNT);
     expect(meshCount(cart)).toBe(CART_MESH_COUNT);
-    expect(CART_MESH_COUNT).toBe(16);
+    expect(CART_MESH_COUNT).toBe(18);
 
     const p = parts(cart);
     expect(p).toContain("bed");
     expect(p.filter((k) => k === "wheel").length).toBe(2);
+    expect(p.filter((k) => k === "hub").length).toBe(2);
     expect(p.filter((k) => k === "handle").length).toBe(2);
     expect(p).toContain("grip");
     expect(p.filter((k) => k === "crate").length).toBe(2);
@@ -108,6 +109,9 @@ describe("player PAPER handcart", () => {
 
     const wheels = cart.children.filter((c) => c.userData.part === "wheel") as THREE.Mesh[];
     expect(wheels.every((w) => w.geometry.type === "CylinderGeometry")).toBe(true);
+    const hubs = cart.children.filter((c) => c.userData.part === "hub") as THREE.Mesh[];
+    expect(hubs.every((h) => h.geometry.type === "BoxGeometry")).toBe(true);
+    expect(hubs.every((h) => (h.material as THREE.MeshLambertMaterial).color.getHex() === 0xc4b496)).toBe(true);
     const roll = cart.children.find((c) => c.userData.part === "roll") as THREE.Mesh;
     expect(roll.geometry.type).toBe("CylinderGeometry");
 
