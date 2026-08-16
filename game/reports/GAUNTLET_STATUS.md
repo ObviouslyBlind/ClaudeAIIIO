@@ -75,15 +75,16 @@ Spawn has no selected plot, so staff is `PAPER · SIMULATED · Staff —` (the d
 
 `/g/lamps55` **FAIL LAMPS**: pier and cream ferry in frame, but 0.4 m kraft glass on inland `along` values read as empty deck from the 24 m spawn camera.
 `/g/lamps56` **FAIL LAMPS**: 2.6 m glass still a speck — live camera sits ~130 m inland of the seaward lip.
-`/g/lamps57` **FAIL LAMPS**: 8 m cream cubes read as flat white pier planks, not posts with lanterns. Posts now reach past camera height with amber lanterns on top.
+`/g/lamps57` **FAIL LAMPS**: 8 m cream cubes read as flat white pier planks, not posts with lanterns.
+`/g/lamps58` **FAIL LAMPS**: still only flat cream rectangles on the deck; no vertical dark posts with amber lanterns. **Lamp round stopped.** Code stays; not pixel-held.
 
 ## In flight (not ferry-only)
 
-Pixel: **quay lamps (tall dark posts + amber lanterns)** at `http://localhost:8787/g/lamps58`. Seaward spawn, no RMB. Close other Two Harbors tabs. Address bar must be `/g/lamps58`. Do not restart play while the critic is on the page.
+Pixel: **north port kraft sign** (`North port · PAPER` board, east of the pier) at `http://localhost:8787/g/sign59`. Seaward spawn, no RMB. Close other Two Harbors tabs. Address bar must be `/g/sign59`. Do not restart play while the critic is on the page.
 
-## Next pixel (after lamps58 PASS, immediately, no wait)
+## Next pixel (after sign59 PASS, immediately, no wait)
 
-If lamps fail again, stop the lamp round and pick the next spawn-visible kraft bar. Shells+lights stay deferred until a human can orbit.
+Sage dinghies in the basin, or another spawn-visible kraft bar. Shells+lights stay deferred until a human can orbit.
 
 ## Frozen
 

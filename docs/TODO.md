@@ -25,7 +25,8 @@ Politics frozen. See `game/reports/GAUNTLET_STATUS.md`.
 - [x] Pixel HUD sheet (`/g/flow51` PASS — flow Faucet 0 · sink 0, tax 0%, goods PAPER · SIMULATED)
 - [x] Pixel HUD sheet (`/g/hud52` PASS — staff PAPER · SIMULATED · Staff —, ferry spread N/S numbers)
 - [x] Pixel ferry fender (`/g/fend54` PASS FENDER — dark tyre + kraft band on the north cream hull)
-- [ ] Pixel quay lamps (`http://localhost:8787/g/lamps58` after `/g/lamps55`–`/g/lamps57` FAIL LAMPS). Shells deferred: seaward spawn, no RMB)
+- [x] Pixel quay lamps (`/g/lamps55`–`/g/lamps58` FAIL LAMPS — round stopped, not pixel-held)
+- [ ] Pixel north port sign (`http://localhost:8787/g/sign59`). Shells deferred: seaward spawn, no RMB)
 
 ## Polymarket paper bot
 
