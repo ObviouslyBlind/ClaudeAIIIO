@@ -301,6 +301,28 @@ function kraftEraser(x, y, z, yaw = 0) {
 }
 
 /**
+ * Tiny kraft paper tack on the clipboard — wood head + strap pin.
+ * PAPER boxes only. Not an eraser, not a clip, not a stamp.
+ */
+function kraftTack(x, y, z, yaw = 0) {
+  const g = new THREE.Group();
+  g.name = "warehouse-tack";
+  g.userData.kind = "warehouse-tack";
+  g.userData.mode = "PAPER";
+  g.userData.part = "tack";
+  g.position.set(x, y, z);
+  g.rotation.y = yaw;
+  // Rest on the clipboard sheet, upper-left, clear of eraser, pencil, clip, stamp, chalk.
+  g.rotation.z = -0.08;
+  const head = paperBox(0.028, 0.01, 0.028, WOOD, "warehouse-tack");
+  head.position.set(-0.1, 0.12, 0.05);
+  const pin = paperBox(0.008, 0.008, 0.016, STRAP, "warehouse-tack");
+  pin.position.set(-0.1, 0.12, 0.058);
+  g.add(head, pin);
+  return g;
+}
+
+/**
  * Tiny kraft inventory card on a crate — cream sheet + strap stripe.
  * PAPER boxes only. Not a pencil, not twine, not chalk, not a broom.
  */
@@ -556,6 +578,9 @@ function makeWarehouseDress() {
   // Tiny kraft paper eraser on that clipboard sheet. Clear of stamp, clip,
   // pencil, card, twine, and chalk.
   g.add(kraftEraser(1.02, 1.58, -3.38));
+  // Tiny kraft paper tack on that clipboard sheet. Clear of eraser, pencil,
+  // clip, stamp, card, twine, and chalk.
+  g.add(kraftTack(1.02, 1.58, -3.38));
   // Tiny kraft twine ball on the back-right crate stack. Clear of pencil,
   // chalk, clipboard, pallet, dolly, and floor crates.
   g.add(kraftTwine(3.22, 1.56, -2.38, 0.18));
