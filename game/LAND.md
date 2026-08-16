@@ -24,4 +24,5 @@ Two fictional Caribbean-scale islands (~2.0 × 1.2 km each), **ports about 3.8 k
 - **Paved road** from the port inland; **dirt tracks** out to fields.
 - **North** costs more per m². Shore costs more than street; street more than field.
 - Tap the land → inspect (area, price). **Lease** (PAPER) → it is yours. **Develop** → farm on a field, stall on street/shore.
+- **Taxi** (PAPER): HUD button. Drives the paved spine only (`/api/map` roads with `kind === "paved"`). Collects you if you are on/near paved, then the next tap if that tap is on paved. Dirt tracks are forbidden.
 - Labelled SIMULATED. No wallet.
