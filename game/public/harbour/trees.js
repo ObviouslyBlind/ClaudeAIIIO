@@ -13,6 +13,19 @@ export const MAX_UNIQUE_MESHES = 80;
 /** Leaf blobs per trunk. */
 export const LEAVES_PER_TREE = 3;
 
+/**
+ * Extra PAPER palms on the north-port grass verge, inland of the quay.
+ * `along` is metres down the paved spline from the inland road head.
+ * Setback 14–16 m is off the tarmac (outside ROAD_CLEAR 11 / PAVED_CLEAR 12)
+ * and off onPublicQuay. Distinct from the d=22/38 verge loop.
+ */
+export const NORTH_PORT_PALM_OFFSETS = Object.freeze([
+  Object.freeze({ along: 10, side: -1, setback: 15 }),
+  Object.freeze({ along: 40, side: 1, setback: 14 }),
+  Object.freeze({ along: 78, side: -1, setback: 16 }),
+  Object.freeze({ along: 120, side: -1, setback: 15 }),
+]);
+
 const TRUNK = 0x8a6238;
 const TRUNK_WARM = 0x9a6a40;
 const LEAF = 0x3f7a38;
@@ -204,6 +217,22 @@ function alongPavedVerge(placed, seen, map, spec, heightAt) {
   const paved = roadsOf(map, spec.id, "paved")[0];
   if (!paved) return;
   const length = polylineLength(paved.points);
+
+  if (spec.id === "north") {
+    for (const extra of NORTH_PORT_PALM_OFFSETS) {
+      const along = pointAlong(paved.points, extra.along);
+      if (!along) continue;
+      const at = offsetFromCentreline(
+        along.x,
+        along.z,
+        along.qx,
+        along.qz,
+        extra.side,
+        extra.setback,
+      );
+      tryPlace(placed, seen, map, spec, heightAt, at.x, at.z, "spawn", 10);
+    }
+  }
 
   // A few PAPER trees on the grass strip beside the tarmac (street lots begin
   // ~18 m). 14–16 m is outside ROAD_CLEAR / PAVED_CLEAR. Skip some stations so
