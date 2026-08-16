@@ -200,6 +200,47 @@ describe("paper building catalogue", () => {
     expect(shopStoops).toBe(0);
   });
 
+  it("puts a small kraft PAPER doormat at the House door", () => {
+    const house = meshForUse("house", { area: 400 });
+    const mats: Array<{
+      userData?: { part?: string; mode?: string };
+      material?: { color?: { getHex: () => number } };
+      geometry?: { type?: string };
+    }> = [];
+    const parts = new Set<string>();
+    const hexes: number[] = [];
+    house.traverse((obj: unknown) => {
+      const mesh = obj as {
+        userData?: { part?: string; mode?: string };
+        material?: { color?: { getHex: () => number } };
+        geometry?: { type?: string };
+      };
+      const part = mesh.userData?.part;
+      if (part) parts.add(part);
+      if (part !== "doormat") return;
+      mats.push(mesh);
+      if (mesh.material?.color) hexes.push(mesh.material.color.getHex());
+    });
+    expect(mats.length).toBeGreaterThanOrEqual(1);
+    expect(parts.has("chimney")).toBe(true);
+    expect(parts.has("knocker")).toBe(true);
+    for (const mesh of mats) {
+      expect(mesh.userData?.mode).toBe("PAPER");
+      expect(mesh.geometry?.type).toBe("BoxGeometry");
+    }
+    expect(hexes.length).toBeGreaterThan(0);
+    expect(hexes.every((c) => c === 0xf4ead8)).toBe(true);
+    expect(hexes.every((c) => !isGrey(c))).toBe(true);
+
+    const shop = meshForUse("shop", { area: 400 });
+    let shopMats = 0;
+    shop.traverse((obj: unknown) => {
+      const mesh = obj as { userData?: { part?: string } };
+      if (mesh.userData?.part === "doormat") shopMats += 1;
+    });
+    expect(shopMats).toBe(0);
+  });
+
   it("puts a kraft PAPER porch slab on the House so plots read as entered from the street", () => {
     const house = meshForUse("house", { area: 400 });
     const parts: string[] = [];

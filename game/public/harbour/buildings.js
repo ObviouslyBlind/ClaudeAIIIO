@@ -202,6 +202,20 @@ function addStoop(g, x, zFace) {
 }
 
 /**
+ * Tiny kraft PAPER doormat at the House door so the stoop reads as
+ * entered, not a bare plank. Original KRAFT — not a new hex.
+ * House door only — shop and shed stay bare. Sits on the stoop,
+ * street-ward of the threshold; does not replace chimney, shutters,
+ * knocker, latch, or sign.
+ */
+function addDoormat(g, x, zFace) {
+  const mat = tagPaper(part(0.62, 0.03, 0.28, KRAFT, false), "doormat");
+  mat.name = "doormat";
+  mat.position.set(x, 0.54, zFace + 0.48);
+  g.add(mat);
+}
+
+/**
  * Paired kraft PAPER shutter boxes beside a House window so the facade
  * reads as a cottage, not a bare pane. Original WOOD / KRAFT / FRAME —
  * not a new hex.
@@ -377,6 +391,7 @@ function cottage(kind) {
   if (!shop && !shed) {
     addPorch(g, -W * 0.12, D / 2, 2.2);
     addStoop(g, -W * 0.12, D / 2);
+    addDoormat(g, -W * 0.12, D / 2);
     addKnocker(g, -W * 0.12, 1.72, D / 2 + 0.18);
   }
   if (shop) {
