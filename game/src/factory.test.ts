@@ -992,3 +992,85 @@ describe("factory PAPER kraft peg", () => {
     expect(boxes).toBeGreaterThanOrEqual(2);
   });
 });
+
+function factoryPaperShavings(root: THREE.Object3D) {
+  const out: THREE.Object3D[] = [];
+  root.traverse((obj) => {
+    if (obj.userData?.part === "shaving") {
+      out.push(obj);
+    }
+  });
+  return out;
+}
+
+describe("factory PAPER kraft shaving", () => {
+  it("puts one tiny kraft PAPER shaving on a factory bench; peg and cork remain", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressFactory(scene);
+
+    const dress = interior.getObjectByName("factory-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+
+    const shavings = factoryPaperShavings(dress!);
+    expect(shavings.length).toBe(1);
+    const shaving = shavings[0];
+    expect(shaving.userData.part).toBe("shaving");
+    expect(shaving.userData.mode).toBe("PAPER");
+    expect(shaving.userData.part).not.toBe("peg");
+    expect(shaving.userData.part).not.toBe("cork");
+    expect(shaving.userData.part).not.toBe("funnel");
+    expect(shaving.userData.part).not.toBe("oilcan");
+    expect(shaving.userData.part).not.toBe("rag");
+    expect(shaving.userData.part).not.toBe("rivet");
+    expect(shaving.userData.part).not.toBe("wrench");
+
+    expect(factoryPaperPegs(dress!).length).toBe(1);
+    expect(factoryPaperCorks(dress!).length).toBe(1);
+    expect(factoryPaperFunnels(dress!).length).toBe(1);
+    expect(factoryPaperOilcans(dress!).length).toBe(1);
+    expect(factoryRags(dress!).length).toBe(1);
+    expect(factoryRivets(dress!).length).toBe(1);
+    expect(factoryTools(dress!).length).toBe(1);
+
+    const peg = factoryPaperPegs(dress!)[0];
+    const cork = factoryPaperCorks(dress!)[0];
+    const funnel = factoryPaperFunnels(dress!)[0];
+    const can = factoryPaperOilcans(dress!)[0];
+    const rag = factoryRags(dress!)[0];
+    const rivet = factoryRivets(dress!)[0];
+    const wrench = factoryTools(dress!)[0];
+    const toPeg = Math.hypot(shaving.position.x - peg.position.x, shaving.position.z - peg.position.z);
+    const toCork = Math.hypot(shaving.position.x - cork.position.x, shaving.position.z - cork.position.z);
+    const toFunnel = Math.hypot(shaving.position.x - funnel.position.x, shaving.position.z - funnel.position.z);
+    const toCan = Math.hypot(shaving.position.x - can.position.x, shaving.position.z - can.position.z);
+    const toRag = Math.hypot(shaving.position.x - rag.position.x, shaving.position.z - rag.position.z);
+    const toRivet = Math.hypot(shaving.position.x - rivet.position.x, shaving.position.z - rivet.position.z);
+    const toWrench = Math.hypot(shaving.position.x - wrench.position.x, shaving.position.z - wrench.position.z);
+    expect(toPeg).toBeGreaterThan(0.5);
+    expect(toCork).toBeGreaterThan(0.5);
+    expect(toFunnel).toBeGreaterThan(0.5);
+    expect(toCan).toBeGreaterThan(0.5);
+    expect(toRag).toBeGreaterThan(0.5);
+    expect(toRivet).toBeGreaterThan(0.5);
+    expect(toWrench).toBeGreaterThan(0.5);
+
+    const colors = hexes(shaving);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.some((c) => c === KRAFT)).toBe(true);
+    expect(colors.every((c) => [KRAFT, 0x9a6a40, 0x6a4a32].includes(c))).toBe(true);
+
+    let boxes = 0;
+    shaving.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        boxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.mode).toBe("PAPER");
+      }
+    });
+    expect(boxes).toBeGreaterThanOrEqual(1);
+  });
+});
