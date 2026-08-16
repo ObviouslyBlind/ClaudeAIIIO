@@ -4,21 +4,21 @@ Base harbour only. Same *kind* of shard as Capital Rift’s public genre (one wo
 
 ## Held (pixel-ratified)
 
-Inland spawn, paved asphalt ribbon (`/?g=rib23`), dirt ribbons (`/?g=dirt24` PASS), traffic-on-road, taxi overlay, ferry ticket $15, RMB orbit, catalogue, lease → House → Enter → Exit (`/?g=int22`), trees + player cart (`/?g=tree25` PASS, Cash $1000).
+Inland spawn, paved asphalt ribbon (`/?g=rib23`), dirt ribbons (`/?g=dirt24`), traffic cars on tarmac (`/?g=cars26` PASS, Cash $1000), taxi overlay, ferry ticket $15, RMB orbit, catalogue, lease → House → Enter → Exit (`/?g=int22`), trees + player cart (`/?g=tree25`).
 
 ## Held (code, not all re-critic’d)
 
-- Econ HUD strip, NPC stall buy, outdoor nametags, warehouse interior, presence cells, visitor cart persist, quay pedestrians, staff slots (`bf1ae1eb`), visitor bid/ask (`3059ece6`)
+- Econ HUD strip, NPC stall buy, outdoor nametags, warehouse interior, presence cells, visitor cart persist, quay pedestrians, staff slots, visitor bid/ask (`3059ece6`)
 
 ## In flight (base)
 
-Pixel: cars (`/?g=cars26`). Shop / farm interiors and nearby-presence HUD still building.
+Pixel: taxi cab (`/?g=taxi27`). Shop / farm / factory interiors, presence HUD, hire/fire HTTP.
 
-Politics agents that already committed (House bills, councils, Senate) stay frozen — do not resume.
+Politics stays frozen — do not resume House/Senate/councils.
 
 ## Next pixel queue (one critic at a time)
 
-Cars, taxi cab, ferry boat, shore, quay, shells, stalls, econ line, pedestrians, nametags, warehouse interior.
+Taxi cab, ferry boat, shore, quay, shells, stalls, econ line, pedestrians, nametags, warehouse interior.
 
 ## Frozen
 
