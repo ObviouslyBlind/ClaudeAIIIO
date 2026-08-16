@@ -85,6 +85,27 @@ describe("owned building interiors", () => {
     expect(upKinds).toContain("interior-floor");
     expect(upKinds).toContain("interior-paper");
 
+    const table = down!.getObjectByName("table");
+    expect(table).toBeTruthy();
+    expect(table!.userData.mode).toBe("PAPER");
+    expect(table!.userData.kind).toBe("interior-table");
+    const tablePos = new THREE.Vector3();
+    table!.getWorldPosition(tablePos);
+    expect(Math.abs(tablePos.x)).toBeLessThan(1);
+    expect(tablePos.z).toBeLessThan(1.2);
+    expect(tablePos.z).toBeGreaterThan(-2);
+    let kraftTop = false;
+    table!.traverse((o) => {
+      if ((o as THREE.Mesh).isMesh && (o as THREE.Mesh).material && "color" in (o as THREE.Mesh).material) {
+        const hex = ((o as THREE.Mesh).material as THREE.MeshLambertMaterial).color.getHex();
+        if (hex === 0xf3efe4) kraftTop = true;
+      }
+    });
+    expect(kraftTop).toBe(true);
+    const chair = down!.getObjectByName("chair");
+    expect(chair).toBeTruthy();
+    expect(chair!.userData.mode).toBe("PAPER");
+
     let exitDoors = 0;
     g.traverse((o) => {
       if (o.userData?.kind === "exit" && (o as THREE.Mesh).isMesh) exitDoors += 1;

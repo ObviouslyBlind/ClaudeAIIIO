@@ -138,19 +138,23 @@ function makeTable(x, z) {
   const g = new THREE.Group();
   g.name = "table";
   g.userData.kind = "interior-table";
+  g.userData.mode = "PAPER";
+  g.position.set(x, 0, z);
   const y0 = 0.16;
   const topY = y0 + 0.72;
-  g.add(box(1.55, 0.07, 0.95, WOOD_TOP, x, topY, z, "interior-prop"));
-  g.add(box(1.42, 0.08, 0.08, WOOD, x, topY - 0.08, z + 0.4, "interior-prop"));
-  g.add(box(1.42, 0.08, 0.08, WOOD, x, topY - 0.08, z - 0.4, "interior-prop"));
+  const paper = { mode: "PAPER" };
+  g.add(box(1.7, 0.07, 1.05, WOOD_TOP, 0, topY, 0, "interior-table", paper));
+  g.add(box(1.58, 0.04, 0.93, PAPER_CARD, 0, topY + 0.055, 0, "interior-table", paper));
+  g.add(box(1.52, 0.08, 0.08, WOOD, 0, topY - 0.08, 0.44, "interior-prop", paper));
+  g.add(box(1.52, 0.08, 0.08, WOOD, 0, topY - 0.08, -0.44, "interior-prop", paper));
   const legH = 0.68;
   for (const [dx, dz] of [
-    [-0.68, -0.38],
-    [0.68, -0.38],
-    [-0.68, 0.38],
-    [0.68, 0.38],
+    [-0.74, -0.42],
+    [0.74, -0.42],
+    [-0.74, 0.42],
+    [0.74, 0.42],
   ]) {
-    g.add(box(0.08, legH, 0.08, WOOD, x + dx, y0 + legH / 2, z + dz, "interior-prop"));
+    g.add(box(0.08, legH, 0.08, WOOD, dx, y0 + legH / 2, dz, "interior-prop", paper));
   }
   return g;
 }
@@ -159,22 +163,23 @@ function makeChair(x, z, yaw) {
   const g = new THREE.Group();
   g.name = "chair";
   g.userData.kind = "interior-chair";
+  g.userData.mode = "PAPER";
   g.position.set(x, 0, z);
   g.rotation.y = yaw;
   const y0 = 0.16;
   const seat = y0 + 0.44;
-  g.add(box(0.42, 0.06, 0.42, WOOD_TOP, 0, seat, 0, "interior-prop"));
+  const paper = { mode: "PAPER" };
+  g.add(box(0.46, 0.06, 0.46, PAPER_CARD, 0, seat, 0, "interior-chair", paper));
+  g.add(box(0.48, 0.05, 0.48, WOOD_TOP, 0, seat - 0.05, 0, "interior-prop", paper));
   for (const [dx, dz] of [
-    [-0.16, -0.16],
-    [0.16, -0.16],
-    [-0.16, 0.16],
-    [0.16, 0.16],
+    [-0.18, -0.18],
+    [0.18, -0.18],
+    [-0.18, 0.18],
+    [0.18, 0.18],
   ]) {
-    g.add(box(0.06, seat - y0, 0.06, WOOD, dx, y0 + (seat - y0) / 2, dz, "interior-prop"));
+    g.add(box(0.07, seat - y0, 0.07, WOOD, dx, y0 + (seat - y0) / 2, dz, "interior-prop", paper));
   }
-  g.add(box(0.4, 0.5, 0.06, WOOD, 0, seat + 0.28, -0.18, "interior-prop"));
-  g.add(box(0.06, 0.42, 0.06, WOOD, -0.14, seat + 0.26, -0.18, "interior-prop"));
-  g.add(box(0.06, 0.42, 0.06, WOOD, 0.14, seat + 0.26, -0.18, "interior-prop"));
+  g.add(box(0.44, 0.52, 0.07, WOOD, 0, seat + 0.28, -0.2, "interior-prop", paper));
   return g;
 }
 
@@ -260,11 +265,11 @@ export function makeInteriorScene() {
   dressWindowX(down, downSideWin[0].along, X0, downSideWin[0].sill, downSideWin[0].head, downSideWin[0].width, +1);
   dressWindowX(down, downRightWin[0].along, X1, downRightWin[0].sill, downRightWin[0].head, downRightWin[0].width, -1);
 
-  down.add(box(2.35, 0.04, 1.7, RUG, -1.15, 0.18, -0.45, "interior-prop"));
-  down.add(makeTable(-1.15, -0.45));
-  down.add(makeChair(-1.15, 0.38, 0));
-  down.add(makeChair(-1.15, -1.28, Math.PI));
-  down.add(makeHangingLamp(-1.15, 2.12, -0.45));
+  down.add(box(2.55, 0.04, 1.85, RUG, -0.15, 0.18, -0.35, "interior-prop"));
+  down.add(makeTable(-0.15, -0.35));
+  down.add(makeChair(-0.15, 0.55, 0));
+  down.add(makeChair(-0.15, -1.22, Math.PI));
+  down.add(makeHangingLamp(-0.15, 2.12, -0.35));
 
   down.add(box(1.35, 0.72, 0.38, WOOD, -3.35, 0.52, -2.55, "interior-prop"));
   down.add(box(1.28, 0.06, 0.36, WOOD_TOP, -3.35, 0.9, -2.55, "interior-prop"));
