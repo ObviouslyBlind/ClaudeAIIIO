@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 import * as THREE from "three";
 import { heightAt, ISLANDS } from "./land.ts";
-import { FOAM_SAMPLES, makeShoreFoam, paintShoreColor } from "../public/harbour/shore.js";
+import {
+  FOAM_SAMPLES,
+  PORT_FOAM_SAMPLES,
+  makeShoreFoam,
+  paintShoreColor,
+} from "../public/harbour/shore.js";
 
 const grass = new THREE.Color(0x4a7a3c);
 const sand = new THREE.Color(0xe8d5a3);
@@ -25,6 +30,14 @@ describe("shoreline read", () => {
     expect(dist(wet, grass)).toBeGreaterThan(0.25);
   });
 
+  it("widens the beach apron inland of the old 0.5–0.8 cut", () => {
+    const apron = paintShoreColor(3.2, 0.6, grass, sand, rock);
+    expect(dist(apron, sand)).toBeLessThan(dist(apron, grass));
+
+    const mid = paintShoreColor(7.4, 0.655, grass, sand, rock);
+    expect(dist(mid, sand)).toBeLessThan(dist(mid, grass));
+  });
+
   it("keeps the interior grassy and the peak rocky", () => {
     const inland = paintShoreColor(18, 0.22, grass, sand, rock);
     expect(dist(inland, grass)).toBeLessThan(dist(inland, sand));
@@ -44,14 +57,29 @@ describe("shoreline read", () => {
     expect(r.equals(rock)).toBe(true);
   });
 
-  it("drops a modest foam ring on the 0.3–0.8 m contour", () => {
+  it("tints drowned verts toward the lagoon, not grass", () => {
+    const drowned = paintShoreColor(-4, 1.15, grass, sand, rock);
+    expect(dist(drowned, water)).toBeLessThan(dist(drowned, grass));
+    expect(dist(drowned, water)).toBeLessThan(dist(drowned, sand));
+  });
+
+  it("puts denser foam near the port, not only a far ring of dots", () => {
     const added: THREE.Object3D[] = [];
     const scene = { add(obj: THREE.Object3D) { added.push(obj); } };
     const group = makeShoreFoam(ISLANDS.north, heightAt, scene);
     expect(added).toEqual([group]);
     expect(group.children.length).toBeGreaterThan(12);
-    expect(group.children.length).toBeLessThanOrEqual(FOAM_SAMPLES);
-    expect(FOAM_SAMPLES).toBeLessThanOrEqual(48);
+    expect(group.children.length).toBeLessThanOrEqual(FOAM_SAMPLES + PORT_FOAM_SAMPLES);
+    expect(FOAM_SAMPLES + PORT_FOAM_SAMPLES).toBeLessThanOrEqual(56);
+
+    const port = ISLANDS.north.port;
+    const nearPort = group.children.filter(
+      (child) => Math.hypot(child.position.x - port.x, child.position.z - port.z) < 320,
+    );
+    expect(nearPort.length).toBeGreaterThanOrEqual(12);
+
+    const geos = new Set(group.children.map((child) => (child as THREE.Mesh).geometry));
+    expect(geos.size).toBeLessThanOrEqual(2);
 
     for (const child of group.children) {
       const h = heightAt(ISLANDS.north, child.position.x, child.position.z);
