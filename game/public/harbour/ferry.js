@@ -71,6 +71,34 @@ function pane(g, x, y, z, w, h) {
   g.add(frame, glass);
 }
 
+/**
+ * PAPER life ring: a short torus of terracotta / kraft boxes on the cabin.
+ * STRIPE rust with HULL and RAIL cream bands — not iron, not a cylinder.
+ */
+function lifeRing(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "lifering";
+  g.userData.part = "lifering";
+  g.position.set(x, y, z);
+  g.rotation.x = Math.PI / 2;
+  const n = 6;
+  const r = 0.38;
+  for (let layer = 0; layer < 2; layer++) {
+    const ly = layer * 0.13;
+    const rot = layer * (Math.PI / n);
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * Math.PI * 2 + rot;
+      const band = (i + layer) % 3 === 0;
+      const color = band ? (layer ? RAIL : HULL) : STRIPE;
+      const seg = part(0.3, 0.13, 0.2, color, false);
+      seg.position.set(Math.cos(a) * r, ly, Math.sin(a) * r);
+      seg.rotation.y = a;
+      g.add(seg);
+    }
+  }
+  return g;
+}
+
 /** Posts plus top and mid rails along +X. */
 function addRail(g, x0, x1, z, y = 2.52) {
   const len = x1 - x0;
@@ -193,6 +221,8 @@ export function makeFerry() {
   const door = part(1.15, 2.05, 0.12, DOOR, false);
   door.position.set(-9.4, 2.88, -3.86);
   g.add(door);
+
+  g.add(lifeRing(-8.5, 4.15, 3.92));
 
   for (const x of [-6.6, -3.6, -0.6, 2.4, 5.2]) {
     pane(g, x, 4.05, 3.86, 1.45, 1.12);

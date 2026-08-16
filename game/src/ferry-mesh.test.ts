@@ -26,4 +26,15 @@ describe("ferry berth", () => {
     });
     expect(bollards).toBeGreaterThanOrEqual(2);
   });
+
+  it("hangs at least one kraft life ring on the cream cabin", () => {
+    expect(HOME_Z).toBe(-6835);
+    const mesh = makeFerry();
+    expect(mesh.position.z).toBe(-6835);
+    let rings = 0;
+    mesh.traverse((obj) => {
+      if (obj.userData?.part === "lifering") rings += 1;
+    });
+    expect(rings).toBeGreaterThanOrEqual(1);
+  });
 });
