@@ -167,7 +167,7 @@ describe("hill and verge trees", () => {
 
     const { meshes, geos } = countMeshes(root);
     expect(meshes).toBeLessThan(MAX_UNIQUE_MESHES);
-    expect(meshes).toBeLessThanOrEqual(16);
+    expect(meshes).toBeLessThanOrEqual(17);
     expect(geos).toBeLessThanOrEqual(6);
     expect(placed.length).toBeGreaterThan(meshes);
 
@@ -650,6 +650,56 @@ describe("hill and verge trees", () => {
     expect(others.length).toBeGreaterThan(0);
     for (const p of others) {
       expect(Math.hypot(huskPos.x - p.x, huskPos.y - p.y, huskPos.z - p.z)).toBeGreaterThan(0.01);
+    }
+  });
+
+  it("sits one tiny kraft PAPER vine on the north-port palm, husk and frond remain", () => {
+    const map = createLandBoard();
+    const scene = { add(_obj: THREE.Object3D) {} };
+    const root = makeTrees(map, {
+      scene,
+      specOf: (id: "north" | "south") => ISLANDS[id],
+      heightAt,
+    });
+
+    const vineBoxes: THREE.Mesh[] = [];
+    const huskBoxes: THREE.Mesh[] = [];
+    const frondBoxes: THREE.Mesh[] = [];
+    root.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (!mesh.isMesh) return;
+      if (mesh.userData.part === "vine") vineBoxes.push(mesh);
+      if (mesh.userData.part === "husk") huskBoxes.push(mesh);
+      if (mesh.userData.part === "frond") frondBoxes.push(mesh);
+    });
+    expect(vineBoxes.length).toBe(1);
+    expect(huskBoxes.length).toBe(1);
+    expect(frondBoxes.length).toBe(1);
+
+    const kraft = new Set([0x8a6238, 0x9a6a40]);
+    const vine = vineBoxes[0];
+    expect(vine.userData.part).toBe("vine");
+    expect(vine.userData.provenance).toBe("PAPER");
+    expect(vine.geometry.type).toBe("BoxGeometry");
+    const mat = vine.material as THREE.MeshLambertMaterial;
+    expect(mat.type).toBe("MeshLambertMaterial");
+    expect(kraft.has(mat.color.getHex())).toBe(true);
+    expect(isGrey(mat.color.getHex())).toBe(false);
+
+    const vinePos = new THREE.Vector3();
+    vine.getWorldPosition(vinePos);
+    const others: THREE.Vector3[] = [];
+    root.traverse((obj) => {
+      const part = obj.userData.part;
+      if (part === "husk" || part === "frond" || part === "leaf" || part === "coconut" || part === "nest") {
+        const p = new THREE.Vector3();
+        obj.getWorldPosition(p);
+        others.push(p);
+      }
+    });
+    expect(others.length).toBeGreaterThan(0);
+    for (const p of others) {
+      expect(Math.hypot(vinePos.x - p.x, vinePos.y - p.y, vinePos.z - p.z)).toBeGreaterThan(0.01);
     }
   });
 });
