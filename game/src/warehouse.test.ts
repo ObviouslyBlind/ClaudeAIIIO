@@ -551,6 +551,11 @@ describe("warehouse PAPER kraft chalk", () => {
     expect(dress!.visible).toBe(true);
 
     const chalks: THREE.Object3D[] = [];
+    const pencils: THREE.Object3D[] = [];
+    const clips: THREE.Object3D[] = [];
+    const stamps: THREE.Object3D[] = [];
+    const cards: THREE.Object3D[] = [];
+    const twines: THREE.Object3D[] = [];
     const crates: THREE.Object3D[] = [];
     const pallets: THREE.Object3D[] = [];
     const coils: THREE.Object3D[] = [];
@@ -561,6 +566,21 @@ describe("warehouse PAPER kraft chalk", () => {
     dress!.traverse((obj) => {
       if (obj.userData?.kind === "warehouse-chalk" && obj.name === "warehouse-chalk") {
         chalks.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-pencil" && obj.name === "warehouse-pencil") {
+        pencils.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-clip" && obj.name === "warehouse-clip") {
+        clips.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-stamp" && obj.name === "warehouse-stamp") {
+        stamps.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-card" && obj.name === "warehouse-card") {
+        cards.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-twine" && obj.name === "warehouse-twine") {
+        twines.push(obj);
       }
       if (obj.name === "warehouse-floor-crate") crates.push(obj);
       if (obj.userData?.kind === "warehouse-pallet" && obj.name === "warehouse-pallet") {
@@ -583,6 +603,11 @@ describe("warehouse PAPER kraft chalk", () => {
       }
     });
     expect(chalks.length).toBe(1);
+    expect(pencils.length).toBe(1);
+    expect(clips.length).toBe(1);
+    expect(stamps.length).toBe(1);
+    expect(cards.length).toBe(1);
+    expect(twines.length).toBe(1);
     expect(crates.length).toBeGreaterThanOrEqual(2);
     expect(pallets.length).toBe(1);
     expect(coils.length).toBe(1);
@@ -594,6 +619,12 @@ describe("warehouse PAPER kraft chalk", () => {
     const chalk = chalks[0];
     expect(chalk.userData.kind).toBe("warehouse-chalk");
     expect(chalk.userData.mode).toBe("PAPER");
+    expect(chalk.userData.part).toBe("chalk");
+    expect(pencils[0].userData.part).toBe("pencil");
+    expect(clips[0].userData.part).toBe("clip");
+    expect(stamps[0].userData.part).toBe("stamp");
+    expect(cards[0].userData.part).toBe("card");
+    expect(twines[0].userData.part).toBe("twine");
     expect(chalk.position.y).toBeGreaterThan(1.2);
     expect(chalk.position.y).toBeLessThan(2.4);
     const onBack = Math.abs(chalk.position.z) > 3.0;

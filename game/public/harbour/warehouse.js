@@ -195,6 +195,7 @@ function kraftChalk(x, y, z, yaw = 0) {
   g.name = "warehouse-chalk";
   g.userData.kind = "warehouse-chalk";
   g.userData.mode = "PAPER";
+  g.userData.part = "chalk";
   g.position.set(x, y, z);
   g.rotation.y = yaw;
   // Rest on the clipboard sheet, slightly askew.
