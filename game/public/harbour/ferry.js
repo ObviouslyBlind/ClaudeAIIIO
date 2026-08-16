@@ -1,7 +1,7 @@
 import * as THREE from "three";
 
 /** Channel midpoint is the origin. Sit in the water south of North port so the side profile reads from the quay. */
-const HOME_Z = -3600;
+const HOME_Z = -2200;
 const SLIDE = 42;
 const SLIDE_SPEED = 0.07;
 

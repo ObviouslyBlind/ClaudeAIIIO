@@ -8,7 +8,9 @@ import {
   heightAt,
   ISLANDS,
   leasePlot,
+  pavedPolyline,
   pointInRing,
+  roadNodes,
   ROAD_CLEAR,
 } from "./land.ts";
 import { createVisitor } from "./sim.ts";
@@ -17,10 +19,10 @@ describe("harbour land board", () => {
   it("authors two Caribbean-scale islands with a channel between the ports", () => {
     const n = ISLANDS.north;
     const s = ISLANDS.south;
-    expect(n.rx * 2).toBeGreaterThanOrEqual(1800);
-    expect(s.rx * 2).toBeGreaterThanOrEqual(1800);
-    expect(s.port.z - n.port.z).toBeGreaterThan(8000);
-    expect(s.cz - n.cz).toBeGreaterThan(9000);
+    expect(n.rx * 2).toBeGreaterThanOrEqual(7000);
+    expect(s.rx * 2).toBeGreaterThanOrEqual(7000);
+    expect(s.port.z - n.port.z).toBeGreaterThan(12000);
+    expect(s.cz - n.cz).toBeGreaterThan(16000);
     expect(heightAt(n, n.port.x, n.port.z)).toBeGreaterThan(0.5);
     expect(heightAt(s, s.port.x, s.port.z)).toBeGreaterThan(0.5);
     expect(heightAt(n, 0, 0)).toBeLessThan(0);
@@ -64,10 +66,24 @@ describe("harbour land board", () => {
     }
   });
 
+  it("authors a curving paved spline, not a 5 m wiggle on a straight", () => {
+    const n = ISLANDS.north;
+    const nodes = roadNodes(n);
+    const pts = pavedPolyline(n);
+    expect(nodes.length).toBeGreaterThanOrEqual(4);
+    expect(pts.length).toBeGreaterThan(nodes.length);
+    const xs = pts.map((p) => p.x);
+    expect(Math.max(...xs) - Math.min(...xs)).toBeGreaterThan(200);
+    const along = Math.hypot(pts[pts.length - 1].x - pts[0].x, pts[pts.length - 1].z - pts[0].z);
+    expect(along).toBeGreaterThan(2500);
+  });
+
   it("lets you lease a piece of ground underfoot and then develop it", () => {
     const board = createLandBoard();
     const visitor = createVisitor(1_000);
-    const vacant = board.plots.find((p) => !p.owner && p.class === "by_right")!;
+    const vacant = board.plots
+      .filter((p) => !p.owner && p.class === "by_right" && p.price <= visitor.cash)
+      .sort((a, b) => a.price - b.price)[0]!;
     expect(pointInRing(vacant.x, vacant.z, vacant.ring)).toBe(true);
     expect(findParcelAt(board, vacant.x, vacant.z)?.id).toBe(vacant.id);
 
