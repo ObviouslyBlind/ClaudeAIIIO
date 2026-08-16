@@ -360,6 +360,15 @@ export function makeQuay(spec, helpers) {
     }
   }
 
+  for (const along of [-20, 6, 22]) {
+    for (const side of [-4.8, 4.8]) {
+      const ring = lifeRing();
+      ring.position.set(x + side, deckY, pierZ + toward * along);
+      ring.rotation.y = side > 0 ? -0.2 : 0.15;
+      root.add(ring);
+    }
+  }
+
   const cart = handcart();
   cart.position.set(x + 2.35, deckY, pierZ - toward * 18);
   cart.rotation.y = toward > 0 ? 0.22 : Math.PI - 0.18;
