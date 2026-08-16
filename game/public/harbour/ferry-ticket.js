@@ -1,12 +1,18 @@
 /**
  * Paper ferry quote. Confirm posts /api/ferry (shared visitor cash), then spawnAt.
  * Kraft card overlay: PAPER / SIMULATED stamp + fare from the quote. Not a wallet.
+ * Tiny tracked serial (NO. 15 · PAPER) in ticket ink. Fare stays $15.
  */
 
 const KRAFT = "#efe4c8";
 const KRAFT_EDGE = "#8a6238";
 const STAMP = "#7a2e22";
 const INK = "#3d2a1c";
+
+/** PAPER ticket fare. Do not change. */
+export const FARE = 15;
+/** Tracked serial / PAPER no. on the kraft canvas. */
+export const SERIAL = "NO. 15 · PAPER";
 
 function cap(id) {
   return id.slice(0, 1).toUpperCase() + id.slice(1);
@@ -73,6 +79,7 @@ export function createFerryTicket({ getIslandId, spawnAt, setStatus, applyMap })
         <rect x="1" y="1" width="278" height="86" fill="${KRAFT}" stroke="${KRAFT_EDGE}" stroke-dasharray="5 3" />
         <path d="${d}" fill="none" stroke="#8a3b2a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
         <text x="18" y="16" fill="${INK}" font-size="11">${cap(next.from)}</text>
+        <text x="18" y="80" fill="${INK}" font-size="8" font-family="Georgia, Times New Roman, serif" letter-spacing="1.8" font-weight="700">${SERIAL}</text>
         <text x="232" y="80" fill="${INK}" font-size="11">${cap(next.to)}</text>
         <g transform="translate(184,8) rotate(-12)">
           <rect x="0" y="0" width="88" height="40" fill="${KRAFT}" stroke="${STAMP}" stroke-width="2.8" stroke-dasharray="6 3" rx="2" />

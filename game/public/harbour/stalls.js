@@ -16,6 +16,8 @@ const CRATE_A = 0x8a6238;
 const CRATE_B = 0x7a5230;
 const CORN = 0xd4b83a;
 const LEAF = 0x5f8a32;
+/** Harbour field green — melon / squash on the counter. Same hex as main.js fields. */
+const MELON = 0x6a8f44;
 const PLASTER = 0xe8d7b8;
 const FRAME = 0x3d2a1c;
 /** Warm oil-glass. Same family as farm lamp bulb — not neon, not street-iron. */
@@ -83,7 +85,7 @@ function labelGood(g) {
   return String(g).replace(/_/g, " ");
 }
 
-/** Visible PAPER market stand: deck, posts, price board, striped awning, counter, crates, hanging scale, produce basket, oil lantern. */
+/** Visible PAPER market stand: deck, posts, price board, striped awning, counter, crates, hanging scale, produce basket, oil lantern, melon. */
 export function makeStallMesh(plot) {
   const g = new THREE.Group();
   g.name = "npc-stall";
@@ -126,6 +128,24 @@ export function makeStallMesh(plot) {
   crateGoods.userData.part = "goods-crate";
   goods.add(crateBody, crateRim, crateGoods);
   g.add(goods);
+
+  // One small kraft melon / squash on the counter so the stall reads as a
+  // farm stand, not only crate + scale. Local offset only — stall world pose
+  // stays put. PAPER box. Harbour green (or terracotta squash).
+  const melon = new THREE.Group();
+  melon.name = "melon";
+  melon.userData.part = "melon";
+  melon.userData.mode = "PAPER";
+  melon.userData.paper = true;
+  melon.position.set(-0.88, 0.9, 1.05);
+  const melonBody = paperBox(0.2, 0.14, 0.18, MELON, false);
+  melonBody.position.y = 0.07;
+  melonBody.userData.part = "melon";
+  const melonStem = paperBox(0.04, 0.05, 0.04, TERRACOTTA, false);
+  melonStem.position.y = 0.165;
+  melonStem.userData.part = "melon";
+  melon.add(melonBody, melonStem);
+  g.add(melon);
 
   for (const x of [-1.85, 1.85]) {
     for (const z of [-1.05, 1.05]) {

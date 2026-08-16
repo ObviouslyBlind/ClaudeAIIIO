@@ -121,6 +121,7 @@ describe("NPC harbour stalls", () => {
     expect(kinds).toContain("crate");
     expect(kinds).toContain("produce");
     expect(kinds).toContain("lantern");
+    expect(kinds).toContain("melon");
     const colors = hexes(mesh);
     expect(colors.length).toBeGreaterThan(4);
     expect(colors.every(isGrey)).toBe(false);
@@ -163,6 +164,41 @@ describe("NPC harbour stalls", () => {
     expect(stalls.group.children.length).toBeGreaterThan(0);
     for (const child of stalls.group.children) {
       expect(child.children.filter((c) => c.userData.part === "goods-crate").length).toBe(1);
+    }
+  });
+
+  it("puts one small kraft melon on each NPC stall counter", () => {
+    const mesh = makeStallMesh({ id: "n-test", use: "farm", island: "north", band: "field" });
+    const counter = mesh.children.find((c) => c.userData.part === "counter") as THREE.Mesh;
+    const melons = mesh.children.filter((c) => c.userData.part === "melon");
+    expect(melons.length).toBe(1);
+    const melon = melons[0]!;
+    expect(melon.userData.mode).toBe("PAPER");
+    expect(melon.userData.paper).toBe(true);
+    const box = counter.geometry as THREE.BoxGeometry;
+    const counterTop = counter.position.y + box.parameters.height / 2;
+    expect(melon.position.y).toBeCloseTo(counterTop, 5);
+    expect(melon.position.z).toBeCloseTo(counter.position.z, 5);
+    expect(Math.abs(melon.position.x)).toBeLessThan(1.7);
+
+    const produce = new Set([0x6a8f44, 0xc45c3a]);
+    const colors = hexes(melon);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.every((c) => produce.has(c))).toBe(true);
+    expect(colors).toContain(0x6a8f44);
+    melon.traverse((obj) => {
+      const m = obj as THREE.Mesh;
+      if (!m.isMesh || m.geometry.type !== "BoxGeometry") return;
+      const g = m.geometry as THREE.BoxGeometry;
+      expect(g.parameters.width).toBeLessThan(0.4);
+      expect(g.parameters.height).toBeLessThan(0.3);
+      expect(g.parameters.depth).toBeLessThan(0.4);
+    });
+
+    const { stalls } = boot();
+    expect(stalls.group.children.length).toBeGreaterThan(0);
+    for (const child of stalls.group.children) {
+      expect(child.children.filter((c) => c.userData.part === "melon").length).toBe(1);
     }
   });
 
