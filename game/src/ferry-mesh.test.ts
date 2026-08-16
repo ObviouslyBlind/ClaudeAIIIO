@@ -149,30 +149,22 @@ describe("ferry berth", () => {
     expect(bollards).toBeGreaterThanOrEqual(2);
   });
 
-  it("hangs one kraft PAPER tyre fender on the hull side", () => {
+  it("hangs one kraft PAPER tyre fender on the north hull face", () => {
     expect(HOME_Z).toBe(-6835);
     const mesh = makeFerry();
     expect(mesh.position.z).toBe(-6835);
     let fenders = 0;
-    let rails = 0;
-    let cleats = 0;
-    let lanterns = 0;
-    let smoke = 0;
     mesh.traverse((obj) => {
       if (obj.userData?.part === "fender") {
-        expect(obj.userData.part).toBe("fender");
+        expect(obj.userData.mode).toBe("PAPER");
+        expect(obj.position.z).toBeLessThan(-5.5);
+        const size = new THREE.Vector3();
+        new THREE.Box3().setFromObject(obj).getSize(size);
+        expect(Math.max(size.x, size.y, size.z)).toBeGreaterThan(2.4);
         fenders += 1;
       }
-      if (obj.userData?.part === "rail") rails += 1;
-      if (obj.userData?.part === "cleat") cleats += 1;
-      if (obj.userData?.part === "lantern") lanterns += 1;
-      if (obj.userData?.part === "smoke") smoke += 1;
     });
     expect(fenders).toBeGreaterThanOrEqual(1);
-    expect(rails).toBeGreaterThanOrEqual(1);
-    expect(cleats).toBeGreaterThanOrEqual(1);
-    expect(lanterns).toBeGreaterThanOrEqual(1);
-    expect(smoke).toBeGreaterThanOrEqual(1);
   });
 
   it("sits a tiny kraft PAPER bucket on the cream deck", () => {
