@@ -285,4 +285,67 @@ describe("hill and verge trees", () => {
       expect(atPalm).toBe(true);
     }
   });
+
+  it("sits one kraft PAPER nest under a north-port verge palm, beside the bird", () => {
+    const map = createLandBoard();
+    const scene = { add(_obj: THREE.Object3D) {} };
+    const root = makeTrees(map, {
+      scene,
+      specOf: (id: "north" | "south") => ISLANDS[id],
+      heightAt,
+    });
+
+    const placed = (root.userData.placed || []) as {
+      island: "north" | "south";
+      x: number;
+      z: number;
+      y: number;
+      role: string;
+      dress?: string;
+    }[];
+    const northPalms = placed.filter((p) => p.island === "north" && p.dress === "north-port-palm");
+    expect(northPalms.length).toBeGreaterThan(0);
+    expect(northPalms.length).toBeLessThanOrEqual(NORTH_PORT_PALM_OFFSETS.length);
+
+    const nests: THREE.Object3D[] = [];
+    root.traverse((obj) => {
+      if (obj.userData.kind === "nest" || obj.userData.part === "nest") nests.push(obj);
+    });
+    expect(nests.length).toBeGreaterThan(0);
+
+    const nestBoxes: THREE.Mesh[] = [];
+    root.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (!mesh.isMesh) return;
+      if (mesh.userData.part === "nest" || mesh.userData.dress === "nest") nestBoxes.push(mesh);
+    });
+    expect(nestBoxes.length).toBeGreaterThanOrEqual(1);
+    expect(nestBoxes.length).toBeLessThanOrEqual(2);
+
+    const birds: THREE.Object3D[] = [];
+    root.traverse((obj) => {
+      if (obj.userData.kind === "bird" || obj.userData.part === "bird") birds.push(obj);
+    });
+    expect(birds.length).toBeGreaterThan(0);
+
+    const kraft = new Set([0x8a6238, 0x9a6a40]);
+    const port = ISLANDS.north.port;
+    for (const nest of nestBoxes) {
+      expect(nest.userData.part === "nest" || nest.userData.dress === "nest").toBe(true);
+      expect(nest.userData.provenance).toBe("PAPER");
+      expect(nest.geometry.type).toBe("BoxGeometry");
+      const mat = nest.material as THREE.MeshLambertMaterial;
+      expect(mat.type).toBe("MeshLambertMaterial");
+      expect(kraft.has(mat.color.getHex())).toBe(true);
+      expect(isGrey(mat.color.getHex())).toBe(false);
+      const pos = new THREE.Vector3();
+      nest.getWorldPosition(pos);
+      expect(distToPaved(ISLANDS.north, pos.x, pos.z)).toBeGreaterThanOrEqual(PAVED_CLEAR_M);
+      expect(onPublicQuay(ISLANDS.north, pos.x, pos.z)).toBe(false);
+      expect(heightAt(ISLANDS.north, pos.x, pos.z)).toBeGreaterThanOrEqual(WATER_MIN_M);
+      expect(Math.hypot(pos.x - port.x, pos.z - port.z)).toBeLessThan(400);
+      const atPalm = northPalms.some((p) => Math.hypot(p.x - pos.x, p.z - pos.z) < 1.2);
+      expect(atPalm).toBe(true);
+    }
+  });
 });
