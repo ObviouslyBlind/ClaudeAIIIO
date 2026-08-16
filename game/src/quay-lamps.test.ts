@@ -39,6 +39,14 @@ function collectBrace(root: THREE.Object3D) {
   return out;
 }
 
+function collectRing(root: THREE.Object3D) {
+  const out: THREE.Object3D[] = [];
+  root.traverse((obj) => {
+    if (obj.userData?.part === "ring") out.push(obj);
+  });
+  return out;
+}
+
 describe("quay paper lamps", () => {
   it("plants a few wooden kraft-glass posts on both timber piers", () => {
     expect(QUAY_LAMP_SPOTS.length).toBeGreaterThanOrEqual(4);
@@ -84,6 +92,27 @@ describe("quay paper lamps", () => {
         expect(mesh.geometry).toBeInstanceOf(THREE.BoxGeometry);
         const mat = mesh.material as THREE.MeshLambertMaterial;
         expect(mat.color.getHex()).toBe(WOOD);
+      }
+
+      const rings = collectRing(group!);
+      expect(rings.length).toBe(QUAY_LAMP_SPOTS.length);
+      for (const r of rings) {
+        expect(r.userData.part).toBe("ring");
+        expect(r.userData.mode).toBe("PAPER");
+        expect(r.position.y).toBeLessThan(2.62);
+        expect(r.position.y).toBeGreaterThan(1.9);
+        const boxes: THREE.Mesh[] = [];
+        r.traverse((obj) => {
+          const mesh = obj as THREE.Mesh;
+          if (mesh.isMesh) boxes.push(mesh);
+        });
+        expect(boxes.length).toBeGreaterThanOrEqual(4);
+        for (const mesh of boxes) {
+          expect(mesh.geometry).toBeInstanceOf(THREE.BoxGeometry);
+          expect(mesh.userData.mode).toBe("PAPER");
+          const mat = mesh.material as THREE.MeshLambertMaterial;
+          expect(mat.color.getHex()).toBe(KRAFT);
+        }
       }
     }
   });
