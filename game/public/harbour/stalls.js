@@ -81,7 +81,7 @@ function labelGood(g) {
   return String(g).replace(/_/g, " ");
 }
 
-/** Visible PAPER market stand: deck, posts, striped awning, counter, crates, hanging scale. */
+/** Visible PAPER market stand: deck, posts, striped awning, counter, crates, hanging scale, produce basket. */
 export function makeStallMesh(plot) {
   const g = new THREE.Group();
   g.name = "npc-stall";
@@ -194,6 +194,36 @@ export function makeStallMesh(plot) {
   weight.userData.part = "hanging-scale";
   scale.add(cord, beam, hangL, hangR, panL, panR, weight);
   g.add(scale);
+
+  // Kraft produce basket under the awning so the stall reads as a farm stand,
+  // not only crate + scale. Wood body, terracotta / leaf goods. Right of the
+  // sign, over the counter. Local offset only — stall world pose stays put.
+  const basket = new THREE.Group();
+  basket.name = "produce-basket";
+  basket.userData.part = "produce-basket";
+  basket.userData.mode = "PAPER";
+  basket.userData.paper = true;
+  basket.position.set(1.18, 1.76, 0.88);
+  const basketCord = paperBox(0.025, 0.24, 0.025, FRAME, false);
+  basketCord.position.y = 0.15;
+  basketCord.userData.part = "produce-basket";
+  const basketHandle = paperBox(0.2, 0.03, 0.03, WOOD, false);
+  basketHandle.position.y = 0.02;
+  basketHandle.userData.part = "produce-basket";
+  const basketBody = paperBox(0.26, 0.12, 0.2, WOOD, false);
+  basketBody.position.y = -0.07;
+  basketBody.userData.part = "produce-basket";
+  const basketRim = paperBox(0.28, 0.03, 0.22, CRATE_A, false);
+  basketRim.position.y = 0.0;
+  basketRim.userData.part = "produce-basket";
+  const tomato = paperBox(0.09, 0.07, 0.09, TERRACOTTA, false);
+  tomato.position.set(-0.05, 0.04, 0);
+  tomato.userData.part = "produce-basket";
+  const greens = paperBox(0.08, 0.08, 0.08, LEAF, false);
+  greens.position.set(0.05, 0.045, 0.02);
+  greens.userData.part = "produce-basket";
+  basket.add(basketCord, basketHandle, basketBody, basketRim, tomato, greens);
+  g.add(basket);
 
   const back = paperBox(3.9, 1.6, 0.12, PLASTER);
   back.position.set(0, 1.05, -1.28);
