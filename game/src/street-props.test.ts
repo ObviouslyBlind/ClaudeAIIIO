@@ -564,4 +564,60 @@ describe("street prop setback", () => {
       expect(distToPaved(ISLANDS.north, p.x, p.z)).toBeGreaterThanOrEqual(ROAD_CLEAR);
     }
   });
+
+  it("sits a tiny kraft PAPER bolt on the village pump, crank dipper lid remain", () => {
+    const map = createLandBoard();
+    const scene = { add(_obj: THREE.Object3D) {} };
+    const root = makeStreetProps(map, {
+      scene,
+      specOf: (id: "north" | "south") => ISLANDS[id],
+      heightAt,
+    });
+
+    const pumpGroups: THREE.Object3D[] = [];
+    const cranks: THREE.Object3D[] = [];
+    const dippers: THREE.Object3D[] = [];
+    const lids: THREE.Object3D[] = [];
+    root.traverse((obj) => {
+      if (obj.userData?.prop === "pump") pumpGroups.push(obj);
+      if (obj.userData?.part === "crank" || obj.userData?.dress === "crank") {
+        if (obj.userData?.prop === "crank" || obj.name === "crank") cranks.push(obj);
+      }
+      if (obj.userData?.part === "dipper" || obj.userData?.dress === "dipper") {
+        if (obj.userData?.prop === "dipper" || obj.name === "dipper") dippers.push(obj);
+      }
+      if (obj.userData?.part === "lid") lids.push(obj);
+    });
+    expect(pumpGroups.length).toBeGreaterThanOrEqual(1);
+    expect(cranks.length).toBeGreaterThanOrEqual(1);
+    expect(dippers.length).toBeGreaterThanOrEqual(1);
+    expect(lids.length).toBeGreaterThanOrEqual(1);
+
+    const wood = new Set([0x8a6238, 0x6a4a2a]);
+    for (const pump of pumpGroups) {
+      expect(pump.userData.mode).toBe("PAPER");
+      const bolts: THREE.Object3D[] = [];
+      pump.traverse((obj) => {
+        if (obj.userData?.part === "bolt") bolts.push(obj);
+      });
+      expect(bolts.length).toBeGreaterThanOrEqual(1);
+      for (const b of bolts) {
+        expect(b.userData.part).toBe("bolt");
+        expect(b.userData.mode === "PAPER" || pump.userData.mode === "PAPER").toBe(true);
+        const mesh = b as THREE.Mesh;
+        expect(mesh.isMesh).toBe(true);
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        const mat = mesh.material as THREE.MeshLambertMaterial;
+        expect(mat.type).toBe("MeshLambertMaterial");
+        expect(wood.has(mat.color.getHex())).toBe(true);
+        const { width, height, depth } = (mesh.geometry as THREE.BoxGeometry).parameters;
+        expect(width).toBeLessThan(0.12);
+        expect(height).toBeLessThan(0.12);
+        expect(depth).toBeLessThan(0.12);
+        expect(mesh.position.y).toBeGreaterThan(0.5);
+        expect(mesh.position.y).toBeLessThan(1.45);
+        expect(Math.hypot(mesh.position.x, mesh.position.z)).toBeLessThan(0.25);
+      }
+    }
+  });
 });
