@@ -12,8 +12,25 @@ import {
   spawnCameraOffset,
   spawnLookAtOffset,
 } from "./roads.js";
+import { canEnter, createInterior, objectWithKind, wrapHarbourWorld } from "./interior.js";
 import { createPlayCamera } from "./camera.js";
 import { createFerryTicket } from "./ferry-ticket.js";
+import { createCatalogPicker, meshForUse } from "./buildings.js";
+
+function ensureDockButton(id, label) {
+  let btn = document.getElementById(id);
+  if (btn) return btn;
+  btn = document.createElement("button");
+  btn.type = "button";
+  btn.id = id;
+  btn.textContent = label;
+  btn.title = "PAPER · SIMULATED";
+  const dock = document.querySelector("nav.dock");
+  const taxiBtn = document.getElementById("btn-taxi");
+  if (dock && taxiBtn) dock.insertBefore(btn, taxiBtn);
+  else if (dock) dock.appendChild(btn);
+  return btn;
+}
 
 const canvas = document.getElementById("c");
 const statusEl = document.getElementById("status");
@@ -24,6 +41,10 @@ const btnLease = document.getElementById("btn-lease");
 const btnDevelop = document.getElementById("btn-develop");
 const btnFerry = document.getElementById("btn-ferry");
 const btnTaxi = document.getElementById("btn-taxi");
+const btnEnter = ensureDockButton("btn-enter", "Enter");
+const btnExit = ensureDockButton("btn-exit", "Exit");
+if (btnEnter) btnEnter.hidden = false;
+if (btnExit) btnExit.hidden = true;
 
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
@@ -63,6 +84,10 @@ let walking = false;
 let lastTap = 0;
 let taxi = null;
 let traffic = null;
+let harbourGroup = null;
+let interior = null;
+let placingUse = null;
+let catalogPicker = null;
 
 const player = new THREE.Mesh(
   new THREE.CapsuleGeometry(0.55, 1.15, 4, 8),
@@ -156,31 +181,68 @@ function nearParcel(p) {
   return Math.hypot(player.position.x - p.x, player.position.z - p.z) < 22;
 }
 
+function cheapestDevelop() {
+  const cat = map.catalog && map.catalog.length ? map.catalog : [];
+  if (!cat.length) return map.developCost ?? 40;
+  return Math.min(...cat.map((c) => c.paperCost));
+}
+
+function canOpenCatalog() {
+  if (!map) return false;
+  const vacant = map.plots.some((p) => p.owner === "visitor" && !p.use);
+  return vacant && map.visitor.cash >= cheapestDevelop();
+}
+
+function catalogLabel(id) {
+  const cat = map && map.catalog ? map.catalog : [];
+  const hit = cat.find((c) => c.id === id);
+  return hit ? hit.label : id;
+}
+
 function refreshHud() {
   if (!map) return;
   cashEl.textContent = "Cash $" + money(map.visitor.cash);
-  placeEl.textContent = specOf(islandId).name;
-  if (!selected) {
-    plotLineEl.textContent = "Tap land to inspect it";
+  const inside = interior && interior.isInside();
+  if (inside) {
+    placeEl.textContent = interior.currentFloor() === "upstairs" ? "Upstairs" : "Downstairs";
+    plotLineEl.textContent = "Inside · PAPER · SIMULATED";
     btnLease.disabled = true;
     btnDevelop.disabled = true;
+    if (btnEnter) {
+      btnEnter.disabled = true;
+      btnEnter.hidden = true;
+    }
+    if (btnExit) {
+      btnExit.disabled = false;
+      btnExit.hidden = false;
+    }
+    return;
+  }
+  placeEl.textContent = specOf(islandId).name;
+  if (btnExit) btnExit.hidden = true;
+  if (btnEnter) btnEnter.hidden = false;
+  btnDevelop.disabled = !canOpenCatalog();
+  if (!selected) {
+    plotLineEl.textContent = placingUse
+      ? "Tap your leased land to place it (PAPER)"
+      : "Tap land to inspect it";
+    btnLease.disabled = true;
+    if (btnEnter) btnEnter.disabled = true;
     return;
   }
   const p = map.plots.find((x) => x.id === selected);
   if (!p) return;
   const near = nearParcel(p);
+  if (btnEnter) btnEnter.disabled = !(canEnter(p) && near);
   if (p.owner === "visitor") {
     plotLineEl.textContent = parcelLabel(p) + (p.use ? " · " + p.use : " · yours");
     btnLease.disabled = true;
-    btnDevelop.disabled = !near || !!p.use || map.visitor.cash < map.developCost;
   } else if (p.owner) {
     plotLineEl.textContent = parcelLabel(p) + " · taken";
     btnLease.disabled = true;
-    btnDevelop.disabled = true;
   } else {
     plotLineEl.textContent = parcelLabel(p) + " · $" + money(p.price);
     btnLease.disabled = !near || map.visitor.cash < p.price;
-    btnDevelop.disabled = true;
   }
 }
 
@@ -262,10 +324,17 @@ function gableEnd(w, h, color) {
   return new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ color, side: THREE.DoubleSide }));
 }
 
-function houseAt(x, z, y, yaw, kind) {
+function worldAdd(obj) {
+  if (harbourGroup) harbourGroup.add(obj);
+  else scene.add(obj);
+}
+
+function houseAt(x, z, y, yaw, kind, plotId) {
   const g = new THREE.Group();
   g.position.set(x, y, z);
   g.rotation.y = yaw;
+  g.userData.kind = "building";
+  if (plotId) g.userData.plotId = plotId;
   const shop = kind === "shop";
   const wall = shop ? 0xe8d7b8 : 0xf4ead8;
   const roof = shop ? 0x7a2e22 : 0x6e4a32;
@@ -329,13 +398,15 @@ function houseAt(x, z, y, yaw, kind) {
       g.add(crate);
     }
   }
-  scene.add(g);
+  worldAdd(g);
   return g;
 }
 
-function farmAt(x, z, y, area) {
+function farmAt(x, z, y, area, plotId) {
   const g = new THREE.Group();
   g.position.set(x, y, z);
+  g.userData.kind = "building";
+  if (plotId) g.userData.plotId = plotId;
   const span = Math.min(16, Math.sqrt(area) * 0.48);
   for (let i = 0; i < 6; i++) {
     const row = part(span, 0.18, 0.55, i % 2 ? 0x5f8a32 : 0x7a5a28, false);
@@ -356,8 +427,8 @@ function farmAt(x, z, y, area) {
   tank.position.set(span * 0.38, 0.8, span * 0.28);
   tank.castShadow = true;
   g.add(tank);
-  scene.add(g);
-  houseAt(x + span * 0.32, z + span * 0.22, y, 0.4, "shed");
+  worldAdd(g);
+  houseAt(x + span * 0.32, z + span * 0.22, y, 0.4, "shed", plotId);
   return g;
 }
 
@@ -497,7 +568,7 @@ function paintParcel(p) {
       );
       rec.fill.userData.kind = "plot";
       rec.fill.userData.plotId = p.id;
-      scene.add(rec.fill);
+      worldAdd(rec.fill);
     }
     rec.fill.visible = true;
     rec.fill.material.color.setHex(parcelTint(p, true));
@@ -507,12 +578,16 @@ function paintParcel(p) {
 }
 
 function useFor(p) {
-  if (!p.use || useMeshes.has(p.id)) return;
+  if (!p || !p.use || useMeshes.has(p.id)) return;
   const spec = specOf(p.island);
   const y = heightAt(spec, p.x, p.z);
   const yaw = spec.id === "north" ? 0.15 : 3.3;
-  const built =
-    p.use === "farm" ? farmAt(p.x, p.z, y, p.area) : houseAt(p.x, p.z, y, yaw, "shop");
+  const built = meshForUse(p.use, { area: p.area });
+  built.position.set(p.x, y, p.z);
+  built.rotation.y = yaw;
+  built.userData.kind = "building";
+  built.userData.plotId = p.id;
+  worldAdd(built);
   useMeshes.set(p.id, built);
 }
 
@@ -593,26 +668,85 @@ function selectLand(p, walk) {
   if (walk && !nearParcel(p)) {
     goTo(p.x, p.z);
     setStatus("Walking onto that land.");
+  } else if (canEnter(p)) {
+    setStatus("Yours. Tap the building or Enter (PAPER).");
   } else {
     setStatus(p.owner ? "This land is taken." : "This land. Lease it to develop.");
   }
+}
+
+function enterPlot(p) {
+  if (!p || !interior || !canEnter(p)) return false;
+  walking = false;
+  if (taxi && taxi.hopOut) taxi.hopOut();
+  const ok = interior.enter(p);
+  if (ok) {
+    selected = p.id;
+    refreshHud();
+  }
+  return ok;
+}
+
+function leaveInterior() {
+  if (!interior || !interior.isInside()) return;
+  const left = interior.exit();
+  if (left) {
+    islandId = left.island;
+    selected = left.id;
+  }
+  walking = false;
+  snapCamera();
+  refreshHud();
 }
 
 function onPointer(ev) {
   if (ev.button != null && ev.button !== 0) return;
   if (Date.now() - lastTap < 180) return;
   lastTap = Date.now();
-  if (taxi && taxi.mapOpen()) return;
-  if (ev.target.closest && ev.target.closest("nav, a, button, #taxi-map, #ferry-ticket")) return;
+  if (taxi && typeof taxi.mapOpen === "function" && taxi.mapOpen()) return;
+  if (ev.target.closest && ev.target.closest("nav, a, button, #taxi-map, #ferry-ticket, #catalog-picker")) return;
   pointer.x = (ev.clientX / window.innerWidth) * 2 - 1;
   pointer.y = -(ev.clientY / window.innerHeight) * 2 + 1;
   raycaster.setFromCamera(pointer, camera);
-  const hits = raycaster.intersectObjects(scene.children, false);
+  if (interior && interior.isInside()) {
+    interior.handleRay(raycaster);
+    refreshHud();
+    return;
+  }
+  const root = harbourGroup || scene;
+  const hits = raycaster.intersectObjects(root.children, true);
+  const buildingHit = hits.find((h) => objectWithKind(h.object, "building"));
   const plotHit = hits.find((h) => h.object.userData.kind === "plot");
   const portHit = hits.find((h) => h.object.userData.kind === "port");
   const groundHit = hits.find((h) => h.object.userData.kind === "ground");
-  const tapPt = plotHit?.point || groundHit?.point || portHit?.point;
+  const tapPt = plotHit?.point || groundHit?.point || portHit?.point || buildingHit?.point;
   if (tapPt && taxi && taxi.handleTap(tapPt.x, tapPt.z, nearestIsland(tapPt.x, tapPt.z))) {
+    return;
+  }
+  if (placingUse) {
+    const tapped = plotHit
+      ? map.plots.find((x) => x.id === plotHit.object.userData.plotId)
+      : groundHit
+        ? findParcelAt(groundHit.point.x, groundHit.point.z)
+        : undefined;
+    if (tapped && tapped.owner === "visitor" && !tapped.use) {
+      developAt(tapped.id, placingUse);
+      return;
+    }
+    if (tapped) {
+      setStatus("Tap land you leased that has no building yet.");
+    }
+  }
+  if (buildingHit) {
+    const b = objectWithKind(buildingHit.object, "building");
+    const p =
+      (b && b.userData.plotId && map.plots.find((x) => x.id === b.userData.plotId)) ||
+      findParcelAt(buildingHit.point.x, buildingHit.point.z);
+    if (p && canEnter(p) && nearParcel(p)) {
+      enterPlot(p);
+      return;
+    }
+    if (p) selectLand(p, true);
     return;
   }
   if (plotHit) {
@@ -649,25 +783,40 @@ async function lease() {
   setStatus("This land is yours for $" + money(body.paid) + " (PAPER). Develop it.");
 }
 
-async function develop() {
-  if (!selected) return;
-  const p = map.plots.find((x) => x.id === selected);
-  const use = p && p.band === "field" ? "farm" : "stall";
+async function developAt(plotId, use) {
   const res = await fetch("/api/develop", {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ plotId: selected, use }),
+    body: JSON.stringify({ plotId, use }),
   });
   const body = await res.json();
   if (!body.ok) {
     setStatus("Could not develop: " + body.reason);
-    return;
+    return false;
   }
   map = body.snapshot;
-  useFor(map.plots.find((x) => x.id === selected));
-  paintParcel(map.plots.find((x) => x.id === selected));
+  selected = plotId;
+  useFor(map.plots.find((x) => x.id === plotId));
+  paintParcel(map.plots.find((x) => x.id === plotId));
+  placingUse = null;
+  if (catalogPicker) catalogPicker.close();
   refreshHud();
-  setStatus("Developed this land as a " + use + " (PAPER).");
+  setStatus("Developed this land as a " + catalogLabel(use) + " (PAPER).");
+  return true;
+}
+
+function openCatalog() {
+  if (!map) return;
+  if (!catalogPicker) return;
+  if (catalogPicker.isOpen()) {
+    catalogPicker.close();
+    placingUse = null;
+    setStatus("Catalogue closed.");
+    return;
+  }
+  if (!canOpenCatalog()) return;
+  catalogPicker.open(map.catalog, map.visitor.cash);
+  setStatus("Choose a building (PAPER). Then tap your leased land.");
 }
 
 const ferryTicket = createFerryTicket({
@@ -694,6 +843,12 @@ function onResize() {
 }
 
 function tick(dt) {
+  if (interior && interior.isInside()) {
+    interior.tick(dt);
+    interior.updateCamera(camera, dt);
+    refreshHud();
+    return;
+  }
   if (taxi) taxi.tick(dt);
   if (traffic) traffic.tick(dt);
   if (walking) {
@@ -765,13 +920,40 @@ async function boot() {
     getPlayer: () => player,
     getIslandId: () => islandId,
   });
+  harbourGroup = wrapHarbourWorld(scene, { keep: [player, sun.target] });
+  interior = createInterior({
+    scene,
+    player,
+    setStatus,
+    heightAt,
+    specOf,
+  });
+  interior.setHarbour(harbourGroup);
   spawnAt("north");
   setStatus("Tap a piece of land. Lease it, then develop it.");
 }
 
+catalogPicker = createCatalogPicker({
+  onPick(id) {
+    placingUse = id;
+    setStatus("Tap your leased land to place a " + catalogLabel(id) + " (PAPER).");
+  },
+  onCancel() {
+    placingUse = null;
+    setStatus("Tap a piece of land. Lease it, then develop it.");
+  },
+});
 canvas.addEventListener("pointerup", onPointer);
 btnLease.addEventListener("click", lease);
-btnDevelop.addEventListener("click", develop);
+btnDevelop.addEventListener("click", openCatalog);
+if (btnEnter) {
+  btnEnter.addEventListener("click", () => {
+    if (!selected || !map) return;
+    const p = map.plots.find((x) => x.id === selected);
+    if (p) enterPlot(p);
+  });
+}
+if (btnExit) btnExit.addEventListener("click", leaveInterior);
 btnFerry.addEventListener("click", ferry);
 window.addEventListener("resize", onResize);
 scene.add(sun.target);
