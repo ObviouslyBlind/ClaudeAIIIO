@@ -107,44 +107,106 @@ export function pavedDestFromMapClick(roads, islandId, spec, sx, sy, w, h) {
   return best;
 }
 
+function taxiMat(color, extra = {}) {
+  return new THREE.MeshLambertMaterial({ color, ...extra });
+}
+
+function taxiBox(w, h, d, mat, shadow = true) {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+  m.castShadow = shadow;
+  m.receiveShadow = true;
+  m.frustumCulled = false;
+  return m;
+}
+
+/** Four black tyres with a hub so the cab is not a floating box. */
+function addTaxiWheels(g, tyreMat, hubMat) {
+  const tyreGeo = new THREE.CylinderGeometry(0.48, 0.48, 0.36, 10);
+  tyreGeo.rotateZ(Math.PI / 2);
+  const hubGeo = new THREE.CylinderGeometry(0.22, 0.22, 0.38, 8);
+  hubGeo.rotateZ(Math.PI / 2);
+  for (const [x, z] of [
+    [1.28, 1.55],
+    [-1.28, 1.55],
+    [1.28, -1.55],
+    [-1.28, -1.55],
+  ]) {
+    const tyre = new THREE.Mesh(tyreGeo, tyreMat);
+    tyre.position.set(x, 0.48, z);
+    tyre.castShadow = true;
+    tyre.frustumCulled = false;
+    const hub = new THREE.Mesh(hubGeo, hubMat);
+    hub.position.set(x, 0.48, z);
+    hub.frustumCulled = false;
+    g.add(tyre, hub);
+  }
+}
+
+/**
+ * Yellow cab that reads from the quay: wheels, glass, roof lamp.
+ * Short lamp box only — no debug mast.
+ */
 function makeTaxiMesh() {
   const g = new THREE.Group();
-  const yellow = new THREE.MeshLambertMaterial({ color: 0xf0c430 });
-  const cabin = new THREE.MeshLambertMaterial({ color: 0xf6d65a });
-  const dark = new THREE.MeshLambertMaterial({ color: 0x2a2a2e });
-  const glass = new THREE.MeshLambertMaterial({ color: 0x4a6a78 });
-  const lamp = new THREE.MeshLambertMaterial({ color: 0xfff3a0 });
+  g.frustumCulled = false;
+  const yellow = taxiMat(0xf0c430, { emissive: 0xf0c430, emissiveIntensity: 0.18 });
+  const cabin = taxiMat(0xf6d65a, { emissive: 0xf6d65a, emissiveIntensity: 0.12 });
+  const dark = taxiMat(0x1a1a1e);
+  const chrome = taxiMat(0xc8c4b8);
+  const glass = taxiMat(0x3a5a6c, { emissive: 0x1a3040, emissiveIntensity: 0.22 });
+  const lamp = taxiMat(0xfff6c8, { emissive: 0xfff3a0, emissiveIntensity: 0.55 });
+  const lampSide = taxiMat(0x2a2a2e);
+  const head = taxiMat(0xfff4d2, { emissive: 0xffe9a8, emissiveIntensity: 0.4 });
+  const tail = taxiMat(0xc42a22, { emissive: 0x8a1814, emissiveIntensity: 0.35 });
 
-  const body = new THREE.Mesh(new THREE.BoxGeometry(2.05, 0.82, 3.7), yellow);
-  body.position.y = 0.68;
-  body.castShadow = true;
+  const body = taxiBox(2.45, 1.05, 5.05, yellow);
+  body.position.y = 0.92;
   g.add(body);
 
-  const roof = new THREE.Mesh(new THREE.BoxGeometry(1.82, 0.62, 1.65), cabin);
-  roof.position.set(0, 1.32, -0.22);
-  roof.castShadow = true;
+  const bumperF = taxiBox(2.52, 0.28, 0.28, dark, false);
+  bumperF.position.set(0, 0.52, 2.58);
+  const bumperR = taxiBox(2.52, 0.28, 0.28, dark, false);
+  bumperR.position.set(0, 0.52, -2.58);
+  g.add(bumperF, bumperR);
+
+  const roof = taxiBox(2.18, 0.92, 2.45, cabin);
+  roof.position.set(0, 1.68, -0.22);
   g.add(roof);
 
-  const wind = new THREE.Mesh(new THREE.BoxGeometry(1.68, 0.38, 0.08), glass);
-  wind.position.set(0, 1.34, 0.58);
+  const wind = taxiBox(2.02, 0.72, 0.16, glass, false);
+  wind.position.set(0, 1.62, 1.08);
+  wind.rotation.x = -0.42;
   g.add(wind);
 
-  const sign = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.2, 0.55), lamp);
-  sign.position.set(0, 1.76, -0.22);
-  g.add(sign);
+  const rearGlass = taxiBox(1.95, 0.58, 0.12, glass, false);
+  rearGlass.position.set(0, 1.62, -1.42);
+  rearGlass.rotation.x = 0.28;
+  g.add(rearGlass);
 
-  const wheelGeo = new THREE.CylinderGeometry(0.3, 0.3, 0.26, 8);
-  wheelGeo.rotateZ(Math.PI / 2);
-  for (const [x, z] of [
-    [0.92, 1.12],
-    [-0.92, 1.12],
-    [0.92, -1.12],
-    [-0.92, -1.12],
-  ]) {
-    const w = new THREE.Mesh(wheelGeo, dark);
-    w.position.set(x, 0.3, z);
-    g.add(w);
+  for (const z of [0.22, -0.55]) {
+    const side = taxiBox(0.08, 0.48, 0.95, glass, false);
+    side.position.set(1.12, 1.62, z);
+    const sideB = side.clone();
+    sideB.position.x = -1.12;
+    g.add(side, sideB);
   }
+
+  const lampBase = taxiBox(0.82, 0.1, 1.12, lampSide, false);
+  lampBase.position.set(0, 2.18, -0.18);
+  const sign = taxiBox(0.72, 0.38, 1.02, lamp);
+  sign.position.set(0, 2.38, -0.18);
+  g.add(lampBase, sign);
+
+  for (const x of [-0.72, 0.72]) {
+    const hl = taxiBox(0.42, 0.22, 0.12, head, false);
+    hl.position.set(x, 0.78, 2.56);
+    const tl = taxiBox(0.38, 0.18, 0.1, tail, false);
+    tl.position.set(x, 0.78, -2.56);
+    g.add(hl, tl);
+  }
+
+  addTaxiWheels(g, dark, chrome);
+
   g.userData.kind = "taxi";
   return g;
 }

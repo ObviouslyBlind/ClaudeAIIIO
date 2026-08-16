@@ -39,22 +39,72 @@ export function pointAlongPolyline(points, dist) {
   return { x: last.x, z: last.z, yaw: 0, total };
 }
 
+function part(mesh, name) {
+  mesh.userData.part = name;
+  mesh.frustumCulled = false;
+  mesh.castShadow = true;
+  return mesh;
+}
+
+/** Sedan: painted body, glass cabin, bumpers, four wheels. No debug masts. */
 function makeCar(color) {
   const g = new THREE.Group();
   g.frustumCulled = false;
-  const mat = new THREE.MeshLambertMaterial({ color, emissive: color, emissiveIntensity: 0.35 });
-  const body = new THREE.Mesh(new THREE.BoxGeometry(3.2, 1.4, 7.2), mat);
-  body.position.y = 1.0;
-  body.castShadow = true;
-  body.frustumCulled = false;
+
+  const paint = new THREE.MeshLambertMaterial({ color, emissive: color, emissiveIntensity: 0.22 });
+  const glass = new THREE.MeshLambertMaterial({
+    color: 0x7ec8e0,
+    emissive: 0x1a4050,
+    emissiveIntensity: 0.18,
+    transparent: true,
+    opacity: 0.72,
+  });
+  const chrome = new THREE.MeshLambertMaterial({ color: 0xc5c8cc });
+  const rubber = new THREE.MeshLambertMaterial({ color: 0x1c1c20 });
+
+  const body = part(new THREE.Mesh(new THREE.BoxGeometry(2.15, 0.72, 4.2), paint), "body");
+  body.position.y = 0.7;
   g.add(body);
-  const cabin = new THREE.Mesh(
-    new THREE.BoxGeometry(2.8, 1.1, 3.2),
-    new THREE.MeshLambertMaterial({ color: 0x1a2430, emissive: 0x1a2430, emissiveIntensity: 0.2 }),
-  );
-  cabin.position.set(0, 2.0, -0.3);
-  cabin.frustumCulled = false;
+
+  const cabin = part(new THREE.Mesh(new THREE.BoxGeometry(1.92, 0.58, 1.88), paint), "cabin");
+  cabin.position.set(0, 1.26, -0.2);
   g.add(cabin);
+
+  const wind = part(new THREE.Mesh(new THREE.BoxGeometry(1.78, 0.42, 0.08), glass), "glass");
+  wind.position.set(0, 1.28, 0.72);
+  g.add(wind);
+
+  const rearGlass = part(new THREE.Mesh(new THREE.BoxGeometry(1.78, 0.42, 0.08), glass), "glass");
+  rearGlass.position.set(0, 1.28, -1.12);
+  g.add(rearGlass);
+
+  for (const x of [-0.97, 0.97]) {
+    const side = part(new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.38, 1.55), glass), "glass");
+    side.position.set(x, 1.28, -0.2);
+    g.add(side);
+  }
+
+  const frontBump = part(new THREE.Mesh(new THREE.BoxGeometry(2.22, 0.28, 0.24), chrome), "bumper");
+  frontBump.position.set(0, 0.48, 2.18);
+  g.add(frontBump);
+
+  const rearBump = part(new THREE.Mesh(new THREE.BoxGeometry(2.22, 0.28, 0.24), chrome), "bumper");
+  rearBump.position.set(0, 0.48, -2.18);
+  g.add(rearBump);
+
+  const wheelGeo = new THREE.CylinderGeometry(0.34, 0.34, 0.28, 10);
+  wheelGeo.rotateZ(Math.PI / 2);
+  for (const [x, z] of [
+    [1.05, 1.28],
+    [-1.05, 1.28],
+    [1.05, -1.28],
+    [-1.05, -1.28],
+  ]) {
+    const wheel = part(new THREE.Mesh(wheelGeo, rubber), "wheel");
+    wheel.position.set(x, 0.34, z);
+    g.add(wheel);
+  }
+
   g.userData.kind = "traffic";
   return g;
 }
