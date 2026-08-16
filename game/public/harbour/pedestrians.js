@@ -141,6 +141,21 @@ function addKraftCanvasApron(figure) {
   figure.add(apron);
 }
 
+/**
+ * Small kraft satchel on the right hip. Same 0.18×0.28×0.14 body + flap
+ * as the visitor bag. Canvas hex already in this file — no new strap colour.
+ * Hat and apron stay.
+ */
+function addKraftSatchel(figure) {
+  const satchel = paperBox(0.18, 0.28, 0.14, CANVAS);
+  satchel.position.set(0.38, 0.78, 0.08);
+  satchel.userData.part = "satchel";
+  const flap = paperBox(0.18, 0.08, 0.16, CANVAS);
+  flap.position.set(0.38, 0.92, 0.09);
+  flap.userData.part = "flap";
+  figure.add(satchel, flap);
+}
+
 function polylineLength(points) {
   let n = 0;
   for (let i = 1; i < points.length; i++) {
@@ -278,6 +293,7 @@ export function makePedestrians(map, helpers) {
     if (lane === "quay") {
       addKraftStrawHat(person.mesh);
       addKraftCanvasApron(person.mesh);
+      addKraftSatchel(person.mesh);
     }
     const at = samplePerson(spec, heightAt, person, along);
     if (!onLand(at)) return;
