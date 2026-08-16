@@ -121,6 +121,15 @@ export function makeSouthSign(spec, helpers) {
   beam.position.set(0, 2.78, 0);
   g.add(beam);
 
+  /** Small kraft cap / finial on each post. WOOD already in this file — PAPER box, not grey iron. */
+  const capL = part(0.22, 0.1, 0.22, WOOD, false);
+  capL.position.set(-1.85, 2.9, 0);
+  capL.userData.part = "cap";
+  const capR = part(0.22, 0.1, 0.22, WOOD, false);
+  capR.position.set(1.85, 2.9, 0);
+  capR.userData.part = "cap";
+  g.add(capL, capR);
+
   const board = part(4.05, 1.28, 0.12, WOOD_LIGHT);
   board.position.set(0, 2.12, 0);
   g.add(board);
