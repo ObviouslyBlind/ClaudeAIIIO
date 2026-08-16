@@ -88,4 +88,38 @@ describe("road node traffic", () => {
     const visible = traffic.cars.filter((c) => c.islandId === "north" && inFrame(c));
     expect(visible.length).toBeGreaterThanOrEqual(3);
   });
+
+  it("builds a sedan mesh: painted body, cabin glass, bumpers, wheels — no debug mast", () => {
+    const board = createLandBoard();
+    const scene = { add() {} };
+    const traffic = createTraffic({
+      scene,
+      getMap: () => board,
+      specOf: (id: "north" | "south") => ISLANDS[id],
+      heightAt,
+    });
+    const mesh = traffic.cars[0]!.mesh as THREE.Group;
+    const parts = new Map<string, number>();
+    const colors: number[] = [];
+    let mast = 0;
+    mesh.traverse((obj) => {
+      const m = obj as THREE.Mesh & { userData: { part?: string } };
+      const name = m.userData?.part;
+      if (name) parts.set(name, (parts.get(name) ?? 0) + 1);
+      const mat = m.material as THREE.MeshLambertMaterial | undefined;
+      if (mat?.color) colors.push(mat.color.getHex());
+      const geo = m.geometry as THREE.BufferGeometry & { parameters?: { height?: number; radiusTop?: number } };
+      const h = geo?.parameters?.height ?? 0;
+      const r = geo?.parameters?.radiusTop ?? 1;
+      if (h > 2.4 && r < 0.2 && mat?.color?.getHex() === 0xff0000) mast += 1;
+    });
+    expect(parts.get("body")).toBe(1);
+    expect(parts.get("cabin")).toBe(1);
+    expect(parts.get("glass")).toBeGreaterThanOrEqual(2);
+    expect(parts.get("bumper")).toBe(2);
+    expect(parts.get("wheel")).toBe(4);
+    expect(colors).toContain(0xff2a1a);
+    expect(mast).toBe(0);
+    expect(mesh.children.length).toBeGreaterThan(6);
+  });
 });
