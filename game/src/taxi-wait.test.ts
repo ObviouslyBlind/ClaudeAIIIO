@@ -362,6 +362,41 @@ describe("taxi roof lamp", () => {
     expect(spares.length).toBeGreaterThanOrEqual(1);
   });
 
+  it("puts tiny kraft PAPER mudflaps behind the taxi rear wheels", () => {
+    const mesh = makeTaxiMesh();
+    const flaps: THREE.Mesh[] = [];
+    const doorPlates: THREE.Mesh[] = [];
+    const caps: THREE.Mesh[] = [];
+    const wipers: THREE.Mesh[] = [];
+    const kraftFlap = new Set([0xf4ead8, 0xc4a574]);
+    mesh.traverse((obj) => {
+      const m = obj as THREE.Mesh & { userData: { part?: string; mode?: string } };
+      if (m.userData?.part === "mudflap") flaps.push(m);
+      if (m.userData?.part === "door-plate") doorPlates.push(m);
+      if (m.userData?.part === "aerial-cap" || m.userData?.part === "cap") caps.push(m);
+      if (m.userData?.part === "wiper") wipers.push(m);
+    });
+    expect(flaps.length).toBeGreaterThanOrEqual(2);
+    expect(flaps.every((f) => f.geometry.type === "BoxGeometry")).toBe(true);
+    expect(flaps.every((f) => f.userData.mode === "PAPER")).toBe(true);
+    expect(
+      flaps.every((f) => kraftFlap.has((f.material as THREE.MeshLambertMaterial).color.getHex())),
+    ).toBe(true);
+    for (const flap of flaps) {
+      const geo = flap.geometry as THREE.BoxGeometry;
+      expect(geo.parameters.width).toBeLessThan(0.5);
+      expect(geo.parameters.height).toBeLessThan(0.5);
+      expect(geo.parameters.depth).toBeLessThan(0.12);
+      expect(flap.position.z).toBeLessThan(-1.55);
+      expect(flap.position.y).toBeGreaterThan(0.1);
+      expect(flap.position.y).toBeLessThan(0.8);
+      expect(Math.abs(flap.position.x)).toBeGreaterThan(1.0);
+    }
+    expect(doorPlates.length).toBeGreaterThanOrEqual(2);
+    expect(caps.length).toBeGreaterThanOrEqual(1);
+    expect(wipers.length).toBeGreaterThanOrEqual(2);
+  });
+
   it("parks the cab on paved at spawn so the roof lamp is in the first frame", () => {
     const board = createLandBoard();
     const spec = ISLANDS.north;
