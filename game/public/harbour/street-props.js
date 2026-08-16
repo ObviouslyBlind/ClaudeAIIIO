@@ -326,12 +326,65 @@ function villagePump(_side) {
   return g;
 }
 
+/**
+ * Small kraft fishing-net rack: two wood posts, wood rails, and a net
+ * grid of thin boxes. Paper boxes only — not a cylinder reel, not wire mesh.
+ */
+function fishingNetRack(_side) {
+  const g = new THREE.Group();
+  g.name = "net-rack";
+  g.userData.kind = "street-prop";
+  g.userData.prop = "net-rack";
+  g.userData.mode = "PAPER";
+  g.userData.part = "net-rack";
+  g.userData.dress = "net-rack";
+
+  const shoeL = part(0.18, 0.08, 0.18, IRON, false);
+  shoeL.position.set(-0.52, 0.04, 0);
+  const shoeR = part(0.18, 0.08, 0.18, IRON, false);
+  shoeR.position.set(0.52, 0.04, 0);
+
+  const postL = part(0.1, 1.42, 0.1, WOOD);
+  postL.userData.part = "post";
+  postL.position.set(-0.52, 0.79, 0);
+  const postR = part(0.1, 1.42, 0.1, WOOD);
+  postR.userData.part = "post";
+  postR.position.set(0.52, 0.79, 0);
+
+  const railTop = part(1.14, 0.07, 0.08, WOOD_DARK, false);
+  railTop.position.set(0, 1.46, 0);
+  const railMid = part(1.14, 0.06, 0.07, WOOD_DARK, false);
+  railMid.position.set(0, 0.86, 0);
+  const railBot = part(1.14, 0.07, 0.08, WOOD_DARK, false);
+  railBot.position.set(0, 0.26, 0);
+
+  g.add(shoeL, shoeR, postL, postR, railTop, railMid, railBot);
+
+  for (const x of [-0.32, -0.11, 0.11, 0.32]) {
+    const twine = part(0.02, 1.12, 0.02, IRON, false);
+    twine.userData.part = "net";
+    twine.userData.dress = "net-rack";
+    twine.position.set(x, 0.86, 0);
+    g.add(twine);
+  }
+  for (const y of [0.44, 0.64, 1.08, 1.28]) {
+    const twine = part(0.96, 0.02, 0.02, IRON, false);
+    twine.userData.part = "net";
+    twine.userData.dress = "net-rack";
+    twine.position.set(0, y, 0);
+    g.add(twine);
+  }
+
+  return g;
+}
+
 function makeProp(kind, side) {
   if (kind === "bench") return crateSeat(side);
   if (kind === "sign") return streetSign(side);
   if (kind === "hawser-drum") return hawserDrum(side);
   if (kind === "stool") return woodStool(side);
   if (kind === "pump") return villagePump(side);
+  if (kind === "net-rack") return fishingNetRack(side);
   return lampPost(side);
 }
 
@@ -443,6 +496,8 @@ function planForIsland(island, length) {
     }
     // One kraft village pump / trough on the spawn verge — off the tarmac.
     plan.push({ along: 72, side: -1, kind: "pump", setback: streetSetbackM(idx++) });
+    // One kraft fishing-net rack on the spawn verge — off the tarmac.
+    plan.push({ along: 80, side: 1, kind: "net-rack", setback: streetSetbackM(idx++) });
   } else {
     for (let along = 38, n = 0; along <= portM; along += 72, n++) {
       plan.push({ along, side: n % 2 ? 1 : -1, kind: "bench", setback: streetSetbackM(idx++) });
@@ -488,7 +543,7 @@ function placeOne(map, road, spec, heightAt, slot, root) {
 }
 
 /**
- * Paper lamp posts, kraft crate seats, hawser drums, one wood stool, one village pump, and signs along the paved spline, on the grass verge.
+ * Paper lamp posts, kraft crate seats, hawser drums, one wood stool, one village pump, one fishing-net rack, and signs along the paved spline, on the grass verge.
  * North port stretch is packed first so spawn looking inland actually sees them.
  */
 export function makeStreetProps(map, helpers) {
