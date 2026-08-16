@@ -54,7 +54,7 @@ describe("owned building interiors", () => {
     expect(boxes).toBeGreaterThan(12);
   });
 
-  it("dresses PAPER rooms as a Caribbean house: windows, table, chairs, lamp, bed", () => {
+  it("dresses PAPER rooms as a Caribbean house: windows, table, chairs, lamp, clock, bed", () => {
     const g = makeInteriorScene();
     const down = g.getObjectByName("downstairs");
     const up = g.getObjectByName("upstairs");
@@ -73,6 +73,7 @@ describe("owned building interiors", () => {
     expect(downKinds).toContain("interior-table");
     expect(downKinds.filter((k) => k === "interior-chair").length).toBeGreaterThanOrEqual(2);
     expect(downKinds).toContain("interior-lamp");
+    expect(downKinds).toContain("interior-clock");
     expect(downKinds).toContain("interior-window");
     expect(downKinds).toContain("exit");
     expect(downKinds).toContain("interior-floor");
@@ -84,6 +85,7 @@ describe("owned building interiors", () => {
     expect(upKinds).toContain("interior-window");
     expect(upKinds).toContain("interior-floor");
     expect(upKinds).toContain("interior-paper");
+    expect(upKinds).not.toContain("interior-clock");
 
     const table = down!.getObjectByName("table");
     expect(table).toBeTruthy();
@@ -136,6 +138,27 @@ describe("owned building interiors", () => {
     expect(glowing).toBe(true);
     expect(shadeW).toBeGreaterThan(0.2);
     expect(shadeW).toBeLessThan(0.5);
+
+    const clock = down!.getObjectByName("clock");
+    expect(clock).toBeTruthy();
+    expect(clock!.userData.mode).toBe("PAPER");
+    expect(clock!.userData.kind).toBe("interior-clock");
+    const clockPos = new THREE.Vector3();
+    clock!.getWorldPosition(clockPos);
+    expect(clockPos.y).toBeGreaterThan(1.4);
+    expect(clockPos.y).toBeLessThan(2.4);
+    expect(clockPos.z).toBeLessThan(-3);
+    let kraftFace = false;
+    let woodRim = false;
+    clock!.traverse((o) => {
+      if ((o as THREE.Mesh).isMesh && (o as THREE.Mesh).material && "color" in (o as THREE.Mesh).material) {
+        const hex = ((o as THREE.Mesh).material as THREE.MeshLambertMaterial).color.getHex();
+        if (hex === 0xf3efe4) kraftFace = true;
+        if (hex === 0x5a3a22) woodRim = true;
+      }
+    });
+    expect(kraftFace).toBe(true);
+    expect(woodRim).toBe(true);
 
     let exitDoors = 0;
     g.traverse((o) => {
