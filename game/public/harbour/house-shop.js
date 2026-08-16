@@ -49,32 +49,71 @@ function makeCounter(x, z) {
   g.userData.kind = "house-shop-counter";
   g.userData.mode = "PAPER";
   const y0 = 0.16;
-  const topY = y0 + 0.88;
-  const top = paperBox(2.45, 0.08, 0.72, WOOD_TOP, "house-shop-counter");
+  const topY = y0 + 0.92;
+  const top = paperBox(2.55, 0.08, 0.78, WOOD_TOP, "house-shop-counter");
   top.position.set(0, topY, 0);
   g.add(top);
-  const body = paperBox(2.35, 0.78, 0.64, WOOD, "house-shop-counter");
-  body.position.set(0, y0 + 0.39, 0);
+  const body = paperBox(2.42, 0.82, 0.7, WOOD, "house-shop-counter");
+  body.position.set(0, y0 + 0.41, 0);
   g.add(body);
-  const kick = paperBox(2.35, 0.1, 0.08, WOOD_DARK, "house-shop-counter");
-  kick.position.set(0, y0 + 0.05, 0.34);
+  const kick = paperBox(2.42, 0.1, 0.08, WOOD_DARK, "house-shop-counter");
+  kick.position.set(0, y0 + 0.05, 0.36);
   g.add(kick);
-  const till = paperBox(0.36, 0.16, 0.28, WOOD_DARK, "house-shop-till");
-  till.position.set(0.72, topY + 0.12, -0.06);
+  const till = paperBox(0.4, 0.18, 0.3, WOOD_DARK, "house-shop-till");
+  till.position.set(0.78, topY + 0.13, -0.06);
   g.add(till);
-  const tillLid = paperBox(0.32, 0.05, 0.24, CORAL, "house-shop-till");
-  tillLid.position.set(0.72, topY + 0.22, -0.06);
+  const tillLid = paperBox(0.36, 0.06, 0.26, CORAL, "house-shop-till");
+  tillLid.position.set(0.78, topY + 0.24, -0.06);
   g.add(tillLid);
-  const jar = paperBox(0.14, 0.2, 0.14, TEAL, "house-shop-goods");
-  jar.position.set(-0.72, topY + 0.14, 0.1);
+  const jar = paperBox(0.18, 0.24, 0.18, TEAL, "house-shop-goods");
+  jar.position.set(-0.82, topY + 0.16, 0.1);
   g.add(jar);
-  const tin = paperBox(0.16, 0.12, 0.16, TIN, "house-shop-goods");
-  tin.position.set(-0.42, topY + 0.1, 0.12);
+  const tin = paperBox(0.2, 0.16, 0.2, TIN, "house-shop-goods");
+  tin.position.set(-0.48, topY + 0.12, 0.12);
   g.add(tin);
-  const stack = paperBox(0.2, 0.07, 0.16, LINEN, "house-shop-goods");
-  stack.position.set(-0.12, topY + 0.07, 0.14);
+  const stack = paperBox(0.24, 0.1, 0.18, LINEN, "house-shop-goods");
+  stack.position.set(-0.12, topY + 0.09, 0.14);
   g.add(stack);
   g.position.set(x, 0, z);
+  return g;
+}
+
+/** Freestanding kraft cabinet — two planks of tins, readable from the door. */
+function makeShelfBox(x, z, yaw) {
+  const g = new THREE.Group();
+  g.name = "house-shop-shelf";
+  g.userData.kind = "house-shop-shelf";
+  g.userData.mode = "PAPER";
+  g.position.set(x, 0, z);
+  g.rotation.y = yaw;
+  const y0 = 0.16;
+  const w = 0.98;
+  const d = 0.44;
+  const h = 1.48;
+  const body = paperBox(w, h, d, WOOD, "house-shop-shelf");
+  body.position.set(0, y0 + h / 2, 0);
+  g.add(body);
+  const back = paperBox(w - 0.06, h - 0.1, 0.06, WOOD_DARK, "house-shop-shelf");
+  back.position.set(0, y0 + h / 2, -d / 2 + 0.05);
+  g.add(back);
+  const goods = [
+    [CORAL, TIN, GREEN],
+    [TEAL, LINEN, CORAL],
+  ];
+  for (let i = 0; i < 2; i++) {
+    const y = y0 + 0.44 + i * 0.54;
+    const plank = paperBox(w - 0.12, 0.05, d - 0.1, WOOD_TOP, "house-shop-shelf");
+    plank.position.set(0, y, 0.04);
+    g.add(plank);
+    const row = goods[i];
+    for (let k = 0; k < row.length; k++) {
+      const t = k / (row.length - 1) - 0.5;
+      const gh = 0.22 + (k % 2) * 0.08;
+      const item = paperBox(0.2, gh, 0.16, row[k], "house-shop-goods");
+      item.position.set(t * 0.62, y + gh / 2 + 0.04, 0.08);
+      g.add(item);
+    }
+  }
   return g;
 }
 
@@ -239,9 +278,13 @@ function makeHouseShopDress() {
   g.userData.mode = "PAPER";
   g.userData.provenance = "SIMULATED";
 
-  g.add(makeCounter(-0.55, 0.55));
+  // Door is at +z; enter camera looks through it at x≈0. Counter + two
+  // shelf boxes sit in that strip so downstairs is not an empty dining room.
+  g.add(makeCounter(0, 0.48));
+  g.add(makeShelfBox(-0.78, -0.52, 0));
+  g.add(makeShelfBox(0.78, -0.52, 0));
   g.add(makeShortShelf(-3.28, 0.45, Math.PI / 2));
-  g.add(hangingLamp(-0.55, 2.18, 0.55));
+  g.add(hangingLamp(0, 2.18, 0.48));
   g.add(paperMark(-2.15, 1.62, 3.38));
 
   const rug = paperBox(1.55, 0.04, 1.25, RUG, "house-shop-rug");
@@ -291,10 +334,11 @@ export function dressHouseShop(scene) {
   interior.userData.interiorUse = "house_shop";
   interior.userData.provenance = "SIMULATED";
   setDownstairsHouseVisible(interior, false);
+  const down = interior.getObjectByName("downstairs") || interior;
   let dress = interior.getObjectByName("house-shop-dress");
   if (!dress) {
     dress = makeHouseShopDress();
-    interior.add(dress);
+    down.add(dress);
   }
   dress.visible = true;
   return interior;
