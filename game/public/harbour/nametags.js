@@ -5,12 +5,12 @@ import * as THREE from "three";
  * Kraft card + brown ink. Not a HUD, not a CoD plate, not Capital Rift UI.
  */
 
-/** Player-to-walker metres. Spawn quay orbit sits ~50 m back. */
-const NEAR_M = 48;
-const LABEL_Y = 2.12;
-/** World metres. Slightly larger kraft card; still a sprite, not a HUD plate. */
-const CARD_W_M = 2.4;
-const CARD_H_M = 0.6;
+/** Player-to-walker metres. `/g/tags45` FAIL TAGS: 48 m hid every crate-scale quay hand. */
+export const NAMETAG_NEAR_M = 240;
+const LABEL_Y = 2.15;
+/** World metres on an unscaled walker. Scaled quay hands compensate in dressPaperNametags. */
+const CARD_W_M = 3.6;
+const CARD_H_M = 0.9;
 const PAPER_FACE = "#efe4c8";
 const PAPER_EDGE = "#8a6238";
 const INK = "#3d2a1c";
@@ -180,8 +180,9 @@ export function makePaperNametag(name) {
   const mat = new THREE.SpriteMaterial({
     map: tex,
     transparent: true,
-    depthTest: true,
+    depthTest: false,
     depthWrite: false,
+    sizeAttenuation: true,
   });
   const sprite = new THREE.Sprite(mat);
   sprite.name = "paper-nametag";
@@ -280,7 +281,15 @@ export function dressPaperNametags(people, { getPlayer } = {}) {
       person.name ||
       "PAPER";
     const tag = makePaperNametag(name);
-    if (tag) mesh.add(tag);
+    if (tag) {
+      const s = mesh.scale.x || 1;
+      if (s > 1.05) {
+        tag.scale.set(8.8 / s, 2.2 / s, 1);
+        tag.position.y = 2.2;
+      }
+      tag.visible = true;
+      mesh.add(tag);
+    }
   }
   return {
     tick() {
@@ -295,7 +304,7 @@ export function dressPaperNametags(people, { getPlayer } = {}) {
         }
         mesh.getWorldPosition(_world);
         const d = Math.hypot(_world.x - pos.x, _world.z - pos.z);
-        tag.visible = d < NEAR_M;
+        tag.visible = d < NAMETAG_NEAR_M;
       }
     },
   };
