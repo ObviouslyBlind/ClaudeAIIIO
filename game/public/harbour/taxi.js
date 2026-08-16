@@ -198,6 +198,20 @@ function addTaxiDoorHandles(g, kraftMat) {
 }
 
 /**
+ * Two small kraft PAPER side mirrors on the A-pillars — tan housing + cream glass.
+ * Same 0xc4a574 / 0xf4ead8 as handles and hubs. Not chrome sedan mirrors.
+ */
+function addTaxiMirrors(g, kraftMat, kraftCreamMat) {
+  for (const side of [-1, 1]) {
+    const housing = tagPart(taxiBox(0.18, 0.14, 0.22, kraftMat, false), "mirror");
+    housing.position.set(side * 1.38, 1.5, 0.92);
+    const face = tagPart(taxiBox(0.04, 0.1, 0.16, kraftCreamMat, false), "mirror");
+    face.position.set(side * 1.48, 1.5, 0.92);
+    g.add(housing, face);
+  }
+}
+
+/**
  * Small kraft cream plate on the rear bumper — reads as a cab, not a yellow brick.
  * Same 0xf4ead8 as the hubs — original palette, not chrome grey. PAPER boxes only.
  */
@@ -227,7 +241,7 @@ function addTaxiSpare(g, tyreMat, hubMat) {
 
 /**
  * Yellow cab that reads from the quay: wheels with kraft cream hub boxes, glass, roof lamp, checker belt,
- * iron bumper, door handles, short kraft roof aerial, kraft cream rear plate, kraft spare on the boot.
+ * iron bumper, door handles, kraft side mirrors, short kraft roof aerial, kraft cream rear plate, kraft spare on the boot.
  * Compact warm PAPER taxi-sign box — original cream lamp, not a sedan lid, not a debug mast, not a cop lightbar.
  */
 export function makeTaxiMesh() {
@@ -254,6 +268,7 @@ export function makeTaxiMesh() {
   addTaxiCheckBand(g, kraft, dark);
   addTaxiBumpers(g, lampSide);
   addTaxiDoorHandles(g, kraft);
+  addTaxiMirrors(g, kraft, kraftHub);
   addTaxiPlate(g, kraftHub);
   addTaxiSpare(g, dark, kraftHub);
 

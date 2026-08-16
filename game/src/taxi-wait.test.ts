@@ -175,6 +175,39 @@ describe("taxi roof lamp", () => {
     expect(plates.every((p) => p.position.z < -2.4)).toBe(true);
   });
 
+  it("has two kraft PAPER side mirrors on the cabin A-pillars", () => {
+    const mesh = makeTaxiMesh();
+    const mirrors: THREE.Mesh[] = [];
+    const aerials: THREE.Mesh[] = [];
+    const spares: THREE.Mesh[] = [];
+    const plates: THREE.Mesh[] = [];
+    const hubs: THREE.Mesh[] = [];
+    const handles: THREE.Mesh[] = [];
+    const kraftMirror = new Set([0xc4a574, 0xf4ead8]);
+    mesh.traverse((obj) => {
+      const m = obj as THREE.Mesh & { userData: { part?: string; mode?: string } };
+      if (m.userData?.part === "mirror") mirrors.push(m);
+      if (m.userData?.part === "aerial") aerials.push(m);
+      if (m.userData?.part === "spare") spares.push(m);
+      if (m.userData?.part === "plate") plates.push(m);
+      if (m.userData?.part === "hub") hubs.push(m);
+      if (m.userData?.part === "handle") handles.push(m);
+    });
+    expect(mirrors.length).toBeGreaterThanOrEqual(2);
+    expect(mirrors.every((m) => m.geometry.type === "BoxGeometry")).toBe(true);
+    expect(mirrors.every((m) => m.userData.mode === "PAPER")).toBe(true);
+    expect(
+      mirrors.every((m) => kraftMirror.has((m.material as THREE.MeshLambertMaterial).color.getHex())),
+    ).toBe(true);
+    expect(mirrors.every((m) => Math.abs(m.position.x) > 1.22)).toBe(true);
+    expect(mirrors.every((m) => m.position.y > 1.3 && m.position.y < 1.7)).toBe(true);
+    expect(aerials.length).toBeGreaterThanOrEqual(1);
+    expect(spares.length).toBeGreaterThanOrEqual(1);
+    expect(plates.length).toBeGreaterThanOrEqual(1);
+    expect(hubs.length).toBe(4);
+    expect(handles.length).toBeGreaterThanOrEqual(2);
+  });
+
   it("puts a kraft PAPER spare tyre on the taxi boot", () => {
     const mesh = makeTaxiMesh();
     const spares: THREE.Mesh[] = [];
