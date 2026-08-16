@@ -3,8 +3,8 @@ import * as THREE from "three";
 /**
  * PAPER farm-shed interior dress. Tools, grain sacks, kraft planter beds,
  * a small wood-post scarecrow at the back of the crop beds, a short wood
- * fence rail behind it, and dim warm light — not the house living room,
- * warehouse crates, shop, or factory.
+ * fence rail behind it, a small wood water trough beside the beds, and dim
+ * warm light — not the house living room, warehouse crates, shop, or factory.
  * No WASD. Tap-to-walk stays in interior.js.
  *
  * Call dressFarm(scene) when plot.kind or plot.use is "farm".
@@ -282,6 +282,42 @@ function cropFence() {
   return g;
 }
 
+/**
+ * Small PAPER wood water trough: box body, dark rim, metal water sheet.
+ * Hexes already in this file (WOOD, WOOD_DARK, METAL). Sits beside the
+ * crop beds on the wall side; centre aisle stays clear.
+ */
+function waterTrough() {
+  const g = new THREE.Group();
+  g.name = "farm-trough";
+  g.userData.kind = "farm-trough";
+  g.userData.mode = "PAPER";
+  const y0 = 0.16;
+  const len = 0.68;
+  const wid = 0.26;
+  const h = 0.16;
+  const body = paperBox(len, h, wid, WOOD, "farm-trough");
+  body.position.y = y0 + h / 2;
+  g.add(body);
+  const band = paperBox(len + 0.03, 0.04, wid + 0.03, WOOD_DARK, "farm-trough");
+  band.position.y = y0 + h - 0.02;
+  g.add(band);
+  const water = paperBox(len * 0.78, 0.03, wid * 0.58, METAL, "farm-trough");
+  water.position.y = y0 + h + 0.01;
+  g.add(water);
+  for (const [dx, dz] of [
+    [-0.26, -0.08],
+    [0.26, -0.08],
+    [-0.26, 0.08],
+    [0.26, 0.08],
+  ]) {
+    const leg = paperBox(0.05, 0.1, 0.05, WOOD_DARK, "farm-trough");
+    leg.position.set(dx, y0 + 0.05, dz);
+    g.add(leg);
+  }
+  return g;
+}
+
 function workbench(x, z) {
   const g = new THREE.Group();
   g.name = "farm-bench";
@@ -349,6 +385,10 @@ function makeFarmDress() {
   const fence = cropFence();
   fence.position.set(2.68, 0, -2.62);
   g.add(fence);
+  const trough = waterTrough();
+  trough.position.set(3.18, 0, 0.48);
+  trough.rotation.y = Math.PI / 2;
+  g.add(trough);
 
   const loftY = 2.94;
   g.add(sack(0.46, 0.56, 0.36, SACK, -2.55, loftY + 0.28, -2.35, 0.1));
@@ -431,7 +471,8 @@ function dimSceneLights(scene, farm) {
 /**
  * Dress an interior (or a scene that contains one) as a PAPER farm shed.
  * Hides living-room furniture, adds tools, sacks, planter beds, a
- * scarecrow and a short back-edge fence, warms and dims lights.
+ * scarecrow, a short back-edge fence, and a small wood water trough,
+ * warms and dims lights.
  * @param {THREE.Object3D} scene
  */
 export function dressFarm(scene) {
