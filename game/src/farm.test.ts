@@ -322,3 +322,98 @@ describe("farm PAPER kraft egg basket", () => {
     expect(scene.userData.interiorUse).toBe("house");
   });
 });
+
+describe("farm PAPER kraft grain scoop", () => {
+  it("puts one kraft PAPER grain scoop on the farm workbench", () => {
+    const scene = new THREE.Scene();
+    dressFarm(scene);
+
+    const dress = scene.getObjectByName("farm-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+    expect(dress!.visible).toBe(true);
+
+    const scoops: THREE.Object3D[] = [];
+    dress!.traverse((obj) => {
+      if (obj.userData?.kind === "farm-scoop" && obj.name === "farm-scoop") {
+        scoops.push(obj);
+      }
+    });
+    expect(scoops.length).toBe(1);
+
+    const scoop = scoops[0];
+    expect(scoop.userData.kind).toBe("farm-scoop");
+    expect(scoop.userData.mode).toBe("PAPER");
+
+    const bench = dress!.getObjectByName("farm-bench")!;
+    expect(bench).toBeTruthy();
+    // Bench top surface is ~0.98; scoop sits on it, not the floor.
+    expect(scoop.position.y).toBeGreaterThan(0.9);
+    expect(scoop.position.y).toBeLessThan(1.15);
+    const toBench = Math.hypot(scoop.position.x - -3.28, scoop.position.z - -0.15);
+    expect(toBench).toBeLessThan(0.55);
+
+    const trough = dress!.getObjectByName("farm-trough")!;
+    expect(trough).toBeTruthy();
+    const toTrough = Math.hypot(scoop.position.x - trough.position.x, scoop.position.z - trough.position.z);
+    expect(toTrough).toBeGreaterThan(4);
+
+    const churn = dress!.getObjectByName("farm-churn")!;
+    expect(churn).toBeTruthy();
+    const toChurn = Math.hypot(scoop.position.x - churn.position.x, scoop.position.z - churn.position.z);
+    expect(toChurn).toBeGreaterThan(4);
+
+    const pail = dress!.getObjectByName("farm-pail")!;
+    expect(pail).toBeTruthy();
+    const toPail = Math.hypot(scoop.position.x - pail.position.x, scoop.position.z - pail.position.z);
+    expect(toPail).toBeGreaterThan(4);
+
+    const fork = dress!.getObjectByName("farm-fork")!;
+    expect(fork).toBeTruthy();
+    const toFork = Math.hypot(scoop.position.x - fork.position.x, scoop.position.z - fork.position.z);
+    expect(toFork).toBeGreaterThan(4);
+
+    const basket = dress!.getObjectByName("farm-basket")!;
+    expect(basket).toBeTruthy();
+    const toBasket = Math.hypot(scoop.position.x - basket.position.x, scoop.position.z - basket.position.z);
+    expect(toBasket).toBeGreaterThan(4);
+
+    const colors = hexes(scoop);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.some((c) => c === WOOD)).toBe(true);
+    expect(colors.some((c) => c === KRAFT)).toBe(true);
+    expect(colors.some((c) => c === WOOD_DARK)).toBe(true);
+    expect(colors.every((c) => [WOOD, KRAFT, WOOD_DARK].includes(c))).toBe(true);
+
+    let boxes = 0;
+    scoop.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        boxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.kind).toBe("farm-scoop");
+        expect(mesh.userData.mode).toBe("PAPER");
+      }
+    });
+    expect(boxes).toBeGreaterThanOrEqual(3);
+  });
+
+  it("keeps dress idempotent and hides the scoop on undress", () => {
+    const scene = new THREE.Scene();
+    dressFarm(scene);
+    dressFarm(scene);
+    expect(scene.children.filter((c) => c.name === "farm-dress").length).toBe(1);
+    const dressed = scene.getObjectByName("farm-dress")!;
+    const scoops: THREE.Object3D[] = [];
+    dressed.traverse((obj) => {
+      if (obj.name === "farm-scoop") scoops.push(obj);
+    });
+    expect(scoops.length).toBe(1);
+
+    undressFarm(scene);
+    const dress = scene.getObjectByName("farm-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.visible).toBe(false);
+    expect(scene.userData.interiorUse).toBe("house");
+  });
+});
