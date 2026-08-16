@@ -244,6 +244,8 @@ function makeCoffeeTable(x, z) {
   g.add(makeTableNapkin(x - 0.22, topY + 0.03, z + 0.08));
   // Kraft spoon on the table top — offset from the cup, napkin, saucer, jars.
   g.add(makeTableSpoon(x + 0.32, topY + 0.03, z - 0.16));
+  // Kraft knife on the table top — offset from the spoon, napkin, saucer, jars.
+  g.add(makeTableKnife(x - 0.32, topY + 0.03, z - 0.18));
   return g;
 }
 
@@ -290,6 +292,28 @@ function makeTableSpoon(x, y, z) {
   const bowl = paperBox(0.032, 0.01, 0.03, LINEN, "house-shop-spoon");
   bowl.position.set(0, 0.008, -0.048);
   g.add(handle, neck, bowl);
+  return g;
+}
+
+/**
+ * Tiny kraft PAPER knife on the living-room table — wood handle, linen
+ * bolster, cream blade. Offset from the spoon, napkin, saucer, and shelf
+ * jars. PAPER boxes only. No new hexes.
+ */
+function makeTableKnife(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "house-shop-knife";
+  g.userData.kind = "house-shop-knife";
+  g.userData.mode = "PAPER";
+  g.userData.part = "knife";
+  g.position.set(x, y, z);
+  const handle = paperBox(0.012, 0.008, 0.08, WOOD, "house-shop-knife");
+  handle.position.set(0, 0.006, 0.026);
+  const bolster = paperBox(0.02, 0.008, 0.014, LINEN, "house-shop-knife");
+  bolster.position.set(0, 0.007, -0.018);
+  const blade = paperBox(0.016, 0.006, 0.07, CREAM, "house-shop-knife");
+  blade.position.set(0, 0.007, -0.058);
+  g.add(handle, bolster, blade);
   return g;
 }
 
