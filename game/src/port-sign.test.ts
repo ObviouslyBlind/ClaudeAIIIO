@@ -32,6 +32,14 @@ function collectNail(root: THREE.Object3D) {
   return out;
 }
 
+function collectScrew(root: THREE.Object3D) {
+  const out: THREE.Object3D[] = [];
+  root.traverse((obj) => {
+    if (obj.userData?.part === "screw") out.push(obj);
+  });
+  return out;
+}
+
 describe("north port sign", () => {
   it("keeps a kraft wood post brace on the north sign, PAPER only", () => {
     const sign = makePortSign(ISLANDS.north, { heightAt });
@@ -96,5 +104,35 @@ describe("north port sign", () => {
       expect(height).toBeLessThan(0.12);
       expect(depth).toBeLessThan(0.12);
     }
+  });
+
+  it("puts a tiny kraft PAPER screw on the north sign board, nail and braces remain", () => {
+    const sign = makePortSign(ISLANDS.north, { heightAt });
+    expect(sign).not.toBeNull();
+    expect(sign!.userData.mode).toBe("PAPER");
+
+    const braces = collectBrace(sign!);
+    expect(braces.length).toBeGreaterThanOrEqual(1);
+    const nails = collectNail(sign!);
+    expect(nails.length).toBeGreaterThanOrEqual(1);
+
+    const screws = collectScrew(sign!);
+    expect(screws.length).toBeGreaterThanOrEqual(1);
+    for (const s of screws) {
+      expect(s.userData.part).toBe("screw");
+      expect(s.userData.mode).toBe("PAPER");
+      const mesh = s as THREE.Mesh;
+      expect(mesh.geometry).toBeInstanceOf(THREE.BoxGeometry);
+      const mat = mesh.material as THREE.MeshLambertMaterial;
+      expect(mat.color.getHex()).toBe(WOOD);
+      const { width, height, depth } = (mesh.geometry as THREE.BoxGeometry).parameters;
+      expect(width).toBeLessThan(0.12);
+      expect(height).toBeLessThan(0.12);
+      expect(depth).toBeLessThan(0.12);
+    }
+
+    const nail = nails[0] as THREE.Mesh;
+    const screw = screws[0] as THREE.Mesh;
+    expect(screw.position.distanceTo(nail.position)).toBeGreaterThan(0.05);
   });
 });
