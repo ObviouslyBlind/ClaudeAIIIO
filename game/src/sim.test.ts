@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { GOOD_IDS, GOODS } from "./goods.ts";
+import { BOOK_ISLANDS, createDualBooks } from "./books.ts";
 import { buyFromStall, createVisitor, createWorld, fastForward, hud } from "./sim.ts";
+import { salesTaxRate, setStatuteSlider } from "./statutes.ts";
 
 describe("headless sim step A", () => {
   it("runs an empty hour without NaN prices or a dead market", () => {
@@ -29,6 +31,8 @@ describe("headless sim step A", () => {
     fastForward(b, 250);
     expect(hud(a)).toEqual(hud(b));
     expect(a.lastPrice).toEqual(b.lastPrice);
+    expect(a.lastPriceSouth).toEqual(b.lastPriceSouth);
+    expect(a.arbSpread).toEqual(b.arbSpread);
   });
 
   it("lets a paper visitor buy from the stall at lastPrice", () => {
@@ -44,5 +48,51 @@ describe("headless sim step A", () => {
     expect(visitor.cash).toBeCloseTo(1_000 - result.paid, 4);
     expect(world.npcCash).toBeCloseTo(beforeNpc + result.paid, 4);
     expect(world.npcStock.corn).toBeCloseTo(beforeStock - 4, 4);
+  });
+});
+
+describe("step D dual island books", () => {
+  it("keeps North and South books as distinct objects", () => {
+    const fresh = createDualBooks();
+    expect(fresh.north).not.toBe(fresh.south);
+    for (const id of GOOD_IDS) {
+      expect(fresh.north[id]).not.toBe(fresh.south[id]);
+    }
+
+    const world = createWorld(1);
+    expect(world.books.north).not.toBe(world.books.south);
+    for (const id of GOOD_IDS) {
+      expect(world.books.north[id]).not.toBe(world.books.south[id]);
+    }
+
+    fastForward(world, 8);
+    expect(world.books.north).not.toBe(world.books.south);
+    for (const id of GOOD_IDS) {
+      expect(world.books.north[id]).not.toBe(world.books.south[id]);
+    }
+    expect(BOOK_ISLANDS).toEqual(["north", "south"]);
+  });
+
+  it("stores arb as the North–South last-price gap and keeps snapshot lastPrice on North", () => {
+    const world = createWorld(11);
+    expect(Object.keys(world.arbSpread).sort()).toEqual([...GOOD_IDS].sort());
+    expect(GOOD_IDS.every((id) => world.arbSpread[id] === 0)).toBe(true);
+
+    fastForward(world, 120);
+    expect(GOOD_IDS.some((id) => world.lastPrice[id] !== world.lastPriceSouth[id])).toBe(true);
+    expect(GOOD_IDS.some((id) => world.arbSpread[id] > 0)).toBe(true);
+    for (const id of GOOD_IDS) {
+      expect(world.arbSpread[id]).toBeCloseTo(Math.abs(world.lastPrice[id] - world.lastPriceSouth[id]), 8);
+    }
+  });
+
+  it("still sinks sales tax on fills when the statute rate is raised", () => {
+    const world = createWorld(7);
+    expect(salesTaxRate(world.statutes)).toBe(0);
+    fastForward(world, 20);
+    expect(hud(world).sink).toBe(0);
+    expect(setStatuteSlider(world.statutes, "sales_tax", "rate", 0.05)).toBe(true);
+    fastForward(world, 20);
+    expect(hud(world).sink).toBeGreaterThan(0);
   });
 });

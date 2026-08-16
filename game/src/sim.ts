@@ -1,18 +1,29 @@
 import { GOODS, GOOD_IDS, INDEX_WEIGHTS, type GoodId } from "./goods.ts";
+import {
+  BOOK_ISLANDS,
+  arbSpreads,
+  createDualBooks,
+  emptyBook,
+  emptyLastPrices,
+  insertOrder,
+  type BookIsland,
+  type DualBooks,
+  type Order,
+  type Side,
+} from "./books.ts";
 import { mulberry32 } from "./rng.ts";
 import { createStatuteCatalog, salesTaxRate, type Statute } from "./statutes.ts";
 
-export type Side = "bid" | "ask";
-
-export type Order = {
-  id: number;
-  good: GoodId;
-  side: Side;
-  price: number;
-  qty: number;
+export {
+  BOOK_ISLANDS,
+  arbSpreads,
+  createDualBooks,
+  type Book,
+  type BookIsland,
+  type DualBooks,
+  type Order,
+  type Side,
 };
-
-export type Book = { bids: Order[]; asks: Order[] };
 
 export type Ledger = {
   produced: number;
@@ -28,8 +39,12 @@ export type World = {
   npcCash: number;
   npcStock: Record<GoodId, number>;
   fair: Record<GoodId, number>;
+  /** North last prices. Stall + `/api/snapshot` keep reading this field. */
   lastPrice: Record<GoodId, number>;
-  books: Record<GoodId, Book>;
+  lastPriceSouth: Record<GoodId, number>;
+  books: DualBooks;
+  /** |North − South| last price per good. */
+  arbSpread: Record<GoodId, number>;
   moneySupply: number;
   goodsProducedWindow: number;
   priceIndex: number;
@@ -42,14 +57,12 @@ export type World = {
 
 export function createWorld(seed = 1): World {
   const fair = {} as Record<GoodId, number>;
-  const lastPrice = {} as Record<GoodId, number>;
   const npcStock = {} as Record<GoodId, number>;
-  const books = {} as Record<GoodId, Book>;
+  const lastPrice = emptyLastPrices();
+  const lastPriceSouth = emptyLastPrices();
   for (const id of GOOD_IDS) {
     fair[id] = GOODS[id].fair0;
-    lastPrice[id] = GOODS[id].fair0;
     npcStock[id] = GOODS[id].produce * 20;
-    books[id] = { bids: [], asks: [] };
   }
   return {
     tick: 0,
@@ -59,7 +72,9 @@ export function createWorld(seed = 1): World {
     npcStock,
     fair,
     lastPrice,
-    books,
+    lastPriceSouth,
+    books: createDualBooks(),
+    arbSpread: arbSpreads(lastPrice, lastPriceSouth),
     moneySupply: 50_000,
     goodsProducedWindow: 0,
     priceIndex: 1,
@@ -74,7 +89,18 @@ function roundMoney(n: number): number {
   return Math.round(n * 10000) / 10000;
 }
 
-function post(world: World, good: GoodId, side: Side, price: number, qty: number): void {
+function lastPricesOf(world: World, island: BookIsland): Record<GoodId, number> {
+  return island === "north" ? world.lastPrice : world.lastPriceSouth;
+}
+
+function post(
+  world: World,
+  island: BookIsland,
+  good: GoodId,
+  side: Side,
+  price: number,
+  qty: number,
+): void {
   if (qty <= 0 || price <= 0) return;
   const order: Order = {
     id: world.nextOrderId++,
@@ -83,18 +109,11 @@ function post(world: World, good: GoodId, side: Side, price: number, qty: number
     price: roundMoney(price),
     qty: roundMoney(qty),
   };
-  const book = world.books[good];
-  if (side === "bid") {
-    book.bids.push(order);
-    book.bids.sort((a, b) => b.price - a.price || a.id - b.id);
-  } else {
-    book.asks.push(order);
-    book.asks.sort((a, b) => a.price - b.price || a.id - b.id);
-  }
+  insertOrder(world.books[island][good], order);
 }
 
-function match(world: World, good: GoodId): void {
-  const book = world.books[good];
+function match(world: World, island: BookIsland, good: GoodId): void {
+  const book = world.books[island][good];
   while (book.bids[0] && book.asks[0] && book.bids[0].price >= book.asks[0].price) {
     const bid = book.bids[0];
     const ask = book.asks[0];
@@ -108,7 +127,7 @@ function match(world: World, good: GoodId): void {
     world.npcCash = roundMoney(world.npcCash + (escrowed - paid));
     bid.qty = roundMoney(bid.qty - qty);
     ask.qty = roundMoney(ask.qty - qty);
-    world.lastPrice[good] = fillPrice;
+    lastPricesOf(world, island)[good] = fillPrice;
     const tax = roundMoney(paid * salesTaxRate(world.statutes));
     if (tax > 0) {
       world.npcCash = roundMoney(world.npcCash - tax);
@@ -136,36 +155,40 @@ function restockNpc(world: World): void {
 }
 
 function npcQuote(world: World): void {
-  for (const id of GOOD_IDS) {
-    world.books[id] = { bids: [], asks: [] };
-    const fair = world.fair[id];
-    const want = roundMoney(GOODS[id].consume * (0.9 + world.rng() * 0.2));
-    const sell = roundMoney(Math.min(world.npcStock[id] * 0.15, GOODS[id].produce * 2));
-    const askPx = roundMoney(fair * (0.97 + world.rng() * 0.06));
-    const bidPx = roundMoney(fair * (0.98 + world.rng() * 0.06));
-    const bidCost = roundMoney(bidPx * want);
-    if (bidCost > 0 && world.npcCash >= bidCost) {
-      world.npcCash = roundMoney(world.npcCash - bidCost);
-      post(world, id, "bid", bidPx, want);
-    }
-    if (sell > 0) {
-      world.npcStock[id] = roundMoney(world.npcStock[id] - sell);
-      post(world, id, "ask", askPx, sell);
+  for (const island of BOOK_ISLANDS) {
+    for (const id of GOOD_IDS) {
+      world.books[island][id] = emptyBook();
+      const fair = world.fair[id];
+      const want = roundMoney(GOODS[id].consume * (0.9 + world.rng() * 0.2));
+      const sell = roundMoney(Math.min(world.npcStock[id] * 0.15, GOODS[id].produce * 2));
+      const askPx = roundMoney(fair * (0.97 + world.rng() * 0.06));
+      const bidPx = roundMoney(fair * (0.98 + world.rng() * 0.06));
+      const bidCost = roundMoney(bidPx * want);
+      if (bidCost > 0 && world.npcCash >= bidCost) {
+        world.npcCash = roundMoney(world.npcCash - bidCost);
+        post(world, island, id, "bid", bidPx, want);
+      }
+      if (sell > 0) {
+        world.npcStock[id] = roundMoney(world.npcStock[id] - sell);
+        post(world, island, id, "ask", askPx, sell);
+      }
     }
   }
 }
 
 function settleUnfilled(world: World): void {
-  for (const id of GOOD_IDS) {
-    const book = world.books[id];
-    for (const bid of book.bids) {
-      world.npcCash = roundMoney(world.npcCash + roundMoney(bid.price * bid.qty));
+  for (const island of BOOK_ISLANDS) {
+    for (const id of GOOD_IDS) {
+      const book = world.books[island][id];
+      for (const bid of book.bids) {
+        world.npcCash = roundMoney(world.npcCash + roundMoney(bid.price * bid.qty));
+      }
+      for (const ask of book.asks) {
+        world.npcStock[id] = roundMoney(world.npcStock[id] + ask.qty);
+      }
+      book.bids = [];
+      book.asks = [];
     }
-    for (const ask of book.asks) {
-      world.npcStock[id] = roundMoney(world.npcStock[id] + ask.qty);
-    }
-    book.bids = [];
-    book.asks = [];
   }
 }
 
@@ -178,13 +201,16 @@ function refreshIndex(world: World): void {
     den += w;
   }
   world.priceIndex = roundMoney(num / den);
+  world.arbSpread = arbSpreads(world.lastPrice, world.lastPriceSouth);
   world.moneySupply = world.npcCash;
 }
 
 export function tick(world: World): void {
   restockNpc(world);
   npcQuote(world);
-  for (const id of GOOD_IDS) match(world, id);
+  for (const island of BOOK_ISLANDS) {
+    for (const id of GOOD_IDS) match(world, island, id);
+  }
   settleUnfilled(world);
   refreshIndex(world);
   world.tick += 1;
