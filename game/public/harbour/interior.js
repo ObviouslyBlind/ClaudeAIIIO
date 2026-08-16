@@ -50,6 +50,19 @@ function box(w, h, d, color, x, y, z, kind, extra = {}, matOpts = {}) {
   return m;
 }
 
+function cyl(rTop, rBot, h, color, x, y, z, kind, extra = {}, matOpts = {}) {
+  const m = new THREE.Mesh(
+    new THREE.CylinderGeometry(rTop, rBot, h, 8),
+    new THREE.MeshLambertMaterial({ color, ...matOpts }),
+  );
+  m.position.set(x, y, z);
+  m.castShadow = true;
+  m.receiveShadow = true;
+  m.userData.kind = kind;
+  Object.assign(m.userData, extra);
+  return m;
+}
+
 function uniqueSorted(values) {
   return [...new Set(values.map((v) => Math.round(v * 1000) / 1000))].sort((a, b) => a - b);
 }
@@ -233,6 +246,24 @@ function makeFramedPicture(x, y, z) {
   return g;
 }
 
+/** Small kraft PAPER vase / jug on the table — cream body, wood foot and rim. */
+function makeVase(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "vase";
+  g.userData.kind = "interior-vase";
+  g.userData.mode = "PAPER";
+  g.position.set(x, y, z);
+  const paper = { mode: "PAPER" };
+  g.add(cyl(0.045, 0.05, 0.03, WOOD, 0, 0.015, 0, "interior-vase", paper));
+  g.add(cyl(0.055, 0.07, 0.16, PAPER_CARD, 0, 0.11, 0, "interior-vase", paper));
+  g.add(cyl(0.04, 0.055, 0.04, PLASTER, 0, 0.21, 0, "interior-vase", paper));
+  g.add(cyl(0.042, 0.038, 0.025, WOOD_TOP, 0, 0.242, 0, "interior-vase", paper));
+  g.add(box(0.02, 0.1, 0.02, WOOD, 0.07, 0.14, 0, "interior-vase", paper));
+  g.add(box(0.04, 0.02, 0.02, WOOD, 0.05, 0.19, 0, "interior-vase", paper));
+  g.add(box(0.04, 0.02, 0.02, WOOD, 0.05, 0.09, 0, "interior-vase", paper));
+  return g;
+}
+
 /** Small kraft paper wall clock — wood rim, cream face, wood hands. Not a till. */
 function makeWallClock(x, y, z) {
   const g = new THREE.Group();
@@ -276,7 +307,7 @@ function makeBed(cx, floorY, cz) {
 
 /**
  * PAPER Caribbean house: plaster walls, wood floors, window openings,
- * downstairs table/chairs/lamp/clock/picture, upstairs bed. Low-poly boxes only.
+ * downstairs table/chairs/lamp/clock/picture/vase, upstairs bed. Low-poly boxes only.
  */
 export function makeInteriorScene() {
   const group = new THREE.Group();
@@ -324,6 +355,8 @@ export function makeInteriorScene() {
   down.add(box(2.55, 0.03, 1.85, PAPER_CARD, -0.15, 0.175, -0.35, "interior-prop"));
   down.add(box(2.28, 0.03, 1.58, RUG, -0.15, 0.195, -0.35, "interior-prop"));
   down.add(makeTable(-0.15, -0.35));
+  // Kraft PAPER vase on the table top — offset so chairs still read around it.
+  down.add(makeVase(0.4, 0.955, -0.18));
   down.add(makeChair(-0.15, 0.55, 0));
   down.add(makeChair(-0.15, -1.22, Math.PI));
   down.add(makeChair(-1.28, -0.35, Math.PI / 2));

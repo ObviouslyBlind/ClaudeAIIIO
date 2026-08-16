@@ -54,7 +54,7 @@ describe("owned building interiors", () => {
     expect(boxes).toBeGreaterThan(12);
   });
 
-  it("dresses PAPER rooms as a Caribbean house: windows, table, chairs, lamp, clock, picture, bed", () => {
+  it("dresses PAPER rooms as a Caribbean house: windows, table, chairs, lamp, clock, picture, vase, bed", () => {
     const g = makeInteriorScene();
     const down = g.getObjectByName("downstairs");
     const up = g.getObjectByName("upstairs");
@@ -75,6 +75,7 @@ describe("owned building interiors", () => {
     expect(downKinds).toContain("interior-lamp");
     expect(downKinds).toContain("interior-clock");
     expect(downKinds).toContain("interior-picture");
+    expect(downKinds).toContain("interior-vase");
     expect(downKinds).toContain("interior-window");
     expect(downKinds).toContain("exit");
     expect(downKinds).toContain("interior-floor");
@@ -88,6 +89,7 @@ describe("owned building interiors", () => {
     expect(upKinds).toContain("interior-paper");
     expect(upKinds).not.toContain("interior-clock");
     expect(upKinds).not.toContain("interior-picture");
+    expect(upKinds).not.toContain("interior-vase");
 
     const table = down!.getObjectByName("table");
     expect(table).toBeTruthy();
@@ -223,5 +225,90 @@ describe("owned building interiors", () => {
     expect(player.position.x).toBeCloseTo(88);
     expect(player.position.z).toBeCloseTo(-6910);
     expect(player.position.y).toBeCloseTo(1.12 + 1.15);
+  });
+});
+
+const VASE_HEX = new Set([0x5a3a22, 0x6e4428, 0xf4ead8, 0xf3efe4]);
+
+function isGrey(hex: number) {
+  const r = (hex >> 16) & 255;
+  const g = (hex >> 8) & 255;
+  const b = hex & 255;
+  return Math.max(r, g, b) - Math.min(r, g, b) < 18;
+}
+
+function collectKind(root: THREE.Object3D, kind: string) {
+  const out: THREE.Object3D[] = [];
+  root.traverse((obj) => {
+    if (obj.userData?.kind === kind && obj.name === kind.replace("interior-", "")) {
+      out.push(obj);
+    }
+  });
+  return out;
+}
+
+describe("house PAPER vase", () => {
+  it("puts one kraft PAPER vase on the downstairs table, not upstairs", () => {
+    const g = makeInteriorScene();
+    const down = g.getObjectByName("downstairs")!;
+    const up = g.getObjectByName("upstairs")!;
+    const table = down.getObjectByName("table")!;
+    expect(table).toBeTruthy();
+
+    const vases = collectKind(down, "interior-vase");
+    expect(vases.length).toBe(1);
+    expect(collectKind(up, "interior-vase").length).toBe(0);
+
+    const vase = vases[0];
+    expect(vase.userData.kind).toBe("interior-vase");
+    expect(vase.userData.mode).toBe("PAPER");
+
+    const tablePos = new THREE.Vector3();
+    table.getWorldPosition(tablePos);
+    const vasePos = new THREE.Vector3();
+    vase.getWorldPosition(vasePos);
+    expect(Math.hypot(vasePos.x - tablePos.x, vasePos.z - tablePos.z)).toBeLessThan(0.85);
+    expect(vasePos.y).toBeGreaterThan(0.9);
+    expect(vasePos.y).toBeLessThan(1.2);
+
+    const colors: number[] = [];
+    vase.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      const mat = mesh.material as THREE.MeshLambertMaterial | undefined;
+      if (mesh.isMesh && mat?.color) {
+        const hex = mat.color.getHex();
+        colors.push(hex);
+        expect(VASE_HEX.has(hex)).toBe(true);
+        expect(isGrey(hex)).toBe(false);
+        expect(["BoxGeometry", "CylinderGeometry"]).toContain(mesh.geometry.type);
+        expect(mesh.userData.kind).toBe("interior-vase");
+        expect(mesh.userData.mode).toBe("PAPER");
+      }
+    });
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.some((c) => c === 0xf3efe4 || c === 0xf4ead8)).toBe(true);
+    expect(colors.some((c) => c === 0x5a3a22 || c === 0x6e4428)).toBe(true);
+
+    const picture = down.getObjectByName("picture");
+    expect(picture).toBeTruthy();
+    expect(picture!.userData.kind).toBe("interior-picture");
+    expect(picture!.userData.mode).toBe("PAPER");
+    const picPos = new THREE.Vector3();
+    picture!.getWorldPosition(picPos);
+    expect(picPos.x).toBeCloseTo(-3.25, 5);
+    expect(picPos.y).toBeCloseTo(1.72, 5);
+    expect(picPos.z).toBeCloseTo(-3.38, 5);
+
+    const clock = down.getObjectByName("clock");
+    expect(clock).toBeTruthy();
+    expect(clock!.userData.kind).toBe("interior-clock");
+    expect(clock!.userData.mode).toBe("PAPER");
+    const clockPos = new THREE.Vector3();
+    clock!.getWorldPosition(clockPos);
+    expect(clockPos.x).toBeCloseTo(2.72, 5);
+    expect(clockPos.y).toBeCloseTo(1.78, 5);
+    expect(clockPos.z).toBeCloseTo(-3.38, 5);
+    expect(up.getObjectByName("picture")).toBeFalsy();
+    expect(up.getObjectByName("clock")).toBeFalsy();
   });
 });
