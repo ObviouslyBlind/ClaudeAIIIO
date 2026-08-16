@@ -256,6 +256,21 @@ export function makeFerry() {
   stackCap.position.set(5.6, 8.85, 0);
   g.add(stackCap);
 
+  /**
+   * Small kraft PAPER puff above the funnel. Two stacked cream boxes —
+   * CABIN then RAIL, not grey, not a cylinder.
+   */
+  const smoke = new THREE.Group();
+  smoke.name = "smoke";
+  smoke.userData.part = "smoke";
+  smoke.position.set(5.6, 9.35, 0);
+  const puffLo = part(1.05, 0.55, 1.05, CABIN, false);
+  puffLo.position.set(0, 0.28, 0);
+  const puffHi = part(0.72, 0.42, 0.72, RAIL, false);
+  puffHi.position.set(0.08, 0.78, 0.06);
+  smoke.add(puffLo, puffHi);
+  g.add(smoke);
+
   addRail(g, -17.6, -11.0, 5.18);
   addRail(g, -17.6, -11.0, -5.18);
   addRail(g, 6.4, 16.2, 5.08, 2.62);

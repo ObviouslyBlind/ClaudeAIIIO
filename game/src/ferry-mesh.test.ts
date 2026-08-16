@@ -48,4 +48,15 @@ describe("ferry berth", () => {
     });
     expect(handles).toBeGreaterThanOrEqual(1);
   });
+
+  it("puffs kraft PAPER smoke above the funnel", () => {
+    expect(HOME_Z).toBe(-6835);
+    const mesh = makeFerry();
+    expect(mesh.position.z).toBe(-6835);
+    let smoke = 0;
+    mesh.traverse((obj) => {
+      if (obj.userData?.part === "smoke") smoke += 1;
+    });
+    expect(smoke).toBeGreaterThanOrEqual(1);
+  });
 });
