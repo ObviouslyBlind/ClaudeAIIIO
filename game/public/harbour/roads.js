@@ -144,6 +144,115 @@ function drawDirt(scene, spec, road, heightAt) {
   });
 }
 
+/** Same stone as house plinth / window sills — original palette, not a new hex. */
+const STONE = 0x9a8a72;
+/** Metres from paved centreline onto the grass lip. Past half-width, off the carriageway. */
+const CURB_SETBACK_M = PAVED_WIDTH_M / 2 + 0.28;
+/** A few stations on the north port stretch (street-props pack the first 280 m). */
+const NORTH_PORT_CURBS = [
+  { along: 22, side: -1 },
+  { along: 22, side: 1 },
+  { along: 58, side: 1 },
+  { along: 96, side: -1 },
+  { along: 138, side: 1 },
+  { along: 184, side: -1 },
+  { along: 232, side: 1 },
+];
+
+function pointAlong(points, dist) {
+  let left = dist;
+  for (let i = 0; i < points.length - 1; i++) {
+    const a = points[i];
+    const b = points[i + 1];
+    const len = Math.hypot(b.x - a.x, b.z - a.z);
+    if (len < 1e-4) continue;
+    if (left <= len) {
+      const t = left / len;
+      return {
+        x: a.x + (b.x - a.x) * t,
+        z: a.z + (b.z - a.z) * t,
+        qx: b.x,
+        qz: b.z,
+      };
+    }
+    left -= len;
+  }
+  return null;
+}
+
+function offsetFromCentreline(px, pz, qx, qz, side, setbackM) {
+  const dx = qx - px;
+  const dz = qz - pz;
+  const len = Math.hypot(dx, dz) || 1;
+  const s = side < 0 ? -1 : 1;
+  return {
+    x: px + (-dz / len) * s * setbackM,
+    z: pz + (dx / len) * s * setbackM,
+    yaw: Math.atan2(dx, dz),
+  };
+}
+
+function paperCurb(stoneMat, kraftMat) {
+  const g = new THREE.Group();
+  g.userData.kind = "ground";
+  g.userData.part = "curb";
+  g.userData.mode = "PAPER";
+
+  const body = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.16, 0.86), stoneMat);
+  body.position.y = 0.08;
+  body.castShadow = false;
+  body.receiveShadow = true;
+  body.userData.kind = "ground";
+  body.userData.part = "curb";
+  body.userData.mode = "PAPER";
+
+  const cap = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.05, 0.9), kraftMat);
+  cap.position.y = 0.185;
+  cap.castShadow = false;
+  cap.receiveShadow = true;
+  cap.userData.kind = "ground";
+  cap.userData.part = "curb-cap";
+  cap.userData.mode = "PAPER";
+
+  g.add(body, cap);
+  return g;
+}
+
+/**
+ * A few kraft/stone PAPER boxes on the north-port grass lip so the tarmac
+ * edge reads as a street, not a black strip. Discrete blocks, not a kerb kit.
+ */
+function drawNorthPortCurbs(scene, map, specOf, heightAt) {
+  const road = (map.roads || []).find(
+    (r) => r.kind === "paved" && r.island === "north" && r.points && r.points.length > 1,
+  );
+  if (!road) return;
+
+  const spec = specOf("north");
+  const root = new THREE.Group();
+  root.name = "north-port-curbs";
+  root.userData.kind = "ground";
+  root.userData.mode = "PAPER";
+  root.userData.part = "curbs";
+
+  const stoneMat = new THREE.MeshLambertMaterial({ color: STONE });
+  const kraftMat = new THREE.MeshLambertMaterial({ color: DIRT });
+
+  for (const slot of NORTH_PORT_CURBS) {
+    const along = pointAlong(road.points, slot.along);
+    if (!along) continue;
+    const at = offsetFromCentreline(along.x, along.z, along.qx, along.qz, slot.side, CURB_SETBACK_M);
+    const y = heightAt(spec, at.x, at.z);
+    if (y < 0.4) continue;
+    const block = paperCurb(stoneMat, kraftMat);
+    block.position.set(at.x, y, at.z);
+    block.rotation.y = at.yaw;
+    root.add(block);
+  }
+
+  if (root.children.length) scene.add(root);
+}
+
 /**
  * Draw `/api/map` roads. Paved = asphalt street. Dirt = thin packed earth on fields only.
  */
@@ -154,4 +263,5 @@ export function makeRoads(map, helpers) {
     if (road.kind === "paved") drawPaved(scene, spec, road, heightAt);
     else drawDirt(scene, spec, road, heightAt);
   }
+  drawNorthPortCurbs(scene, map, specOf, heightAt);
 }
