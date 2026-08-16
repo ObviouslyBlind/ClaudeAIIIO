@@ -10,7 +10,7 @@ import * as THREE from "three";
  * a small kraft PAPER lantern on the workbench, a small kraft PAPER seed
  * packet on the workbench, a tiny kraft PAPER pail lid on the pail, a tiny
  * kraft PAPER mug on the workbench, a tiny kraft PAPER egg on the
- * workbench, and
+ * workbench, a tiny kraft PAPER pail on the workbench, and
  * dim warm light — not the
  * house living room, warehouse crates, shop, or factory.
  * No WASD. Tap-to-walk stays in interior.js.
@@ -596,7 +596,7 @@ function farmMug() {
  * Tiny kraft PAPER egg: one kraft body + a smaller kraft tip.
  * Hexes already in this file (KRAFT). PAPER boxes only — no grey.
  * Sits on the farm workbench top; offset from mug, lid, seed, lantern,
- * scoop, basket, and fork.
+ * scoop, basket, fork, and the tiny workbench pail.
  */
 function farmEgg() {
   const g = new THREE.Group();
@@ -612,6 +612,33 @@ function farmEgg() {
   tip.userData.part = "egg";
   tip.position.y = 0.054;
   g.add(tip);
+  return g;
+}
+
+/**
+ * Tiny kraft PAPER pail: kraft bucket, wood rim, thin wood bail.
+ * Hexes already in this file (KRAFT, WOOD). PAPER boxes only — no grey.
+ * Sits on the farm workbench top; offset from egg, mug, lid, seed, lantern,
+ * scoop, basket, and fork. Not the floor wood farm-pail by the churn.
+ */
+function farmTablePail() {
+  const g = new THREE.Group();
+  g.name = "farm-table-pail";
+  g.userData.kind = "farm-table-pail";
+  g.userData.part = "pail";
+  g.userData.mode = "PAPER";
+  const body = paperBox(0.055, 0.06, 0.055, KRAFT, "farm-table-pail");
+  body.userData.part = "pail";
+  body.position.y = 0.03;
+  g.add(body);
+  const rim = paperBox(0.062, 0.012, 0.062, WOOD, "farm-table-pail");
+  rim.userData.part = "pail";
+  rim.position.y = 0.066;
+  g.add(rim);
+  const bail = paperBox(0.038, 0.012, 0.012, WOOD, "farm-table-pail");
+  bail.userData.part = "pail";
+  bail.position.y = 0.082;
+  g.add(bail);
   return g;
 }
 
@@ -732,6 +759,11 @@ function makeFarmDress() {
   // scoop, and seed; not the trough cluster (lid, basket, fork).
   egg.position.set(-3.22, 0.16 + 0.78 + 0.04, -0.36);
   g.add(egg);
+  const tablePail = farmTablePail();
+  // Front-left of the 1.55 × 0.58 top — offset from egg, mug, lantern,
+  // scoop, and seed; not the floor farm-pail or trough cluster.
+  tablePail.position.set(-3.62, 0.16 + 0.78 + 0.04, -0.02);
+  g.add(tablePail);
 
   const loftY = 2.94;
   g.add(sack(0.46, 0.56, 0.36, SACK, -2.55, loftY + 0.28, -2.35, 0.1));
@@ -820,8 +852,8 @@ function dimSceneLights(scene, farm) {
  * small kraft egg basket beside the trough, a small kraft grain scoop
  * on the workbench, a small kraft lantern on the workbench, a small
  * kraft seed packet on the workbench, a tiny kraft pail lid on the
- * pail, a tiny kraft mug on the workbench, and a tiny kraft egg on
- * the workbench, warms and dims lights.
+ * pail, a tiny kraft mug on the workbench, a tiny kraft egg on
+ * the workbench, and a tiny kraft pail on the workbench, warms and dims lights.
  * @param {THREE.Object3D} scene
  */
 export function dressFarm(scene) {
