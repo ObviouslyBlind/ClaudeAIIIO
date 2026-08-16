@@ -8,17 +8,17 @@ Inland spawn, paved asphalt ribbon (`/?g=rib23`), dirt ribbons (`/?g=dirt24`), t
 
 ## Held (code, not all re-critic’d)
 
-- Econ HUD strip, NPC stall buy, outdoor nametags, warehouse interior, presence cells, visitor cart persist, quay pedestrians, staff slots, visitor bid/ask (`3059ece6`)
+- Econ HUD strip, NPC stall buy, outdoor nametags, warehouse interior, presence cells, nearby names on the sheet (`0e22057f`), visitor cart persist, quay pedestrians, staff slots, visitor bid/ask
 
 ## In flight (base)
 
-Pixel: taxi cab (`/?g=taxi27`). Shop / farm / factory interiors, presence HUD, hire/fire HTTP.
+Pixel: taxi cab (`/?g=taxi27`). Shop / farm / factory interiors, hire/fire HTTP, market order strip.
 
 Politics stays frozen — do not resume House/Senate/councils.
 
 ## Next pixel queue (one critic at a time)
 
-Taxi cab, ferry boat, shore, quay, shells, stalls, econ line, pedestrians, nametags, warehouse interior.
+Taxi cab, ferry boat, shore, quay, shells, stalls, econ line, nearby names, pedestrians, nametags, warehouse interior.
 
 ## Frozen
 
