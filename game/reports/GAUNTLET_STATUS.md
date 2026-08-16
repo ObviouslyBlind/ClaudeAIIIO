@@ -12,15 +12,16 @@ Inland spawn, paved ribbon, dirt, cars, yellow taxi, trees+cart, lease → House
 
 ## Held (code, live on the same page as the ferry)
 
-Shore foam, quay clutter, building shells, window lights, stalls, pedestrians (cloth colours), nametags, warehouse/factory/shop/farm/house-shop interiors, presence, cart, staff hire/fire, bid/ask/sell/cancel + market cancel button, North/South books, upkeep, persist dump + restore, lease afford, player "You · PAPER" tag, north and south port signs, calendar, develop afford, ferry fare, sales tax, held-goods, faucet/sink, stall last-print, quay lamp posts, street verge lamps, House chimney, deeper quay-channel water.
+Shore foam (denser quay dashes), quay clutter, building shells, window lights, stalls, pedestrians (cloth colours), nametags, warehouse/factory/shop/farm/house-shop interiors, presence, cart, staff hire/fire, bid/ask/sell/cancel + market cancel button, North/South books, upkeep, persist dump + restore, lease afford, player "You · PAPER" tag, north and south port signs, calendar, develop afford, ferry fare, sales tax, held-goods, faucet/sink, stall last-print, quay lamp posts, street verge lamps, House chimney, deeper quay-channel water.
 
 ## Pixel ferry
 
-`/?g=ferry30` **FAIL**: Cash $1000, harbour water visible, no cream hull. Cause: `HOME_Z=-6400` was 550 m south of the north pier. Fix: berth at `HOME_Z=-6835` (just past the dinghies). Next critic: `/?g=ferry31`.
+`/?g=ferry30` **FAIL**: hull 550 m off the pier. Berth `HOME_Z=-6835`.
+`/?g=ferry31` **FAIL**: Cash $1000 but canvas stayed CSS teal `#0e4a55`, status stuck on Loading (boot blocked the main thread before the first status paint). Fix: yield between boot chunks and paint "North port · PAPER" as soon as water+player exist. Next critic: `/?g=ferry32`.
 
 ## In flight (not ferry-only)
 
-Pixel: ferry hull at north quay `/?g=ferry31` (do not restart play). Also building: denser quay foam, taxi fare HUD, persist restore HUD, stall awnings, spawn trees, taxi roof lamp, nametag size, cart crates.
+Pixel: ferry hull at north quay `/?g=ferry32` after boot-yield restart. Also building: persist restore HUD, stall awnings, spawn trees, taxi roof lamp, nametag size, cart crates.
 
 ## Next pixel (after ferry31 PASS, immediately, no wait)
 

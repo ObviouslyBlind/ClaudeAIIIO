@@ -873,6 +873,15 @@ function startLoop() {
   });
 }
 
+/** Let Chrome paint so boot cannot sit on "Loading…" until every mesh exists. */
+function afterPaint() {
+  return new Promise((resolve) => {
+    const later = () => setTimeout(resolve, 0);
+    if (typeof requestAnimationFrame === "function") requestAnimationFrame(later);
+    else later();
+  });
+}
+
 async function boot() {
   const res = await fetch("/api/map");
   map = await res.json();
@@ -884,13 +893,19 @@ async function boot() {
   makeWater(scene);
   spawnAt("north");
   startLoop();
+  setStatus("North port · PAPER");
+  await afterPaint();
   makeTerrain(specOf("north"));
+  await afterPaint();
   makeTerrain(specOf("south"));
+  await afterPaint();
   makeShoreFoam(specOf("north"), heightAt, scene);
   makeShoreFoam(specOf("south"), heightAt, scene);
   makeRoads(map, { scene, specOf, heightAt });
+  await afterPaint();
   makeStreetProps(map, { scene, specOf, heightAt });
   makeTrees(map, { scene, specOf, heightAt });
+  await afterPaint();
   makePort(specOf("north"));
   makeQuay(specOf("north"), { scene, heightAt });
   makePort(specOf("south"));
@@ -901,6 +916,7 @@ async function boot() {
   makePalms(specOf("north"));
   makePalms(specOf("south"));
   makeParcels();
+  await afterPaint();
   taxi = createTaxi({
     scene,
     player,
