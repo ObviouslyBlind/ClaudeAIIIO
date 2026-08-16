@@ -795,3 +795,62 @@ describe("factory PAPER kraft oilcan", () => {
     expect(boxes).toBeGreaterThanOrEqual(2);
   });
 });
+
+function factoryPaperFunnels(root: THREE.Object3D) {
+  const out: THREE.Object3D[] = [];
+  root.traverse((obj) => {
+    if (obj.userData?.part === "funnel") {
+      out.push(obj);
+    }
+  });
+  return out;
+}
+
+describe("factory PAPER kraft funnel", () => {
+  it("puts one tiny kraft PAPER funnel on a factory bench, oilcan and rag remain", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressFactory(scene);
+
+    const dress = interior.getObjectByName("factory-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+
+    const funnels = factoryPaperFunnels(dress!);
+    expect(funnels.length).toBe(1);
+    const funnel = funnels[0];
+    expect(funnel.userData.part).toBe("funnel");
+    expect(funnel.userData.mode).toBe("PAPER");
+    expect(funnel.userData.part).not.toBe("oilcan");
+    expect(funnel.userData.part).not.toBe("rag");
+    expect(funnel.userData.part).not.toBe("rivet");
+    expect(funnel.userData.part).not.toBe("wrench");
+
+    expect(factoryPaperOilcans(dress!).length).toBe(1);
+    expect(factoryRags(dress!).length).toBe(1);
+
+    const can = factoryPaperOilcans(dress!)[0];
+    const rag = factoryRags(dress!)[0];
+    const toCan = Math.hypot(funnel.position.x - can.position.x, funnel.position.z - can.position.z);
+    const toRag = Math.hypot(funnel.position.x - rag.position.x, funnel.position.z - rag.position.z);
+    expect(toCan).toBeGreaterThan(0.5);
+    expect(toRag).toBeGreaterThan(0.5);
+
+    const colors = hexes(funnel);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.some((c) => c === KRAFT)).toBe(true);
+    expect(colors.every((c) => [KRAFT, 0x9a6a40, 0x6a4a32].includes(c))).toBe(true);
+
+    let boxes = 0;
+    funnel.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        boxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.mode).toBe("PAPER");
+      }
+    });
+    expect(boxes).toBeGreaterThanOrEqual(2);
+  });
+});

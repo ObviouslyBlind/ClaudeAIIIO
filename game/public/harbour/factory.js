@@ -430,6 +430,30 @@ function paperOilcan(x, z, yaw = 0) {
 }
 
 /**
+ * Tiny kraft PAPER funnel: KRAFT mouth, KRAFT_LIGHT cone, BENCH_WOOD spout.
+ * Sits on the left-wall bench — not the oilcan, rag, rivet, or wrench.
+ */
+function paperFunnel(x, z, yaw = 0) {
+  const g = new THREE.Group();
+  g.name = "factory-paper-funnel";
+  g.userData.kind = "factory-paper-funnel";
+  g.userData.mode = "PAPER";
+  g.userData.part = "funnel";
+  // Second workbench lip top: y0 0.16 + 0.78, lip centre +0.05, half lip 0.015.
+  const sitY = 0.16 + 0.78 + 0.05 + 0.015;
+  g.position.set(x, sitY, z);
+  g.rotation.y = yaw;
+  const mouth = paperBox(0.08, 0.016, 0.08, KRAFT, "factory-paper-funnel");
+  mouth.position.y = 0.068;
+  const cone = paperBox(0.05, 0.036, 0.05, KRAFT_LIGHT, "factory-paper-funnel");
+  cone.position.y = 0.042;
+  const spout = paperBox(0.022, 0.028, 0.022, BENCH_WOOD, "factory-paper-funnel");
+  spout.position.y = 0.014;
+  g.add(mouth, cone, spout);
+  return g;
+}
+
+/**
  * Small kraft/iron PAPER oil can: short box body, thinner spout.
  * Sits on the first workbench top — not a mill, not the hanging wrench.
  */
@@ -559,6 +583,8 @@ function makeFactoryDress() {
   g.add(workbench(-3.08, 0.15, 2.15, 0.68, Math.PI / 2));
   // Left-wall bench top. Off the rag, rivet, wrench, scrap-bin, and floor grate.
   g.add(paperOilcan(-3.02, 0.72, 0.1));
+  // Left-wall bench, south of the oilcan. Off the rag, rivet, and wrench.
+  g.add(paperFunnel(-3.14, -0.42, 0.08));
   g.add(woodWorkbench(3.1, -1.18, 1.92, 0.64, Math.PI / 2));
   // Left wall, opposite the wood bench. Off the centre aisle (x≈0).
   g.add(scrapBin(-3.22, -2.62, 0.08));
