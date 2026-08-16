@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { createTaxi } from "./taxi.js";
 import { makeFerry, tickFerry } from "./ferry.js";
+import { paintShoreColor, makeShoreFoam } from "./shore.js";
 import { makeQuay } from "./quay.js";
 
 const canvas = document.getElementById("c");
@@ -196,7 +197,7 @@ function makeTerrain(spec) {
     const dx = (x - spec.cx) / spec.rx;
     const dz = (z - spec.cz) / spec.rz;
     const t = Math.hypot(dx, dz);
-    const c = h < 0 ? new THREE.Color(0x1d7a86) : t > 0.78 ? sand : h > 38 ? rock : grass;
+    const c = paintShoreColor(h, t, grass, sand, rock);
     colors.push(c.r, c.g, c.b);
   }
   geo.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
@@ -731,6 +732,8 @@ async function boot() {
   scene.add(water);
   makeTerrain(specOf("north"));
   makeTerrain(specOf("south"));
+  makeShoreFoam(specOf("north"), heightAt, scene);
+  makeShoreFoam(specOf("south"), heightAt, scene);
   makeRoads();
   makePort(specOf("north"));
   makeQuay(specOf("north"), { scene, heightAt });
