@@ -5,8 +5,12 @@ import * as THREE from "three";
  * Kraft card + brown ink. Not a HUD, not a CoD plate, not Capital Rift UI.
  */
 
-const NEAR_M = 26;
+/** Player-to-walker metres. Spawn quay orbit sits ~50 m back. */
+const NEAR_M = 48;
 const LABEL_Y = 2.12;
+/** World metres. Slightly larger kraft card; still a sprite, not a HUD plate. */
+const CARD_W_M = 2.4;
+const CARD_H_M = 0.6;
 const PAPER_FACE = "#efe4c8";
 const PAPER_EDGE = "#8a6238";
 const INK = "#3d2a1c";
@@ -49,8 +53,8 @@ function paperBox(w, h, d, color) {
 /** Simple canvas card: name in ink, PAPER stamp. */
 export function makePaperNametag(name) {
   if (typeof document === "undefined") return null;
-  const w = 384;
-  const h = 96;
+  const w = 512;
+  const h = 128;
   const canvas = document.createElement("canvas");
   canvas.width = w;
   canvas.height = h;
@@ -59,18 +63,18 @@ export function makePaperNametag(name) {
   ctx.fillStyle = PAPER_FACE;
   ctx.fillRect(0, 0, w, h);
   ctx.strokeStyle = PAPER_EDGE;
-  ctx.lineWidth = 6;
-  ctx.strokeRect(5, 5, w - 10, h - 10);
+  ctx.lineWidth = 8;
+  ctx.strokeRect(6, 6, w - 12, h - 12);
 
   ctx.fillStyle = INK;
-  ctx.font = "600 34px Georgia, 'Times New Roman', serif";
+  ctx.font = "600 46px Georgia, 'Times New Roman', serif";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText(String(name || "PAPER"), w / 2, h / 2 - 8);
+  ctx.fillText(String(name || "PAPER"), w / 2, h / 2 - 10);
 
   ctx.fillStyle = STAMP;
-  ctx.font = "600 15px Georgia, 'Times New Roman', serif";
-  ctx.fillText("PAPER", w / 2, h - 20);
+  ctx.font = "600 20px Georgia, 'Times New Roman', serif";
+  ctx.fillText("PAPER", w / 2, h - 26);
 
   const tex = new THREE.CanvasTexture(canvas);
   tex.colorSpace = THREE.SRGBColorSpace;
@@ -85,7 +89,7 @@ export function makePaperNametag(name) {
   });
   const sprite = new THREE.Sprite(mat);
   sprite.name = "paper-nametag";
-  sprite.scale.set(1.7, 0.42, 1);
+  sprite.scale.set(CARD_W_M, CARD_H_M, 1);
   sprite.position.y = LABEL_Y;
   sprite.center.set(0.5, 0);
   sprite.frustumCulled = false;
