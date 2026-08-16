@@ -286,7 +286,13 @@ function hawserDrum(_side) {
   tail.userData.part = "hawser";
   tail.userData.dress = "hawser-drum";
 
-  g.add(runnerA, runnerB, chockA, chockB, flangeN, flangeS, barrel, wrap, band, tail);
+  /** Tiny kraft bung on the hawser barrel. WOOD_DARK already in this file — PAPER box, not grey iron. */
+  const bung = part(0.05, 0.05, 0.04, WOOD_DARK, false);
+  bung.userData.part = "bung";
+  bung.userData.mode = "PAPER";
+  bung.position.set(0.38, 0.82, 0);
+
+  g.add(runnerA, runnerB, chockA, chockB, flangeN, flangeS, barrel, wrap, band, tail, bung);
   return g;
 }
 
