@@ -1,8 +1,10 @@
 import * as THREE from "three";
 
-const CAR_COUNT = 5;
-const SPEED = 16;
-const Y_LIFT = 0.35;
+const CAR_COUNT = 6;
+const SPEED = 9;
+const Y_LIFT = 0.45;
+/** Metres from the port along the spline. Spawn must see cars here. */
+export const SPAWN_SPAN_M = 380;
 
 export function polylineLength(points) {
   let acc = 0;
@@ -39,26 +41,27 @@ export function pointAlongPolyline(points, dist) {
 function makeCar(color) {
   const g = new THREE.Group();
   const body = new THREE.Mesh(
-    new THREE.BoxGeometry(1.6, 0.55, 3.1),
+    new THREE.BoxGeometry(2.4, 0.85, 4.6),
     new THREE.MeshLambertMaterial({ color }),
   );
-  body.position.y = 0.45;
+  body.position.y = 0.7;
   body.castShadow = true;
   g.add(body);
   const cabin = new THREE.Mesh(
-    new THREE.BoxGeometry(1.35, 0.42, 1.4),
-    new THREE.MeshLambertMaterial({ color: 0x3a4a52 }),
+    new THREE.BoxGeometry(2.05, 0.7, 2.1),
+    new THREE.MeshLambertMaterial({ color: 0x2a3340 }),
   );
-  cabin.position.set(0, 0.88, -0.15);
+  cabin.position.set(0, 1.35, -0.2);
   g.add(cabin);
   g.userData.kind = "traffic";
   return g;
 }
 
-const COLORS = [0xc45c3a, 0x4a6a78, 0xe8d7b8, 0x3d5a3c, 0x5a3a22];
+const COLORS = [0xe23b2e, 0x2f6fb5, 0xf4f0e4, 0x222222, 0xf0c430, 0x2f6b32];
 
 /**
  * PAPER NPC cars that loop the paved spline. They never leave `kind === "paved"`.
+ * Start packed near the port so spawn actually sees them.
  */
 export function createTraffic({ scene, getMap, specOf, heightAt }) {
   const cars = [];
@@ -69,16 +72,34 @@ export function createTraffic({ scene, getMap, specOf, heightAt }) {
     return map.roads.find((r) => r.kind === "paved" && r.island === islandId) || null;
   }
 
+  function place(car) {
+    const road = paved(car.islandId);
+    if (!road) return;
+    const p = pointAlongPolyline(road.points, car.along);
+    const spec = specOf(car.islandId);
+    const y = heightAt(spec, p.x, p.z);
+    car.mesh.position.set(p.x, y + Y_LIFT, p.z);
+    car.mesh.rotation.y = p.yaw;
+  }
+
   function spawnIsland(islandId) {
     const road = paved(islandId);
     if (!road || road.points.length < 2) return;
-    const total = polylineLength(road.points);
+    const span = Math.min(SPAWN_SPAN_M, polylineLength(road.points) * 0.25);
     for (let i = 0; i < CAR_COUNT; i++) {
       const mesh = makeCar(COLORS[i % COLORS.length]);
-      const along = (i / CAR_COUNT) * total;
-      const dir = islandId === "north" ? 1 : -1;
-      cars.push({ mesh, islandId, along, dir, speed: SPEED * (0.75 + (i % 3) * 0.12) });
+      const along = 30 + (i / Math.max(1, CAR_COUNT - 1)) * span;
+      const dir = i % 2 === 0 ? 1 : -1;
+      const car = {
+        mesh,
+        islandId,
+        along,
+        dir,
+        speed: SPEED * (0.85 + (i % 3) * 0.1),
+      };
+      cars.push(car);
       scene.add(mesh);
+      place(car);
     }
   }
 
@@ -87,16 +108,10 @@ export function createTraffic({ scene, getMap, specOf, heightAt }) {
 
   function tick(dt) {
     for (const car of cars) {
-      const road = paved(car.islandId);
-      if (!road) continue;
       car.along += car.speed * car.dir * dt;
-      const p = pointAlongPolyline(road.points, car.along);
-      const spec = specOf(car.islandId);
-      const y = heightAt(spec, p.x, p.z);
-      car.mesh.position.set(p.x, y + Y_LIFT, p.z);
-      car.mesh.rotation.y = p.yaw;
+      place(car);
     }
   }
 
-  return { cars, tick };
+  return { cars, tick, place };
 }
