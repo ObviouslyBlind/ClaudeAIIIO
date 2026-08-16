@@ -6,6 +6,7 @@ import { GOOD_IDS } from "./goods.ts";
 import { createLandBoard, developPlot, leasePlot } from "./land.ts";
 import { parseLandUse } from "./buildings.ts";
 import { buyAtIsland } from "./buy.ts";
+import { sellAtIsland } from "./sell.ts";
 import { createVisitor, createWorld, hud, tick } from "./sim.ts";
 import { listOpenOrders, placeAsk, placeBid } from "./orders.ts";
 import { postStaff, staffMapSnapshot } from "./staff-http.ts";
@@ -200,6 +201,21 @@ const server = createServer(async (req, res) => {
       return;
     }
     const result = buyAtIsland(world, visitor, {
+      island: body.island ?? "north",
+      goodId: body.goodId ?? body.good,
+      qty: body.qty ?? 1,
+    });
+    json(res, result.ok ? 200 : 400, { ...result, snapshot: snapshot() });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/sell") {
+    const body = await readJsonBody(req);
+    if (!body) {
+      json(res, 400, { ok: false, reason: "bad_json" });
+      return;
+    }
+    const result = sellAtIsland(world, visitor, {
       island: body.island ?? "north",
       goodId: body.goodId ?? body.good,
       qty: body.qty ?? 1,
