@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { createLandBoard } from "./land.ts";
-import { pointAlongPolyline, polylineLength } from "../public/harbour/traffic.js";
+import { createLandBoard, heightAt, ISLANDS } from "./land.ts";
+import {
+  createTraffic,
+  pointAlongPolyline,
+  polylineLength,
+  SPAWN_SPAN_M,
+} from "../public/harbour/traffic.js";
 import { projectOnPolyline } from "../public/harbour/taxi.js";
 
 describe("road node traffic", () => {
@@ -23,5 +28,29 @@ describe("road node traffic", () => {
     const looped = pointAlongPolyline(paved.points, total + 3);
     const start = pointAlongPolyline(paved.points, 3);
     expect(Math.hypot(looped.x - start.x, looped.z - start.z)).toBeLessThan(1);
+  });
+
+  it("parks several cars on the first stretch of tarmac, not kilometres inland", () => {
+    const board = createLandBoard();
+    const added: unknown[] = [];
+    const scene = { add(obj: unknown) { added.push(obj); } };
+    const traffic = createTraffic({
+      scene,
+      getMap: () => board,
+      specOf: (id: "north" | "south") => ISLANDS[id],
+      heightAt,
+    });
+    const north = traffic.cars.filter((c) => c.islandId === "north");
+    expect(north.length).toBeGreaterThanOrEqual(5);
+    expect(SPAWN_SPAN_M).toBeLessThan(500);
+    for (const car of north) {
+      expect(car.along).toBeLessThan(SPAWN_SPAN_M + 40);
+      expect(car.mesh.position.y).toBeGreaterThan(0.5);
+    }
+    const port = ISLANDS.north.port;
+    const nearest = Math.min(
+      ...north.map((c) => Math.hypot(c.mesh.position.x - port.x, c.mesh.position.z - port.z)),
+    );
+    expect(nearest).toBeLessThan(120);
   });
 });
