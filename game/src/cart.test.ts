@@ -92,7 +92,7 @@ describe("player PAPER handcart", () => {
     const cart = player.getObjectByName("paper-cart")!;
     expect(cart.children.length).toBe(CART_MESH_COUNT);
     expect(meshCount(cart)).toBe(CART_MESH_COUNT);
-    expect(CART_MESH_COUNT).toBe(36);
+    expect(CART_MESH_COUNT).toBe(37);
 
     const p = parts(cart);
     expect(p).toContain("bed");
@@ -479,6 +479,57 @@ describe("player PAPER handcart", () => {
     expect([0x8a6238, 0x7a5230, 0x9a6a40, 0xc4b496, 0xf4ead8]).toContain(hex);
     expect(isGrey(hex)).toBe(false);
     const { width, height, depth } = (radish.geometry as THREE.BoxGeometry).parameters;
+    expect(width).toBeLessThan(0.12);
+    expect(height).toBeLessThan(0.12);
+    expect(depth).toBeLessThan(0.12);
+  });
+
+  it("puts one tiny kraft PAPER squash on the cart bed; radish, beet, turnip, leek, cabbage, garlic, onion, potato, carrot, apple remain", () => {
+    const player = makePlayer();
+    dressCart(player);
+    const cart = player.getObjectByName("paper-cart")!;
+    const p = parts(cart);
+    expect(p.filter((k) => k === "squash").length).toBe(1);
+    expect(p.filter((k) => k === "radish").length).toBeGreaterThanOrEqual(1);
+    expect(p.filter((k) => k === "beet").length).toBeGreaterThanOrEqual(1);
+    expect(p.filter((k) => k === "turnip").length).toBeGreaterThanOrEqual(1);
+    expect(p.filter((k) => k === "leek").length).toBeGreaterThanOrEqual(1);
+    expect(p.filter((k) => k === "cabbage").length).toBeGreaterThanOrEqual(1);
+    expect(p.filter((k) => k === "garlic").length).toBeGreaterThanOrEqual(1);
+    expect(p.filter((k) => k === "onion").length).toBeGreaterThanOrEqual(1);
+    expect(p.filter((k) => k === "potato").length).toBeGreaterThanOrEqual(1);
+    expect(p.filter((k) => k === "carrot").length).toBeGreaterThanOrEqual(1);
+    expect(p.filter((k) => k === "apple").length).toBeGreaterThanOrEqual(1);
+
+    const squash = cart.children.find((c) => c.userData.part === "squash") as THREE.Mesh;
+    const radish = cart.children.find((c) => c.userData.part === "radish") as THREE.Mesh;
+    const beet = cart.children.find((c) => c.userData.part === "beet") as THREE.Mesh;
+    const turnip = cart.children.find((c) => c.userData.part === "turnip") as THREE.Mesh;
+    const leek = cart.children.find((c) => c.userData.part === "leek") as THREE.Mesh;
+    const cabbage = cart.children.find((c) => c.userData.part === "cabbage") as THREE.Mesh;
+    const garlic = cart.children.find((c) => c.userData.part === "garlic") as THREE.Mesh;
+    const onion = cart.children.find((c) => c.userData.part === "onion") as THREE.Mesh;
+    const potato = cart.children.find((c) => c.userData.part === "potato") as THREE.Mesh;
+    const carrot = cart.children.find((c) => c.userData.part === "carrot") as THREE.Mesh;
+    const apple = cart.children.find((c) => c.userData.part === "apple") as THREE.Mesh;
+    const bed = cart.children.find((c) => c.userData.part === "bed")!;
+    expect(squash.userData.mode).toBe("PAPER");
+    expect(squash.geometry.type).toBe("BoxGeometry");
+    expect(squash.position.y).toBeGreaterThan(bed.position.y);
+    expect(Math.hypot(squash.position.x - radish.position.x, squash.position.z - radish.position.z)).toBeGreaterThan(0.12);
+    expect(Math.hypot(squash.position.x - beet.position.x, squash.position.z - beet.position.z)).toBeGreaterThan(0.12);
+    expect(Math.hypot(squash.position.x - turnip.position.x, squash.position.z - turnip.position.z)).toBeGreaterThan(0.12);
+    expect(Math.hypot(squash.position.x - leek.position.x, squash.position.z - leek.position.z)).toBeGreaterThan(0.12);
+    expect(Math.hypot(squash.position.x - cabbage.position.x, squash.position.z - cabbage.position.z)).toBeGreaterThan(0.12);
+    expect(Math.hypot(squash.position.x - garlic.position.x, squash.position.z - garlic.position.z)).toBeGreaterThan(0.12);
+    expect(Math.hypot(squash.position.x - onion.position.x, squash.position.z - onion.position.z)).toBeGreaterThan(0.12);
+    expect(Math.hypot(squash.position.x - potato.position.x, squash.position.z - potato.position.z)).toBeGreaterThan(0.12);
+    expect(Math.hypot(squash.position.x - carrot.position.x, squash.position.z - carrot.position.z)).toBeGreaterThan(0.12);
+    expect(Math.hypot(squash.position.x - apple.position.x, squash.position.z - apple.position.z)).toBeGreaterThan(0.12);
+    const hex = (squash.material as THREE.MeshLambertMaterial).color.getHex();
+    expect([0x8a6238, 0x7a5230, 0x9a6a40, 0xc4b496, 0xf4ead8]).toContain(hex);
+    expect(isGrey(hex)).toBe(false);
+    const { width, height, depth } = (squash.geometry as THREE.BoxGeometry).parameters;
     expect(width).toBeLessThan(0.12);
     expect(height).toBeLessThan(0.12);
     expect(depth).toBeLessThan(0.12);
