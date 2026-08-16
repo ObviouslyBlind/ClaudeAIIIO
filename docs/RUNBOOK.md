@@ -12,7 +12,7 @@ npm test
 npm run play
 ```
 
-Open `http://localhost:8787/` — critics must use a fresh query, e.g. `http://localhost:8787/?g=tree25`.
+Open `http://localhost:8787/` — critics must use a fresh query, e.g. `http://localhost:8787/?g=ferry34`.
 
 - Port **8787**. Restart: `game/scripts/restart-play.sh` (tmux `two-harbors-play`).
 - Do **not** restart play while a critic is on the page.

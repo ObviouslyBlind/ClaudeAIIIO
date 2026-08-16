@@ -21,4 +21,13 @@ import { createTaxi } from "./taxi.js?v=1";`;
     expect(out).toContain('./taxi.js?v=77');
     expect(out).not.toContain("v=1");
   });
+
+  it("stamps dynamic import() so first-frame.js can load main.js fresh", () => {
+    const js = `import("./main.js");
+import("./lease-hud.js?v=1");`;
+    const out = bustModuleImports(js, 88);
+    expect(out).toContain('import("./main.js?v=88")');
+    expect(out).toContain('import("./lease-hud.js?v=88")');
+    expect(out).not.toContain("v=1");
+  });
 });

@@ -5,12 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Two Harbors — harbour</title>
     <link rel="stylesheet" href="/harbour/style.css" />
+    <style>
+      #c {
+        position: absolute;
+        inset: 0;
+        display: block;
+        width: 100%;
+        height: 100%;
+        background: #7ec8d4;
+      }
+    </style>
   </head>
   <body>
     <header class="bar">
       <p class="badge">BASE · 3D HARBOUR · PAPER · SIMULATED</p>
       <h1 id="place">North port</h1>
-      <p id="status">Loading 3D harbour…</p>
+      <p id="status">North port · PAPER</p>
     </header>
     <aside class="sheet" id="sheet">
       <p id="cash">Cash $0</p>
@@ -31,7 +41,7 @@
       <p id="stall-hint"></p>
       <p id="persist-line">PAPER · SIMULATED</p>
     </aside>
-    <canvas id="c"></canvas>
+    <canvas id="c" width="1280" height="720" style="background:#7ec8d4"></canvas>
     <div id="taxi-map" class="taxi-map" hidden>
       <p class="taxi-map-badge">PAPER · SIMULATED</p>
       <p class="taxi-map-hint">Tap a rough point. Ride stays on paved. Dirt forbidden.</p>
@@ -94,7 +104,9 @@
                 "Cash $" +
                 Number(d.visitor.cash).toLocaleString("en-US", { maximumFractionDigits: 0 });
             }
-            if (status && stillBooting()) status.textContent = "Cash loaded · starting 3D · PAPER";
+            if (status && (status.textContent || "").indexOf("Loading") === 0) {
+              status.textContent = "Cash loaded · starting 3D · PAPER";
+            }
           })
           .catch(function (e) {
             fail("map " + (e && e.message ? e.message : e));
@@ -104,18 +116,6 @@
     <script type="importmap">
       { "imports": { "three": "/vendor/three.module.js" } }
     </script>
-    <script type="module" src="/harbour/lease-hud.js"></script>
-    <script type="module" src="/harbour/develop-hud.js"></script>
-    <script type="module" src="/harbour/unpaid-hud.js"></script>
-    <script type="module" src="/harbour/spread-hud.js"></script>
-    <script type="module" src="/harbour/tax-hud.js"></script>
-    <script type="module" src="/harbour/ferry-hud.js"></script>
-    <script type="module" src="/harbour/taxi-hud.js"></script>
-    <script type="module" src="/harbour/calendar-hud.js"></script>
-    <script type="module" src="/harbour/goods-hud.js"></script>
-    <script type="module" src="/harbour/flow-hud.js"></script>
-    <script type="module" src="/harbour/stall-hud.js"></script>
-    <script type="module" src="/harbour/persist-hud.js"></script>
-    <script type="module" src="/harbour/main.js"></script>
+    <script type="module" src="/harbour/first-frame.js"></script>
   </body>
 </html>
