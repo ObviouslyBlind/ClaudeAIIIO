@@ -112,6 +112,7 @@ function tagPaper(mesh, partName) {
 
 /**
  * Brick stack with kraft flashing/cap so a House reads as a building, not a lid.
+ * Short darker brick pot/cap on top so the stack is not a flat brick stub.
  * Optional tiny side stack for warehouse roofs.
  */
 function addChimney(g, x, baseY, z, h = 1.85, tinyStack = false) {
@@ -129,9 +130,11 @@ function addChimney(g, x, baseY, z, h = 1.85, tinyStack = false) {
   course.position.set(0, h * 0.58, 0);
   const cap = tagPaper(part(0.88, 0.12, 0.88, KRAFT, false), "chimney");
   cap.position.set(0, h + 0.04, 0);
-  const pot = tagPaper(part(0.22, 0.38, 0.22, BRICK, false), "chimney");
-  pot.position.set(-0.14, h + 0.3, 0);
-  chimney.add(stack, flash, course, cap, pot);
+  const potCap = tagPaper(part(0.8, 0.2, 0.8, BRICK, false), "chimney");
+  potCap.position.set(0, h + 0.2, 0);
+  const pot = tagPaper(part(0.26, 0.34, 0.26, BRICK, false), "chimney");
+  pot.position.set(-0.12, h + 0.46, 0);
+  chimney.add(stack, flash, course, cap, potCap, pot);
 
   if (tinyStack) {
     const tiny = tagPaper(part(0.34, h * 0.55, 0.34, BRICK, false), "stack");
@@ -140,8 +143,8 @@ function addChimney(g, x, baseY, z, h = 1.85, tinyStack = false) {
     tinyCap.position.set(0.52, h * 0.55 + 0.04, 0.06);
     chimney.add(tiny, tinyCap);
   } else {
-    const potB = tagPaper(part(0.18, 0.28, 0.18, KRAFT, false), "stack");
-    potB.position.set(0.16, h + 0.24, 0);
+    const potB = tagPaper(part(0.2, 0.26, 0.2, KRAFT, false), "stack");
+    potB.position.set(0.14, h + 0.42, 0);
     chimney.add(potB);
   }
 
