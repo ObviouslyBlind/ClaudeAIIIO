@@ -16,10 +16,27 @@ export function canEnter(plot) {
   return plot.owner === "visitor" && Boolean(plot.use);
 }
 
-function box(w, h, d, color, x, y, z, kind, extra = {}) {
+const WOOD = 0x5a3a22;
+const WOOD_FLOOR = 0x8a5530;
+const WOOD_FLOOR_UP = 0x7a4a28;
+const WOOD_TOP = 0x6e4428;
+const PLASTER = 0xf4ead8;
+const PLASTER_SIDE = 0xefe0c8;
+const FRAME = 0x3d2a1c;
+const GLASS = 0x8ec4d4;
+const SHUTTER = 0x2a7a72;
+const DOOR = 0x4a3220;
+const LINEN = 0xf7f1e6;
+const CORAL = 0xc45c3a;
+const RUG = 0xa84232;
+const BRASS = 0xc4a574;
+const SHADE = 0xf0c878;
+const PAPER_CARD = 0xf3efe4;
+
+function box(w, h, d, color, x, y, z, kind, extra = {}, matOpts = {}) {
   const m = new THREE.Mesh(
     new THREE.BoxGeometry(w, h, d),
-    new THREE.MeshLambertMaterial({ color }),
+    new THREE.MeshLambertMaterial({ color, ...matOpts }),
   );
   m.position.set(x, y, z);
   m.castShadow = true;
@@ -29,9 +46,173 @@ function box(w, h, d, color, x, y, z, kind, extra = {}) {
   return m;
 }
 
+function uniqueSorted(values) {
+  return [...new Set(values.map((v) => Math.round(v * 1000) / 1000))].sort((a, b) => a - b);
+}
+
+function openingHit(alongMid, yMid, openings) {
+  return openings.some((o) => {
+    const a0 = o.along - o.width / 2;
+    const a1 = o.along + o.width / 2;
+    return alongMid > a0 && alongMid < a1 && yMid > o.sill && yMid < o.head;
+  });
+}
+
+/** Wall in the XY plane (constant z), boxes around window/door openings. */
+function addWallZ(parent, { z, x0, x1, y0, y1, thick, color, openings, kind }) {
+  const xs = uniqueSorted([x0, x1, ...openings.flatMap((o) => [o.along - o.width / 2, o.along + o.width / 2])]);
+  const ys = uniqueSorted([y0, y1, ...openings.flatMap((o) => [o.sill, o.head])]);
+  for (let i = 0; i < xs.length - 1; i++) {
+    const w = xs[i + 1] - xs[i];
+    if (w < 0.03) continue;
+    const xm = (xs[i] + xs[i + 1]) / 2;
+    for (let j = 0; j < ys.length - 1; j++) {
+      const h = ys[j + 1] - ys[j];
+      if (h < 0.03) continue;
+      const ym = (ys[j] + ys[j + 1]) / 2;
+      if (openingHit(xm, ym, openings)) continue;
+      parent.add(box(w, h, thick, color, xm, ym, z, kind));
+    }
+  }
+}
+
+/** Wall in the ZY plane (constant x). */
+function addWallX(parent, { x, z0, z1, y0, y1, thick, color, openings, kind }) {
+  const zs = uniqueSorted([z0, z1, ...openings.flatMap((o) => [o.along - o.width / 2, o.along + o.width / 2])]);
+  const ys = uniqueSorted([y0, y1, ...openings.flatMap((o) => [o.sill, o.head])]);
+  for (let i = 0; i < zs.length - 1; i++) {
+    const d = zs[i + 1] - zs[i];
+    if (d < 0.03) continue;
+    const zm = (zs[i] + zs[i + 1]) / 2;
+    for (let j = 0; j < ys.length - 1; j++) {
+      const h = ys[j + 1] - ys[j];
+      if (h < 0.03) continue;
+      const ym = (ys[j] + ys[j + 1]) / 2;
+      if (openingHit(zm, ym, openings)) continue;
+      parent.add(box(thick, h, d, color, x, ym, zm, kind));
+    }
+  }
+}
+
+function dressWindowZ(parent, x, z, sill, head, w, inward) {
+  const h = head - sill;
+  const midY = (sill + head) / 2;
+  const n = inward;
+  parent.add(box(w + 0.18, h + 0.18, 0.07, FRAME, x, midY, z + n * 0.07, "interior-window"));
+  parent.add(box(w, h, 0.04, GLASS, x, midY, z + n * 0.1, "interior-window", {}, { transparent: true, opacity: 0.45 }));
+  parent.add(box(w + 0.3, 0.07, 0.16, WOOD, x, sill - 0.02, z + n * 0.1, "interior-trim"));
+  const sh = h * 0.9;
+  parent.add(box(0.2, sh, 0.05, SHUTTER, x - w / 2 - 0.14, midY, z + n * 0.13, "interior-window"));
+  parent.add(box(0.2, sh, 0.05, SHUTTER, x + w / 2 + 0.14, midY, z + n * 0.13, "interior-window"));
+}
+
+function dressWindowX(parent, z, x, sill, head, w, inward) {
+  const h = head - sill;
+  const midY = (sill + head) / 2;
+  const n = inward;
+  parent.add(box(0.07, h + 0.18, w + 0.18, FRAME, x + n * 0.07, midY, z, "interior-window"));
+  parent.add(box(0.04, h, w, GLASS, x + n * 0.1, midY, z, "interior-window", {}, { transparent: true, opacity: 0.45 }));
+  parent.add(box(0.16, 0.07, w + 0.3, WOOD, x + n * 0.1, sill - 0.02, z, "interior-trim"));
+  const sh = h * 0.9;
+  parent.add(box(0.05, sh, 0.2, SHUTTER, x + n * 0.13, midY, z - w / 2 - 0.14, "interior-window"));
+  parent.add(box(0.05, sh, 0.2, SHUTTER, x + n * 0.13, midY, z + w / 2 + 0.14, "interior-window"));
+}
+
+function paperPlaque(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "paper-plaque";
+  g.userData.kind = "interior-paper";
+  g.userData.mode = "PAPER";
+  g.add(box(1.55, 0.5, 0.05, WOOD, x, y, z, "interior-paper", { mode: "PAPER" }));
+  const card = box(1.38, 0.36, 0.04, PAPER_CARD, x, y, z + 0.03, "interior-paper");
+  card.userData.mode = "PAPER";
+  g.add(card);
+  return g;
+}
+
+function makeTable(x, z) {
+  const g = new THREE.Group();
+  g.name = "table";
+  g.userData.kind = "interior-table";
+  const y0 = 0.16;
+  const topY = y0 + 0.72;
+  g.add(box(1.55, 0.07, 0.95, WOOD_TOP, x, topY, z, "interior-prop"));
+  g.add(box(1.42, 0.08, 0.08, WOOD, x, topY - 0.08, z + 0.4, "interior-prop"));
+  g.add(box(1.42, 0.08, 0.08, WOOD, x, topY - 0.08, z - 0.4, "interior-prop"));
+  const legH = 0.68;
+  for (const [dx, dz] of [
+    [-0.68, -0.38],
+    [0.68, -0.38],
+    [-0.68, 0.38],
+    [0.68, 0.38],
+  ]) {
+    g.add(box(0.08, legH, 0.08, WOOD, x + dx, y0 + legH / 2, z + dz, "interior-prop"));
+  }
+  return g;
+}
+
+function makeChair(x, z, yaw) {
+  const g = new THREE.Group();
+  g.name = "chair";
+  g.userData.kind = "interior-chair";
+  g.position.set(x, 0, z);
+  g.rotation.y = yaw;
+  const y0 = 0.16;
+  const seat = y0 + 0.44;
+  g.add(box(0.42, 0.06, 0.42, WOOD_TOP, 0, seat, 0, "interior-prop"));
+  for (const [dx, dz] of [
+    [-0.16, -0.16],
+    [0.16, -0.16],
+    [-0.16, 0.16],
+    [0.16, 0.16],
+  ]) {
+    g.add(box(0.06, seat - y0, 0.06, WOOD, dx, y0 + (seat - y0) / 2, dz, "interior-prop"));
+  }
+  g.add(box(0.4, 0.5, 0.06, WOOD, 0, seat + 0.28, -0.18, "interior-prop"));
+  g.add(box(0.06, 0.42, 0.06, WOOD, -0.14, seat + 0.26, -0.18, "interior-prop"));
+  g.add(box(0.06, 0.42, 0.06, WOOD, 0.14, seat + 0.26, -0.18, "interior-prop"));
+  return g;
+}
+
+function makeHangingLamp(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "lamp";
+  g.userData.kind = "interior-lamp";
+  g.add(box(0.04, 0.4, 0.04, FRAME, x, y + 0.28, z, "interior-prop"));
+  g.add(box(0.12, 0.05, 0.12, BRASS, x, y + 0.1, z, "interior-prop"));
+  g.add(box(0.58, 0.2, 0.58, SHADE, x, y, z, "interior-prop"));
+  g.add(box(0.1, 0.08, 0.1, 0xfff1d0, x, y - 0.12, z, "interior-prop"));
+  return g;
+}
+
+function makeTableLamp(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "lamp";
+  g.userData.kind = "interior-lamp";
+  g.add(box(0.18, 0.04, 0.18, WOOD, x, y, z, "interior-prop"));
+  g.add(box(0.05, 0.28, 0.05, BRASS, x, y + 0.16, z, "interior-prop"));
+  g.add(box(0.28, 0.16, 0.28, SHADE, x, y + 0.36, z, "interior-prop"));
+  return g;
+}
+
+function makeBed(cx, floorY, cz) {
+  const g = new THREE.Group();
+  g.name = "bed";
+  g.userData.kind = "interior-bed";
+  g.add(box(2.15, 0.28, 1.28, WOOD, cx, floorY + 0.22, cz, "interior-prop"));
+  g.add(box(2.02, 0.16, 1.16, LINEN, cx, floorY + 0.42, cz, "interior-prop"));
+  g.add(box(1.42, 0.08, 1.14, CORAL, cx + 0.24, floorY + 0.52, cz, "interior-prop"));
+  g.add(box(0.36, 0.14, 0.5, LINEN, cx - 0.78, floorY + 0.54, cz - 0.28, "interior-prop"));
+  g.add(box(0.36, 0.14, 0.5, LINEN, cx - 0.78, floorY + 0.54, cz + 0.28, "interior-prop"));
+  g.add(box(0.1, 0.88, 1.32, WOOD, cx - 1.12, floorY + 0.58, cz, "interior-prop"));
+  g.add(box(0.08, 0.98, 0.08, WOOD, cx - 1.12, floorY + 0.62, cz - 0.6, "interior-prop"));
+  g.add(box(0.08, 0.98, 0.08, WOOD, cx - 1.12, floorY + 0.62, cz + 0.6, "interior-prop"));
+  return g;
+}
+
 /**
- * Placeholder PAPER interior: downstairs room, a stair flight, upstairs room.
- * Boxes only. No catalog meshes.
+ * PAPER Caribbean house: plaster walls, wood floors, window openings,
+ * downstairs table/chairs/lamp, upstairs bed. Low-poly boxes only.
  */
 export function makeInteriorScene() {
   const group = new THREE.Group();
@@ -40,54 +221,113 @@ export function makeInteriorScene() {
   group.userData.mode = "PAPER";
   group.userData.provenance = "SIMULATED";
 
+  const X0 = -4.1;
+  const X1 = 4.1;
+  const Z0 = -3.6;
+  const Z1 = 3.6;
+  const Y0 = 0.16;
+  const Y1 = 2.78;
+  const U0 = 2.86;
+  const U1 = 5.06;
+
+  const downWins = [
+    { along: -2.05, width: 1.15, sill: 0.9, head: 2.05 },
+    { along: 1.15, width: 1.15, sill: 0.9, head: 2.05 },
+  ];
+  const downSideWin = [{ along: 0.15, width: 1.1, sill: 0.9, head: 2.05 }];
+  const downRightWin = [{ along: 1.85, width: 0.95, sill: 1.15, head: 2.05 }];
+  const doorOpen = [{ along: 0, width: 1.2, sill: Y0, head: 2.18 }];
+
   const down = new THREE.Group();
   down.name = "downstairs";
   down.userData.kind = "downstairs";
-  down.add(box(8.2, 0.16, 7.2, 0xc4a574, 0, 0.08, 0, "interior-floor", { level: "downstairs" }));
-  down.add(box(8.2, 2.7, 0.16, 0xe8dcc8, 0, 1.43, -3.52, "interior-wall"));
-  down.add(box(3.1, 2.7, 0.16, 0xe8dcc8, -2.55, 1.43, 3.52, "interior-wall"));
-  down.add(box(3.1, 2.7, 0.16, 0xe8dcc8, 2.55, 1.43, 3.52, "interior-wall"));
-  down.add(box(8.2, 0.7, 0.16, 0xe8dcc8, 0, 2.43, 3.52, "interior-wall"));
-  down.add(box(0.16, 2.7, 7.2, 0xe4d4b8, -4.1, 1.43, 0, "interior-wall"));
-  down.add(box(0.16, 2.7, 7.2, 0xe4d4b8, 4.1, 1.43, 0, "interior-wall"));
-  down.add(box(1.4, 0.72, 0.9, 0x8a6238, -1.1, 0.52, -0.4, "interior-prop"));
-  down.add(box(0.45, 0.85, 0.45, 0x6e4a32, -1.8, 0.5, 0.2, "interior-prop"));
-  down.add(box(0.45, 0.85, 0.45, 0x6e4a32, -0.4, 0.5, 0.2, "interior-prop"));
-  down.add(box(0.7, 0.55, 0.7, 0x7a5230, 2.4, 0.4, -2.2, "interior-prop"));
-  const plaque = box(1.6, 0.55, 0.06, 0xf3efe4, 0, 1.85, 3.42, "interior-paper");
-  plaque.userData.mode = "PAPER";
-  down.add(plaque);
-  const door = box(1.15, 2.05, 0.1, 0x4a3220, 0, 1.1, 3.58, "exit");
+  down.add(box(8.2, 0.16, 7.2, WOOD_FLOOR, 0, 0.08, 0, "interior-floor", { level: "downstairs" }));
+  down.add(box(8.0, 0.1, 0.08, WOOD, 0, 0.21, Z0 + 0.12, "interior-trim"));
+  down.add(box(8.0, 0.1, 0.08, WOOD, 0, 0.21, Z1 - 0.12, "interior-trim"));
+  down.add(box(0.08, 0.1, 6.9, WOOD, X0 + 0.12, 0.21, 0, "interior-trim"));
+  down.add(box(0.08, 0.1, 6.9, WOOD, X1 - 0.12, 0.21, 0, "interior-trim"));
+
+  addWallZ(down, { z: -3.52, x0: X0, x1: X1, y0: Y0, y1: Y1, thick: 0.16, color: PLASTER, openings: downWins, kind: "interior-wall" });
+  addWallZ(down, { z: 3.52, x0: X0, x1: X1, y0: Y0, y1: Y1, thick: 0.16, color: PLASTER, openings: doorOpen, kind: "interior-wall" });
+  addWallX(down, { x: X0, z0: Z0, z1: Z1, y0: Y0, y1: Y1, thick: 0.16, color: PLASTER_SIDE, openings: downSideWin, kind: "interior-wall" });
+  addWallX(down, { x: X1, z0: Z0, z1: Z1, y0: Y0, y1: Y1, thick: 0.16, color: PLASTER_SIDE, openings: downRightWin, kind: "interior-wall" });
+
+  for (const w of downWins) dressWindowZ(down, w.along, -3.52, w.sill, w.head, w.width, +1);
+  dressWindowX(down, downSideWin[0].along, X0, downSideWin[0].sill, downSideWin[0].head, downSideWin[0].width, +1);
+  dressWindowX(down, downRightWin[0].along, X1, downRightWin[0].sill, downRightWin[0].head, downRightWin[0].width, -1);
+
+  down.add(box(2.35, 0.04, 1.7, RUG, -1.15, 0.18, -0.45, "interior-prop"));
+  down.add(makeTable(-1.15, -0.45));
+  down.add(makeChair(-1.15, 0.38, 0));
+  down.add(makeChair(-1.15, -1.28, Math.PI));
+  down.add(makeHangingLamp(-1.15, 2.12, -0.45));
+
+  down.add(box(1.35, 0.72, 0.38, WOOD, -3.35, 0.52, -2.55, "interior-prop"));
+  down.add(box(1.28, 0.06, 0.36, WOOD_TOP, -3.35, 0.9, -2.55, "interior-prop"));
+
+  down.add(box(0.12, 2.12, 0.14, WOOD, -0.66, 1.22, 3.52, "interior-trim"));
+  down.add(box(0.12, 2.12, 0.14, WOOD, 0.66, 1.22, 3.52, "interior-trim"));
+  down.add(box(1.44, 0.12, 0.14, WOOD, 0, 2.22, 3.52, "interior-trim"));
+  const door = box(1.15, 2.05, 0.1, DOOR, 0, 1.1, 3.58, "exit");
+  const handle = box(0.08, 0.08, 0.12, BRASS, 0.42, 0.05, 0.08, "exit");
+  door.add(handle);
   down.add(door);
+  down.add(paperPlaque(-2.15, 1.72, 3.42));
+
+  for (const x of [-2.5, -0.4, 1.4]) {
+    down.add(box(0.12, 0.1, 6.6, WOOD, x, 2.68, 0, "interior-trim"));
+  }
   group.add(down);
 
   const stairs = new THREE.Group();
   stairs.name = "stairs";
   stairs.userData.kind = "stairs";
+  stairs.add(box(0.1, 2.5, 3.15, WOOD, 2.44, 1.32, -1.05, "stairs"));
+  stairs.add(box(0.12, 1.02, 0.12, WOOD, 2.48, 0.67, -2.18, "stairs"));
   for (let i = 0; i < 8; i++) {
     const t = i / 7;
+    const y = 0.18 + t * 2.55;
+    const z = -2.35 + i * 0.38;
     stairs.add(
-      box(1.35, 0.18, 0.42, 0x9a7a52, 3.15, 0.18 + t * 2.55, -2.35 + i * 0.38, "stairs", {
+      box(1.35, 0.18, 0.42, 0x9a7a52, 3.15, y, z, "stairs", {
         level: t < 0.5 ? "downstairs" : "upstairs",
       }),
     );
+    stairs.add(box(0.06, 0.82, 0.06, WOOD, 2.5, y + 0.52, z, "stairs"));
   }
+  const rail = box(0.07, 0.07, 3.35, WOOD, 2.5, 1.58, -1.02, "stairs");
+  rail.rotation.x = -Math.atan2(2.55, 2.66);
+  stairs.add(rail);
   group.add(stairs);
+
+  const upWinsBack = [
+    { along: -2.05, width: 1.1, sill: 3.55, head: 4.55 },
+    { along: 0.85, width: 1.1, sill: 3.55, head: 4.55 },
+  ];
+  const upWinLeft = [{ along: -0.2, width: 1.05, sill: 3.55, head: 4.55 }];
+  const upWinFront = [{ along: -2.4, width: 1.05, sill: 3.55, head: 4.55 }];
 
   const up = new THREE.Group();
   up.name = "upstairs";
   up.userData.kind = "upstairs";
-  up.add(box(8.2, 0.16, 7.2, 0xb7a078, 0, 2.78, 0, "interior-floor", { level: "upstairs" }));
-  up.add(box(8.2, 2.2, 0.16, 0xf0e6d4, 0, 3.96, -3.52, "interior-wall"));
-  up.add(box(8.2, 2.2, 0.16, 0xf0e6d4, 0, 3.96, 3.52, "interior-wall"));
-  up.add(box(0.16, 2.2, 7.2, 0xeadcc4, -4.1, 3.96, 0, "interior-wall"));
-  up.add(box(0.16, 2.2, 7.2, 0xeadcc4, 4.1, 3.96, 0, "interior-wall"));
-  up.add(box(2.1, 0.35, 1.15, 0x6e4a32, -1.6, 3.08, -1.6, "interior-prop"));
-  up.add(box(0.9, 0.55, 0.7, 0xc45c3a, -1.6, 3.53, -1.6, "interior-prop"));
-  up.add(box(0.8, 0.7, 0.55, 0x8a6238, 1.8, 3.25, 2.0, "interior-prop"));
-  const upPlaque = box(1.4, 0.45, 0.06, 0xf3efe4, -2.2, 4.15, -3.42, "interior-paper");
-  upPlaque.userData.mode = "PAPER";
-  up.add(upPlaque);
+  up.add(box(6.55, 0.16, 7.2, WOOD_FLOOR_UP, -0.825, 2.78, 0, "interior-floor", { level: "upstairs" }));
+  up.add(box(1.65, 0.16, 3.05, WOOD_FLOOR_UP, 3.275, 2.78, 2.075, "interior-floor", { level: "upstairs" }));
+  up.add(box(1.65, 0.16, 1.05, WOOD_FLOOR_UP, 3.275, 2.78, -3.075, "interior-floor", { level: "upstairs" }));
+
+  addWallZ(up, { z: -3.52, x0: X0, x1: X1, y0: U0, y1: U1, thick: 0.16, color: PLASTER, openings: upWinsBack, kind: "interior-wall" });
+  addWallZ(up, { z: 3.52, x0: X0, x1: X1, y0: U0, y1: U1, thick: 0.16, color: PLASTER, openings: upWinFront, kind: "interior-wall" });
+  addWallX(up, { x: X0, z0: Z0, z1: Z1, y0: U0, y1: U1, thick: 0.16, color: PLASTER_SIDE, openings: upWinLeft, kind: "interior-wall" });
+  addWallX(up, { x: X1, z0: Z0, z1: Z1, y0: U0, y1: U1, thick: 0.16, color: PLASTER_SIDE, openings: [], kind: "interior-wall" });
+
+  for (const w of upWinsBack) dressWindowZ(up, w.along, -3.52, w.sill, w.head, w.width, +1);
+  dressWindowZ(up, upWinFront[0].along, 3.52, upWinFront[0].sill, upWinFront[0].head, upWinFront[0].width, -1);
+  dressWindowX(up, upWinLeft[0].along, X0, upWinLeft[0].sill, upWinLeft[0].head, upWinLeft[0].width, +1);
+
+  up.add(makeBed(-1.55, U0, -1.85));
+  up.add(box(0.48, 0.42, 0.42, WOOD, -0.22, U0 + 0.21, -1.85, "interior-prop"));
+  up.add(makeTableLamp(-0.22, U0 + 0.44, -1.85));
+  up.add(box(1.15, 0.04, 1.55, RUG, -1.55, U0 + 0.02, -0.55, "interior-prop"));
+  up.add(paperPlaque(1.55, 4.15, 3.42));
   group.add(up);
 
   const lamp = new THREE.PointLight(0xfff1d0, 1.15, 18, 2);
