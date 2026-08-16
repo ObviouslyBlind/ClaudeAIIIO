@@ -234,6 +234,19 @@ function addTaxiWipers(g, kraftCreamMat) {
 }
 
 /**
+ * Tiny kraft cream PAPER ball/cap on the roof aerial tip — same 0xf4ead8 as hubs.
+ * PAPER box only. Aerial stem stays.
+ */
+function addTaxiAerialCap(g, kraftCreamMat, aerial) {
+  const geo = aerial.geometry;
+  const aerialH = geo.parameters?.height ?? 0.32;
+  const capH = 0.08;
+  const cap = tagPart(taxiBox(0.08, capH, 0.08, kraftCreamMat, false), "aerial-cap");
+  cap.position.set(aerial.position.x, aerial.position.y + aerialH / 2 + capH / 2, aerial.position.z);
+  g.add(cap);
+}
+
+/**
  * One small kraft PAPER spare on the boot — short rubber cylinder + cream hub box.
  * Same 0x1a1a1e / 0xf4ead8 as the road wheels. Not a new grey. Roof aerial stays.
  */
@@ -253,8 +266,8 @@ function addTaxiSpare(g, tyreMat, hubMat) {
 
 /**
  * Yellow cab that reads from the quay: wheels with kraft cream hub boxes, glass, roof lamp, checker belt,
- * iron bumper, door handles, kraft side mirrors, short kraft roof aerial, kraft cream rear plate, kraft spare on the boot,
- * two kraft cream PAPER wipers on the windscreen.
+ * iron bumper, door handles, kraft side mirrors, short kraft roof aerial with a kraft cream PAPER cap,
+ * kraft cream rear plate, kraft spare on the boot, two kraft cream PAPER wipers on the windscreen.
  * Compact warm PAPER taxi-sign box — original cream lamp, not a sedan lid, not a debug mast, not a cop lightbar.
  */
 export function makeTaxiMesh() {
@@ -328,6 +341,7 @@ export function makeTaxiMesh() {
   const aerial = tagPart(taxiBox(0.04, aerialH, 0.04, kraft, false), "aerial");
   aerial.position.set(0, roofTopY + aerialH / 2, lampZ - 0.36);
   g.add(aerial);
+  addTaxiAerialCap(g, kraftHub, aerial);
 
   for (const x of [-0.72, 0.72]) {
     const hl = taxiBox(0.42, 0.22, 0.12, head, false);

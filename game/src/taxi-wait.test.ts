@@ -248,6 +248,53 @@ describe("taxi roof lamp", () => {
     expect(wipers.length).toBeGreaterThanOrEqual(2);
   });
 
+  it("puts a tiny kraft cream PAPER cap on the taxi roof aerial", () => {
+    const mesh = makeTaxiMesh();
+    const caps: THREE.Mesh[] = [];
+    const aerials: THREE.Mesh[] = [];
+    const wipers: THREE.Mesh[] = [];
+    const spares: THREE.Mesh[] = [];
+    const mirrors: THREE.Mesh[] = [];
+    const plates: THREE.Mesh[] = [];
+    const hubs: THREE.Mesh[] = [];
+    const handles: THREE.Mesh[] = [];
+    mesh.traverse((obj) => {
+      const m = obj as THREE.Mesh & { userData: { part?: string; mode?: string } };
+      if (m.userData?.part === "aerial-cap" || m.userData?.part === "cap") caps.push(m);
+      if (m.userData?.part === "aerial") aerials.push(m);
+      if (m.userData?.part === "wiper") wipers.push(m);
+      if (m.userData?.part === "spare") spares.push(m);
+      if (m.userData?.part === "mirror") mirrors.push(m);
+      if (m.userData?.part === "plate") plates.push(m);
+      if (m.userData?.part === "hub") hubs.push(m);
+      if (m.userData?.part === "handle") handles.push(m);
+    });
+    expect(caps.length).toBeGreaterThanOrEqual(1);
+    expect(caps.every((c) => c.geometry.type === "BoxGeometry")).toBe(true);
+    expect(caps.every((c) => c.userData.mode === "PAPER")).toBe(true);
+    expect(
+      caps.every((c) => (c.material as THREE.MeshLambertMaterial).color.getHex() === 0xf4ead8),
+    ).toBe(true);
+    expect(aerials.length).toBeGreaterThanOrEqual(1);
+    const aerial = aerials[0];
+    const aerialTop = aerial.position.y + ((aerial.geometry as THREE.BoxGeometry).parameters.height ?? 0) / 2;
+    for (const cap of caps) {
+      const geo = cap.geometry as THREE.BoxGeometry;
+      expect(geo.parameters.width).toBeLessThan(0.16);
+      expect(geo.parameters.height).toBeLessThan(0.16);
+      expect(geo.parameters.depth).toBeLessThan(0.16);
+      expect(cap.position.y).toBeGreaterThan(aerialTop - 0.02);
+      expect(Math.abs(cap.position.x - aerial.position.x)).toBeLessThan(0.08);
+      expect(Math.abs(cap.position.z - aerial.position.z)).toBeLessThan(0.08);
+    }
+    expect(wipers.length).toBeGreaterThanOrEqual(2);
+    expect(spares.length).toBeGreaterThanOrEqual(1);
+    expect(mirrors.length).toBeGreaterThanOrEqual(2);
+    expect(plates.length).toBeGreaterThanOrEqual(1);
+    expect(hubs.length).toBe(4);
+    expect(handles.length).toBeGreaterThanOrEqual(2);
+  });
+
   it("puts two thin kraft cream PAPER wipers on the taxi windscreen", () => {
     const mesh = makeTaxiMesh();
     const wipers: THREE.Mesh[] = [];
