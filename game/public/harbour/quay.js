@@ -249,31 +249,28 @@ function gangplank() {
   g.userData.dress = "brow";
   g.userData.mode = "PAPER";
 
-  const sill = part(4.4, 0.35, 0.9, 0x6a4a2a);
-  sill.position.set(0, 0.18, 0.08);
-  g.add(sill);
-
-  const plank = part(4.2, 0.4, 16, 0x8a6238);
-  plank.rotation.x = -0.22;
-  plank.position.set(0, -0.7, 7.4);
+  /** Centered on the group so world position is the plank, not 7 m into the dinghies. */
+  const plank = part(7.4, 0.55, 10, 0x4a3220);
+  plank.rotation.x = -0.16;
+  plank.position.set(0, 0, 0);
   plank.userData.part = "plank";
   g.add(plank);
 
-  const wear = part(3.8, 0.12, 15.4, 0x9a6a40, false);
-  wear.rotation.x = -0.22;
-  wear.position.set(0, -0.48, 7.4);
+  const wear = part(6.6, 0.22, 9.2, 0xc4b496, false);
+  wear.rotation.x = -0.16;
+  wear.position.set(0, 0.32, 0);
   g.add(wear);
 
-  for (const sx of [-2.0, 2.0]) {
-    const postA = part(0.35, 1.6, 0.35, 0x5a3a22, false);
-    postA.position.set(sx, 0.85, 0.4);
-    const postB = part(0.35, 1.6, 0.35, 0x5a3a22, false);
-    postB.position.set(sx, -0.35, 12.6);
+  for (const sx of [-3.4, 3.4]) {
+    const postA = part(0.35, 1.4, 0.35, 0x5a3a22, false);
+    postA.position.set(sx, 0.7, -4.4);
+    const postB = part(0.35, 1.4, 0.35, 0x5a3a22, false);
+    postB.position.set(sx, 0.7, 4.4);
     g.add(postA, postB);
 
-    const rail = part(0.28, 0.22, 12.4, 0x7a5230, false);
-    rail.rotation.x = -0.22;
-    rail.position.set(sx, 0.45, 6.5);
+    const rail = part(0.28, 0.22, 9.0, 0x7a5230, false);
+    rail.rotation.x = -0.16;
+    rail.position.set(sx, 1.15, 0);
     g.add(rail);
   }
 
@@ -472,7 +469,10 @@ export function makeQuay(spec, helpers) {
 
   if (spec.id === "north") {
     const brow = gangplank();
-    brow.position.set(x + 1.55, deckY, pierZ + 40);
+    /** /g/brow66 FAIL BROW: kraft on the pier lip read as decking.
+     *  toward*100 + local z=7.4 sat inside the sage dinghies. Water gap
+     *  between pier lip (along 81) and dinghy near-face (along ~97). */
+    brow.position.set(x, 1.9, z + toward * 84);
     root.add(brow);
 
     // Extra kraft stack on the north timber, west of the walk, short of the brow.

@@ -100,7 +100,11 @@ Sage dinghies in the north basin (`/g/ding65` PASS).
 
 Pixel: **kraft gangplank / brow** from the north pier toward the basin at `http://localhost:8787/g/brow66`. Seaward spawn, no RMB. Close other Two Harbors tabs. Address bar must be `/g/brow66`. Do not restart play while the critic is on the page.
 
-## Next pixel (after brow66 PASS, immediately, no wait)
+`/g/brow66` **FAIL BROW**: pier, cream ferry, and white pier sections in frame; the kraft plank sat on the pier lip and read as decking.
+
+Pixel: **kraft gangplank / brow** at `http://localhost:8787/g/brow67`. Center water channel (same as ding65), dark plank + kraft wear. No RMB. Address bar must be `/g/brow67`. Do not restart play while the critic is on the page.
+
+## Next pixel (after brow67 PASS, immediately, no wait)
 
 ## Frozen
 
