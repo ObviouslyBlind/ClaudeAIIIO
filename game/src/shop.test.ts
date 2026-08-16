@@ -123,6 +123,16 @@ function shopCoins(root: THREE.Object3D) {
   return out;
 }
 
+function shopBlotters(root: THREE.Object3D) {
+  const out: THREE.Object3D[] = [];
+  root.traverse((obj) => {
+    if (obj.userData?.kind === "shop-blotter" && obj.name === "shop-blotter") {
+      out.push(obj);
+    }
+  });
+  return out;
+}
+
 describe("shop PAPER wrapped parcel", () => {
   it("matches shop plots only", () => {
     expect(isShopPlot({ use: "shop" })).toBe(true);
@@ -950,5 +960,73 @@ describe("shop PAPER kraft coin", () => {
     expect(shopReceipts(interior).length).toBe(1);
     expect(interior.getObjectByName("shop-till")).toBeTruthy();
     expect(interior.userData.interiorUse).toBe("house");
+  });
+});
+
+describe("shop PAPER kraft blotter", () => {
+  it("puts one tiny kraft PAPER blotter on the shop counter, coin and receipt remain", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressShop(scene);
+
+    const dress = interior.getObjectByName("shop-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+
+    const counter = dress!.getObjectByName("shop-counter");
+    expect(counter).toBeTruthy();
+
+    const blotters = shopBlotters(counter!);
+    expect(blotters.length).toBe(1);
+    const blotter = blotters[0];
+    expect(blotter.userData.part).toBe("blotter");
+    expect(blotter.userData.mode).toBe("PAPER");
+    expect(blotter.parent?.name).toBe("shop-counter");
+
+    const coins = shopCoins(counter!);
+    const receipts = shopReceipts(counter!);
+    expect(coins.length).toBe(1);
+    expect(receipts.length).toBe(1);
+    expect(coins[0].userData.part).toBe("coin");
+    expect(receipts[0].userData.part).toBe("receipt");
+
+    const neighbors = [
+      coins[0],
+      receipts[0],
+      shopStamps(counter!)[0],
+      shopSlips(counter!)[0],
+      shopParcels(counter!)[0],
+      shopBags(counter!)[0],
+      counter!.getObjectByName("shop-till")!,
+      shopScales(counter!)[0],
+    ];
+    for (const other of neighbors) {
+      expect(other).toBeTruthy();
+      const dx = blotter.position.x - other.position.x;
+      const dz = blotter.position.z - other.position.z;
+      expect(Math.hypot(dx, dz)).toBeGreaterThan(0.12);
+    }
+
+    const colors = hexes(blotter);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.every((c) => c === CREAM || c === WOOD)).toBe(true);
+    expect(colors.some((c) => c === CREAM)).toBe(true);
+    expect(colors.some((c) => c === WOOD)).toBe(true);
+    expect(colors.every((c) => !isGrey(c))).toBe(true);
+
+    let boxes = 0;
+    blotter.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        boxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.part).toBe("blotter");
+        expect(mesh.userData.mode).toBe("PAPER");
+        const box = mesh.geometry as THREE.BoxGeometry;
+        expect(box.parameters.height).toBeLessThan(0.02);
+      }
+    });
+    expect(boxes).toBeGreaterThanOrEqual(1);
   });
 });
