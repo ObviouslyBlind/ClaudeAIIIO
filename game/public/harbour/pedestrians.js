@@ -42,10 +42,15 @@ export const LAND_MIN_M = 0.4;
 /** Slow stroll, metres per second. */
 export const WALK_SPEED_M_S = 0.85;
 
-const QUAY_ALONG_MIN = -22;
-const QUAY_ALONG_MAX = 64;
+/** Seaward of the north port, short of the ferry. `/g/peds42` FAIL PEDS:
+ * along -18/-6 sat on the visitor; kraft aprons facing the camera read as crates. */
+export const SPAWN_QUAY_ALONG = Object.freeze([18, 28, 40, 52, 64, 76]);
+const QUAY_ALONG_MIN = 12;
+const QUAY_ALONG_MAX = 88;
 const VERGE_ALONG_MIN = 10;
 const VERGE_ALONG_MAX = 180;
+/** Shirt colours that read on kraft timber from the seaward spawn look. Skip cream seed 0. */
+const QUAY_SHIRT_SEEDS = Object.freeze([1, 2, 3, 5, 1, 2]);
 
 function paperBox(w, h, d, color) {
   const mesh = new THREE.Mesh(
@@ -54,6 +59,7 @@ function paperBox(w, h, d, color) {
   );
   mesh.castShadow = true;
   mesh.receiveShadow = true;
+  mesh.frustumCulled = false;
   return mesh;
 }
 
@@ -252,13 +258,34 @@ function northPaved(map) {
   return (map?.roads || []).find((r) => r.kind === "paved" && r.island === "north" && r.points?.length > 1) || null;
 }
 
+/**
+ * Face seaward so the spawn camera (inland, looking at the berth) sees the
+ * coloured shirt back, not the kraft apron. `/g/peds42` FAIL PEDS.
+ */
+function quayYaw(spec) {
+  return spec.id === "north" ? 0 : Math.PI;
+}
+
 function sampleQuay(spec, heightAt, person, along) {
   const toward = spec.id === "north" ? 1 : -1;
   const x = spec.port.x + person.side * VERGE_OFFSET_M;
   const z = spec.port.z + toward * along;
   const y = heightAt(spec, x, z);
-  const yaw = person.dir * toward >= 0 ? 0 : Math.PI;
-  return { x, z, y, yaw };
+  return { x, z, y, yaw: quayYaw(spec) };
+}
+
+/** Cloth must read on kraft timber from ~100 m. Cream shirts vanish into crates. */
+function lightQuayShirt(figure) {
+  figure.frustumCulled = false;
+  figure.traverse((obj) => {
+    obj.frustumCulled = false;
+    if (obj.userData?.part !== "body" || !obj.material) return;
+    const mat = obj.material;
+    if (mat.color) {
+      mat.emissive = mat.color.clone();
+      mat.emissiveIntensity = 0.48;
+    }
+  });
 }
 
 function sampleVerge(spec, heightAt, points, person, along) {
@@ -339,6 +366,7 @@ export function makePedestrians(map, helpers) {
       addKraftSatchel(person.mesh);
       addKraftKerchief(person.mesh);
       addKraftWorkGloves(person.mesh);
+      lightQuayShirt(person.mesh);
     }
     const at = samplePerson(spec, heightAt, person, along);
     if (!onLand(at)) return;
@@ -347,9 +375,16 @@ export function makePedestrians(map, helpers) {
     people.push(person);
   }
 
-  const quayAlong = [-18, -6, 8, 22, 40, 54];
-  for (let i = 0; i < quayAlong.length; i++) {
-    spawn("quay", quayAlong[i], i % 2 === 0 ? -1 : 1, QUAY_ALONG_MIN, QUAY_ALONG_MAX, null, i);
+  for (let i = 0; i < SPAWN_QUAY_ALONG.length; i++) {
+    spawn(
+      "quay",
+      SPAWN_QUAY_ALONG[i],
+      i % 2 === 0 ? -1 : 1,
+      QUAY_ALONG_MIN,
+      QUAY_ALONG_MAX,
+      null,
+      QUAY_SHIRT_SEEDS[i % QUAY_SHIRT_SEEDS.length],
+    );
   }
 
   if (paved && pavedLen > VERGE_ALONG_MIN + 20) {

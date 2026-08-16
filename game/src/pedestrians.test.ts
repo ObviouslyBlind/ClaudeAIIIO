@@ -5,11 +5,14 @@ import { onPublicQuay } from "../public/harbour/trees.js";
 import {
   LAND_MIN_M,
   MAX_PEOPLE,
+  SPAWN_QUAY_ALONG,
   VERGE_OFFSET_M,
   WALK_SPEED_M_S,
   makePaperPerson,
   makePedestrians,
 } from "../public/harbour/pedestrians.js";
+import { spawnLookAtOffset } from "../public/harbour/roads.js";
+import { HOME_Z } from "../public/harbour/ferry.js";
 
 function hexes(root: THREE.Object3D) {
   const colors: number[] = [];
@@ -284,5 +287,38 @@ describe("harbour PAPER pedestrians", () => {
       expect(partsOf(p.mesh).get("boot")).toBe(2);
       expect(partsOf(p.mesh).get("shoe")).toBe(2);
     }
+  });
+
+  it("plants quay walkers in the seaward spawn look, not on the visitor", () => {
+    const spec = ISLANDS.north;
+    const playerZ = spec.port.z - 8;
+    const lookZ = playerZ + spawnLookAtOffset("north").z;
+    expect(HOME_Z).toBe(-6835);
+    expect(lookZ).toBeCloseTo(HOME_Z - 33, 0);
+    expect(SPAWN_QUAY_ALONG.every((along) => along >= 18 && along <= 80)).toBe(true);
+
+    const { people } = spawn();
+    const quay = people.filter((p) => p.lane === "quay");
+    expect(quay.length).toBe(SPAWN_QUAY_ALONG.length);
+
+    const bright = new Set([0xc45c3a, 0x4a6e8a, 0x6a8f44, 0x2a7a72]);
+    let lit = 0;
+    for (const p of quay) {
+      const { x, z } = p.mesh.position;
+      expect(Math.abs(p.mesh.position.z - playerZ)).toBeGreaterThan(20);
+      expect(z).toBeGreaterThan(spec.port.z + 10);
+      expect(z).toBeLessThan(HOME_Z);
+      expect(Math.abs(x - spec.port.x)).toBeCloseTo(VERGE_OFFSET_M, 5);
+      expect(p.mesh.frustumCulled).toBe(false);
+      expect(p.mesh.rotation.y).toBeCloseTo(0, 5);
+      p.mesh.traverse((obj) => {
+        if (obj.userData?.part !== "body") return;
+        const mat = (obj as THREE.Mesh).material as THREE.MeshLambertMaterial;
+        expect(bright.has(mat.color.getHex())).toBe(true);
+        expect(mat.emissiveIntensity).toBeGreaterThan(0.3);
+        lit += 1;
+      });
+    }
+    expect(lit).toBeGreaterThanOrEqual(6);
   });
 });
