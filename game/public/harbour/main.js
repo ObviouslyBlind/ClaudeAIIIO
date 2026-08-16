@@ -207,7 +207,10 @@ function parcelLabel(p) {
 }
 
 function nearParcel(p) {
-  return Math.hypot(player.position.x - p.x, player.position.z - p.z) < 22;
+  return (
+    pointInRing(player.position.x, player.position.z, p.ring) ||
+    Math.hypot(player.position.x - p.x, player.position.z - p.z) < 22
+  );
 }
 
 function cheapestDevelop() {
@@ -272,6 +275,9 @@ function refreshHud() {
   } else {
     plotLineEl.textContent = parcelLabel(p) + " · $" + money(p.price);
     btnLease.disabled = !near || map.visitor.cash < p.price;
+    if (map.visitor.cash < p.price) {
+      plotLineEl.textContent = parcelLabel(p) + " · $" + money(p.price) + " · need cash";
+    }
   }
 }
 

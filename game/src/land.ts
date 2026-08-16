@@ -224,6 +224,17 @@ export function pointInRing(x: number, z: number, ring: Ring): boolean {
   return inside;
 }
 
+/** Standing on the dirt counts, not only within 22 m of the centroid. */
+export function standingOnParcel(
+  x: number,
+  z: number,
+  plot: { x: number; z: number; ring: Ring },
+  centroidReachM = 22,
+): boolean {
+  if (pointInRing(x, z, plot.ring)) return true;
+  return Math.hypot(x - plot.x, z - plot.z) < centroidReachM;
+}
+
 function publicQuay(spec: IslandSpec, x: number, z: number): boolean {
   const along = (z - spec.port.z) * (spec.id === "north" ? 1 : -1);
   const across = Math.abs(x - spec.port.x);

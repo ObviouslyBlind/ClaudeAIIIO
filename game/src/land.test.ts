@@ -12,6 +12,7 @@ import {
   pointInRing,
   roadNodes,
   ROAD_CLEAR,
+  standingOnParcel,
 } from "./land.ts";
 import { createVisitor } from "./sim.ts";
 
@@ -100,5 +101,21 @@ describe("harbour land board", () => {
 
     const again = developPlot(board, visitor, vacant.id, "stall");
     expect(again.ok).toBe(false);
+  });
+
+  it("counts standing inside a large field as on that parcel, not only the centroid", () => {
+    const board = createLandBoard();
+    const field = board.plots
+      .filter((p) => p.band === "field" && p.ring.length >= 4)
+      .sort((a, b) => b.area - a.area)[0]!;
+    expect(standingOnParcel(field.x, field.z, field)).toBe(true);
+    const [ax, az] = field.ring[0];
+    const [bx, bz] = field.ring[1];
+    const [cx, cz] = field.ring[2];
+    const insideX = (ax + bx + cx + field.x) / 4;
+    const insideZ = (az + bz + cz + field.z) / 4;
+    expect(pointInRing(insideX, insideZ, field.ring)).toBe(true);
+    expect(standingOnParcel(insideX, insideZ, field)).toBe(true);
+    expect(standingOnParcel(0, 0, field)).toBe(false);
   });
 });
