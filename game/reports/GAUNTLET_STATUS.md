@@ -8,11 +8,11 @@ Inland spawn, paved asphalt ribbon (`/?g=rib23`), dirt ribbons (`/?g=dirt24`), t
 
 ## Held (code, not all re-critic’d)
 
-Econ HUD, NPC stall buy, nametags, warehouse + factory + shop + farm interiors, presence cells, nearby names, visitor cart persist + cart HUD, quay pedestrians, staff slots + hire/fire HTTP, visitor bid/ask + market bid/ask + sell strips, North/South buy + sell, land upkeep (live tick), window lights.
+Econ HUD, NPC stall buy, nametags, warehouse + factory + shop + farm interiors, presence cells, nearby names, visitor cart persist + cart HUD, quay pedestrians, staff slots + hire/fire HTTP, visitor bid/ask + market bid/ask + sell strips, North/South buy + sell, land upkeep (live tick), window lights, lease afford hint.
 
 ## In flight
 
-Pixel: ferry boat (`/?g=ferry29`). Persist staff / house-shop interior / cancel order / lease HUD / presence sync.
+Pixel: ferry boat (`/?g=ferry29`). Persist staff / house-shop interior / cancel order / presence sync / persist dump / unpaid hint / buy-fills-cart.
 
 ## Next pixel queue (one critic at a time)
 
