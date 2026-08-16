@@ -12,7 +12,7 @@ Inland spawn, paved ribbon, dirt, cars, yellow taxi, trees+cart, lease → House
 
 ## Held (code, live on the same page as the ferry)
 
-Building shells + window lights — **not in the seaward spawn frame**; computerUse cannot RMB-orbit, so shells wait. Stalls, nametags (kraft cards + fold + punch hole) — **next pixel**, warehouse/factory/shop/farm/house-shop interiors, presence, cart, staff hire/fire, market books, persist, lease afford, player "You · PAPER" tag, north and south port signs, calendar, fares, tax, held-goods, faucet/sink, quay lamps, House chimney + porch + shutters + knocker, taxi/sedan dress, ferry bollards + life ring + door handle.
+Building shells + window lights — **not in the seaward spawn frame**; computerUse cannot RMB-orbit, so shells wait. Stalls, nametags (kraft cards + fold + punch hole) — `/g/tags45` FAIL TAGS, larger near-range next, warehouse/factory/shop/farm/house-shop interiors, presence, cart, staff hire/fire, market books, persist, lease afford, player "You · PAPER" tag, north and south port signs, calendar, fares, tax, held-goods, faucet/sink, quay lamps, House chimney + porch + shutters + knocker, taxi/sedan dress, ferry bollards + life ring + door handle.
 
 ## Pixel ferry
 
@@ -40,11 +40,15 @@ Building shells + window lights — **not in the seaward spawn frame**; computer
 `/g/peds43` **FAIL PEDS**: 1.8 m shirts were specks on the crate path.
 `/g/peds44` **PASS**: four coloured crate-scale box people on the pier (teal, slate, green, terracotta), seaward of the visitor.
 
+## Pixel nametags
+
+`/g/tags45` **FAIL TAGS**: coloured pier people in frame, but no kraft cards above them (48 m nearby hide + small sprites). Cards now stay on out to 240 m and read at crate-scale. Next `/g/tags46`.
+
 ## In flight (not ferry-only)
 
-Pixel: kraft **nametags** above the north-quay walkers `http://localhost:8787/g/tags45`. No RMB. Close other Two Harbors tabs. Address bar must be `/g/tags45`. Do not restart play while the critic is on the page.
+Pixel: kraft **nametags** above the north-quay walkers `http://localhost:8787/g/tags46`. No RMB. Close other Two Harbors tabs. Address bar must be `/g/tags46`. Do not restart play while the critic is on the page.
 
-## Next pixel (after tags45 PASS, immediately, no wait)
+## Next pixel (after tags46 PASS, immediately, no wait)
 
 Econ/nearby/staff HUD lines. Shells+lights stay deferred until a human can orbit.
 

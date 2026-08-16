@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   NAMETAG_FOLD,
   NAMETAG_HOLE,
+  NAMETAG_NEAR_M,
   makePaperNametag,
   paintPaperNametagCard,
 } from "../public/harbour/nametags.js";
@@ -47,6 +48,7 @@ describe("outdoor PAPER nametags", () => {
   it("keeps a kraft folded corner, punch-hole, and still stamps PAPER", () => {
     expect(NAMETAG_FOLD).toBe(true);
     expect(NAMETAG_HOLE).toBe(true);
+    expect(NAMETAG_NEAR_M).toBeGreaterThanOrEqual(200);
     const ctx = mockCtx();
     paintPaperNametagCard(ctx, 512, 128, "Ferry clerk");
     const written = ctx.texts.join("");
