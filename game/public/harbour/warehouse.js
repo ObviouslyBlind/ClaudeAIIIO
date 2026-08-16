@@ -234,6 +234,36 @@ function kraftLantern(x, y, z) {
 
 
 /**
+ * Small kraft shipping pallet on the floor — wood stringers + deck slats.
+ * PAPER boxes only. Not a crate, not the rope coil.
+ */
+function kraftPallet(x, z, yaw = 0) {
+  const g = new THREE.Group();
+  g.name = "warehouse-pallet";
+  g.userData.kind = "warehouse-pallet";
+  g.userData.mode = "PAPER";
+  g.position.set(x, 0, z);
+  g.rotation.y = yaw;
+  const y0 = 0.16;
+  const stringerL = paperBox(0.72, 0.06, 0.08, WOOD_DARK, "warehouse-pallet");
+  stringerL.position.set(0, y0 + 0.03, -0.22);
+  const stringerC = paperBox(0.72, 0.06, 0.08, WOOD_DARK, "warehouse-pallet");
+  stringerC.position.set(0, y0 + 0.03, 0);
+  const stringerR = paperBox(0.72, 0.06, 0.08, WOOD_DARK, "warehouse-pallet");
+  stringerR.position.set(0, y0 + 0.03, 0.22);
+  const slatA = paperBox(0.1, 0.04, 0.56, WOOD, "warehouse-pallet");
+  slatA.position.set(-0.28, y0 + 0.08, 0);
+  const slatB = paperBox(0.1, 0.04, 0.56, WOOD_LIGHT, "warehouse-pallet");
+  slatB.position.set(-0.1, y0 + 0.08, 0);
+  const slatC = paperBox(0.1, 0.04, 0.56, WOOD, "warehouse-pallet");
+  slatC.position.set(0.1, y0 + 0.08, 0);
+  const slatD = paperBox(0.1, 0.04, 0.56, WOOD_LIGHT, "warehouse-pallet");
+  slatD.position.set(0.28, y0 + 0.08, 0);
+  g.add(stringerL, stringerC, stringerR, slatA, slatB, slatC, slatD);
+  return g;
+}
+
+/**
  * Small kraft rope coil on the floor — short stack of squat boxes, not a
  * crate and not a new grey. PAPER boxes only (helpers already in this file).
  */
@@ -364,6 +394,9 @@ function makeWarehouseDress() {
   // Small kraft rope coil on the downstairs floor, right of the aisle.
   // Clear of floor crates, broom, lantern, clipboard, and hook.
   g.add(kraftCoil(1.58, 1.48, 0.22));
+  // Small kraft pallet on the downstairs floor, left of the aisle toward the door.
+  // Clear of floor crates, coil, broom, lantern, clipboard, and hook.
+  g.add(kraftPallet(-0.12, 2.18, 0.14));
 
   const postL = paperBox(0.16, 2.45, 0.16, STRAP, "warehouse-prop");
   postL.position.set(-2.05, 1.38, 1.85);
