@@ -52,6 +52,7 @@ function paperBox(w, h, d, color) {
  *   visor   y 1.84–1.87   (0, 1.855, 0.32)      0.30×0.03×0.16   kraft, forward
  *   pocket  y 1.13–1.25   (−0.10, 1.19, 0.16)   0.12×0.12×0.04   kraft, shirt
  *   button  y 1.28–1.32   (0.08, 1.30, 0.155)   0.04×0.04×0.03   kraft, shirt
+ *   badge   y 1.315–1.365 (0.16, 1.34, 0.155)   0.08×0.05×0.03   kraft, shirt
  *   satchel y 0.64–0.92   (0.38, 0.78, 0.08)    0.18×0.28×0.14   kraft
  *   flap    y 0.88–0.96   (0.38, 0.92, 0.09)    0.18×0.08×0.16   kraft
  *   strap   y 0.92–1.40   (0.05, 1.14, 0.16)    0.04×0.82×0.02   cross-body
@@ -102,6 +103,11 @@ export function dressPlayer(player) {
   const button = paperBox(0.04, 0.04, 0.03, KRAFT);
   button.position.set(0.08, 1.3, 0.155);
   button.userData.part = "button";
+
+  // Tiny kraft PAPER badge on the cream shirt. Offset from button, pocket, buckle.
+  const badge = paperBox(0.08, 0.05, 0.03, KRAFT);
+  badge.position.set(0.16, 1.34, 0.155);
+  badge.userData.part = "badge";
 
   const belt = paperBox(0.48, 0.08, 0.3, BELT);
   belt.position.set(0, 0.84, 0);
@@ -169,6 +175,7 @@ export function dressPlayer(player) {
     body,
     pocket,
     button,
+    badge,
     belt,
     buckle,
     leftArm,
