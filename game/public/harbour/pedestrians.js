@@ -217,6 +217,18 @@ function addKraftHatPin(figure) {
 }
 
 /**
+ * Tiny kraft PAPER market basket in the left hand. Original straw hex
+ * already in this file — no new grey. PAPER box only. Hat, apron, satchel,
+ * gloves, tin, pin, boots stay. Offset forward of the lunch tin.
+ */
+function addKraftPaperBasket(figure) {
+  const basket = paperBox(0.12, 0.08, 0.1, STRAW);
+  basket.position.set(-0.32, 0.58, 0.2);
+  basket.userData.part = "basket";
+  figure.add(basket);
+}
+
+/**
  * Short kraft work-boot shafts above each shoe so dock hands read as
  * boots, not socks on boxes. Original shoe hex already in this file —
  * no new grey. PAPER boxes only. Existing shoes stay.
@@ -395,6 +407,7 @@ export function makePedestrians(map, helpers) {
       addKraftWorkGloves(person.mesh);
       addKraftLunchTin(person.mesh);
       addKraftHatPin(person.mesh);
+      addKraftPaperBasket(person.mesh);
       lightQuayShirt(person.mesh);
     }
     const at = samplePerson(spec, heightAt, person, along);
