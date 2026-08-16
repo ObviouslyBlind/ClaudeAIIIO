@@ -1,5 +1,6 @@
 import { ISLANDS, type IslandId } from "./land.ts";
 import type { Visitor } from "./sim.ts";
+import { createStatuteCatalog, ferryTicketCost, type Statute } from "./statutes.ts";
 
 export type FerryPoint = { x: number; z: number };
 
@@ -31,8 +32,14 @@ export const FERRY_ROUTES: FerryRoute[] = [
   },
 ];
 
-export function listFerryRoutes(): FerryRoute[] {
-  return FERRY_ROUTES;
+function liveTicketCost(catalog?: Statute[]): number {
+  return ferryTicketCost(catalog ?? createStatuteCatalog());
+}
+
+/** Geometry from FERRY_ROUTES; fare from statute `ferry_ticket` slider `cost`. */
+export function listFerryRoutes(catalog?: Statute[]): FerryRoute[] {
+  const cost = liveTicketCost(catalog);
+  return FERRY_ROUTES.map((r) => ({ ...r, cost }));
 }
 
 export function getFerryRoute(id: string): FerryRoute | undefined {
@@ -66,6 +73,7 @@ export type FerryConfirmFail = { ok: false; reason: string };
 export function confirmFerry(
   visitor: Visitor,
   body: { routeId?: string; from?: string },
+  catalog?: Statute[],
 ): FerryConfirmOk | FerryConfirmFail {
   const from = body.from;
   if (from !== "north" && from !== "south") return { ok: false, reason: "bad_from" };
@@ -78,7 +86,8 @@ export function confirmFerry(
   const to = ferryDestination(route, from);
   if (!to) return { ok: false, reason: "wrong_port" };
 
-  if (visitor.cash < route.cost) return { ok: false, reason: "no_cash" };
-  visitor.cash = Math.round((visitor.cash - route.cost) * 10000) / 10000;
-  return { ok: true, paid: route.cost, from, to, routeId: route.id };
+  const cost = liveTicketCost(catalog);
+  if (visitor.cash < cost) return { ok: false, reason: "no_cash" };
+  visitor.cash = Math.round((visitor.cash - cost) * 10000) / 10000;
+  return { ok: true, paid: cost, from, to, routeId: route.id };
 }
