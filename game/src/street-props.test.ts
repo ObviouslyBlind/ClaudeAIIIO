@@ -676,4 +676,53 @@ describe("street prop setback", () => {
       }
     }
   });
+
+  it("sits a tiny kraft PAPER peg on the village pump, bolt and washer remain", () => {
+    const map = createLandBoard();
+    const scene = { add(_obj: THREE.Object3D) {} };
+    const root = makeStreetProps(map, {
+      scene,
+      specOf: (id: "north" | "south") => ISLANDS[id],
+      heightAt,
+    });
+
+    const pumpGroups: THREE.Object3D[] = [];
+    const bolts: THREE.Object3D[] = [];
+    const washers: THREE.Object3D[] = [];
+    root.traverse((obj) => {
+      if (obj.userData?.prop === "pump") pumpGroups.push(obj);
+      if (obj.userData?.part === "bolt") bolts.push(obj);
+      if (obj.userData?.part === "washer") washers.push(obj);
+    });
+    expect(pumpGroups.length).toBeGreaterThanOrEqual(1);
+    expect(bolts.length).toBeGreaterThanOrEqual(1);
+    expect(washers.length).toBeGreaterThanOrEqual(1);
+
+    const wood = new Set([0x8a6238, 0x6a4a2a]);
+    for (const pump of pumpGroups) {
+      expect(pump.userData.mode).toBe("PAPER");
+      const pegs: THREE.Object3D[] = [];
+      pump.traverse((obj) => {
+        if (obj.userData?.part === "peg") pegs.push(obj);
+      });
+      expect(pegs.length).toBeGreaterThanOrEqual(1);
+      for (const p of pegs) {
+        expect(p.userData.part).toBe("peg");
+        expect(p.userData.mode === "PAPER" || pump.userData.mode === "PAPER").toBe(true);
+        const mesh = p as THREE.Mesh;
+        expect(mesh.isMesh).toBe(true);
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        const mat = mesh.material as THREE.MeshLambertMaterial;
+        expect(mat.type).toBe("MeshLambertMaterial");
+        expect(wood.has(mat.color.getHex())).toBe(true);
+        const { width, height, depth } = (mesh.geometry as THREE.BoxGeometry).parameters;
+        expect(width).toBeLessThan(0.12);
+        expect(height).toBeLessThan(0.12);
+        expect(depth).toBeLessThan(0.12);
+        expect(mesh.position.y).toBeGreaterThan(0.5);
+        expect(mesh.position.y).toBeLessThan(1.45);
+        expect(Math.hypot(mesh.position.x, mesh.position.z)).toBeLessThan(0.25);
+      }
+    }
+  });
 });
