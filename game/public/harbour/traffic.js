@@ -46,7 +46,7 @@ function part(mesh, name) {
   return mesh;
 }
 
-/** Sedan: painted body, glass cabin, bumpers, kraft lamps, chrome side mirrors, four wheels with kraft hub boxes, short kraft roof aerial, two kraft PAPER wipers, one kraft spare-tyre bolt. No debug masts. */
+/** Sedan: painted body, glass cabin, bumpers, kraft lamps, chrome side mirrors, four wheels with kraft hub boxes, short kraft roof aerial, two kraft PAPER wipers, one kraft spare-tyre bolt, one kraft PAPER running board. No debug masts. */
 function makeCar(color) {
   const g = new THREE.Group();
   g.frustumCulled = false;
@@ -122,6 +122,11 @@ function makeCar(color) {
   const bolt = part(new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.06, 0.08), kraft), "bolt");
   bolt.position.set(0, 1.1, -1.62);
   g.add(bolt);
+
+  /** Tiny kraft PAPER running board on one flank. Spare is a bolt, not a spare part, so this is board. Offset from aerial and wipers. Same 0xf4ead8. */
+  const runningBoard = part(new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.05, 0.42), kraft), "board");
+  runningBoard.position.set(1.14, 0.4, 0);
+  g.add(runningBoard);
 
   for (const x of [-0.68, 0.68]) {
     const head = part(new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.14, 0.1), kraft), "headlight");
