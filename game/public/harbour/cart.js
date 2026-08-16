@@ -16,11 +16,12 @@ import * as THREE from "three";
  * + a small kraft produce apple (WOOD_LIGHT tray + CANVAS fruit) at center-front
  * + a tiny kraft produce carrot (WOOD_LIGHT root + CANVAS greens) at bed center
  * + a tiny kraft produce potato (WOOD_CRATE box) on the right of the bed
- * + a tiny kraft produce onion (WOOD box) on the left of the bed.
+ * + a tiny kraft produce onion (WOOD box) on the left of the bed
+ * + a tiny kraft produce garlic (CANVAS box) at the tail of the bed.
  * Wheels: kraft cream hub discs (paper boxes) on the outer face of each wheel.
  * Grip: a short kraft hitch pin (paper box) through the handle.
  */
-export const CART_MESH_COUNT = 30;
+export const CART_MESH_COUNT = 31;
 /** Metres from player.position down to the soles. Same as player.js SOLE_Y. */
 const SOLE_Y = -1.15;
 
@@ -201,7 +202,14 @@ function makeHandcart() {
   onion.position.set(-0.26, 0.553, -1.04);
   onion.userData.part = "onion";
 
-  g.add(bed, sideL, sideR, tail, head, wheelL, wheelR, hubL, hubR, handleL, handleR, grip, pin, crate, strap, crate2, roll, coil, coilTop, lanternPost, lanternGlass, jugBody, jugNeck, jugHandle, appleBox, apple, carrot, carrotTop, potato, onion);
+  // Tiny kraft produce garlic on the bed — one CANVAS paper box.
+  // Tail-center, inside the rails, clear of onion, potato, carrot, apple.
+  // Sits on the bed top (y = 0.53). Paper box only.
+  const garlic = paperBox(0.045, 0.04, 0.045, CANVAS, false);
+  garlic.position.set(0, 0.553, -1.34);
+  garlic.userData.part = "garlic";
+
+  g.add(bed, sideL, sideR, tail, head, wheelL, wheelR, hubL, hubR, handleL, handleR, grip, pin, crate, strap, crate2, roll, coil, coilTop, lanternPost, lanternGlass, jugBody, jugNeck, jugHandle, appleBox, apple, carrot, carrotTop, potato, onion, garlic);
   return g;
 }
 

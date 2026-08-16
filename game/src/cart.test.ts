@@ -92,7 +92,7 @@ describe("player PAPER handcart", () => {
     const cart = player.getObjectByName("paper-cart")!;
     expect(cart.children.length).toBe(CART_MESH_COUNT);
     expect(meshCount(cart)).toBe(CART_MESH_COUNT);
-    expect(CART_MESH_COUNT).toBe(30);
+    expect(CART_MESH_COUNT).toBe(31);
 
     const p = parts(cart);
     expect(p).toContain("bed");
@@ -242,6 +242,36 @@ describe("player PAPER handcart", () => {
     ).toBe(true);
     expect(p.filter((k) => k === "potato").length).toBeGreaterThanOrEqual(1);
     expect(p.filter((k) => k === "carrot").length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("puts one tiny kraft PAPER garlic on the cart bed; onion and potato remain", () => {
+    const player = makePlayer();
+    dressCart(player);
+    const cart = player.getObjectByName("paper-cart")!;
+    const p = parts(cart);
+    expect(p.filter((k) => k === "garlic").length).toBe(1);
+    expect(p.filter((k) => k === "onion").length).toBeGreaterThanOrEqual(1);
+    expect(p.filter((k) => k === "potato").length).toBeGreaterThanOrEqual(1);
+
+    const garlic = cart.children.find((c) => c.userData.part === "garlic") as THREE.Mesh;
+    const onion = cart.children.find((c) => c.userData.part === "onion") as THREE.Mesh;
+    const potato = cart.children.find((c) => c.userData.part === "potato") as THREE.Mesh;
+    const carrot = cart.children.find((c) => c.userData.part === "carrot") as THREE.Mesh;
+    const apple = cart.children.find((c) => c.userData.part === "apple") as THREE.Mesh;
+    const bed = cart.children.find((c) => c.userData.part === "bed")!;
+    expect(garlic.geometry.type).toBe("BoxGeometry");
+    expect(garlic.position.y).toBeGreaterThan(bed.position.y);
+    expect(Math.hypot(garlic.position.x - onion.position.x, garlic.position.z - onion.position.z)).toBeGreaterThan(0.12);
+    expect(Math.hypot(garlic.position.x - potato.position.x, garlic.position.z - potato.position.z)).toBeGreaterThan(0.12);
+    expect(Math.hypot(garlic.position.x - carrot.position.x, garlic.position.z - carrot.position.z)).toBeGreaterThan(0.12);
+    expect(Math.hypot(garlic.position.x - apple.position.x, garlic.position.z - apple.position.z)).toBeGreaterThan(0.12);
+    const hex = (garlic.material as THREE.MeshLambertMaterial).color.getHex();
+    expect([0x8a6238, 0x7a5230, 0x9a6a40, 0xc4b496, 0xf4ead8]).toContain(hex);
+    expect(isGrey(hex)).toBe(false);
+    const { width, height, depth } = (garlic.geometry as THREE.BoxGeometry).parameters;
+    expect(width).toBeLessThan(0.12);
+    expect(height).toBeLessThan(0.12);
+    expect(depth).toBeLessThan(0.12);
   });
 
   it("is idempotent and never writes player.position", () => {
