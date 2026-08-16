@@ -18,11 +18,12 @@ Shore foam (denser quay dashes), quay clutter, building shells, window lights (w
 
 `/?g=ferry30` **FAIL**: hull 550 m off the pier. Berth `HOME_Z=-6835`.
 `/?g=ferry31` **FAIL**: teal canvas, stuck on Loading.
-`/?g=ferry33` **FAIL**: Cash $1000, canvas body teal `#0e4a55`, status still "Loading 3D harbour…" at 25s. HUD module tags were loading before `main.js`, so the first WebGL frame never ran. Fix: `first-frame.js` paints sky+berth after three.js only; HUD loads after the loop starts; canvas inline `#7ec8d4`. Next: `/?g=ferry34`.
+`/?g=ferry33` **FAIL**: Loading + body teal.
+`/?g=ferry34` **FAIL BOOT**: critic was on stale Chrome tab `/?g=ferry32` (Loading, body teal). Next: unique path `/g/ferry35`.
 
 ## In flight (not ferry-only)
 
-Pixel: ferry hull at north quay `/?g=ferry34` (restart play first; do not restart while the critic is on the page).
+Pixel: ferry hull at north quay `http://localhost:8787/g/ferry35` (close other Two Harbors tabs). Do not restart play while the critic is on the page.
 
 ## Next pixel (after ferry33 PASS, immediately, no wait)
 

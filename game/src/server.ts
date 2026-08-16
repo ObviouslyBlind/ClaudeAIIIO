@@ -12,6 +12,7 @@ import { cancelOrder } from "./cancelOrder.ts";
 import { listOpenOrders, placeAsk, placeBid } from "./orders.ts";
 import { postStaff, staffMapSnapshot } from "./staff-http.ts";
 import { bustHarbourAssets, bustModuleImports } from "./cache-bust.ts";
+import { resolvePublicPath } from "./public-path.ts";
 import { confirmFerry, listFerryRoutes } from "./ferry-routes.ts";
 import { calendarHud } from "./calendar.ts";
 import { createPresence, presenceQuery } from "./presence.ts";
@@ -290,13 +291,7 @@ const server = createServer(async (req, res) => {
     return;
   }
 
-  let pathname = url.pathname;
-  if (pathname.startsWith("/harbor")) pathname = "/harbour" + pathname.slice("/harbor".length);
-  if (pathname === "/") pathname = "/harbour/index.html";
-  if (pathname === "/harbour" || pathname === "/harbour/") pathname = "/harbour/index.html";
-  if (pathname === "/market" || pathname === "/market/") pathname = "/market/index.html";
-  if (pathname === "/hansard" || pathname === "/hansard/") pathname = "/hansard/index.html";
-  if (pathname === "/play" || pathname === "/play/") pathname = "/harbour/index.html";
+  const pathname = resolvePublicPath(url.pathname);
 
   let filePath = join(publicDir, pathname);
   if (!filePath.startsWith(publicDir)) {
