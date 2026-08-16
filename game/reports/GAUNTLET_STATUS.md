@@ -12,7 +12,7 @@ Econ HUD, NPC stall buy, nametags, warehouse + factory + shop + farm interiors, 
 
 ## In flight
 
-Pixel: ferry boat (`/?g=ferry28`). Sell strip / persist staff / house-shop interior / cancel order / lease HUD / window lights / presence sync.
+Pixel: ferry boat relaunch (`/?g=ferry29`; prior ferry28 critic went idle with no verdict). Sell strip / persist staff / house-shop interior / cancel order / lease HUD / window lights / presence sync.
 
 ## Next pixel queue (one critic at a time)
 
