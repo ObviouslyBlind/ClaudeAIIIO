@@ -171,6 +171,32 @@ function deckCleat(x, y, z) {
   return g;
 }
 
+/**
+ * Small kraft PAPER tyre fender on the hull side. Short BOOT/DECK
+ * cylinders + a STRIPE band — hangs on the cream hull, not the rail,
+ * not the cleat, not the wheelhouse lantern, not the funnel smoke,
+ * not the door handle.
+ */
+function hullFender(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "fender";
+  g.userData.part = "fender";
+  g.userData.mode = "PAPER";
+  g.position.set(x, y, z);
+  const tyre = cyl(0.46, 0.46, 0.2, BOOT, false);
+  tyre.rotation.x = Math.PI / 2;
+  const kraft = cyl(0.28, 0.28, 0.14, DECK, false);
+  kraft.rotation.x = Math.PI / 2;
+  kraft.position.z = 0.02;
+  const hub = cyl(0.12, 0.12, 0.1, HULL, false);
+  hub.rotation.x = Math.PI / 2;
+  hub.position.z = 0.03;
+  const band = cyl(0.48, 0.48, 0.06, STRIPE, false);
+  band.rotation.x = Math.PI / 2;
+  g.add(tyre, kraft, hub, band);
+  return g;
+}
+
 /** Posts plus top and mid rails along +X. */
 function addRail(g, x0, x1, z, y = 2.52) {
   const len = x1 - x0;
@@ -273,6 +299,8 @@ export function makeFerry() {
   g.add(deckRail(13.4, 1.95, 3.4));
   // PAPER cleat sits on the port cream deck, clear of rail/lantern/smoke/handle.
   g.add(deckCleat(13.4, 1.95, -3.4));
+  // PAPER tyre fender hangs on the starboard hull side, clear of rail/cleat/lantern/smoke/handle.
+  g.add(hullFender(-3.7, 0.62, 6.02));
 
   const cabin = part(16.5, 3.35, 7.6, CABIN);
   cabin.position.set(-2.4, 3.52, 0);
