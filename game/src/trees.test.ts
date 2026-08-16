@@ -167,7 +167,7 @@ describe("hill and verge trees", () => {
 
     const { meshes, geos } = countMeshes(root);
     expect(meshes).toBeLessThan(MAX_UNIQUE_MESHES);
-    expect(meshes).toBeLessThanOrEqual(13);
+    expect(meshes).toBeLessThanOrEqual(14);
     expect(geos).toBeLessThanOrEqual(6);
     expect(placed.length).toBeGreaterThan(meshes);
 
@@ -418,6 +418,93 @@ describe("hill and verge trees", () => {
       expect(atPalm).toBe(true);
       expect(Math.hypot(pos.x - nestPos.x, pos.z - nestPos.z)).toBeLessThan(0.3);
       expect(Math.abs(pos.y - nestPos.y)).toBeLessThan(0.2);
+    }
+  });
+
+  it("sits one small kraft PAPER leaf on the north-port palm nest twig", () => {
+    const map = createLandBoard();
+    const scene = { add(_obj: THREE.Object3D) {} };
+    const root = makeTrees(map, {
+      scene,
+      specOf: (id: "north" | "south") => ISLANDS[id],
+      heightAt,
+    });
+
+    const placed = (root.userData.placed || []) as {
+      island: "north" | "south";
+      x: number;
+      z: number;
+      y: number;
+      role: string;
+      dress?: string;
+    }[];
+    const northPalms = placed.filter((p) => p.island === "north" && p.dress === "north-port-palm");
+    expect(northPalms.length).toBeGreaterThan(0);
+    expect(northPalms.length).toBeLessThanOrEqual(NORTH_PORT_PALM_OFFSETS.length);
+
+    const leafBoxes: THREE.Mesh[] = [];
+    root.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (!mesh.isMesh) return;
+      if (mesh.userData.part === "leaf" || mesh.userData.dress === "leaf") leafBoxes.push(mesh);
+    });
+    expect(leafBoxes.length).toBe(1);
+
+    const nuts: THREE.Mesh[] = [];
+    root.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (!mesh.isMesh) return;
+      if (mesh.userData.part === "coconut" || mesh.userData.dress === "coconut") nuts.push(mesh);
+    });
+    expect(nuts.length).toBeGreaterThanOrEqual(4);
+
+    const birds: THREE.Object3D[] = [];
+    root.traverse((obj) => {
+      if (obj.userData.kind === "bird") birds.push(obj);
+    });
+    expect(birds.length).toBe(1);
+
+    const nests: THREE.Object3D[] = [];
+    root.traverse((obj) => {
+      if (obj.userData.kind === "nest") nests.push(obj);
+    });
+    expect(nests.length).toBe(1);
+
+    const eggs: THREE.Object3D[] = [];
+    root.traverse((obj) => {
+      if (obj.userData.kind === "egg") eggs.push(obj);
+    });
+    expect(eggs.length).toBe(1);
+
+    const kraft = new Set([0x8a6238, 0x9a6a40]);
+    const port = ISLANDS.north.port;
+    const nestPos = new THREE.Vector3();
+    nests[0].getWorldPosition(nestPos);
+    for (const leaf of leafBoxes) {
+      expect(leaf.userData.part === "leaf" || leaf.userData.dress === "leaf").toBe(true);
+      expect(leaf.userData.provenance).toBe("PAPER");
+      expect(leaf.geometry.type).toBe("BoxGeometry");
+      const mat = leaf.material as THREE.MeshLambertMaterial;
+      expect(mat.type).toBe("MeshLambertMaterial");
+      expect(kraft.has(mat.color.getHex())).toBe(true);
+      expect(isGrey(mat.color.getHex())).toBe(false);
+      const pos = new THREE.Vector3();
+      leaf.getWorldPosition(pos);
+      expect(distToPaved(ISLANDS.north, pos.x, pos.z)).toBeGreaterThanOrEqual(PAVED_CLEAR_M);
+      expect(onPublicQuay(ISLANDS.north, pos.x, pos.z)).toBe(false);
+      expect(heightAt(ISLANDS.north, pos.x, pos.z)).toBeGreaterThanOrEqual(WATER_MIN_M);
+      expect(Math.hypot(pos.x - port.x, pos.z - port.z)).toBeLessThan(400);
+      const atPalm = northPalms.some((p) => Math.hypot(p.x - pos.x, p.z - pos.z) < 1.2);
+      expect(atPalm).toBe(true);
+      expect(Math.hypot(pos.x - nestPos.x, pos.z - nestPos.z)).toBeLessThan(0.3);
+      expect(Math.abs(pos.y - nestPos.y)).toBeLessThan(0.2);
+      leaf.geometry.computeBoundingBox();
+      const size = new THREE.Vector3();
+      leaf.geometry.boundingBox!.getSize(size);
+      size.multiply(leaf.scale);
+      expect(size.x).toBeLessThan(0.2);
+      expect(size.y).toBeLessThan(0.08);
+      expect(size.z).toBeLessThan(0.15);
     }
   });
 });
