@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { dressWindowLights } from "./window-lights.js";
 
 /**
  * PAPER placeholder buildings. Pitched roofs, warm walls — not grey cubes.
@@ -477,6 +478,7 @@ export function meshForUse(use, opts = {}) {
   g.userData.kind = "building";
   g.userData.use = use;
   g.userData.paper = true;
+  dressWindowLights(g);
   return g;
 }
 
