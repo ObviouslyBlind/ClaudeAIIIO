@@ -578,7 +578,13 @@ function nearPort() {
 
 function goTo(x, z) {
   const h = landHeight(x, z);
-  if (h < 0.2) {
+  // Keep in sync with game/src/walk.ts BEACH_THRESHOLD_M
+  if (h <= 0.25) {
+    setStatus("Stay on land.");
+    return;
+  }
+  const midH = landHeight((player.position.x + x) * 0.5, (player.position.z + z) * 0.5);
+  if (midH <= 0.25) {
     setStatus("Stay on land.");
     return;
   }
