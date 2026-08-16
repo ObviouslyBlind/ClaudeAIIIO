@@ -107,6 +107,16 @@ export function makeSouthSign(spec, helpers) {
   postR.position.set(1.85, 1.42, 0);
   g.add(postL, postR);
 
+  const braceL = part(0.09, 0.78, 0.09, WOOD);
+  braceL.position.set(-1.52, 1.62, 0);
+  braceL.rotation.z = -0.62;
+  braceL.userData.part = "brace";
+  const braceR = part(0.09, 0.78, 0.09, WOOD);
+  braceR.position.set(1.52, 1.62, 0);
+  braceR.rotation.z = 0.62;
+  braceR.userData.part = "brace";
+  g.add(braceL, braceR);
+
   const beam = part(4.05, 0.12, 0.14, WOOD, false);
   beam.position.set(0, 2.78, 0);
   g.add(beam);
