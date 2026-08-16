@@ -245,3 +245,95 @@ describe("warehouse PAPER kraft broom", () => {
     expect(interior.userData.interiorUse).toBe("house");
   });
 });
+
+function horizDist(a: THREE.Object3D, b: THREE.Object3D) {
+  const dx = a.position.x - b.position.x;
+  const dz = a.position.z - b.position.z;
+  return Math.hypot(dx, dz);
+}
+
+describe("warehouse PAPER kraft lantern", () => {
+  it("hangs one kraft PAPER lantern with a wood bail and cream glass", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressWarehouse(scene);
+
+    const dress = interior.getObjectByName("warehouse-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+    expect(dress!.visible).toBe(true);
+
+    const lanterns: THREE.Object3D[] = [];
+    const clipboards: THREE.Object3D[] = [];
+    const hooks: THREE.Object3D[] = [];
+    const brooms: THREE.Object3D[] = [];
+    dress!.traverse((obj) => {
+      if (obj.userData?.kind === "warehouse-lantern" && obj.name === "warehouse-lantern") {
+        lanterns.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-clipboard" && obj.name === "warehouse-clipboard") {
+        clipboards.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-hook" && obj.name === "warehouse-hook") {
+        hooks.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-broom" && obj.name === "warehouse-broom") {
+        brooms.push(obj);
+      }
+    });
+    expect(lanterns.length).toBe(1);
+    expect(clipboards.length).toBeGreaterThanOrEqual(1);
+    expect(hooks.length).toBeGreaterThanOrEqual(1);
+    expect(brooms.length).toBe(1);
+
+    const lantern = lanterns[0];
+    expect(lantern.userData.kind).toBe("warehouse-lantern");
+    expect(lantern.userData.mode).toBe("PAPER");
+    expect(lantern.position.y).toBeGreaterThan(1.8);
+    expect(lantern.position.y).toBeLessThan(2.8);
+    expect(horizDist(lantern, clipboards[0])).toBeGreaterThan(1.5);
+    expect(horizDist(lantern, hooks[0])).toBeGreaterThan(1.5);
+    expect(horizDist(lantern, brooms[0])).toBeGreaterThan(1.5);
+
+    const colors = hexes(lantern);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.some((c) => c === 0x8a6238)).toBe(true);
+    expect(colors.some((c) => c === 0xe8d8a8)).toBe(true);
+    expect(colors.every((c) => !isGrey(c))).toBe(true);
+
+    let boxes = 0;
+    lantern.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        boxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.kind).toBe("warehouse-lantern");
+        expect(mesh.userData.mode).toBe("PAPER");
+      }
+    });
+    expect(boxes).toBeGreaterThanOrEqual(3);
+  });
+
+  it("keeps dress idempotent and hides the lantern on undress", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressWarehouse(scene);
+    dressWarehouse(scene);
+    expect(interior.children.filter((c) => c.name === "warehouse-dress").length).toBe(1);
+
+    const dressed = interior.getObjectByName("warehouse-dress")!;
+    const lanterns: THREE.Object3D[] = [];
+    dressed.traverse((obj) => {
+      if (obj.name === "warehouse-lantern") lanterns.push(obj);
+    });
+    expect(lanterns.length).toBe(1);
+
+    undressWarehouse(scene);
+    const dress = interior.getObjectByName("warehouse-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.visible).toBe(false);
+    expect(interior.userData.interiorUse).toBe("house");
+  });
+});

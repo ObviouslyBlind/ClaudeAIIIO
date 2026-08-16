@@ -208,6 +208,30 @@ function kraftBroom(x, z, yaw = 0) {
   return g;
 }
 
+/**
+ * Small kraft hanging lantern — wood bail + warm cream glass box.
+ * PAPER boxes only. Not a crate, not the iron hanging lamp.
+ */
+function kraftLantern(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "warehouse-lantern";
+  g.userData.kind = "warehouse-lantern";
+  g.userData.mode = "PAPER";
+  g.position.set(x, y, z);
+  const cord = paperBox(0.03, 0.22, 0.03, WOOD_DARK, "warehouse-lantern");
+  cord.position.y = 0.2;
+  const bail = paperBox(0.12, 0.03, 0.03, WOOD, "warehouse-lantern");
+  bail.position.y = 0.08;
+  const hood = paperBox(0.16, 0.04, 0.16, WOOD, "warehouse-lantern");
+  hood.position.y = 0.04;
+  const glass = paperBox(0.12, 0.14, 0.12, LAMP_BULB, "warehouse-lantern");
+  glass.position.y = -0.06;
+  const base = paperBox(0.14, 0.03, 0.14, WOOD, "warehouse-lantern");
+  base.position.y = -0.145;
+  g.add(cord, bail, hood, glass, base);
+  return g;
+}
+
 function wallHook(x, y, z, yaw = 0) {
   const g = new THREE.Group();
   g.name = "warehouse-hook";
@@ -309,6 +333,9 @@ function makeWarehouseDress() {
   g.add(wallClipboard(1.02, 1.58, -3.38));
   // Kraft broom leaning on the right wall, in the gap between the mid and low stacks.
   g.add(kraftBroom(3.32, -1.52));
+  // Small kraft hanging lantern off the left post — wood bail + cream glass.
+  // Clear of the back-wall clipboard/hook and the right-wall broom.
+  g.add(kraftLantern(-1.88, 2.32, 1.85));
 
   const postL = paperBox(0.16, 2.45, 0.16, STRAP, "warehouse-prop");
   postL.position.set(-2.05, 1.38, 1.85);
