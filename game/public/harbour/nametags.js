@@ -23,6 +23,8 @@ export const NAMETAG_HOLE = true;
 export const NAMETAG_CLIP = true;
 /** Tiny kraft PAPER string/cord on the card. 3D box, existing walker hex. */
 export const NAMETAG_STRING = true;
+/** Tiny kraft PAPER pin on the card. 3D box, existing walker hex. */
+export const NAMETAG_PIN = true;
 
 const SKIN = 0xf2d2a8;
 const PANTS = 0x6e4a32;
@@ -93,6 +95,25 @@ export function makeNametagString() {
   cord.material.depthTest = false;
   cord.position.set(0.16, 0.58, 0.05);
   return cord;
+}
+
+/**
+ * Tiny kraft PAPER pin on the lower-right of the name card. SHOES brown box —
+ * not grey metal. Offset from the clip (top-left), string, fold (top-right),
+ * and punch-hole (top-centre). Sprite-local so it stays a pin on the kraft card.
+ */
+export function makeNametagPin() {
+  const pin = paperBox(0.03, 0.1, 0.025, SHOES);
+  pin.name = "paper-nametag-pin";
+  pin.userData.part = "pin";
+  pin.userData.mode = "PAPER";
+  pin.castShadow = false;
+  pin.receiveShadow = false;
+  pin.frustumCulled = false;
+  pin.renderOrder = 4;
+  pin.material.depthTest = false;
+  pin.position.set(0.34, 0.22, 0.05);
+  return pin;
 }
 
 /** Tracked letters so PAPER reads as a stamp even without canvas letterSpacing. */
@@ -237,6 +258,7 @@ export function makePaperNametag(name) {
   sprite.userData.paperName = name;
   if (NAMETAG_CLIP) sprite.add(makeNametagClip());
   if (NAMETAG_STRING) sprite.add(makeNametagString());
+  if (NAMETAG_PIN) sprite.add(makeNametagPin());
   return sprite;
 }
 
