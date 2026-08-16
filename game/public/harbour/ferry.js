@@ -150,6 +150,27 @@ function deckRail(x, y, z) {
   return g;
 }
 
+/**
+ * Small kraft PAPER mooring cleat: two wood POST horns + one DECK/BOOT
+ * bar. Boxes only — sits on the cream deck, not the rail, not the
+ * wheelhouse lantern, not the funnel smoke, not the door handle.
+ */
+function deckCleat(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "cleat";
+  g.userData.part = "cleat";
+  g.userData.mode = "PAPER";
+  g.position.set(x, y, z);
+  const hornA = part(0.12, 0.22, 0.12, POST, false);
+  hornA.position.set(-0.18, 0.11, 0);
+  const hornB = part(0.12, 0.22, 0.12, POST, false);
+  hornB.position.set(0.18, 0.11, 0);
+  const bar = part(0.52, 0.08, 0.12, BOOT, false);
+  bar.position.set(0, 0.24, 0);
+  g.add(hornA, hornB, bar);
+  return g;
+}
+
 /** Posts plus top and mid rails along +X. */
 function addRail(g, x0, x1, z, y = 2.52) {
   const len = x1 - x0;
@@ -250,6 +271,8 @@ export function makeFerry() {
   g.add(deckBollard(-16.2, 1.81, -3.85));
   // PAPER rail sits on the starboard cream deck, clear of lantern/smoke/handle.
   g.add(deckRail(13.4, 1.95, 3.4));
+  // PAPER cleat sits on the port cream deck, clear of rail/lantern/smoke/handle.
+  g.add(deckCleat(13.4, 1.95, -3.4));
 
   const cabin = part(16.5, 3.35, 7.6, CABIN);
   cabin.position.set(-2.4, 3.52, 0);
