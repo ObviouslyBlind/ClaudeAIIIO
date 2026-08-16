@@ -77,14 +77,14 @@ describe("player PAPER handcart", () => {
     const cart = player.getObjectByName("paper-cart")!;
     expect(cart.children.length).toBe(CART_MESH_COUNT);
     expect(meshCount(cart)).toBe(CART_MESH_COUNT);
-    expect(CART_MESH_COUNT).toBe(12);
+    expect(CART_MESH_COUNT).toBe(13);
 
     const p = parts(cart);
     expect(p).toContain("bed");
     expect(p.filter((k) => k === "wheel").length).toBe(2);
     expect(p.filter((k) => k === "handle").length).toBe(2);
     expect(p).toContain("grip");
-    expect(p.filter((k) => k === "crate").length).toBe(1);
+    expect(p.filter((k) => k === "crate").length).toBe(2);
     expect(p.filter((k) => k === "roll").length).toBe(1);
     expect(p.filter((k) => k === "side").length).toBe(2);
     expect(p.filter((k) => k === "end").length).toBe(2);
