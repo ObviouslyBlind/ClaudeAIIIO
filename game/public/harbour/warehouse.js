@@ -210,6 +210,30 @@ function kraftChalk(x, y, z, yaw = 0) {
 }
 
 /**
+ * Small kraft pencil on the clipboard — wood shaft + strap tip.
+ * PAPER boxes only. Not a crate, not the pallet, not the dolly.
+ */
+function kraftPencil(x, y, z, yaw = 0) {
+  const g = new THREE.Group();
+  g.name = "warehouse-pencil";
+  g.userData.kind = "warehouse-pencil";
+  g.userData.mode = "PAPER";
+  g.userData.part = "pencil";
+  g.position.set(x, y, z);
+  g.rotation.y = yaw;
+  // Rest on the clipboard sheet beside the chalk, slightly askew the other way.
+  g.rotation.z = -0.38;
+  const shaft = paperBox(0.17, 0.018, 0.018, WOOD, "warehouse-pencil");
+  shaft.position.set(-0.05, 0.05, 0.05);
+  const band = paperBox(0.028, 0.022, 0.022, STRAP, "warehouse-pencil");
+  band.position.set(-0.12, 0.05, 0.05);
+  const tip = paperBox(0.02, 0.012, 0.012, STRAP, "warehouse-pencil");
+  tip.position.set(0.045, 0.05, 0.05);
+  g.add(shaft, band, tip);
+  return g;
+}
+
+/**
  * Kraft broom leaning on the wall — wood stick + bristle block.
  * PAPER boxes only. Not a crate, not a hook.
  */
@@ -412,6 +436,8 @@ function makeWarehouseDress() {
   // Small kraft chalk stick on that clipboard. Clear of pallet, coil, broom,
   // lantern, hook, and floor crates.
   g.add(kraftChalk(1.02, 1.58, -3.38));
+  // Small kraft pencil on that clipboard sheet, beside the chalk.
+  g.add(kraftPencil(1.02, 1.58, -3.38));
   // Kraft broom leaning on the right wall, in the gap between the mid and low stacks.
   g.add(kraftBroom(3.32, -1.52));
   // Small kraft hanging lantern off the left post — wood bail + cream glass.

@@ -172,6 +172,32 @@ function deckCleat(x, y, z) {
 }
 
 /**
+ * Tiny kraft PAPER deck bucket: tapered DECK body, BOOT hoop, POST
+ * bail. Boxes/cylinders only — sits on the cream deck, not the rail,
+ * not the cleat, not the fender, not the wheelhouse lantern, not the
+ * funnel smoke, not the door handle.
+ */
+function deckBucket(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "bucket";
+  g.userData.part = "bucket";
+  g.userData.mode = "PAPER";
+  g.position.set(x, y, z);
+  const body = cyl(0.14, 0.18, 0.28, DECK, false);
+  body.position.y = 0.14;
+  const hoop = cyl(0.185, 0.185, 0.04, BOOT, false);
+  hoop.position.y = 0.08;
+  const postA = part(0.035, 0.14, 0.035, POST, false);
+  postA.position.set(-0.13, 0.34, 0);
+  const postB = part(0.035, 0.14, 0.035, POST, false);
+  postB.position.set(0.13, 0.34, 0);
+  const bail = part(0.3, 0.035, 0.035, POST, false);
+  bail.position.set(0, 0.42, 0);
+  g.add(body, hoop, postA, postB, bail);
+  return g;
+}
+
+/**
  * Small kraft PAPER tyre fender on the hull side. Short BOOT/DECK
  * cylinders + a STRIPE band — hangs on the cream hull, not the rail,
  * not the cleat, not the wheelhouse lantern, not the funnel smoke,
@@ -301,6 +327,8 @@ export function makeFerry() {
   g.add(deckCleat(13.4, 1.95, -3.4));
   // PAPER tyre fender hangs on the starboard hull side, clear of rail/cleat/lantern/smoke/handle.
   g.add(hullFender(-3.7, 0.62, 6.02));
+  // PAPER bucket sits on the starboard aft cream deck, clear of rail/cleat/fender/lantern/smoke/handle.
+  g.add(deckBucket(-13.6, 1.81, 2.55));
 
   const cabin = part(16.5, 3.35, 7.6, CABIN);
   cabin.position.set(-2.4, 3.52, 0);
