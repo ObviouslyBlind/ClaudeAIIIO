@@ -17,7 +17,7 @@ Mechanic we copy: you do not receive a lot from a menu. You walk the world, tap 
 
 ## What we do instead
 
-Two fictional Caribbean-scale islands (~2.0 × 1.2 km). Metres, origin at the channel.
+Two fictional Caribbean-scale islands (~2.0 × 1.2 km each), **ports about 3.8 km apart** across a channel. Metres, origin at the channel.
 
 - **Port** is public (pier + warehouse). You cannot buy the quay.
 - **Parcels** are irregular pieces of the island: street lots along a paved spine, fields behind them, a few shore lots. They are the dirt, not a numbered card.
