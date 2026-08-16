@@ -92,7 +92,7 @@ describe("player PAPER handcart", () => {
     const cart = player.getObjectByName("paper-cart")!;
     expect(cart.children.length).toBe(CART_MESH_COUNT);
     expect(meshCount(cart)).toBe(CART_MESH_COUNT);
-    expect(CART_MESH_COUNT).toBe(18);
+    expect(CART_MESH_COUNT).toBe(19);
 
     const p = parts(cart);
     expect(p).toContain("bed");
@@ -100,6 +100,7 @@ describe("player PAPER handcart", () => {
     expect(p.filter((k) => k === "hub").length).toBe(2);
     expect(p.filter((k) => k === "handle").length).toBe(2);
     expect(p).toContain("grip");
+    expect(p.filter((k) => k === "pin").length).toBe(1);
     expect(p.filter((k) => k === "crate").length).toBe(2);
     expect(p.filter((k) => k === "strap").length).toBe(1);
     expect(p.filter((k) => k === "roll").length).toBe(1);
@@ -112,6 +113,10 @@ describe("player PAPER handcart", () => {
     const hubs = cart.children.filter((c) => c.userData.part === "hub") as THREE.Mesh[];
     expect(hubs.every((h) => h.geometry.type === "BoxGeometry")).toBe(true);
     expect(hubs.every((h) => (h.material as THREE.MeshLambertMaterial).color.getHex() === 0xc4b496)).toBe(true);
+    const pin = cart.children.find((c) => c.userData.part === "pin") as THREE.Mesh;
+    expect(pin.geometry.type).toBe("BoxGeometry");
+    const pinHex = (pin.material as THREE.MeshLambertMaterial).color.getHex();
+    expect([0x8a6238, 0x6a4a2a, 0x5a3a22, 0x3d2a1c, 0xc4b496]).toContain(pinHex);
     const roll = cart.children.find((c) => c.userData.part === "roll") as THREE.Mesh;
     expect(roll.geometry.type).toBe("CylinderGeometry");
 
