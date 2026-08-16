@@ -635,3 +635,105 @@ describe("farm PAPER kraft seed packet", () => {
     expect(scene.userData.interiorUse).toBe("house");
   });
 });
+
+describe("farm PAPER kraft pail lid", () => {
+  it("puts one small kraft PAPER lid on the pail, lantern scoop seed remain", () => {
+    const scene = new THREE.Scene();
+    dressFarm(scene);
+
+    const dress = scene.getObjectByName("farm-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+    expect(dress!.visible).toBe(true);
+
+    const lids: THREE.Object3D[] = [];
+    dress!.traverse((obj) => {
+      if (obj.userData?.kind === "farm-lid" && obj.name === "farm-lid") {
+        lids.push(obj);
+      }
+    });
+    expect(lids.length).toBe(1);
+
+    const lid = lids[0];
+    expect(lid.userData.kind).toBe("farm-lid");
+    expect(lid.userData.part).toBe("lid");
+    expect(lid.userData.mode).toBe("PAPER");
+
+    const pail = dress!.getObjectByName("farm-pail")!;
+    expect(pail).toBeTruthy();
+    const toPail = Math.hypot(lid.position.x - pail.position.x, lid.position.z - pail.position.z);
+    expect(toPail).toBeLessThan(0.2);
+    expect(lid.position.y).toBeGreaterThan(0.28);
+    expect(lid.position.y).toBeLessThan(0.5);
+
+    const lantern = dress!.getObjectByName("farm-lantern")!;
+    expect(lantern).toBeTruthy();
+    const toLantern = Math.hypot(lid.position.x - lantern.position.x, lid.position.z - lantern.position.z);
+    expect(toLantern).toBeGreaterThan(4);
+
+    const scoop = dress!.getObjectByName("farm-scoop")!;
+    expect(scoop).toBeTruthy();
+    const toScoop = Math.hypot(lid.position.x - scoop.position.x, lid.position.z - scoop.position.z);
+    expect(toScoop).toBeGreaterThan(4);
+
+    const seed = dress!.getObjectByName("farm-seed")!;
+    expect(seed).toBeTruthy();
+    const toSeed = Math.hypot(lid.position.x - seed.position.x, lid.position.z - seed.position.z);
+    expect(toSeed).toBeGreaterThan(4);
+
+    const basket = dress!.getObjectByName("farm-basket")!;
+    expect(basket).toBeTruthy();
+    const toBasket = Math.hypot(lid.position.x - basket.position.x, lid.position.z - basket.position.z);
+    expect(toBasket).toBeGreaterThan(0.5);
+
+    const fork = dress!.getObjectByName("farm-fork")!;
+    expect(fork).toBeTruthy();
+    const toFork = Math.hypot(lid.position.x - fork.position.x, lid.position.z - fork.position.z);
+    expect(toFork).toBeGreaterThan(0.12);
+
+    const colors = hexes(lid);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.some((c) => c === KRAFT)).toBe(true);
+    expect(colors.every((c) => [KRAFT, WOOD, WOOD_DARK, HANDLE].includes(c))).toBe(true);
+
+    let boxes = 0;
+    lid.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        boxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.kind).toBe("farm-lid");
+        expect(mesh.userData.part).toBe("lid");
+        expect(mesh.userData.mode).toBe("PAPER");
+        const geo = mesh.geometry as THREE.BoxGeometry;
+        expect(geo.parameters.width).toBeLessThan(0.16);
+        expect(geo.parameters.height).toBeLessThan(0.08);
+        expect(geo.parameters.depth).toBeLessThan(0.16);
+      }
+    });
+    expect(boxes).toBeGreaterThanOrEqual(1);
+    expect(boxes).toBeLessThanOrEqual(3);
+  });
+
+  it("keeps dress idempotent and hides the lid on undress", () => {
+    const scene = new THREE.Scene();
+    dressFarm(scene);
+    dressFarm(scene);
+    expect(scene.children.filter((c) => c.name === "farm-dress").length).toBe(1);
+    const dressed = scene.getObjectByName("farm-dress")!;
+    const lids: THREE.Object3D[] = [];
+    dressed.traverse((obj) => {
+      if (obj.name === "farm-lid") lids.push(obj);
+    });
+    expect(lids.length).toBe(1);
+    expect(dressed.getObjectByName("farm-lantern")).toBeTruthy();
+    expect(dressed.getObjectByName("farm-scoop")).toBeTruthy();
+    expect(dressed.getObjectByName("farm-seed")).toBeTruthy();
+
+    undressFarm(scene);
+    const dress = scene.getObjectByName("farm-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.visible).toBe(false);
+    expect(scene.userData.interiorUse).toBe("house");
+  });
+});
