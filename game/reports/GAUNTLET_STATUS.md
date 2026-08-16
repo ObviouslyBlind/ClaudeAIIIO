@@ -1,22 +1,18 @@
-# Gauntlet status — harbour land (round 11b)
+# Gauntlet status — five parallel builders
 
-Loop is **autonomous**. Critic = pixels only. Tests = lead. No user hard-refresh.
+Loop is **autonomous**. Critic = pixels only. Tests = each builder. No user hard-refresh.
 
-**Round 10 critic:** inland spawn PASS. Black tarmac PASS. HUD PASS.
-**Round 11 critic:** cars FAIL (none at spawn).
-**11c:** critic still saw an empty road. Cars are now bus-sized, emissive red/blue/yellow, packed into the first 160 m, and a spawn-frustum unit test locks that.
+**Held:** inland spawn, black tarmac, PAPER HUD.
+**Traffic:** still under a strict pixel critic (must see colored meshes move). Do not rewrite `traffic.js`.
 
-Bar (open `/`, wait ~8s, do not run tests):
+**Live builders (one piece each, cursor grok 4.6 high fast):**
 
-1. Moving vehicles on the black road, visible from spawn.
-2. Inland island + black ribbon + PAPER HUD still hold.
+1. Taxi: 60s leave if not boarded; boarded → top-down island map, tap dest — `taxi.js` + overlay
+2. RMB-hold camera (Roblox-style); left click still walk — `camera.js`
+3. Ferry quote: route + PAPER cost before travel — `ferry-ticket.js`
+4. Building catalog: house / shop / house+shop / farm / factory shells — `buildings.js`
+5. Interiors: enter owned buildings, up/down — `interior.js`
 
-**Queue (lead pops these, one per round, after a pass):**
-
-1. Taxi: leave after 60s if not boarded; boarded → top-down island map, tap dest
-2. Right-hold camera (Roblox-style). Own builder. Left click still walk
-3. Ferry button: route + PAPER cost before travel
-4. Develop: pick building type and place (catalog)
-5. Interiors: enter owned buildings, stairs
+Do not touch `traffic.js`, `land.ts` island centres, or PLAN.md. Rebase if `main.js` conflicts; keep other agents' imports.
 
 **You are the brake.**
