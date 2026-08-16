@@ -637,6 +637,54 @@ function plantNorthPortNest(root, placed, map, specOf, heightAt) {
   }
 }
 
+function markEgg(mesh) {
+  mesh.userData.part = "egg";
+  mesh.userData.dress = "egg";
+  mesh.userData.provenance = "PAPER";
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+}
+
+/**
+ * One small kraft PAPER egg (one box) in the north-port palm nest —
+ * not instead of the bird or nest. Hexes already in this file: trunk
+ * kraft. Reuses the nest twig box so geometry count stays put. Unique
+ * mesh — one box — so the phone mesh budget stays tiny. Trunks, leaves,
+ * coconuts, bird, and nest stay put.
+ */
+function plantNorthPortEgg(root) {
+  let nest = null;
+  root.traverse((obj) => {
+    if (!nest && obj.userData.kind === "nest") nest = obj;
+  });
+  if (!nest) return;
+
+  let geo = null;
+  nest.traverse((obj) => {
+    if (geo) return;
+    if (obj.isMesh && obj.geometry) geo = obj.geometry;
+  });
+  if (!geo) return;
+
+  const mat = new THREE.MeshLambertMaterial({ color: TRUNK_WARM });
+  const egg = new THREE.Group();
+  egg.name = "egg";
+  egg.userData.kind = "egg";
+  egg.userData.part = "egg";
+  egg.userData.dress = "egg";
+  egg.userData.provenance = "PAPER";
+  // Sit in the nest cup, above the crossed twigs.
+  egg.position.set(0.01, 0.055, 0);
+
+  const box = new THREE.Mesh(geo, mat);
+  box.name = "egg-box";
+  markEgg(box);
+  box.scale.set(0.32, 1.4, 0.72);
+
+  egg.add(box);
+  nest.add(egg);
+}
+
 /**
  * Low-poly PAPER trees on hills, inland slopes, and behind street lots.
  * Palms stay on the quay (makePalms). helpers: { scene, specOf, heightAt }.
@@ -658,6 +706,7 @@ export function makeTrees(map, helpers) {
   plantNorthPortCoconuts(root, placed, map || {}, specOf, heightAt);
   plantNorthPortBird(root, placed, map || {}, specOf, heightAt);
   plantNorthPortNest(root, placed, map || {}, specOf, heightAt);
+  plantNorthPortEgg(root);
   scene.add(root);
   return root;
 }
