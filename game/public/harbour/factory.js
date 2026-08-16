@@ -165,6 +165,34 @@ function scrapBin(x, z, yaw = 0) {
 }
 
 /**
+ * Dark iron floor grate / drain plate. Flat PAPER boxes on the floor,
+ * against a wall; centre aisle stays open. Not a mill, not a crate.
+ */
+function floorGrate(x, z, yaw = 0) {
+  const g = new THREE.Group();
+  g.name = "factory-grate";
+  g.userData.kind = "factory-prop";
+  g.userData.mode = "PAPER";
+  g.userData.part = "floor-grate";
+  g.position.set(x, 0, z);
+  g.rotation.y = yaw;
+  const y0 = 0.16;
+  const w = 0.68;
+  const d = 0.68;
+  const plate = paperBox(w, 0.04, d, IRON_DARK, "factory-prop");
+  plate.position.y = y0 + 0.02;
+  const well = paperBox(w * 0.7, 0.03, d * 0.7, LAMP_METAL, "factory-prop");
+  well.position.y = y0 + 0.032;
+  g.add(plate, well);
+  for (let i = 0; i < 4; i++) {
+    const bar = paperBox(w * 0.64, 0.025, 0.045, i % 2 ? IRON_RUST : IRON_LIGHT, "factory-prop");
+    bar.position.set(0, y0 + 0.05, -0.18 + i * 0.12);
+    g.add(bar);
+  }
+  return g;
+}
+
+/**
  * Chunky kraft mill on the floor — wood body, small iron press.
  * Reads from the enter camera (door +Z looking −Z). Not a warehouse crate.
  */
@@ -307,6 +335,8 @@ function makeFactoryDress() {
   g.add(woodWorkbench(3.1, -1.18, 1.92, 0.64, Math.PI / 2));
   // Left wall, opposite the wood bench. Off the centre aisle (x≈0).
   g.add(scrapBin(-3.22, -2.62, 0.08));
+  // Right wall, door side. Off the centre aisle (x≈0). Flat on the floor.
+  g.add(floorGrate(3.2, 1.48, 0.06));
   g.add(kraftMachine(-1.42, 0.58, 1.55, 0.9, 0.06));
   g.add(kraftMachine(1.18, 1.32, 1.32, 0.78, -0.1));
   g.add(kraftMachine(0.22, -0.42, 1.48, 0.86, 0.12));
