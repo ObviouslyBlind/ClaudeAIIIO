@@ -6,7 +6,7 @@
 
 ### Harbour (PAPER / SIMULATED)
 
-- Pixel-held: inland spawn, paved ribbon, traffic, taxi overlay, ferry $15, RMB orbit, lease → House → Enter → Exit
+- Pixel-held: inland spawn, paved ribbon, dirt ribbons, traffic, taxi overlay, ferry $15, RMB orbit, lease → House → Enter → Exit, trees + cart (`/?g=tree25`)
 - Code-held: econ HUD, NPC stall buy, pedestrians, nametags, warehouse interior, presence cells, cart persist
 - In flight: trees+cart critic, visitor orders, staff slots
 - Play: `http://localhost:8787/` (port 8787). New critic queries use `?g=`
