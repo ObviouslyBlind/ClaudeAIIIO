@@ -1,7 +1,8 @@
 import * as THREE from "three";
 
 /** Channel midpoint is the origin. Sit in the water south of North port so the side profile reads from the quay. */
-const HOME_Z = -2200;
+/** North port is z=-6950. Sit in the channel just south of that quay so spawn/orbit can see the hull. */
+export const HOME_Z = -6400;
 const SLIDE = 42;
 const SLIDE_SPEED = 0.07;
 
