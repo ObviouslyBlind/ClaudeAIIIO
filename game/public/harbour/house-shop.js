@@ -281,6 +281,24 @@ function hangingBell(x, y, z) {
   return g;
 }
 
+/**
+ * Small kraft receipt pad / tally card on the counter — cream pad, darker
+ * slip on top. PAPER boxes only. Not a till, not the bell.
+ */
+function makeReceiptPad(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "house-shop-pad";
+  g.userData.kind = "house-shop-pad";
+  g.userData.mode = "PAPER";
+  g.position.set(x, y, z);
+  const pad = paperBox(0.28, 0.018, 0.36, CREAM, "house-shop-pad");
+  pad.position.set(0, 0.009, 0);
+  const slip = paperBox(0.22, 0.01, 0.28, WOOD, "house-shop-pad");
+  slip.position.set(0.01, 0.023, 0.01);
+  g.add(pad, slip);
+  return g;
+}
+
 function tableLamp(x, y, z) {
   const g = new THREE.Group();
   g.name = "house-shop-lamp";
@@ -327,6 +345,8 @@ function makeHouseShopDress() {
   g.add(hangingLamp(0, 2.18, 0.48));
   // Kraft tin bell above the counter, offset from the lamp so both read.
   g.add(hangingBell(0.62, 1.78, 0.62));
+  // Kraft receipt pad on the counter top, offset from the bell so both read.
+  g.add(makeReceiptPad(0.18, 1.12, 0.36));
   g.add(paperMark(-2.15, 1.62, 3.38));
 
   const rug = paperBox(1.55, 0.04, 1.25, RUG, "house-shop-rug");
