@@ -222,6 +222,18 @@ function addTaxiPlate(g, kraftCreamMat) {
 }
 
 /**
+ * Two thin kraft cream PAPER wipers on the windscreen — parked blades, not chrome.
+ * Same 0xf4ead8 as the hubs and plate. PAPER boxes only.
+ */
+function addTaxiWipers(g, kraftCreamMat) {
+  for (const x of [-0.42, 0.42]) {
+    const wiper = tagPart(taxiBox(0.72, 0.03, 0.04, kraftCreamMat, false), "wiper");
+    wiper.position.set(x, 1.32, 1.16);
+    g.add(wiper);
+  }
+}
+
+/**
  * One small kraft PAPER spare on the boot — short rubber cylinder + cream hub box.
  * Same 0x1a1a1e / 0xf4ead8 as the road wheels. Not a new grey. Roof aerial stays.
  */
@@ -241,7 +253,8 @@ function addTaxiSpare(g, tyreMat, hubMat) {
 
 /**
  * Yellow cab that reads from the quay: wheels with kraft cream hub boxes, glass, roof lamp, checker belt,
- * iron bumper, door handles, kraft side mirrors, short kraft roof aerial, kraft cream rear plate, kraft spare on the boot.
+ * iron bumper, door handles, kraft side mirrors, short kraft roof aerial, kraft cream rear plate, kraft spare on the boot,
+ * two kraft cream PAPER wipers on the windscreen.
  * Compact warm PAPER taxi-sign box — original cream lamp, not a sedan lid, not a debug mast, not a cop lightbar.
  */
 export function makeTaxiMesh() {
@@ -271,6 +284,7 @@ export function makeTaxiMesh() {
   addTaxiMirrors(g, kraft, kraftHub);
   addTaxiPlate(g, kraftHub);
   addTaxiSpare(g, dark, kraftHub);
+  addTaxiWipers(g, kraftHub);
 
   const roof = taxiBox(2.18, 0.92, 2.45, cabin);
   roof.position.set(0, 1.68, -0.22);
