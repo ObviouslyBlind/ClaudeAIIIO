@@ -10,8 +10,8 @@ Politics frozen. See `game/reports/GAUNTLET_STATUS.md`.
 - [x] Nearby presence, cart persist, warehouse interior, nametags (code)
 - [x] Pixel: trees + cart (`/?g=tree25` PASS)
 - [x] Pixel: dirt ribbons (`/?g=dirt24` PASS)
-- [ ] Visitor PAPER bid/ask vs NPC books
-- [ ] Staff slots on developed plots
+- [x] Visitor PAPER bid/ask vs NPC books
+- [x] Staff slots on developed plots
 - [ ] Pixel remaining meshes (cars, taxi, ferry, shore, quay, shells)
 
 ## Polymarket paper bot
