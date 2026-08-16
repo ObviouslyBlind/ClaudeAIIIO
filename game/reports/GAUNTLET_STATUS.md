@@ -8,7 +8,7 @@ Not a Capital Rift clone. No new politics.
 
 ## Held (pixel-ratified)
 
-Inland spawn, paved ribbon, dirt, cars, yellow taxi, trees+cart, lease → House → Enter → Exit, ferry ticket $15, RMB orbit, cream ferry hull at north quay (`/g/ferry37` PASS, no orbit), kraft/cream shore foam bars in the north-quay basin (`/g/shore40` PASS), working-harbour quay clutter on the north timber pier (`/g/quay41` PASS), crate-scale coloured pedestrians on the north pier (`/g/peds44` PASS — teal / slate / green / terracotta shirts), kraft nametag cards above those walkers (`/g/tags46` PASS).
+Inland spawn, paved ribbon, dirt, cars, yellow taxi, trees+cart, lease → House → Enter → Exit, ferry ticket $15, RMB orbit, cream ferry hull at north quay (`/g/ferry37` PASS, no orbit), kraft/cream shore foam bars in the north-quay basin (`/g/shore40` PASS), working-harbour quay clutter on the north timber pier (`/g/quay41` PASS), crate-scale coloured pedestrians on the north pier (`/g/peds44` PASS — teal / slate / green / terracotta shirts), kraft nametag cards above those walkers (`/g/tags46` PASS), spawn-sheet econ/nearby/staff (`/g/hud47` PASS).
 
 ## Held (code, live on the same page as the ferry)
 
@@ -45,13 +45,17 @@ Building shells + window lights — **not in the seaward spawn frame**; computer
 `/g/tags45` **FAIL TAGS**: coloured pier people in frame, but no kraft cards above them (48 m nearby hide + small sprites).
 `/g/tags46` **PASS**: cream/tan kraft name cards above the coloured pier walkers, not only the visitor `You · PAPER` tag.
 
+## Pixel HUD (econ / nearby / staff)
+
+`/g/hud47` **PASS**: sheet showed `PAPER · SIMULATED · Index 1.00 · NPC $50,000 · out 19,601`, `PAPER · SIMULATED · 250 m PAPER cell · 0 nearby`, `PAPER · SIMULATED · Staff —`.
+
 ## In flight (not ferry-only)
 
-Pixel: **econ / nearby / staff HUD** on the spawn sheet `http://localhost:8787/g/hud47`. No RMB. Close other Two Harbors tabs. Address bar must be `/g/hud47`. Do not restart play while the critic is on the page.
+Pixel: **cart / persist / calendar HUD** on the spawn sheet `http://localhost:8787/g/hud48`. No RMB. Close other Two Harbors tabs. Address bar must be `/g/hud48`. Do not restart play while the critic is on the page.
 
-## Next pixel (after hud47 PASS, immediately, no wait)
+## Next pixel (after hud48 PASS, immediately, no wait)
 
-Cart / persist / calendar HUD lines if those still read as placeholders. Shells+lights stay deferred until a human can orbit.
+Presence count is 0 at spawn (code-held walkers). Then shells+lights stay deferred until a human can orbit.
 
 ## Frozen
 
