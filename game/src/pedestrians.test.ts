@@ -96,6 +96,30 @@ describe("harbour PAPER pedestrians", () => {
     expect(boxes).toBe(10);
   });
 
+  it("gives walkers a few original-palette cloth colours, not one cream clone", () => {
+    function partHex(root: THREE.Object3D, part: string) {
+      let hex = -1;
+      root.traverse((obj) => {
+        if (obj.userData?.part !== part) return;
+        const mat = (obj as THREE.Mesh).material as THREE.MeshLambertMaterial;
+        if (mat?.color) hex = mat.color.getHex();
+      });
+      return hex;
+    }
+    const shirts = [0, 1, 2, 3, 4, 5].map((s) => partHex(makePaperPerson(s), "body"));
+    expect(shirts[0]).toBe(0xf4ead8);
+    expect(new Set(shirts).size).toBe(shirts.length);
+    expect(shirts).toContain(0xc45c3a);
+    expect(shirts).toContain(0x4a6e8a);
+    expect(shirts).toContain(0x6a8f44);
+    expect(shirts.every(isGrey)).toBe(false);
+
+    const { people } = spawn();
+    const liveShirts = new Set(people.map((p) => partHex(p.mesh, "body")));
+    expect(liveShirts.size).toBeGreaterThanOrEqual(5);
+    expect(liveShirts.has(0xf4ead8)).toBe(true);
+  });
+
   it("plants people on the north quay and the paved verge, on land, off the tarmac, out of the water", () => {
     const { added, root, people, body, before } = spawn();
     expect(added).toEqual([root]);
