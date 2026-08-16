@@ -19,6 +19,6 @@ Forbidden bar: Capital Rift screenshots, Call of Duty, OSM.
 **Round 5:** Taxi HUD button. Yellow mesh pathfollows `/api/map` paved polylines only.
 **Round 6:** Ports ~8.6 km apart. Parcel fills removed. Gable shops. **Critic:** channel PASS, HUD PASS, ferry PASS. **FAIL: no visible paved road** from spawn (camera looks at quay/channel; spine runs inland). Buildings only partial (warehouse seen).
 **Round 7:** Dashed asphalt spine + side-on spawn camera. **Critic:** road PASS, port PASS, buildings PASS, HUD PASS. **FAIL: second island not in spawn view** (camera looks along this shore; far island is 8.6 km off-frame, not missing).
-**Round 8:** Spawn camera `{ x: 56, y: 54, z: -132 }` (north), lookAt `{ x: 0, y: 2, z: 240 }` toward the channel. Far shore on the **left** of the north spawn frame. Fog 5200–28000. Islands not moved.
+**Round 8:** Spawn camera `{ x: 56, y: 54, z: -132 }` (north), lookAt `{ x: 0, y: 2, z: 240 }` toward the channel. Far shore on the **left** of the north spawn frame. Fog 5200–28000. Islands not moved. **Awaiting critic.**
 
 **You are the brake.**
