@@ -17,11 +17,12 @@ import * as THREE from "three";
  * + a tiny kraft produce carrot (WOOD_LIGHT root + CANVAS greens) at bed center
  * + a tiny kraft produce potato (WOOD_CRATE box) on the right of the bed
  * + a tiny kraft produce onion (WOOD box) on the left of the bed
- * + a tiny kraft produce garlic (CANVAS box) at the tail of the bed.
+ * + a tiny kraft produce garlic (CANVAS box) at the tail of the bed
+ * + a tiny kraft produce cabbage (WOOD_LIGHT box) left of the garlic.
  * Wheels: kraft cream hub discs (paper boxes) on the outer face of each wheel.
  * Grip: a short kraft hitch pin (paper box) through the handle.
  */
-export const CART_MESH_COUNT = 31;
+export const CART_MESH_COUNT = 32;
 /** Metres from player.position down to the soles. Same as player.js SOLE_Y. */
 const SOLE_Y = -1.15;
 
@@ -209,7 +210,15 @@ function makeHandcart() {
   garlic.position.set(0, 0.553, -1.34);
   garlic.userData.part = "garlic";
 
-  g.add(bed, sideL, sideR, tail, head, wheelL, wheelR, hubL, hubR, handleL, handleR, grip, pin, crate, strap, crate2, roll, coil, coilTop, lanternPost, lanternGlass, jugBody, jugNeck, jugHandle, appleBox, apple, carrot, carrotTop, potato, onion, garlic);
+  // Tiny kraft produce cabbage on the bed — one WOOD_LIGHT paper box.
+  // Left of garlic at the tail, inside the rails, clear of garlic, onion, potato, carrot, apple.
+  // Sits on the bed top (y = 0.53). Paper box only.
+  const cabbage = paperBox(0.05, 0.045, 0.05, WOOD_LIGHT, false);
+  cabbage.position.set(-0.22, 0.553, -1.38);
+  cabbage.userData.mode = "PAPER";
+  cabbage.userData.part = "cabbage";
+
+  g.add(bed, sideL, sideR, tail, head, wheelL, wheelR, hubL, hubR, handleL, handleR, grip, pin, crate, strap, crate2, roll, coil, coilTop, lanternPost, lanternGlass, jugBody, jugNeck, jugHandle, appleBox, apple, carrot, carrotTop, potato, onion, garlic, cabbage);
   return g;
 }
 
