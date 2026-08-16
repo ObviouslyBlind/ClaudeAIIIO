@@ -114,6 +114,7 @@ describe("road node traffic", () => {
     expect(parts.get("bumper")).toBe(2);
     expect(parts.get("wheel")).toBe(4);
     expect(parts.get("mirror")).toBe(2);
+    expect(parts.get("plate")).toBeGreaterThanOrEqual(1);
     expect(colors).toContain(0xc45c3a);
     expect(mast).toBe(0);
     expect(mesh.children.length).toBeGreaterThan(6);
@@ -149,5 +150,29 @@ describe("road node traffic", () => {
     const taxiYellow = new Set([0xf0c430, 0xf6d65a, 0xffe14a]);
     expect(paints.some((h) => taxiYellow.has(h))).toBe(false);
     expect(paints.every((h) => h === 0xf4ead8 || h === 0xe8d7b8)).toBe(false);
+  });
+
+  it("puts a kraft cream license plate on every sedan rear", () => {
+    const board = createLandBoard();
+    const scene = { add() {} };
+    const traffic = createTraffic({
+      scene,
+      getMap: () => board,
+      specOf: (id: "north" | "south") => ISLANDS[id],
+      heightAt,
+    });
+    expect(traffic.cars.length).toBeGreaterThan(0);
+    for (const car of traffic.cars) {
+      let plates = 0;
+      const plateHexes: number[] = [];
+      car.mesh.traverse((obj: THREE.Object3D) => {
+        if (obj.userData?.part !== "plate") return;
+        plates += 1;
+        const mat = (obj as THREE.Mesh).material as THREE.MeshLambertMaterial;
+        if (mat?.color) plateHexes.push(mat.color.getHex());
+      });
+      expect(plates).toBeGreaterThanOrEqual(1);
+      expect(plateHexes).toContain(0xf4ead8);
+    }
   });
 });

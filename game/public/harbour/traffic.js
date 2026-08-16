@@ -100,6 +100,11 @@ function makeCar(color) {
   rearBump.position.set(0, 0.48, -2.18);
   g.add(rearBump);
 
+  /** Small kraft cream plate on the rear bumper — reads as a car, not a toy brick. */
+  const plate = part(new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.14, 0.04), kraft), "plate");
+  plate.position.set(0, 0.62, -2.2);
+  g.add(plate);
+
   for (const x of [-0.68, 0.68]) {
     const head = part(new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.14, 0.1), kraft), "headlight");
     head.position.set(x, 0.72, 2.16);
