@@ -126,4 +126,67 @@ describe("street prop setback", () => {
       expect(iron).toBeGreaterThan(0);
     }
   });
+
+  it("sits kraft PAPER crate seats on the north spawn verge, off ROAD_CLEAR", () => {
+    const map = createLandBoard();
+    const scene = { add(_obj: THREE.Object3D) {} };
+    const root = makeStreetProps(map, {
+      scene,
+      specOf: (id: "north" | "south") => ISLANDS[id],
+      heightAt,
+    });
+
+    const placed = (root.userData.placed || []) as {
+      kind: string;
+      island: string;
+      x: number;
+      z: number;
+      setback: number;
+      along: number;
+    }[];
+    const port = ISLANDS.north.port;
+    const nearSpawn = placed.filter(
+      (p) =>
+        p.kind === "bench" &&
+        p.island === "north" &&
+        p.along <= NORTH_PORT_STRETCH_M &&
+        Math.hypot(p.x - port.x, p.z - port.z) < 220,
+    );
+    expect(nearSpawn.length).toBeGreaterThanOrEqual(3);
+
+    const benches: THREE.Object3D[] = [];
+    root.traverse((obj) => {
+      if (obj.userData?.prop === "bench") benches.push(obj);
+    });
+    expect(benches.length).toBeGreaterThanOrEqual(nearSpawn.length);
+
+    const wood = new Set([0x8a6238, 0x9a6a40, 0x6a4a2a]);
+    for (const bench of benches) {
+      expect(bench.userData.mode).toBe("PAPER");
+      expect(bench.userData.part).toBe("crate-seat");
+      let boxes = 0;
+      let crate = 0;
+      let seat = 0;
+      bench.traverse((obj) => {
+        const mesh = obj as THREE.Mesh;
+        if (!mesh.isMesh) return;
+        boxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        const mat = mesh.material as THREE.MeshLambertMaterial;
+        expect(mat.type).toBe("MeshLambertMaterial");
+        const hex = mat.color.getHex();
+        expect(wood.has(hex)).toBe(true);
+        if (mesh.userData.part === "crate") crate += 1;
+        if (mesh.userData.part === "seat") seat += 1;
+      });
+      expect(boxes).toBeGreaterThanOrEqual(6);
+      expect(crate).toBe(2);
+      expect(seat).toBe(2);
+    }
+
+    for (const p of nearSpawn) {
+      expect(p.setback).toBeGreaterThanOrEqual(STREET_SETBACK_MIN_M);
+      expect(distToPaved(ISLANDS.north, p.x, p.z)).toBeGreaterThanOrEqual(ROAD_CLEAR);
+    }
+  });
 });
