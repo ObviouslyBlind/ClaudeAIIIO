@@ -8,11 +8,11 @@ Not a Capital Rift clone. No new politics.
 
 ## Held (pixel-ratified)
 
-Inland spawn, paved ribbon, dirt, cars, yellow taxi, trees+cart, lease → House → Enter → Exit, ferry ticket $15, RMB orbit, cream ferry hull at north quay (`/g/ferry37` PASS, no orbit), kraft/cream shore foam bars in the north-quay basin (`/g/shore40` PASS), working-harbour quay clutter on the north timber pier (`/g/quay41` PASS — crates on the kraft deck).
+Inland spawn, paved ribbon, dirt, cars, yellow taxi, trees+cart, lease → House → Enter → Exit, ferry ticket $15, RMB orbit, cream ferry hull at north quay (`/g/ferry37` PASS, no orbit), kraft/cream shore foam bars in the north-quay basin (`/g/shore40` PASS), working-harbour quay clutter on the north timber pier (`/g/quay41` PASS), crate-scale coloured pedestrians on the north pier (`/g/peds44` PASS — teal / slate / green / terracotta shirts).
 
 ## Held (code, live on the same page as the ferry)
 
-Building shells + window lights (warmer glow) — **not in the seaward spawn frame**; computerUse cannot RMB-orbit and spawn framing stays until orbit, so shells wait. Stalls (awning stripes + lantern + melon), pedestrians (cloth colours — `/g/peds42` FAIL PEDS, seaward shirts next), nametags (larger kraft cards + fold), warehouse (floor crates + clipboard)/factory (floor machines + wrench)/shop (counter + parcel)/farm (crop beds + churn)/house-shop (shelves + bell) interiors, presence, cart (crate + canvas strap + hubs), staff hire/fire, bid/ask/sell/cancel + market cancel button, North/South books, upkeep, persist dump + restore control, lease afford, player "You · PAPER" tag + satchel + kraft fold, north and south port signs, calendar, develop afford, ferry fare + ticket serial `NO. 15 · PAPER`, taxi fare + roof aerial, sales tax, held-goods, faucet/sink, stall last-print, quay lamp posts, street verge lamps, House chimney + porch slab + shutters + door knocker, deeper quay-channel water, spawn verge trees, taxi roof sign + door handles, sedan paint + mirrors + kraft rear plate, warmer sky haze, House downstairs table + clock + framed picture, extra quay coils, verge crate seats + fish crate, kraft ferry-ticket stamp, ferry deck bollards + cabin life ring, quay tyre fenders.
+Building shells + window lights — **not in the seaward spawn frame**; computerUse cannot RMB-orbit, so shells wait. Stalls, nametags (kraft cards + fold + punch hole) — **next pixel**, warehouse/factory/shop/farm/house-shop interiors, presence, cart, staff hire/fire, market books, persist, lease afford, player "You · PAPER" tag, north and south port signs, calendar, fares, tax, held-goods, faucet/sink, quay lamps, House chimney + porch + shutters + knocker, taxi/sedan dress, ferry bollards + life ring + door handle.
 
 ## Pixel ferry
 
@@ -32,20 +32,21 @@ Building shells + window lights (warmer glow) — **not in the seaward spawn fra
 
 ## Pixel quay clutter
 
-`/g/quay41` **PASS**: kraft timber pier with visible crates / cargo on the deck (working harbour, not a bare slab). Cream hull + foam still in frame.
+`/g/quay41` **PASS**: kraft timber pier with visible crates / cargo on the deck.
 
 ## Pixel pedestrians
 
 `/g/peds42` **FAIL PEDS**: inland along sat on the visitor.
-`/g/peds43` **FAIL PEDS**: pier/crates/ferry in frame; 1.8 m shirts were specks on the crate path. Quay walkers now boot with the hull and stand crate-scale with lit terracotta/teal shirts. Next `/g/peds44`.
+`/g/peds43` **FAIL PEDS**: 1.8 m shirts were specks on the crate path.
+`/g/peds44` **PASS**: four coloured crate-scale box people on the pier (teal, slate, green, terracotta), seaward of the visitor.
 
 ## In flight (not ferry-only)
 
-Pixel: kraft **pedestrians** on the north quay `http://localhost:8787/g/peds44`. No RMB. Close other Two Harbors tabs. Address bar must be `/g/peds44`. Do not restart play while the critic is on the page.
+Pixel: kraft **nametags** above the north-quay walkers `http://localhost:8787/g/tags45`. No RMB. Close other Two Harbors tabs. Address bar must be `/g/tags45`. Do not restart play while the critic is on the page.
 
-## Next pixel (after peds44 PASS, immediately, no wait)
+## Next pixel (after tags45 PASS, immediately, no wait)
 
-Nametags, econ/nearby/staff HUD lines. Shells+lights stay deferred until a human can orbit (spawn look is seaward; walking does not turn the camera).
+Econ/nearby/staff HUD lines. Shells+lights stay deferred until a human can orbit.
 
 ## Frozen
 
