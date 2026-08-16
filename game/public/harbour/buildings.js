@@ -166,7 +166,6 @@ function addSteps(g, x, zFace, width = 1.55, treads = 3) {
 function addPorch(g, x, zFace, width = 2.2) {
   const porch = new THREE.Group();
   porch.name = "porch";
-  porch.userData.part = "porch";
   porch.userData.mode = "PAPER";
 
   const slab = tagPaper(part(width, 0.1, 0.95, KRAFT, false), "porch");
