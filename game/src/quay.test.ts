@@ -4,6 +4,7 @@ import { distToPaved, heightAt, ISLANDS, ROAD_CLEAR } from "./land.ts";
 import {
   makeQuay,
   PIER_PALM_OFFSETS,
+  QUAY_DECK_SPOTS,
   QUAY_LAND_SPOTS,
   quayWorldPoint,
 } from "../public/harbour/quay.js";
@@ -73,5 +74,36 @@ describe("quay harbour dressing", () => {
     expect(colors).toContain(0xc4b496);
     expect(colors).toContain(0x6e2e22);
     expect(colors).toContain(0x8a6238);
+  });
+
+  it("puts 1–2 extra kraft coils on each timber deck, off the walk and berth", () => {
+    expect(QUAY_DECK_SPOTS.length).toBeGreaterThanOrEqual(1);
+    expect(QUAY_DECK_SPOTS.length).toBeLessThanOrEqual(2);
+
+    for (const spot of QUAY_DECK_SPOTS) {
+      expect(Math.abs(spot.x)).toBeGreaterThanOrEqual(2.2);
+      expect(Math.abs(spot.x)).toBeLessThan(5.5);
+      expect(Math.abs(spot.along)).toBeLessThan(36);
+    }
+
+    for (const id of ["north", "south"] as const) {
+      const spec = ISLANDS[id];
+      const toward = id === "north" ? 1 : -1;
+      const pierZ = spec.port.z + toward * 38;
+      const added: THREE.Object3D[] = [];
+      const scene = { add(obj: THREE.Object3D) { added.push(obj); } };
+      const root = makeQuay(spec, { scene, heightAt });
+      const ropes = collectDress(root, "rope");
+      expect(ropes.length).toBeGreaterThanOrEqual(2 + QUAY_DECK_SPOTS.length);
+      for (const spot of QUAY_DECK_SPOTS) {
+        const hit = ropes.some((r) => {
+          const dx = Math.abs(r.position.x - (spec.port.x + spot.x));
+          const dz = Math.abs(r.position.z - (pierZ + toward * spot.along));
+          return dx < 0.05 && dz < 0.05;
+        });
+        expect(hit).toBe(true);
+      }
+      expect(hexes(root)).toContain(0xc4a06a);
+    }
   });
 });
