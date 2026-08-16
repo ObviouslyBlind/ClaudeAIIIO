@@ -31,7 +31,11 @@ function bollard() {
   stem.position.y = 0.48;
   const cap = cyl(0.28, 0.24, 0.16, 0x2a2d32, 8, false);
   cap.position.y = 0.98;
-  g.add(stem, cap);
+  // Tiny kraft timber lid on the bollard top. PAPER box, hex already in this file.
+  const kraftCap = part(0.22, 0.08, 0.22, 0x8a6238, false);
+  kraftCap.position.y = 1.1;
+  kraftCap.userData.part = "bollard-cap";
+  g.add(stem, cap, kraftCap);
   return g;
 }
 
