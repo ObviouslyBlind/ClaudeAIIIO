@@ -158,4 +158,50 @@ describe("south port sign", () => {
       expect(washer.position.distanceTo(b.position)).toBeGreaterThan(0.05);
     }
   });
+
+  it("puts a tiny kraft PAPER pin on the south sign board, washer screw and nail remain", () => {
+    const sign = makeSouthSign(ISLANDS.south, { heightAt });
+    expect(sign).not.toBeNull();
+    expect(sign!.userData.mode).toBe("PAPER");
+
+    const nails = collectPart(sign!, "nail");
+    expect(nails.length).toBeGreaterThanOrEqual(1);
+    const screws = collectPart(sign!, "screw");
+    expect(screws.length).toBeGreaterThanOrEqual(1);
+    const washers = collectPart(sign!, "washer");
+    expect(washers.length).toBeGreaterThanOrEqual(1);
+    const braces = collectPart(sign!, "brace");
+    expect(braces.length).toBeGreaterThanOrEqual(1);
+    const caps = collectPart(sign!, "cap");
+    expect(caps.length).toBeGreaterThanOrEqual(1);
+
+    const pins = collectPart(sign!, "pin");
+    expect(pins.length).toBeGreaterThanOrEqual(1);
+    for (const p of pins) {
+      expect(p.userData.part).toBe("pin");
+      expect(p.userData.mode).toBe("PAPER");
+      const mesh = p as THREE.Mesh;
+      expect(mesh.geometry).toBeInstanceOf(THREE.BoxGeometry);
+      const mat = mesh.material as THREE.MeshLambertMaterial;
+      expect(mat.color.getHex()).toBe(WOOD_DARK);
+      const { width, height, depth } = (mesh.geometry as THREE.BoxGeometry).parameters;
+      expect(width).toBeLessThan(0.12);
+      expect(height).toBeLessThan(0.12);
+      expect(depth).toBeLessThan(0.12);
+    }
+
+    const pin = pins[0] as THREE.Mesh;
+    const washer = washers[0] as THREE.Mesh;
+    const screw = screws[0] as THREE.Mesh;
+    const nail = nails[0] as THREE.Mesh;
+    expect(pin.position.distanceTo(washer.position)).toBeGreaterThan(0.05);
+    expect(pin.position.distanceTo(screw.position)).toBeGreaterThan(0.05);
+    expect(pin.position.distanceTo(nail.position)).toBeGreaterThan(0.05);
+    for (const c of caps) {
+      expect(pin.position.distanceTo(c.position)).toBeGreaterThan(0.05);
+    }
+    for (const b of braces) {
+      expect(pin.position.distanceTo(b.position)).toBeGreaterThan(0.05);
+    }
+  });
 });
