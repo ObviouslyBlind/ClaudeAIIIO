@@ -12,7 +12,7 @@ Inland spawn, paved ribbon, dirt, cars, yellow taxi, trees+cart, lease → House
 
 ## Held (code, live on the same page as the ferry)
 
-Shore foam (denser quay dashes), quay clutter, building shells, window lights (warmer glow), stalls (awning stripes), pedestrians (cloth colours), nametags (larger kraft cards), warehouse/factory (floor machines)/shop (counter)/farm (crop beds)/house-shop interiors, presence, cart (crate + canvas), staff hire/fire, bid/ask/sell/cancel + market cancel button, North/South books, upkeep, persist dump + restore control, lease afford, player "You · PAPER" tag, north and south port signs, calendar, develop afford, ferry fare, taxi fare, sales tax, held-goods, faucet/sink, stall last-print, quay lamp posts, street verge lamps, House chimney, deeper quay-channel water, spawn verge trees, taxi roof sign, sedan paint variety, warmer sky haze.
+Shore foam (denser quay dashes), quay clutter, building shells, window lights (warmer glow), stalls (awning stripes), pedestrians (cloth colours), nametags (larger kraft cards), warehouse (floor crates)/factory (floor machines)/shop (counter)/farm (crop beds)/house-shop interiors, presence, cart (crate + canvas), staff hire/fire, bid/ask/sell/cancel + market cancel button, North/South books, upkeep, persist dump + restore control, lease afford, player "You · PAPER" tag, north and south port signs, calendar, develop afford, ferry fare, taxi fare, sales tax, held-goods, faucet/sink, stall last-print, quay lamp posts, street verge lamps, House chimney, deeper quay-channel water, spawn verge trees, taxi roof sign, sedan paint variety, warmer sky haze, House downstairs table.
 
 ## Pixel ferry
 
@@ -21,7 +21,7 @@ Shore foam (denser quay dashes), quay clutter, building shells, window lights (w
 
 ## In flight (not ferry-only)
 
-Pixel: ferry hull at north quay `/?g=ferry32` (do not restart play). Also building: warehouse crates, factory benches, house-shop shelves, house table, player satchel, house porch, quay coils, verge benches.
+Pixel: ferry hull at north quay `/?g=ferry32` (do not restart play). Also building: house-shop shelves, player satchel, house porch, quay coils, verge benches, extra quay walker, ferry ticket stamp.
 
 ## Next pixel (after ferry32 PASS, immediately, no wait)
 
