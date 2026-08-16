@@ -18,7 +18,7 @@ Politics stays frozen — do not resume House/Senate/councils.
 
 ## Next pixel queue (one critic at a time)
 
-Ferry boat, shore, quay, shells, stalls, econ line, nearby names, pedestrians, nametags, warehouse interior, factory interior.
+Ferry boat, shore, quay, shells, stalls, econ line, nearby names, market bid/ask strip, pedestrians, nametags, warehouse interior, factory interior.
 
 ## Frozen
 
