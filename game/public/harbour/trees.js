@@ -883,6 +883,58 @@ function plantNorthPortVine(root) {
   nest.add(vine);
 }
 
+function markTwig(mesh) {
+  mesh.userData.part = "twig";
+  mesh.userData.dress = "twig";
+  mesh.userData.mode = "PAPER";
+  mesh.userData.provenance = "PAPER";
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+}
+
+/**
+ * One tiny kraft PAPER twig (one box) on a north-port palm nest —
+ * not instead of the vine, husk, frond, leaf, coconut, bird, nest, or
+ * egg. Hexes already in this file: trunk kraft. Reuses the nest twig
+ * box so geometry count stays put. Unique mesh — one box — so the
+ * phone mesh budget stays tiny. Trunks, leaves, coconuts, bird, nest,
+ * egg, leaf, frond, husk, and vine stay put.
+ */
+function plantNorthPortTwig(root) {
+  let nest = null;
+  root.traverse((obj) => {
+    if (!nest && obj.userData.kind === "nest") nest = obj;
+  });
+  if (!nest) return;
+
+  let geo = null;
+  nest.traverse((obj) => {
+    if (geo) return;
+    if (obj.isMesh && obj.geometry && obj.userData.part === "nest") geo = obj.geometry;
+  });
+  if (!geo) return;
+
+  const mat = new THREE.MeshLambertMaterial({ color: TRUNK });
+  const twig = new THREE.Group();
+  twig.name = "twig";
+  twig.userData.kind = "twig";
+  twig.userData.part = "twig";
+  twig.userData.dress = "twig";
+  twig.userData.mode = "PAPER";
+  twig.userData.provenance = "PAPER";
+  // Sit on the palm nest, offset from vine, husk, frond, leaf, and egg.
+  twig.position.set(0.08, 0.016, 0.05);
+  twig.rotation.set(0.2, 0.8, -0.35);
+
+  const box = new THREE.Mesh(geo, mat);
+  box.name = "twig-box";
+  markTwig(box);
+  box.scale.set(0.3, 0.35, 0.55);
+
+  twig.add(box);
+  nest.add(twig);
+}
+
 /**
  * Low-poly PAPER trees on hills, inland slopes, and behind street lots.
  * Palms stay on the quay (makePalms). helpers: { scene, specOf, heightAt }.
@@ -909,6 +961,7 @@ export function makeTrees(map, helpers) {
   plantNorthPortFrond(root);
   plantNorthPortHusk(root);
   plantNorthPortVine(root);
+  plantNorthPortTwig(root);
   scene.add(root);
   return root;
 }
