@@ -22,6 +22,9 @@ import { makeStreetProps } from "./street-props.js";
 import { makeTrees } from "./trees.js";
 import { dressPlayer } from "./player.js";
 import { dressCart } from "./cart.js";
+import { mountEconHud } from "./hud-econ.js";
+import { createStalls } from "./stalls.js";
+import { makePedestrians } from "./pedestrians.js";
 
 function ensureDockButton(id, label) {
   let btn = document.getElementById(id);
@@ -138,6 +141,11 @@ const plotMeshes = new Map();
 const useMeshes = new Map();
 const ground = [];
 let ferryMesh = null;
+let stalls = null;
+let pedestrians = null;
+const econHud = mountEconHud({
+  el: document.getElementById("econ"),
+});
 
 function money(n) {
   return Number(n).toLocaleString("en-US", { maximumFractionDigits: 0 });
@@ -650,6 +658,10 @@ function onPointer(ev) {
     refreshHud();
     return;
   }
+  if (stalls && stalls.handleRay(raycaster)) {
+    refreshHud();
+    return;
+  }
   const root = harbourGroup || scene;
   const hits = raycaster.intersectObjects(root.children, true);
   const buildingHit = hits.find((h) => objectWithKind(h.object, "building"));
@@ -808,6 +820,9 @@ function tick(dt) {
   }
   if (taxi) taxi.tick(dt);
   if (traffic) traffic.tick(dt);
+  if (stalls) stalls.tick(dt);
+  if (pedestrians) pedestrians.tick(dt);
+  if (econHud) econHud.tick(dt);
   if (walking) {
     const dx = walkTarget.x - player.position.x;
     const dz = walkTarget.z - player.position.z;
@@ -865,6 +880,7 @@ async function boot() {
   makeQuay(specOf("north"), { scene, heightAt });
   makePort(specOf("south"));
   makeQuay(specOf("south"), { scene, heightAt });
+  pedestrians = makePedestrians(map, { scene, specOf, heightAt, getPlayer: () => player });
   ferryMesh = makeFerry();
   scene.add(ferryMesh);
   makePalms(specOf("north"));
@@ -890,6 +906,15 @@ async function boot() {
     heightAt,
     getPlayer: () => player,
     getIslandId: () => islandId,
+  });
+  stalls = createStalls({
+    scene,
+    getMap: () => map,
+    specOf,
+    heightAt,
+    setStatus,
+    applySnapshot,
+    getPlayer: () => player,
   });
   harbourGroup = wrapHarbourWorld(scene, { keep: [player, sun.target] });
   interior = createInterior({
