@@ -2,9 +2,9 @@ import * as THREE from "three";
 
 /**
  * PAPER shop interior dress. Kraft-paper counter (cream top, wood body), a
- * small wooden till, a short wall shelf with two kraft boxes, plus two
- * shelf bays — not the house living room and not the warehouse. No WASD.
- * Tap-to-walk stays in interior.js.
+ * small wooden till, a kraft wrapped parcel, a short wall shelf with two
+ * kraft boxes, plus two shelf bays — not the house living room and not the
+ * warehouse. No WASD. Tap-to-walk stays in interior.js.
  *
  * Call dressShop(scene) when plot.kind or plot.use is "shop" or "house_shop".
  * Idempotent: a second call only shows the existing dress.
@@ -147,6 +147,29 @@ function cashBox(x, y, z) {
 }
 
 /**
+ * Small kraft wrapped parcel on the counter: cream box + strap + wood
+ * label. Paper boxes only. Not a till, not a goods crate.
+ */
+function wrappedParcel(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "shop-parcel";
+  g.userData.kind = "shop-parcel";
+  g.userData.mode = "PAPER";
+  g.position.set(x, y, z);
+  const w = 0.2;
+  const h = 0.12;
+  const d = 0.16;
+  const body = paperBox(w, h, d, CREAM, "shop-parcel");
+  g.add(body);
+  const band = paperBox(w + 0.02, 0.035, d + 0.02, STRAP, "shop-parcel");
+  g.add(band);
+  const label = paperBox(0.07, 0.02, 0.05, WOOD, "shop-parcel");
+  label.position.y = h / 2 + 0.01;
+  g.add(label);
+  return g;
+}
+
+/**
  * Short wall shelf above the counter: one plank, two kraft boxes.
  * Original WOOD / WOOD_DARK / WOOD_TOP / TIN. Not a till, not jars.
  */
@@ -196,6 +219,8 @@ function makeCounter(x, z) {
   g.add(stripe);
   // Wooden cash box on the linen top — kraft lid, wood body. Not a wallet.
   g.add(cashBox(0.88, topY + 0.13, -0.08));
+  // Kraft wrapped parcel beside the till — cream box + strap. Not a wallet.
+  g.add(wrappedParcel(1.22, topY + 0.11, 0.08));
   // Two small kraft / terracotta jars beside the till. Original TIN + CORAL.
   const kraftJar = paperBox(0.12, 0.16, 0.12, TIN, "shop-goods");
   kraftJar.position.set(0.48, topY + 0.13, -0.04);
