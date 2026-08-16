@@ -395,6 +395,49 @@ describe("harbour PAPER pedestrians", () => {
     }
   });
 
+  it("sits a tiny kraft PAPER loaf on quay walkers; basket and tin remain", () => {
+    const kraftLoaf = new Set([0xc4b496, 0xc4a574, 0x4a3220]);
+    const figure = makePaperPerson(0);
+    expect(partsOf(figure).get("loaf")).toBeUndefined();
+    expect(partsOf(figure).get("basket")).toBeUndefined();
+    expect(partsOf(figure).get("tin")).toBeUndefined();
+
+    const { people } = spawn();
+    const quay = people.filter((p) => p.lane === "quay");
+    const verge = people.filter((p) => p.lane === "verge");
+    expect(quay.length).toBeGreaterThanOrEqual(4);
+
+    for (const p of quay) {
+      const parts = partsOf(p.mesh);
+      expect(parts.get("loaf")).toBeGreaterThanOrEqual(1);
+      expect(parts.get("basket")).toBeGreaterThanOrEqual(1);
+      expect(parts.get("tin")).toBeGreaterThanOrEqual(1);
+      p.mesh.traverse((obj) => {
+        if (obj.userData?.part !== "loaf") return;
+        const mesh = obj as THREE.Mesh;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect((mesh.material as THREE.MeshLambertMaterial).type).toBe("MeshLambertMaterial");
+        const hex = (mesh.material as THREE.MeshLambertMaterial).color.getHex();
+        expect(isGrey(hex)).toBe(false);
+        expect(kraftLoaf.has(hex)).toBe(true);
+        const { width, height, depth } = (mesh.geometry as THREE.BoxGeometry).parameters;
+        expect(width).toBeLessThan(0.18);
+        expect(height).toBeLessThan(0.14);
+        expect(depth).toBeLessThan(0.18);
+        expect(mesh.position.y).toBeGreaterThan(0.55);
+        expect(mesh.position.y).toBeLessThan(0.8);
+        expect(Math.abs(mesh.position.x)).toBeGreaterThan(0.24);
+        expect(mesh.position.distanceTo(new THREE.Vector3(-0.32, 0.58, 0.2))).toBeGreaterThan(0.04);
+        expect(mesh.position.distanceTo(new THREE.Vector3(-0.38, 0.72, 0.08))).toBeGreaterThan(0.08);
+        expect(mesh.position.distanceTo(new THREE.Vector3(0.18, 1.9, 0.16))).toBeGreaterThan(0.8);
+      });
+    }
+
+    for (const p of verge) {
+      expect(partsOf(p.mesh).get("loaf")).toBeUndefined();
+    }
+  });
+
   it("puts kraft work-boot shafts above each shoe", () => {
     const kraftShoe = new Set([0x4a3220, 0xc4b496]);
     const figure = makePaperPerson(0);
