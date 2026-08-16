@@ -3,6 +3,7 @@ import { createTaxi } from "./taxi.js";
 import { makeFerry, tickFerry } from "./ferry.js";
 import { paintShoreColor, makeShoreFoam } from "./shore.js";
 import { makeQuay } from "./quay.js";
+import { makeRoads, spawnCameraOffset } from "./roads.js";
 
 const canvas = document.getElementById("c");
 const statusEl = document.getElementById("status");
@@ -426,32 +427,6 @@ function makePalms(spec) {
   }
 }
 
-function makeRoads() {
-  for (const road of map.roads) {
-    const spec = specOf(road.island);
-    const width = road.kind === "paved" ? 6.2 : 2.8;
-    const color = road.kind === "paved" ? 0x4a4f57 : 0x8a6238;
-    for (let i = 0; i < road.points.length - 1; i++) {
-      const a = road.points[i];
-      const b = road.points[i + 1];
-      const len = Math.hypot(b.x - a.x, b.z - a.z);
-      if (len < 1) continue;
-      const mx = (a.x + b.x) / 2;
-      const mz = (a.z + b.z) / 2;
-      const y = heightAt(spec, mx, mz) + 0.07;
-      const yaw = Math.atan2(b.x - a.x, b.z - a.z);
-      if (road.kind === "paved") {
-        const verge = box(18, 0.08, len + 0.5, 0x6a8f44, mx, y - 0.03, mz, false);
-        verge.rotation.y = yaw;
-        verge.userData.kind = "ground";
-      }
-      const seg = box(width, 0.12, len + 0.4, color, mx, y, mz, false);
-      seg.rotation.y = yaw;
-      seg.userData.kind = "ground";
-    }
-  }
-}
-
 function insetRing(ring, t) {
   let cx = 0;
   let cz = 0;
@@ -552,7 +527,8 @@ function makeParcels() {
 }
 
 function cameraOffset() {
-  return islandId === "north" ? new THREE.Vector3(22, 36, -58) : new THREE.Vector3(22, 36, 58);
+  const o = spawnCameraOffset(islandId);
+  return new THREE.Vector3(o.x, o.y, o.z);
 }
 
 function snapCamera() {
@@ -734,7 +710,7 @@ async function boot() {
   makeTerrain(specOf("south"));
   makeShoreFoam(specOf("north"), heightAt, scene);
   makeShoreFoam(specOf("south"), heightAt, scene);
-  makeRoads();
+  makeRoads(map, { scene, specOf, heightAt });
   makePort(specOf("north"));
   makeQuay(specOf("north"), { scene, heightAt });
   makePort(specOf("south"));
