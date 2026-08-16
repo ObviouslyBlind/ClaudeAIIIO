@@ -80,6 +80,41 @@ describe("harbour land board", () => {
     expect(along).toBeGreaterThan(2500);
   });
 
+  it("leaves vacant street lots on the inland walk from the north quay that $1000 PAPER can lease and develop", () => {
+    const board = createLandBoard();
+    const spec = ISLANDS.north;
+    const pts = pavedPolyline(spec);
+    const starters: { id: string; price: number }[] = [];
+    let dist = 0;
+    for (let i = 1; i < pts.length && dist < 220; i++) {
+      dist += Math.hypot(pts[i].x - pts[i - 1].x, pts[i].z - pts[i - 1].z);
+      const dx = pts[i].x - pts[i - 1].x;
+      const dz = pts[i].z - pts[i - 1].z;
+      const len = Math.hypot(dx, dz) || 1;
+      const px = -dz / len;
+      const pz = dx / len;
+      for (const side of [-1, 1] as const) {
+        const hit = findParcelAt(board, pts[i].x + px * side * 22, pts[i].z + pz * side * 22);
+        if (
+          hit &&
+          !hit.owner &&
+          hit.band === "street" &&
+          hit.price <= 500 &&
+          hit.price + DEVELOP_COST <= 1_000
+        ) {
+          starters.push({ id: hit.id, price: hit.price });
+        }
+      }
+    }
+    const unique = [...new Map(starters.map((s) => [s.id, s])).values()];
+    expect(unique.length).toBeGreaterThanOrEqual(2);
+
+    const visitor = createVisitor(1_000);
+    const pick = unique.sort((a, b) => a.price - b.price)[0]!;
+    expect(leasePlot(board, visitor, pick.id).ok).toBe(true);
+    expect(developPlot(board, visitor, pick.id, "house").ok).toBe(true);
+  });
+
   it("lets you lease a piece of ground underfoot and then develop it", () => {
     const board = createLandBoard();
     const visitor = createVisitor(1_000);

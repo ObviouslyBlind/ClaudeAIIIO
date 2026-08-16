@@ -470,7 +470,7 @@ function paintParcel(p) {
   if (!rec) return;
   const sel = p.id === selected;
   rec.line.material.color.setHex(parcelTint(p, sel));
-  rec.line.material.opacity = sel ? 0.95 : p.owner ? 0.5 : 0.16;
+  rec.line.material.opacity = sel ? 0.95 : p.owner ? 0.5 : 0.28;
   if (sel) {
     if (!rec.fill) {
       const spec = specOf(p.island);
@@ -521,7 +521,7 @@ function makeParcels() {
       new THREE.LineBasicMaterial({
         color: parcelTint(p, false),
         transparent: true,
-        opacity: p.owner ? 0.45 : 0.06,
+        opacity: p.owner ? 0.45 : 0.28,
       }),
     );
     line.userData.kind = "plot-line";

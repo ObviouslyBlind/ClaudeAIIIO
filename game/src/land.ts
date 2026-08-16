@@ -295,6 +295,11 @@ function pushParcel(
   });
 }
 
+/** House-scale street frontage. One road step was a 140 m slab at harbour prices. */
+const STREET_CUTS = 4;
+/** NPC farms sit inland so the quay walk is vacant. */
+const NPC_INLAND_M = 700;
+
 function lotsAlongRoad(spec: IslandSpec): { lots: Parcel[]; dirt: Road[] } {
   const lots: Parcel[] = [];
   const dirt: Road[] = [];
@@ -308,13 +313,21 @@ function lotsAlongRoad(spec: IslandSpec): { lots: Parcel[]; dirt: Road[] } {
       const p = { x: perp.x * side, z: perp.z * side };
       const h = hash(i * 17 + side * 9 + (spec.id === "north" ? 1 : 3));
       const streetDepth = 18 + h * 14;
-      const street = quad(a, b, p, 18, streetDepth, (h - 0.5) * 0.08);
-      const before = lots.length;
-      pushParcel(lots, spec, street, "street", lots.length);
+      for (let k = 0; k < STREET_CUTS; k++) {
+        const sa = roadPoint(spec, (i + k / STREET_CUTS) / steps);
+        const sb = roadPoint(spec, (i + (k + 1) / STREET_CUTS) / steps);
+        const slen = Math.hypot(sb.x - sa.x, sb.z - sa.z) || 1;
+        const sperp = { x: -(sb.z - sa.z) / slen, z: (sb.x - sa.x) / slen };
+        const sp = { x: sperp.x * side, z: sperp.z * side };
+        const hk = hash(i * 17 + side * 9 + k * 13 + (spec.id === "north" ? 1 : 3));
+        const street = quad(sa, sb, sp, 18, streetDepth, (hk - 0.5) * 0.08);
+        pushParcel(lots, spec, street, "street", lots.length);
+      }
       const fieldSetback = 18 + streetDepth + 10;
       const field = quad(a, b, p, fieldSetback, 32 + h * 18, (h - 0.4) * 0.1);
+      const fieldBefore = lots.length;
       pushParcel(lots, spec, field, "field", lots.length);
-      if (lots.length > before + 1) {
+      if (lots.length > fieldBefore) {
         const fieldPlot = lots[lots.length - 1];
         const inner = {
           x: (a.x + b.x) / 2 + p.x * (fieldSetback + 2),
@@ -352,6 +365,21 @@ function shoreLots(spec: IslandSpec): Parcel[] {
   return lots;
 }
 
+function seedNpcLots(plots: Parcel[]): void {
+  for (const spec of Object.values(ISLANDS)) {
+    const ranked = plots
+      .filter((p) => p.island === spec.id && p.class === "by_right" && !p.owner)
+      .map((p) => ({ p, d: Math.hypot(p.x - spec.port.x, p.z - spec.port.z) }))
+      .sort((a, b) => b.d - a.d);
+    const inland = ranked.filter((x) => x.d > NPC_INLAND_M);
+    const pick = (inland.length >= 2 ? inland : ranked).slice(0, 2);
+    for (const { p } of pick) {
+      p.owner = "npc";
+      p.use = p.band === "field" ? "farm" : "stall";
+    }
+  }
+}
+
 export function createLandBoard(): LandBoard {
   const plots: Parcel[] = [];
   const dirt: Road[] = [];
@@ -360,16 +388,7 @@ export function createLandBoard(): LandBoard {
     plots.push(...built.lots, ...shoreLots(spec));
     dirt.push(...built.dirt);
   }
-  const leaseable = plots.filter((p) => p.class === "by_right");
-  for (const p of leaseable.slice(0, 2)) {
-    p.owner = "npc";
-    p.use = p.band === "field" ? "farm" : "stall";
-  }
-  const south = leaseable.filter((p) => p.island === "south");
-  for (const p of south.slice(0, 2)) {
-    p.owner = "npc";
-    p.use = p.band === "field" ? "farm" : "stall";
-  }
+  seedNpcLots(plots);
   const roads = Object.values(ISLANDS).flatMap((spec) => [
     { island: spec.id, kind: "paved" as const, nodes: roadNodes(spec), points: pavedPolyline(spec) },
     ...dirt.filter((d) => d.island === spec.id),
