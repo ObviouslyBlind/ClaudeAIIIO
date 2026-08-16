@@ -11,8 +11,9 @@ import * as THREE from "three";
  * Warm wood — harbour crate family: 0x8a6238 / 0x7a5230 / 0x9a6a40.
  * Bed load: two small kraft crates + one canvas roll + a short kraft rope coil
  * + a thin kraft canvas strap over the visitor crate.
+ * Wheels: kraft cream hub discs (paper boxes) on the outer face of each wheel.
  */
-export const CART_MESH_COUNT = 16;
+export const CART_MESH_COUNT = 18;
 /** Metres from player.position down to the soles. Same as player.js SOLE_Y. */
 const SOLE_Y = -1.15;
 
@@ -84,6 +85,14 @@ function makeHandcart() {
   wheelR.receiveShadow = true;
   wheelR.userData.part = "wheel";
 
+  // Kraft cream hub discs on the outer face of each wheel — paper boxes only.
+  const hubL = paperBox(0.04, 0.14, 0.14, CANVAS, false);
+  hubL.position.set(-0.5, 0.22, -1.05);
+  hubL.userData.part = "hub";
+  const hubR = paperBox(0.04, 0.14, 0.14, CANVAS, false);
+  hubR.position.set(0.5, 0.22, -1.05);
+  hubR.userData.part = "hub";
+
   const handleL = paperBox(0.05, 0.05, 0.95, WOOD_HANDLE, false);
   handleL.position.set(-0.22, 0.95, -0.72);
   handleL.userData.part = "handle";
@@ -122,7 +131,7 @@ function makeHandcart() {
   coilTop.position.set(-0.16, 0.645, -0.84);
   coilTop.userData.part = "coil";
 
-  g.add(bed, sideL, sideR, tail, head, wheelL, wheelR, handleL, handleR, grip, crate, strap, crate2, roll, coil, coilTop);
+  g.add(bed, sideL, sideR, tail, head, wheelL, wheelR, hubL, hubR, handleL, handleR, grip, crate, strap, crate2, roll, coil, coilTop);
   return g;
 }
 
