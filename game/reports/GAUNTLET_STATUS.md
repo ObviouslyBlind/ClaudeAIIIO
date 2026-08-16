@@ -12,7 +12,7 @@ Inland spawn, paved ribbon, dirt, cars, yellow taxi, trees+cart, lease → House
 
 ## Held (code, live on the same page as the ferry)
 
-Shore foam (denser quay dashes), quay clutter, building shells, window lights (warmer glow), stalls (awning stripes), pedestrians (cloth colours), nametags (larger kraft cards), warehouse (floor crates)/factory (floor machines)/shop (counter)/farm (crop beds)/house-shop interiors, presence, cart (crate + canvas), staff hire/fire, bid/ask/sell/cancel + market cancel button, North/South books, upkeep, persist dump + restore control, lease afford, player "You · PAPER" tag, north and south port signs, calendar, develop afford, ferry fare, taxi fare, sales tax, held-goods, faucet/sink, stall last-print, quay lamp posts, street verge lamps, House chimney, deeper quay-channel water, spawn verge trees, taxi roof sign, sedan paint variety, warmer sky haze, House downstairs table.
+Shore foam (denser quay dashes), quay clutter, building shells, window lights (warmer glow), stalls (awning stripes), pedestrians (cloth colours + extra quay walker), nametags (larger kraft cards), warehouse (floor crates)/factory (floor machines)/shop (counter)/farm (crop beds)/house-shop (shelves) interiors, presence, cart (crate + canvas), staff hire/fire, bid/ask/sell/cancel + market cancel button, North/South books, upkeep, persist dump + restore control, lease afford, player "You · PAPER" tag + satchel, north and south port signs, calendar, develop afford, ferry fare, taxi fare, sales tax, held-goods, faucet/sink, stall last-print, quay lamp posts, street verge lamps, House chimney + porch slab, deeper quay-channel water, spawn verge trees, taxi roof sign, sedan paint variety, warmer sky haze, House downstairs table, extra quay coils, verge crate seats, kraft ferry-ticket stamp.
 
 ## Pixel ferry
 
@@ -22,9 +22,9 @@ Shore foam (denser quay dashes), quay clutter, building shells, window lights (w
 
 ## In flight (not ferry-only)
 
-Pixel: ferry hull at north quay `/?g=ferry33` after first-frame + early-ferry restart. Also building: house-shop shelves, player satchel, house porch, quay coils, verge benches, extra quay walker, ferry ticket stamp.
+Pixel: ferry hull at north quay `/?g=ferry33` (do not restart play). Also building: staff wage hint, lease leftover cash, cart counts, nearby 250 m, house lamp, dirt edge, stall crate, nametag stamp.
 
-## Next pixel (after ferry32 PASS, immediately, no wait)
+## Next pixel (after ferry33 PASS, immediately, no wait)
 
 Shore foam, quay, shells+lights, stalls, econ/nearby/staff lines, pedestrians, nametags, interiors.
 
