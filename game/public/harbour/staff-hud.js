@@ -12,6 +12,7 @@ function money(n) {
 }
 
 function num(v) {
+  if (v == null || v === "") return null;
   const n = Number(v);
   return Number.isFinite(n) && n >= 0 ? n : null;
 }
@@ -37,32 +38,40 @@ function wageFromStatutes(statutes) {
     return num(sliders.wage ?? sliders.cost ?? sliders.floor ?? row.wage);
   }
   if (typeof statutes === "object") {
-    const row = statutes.wage_floor || statutes.wage;
+    const row = statutes.wage_floor || (typeof statutes.wage === "object" ? statutes.wage : null);
     if (row && typeof row === "object") {
       const sliders = row.sliders && typeof row.sliders === "object" ? row.sliders : row;
       return num(sliders.wage ?? sliders.cost ?? sliders.floor ?? row.wage);
     }
-    return num(statutes.wage);
   }
   return null;
 }
 
-/** Slot wage, map/hud field, wage-floor statute, else $4. Never visitor cash. */
-export function wageOf(map) {
-  if (!map || typeof map !== "object") return STAFF_WAGE;
+function knownWage(map) {
+  if (!map || typeof map !== "object") return null;
   const slots = slotsOf(map);
   for (const s of slots) {
     const w = s ? num(s.wage) : null;
     if (w != null) return w;
   }
   const hud = map.hud && typeof map.hud === "object" ? map.hud : null;
-  const direct = num(
-    map.staffWage ?? map.wage ?? map.hireCost ?? (hud && (hud.staffWage ?? hud.wage)),
-  );
+  const direct = num(map.staffWage) ?? num(map.wage) ?? num(map.hireCost);
   if (direct != null) return direct;
-  const fromLaw = wageFromStatutes(map.statutes != null ? map.statutes : map);
-  if (fromLaw != null) return fromLaw;
-  return STAFF_WAGE;
+  if (hud) {
+    const fromHud = num(hud.staffWage) ?? num(hud.wage);
+    if (fromHud != null) return fromHud;
+  }
+  return wageFromStatutes(map.statutes);
+}
+
+/** Slot wage, map/hud field, wage-floor statute, else $4. Never visitor cash. */
+export function wageOf(map) {
+  return knownWage(map) ?? STAFF_WAGE;
+}
+
+function costSuffix(map) {
+  const bit = "$" + money(wageOf(map));
+  return ` · hire ${bit} · wage ${bit}/day`;
 }
 
 export function formatStaffLine(map, plot) {
@@ -70,8 +79,14 @@ export function formatStaffLine(map, plot) {
     return "PAPER · SIMULATED · Staff —";
   }
   const n = countOnPlot(slotsOf(map), plot.id);
-  const bit = "$" + money(wageOf(map));
-  return `PAPER · SIMULATED · Staff ${n}/${MAX_STAFF_PER_PLOT} · hire ${bit} · wage ${bit}/day`;
+  return `PAPER · SIMULATED · Staff ${n}/${MAX_STAFF_PER_PLOT}`;
+}
+
+/** Count line plus short PAPER hire/wage cost on a developed plot. */
+export function paintStaffLine(map, plot) {
+  const base = formatStaffLine(map, plot);
+  if (!plot || plot.owner !== "visitor" || !plot.use) return base;
+  return base + costSuffix(map);
 }
 
 function ensureStaffLine() {
@@ -125,7 +140,7 @@ export function mountStaffHud(opts = {}) {
   function sync() {
     const map = typeof opts.getMap === "function" ? opts.getMap() : null;
     const plot = selectedPlot(opts);
-    if (lineEl) lineEl.textContent = formatStaffLine(map, plot);
+    if (lineEl) lineEl.textContent = paintStaffLine(map, plot);
     const mine = Boolean(plot && plot.owner === "visitor" && plot.use);
     const n = plot ? countOnPlot(slotsOf(map), plot.id) : 0;
     if (hireBtn) hireBtn.disabled = !mine || n >= MAX_STAFF_PER_PLOT || busy;
