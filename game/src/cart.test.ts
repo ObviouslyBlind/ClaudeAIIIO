@@ -92,7 +92,7 @@ describe("player PAPER handcart", () => {
     const cart = player.getObjectByName("paper-cart")!;
     expect(cart.children.length).toBe(CART_MESH_COUNT);
     expect(meshCount(cart)).toBe(CART_MESH_COUNT);
-    expect(CART_MESH_COUNT).toBe(31);
+    expect(CART_MESH_COUNT).toBe(32);
 
     const p = parts(cart);
     expect(p).toContain("bed");
@@ -269,6 +269,42 @@ describe("player PAPER handcart", () => {
     expect([0x8a6238, 0x7a5230, 0x9a6a40, 0xc4b496, 0xf4ead8]).toContain(hex);
     expect(isGrey(hex)).toBe(false);
     const { width, height, depth } = (garlic.geometry as THREE.BoxGeometry).parameters;
+    expect(width).toBeLessThan(0.12);
+    expect(height).toBeLessThan(0.12);
+    expect(depth).toBeLessThan(0.12);
+  });
+
+  it("puts one tiny kraft PAPER cabbage on the cart bed; garlic, onion, potato, carrot, apple remain", () => {
+    const player = makePlayer();
+    dressCart(player);
+    const cart = player.getObjectByName("paper-cart")!;
+    const p = parts(cart);
+    expect(p.filter((k) => k === "cabbage").length).toBe(1);
+    expect(p.filter((k) => k === "garlic").length).toBeGreaterThanOrEqual(1);
+    expect(p.filter((k) => k === "onion").length).toBeGreaterThanOrEqual(1);
+    expect(p.filter((k) => k === "potato").length).toBeGreaterThanOrEqual(1);
+    expect(p.filter((k) => k === "carrot").length).toBeGreaterThanOrEqual(1);
+    expect(p.filter((k) => k === "apple").length).toBeGreaterThanOrEqual(1);
+
+    const cabbage = cart.children.find((c) => c.userData.part === "cabbage") as THREE.Mesh;
+    const garlic = cart.children.find((c) => c.userData.part === "garlic") as THREE.Mesh;
+    const onion = cart.children.find((c) => c.userData.part === "onion") as THREE.Mesh;
+    const potato = cart.children.find((c) => c.userData.part === "potato") as THREE.Mesh;
+    const carrot = cart.children.find((c) => c.userData.part === "carrot") as THREE.Mesh;
+    const apple = cart.children.find((c) => c.userData.part === "apple") as THREE.Mesh;
+    const bed = cart.children.find((c) => c.userData.part === "bed")!;
+    expect(cabbage.userData.mode).toBe("PAPER");
+    expect(cabbage.geometry.type).toBe("BoxGeometry");
+    expect(cabbage.position.y).toBeGreaterThan(bed.position.y);
+    expect(Math.hypot(cabbage.position.x - garlic.position.x, cabbage.position.z - garlic.position.z)).toBeGreaterThan(0.12);
+    expect(Math.hypot(cabbage.position.x - onion.position.x, cabbage.position.z - onion.position.z)).toBeGreaterThan(0.12);
+    expect(Math.hypot(cabbage.position.x - potato.position.x, cabbage.position.z - potato.position.z)).toBeGreaterThan(0.12);
+    expect(Math.hypot(cabbage.position.x - carrot.position.x, cabbage.position.z - carrot.position.z)).toBeGreaterThan(0.12);
+    expect(Math.hypot(cabbage.position.x - apple.position.x, cabbage.position.z - apple.position.z)).toBeGreaterThan(0.12);
+    const hex = (cabbage.material as THREE.MeshLambertMaterial).color.getHex();
+    expect([0x8a6238, 0x7a5230, 0x9a6a40, 0xc4b496, 0xf4ead8]).toContain(hex);
+    expect(isGrey(hex)).toBe(false);
+    const { width, height, depth } = (cabbage.geometry as THREE.BoxGeometry).parameters;
     expect(width).toBeLessThan(0.12);
     expect(height).toBeLessThan(0.12);
     expect(depth).toBeLessThan(0.12);
