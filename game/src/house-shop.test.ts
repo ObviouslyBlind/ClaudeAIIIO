@@ -261,3 +261,95 @@ describe("house-shop PAPER counter jar", () => {
     expect(interior.userData.interiorUse).toBe("house");
   });
 });
+
+describe("house-shop PAPER counter kettle", () => {
+  it("sits a kraft PAPER kettle on the house-shop counter", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressHouseShop(scene);
+
+    const dress = interior.getObjectByName("house-shop-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+
+    const kettles: THREE.Object3D[] = [];
+    dress!.traverse((obj) => {
+      if (obj.userData?.kind === "house-shop-kettle" && obj.name === "house-shop-kettle") {
+        kettles.push(obj);
+      }
+    });
+    expect(kettles.length).toBe(1);
+
+    const kettle = kettles[0];
+    expect(kettle.userData.kind).toBe("house-shop-kettle");
+    expect(kettle.userData.mode).toBe("PAPER");
+    // Counter top is ~1.12; kettle sits on it, not hanging with the bell.
+    expect(kettle.position.y).toBeGreaterThan(1.0);
+    expect(kettle.position.y).toBeLessThan(1.25);
+    expect(Math.abs(kettle.position.x)).toBeLessThan(1.2);
+    expect(kettle.position.z).toBeGreaterThan(0.1);
+    expect(kettle.position.z).toBeLessThan(0.9);
+
+    const jar = dress!.getObjectByName("house-shop-jar");
+    const pad = dress!.getObjectByName("house-shop-pad");
+    const bell = dress!.getObjectByName("house-shop-bell");
+    expect(jar).toBeTruthy();
+    expect(pad).toBeTruthy();
+    expect(bell).toBeTruthy();
+    const jarOffset = Math.hypot(
+      kettle.position.x - jar!.position.x,
+      kettle.position.z - jar!.position.z,
+    );
+    const padOffset = Math.hypot(
+      kettle.position.x - pad!.position.x,
+      kettle.position.z - pad!.position.z,
+    );
+    const bellOffset = Math.hypot(
+      kettle.position.x - bell!.position.x,
+      kettle.position.z - bell!.position.z,
+    );
+    expect(jarOffset).toBeGreaterThan(0.25);
+    expect(padOffset).toBeGreaterThan(0.25);
+    expect(bellOffset).toBeGreaterThan(0.25);
+
+    const colors = hexes(kettle);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.every((c) => c === WOOD || c === TIN || c === CREAM)).toBe(true);
+    expect(colors.some((c) => c === WOOD)).toBe(true);
+    expect(colors.some((c) => c === TIN)).toBe(true);
+    expect(colors.some((c) => c === CREAM)).toBe(true);
+    expect(colors.every((c) => !isGrey(c))).toBe(true);
+
+    kettle.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.kind).toBe("house-shop-kettle");
+        expect(mesh.userData.mode).toBe("PAPER");
+      }
+    });
+  });
+
+  it("keeps dress idempotent and hides the kettle on undress", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressHouseShop(scene);
+    dressHouseShop(scene);
+
+    const kettles: THREE.Object3D[] = [];
+    interior.traverse((obj) => {
+      if (obj.name === "house-shop-kettle") kettles.push(obj);
+    });
+    expect(kettles.length).toBe(1);
+
+    undressHouseShop(scene);
+    const dress = interior.getObjectByName("house-shop-dress");
+    const kettle = interior.getObjectByName("house-shop-kettle");
+    expect(dress).toBeTruthy();
+    expect(kettle).toBeTruthy();
+    expect(dress!.visible).toBe(false);
+    expect(interior.userData.interiorUse).toBe("house");
+  });
+});
