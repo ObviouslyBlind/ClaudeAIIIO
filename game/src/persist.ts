@@ -3,6 +3,7 @@
 import { DEVELOP_COST, createLandBoard, getPlot, leasePlot, type LandBoard } from "./land.ts";
 import { createVisitor, createWorld, type Visitor, type World } from "./sim.ts";
 import { setStatuteSlider, statuteById } from "./statutes.ts";
+import { dumpCart, restoreCart, type CartLine } from "./visitorCart.ts";
 
 export type ShardInput = {
   world: World;
@@ -18,6 +19,7 @@ export type ShardBlob = {
   visitor: {
     cash: number;
     leases: string[];
+    cart: CartLine[];
   };
   statutes: {
     sales_tax: { rate: number };
@@ -72,12 +74,12 @@ function readBlob(raw: unknown): ShardBlob | null {
     provenance: "SIMULATED",
     note: typeof b.note === "string" ? b.note : NOTE,
     tick: b.tick,
-    visitor: { cash: v.cash, leases: [...(v.leases as string[])] },
+    visitor: { cash: v.cash, leases: [...(v.leases as string[])], cart: restoreCart(v.cart) },
     statutes: { sales_tax: { rate } },
   };
 }
 
-/** Dump a JSON-safe PAPER shard. Cash, lease ids, tick, sales_tax slider. */
+/** Dump a JSON-safe PAPER shard. Cash, lease ids, cart lines, tick, sales_tax slider. */
 export function serializeShard(input: ShardInput): ShardBlob {
   return jsonSafe({
     mode: "PAPER" as const,
@@ -87,6 +89,7 @@ export function serializeShard(input: ShardInput): ShardBlob {
     visitor: {
       cash: input.visitor.cash,
       leases: visitorLeaseIds(input.land),
+      cart: dumpCart(input.visitor.cart),
     },
     statutes: {
       sales_tax: { rate: salesTaxSlider(input.world) },
@@ -119,6 +122,7 @@ export function restoreShard(raw: unknown): RestoreResult {
     if (!leased.ok) return { ok: false, reason: leased.reason };
   }
   visitor.cash = blob.visitor.cash;
+  visitor.cart = blob.visitor.cart;
 
   return { ok: true, world, land, visitor };
 }
