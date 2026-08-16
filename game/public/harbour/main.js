@@ -3,7 +3,14 @@ import { createTaxi } from "./taxi.js";
 import { makeFerry, tickFerry } from "./ferry.js";
 import { paintShoreColor, makeShoreFoam } from "./shore.js";
 import { makeQuay } from "./quay.js";
-import { makeRoads, spawnCameraOffset } from "./roads.js";
+import {
+  CAMERA_FAR_M,
+  FOG_FAR_M,
+  FOG_NEAR_M,
+  makeRoads,
+  spawnCameraOffset,
+  spawnLookAtOffset,
+} from "./roads.js";
 
 const canvas = document.getElementById("c");
 const statusEl = document.getElementById("status");
@@ -23,9 +30,9 @@ renderer.shadowMap.type = THREE.BasicShadowMap;
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x7ec8d4);
-scene.fog = new THREE.Fog(0x7ec8d4, 2800, 16000);
+scene.fog = new THREE.Fog(0x7ec8d4, FOG_NEAR_M, FOG_FAR_M);
 
-const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.4, 22000);
+const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.4, CAMERA_FAR_M);
 
 scene.add(new THREE.HemisphereLight(0xb8e4ff, 0xc4a574, 1.15));
 const sun = new THREE.DirectionalLight(0xfff1d0, 2.1);
@@ -531,9 +538,18 @@ function cameraOffset() {
   return new THREE.Vector3(o.x, o.y, o.z);
 }
 
+function lookTarget() {
+  const l = spawnLookAtOffset(islandId);
+  return new THREE.Vector3(
+    player.position.x + l.x,
+    player.position.y + l.y,
+    player.position.z + l.z,
+  );
+}
+
 function snapCamera() {
   camera.position.copy(player.position).add(cameraOffset());
-  camera.lookAt(player.position.x, player.position.y + 1.2, player.position.z);
+  camera.lookAt(lookTarget());
 }
 
 function spawnAt(id) {
@@ -690,7 +706,7 @@ function tick(dt) {
   refreshHud();
   tmp.copy(player.position).add(cameraOffset());
   camera.position.lerp(tmp, 1 - Math.pow(0.001, dt));
-  camera.lookAt(player.position.x, player.position.y + 1.2, player.position.z);
+  camera.lookAt(lookTarget());
   sun.position.set(player.position.x + 180, 260, player.position.z + 80);
   sun.target.position.copy(player.position);
   sun.target.updateMatrixWorld();
