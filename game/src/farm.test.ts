@@ -7,6 +7,7 @@ const WOOD = 0x7a5230;
 const WOOD_DARK = 0x5a3a22;
 const HANDLE = 0x8a6238;
 const METAL = 0x6a6a62;
+const LAMP_BULB = 0xffd090;
 
 function hexes(root: THREE.Object3D) {
   const colors: number[] = [];
@@ -409,6 +410,106 @@ describe("farm PAPER kraft grain scoop", () => {
       if (obj.name === "farm-scoop") scoops.push(obj);
     });
     expect(scoops.length).toBe(1);
+
+    undressFarm(scene);
+    const dress = scene.getObjectByName("farm-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.visible).toBe(false);
+    expect(scene.userData.interiorUse).toBe("house");
+  });
+});
+
+describe("farm PAPER kraft lantern", () => {
+  it("puts one kraft PAPER lantern on the farm workbench", () => {
+    const scene = new THREE.Scene();
+    dressFarm(scene);
+
+    const dress = scene.getObjectByName("farm-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+    expect(dress!.visible).toBe(true);
+
+    const lanterns: THREE.Object3D[] = [];
+    dress!.traverse((obj) => {
+      if (obj.userData?.kind === "farm-lantern" && obj.name === "farm-lantern") {
+        lanterns.push(obj);
+      }
+    });
+    expect(lanterns.length).toBe(1);
+
+    const lantern = lanterns[0];
+    expect(lantern.userData.kind).toBe("farm-lantern");
+    expect(lantern.userData.mode).toBe("PAPER");
+
+    const bench = dress!.getObjectByName("farm-bench")!;
+    expect(bench).toBeTruthy();
+    // Bench top surface is ~0.98; lantern sits on it, not the floor or rafters.
+    expect(lantern.position.y).toBeGreaterThan(0.9);
+    expect(lantern.position.y).toBeLessThan(1.15);
+    const toBench = Math.hypot(lantern.position.x - -3.28, lantern.position.z - -0.15);
+    expect(toBench).toBeLessThan(0.55);
+
+    const scoop = dress!.getObjectByName("farm-scoop")!;
+    expect(scoop).toBeTruthy();
+    const toScoop = Math.hypot(lantern.position.x - scoop.position.x, lantern.position.z - scoop.position.z);
+    expect(toScoop).toBeGreaterThan(0.25);
+    expect(toScoop).toBeLessThan(0.9);
+
+    const trough = dress!.getObjectByName("farm-trough")!;
+    expect(trough).toBeTruthy();
+    const toTrough = Math.hypot(lantern.position.x - trough.position.x, lantern.position.z - trough.position.z);
+    expect(toTrough).toBeGreaterThan(4);
+
+    const churn = dress!.getObjectByName("farm-churn")!;
+    expect(churn).toBeTruthy();
+    const toChurn = Math.hypot(lantern.position.x - churn.position.x, lantern.position.z - churn.position.z);
+    expect(toChurn).toBeGreaterThan(4);
+
+    const pail = dress!.getObjectByName("farm-pail")!;
+    expect(pail).toBeTruthy();
+    const toPail = Math.hypot(lantern.position.x - pail.position.x, lantern.position.z - pail.position.z);
+    expect(toPail).toBeGreaterThan(4);
+
+    const fork = dress!.getObjectByName("farm-fork")!;
+    expect(fork).toBeTruthy();
+    const toFork = Math.hypot(lantern.position.x - fork.position.x, lantern.position.z - fork.position.z);
+    expect(toFork).toBeGreaterThan(4);
+
+    const basket = dress!.getObjectByName("farm-basket")!;
+    expect(basket).toBeTruthy();
+    const toBasket = Math.hypot(lantern.position.x - basket.position.x, lantern.position.z - basket.position.z);
+    expect(toBasket).toBeGreaterThan(4);
+
+    const colors = hexes(lantern);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.some((c) => c === WOOD)).toBe(true);
+    expect(colors.some((c) => c === LAMP_BULB)).toBe(true);
+    expect(colors.every((c) => [WOOD, LAMP_BULB].includes(c))).toBe(true);
+
+    let boxes = 0;
+    lantern.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        boxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.kind).toBe("farm-lantern");
+        expect(mesh.userData.mode).toBe("PAPER");
+      }
+    });
+    expect(boxes).toBeGreaterThanOrEqual(3);
+  });
+
+  it("keeps dress idempotent and hides the lantern on undress", () => {
+    const scene = new THREE.Scene();
+    dressFarm(scene);
+    dressFarm(scene);
+    expect(scene.children.filter((c) => c.name === "farm-dress").length).toBe(1);
+    const dressed = scene.getObjectByName("farm-dress")!;
+    const lanterns: THREE.Object3D[] = [];
+    dressed.traverse((obj) => {
+      if (obj.name === "farm-lantern") lanterns.push(obj);
+    });
+    expect(lanterns.length).toBe(1);
 
     undressFarm(scene);
     const dress = scene.getObjectByName("farm-dress");
