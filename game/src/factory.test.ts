@@ -915,3 +915,80 @@ describe("factory PAPER kraft cork", () => {
     expect(boxes).toBeGreaterThanOrEqual(2);
   });
 });
+
+function factoryPaperPegs(root: THREE.Object3D) {
+  const out: THREE.Object3D[] = [];
+  root.traverse((obj) => {
+    if (obj.userData?.part === "peg") {
+      out.push(obj);
+    }
+  });
+  return out;
+}
+
+describe("factory PAPER kraft peg", () => {
+  it("puts one tiny kraft PAPER peg on a factory bench; cork and oilcan remain", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressFactory(scene);
+
+    const dress = interior.getObjectByName("factory-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+
+    const pegs = factoryPaperPegs(dress!);
+    expect(pegs.length).toBe(1);
+    const peg = pegs[0];
+    expect(peg.userData.part).toBe("peg");
+    expect(peg.userData.mode).toBe("PAPER");
+    expect(peg.userData.part).not.toBe("cork");
+    expect(peg.userData.part).not.toBe("funnel");
+    expect(peg.userData.part).not.toBe("oilcan");
+    expect(peg.userData.part).not.toBe("rag");
+    expect(peg.userData.part).not.toBe("rivet");
+    expect(peg.userData.part).not.toBe("wrench");
+
+    expect(factoryPaperCorks(dress!).length).toBe(1);
+    expect(factoryPaperFunnels(dress!).length).toBe(1);
+    expect(factoryPaperOilcans(dress!).length).toBe(1);
+    expect(factoryRags(dress!).length).toBe(1);
+    expect(factoryRivets(dress!).length).toBe(1);
+    expect(factoryTools(dress!).length).toBe(1);
+
+    const cork = factoryPaperCorks(dress!)[0];
+    const funnel = factoryPaperFunnels(dress!)[0];
+    const can = factoryPaperOilcans(dress!)[0];
+    const rag = factoryRags(dress!)[0];
+    const rivet = factoryRivets(dress!)[0];
+    const wrench = factoryTools(dress!)[0];
+    const toCork = Math.hypot(peg.position.x - cork.position.x, peg.position.z - cork.position.z);
+    const toFunnel = Math.hypot(peg.position.x - funnel.position.x, peg.position.z - funnel.position.z);
+    const toCan = Math.hypot(peg.position.x - can.position.x, peg.position.z - can.position.z);
+    const toRag = Math.hypot(peg.position.x - rag.position.x, peg.position.z - rag.position.z);
+    const toRivet = Math.hypot(peg.position.x - rivet.position.x, peg.position.z - rivet.position.z);
+    const toWrench = Math.hypot(peg.position.x - wrench.position.x, peg.position.z - wrench.position.z);
+    expect(toCork).toBeGreaterThan(0.5);
+    expect(toFunnel).toBeGreaterThan(0.5);
+    expect(toCan).toBeGreaterThan(0.5);
+    expect(toRag).toBeGreaterThan(0.5);
+    expect(toRivet).toBeGreaterThan(0.5);
+    expect(toWrench).toBeGreaterThan(0.5);
+
+    const colors = hexes(peg);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.some((c) => c === KRAFT)).toBe(true);
+    expect(colors.every((c) => [KRAFT, 0x9a6a40, 0x6a4a32].includes(c))).toBe(true);
+
+    let boxes = 0;
+    peg.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        boxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.mode).toBe("PAPER");
+      }
+    });
+    expect(boxes).toBeGreaterThanOrEqual(2);
+  });
+});
