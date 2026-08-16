@@ -4,6 +4,7 @@ import { extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { GOOD_IDS, type GoodId } from "./goods.ts";
 import { createLandBoard, developPlot, landSnapshot, leasePlot } from "./land.ts";
+import { buyFromStall, createVisitor, createWorld, hud, tick } from "./sim.ts";
 import { bustHarbourAssets } from "./cache-bust.ts";
 
 const root = join(fileURLToPath(new URL(".", import.meta.url)), "..");
