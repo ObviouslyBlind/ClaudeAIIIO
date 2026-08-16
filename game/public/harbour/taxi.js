@@ -303,6 +303,17 @@ function addTaxiHubcap(g, kraftMat) {
 }
 
 /**
+ * One tiny kraft PAPER headlamp on the cab front — small box, not chrome,
+ * not a second visor. Same 0xc4a574 as the visor. PAPER box only.
+ * Offset from visor, wiper, plate, fare, mirror, hubcap, mudflap, aerial.
+ */
+function addTaxiHeadlamp(g, kraftMat) {
+  const headlamp = tagPart(taxiBox(0.18, 0.12, 0.08, kraftMat, false), "headlamp");
+  headlamp.position.set(0, 0.86, 2.62);
+  g.add(headlamp);
+}
+
+/**
  * Tiny kraft cream PAPER mudflaps behind the rear wheels — small hanging boxes.
  * Same 0xf4ead8 as the hubs. PAPER boxes only. Door plates, aerial cap, wipers stay.
  */
@@ -339,7 +350,7 @@ function addTaxiSpare(g, tyreMat, hubMat) {
  * wipers on the windscreen, tiny kraft cream PAPER mudflaps behind the rear wheels,
  * one tiny kraft PAPER fare card on the dash, one tiny kraft PAPER roof flag,
  * one tiny kraft PAPER sun visor at the windscreen, one tiny kraft PAPER hubcap
- * on a front wheel.
+ * on a front wheel, one tiny kraft PAPER headlamp on the cab front.
  * Compact warm PAPER taxi-sign box — original cream lamp, not a sedan lid, not a debug mast, not a cop lightbar.
  */
 export function makeTaxiMesh() {
@@ -430,6 +441,7 @@ export function makeTaxiMesh() {
   addTaxiFare(g, kraft);
   addTaxiFlag(g, kraft);
   addTaxiVisor(g, kraft);
+  addTaxiHeadlamp(g, kraft);
 
   g.userData.kind = "taxi";
   g.userData.mode = "PAPER";
