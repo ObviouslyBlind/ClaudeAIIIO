@@ -4,13 +4,13 @@ Loop is live for the full PLAN (A–N). User is the brake. Critics one-at-a-time
 
 ## Held (pixel-ratified)
 
-Inland spawn, tarmac HUD, traffic-on-road, taxi overlay, ferry ticket, RMB orbit, catalogue, **lease → House → Enter → Exit** (`/?g=int22` PASS, Cash $673 PAPER, house stayed).
+Inland spawn, **paved asphalt ribbon** (`/?g=rib23` PASS), traffic-on-road, taxi overlay, ferry ticket, RMB orbit, catalogue, lease → House → Enter → Exit.
 
 ## In flight
 
-PLAN B+ builders: statutes, books, calendar, districts, cart, Hansard, planning, ferry statute.
+PLAN B+ builders (statutes, books, calendar, districts, cart, Hansard, planning). Ferry statute landed.
 
-Next critic: paved ribbon `/?g=rib23` (continuous black asphalt, not box slabs). Then dirt ribbon, trees, street props, cars, taxi cab, ferry boat, shore, quay, shells, cart.
+Next critic: dirt tracks `/?g=dirt24` (thin brown ribbon to fields, not box slabs). Then trees, street props, cars, taxi cab, ferry boat, shore, quay, shells, cart.
 
 ## PLAN ladder
 
