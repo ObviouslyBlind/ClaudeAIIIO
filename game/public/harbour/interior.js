@@ -183,14 +183,28 @@ function makeChair(x, z, yaw) {
   return g;
 }
 
+/** Small kraft paper hanging lamp — wood stem, cream shade, warm glow. */
 function makeHangingLamp(x, y, z) {
   const g = new THREE.Group();
   g.name = "lamp";
   g.userData.kind = "interior-lamp";
-  g.add(box(0.04, 0.4, 0.04, FRAME, x, y + 0.28, z, "interior-prop"));
-  g.add(box(0.12, 0.05, 0.12, BRASS, x, y + 0.1, z, "interior-prop"));
-  g.add(box(0.58, 0.2, 0.58, SHADE, x, y, z, "interior-prop"));
-  g.add(box(0.1, 0.08, 0.1, 0xfff1d0, x, y - 0.12, z, "interior-prop"));
+  g.userData.mode = "PAPER";
+  g.position.set(x, y, z);
+  const paper = { mode: "PAPER" };
+  g.add(box(0.03, 0.36, 0.03, WOOD, 0, 0.26, 0, "interior-prop", paper));
+  g.add(box(0.1, 0.04, 0.1, WOOD_TOP, 0, 0.07, 0, "interior-prop", paper));
+  g.add(
+    box(0.36, 0.14, 0.36, PAPER_CARD, 0, 0, 0, "interior-prop", paper, {
+      emissive: SHADE,
+      emissiveIntensity: 0.48,
+    }),
+  );
+  g.add(
+    box(0.08, 0.06, 0.08, 0xfff1d0, 0, -0.1, 0, "interior-prop", paper, {
+      emissive: 0xfff1d0,
+      emissiveIntensity: 0.55,
+    }),
+  );
   return g;
 }
 
@@ -339,8 +353,8 @@ export function makeInteriorScene() {
   up.add(paperPlaque(1.55, 4.15, 3.42));
   group.add(up);
 
-  const lamp = new THREE.PointLight(0xfff1d0, 1.15, 18, 2);
-  lamp.position.set(0, 2.4, 0);
+  const lamp = new THREE.PointLight(0xfff1d0, 1.65, 18, 2);
+  lamp.position.set(-0.15, 2.22, -0.35);
   group.add(lamp);
 
   group.visible = false;
