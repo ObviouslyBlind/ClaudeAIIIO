@@ -1,11 +1,16 @@
 import { describe, expect, it } from "vitest";
+import * as THREE from "three";
 import { createLandBoard, heightAt, ISLANDS } from "./land.ts";
 import {
   ASPHALT,
+  CAMERA_FAR_M,
   DIRT_WIDTH_M,
+  FOG_FAR_M,
+  FOG_NEAR_M,
   PAVED_WIDTH_M,
   makeRoads,
   spawnCameraOffset,
+  spawnLookAtOffset,
 } from "../public/harbour/roads.js";
 
 function lum(hex: number) {
@@ -52,15 +57,66 @@ describe("paved street from spawn", () => {
     );
   });
 
-  it("places the spawn camera beside the player, toward the channel, not inland looking at water", () => {
+  it("places the spawn camera inland-and-east so the street and far shore share one frame", () => {
+    // Intended north: offset { x: 56, y: 54, z: -132 }, lookAt { x: 0, y: 2, z: 240 }.
+    // East of the spine (not inland-only water). Inland of the player so look faces
+    // the channel. Far shore: LEFT of the north spawn frame, RIGHT on south.
     const n = spawnCameraOffset("north");
     const s = spawnCameraOffset("south");
-    expect(Math.abs(n.x)).toBeGreaterThan(Math.abs(n.z));
-    expect(Math.abs(s.x)).toBeGreaterThan(Math.abs(s.z));
-    expect(n.z).toBeGreaterThan(0);
-    expect(s.z).toBeLessThan(0);
-    expect(n.y).toBeGreaterThan(18);
-    expect(n.y).toBeLessThan(42);
+    const nl = spawnLookAtOffset("north");
+    const sl = spawnLookAtOffset("south");
+
+    expect(n).toEqual({ x: 56, y: 54, z: -132 });
+    expect(s).toEqual({ x: 56, y: 54, z: 132 });
+    expect(nl).toEqual({ x: 0, y: 2, z: 240 });
+    expect(sl).toEqual({ x: 0, y: 2, z: -240 });
+
     expect(n.x).toBeGreaterThan(40);
+    expect(n.z).toBeLessThan(0);
+    expect(s.z).toBeGreaterThan(0);
+    expect(n.y).toBeGreaterThan(40);
+    expect(n.y).toBeLessThan(80);
+    expect(nl.z).toBeGreaterThan(100);
+    expect(sl.z).toBeLessThan(-100);
+
+    const farM = ISLANDS.south.port.z - ISLANDS.north.port.z;
+    const fogged = (farM - FOG_NEAR_M) / (FOG_FAR_M - FOG_NEAR_M);
+    expect(farM).toBeGreaterThan(8000);
+    expect(fogged).toBeGreaterThan(0.05);
+    expect(fogged).toBeLessThan(0.25);
+    expect(CAMERA_FAR_M).toBeGreaterThan(FOG_FAR_M);
+
+    for (const id of ["north", "south"] as const) {
+      const spec = ISLANDS[id];
+      const o = spawnCameraOffset(id);
+      const l = spawnLookAtOffset(id);
+      const px = spec.port.x;
+      const pz = spec.port.z + (id === "north" ? -8 : 8);
+      const py = heightAt(spec, px, pz) + 1.15;
+      const inland = id === "north" ? -1 : 1;
+      const other = id === "north" ? ISLANDS.south : ISLANDS.north;
+      const cam = new THREE.PerspectiveCamera(55, 16 / 9, 0.4, CAMERA_FAR_M);
+      cam.position.set(px + o.x, py + o.y, pz + o.z);
+      cam.lookAt(px + l.x, py + l.y, pz + l.z);
+      cam.updateMatrixWorld();
+
+      const ndc = (x: number, y: number, z: number) => {
+        const v = new THREE.Vector3(x, y, z).project(cam);
+        return v;
+      };
+      const inFrame = (v: THREE.Vector3) =>
+        Math.abs(v.x) < 0.92 && Math.abs(v.y) < 0.92 && v.z < 1;
+
+      const player = ndc(px, py, pz);
+      const dash = ndc(px, py - 0.6, pz + inland * 20);
+      const farShore = ndc(other.cx, 12, other.cz - Math.sign(other.cz) * other.rz);
+
+      expect(inFrame(player)).toBe(true);
+      expect(inFrame(dash)).toBe(true);
+      expect(inFrame(farShore)).toBe(true);
+      if (id === "north") expect(farShore.x).toBeLessThan(0);
+      else expect(farShore.x).toBeGreaterThan(0);
+      expect(farShore.y).toBeGreaterThan(0.1);
+    }
   });
 });

@@ -15,12 +15,33 @@ const DASH_LEN = 2.5;
 const DASH_GAP = 3.5;
 
 /**
- * East of the player, a few metres toward the channel.
- * Three-quarter: quay/pier on the water side, paved spine running inland.
- * Old offset sat inland (north z = -58) and looked only at open water.
+ * Linear fog (metres). Ports are ~8.6 km apart. Old 2800–16000 ate the far
+ * silhouette; keep the other shore readable without looking like a neighbour beach.
+ */
+export const FOG_NEAR_M = 5200;
+export const FOG_FAR_M = 28000;
+/** Perspective far plane; past FOG_FAR so the horizon can fade. */
+export const CAMERA_FAR_M = 36000;
+
+/**
+ * Spawn camera, metres from the player.
+ *
+ * Intended north offset: { x: 56, y: 54, z: -132 }
+ * East of the paved spine, inland, raised. Looking at spawnLookAtOffset (channel)
+ * puts (a) dashed asphalt in the lower frame and (b) the far island on the
+ * horizon — LEFT of frame on north, RIGHT on south.
+ *
+ * Not the old side-on { x: 58, y: 30, z: 14 } (looked west along this shore;
+ * south island at +Z was off-frame). Not inland-only with no X: that stares
+ * at water and loses the street.
  */
 export function spawnCameraOffset(islandId) {
-  return islandId === "north" ? { x: 58, y: 30, z: 14 } : { x: 58, y: 30, z: -14 };
+  return islandId === "north" ? { x: 56, y: 54, z: -132 } : { x: 56, y: 54, z: 132 };
+}
+
+/** Metres from the player. Toward the channel so the far shore sits on the horizon. */
+export function spawnLookAtOffset(islandId) {
+  return islandId === "north" ? { x: 0, y: 2, z: 240 } : { x: 0, y: 2, z: -240 };
 }
 
 function addBox(scene, w, h, d, color, x, y, z, yaw, roadKind) {
