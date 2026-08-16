@@ -144,6 +144,7 @@ const server = createServer(async (req, res) => {
   }
 
   let pathname = url.pathname;
+  if (pathname.startsWith("/harbor")) pathname = "/harbour" + pathname.slice("/harbor".length);
   if (pathname === "/") pathname = "/harbour/index.html";
   if (pathname === "/harbour" || pathname === "/harbour/") pathname = "/harbour/index.html";
   if (pathname === "/market" || pathname === "/market/") pathname = "/market/index.html";
