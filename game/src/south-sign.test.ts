@@ -5,10 +5,10 @@ import { makeSouthSign, SIGN_LINE } from "../public/harbour/south-sign.js";
 
 const WOOD = 0x8a6238;
 
-function collectBrace(root: THREE.Object3D) {
+function collectPart(root: THREE.Object3D, name: string) {
   const out: THREE.Object3D[] = [];
   root.traverse((obj) => {
-    if (obj.userData?.part === "brace") {
+    if (obj.userData?.part === name) {
       out.push(obj);
     }
   });
@@ -25,7 +25,7 @@ describe("south port sign", () => {
     expect(SIGN_LINE).toContain("PAPER");
     expect(SIGN_LINE).toBe("South port · PAPER");
 
-    const braces = collectBrace(sign!);
+    const braces = collectPart(sign!, "brace");
     expect(braces.length).toBeGreaterThanOrEqual(1);
     for (const b of braces) {
       expect(b.userData.part).toBe("brace");
@@ -37,5 +37,25 @@ describe("south port sign", () => {
     }
 
     expect(makeSouthSign(ISLANDS.north, { heightAt })).toBeNull();
+  });
+
+  it("puts a kraft PAPER cap on a south sign post, WOOD box only", () => {
+    const sign = makeSouthSign(ISLANDS.south, { heightAt });
+    expect(sign).not.toBeNull();
+    expect(sign!.userData.mode).toBe("PAPER");
+
+    const braces = collectPart(sign!, "brace");
+    expect(braces.length).toBeGreaterThanOrEqual(1);
+
+    const caps = collectPart(sign!, "cap");
+    expect(caps.length).toBeGreaterThanOrEqual(1);
+    for (const c of caps) {
+      expect(c.userData.part).toBe("cap");
+      expect(c.userData.mode).toBe("PAPER");
+      const mesh = c as THREE.Mesh;
+      expect(mesh.geometry).toBeInstanceOf(THREE.BoxGeometry);
+      const mat = mesh.material as THREE.MeshLambertMaterial;
+      expect(mat.color.getHex()).toBe(WOOD);
+    }
   });
 });
