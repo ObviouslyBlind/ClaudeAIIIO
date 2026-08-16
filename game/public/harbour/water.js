@@ -3,8 +3,8 @@ import * as THREE from "three";
 /** Lagoon water. Builder fills this module — keep the tint 0x1d7a86. */
 export const WATER_COLOR = 0x1d7a86;
 
-/** Deeper water down the ferry channel. Same hue, darker. */
-const CHANNEL_COLOR = 0x145e68;
+/** Deeper water down the ferry channel. Same hue, darker than the lagoon. */
+const CHANNEL_COLOR = 0x10525c;
 
 function addWaterMesh(geo, material, y) {
   const mesh = new THREE.Mesh(geo, material);
@@ -45,8 +45,8 @@ function channelVertex() {
 }
 
 /**
- * Working harbour off each quay. Deepest in the ferry lane just seaward of
- * the pier (HOME_Z is 115 m off the north port), fading to lagoon at the lip.
+ * Working harbour off each quay. Deepest in the ferry lane under the north
+ * berth (HOME_Z -6835), fading to lagoon at the lip.
  */
 function harbourBasin(z) {
   const w = 360;
@@ -100,8 +100,8 @@ export function makeWater(scene) {
   );
   scene.add(water);
   scene.add(channelStrip());
-  // Centre on the water immediately off each quay (ferry berth ~115 m seaward).
-  scene.add(harbourBasin(-6860));
-  scene.add(harbourBasin(6860));
+  // Centre the pocket on HOME_Z so the cream hull sits on the deep lane.
+  scene.add(harbourBasin(-6835));
+  scene.add(harbourBasin(6835));
   return water;
 }
