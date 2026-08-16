@@ -128,6 +128,34 @@ describe("taxi roof lamp", () => {
     expect(handles.length).toBeGreaterThanOrEqual(2);
   });
 
+  it("has kraft cream PAPER hub boxes on the outer face of each wheel", () => {
+    const mesh = makeTaxiMesh();
+    const hubs: THREE.Mesh[] = [];
+    const aerials: THREE.Mesh[] = [];
+    const handles: THREE.Mesh[] = [];
+    const bumpers: THREE.Mesh[] = [];
+    const checks: THREE.Mesh[] = [];
+    mesh.traverse((obj) => {
+      const m = obj as THREE.Mesh & { userData: { part?: string; mode?: string } };
+      if (m.userData?.part === "hub") hubs.push(m);
+      if (m.userData?.part === "aerial") aerials.push(m);
+      if (m.userData?.part === "handle") handles.push(m);
+      if (m.userData?.part === "bumper") bumpers.push(m);
+      if (m.userData?.part === "check") checks.push(m);
+    });
+    expect(hubs.length).toBe(4);
+    expect(hubs.every((h) => h.geometry.type === "BoxGeometry")).toBe(true);
+    expect(hubs.every((h) => h.userData.mode === "PAPER")).toBe(true);
+    expect(
+      hubs.every((h) => (h.material as THREE.MeshLambertMaterial).color.getHex() === 0xf4ead8),
+    ).toBe(true);
+    expect(hubs.every((h) => Math.abs(h.position.x) > 1.28)).toBe(true);
+    expect(aerials.length).toBeGreaterThanOrEqual(1);
+    expect(handles.length).toBeGreaterThanOrEqual(2);
+    expect(bumpers.length).toBe(2);
+    expect(checks.length).toBeGreaterThan(0);
+  });
+
   it("parks the cab on paved at spawn so the roof lamp is in the first frame", () => {
     const board = createLandBoard();
     const spec = ISLANDS.north;
