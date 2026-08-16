@@ -186,6 +186,28 @@ function wallClipboard(x, y, z, yaw = 0) {
   return g;
 }
 
+/**
+ * Kraft broom leaning on the wall — wood stick + bristle block.
+ * PAPER boxes only. Not a crate, not a hook.
+ */
+function kraftBroom(x, z, yaw = 0) {
+  const g = new THREE.Group();
+  g.name = "warehouse-broom";
+  g.userData.kind = "warehouse-broom";
+  g.userData.mode = "PAPER";
+  g.position.set(x, 0, z);
+  g.rotation.y = yaw;
+  // Lean the stick toward the +X wall.
+  g.rotation.z = -0.38;
+  const y0 = 0.16;
+  const stick = paperBox(0.045, 1.1, 0.045, WOOD, "warehouse-broom");
+  stick.position.set(0, y0 + 0.65, 0);
+  const bristles = paperBox(0.26, 0.2, 0.1, WOOD_DARK, "warehouse-broom");
+  bristles.position.set(0, y0 + 0.1, 0);
+  g.add(stick, bristles);
+  return g;
+}
+
 function wallHook(x, y, z, yaw = 0) {
   const g = new THREE.Group();
   g.name = "warehouse-hook";
@@ -285,6 +307,8 @@ function makeWarehouseDress() {
   g.add(wallHook(-0.58, 1.62, -3.38));
   // Kraft clipboard on the back wall, in the gap between the mid and low stacks.
   g.add(wallClipboard(1.02, 1.58, -3.38));
+  // Kraft broom leaning on the right wall, in the gap between the mid and low stacks.
+  g.add(kraftBroom(3.32, -1.52));
 
   const postL = paperBox(0.16, 2.45, 0.16, STRAP, "warehouse-prop");
   postL.position.set(-2.05, 1.38, 1.85);
