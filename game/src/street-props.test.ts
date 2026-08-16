@@ -774,4 +774,72 @@ describe("street prop setback", () => {
       }
     }
   });
+
+  it("sits a tiny kraft PAPER bung on the street-props barrel, lid bolt washer peg hook dipper crank remain", () => {
+    const map = createLandBoard();
+    const scene = { add(_obj: THREE.Object3D) {} };
+    const root = makeStreetProps(map, {
+      scene,
+      specOf: (id: "north" | "south") => ISLANDS[id],
+      heightAt,
+    });
+
+    const drums: THREE.Object3D[] = [];
+    const lids: THREE.Object3D[] = [];
+    const bolts: THREE.Object3D[] = [];
+    const washers: THREE.Object3D[] = [];
+    const pegs: THREE.Object3D[] = [];
+    const hooks: THREE.Object3D[] = [];
+    const dippers: THREE.Object3D[] = [];
+    const cranks: THREE.Object3D[] = [];
+    root.traverse((obj) => {
+      if (obj.userData?.prop === "hawser-drum") drums.push(obj);
+      if (obj.userData?.part === "lid") lids.push(obj);
+      if (obj.userData?.part === "bolt") bolts.push(obj);
+      if (obj.userData?.part === "washer") washers.push(obj);
+      if (obj.userData?.part === "peg") pegs.push(obj);
+      if (obj.userData?.part === "hook") hooks.push(obj);
+      if (obj.userData?.part === "dipper" || obj.userData?.dress === "dipper") {
+        if (obj.userData?.prop === "dipper" || obj.name === "dipper") dippers.push(obj);
+      }
+      if (obj.userData?.part === "crank" || obj.userData?.dress === "crank") {
+        if (obj.userData?.prop === "crank" || obj.name === "crank") cranks.push(obj);
+      }
+    });
+    expect(drums.length).toBeGreaterThanOrEqual(1);
+    expect(lids.length).toBeGreaterThanOrEqual(1);
+    expect(bolts.length).toBeGreaterThanOrEqual(1);
+    expect(washers.length).toBeGreaterThanOrEqual(1);
+    expect(pegs.length).toBeGreaterThanOrEqual(1);
+    expect(hooks.length).toBeGreaterThanOrEqual(1);
+    expect(dippers.length).toBeGreaterThanOrEqual(1);
+    expect(cranks.length).toBeGreaterThanOrEqual(1);
+
+    const wood = new Set([0x8a6238, 0x6a4a2a]);
+    for (const drum of drums) {
+      expect(drum.userData.mode).toBe("PAPER");
+      const bungs: THREE.Object3D[] = [];
+      drum.traverse((obj) => {
+        if (obj.userData?.part === "bung") bungs.push(obj);
+      });
+      expect(bungs.length).toBeGreaterThanOrEqual(1);
+      for (const b of bungs) {
+        expect(b.userData.part).toBe("bung");
+        expect(b.userData.mode === "PAPER" || drum.userData.mode === "PAPER").toBe(true);
+        const mesh = b as THREE.Mesh;
+        expect(mesh.isMesh).toBe(true);
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        const mat = mesh.material as THREE.MeshLambertMaterial;
+        expect(mat.type).toBe("MeshLambertMaterial");
+        expect(wood.has(mat.color.getHex())).toBe(true);
+        const { width, height, depth } = (mesh.geometry as THREE.BoxGeometry).parameters;
+        expect(width).toBeLessThan(0.12);
+        expect(height).toBeLessThan(0.12);
+        expect(depth).toBeLessThan(0.12);
+        expect(mesh.position.y).toBeGreaterThan(0.4);
+        expect(mesh.position.y).toBeLessThan(1.2);
+        expect(Math.hypot(mesh.position.x, mesh.position.z)).toBeLessThan(0.5);
+      }
+    }
+  });
 });
