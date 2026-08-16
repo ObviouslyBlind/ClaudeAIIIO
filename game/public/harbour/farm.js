@@ -7,7 +7,8 @@ import * as THREE from "three";
  * milk churn beside the trough, a short wood pail beside the churn, a small
  * kraft pitchfork leaning by the trough and pail, a small kraft PAPER egg
  * basket beside the trough, a small kraft PAPER grain scoop on the workbench,
- * a small kraft PAPER lantern on the workbench, and dim warm light — not the
+ * a small kraft PAPER lantern on the workbench, a small kraft PAPER seed
+ * packet on the workbench, and dim warm light — not the
  * house living room, warehouse crates, shop, or factory.
  * No WASD. Tap-to-walk stays in interior.js.
  *
@@ -512,6 +513,33 @@ function farmLantern() {
   return g;
 }
 
+/**
+ * Tiny PAPER kraft seed packet: kraft envelope, wood flap, warm seed mark.
+ * Hexes already in this file (WOOD, LAMP_BULB, KRAFT). PAPER boxes only.
+ * Sits on the farm workbench top; not the lantern, scoop, trough, churn,
+ * pail, fork, or basket.
+ */
+function farmSeed() {
+  const g = new THREE.Group();
+  g.name = "farm-seed";
+  g.userData.kind = "farm-seed";
+  g.userData.part = "seed";
+  g.userData.mode = "PAPER";
+  const body = paperBox(0.07, 0.09, 0.018, KRAFT, "farm-seed");
+  body.userData.part = "seed";
+  body.position.y = 0.045;
+  g.add(body);
+  const flap = paperBox(0.07, 0.018, 0.022, WOOD, "farm-seed");
+  flap.userData.part = "seed";
+  flap.position.y = 0.096;
+  g.add(flap);
+  const mark = paperBox(0.028, 0.028, 0.012, LAMP_BULB, "farm-seed");
+  mark.userData.part = "seed";
+  mark.position.set(0, 0.04, 0.008);
+  g.add(mark);
+  return g;
+}
+
 function workbench(x, z) {
   const g = new THREE.Group();
   g.name = "farm-bench";
@@ -608,6 +636,12 @@ function makeFarmDress() {
   // hanging farm-lamp, trough cluster, or scoop bowl.
   lantern.position.set(-3.52, 0.16 + 0.78 + 0.04, -0.28);
   g.add(lantern);
+  const seed = farmSeed();
+  // Front-center of the 1.55 × 0.58 top — offset from lantern and scoop,
+  // not the trough cluster.
+  seed.position.set(-3.38, 0.16 + 0.78 + 0.04, 0.08);
+  seed.rotation.y = -0.22;
+  g.add(seed);
 
   const loftY = 2.94;
   g.add(sack(0.46, 0.56, 0.36, SACK, -2.55, loftY + 0.28, -2.35, 0.1));
@@ -694,8 +728,8 @@ function dimSceneLights(scene, farm) {
  * kraft milk churn beside the trough, a short wood pail beside the
  * churn, a small kraft pitchfork leaning by the trough and pail, a
  * small kraft egg basket beside the trough, a small kraft grain scoop
- * on the workbench, and a small kraft lantern on the workbench, warms
- * and dims lights.
+ * on the workbench, a small kraft lantern on the workbench, and a small
+ * kraft seed packet on the workbench, warms and dims lights.
  * @param {THREE.Object3D} scene
  */
 export function dressFarm(scene) {

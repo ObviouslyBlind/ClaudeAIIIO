@@ -518,3 +518,120 @@ describe("farm PAPER kraft lantern", () => {
     expect(scene.userData.interiorUse).toBe("house");
   });
 });
+
+describe("farm PAPER kraft seed packet", () => {
+  it("puts one small kraft PAPER seed packet on the farm workbench", () => {
+    const scene = new THREE.Scene();
+    dressFarm(scene);
+
+    const dress = scene.getObjectByName("farm-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+    expect(dress!.visible).toBe(true);
+
+    const seeds: THREE.Object3D[] = [];
+    dress!.traverse((obj) => {
+      if (obj.userData?.kind === "farm-seed" && obj.name === "farm-seed") {
+        seeds.push(obj);
+      }
+    });
+    expect(seeds.length).toBe(1);
+
+    const seed = seeds[0];
+    expect(seed.userData.kind).toBe("farm-seed");
+    expect(seed.userData.part).toBe("seed");
+    expect(seed.userData.mode).toBe("PAPER");
+
+    const bench = dress!.getObjectByName("farm-bench")!;
+    expect(bench).toBeTruthy();
+    // Bench top surface is ~0.98; packet sits on it, not the floor.
+    expect(seed.position.y).toBeGreaterThan(0.9);
+    expect(seed.position.y).toBeLessThan(1.15);
+    const toBench = Math.hypot(seed.position.x - -3.28, seed.position.z - -0.15);
+    expect(toBench).toBeLessThan(0.55);
+
+    const lantern = dress!.getObjectByName("farm-lantern")!;
+    expect(lantern).toBeTruthy();
+    const toLantern = Math.hypot(seed.position.x - lantern.position.x, seed.position.z - lantern.position.z);
+    expect(toLantern).toBeGreaterThan(0.2);
+    expect(toLantern).toBeLessThan(0.9);
+
+    const scoop = dress!.getObjectByName("farm-scoop")!;
+    expect(scoop).toBeTruthy();
+    const toScoop = Math.hypot(seed.position.x - scoop.position.x, seed.position.z - scoop.position.z);
+    expect(toScoop).toBeGreaterThan(0.2);
+    expect(toScoop).toBeLessThan(0.9);
+
+    const basket = dress!.getObjectByName("farm-basket")!;
+    expect(basket).toBeTruthy();
+    const toBasket = Math.hypot(seed.position.x - basket.position.x, seed.position.z - basket.position.z);
+    expect(toBasket).toBeGreaterThan(4);
+
+    const trough = dress!.getObjectByName("farm-trough")!;
+    expect(trough).toBeTruthy();
+    const toTrough = Math.hypot(seed.position.x - trough.position.x, seed.position.z - trough.position.z);
+    expect(toTrough).toBeGreaterThan(4);
+
+    const churn = dress!.getObjectByName("farm-churn")!;
+    expect(churn).toBeTruthy();
+    const toChurn = Math.hypot(seed.position.x - churn.position.x, seed.position.z - churn.position.z);
+    expect(toChurn).toBeGreaterThan(4);
+
+    const pail = dress!.getObjectByName("farm-pail")!;
+    expect(pail).toBeTruthy();
+    const toPail = Math.hypot(seed.position.x - pail.position.x, seed.position.z - pail.position.z);
+    expect(toPail).toBeGreaterThan(4);
+
+    const fork = dress!.getObjectByName("farm-fork")!;
+    expect(fork).toBeTruthy();
+    const toFork = Math.hypot(seed.position.x - fork.position.x, seed.position.z - fork.position.z);
+    expect(toFork).toBeGreaterThan(4);
+
+    const colors = hexes(seed);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.some((c) => c === WOOD)).toBe(true);
+    expect(colors.some((c) => c === KRAFT)).toBe(true);
+    expect(colors.some((c) => c === LAMP_BULB)).toBe(true);
+    expect(colors.every((c) => [WOOD, KRAFT, LAMP_BULB].includes(c))).toBe(true);
+
+    let boxes = 0;
+    seed.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        boxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.kind).toBe("farm-seed");
+        expect(mesh.userData.part).toBe("seed");
+        expect(mesh.userData.mode).toBe("PAPER");
+        const geo = mesh.geometry as THREE.BoxGeometry;
+        expect(geo.parameters.width).toBeLessThan(0.12);
+        expect(geo.parameters.height).toBeLessThan(0.12);
+        expect(geo.parameters.depth).toBeLessThan(0.12);
+      }
+    });
+    expect(boxes).toBeGreaterThanOrEqual(2);
+    expect(boxes).toBeLessThanOrEqual(4);
+  });
+
+  it("keeps dress idempotent and hides the seed packet on undress", () => {
+    const scene = new THREE.Scene();
+    dressFarm(scene);
+    dressFarm(scene);
+    expect(scene.children.filter((c) => c.name === "farm-dress").length).toBe(1);
+    const dressed = scene.getObjectByName("farm-dress")!;
+    const seeds: THREE.Object3D[] = [];
+    dressed.traverse((obj) => {
+      if (obj.name === "farm-seed") seeds.push(obj);
+    });
+    expect(seeds.length).toBe(1);
+    expect(dressed.getObjectByName("farm-lantern")).toBeTruthy();
+    expect(dressed.getObjectByName("farm-scoop")).toBeTruthy();
+    expect(dressed.getObjectByName("farm-basket")).toBeTruthy();
+
+    undressFarm(scene);
+    const dress = scene.getObjectByName("farm-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.visible).toBe(false);
+    expect(scene.userData.interiorUse).toBe("house");
+  });
+});
