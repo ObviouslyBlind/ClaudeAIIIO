@@ -8,14 +8,15 @@ Critics must open a **new query** (`/?g=…`). Do not reuse a tab already on `/`
 - Inland spawn + black tarmac + PAPER HUD
 - Traffic: colored meshes + red masts on paved
 - Taxi overlay: island ellipse + paved polyline
-- **Ferry ticket:** PAPER quote North ↔ South, $15, Confirm/Cancel; Cancel keeps you at North (`/?g=ferry15`)
+- Ferry ticket: PAPER $15 North ↔ South; Cancel keeps cash
+- **RMB orbit:** hold-drag yaws/pitches around the player; left click still walks (`/?g=cam16`)
 
 ## Shipped (code, not yet pixel-ratified)
 
-RMB orbit · catalogue · interiors
+Catalogue · interiors
 
 ## Next piece
 
-**RMB-hold orbit.** Left click still walks. Phone/tap must not orbit. Custom spherical camera, not three.js OrbitControls.
+**Develop catalogue.** Lease a vacant parcel, click **Develop**, see the PAPER picker (house, shop, house with shop, farm, warehouse, factory) with paper costs. Do not require a finished interior this round.
 
 Do not rewrite `traffic.js`, island centres, or PLAN.md.
