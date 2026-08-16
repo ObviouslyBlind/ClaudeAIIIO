@@ -126,6 +126,30 @@ function tagPart(mesh, part) {
   return mesh;
 }
 
+/**
+ * Short kraft/black checker belt on the doors so the cab is not a yellow sedan.
+ * Original kraft tan + the cab black. PAPER boxes only. Roof sign stays.
+ */
+function addTaxiCheckBand(g, kraftMat, blackMat) {
+  const tileW = 0.07;
+  const tileH = 0.16;
+  const tileD = 0.24;
+  const cols = 7;
+  const rows = 2;
+  const y0 = 1.12;
+  const z0 = -0.22 - (cols * tileD) / 2;
+  for (const side of [-1, 1]) {
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+        const mat = (row + col) % 2 ? blackMat : kraftMat;
+        const tile = tagPart(taxiBox(tileW, tileH, tileD - 0.02, mat, false), "check");
+        tile.position.set(side * 1.26, y0 + row * tileH, z0 + (col + 0.5) * tileD);
+        g.add(tile);
+      }
+    }
+  }
+}
+
 /** Four black tyres with a hub so the cab is not a floating box. */
 function addTaxiWheels(g, tyreMat, hubMat) {
   const tyreGeo = new THREE.CylinderGeometry(0.48, 0.48, 0.36, 10);
@@ -150,7 +174,7 @@ function addTaxiWheels(g, tyreMat, hubMat) {
 }
 
 /**
- * Yellow cab that reads from the quay: wheels, glass, roof lamp.
+ * Yellow cab that reads from the quay: wheels, glass, roof lamp, checker belt.
  * Compact warm PAPER taxi-sign box — original cream lamp, not a sedan lid,
  * not a debug mast, not a cop lightbar.
  */
@@ -160,6 +184,8 @@ export function makeTaxiMesh() {
   const yellow = taxiMat(0xf0c430, { emissive: 0xf0c430, emissiveIntensity: 0.18 });
   const cabin = taxiMat(0xf6d65a, { emissive: 0xf6d65a, emissiveIntensity: 0.12 });
   const dark = taxiMat(0x1a1a1e);
+  /** Same kraft tan as quay decks / straw — original palette, not a new hex. */
+  const kraft = taxiMat(0xc4a574);
   const chrome = taxiMat(0xc8c4b8);
   const glass = taxiMat(0x3a5a6c, { emissive: 0x1a3040, emissiveIntensity: 0.22 });
   /** Original taxi lamp cream. Warm PAPER glow, not neon. */
@@ -171,6 +197,8 @@ export function makeTaxiMesh() {
   const body = taxiBox(2.45, 1.05, 5.05, yellow);
   body.position.y = 0.92;
   g.add(body);
+
+  addTaxiCheckBand(g, kraft, dark);
 
   const bumperF = taxiBox(2.52, 0.28, 0.28, dark, false);
   bumperF.position.set(0, 0.52, 2.58);
