@@ -18,6 +18,8 @@ const CORN = 0xd4b83a;
 const LEAF = 0x5f8a32;
 const PLASTER = 0xe8d7b8;
 const FRAME = 0x3d2a1c;
+/** Warm oil-glass. Same family as farm lamp bulb — not neon, not street-iron. */
+const WARM_GLASS = 0xffd090;
 
 /** PAPER canvas pairs. Same three hexes, swapped per stall. */
 const AWNING_PAIRS = [
@@ -81,7 +83,7 @@ function labelGood(g) {
   return String(g).replace(/_/g, " ");
 }
 
-/** Visible PAPER market stand: deck, posts, price board, striped awning, counter, crates, hanging scale, produce basket. */
+/** Visible PAPER market stand: deck, posts, price board, striped awning, counter, crates, hanging scale, produce basket, oil lantern. */
 export function makeStallMesh(plot) {
   const g = new THREE.Group();
   g.name = "npc-stall";
@@ -247,6 +249,36 @@ export function makeStallMesh(plot) {
   greens.userData.part = "produce-basket";
   basket.add(basketCord, basketHandle, basketBody, basketRim, tomato, greens);
   g.add(basket);
+
+  // Small hanging oil lantern under the awning so the stand reads as a
+  // dusk market stall, not a street-lamp post. Wood hood + warm kraft glass.
+  // Local offset only — stall world pose stays put.
+  const lantern = new THREE.Group();
+  lantern.name = "lantern";
+  lantern.userData.part = "lantern";
+  lantern.userData.mode = "PAPER";
+  lantern.userData.paper = true;
+  lantern.position.set(0, 1.9, 0.42);
+  const lanternCord = paperBox(0.025, 0.2, 0.025, FRAME, false);
+  lanternCord.position.y = 0.16;
+  lanternCord.userData.part = "lantern";
+  const lanternBail = paperBox(0.1, 0.03, 0.03, WOOD, false);
+  lanternBail.position.y = 0.05;
+  lanternBail.userData.part = "lantern";
+  const lanternHood = paperBox(0.16, 0.04, 0.16, WOOD, false);
+  lanternHood.position.y = 0.02;
+  lanternHood.userData.part = "lantern";
+  const lanternGlass = paperBox(0.11, 0.13, 0.11, WARM_GLASS, false);
+  lanternGlass.position.y = -0.07;
+  lanternGlass.userData.part = "lantern";
+  const lanternPane = paperBox(0.08, 0.1, 0.08, KRAFT, false);
+  lanternPane.position.y = -0.07;
+  lanternPane.userData.part = "lantern";
+  const lanternBase = paperBox(0.14, 0.03, 0.14, WOOD, false);
+  lanternBase.position.y = -0.15;
+  lanternBase.userData.part = "lantern";
+  lantern.add(lanternCord, lanternBail, lanternHood, lanternGlass, lanternPane, lanternBase);
+  g.add(lantern);
 
   const back = paperBox(3.9, 1.6, 0.12, PLASTER);
   back.position.set(0, 1.05, -1.28);

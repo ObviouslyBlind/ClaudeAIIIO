@@ -120,6 +120,7 @@ describe("NPC harbour stalls", () => {
     expect(kinds).toContain("counter");
     expect(kinds).toContain("crate");
     expect(kinds).toContain("produce");
+    expect(kinds).toContain("lantern");
     const colors = hexes(mesh);
     expect(colors.length).toBeGreaterThan(4);
     expect(colors.every(isGrey)).toBe(false);
@@ -162,6 +163,44 @@ describe("NPC harbour stalls", () => {
     expect(stalls.group.children.length).toBeGreaterThan(0);
     for (const child of stalls.group.children) {
       expect(child.children.filter((c) => c.userData.part === "goods-crate").length).toBe(1);
+    }
+  });
+
+  it("hangs one small warm kraft oil lantern under each stall awning", () => {
+    const mesh = makeStallMesh({ id: "n-test", use: "farm", island: "north", band: "field" });
+    const awnings = mesh.children.filter((c) => c.userData.part === "awning");
+    const lamps = mesh.children.filter((c) => c.userData.part === "lantern");
+    expect(lamps.length).toBe(1);
+    const lantern = lamps[0]!;
+    expect(lantern.userData.mode).toBe("PAPER");
+    expect(lantern.userData.paper).toBe(true);
+
+    const awningY = Math.min(...awnings.map((a) => a.position.y));
+    expect(lantern.position.y).toBeLessThan(awningY);
+    expect(lantern.position.y).toBeGreaterThan(1.2);
+    expect(Math.abs(lantern.position.x)).toBeLessThan(1.4);
+    expect(Math.abs(lantern.position.z)).toBeLessThan(1.2);
+
+    const warm = new Set([0x5a3a22, 0x3d2a1c, 0x6a4a2a, 0x8a6238, 0xf4ead8, 0xffd090, 0xd4b83a, 0xc4a574]);
+    const colors = hexes(lantern);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.every((c) => warm.has(c))).toBe(true);
+    expect(colors).toContain(0x5a3a22);
+    expect(colors.some((c) => c === 0xffd090 || c === 0xf4ead8)).toBe(true);
+    lantern.traverse((obj) => {
+      const m = obj as THREE.Mesh;
+      if (!m.isMesh) return;
+      expect(m.geometry.type).toBe("BoxGeometry");
+      const g = m.geometry as THREE.BoxGeometry;
+      expect(g.parameters.width).toBeLessThan(0.35);
+      expect(g.parameters.height).toBeLessThan(0.35);
+      expect(g.parameters.depth).toBeLessThan(0.35);
+    });
+
+    const { stalls } = boot();
+    expect(stalls.group.children.length).toBeGreaterThan(0);
+    for (const child of stalls.group.children) {
+      expect(child.children.filter((c) => c.userData.part === "lantern").length).toBe(1);
     }
   });
 
