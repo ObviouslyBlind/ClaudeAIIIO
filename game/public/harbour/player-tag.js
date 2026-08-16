@@ -7,7 +7,7 @@ import * as THREE from "three";
  * Not a HUD, not a CoD plate, not Capital Rift UI.
  */
 
-const LABEL = "You · PAPER";
+export const LABEL = "You · PAPER";
 const NAME = "You";
 const LABEL_Y = 2.12;
 /** World metres. Same kraft card as outdoor walker nametags. */
@@ -17,6 +17,8 @@ const PAPER_FACE = "#efe4c8";
 const PAPER_EDGE = "#8a6238";
 const INK = "#3d2a1c";
 const STAMP = "#7a2e22";
+/** Canvas-card fold is on. Not a 3D mesh. Same recipe as outdoor nametags. */
+export const PLAYER_TAG_FOLD = true;
 
 /** Tracked letters so PAPER reads as a stamp even without canvas letterSpacing. */
 function fillSpaced(ctx, text, x, y, tracking) {
@@ -30,6 +32,30 @@ function fillSpaced(ctx, text, x, y, tracking) {
     ctx.fillText(chars[i], cx + widths[i] / 2, y);
     cx += widths[i] + tracking;
   }
+}
+
+/**
+ * Tiny folded kraft triangle in the top-right of the card. Canvas only —
+ * PAPER_EDGE face + INK crease. Same recipe as outdoor nametags. Not a 3D mesh.
+ */
+function drawFoldedCorner(ctx, w) {
+  if (!PLAYER_TAG_FOLD) return;
+  const s = 26;
+  ctx.save();
+  ctx.fillStyle = PAPER_EDGE;
+  ctx.beginPath();
+  ctx.moveTo(w - s, 0);
+  ctx.lineTo(w, 0);
+  ctx.lineTo(w, s);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = INK;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(w - s, 0);
+  ctx.lineTo(w, s);
+  ctx.stroke();
+  ctx.restore();
 }
 
 /**
@@ -57,6 +83,25 @@ function drawPaperStamp(ctx, cx, cy) {
   ctx.restore();
 }
 
+/** Paint kraft card: face, edge, folded corner, name, PAPER stamp. */
+export function paintPlayerTagCard(ctx, w, h) {
+  ctx.fillStyle = PAPER_FACE;
+  ctx.fillRect(0, 0, w, h);
+  ctx.strokeStyle = PAPER_EDGE;
+  ctx.lineWidth = 8;
+  ctx.strokeRect(6, 6, w - 12, h - 12);
+
+  drawFoldedCorner(ctx, w);
+
+  ctx.fillStyle = INK;
+  ctx.font = "600 44px Georgia, 'Times New Roman', serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(NAME, w / 2, 48);
+
+  drawPaperStamp(ctx, w / 2, h - 36);
+}
+
 export function makePlayerTag() {
   if (typeof document === "undefined") return null;
   const w = 512;
@@ -66,19 +111,7 @@ export function makePlayerTag() {
   canvas.height = h;
   const ctx = canvas.getContext("2d");
 
-  ctx.fillStyle = PAPER_FACE;
-  ctx.fillRect(0, 0, w, h);
-  ctx.strokeStyle = PAPER_EDGE;
-  ctx.lineWidth = 8;
-  ctx.strokeRect(6, 6, w - 12, h - 12);
-
-  ctx.fillStyle = INK;
-  ctx.font = "600 44px Georgia, 'Times New Roman', serif";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText(NAME, w / 2, 48);
-
-  drawPaperStamp(ctx, w / 2, h - 36);
+  paintPlayerTagCard(ctx, w, h);
 
   const tex = new THREE.CanvasTexture(canvas);
   tex.colorSpace = THREE.SRGBColorSpace;
