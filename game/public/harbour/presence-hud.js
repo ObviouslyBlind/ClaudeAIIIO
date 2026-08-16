@@ -8,16 +8,21 @@ export const POLL_MS = 1000;
 export const CELL_SIZE_M = 250;
 const TITLE = "PAPER · SIMULATED · 250 m cell";
 
-function xzOf(getPos) {
-  if (typeof getPos !== "function") return { x: 0, z: 0 };
+/** Origin is the unspawned three.js mesh, not the north quay. Omit coords. */
+export function xzOf(getPos) {
+  if (typeof getPos !== "function") return null;
   const p = getPos();
   const pos = p && p.position ? p.position : p;
-  const x = pos ? Number(pos.x) : 0;
-  const z = pos ? Number(pos.z) : 0;
-  return {
-    x: Number.isFinite(x) ? x : 0,
-    z: Number.isFinite(z) ? z : 0,
-  };
+  const x = pos ? Number(pos.x) : NaN;
+  const z = pos ? Number(pos.z) : NaN;
+  if (!Number.isFinite(x) || !Number.isFinite(z)) return null;
+  if (x === 0 && z === 0) return null;
+  return { x, z };
+}
+
+export function presenceUrl(pos) {
+  if (!pos) return "/api/presence";
+  return `/api/presence?x=${encodeURIComponent(pos.x)}&z=${encodeURIComponent(pos.z)}`;
 }
 
 function cellMetres(data) {
@@ -45,8 +50,7 @@ export function mountPresenceHud(opts = {}) {
   async function refresh() {
     if (!el || typeof fetchImpl !== "function") return;
     try {
-      const { x, z } = xzOf(getPos);
-      const res = await fetchImpl(`/api/presence?x=${encodeURIComponent(x)}&z=${encodeURIComponent(z)}`);
+      const res = await fetchImpl(presenceUrl(xzOf(getPos)));
       if (!res || !res.ok) return;
       el.textContent = formatPresenceLine(await res.json());
     } catch {
@@ -55,7 +59,8 @@ export function mountPresenceHud(opts = {}) {
   }
 
   if (el) {
-    el.textContent = formatPresenceLine(null);
+    const already = String(el.textContent || "");
+    if (!already.includes("PAPER")) el.textContent = formatPresenceLine(null);
     if (el.setAttribute) el.setAttribute("title", TITLE);
     refresh();
     timer = setInterval(refresh, POLL_MS);

@@ -29,7 +29,7 @@
       <p id="flow">Faucet — · sink — · PAPER</p>
       <p id="spread">Ferry spread · PAPER</p>
       <p id="tax">Sales tax 0% · PAPER</p>
-      <p id="nearby">Nearby —</p>
+      <p id="nearby">PAPER · SIMULATED · 250 m PAPER cell · — nearby</p>
       <p id="cart">PAPER</p>
       <p id="goods">PAPER</p>
       <p id="staff-line">Staff — · PAPER</p>
@@ -137,6 +137,22 @@
               calEl.textContent = "PAPER · SIMULATED · Day " + day + " · tick " + tick;
             }
             if (cartEl) cartEl.textContent = "PAPER";
+          })
+          .catch(function () {});
+        // Nearby must read PAPER walkers before main.js. `/g/hud47` showed
+        // "0 nearby" because the three.js mesh still sat at 0,0 pre-spawnAt.
+        fetch("/api/presence")
+          .then(function (r) {
+            return r && r.ok ? r.json() : null;
+          })
+          .then(function (d) {
+            var el = document.getElementById("nearby");
+            if (!el || !d) return;
+            var n = d.actors && d.actors.length ? d.actors.length : 0;
+            var cell = d.cellSize != null ? Number(d.cellSize) : 250;
+            if (!isFinite(cell) || cell <= 0) cell = 250;
+            el.textContent =
+              "PAPER · SIMULATED · " + Math.round(cell) + " m PAPER cell · " + n + " nearby";
           })
           .catch(function () {});
       })();

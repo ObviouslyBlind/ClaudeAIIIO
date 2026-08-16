@@ -104,6 +104,14 @@ describe("PAPER outdoor presence cells", () => {
     expect(first.cellSize).toBe(250);
     expect(first.query).toEqual({ x: port.x, z: port.z, radius: 250 });
     expect(first.actors).toHaveLength(4);
+
+    const origin = presenceQuery(createPresence(), { x: "0", z: "0" });
+    expect(origin.query).toEqual({ x: port.x, z: port.z, radius: 250 });
+    expect(origin.actors).toHaveLength(4);
+
+    const spawn = presenceQuery(createPresence(), { x: "0", z: "-6958" });
+    expect(spawn.query).toEqual({ x: 0, z: -6958, radius: 250 });
+    expect(spawn.actors).toHaveLength(4);
     expect(first.actors.every((a) => a.island === "north")).toBe(true);
 
     const south = presenceQuery(grid, {

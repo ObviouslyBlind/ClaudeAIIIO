@@ -158,14 +158,33 @@ export function toSnapshot(
   };
 }
 
+function isBlank(raw: string | null | undefined): boolean {
+  return raw == null || raw === "";
+}
+
+/**
+ * Unspawned three.js mesh sits at the origin. That is mid-channel, not a quay.
+ * Treat missing coords or explicit 0,0 as the north port so spawn HUD is not
+ * "0 nearby" while boot() still has not called spawnAt.
+ */
+export function resolvePresenceQuery(
+  params: { x?: string | null; z?: string | null },
+): { x: number; z: number } {
+  const x = parseCoord(params.x, northPort.x);
+  const z = parseCoord(params.z, northPort.z);
+  if ((isBlank(params.x) && isBlank(params.z)) || (x === 0 && z === 0)) {
+    return { x: northPort.x, z: northPort.z };
+  }
+  return { x, z };
+}
+
 /** HTTP poll helper. First query seeds the north-quay walkers. */
 export function presenceQuery(
   grid: PresenceGrid,
   params: { x?: string | null; z?: string | null; radius?: string | null },
 ): PresenceSnapshot {
   seedNorthQuayWalkersOnce(grid);
-  const x = parseCoord(params.x, northPort.x);
-  const z = parseCoord(params.z, northPort.z);
+  const { x, z } = resolvePresenceQuery(params);
   const radius = parseCoord(params.radius, DEFAULT_RADIUS_M);
   return toSnapshot(grid, { x, z, radius: radius > 0 ? radius : DEFAULT_RADIUS_M });
 }
