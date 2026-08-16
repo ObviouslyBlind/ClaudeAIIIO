@@ -60,6 +60,7 @@ describe("player PAPER visor", () => {
     expect(p.filter((k) => k === "button").length).toBe(1);
     expect(p.filter((k) => k === "badge").length).toBe(1);
     expect(p.filter((k) => k === "lanyard").length).toBe(1);
+    expect(p.filter((k) => k === "kerchief").length).toBe(1);
 
     const visor = figure.children.find((c) => c.userData.part === "visor") as THREE.Mesh;
     const hats = figure.children.filter((c) => c.userData.part === "hat") as THREE.Mesh[];
@@ -158,5 +159,41 @@ describe("player PAPER visor", () => {
     expect(colors).toContain(KRAFT);
     expect(colors).toContain(SHIRT);
     expect(colors.every((c) => !isGrey(c))).toBe(true);
+  });
+});
+
+describe("player PAPER kerchief", () => {
+  it("sticks one tiny kraft PAPER kerchief; lanyard and badge remain", () => {
+    const player = makePlayer();
+    expect(player.position.x).toBe(12);
+    expect(player.position.y).toBe(3.4);
+    expect(player.position.z).toBe(-6950);
+
+    const figure = player.getObjectByName("paper-figure")!;
+    const p = parts(figure);
+    expect(p.filter((k) => k === "kerchief").length).toBe(1);
+    expect(p.filter((k) => k === "lanyard").length).toBe(1);
+    expect(p.filter((k) => k === "badge").length).toBe(1);
+
+    const kerchief = figure.children.find((c) => c.userData.part === "kerchief") as THREE.Mesh;
+    const lanyard = figure.children.find((c) => c.userData.part === "lanyard") as THREE.Mesh;
+    const badge = figure.children.find((c) => c.userData.part === "badge") as THREE.Mesh;
+    const button = figure.children.find((c) => c.userData.part === "button") as THREE.Mesh;
+    const pocket = figure.children.find((c) => c.userData.part === "pocket") as THREE.Mesh;
+    const visor = figure.children.find((c) => c.userData.part === "visor") as THREE.Mesh;
+    expect(kerchief).toBeTruthy();
+    expect(lanyard).toBeTruthy();
+    expect(badge).toBeTruthy();
+    expect(kerchief.geometry.type).toBe("BoxGeometry");
+    expect((kerchief.material as THREE.MeshLambertMaterial).color.getHex()).toBe(KRAFT);
+    expect(kerchief.position.x).not.toBeCloseTo(lanyard.position.x, 1);
+    expect(kerchief.position.x).not.toBeCloseTo(badge.position.x, 1);
+    expect(kerchief.position.x).not.toBeCloseTo(button.position.x, 1);
+    expect(kerchief.position.x).not.toBeCloseTo(pocket.position.x, 1);
+    expect(kerchief.position.y).not.toBeCloseTo(visor.position.y, 1);
+    const box = kerchief.geometry as THREE.BoxGeometry;
+    expect(box.parameters.width).toBeLessThan(0.12);
+    expect(box.parameters.height).toBeLessThan(0.08);
+    expect(box.parameters.depth).toBeLessThan(0.06);
   });
 });
