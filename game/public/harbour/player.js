@@ -54,6 +54,7 @@ function paperBox(w, h, d, color) {
  *   button  y 1.28–1.32   (0.08, 1.30, 0.155)   0.04×0.04×0.03   kraft, shirt
  *   badge   y 1.315–1.365 (0.16, 1.34, 0.155)   0.08×0.05×0.03   kraft, shirt
  *   lanyard y 1.29–1.43   (−0.18, 1.36, 0.155)  0.03×0.14×0.02   kraft, collar
+ *   kerchief y 1.42–1.46  (0, 1.44, 0.16)       0.08×0.04×0.03   kraft, collar
  *   satchel y 0.64–0.92   (0.38, 0.78, 0.08)    0.18×0.28×0.14   kraft
  *   flap    y 0.88–0.96   (0.38, 0.92, 0.09)    0.18×0.08×0.16   kraft
  *   strap   y 0.92–1.40   (0.05, 1.14, 0.16)    0.04×0.82×0.02   cross-body
@@ -114,6 +115,11 @@ export function dressPlayer(player) {
   const lanyard = paperBox(0.03, 0.14, 0.02, KRAFT);
   lanyard.position.set(-0.18, 1.36, 0.155);
   lanyard.userData.part = "lanyard";
+
+  // Tiny kraft PAPER kerchief at the collar. Offset from lanyard, badge, button, pocket, visor.
+  const kerchief = paperBox(0.08, 0.04, 0.03, KRAFT);
+  kerchief.position.set(0, 1.44, 0.16);
+  kerchief.userData.part = "kerchief";
 
   const belt = paperBox(0.48, 0.08, 0.3, BELT);
   belt.position.set(0, 0.84, 0);
@@ -183,6 +189,7 @@ export function dressPlayer(player) {
     button,
     badge,
     lanyard,
+    kerchief,
     belt,
     buckle,
     leftArm,
