@@ -1,6 +1,12 @@
 /**
  * Paper ferry quote. Confirm posts /api/ferry (shared visitor cash), then spawnAt.
+ * Kraft card overlay: PAPER / SIMULATED stamp + fare from the quote. Not a wallet.
  */
+
+const KRAFT = "#efe4c8";
+const KRAFT_EDGE = "#8a6238";
+const STAMP = "#7a2e22";
+const INK = "#3d2a1c";
 
 function cap(id) {
   return id.slice(0, 1).toUpperCase() + id.slice(1);
@@ -37,6 +43,13 @@ export function createFerryTicket({ getIslandId, spawnAt, setStatus, applyMap })
   el.hidden = true;
   el.setAttribute("role", "dialog");
   el.setAttribute("aria-labelledby", "ferry-ticket-title");
+  el.setAttribute("data-mode", "PAPER");
+  el.setAttribute("data-provenance", "SIMULATED");
+  el.title = "PAPER · SIMULATED";
+  el.style.background = KRAFT;
+  el.style.color = INK;
+  el.style.border = "2px solid " + KRAFT_EDGE;
+  el.style.boxShadow = "0 10px 28px rgba(61, 42, 28, 0.35), inset 0 0 0 1px #d9cbb3";
   document.body.appendChild(el);
 
   let route = null;
@@ -51,16 +64,24 @@ export function createFerryTicket({ getIslandId, spawnAt, setStatus, applyMap })
   function render(next, from) {
     route = next;
     const d = polylinePath(next.points, 280, 88, 18);
+    const fare = money(next.cost);
     el.innerHTML = `
-      <p class="stamp">PAPER · SIMULATED · TICKET</p>
+      <p class="stamp" style="display:inline-block;margin:2px 0 10px;padding:7px 12px;border:2px dashed ${STAMP};color:${STAMP};background:${KRAFT};font-size:14px;font-weight:700;letter-spacing:0.14em;line-height:1.25;text-transform:uppercase;transform:rotate(-5deg);box-shadow:inset 0 0 0 1px ${STAMP}">PAPER / SIMULATED</p>
       <h2 id="ferry-ticket-title">${routeLabel(next)}</h2>
-      <p class="mute">From ${cap(from)} port. Not a teleport until you confirm.</p>
-      <svg viewBox="0 0 280 88" aria-hidden="true">
+      <p class="mute">From ${cap(from)} port. Kraft ticket. Not a teleport until you confirm.</p>
+      <svg viewBox="0 0 280 88" aria-hidden="true" style="background:${KRAFT};border:1px solid ${KRAFT_EDGE}">
+        <rect x="1" y="1" width="278" height="86" fill="${KRAFT}" stroke="${KRAFT_EDGE}" />
         <path d="${d}" fill="none" stroke="#8a3b2a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
-        <text x="18" y="16" fill="#5a3a22" font-size="11">${cap(next.from)}</text>
-        <text x="232" y="80" fill="#5a3a22" font-size="11">${cap(next.to)}</text>
+        <text x="18" y="16" fill="${INK}" font-size="11">${cap(next.from)}</text>
+        <text x="232" y="80" fill="${INK}" font-size="11">${cap(next.to)}</text>
+        <g transform="translate(196,10) rotate(-12)">
+          <rect x="0" y="0" width="74" height="32" fill="${KRAFT}" stroke="${STAMP}" stroke-width="1.8" stroke-dasharray="4 2" rx="2" />
+          <text x="37" y="13" text-anchor="middle" fill="${STAMP}" font-size="9" font-weight="700">PAPER</text>
+          <text x="37" y="25" text-anchor="middle" fill="${STAMP}" font-size="8" font-weight="700">SIMULATED</text>
+        </g>
       </svg>
-      <p class="fare">PAPER $${money(next.cost)}</p>
+      <p class="fare" style="margin:8px 0 0;font-size:22px;font-weight:700;color:${INK};letter-spacing:0.02em">PAPER $${fare}</p>
+      <p class="stamp" style="margin:4px 0 0;font-size:12px;font-weight:700;letter-spacing:0.16em;color:${STAMP};text-transform:uppercase">SIMULATED · $${fare} fare</p>
       <div class="actions">
         <button type="button" class="cancel" id="ferry-cancel">Cancel</button>
         <button type="button" class="confirm" id="ferry-confirm">Confirm</button>
