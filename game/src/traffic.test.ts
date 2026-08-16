@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import * as THREE from "three";
 import { createLandBoard, heightAt, ISLANDS } from "./land.ts";
 import {
   createTraffic,
@@ -7,6 +8,7 @@ import {
   SPAWN_SPAN_M,
 } from "../public/harbour/traffic.js";
 import { projectOnPolyline } from "../public/harbour/taxi.js";
+import { CAMERA_FAR_M, spawnCameraOffset, spawnLookAtOffset } from "../public/harbour/roads.js";
 
 describe("road node traffic", () => {
   it("keeps sampled cars on the paved spline, never on dirt", () => {
@@ -42,9 +44,9 @@ describe("road node traffic", () => {
     });
     const north = traffic.cars.filter((c) => c.islandId === "north");
     expect(north.length).toBeGreaterThanOrEqual(5);
-    expect(SPAWN_SPAN_M).toBeLessThan(500);
+    expect(SPAWN_SPAN_M).toBeLessThan(220);
     for (const car of north) {
-      expect(car.along).toBeLessThan(SPAWN_SPAN_M + 40);
+      expect(car.along).toBeLessThanOrEqual(SPAWN_SPAN_M + 40);
       expect(car.mesh.position.y).toBeGreaterThan(0.5);
     }
     const port = ISLANDS.north.port;
@@ -52,5 +54,32 @@ describe("road node traffic", () => {
       ...north.map((c) => Math.hypot(c.mesh.position.x - port.x, c.mesh.position.z - port.z)),
     );
     expect(nearest).toBeLessThan(120);
+  });
+
+  it("puts at least three north cars inside the spawn camera frame", () => {
+    const board = createLandBoard();
+    const scene = { add() {} };
+    const traffic = createTraffic({
+      scene,
+      getMap: () => board,
+      specOf: (id: "north" | "south") => ISLANDS[id],
+      heightAt,
+    });
+    const spec = ISLANDS.north;
+    const o = spawnCameraOffset("north");
+    const l = spawnLookAtOffset("north");
+    const px = spec.port.x;
+    const pz = spec.port.z - 8;
+    const py = heightAt(spec, px, pz) + 1.15;
+    const cam = new THREE.PerspectiveCamera(55, 16 / 9, 0.4, CAMERA_FAR_M);
+    cam.position.set(px + o.x, py + o.y, pz + o.z);
+    cam.lookAt(px + l.x, py + l.y, pz + l.z);
+    cam.updateMatrixWorld();
+    const inFrame = (c: { mesh: { position: THREE.Vector3 } }) => {
+      const v = c.mesh.position.clone().project(cam);
+      return Math.abs(v.x) < 0.92 && Math.abs(v.y) < 0.92 && v.z < 1;
+    };
+    const visible = traffic.cars.filter((c) => c.islandId === "north" && inFrame(c));
+    expect(visible.length).toBeGreaterThanOrEqual(3);
   });
 });
