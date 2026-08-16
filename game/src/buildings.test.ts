@@ -157,6 +157,31 @@ describe("paper building catalogue", () => {
     expect(chimneyHexes.every((c) => c === 0x8a6a55 || c === 0xf4ead8)).toBe(true);
   });
 
+  it("puts a kraft PAPER porch slab on the House so plots read as entered from the street", () => {
+    const house = meshForUse("house", { area: 400 });
+    const parts: string[] = [];
+    const hexes: number[] = [];
+    const zs: number[] = [];
+    house.traverse((obj: unknown) => {
+      const mesh = obj as {
+        userData?: { part?: string; mode?: string };
+        material?: { color?: { getHex: () => number } };
+        position?: { z: number };
+      };
+      const part = mesh.userData?.part;
+      if (part !== "porch" && part !== "doorstep") return;
+      parts.push(part);
+      expect(mesh.userData?.mode).toBe("PAPER");
+      if (mesh.material?.color) hexes.push(mesh.material.color.getHex());
+      if (mesh.position) zs.push(mesh.position.z);
+    });
+    expect(parts).toContain("porch");
+    expect(parts).toContain("doorstep");
+    expect(hexes.length).toBeGreaterThan(0);
+    expect(hexes.every((c) => c === 0xf4ead8)).toBe(true);
+    expect(zs.every((z) => z > 2.6)).toBe(true);
+  });
+
   it("keeps a brick/kraft chimney and tiny stack on the warehouse shell", () => {
     const warehouse = meshForUse("warehouse", { area: 400 });
     const parts: string[] = [];
