@@ -394,6 +394,12 @@ export function makeQuay(spec, helpers) {
     const brow = gangplank();
     brow.position.set(x + 1.55, deckY, pierZ + 40);
     root.add(brow);
+
+    // Extra kraft stack on the north timber, west of the walk, short of the brow.
+    const stackN = crateStack();
+    stackN.position.set(x - 3.3, deckY, pierZ - toward * 12);
+    stackN.rotation.y = 0.28;
+    root.add(stackN);
   }
 
   for (const along of [-24, -8, 10, 26]) {
