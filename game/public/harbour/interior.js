@@ -279,7 +279,9 @@ export function makeInteriorScene() {
   dressWindowX(down, downSideWin[0].along, X0, downSideWin[0].sill, downSideWin[0].head, downSideWin[0].width, +1);
   dressWindowX(down, downRightWin[0].along, X1, downRightWin[0].sill, downRightWin[0].head, downRightWin[0].width, -1);
 
-  down.add(box(2.55, 0.04, 1.85, RUG, -0.15, 0.18, -0.35, "interior-prop"));
+  // Kraft card + terracotta face under the table — original PAPER_CARD / RUG.
+  down.add(box(2.55, 0.03, 1.85, PAPER_CARD, -0.15, 0.175, -0.35, "interior-prop"));
+  down.add(box(2.28, 0.03, 1.58, RUG, -0.15, 0.195, -0.35, "interior-prop"));
   down.add(makeTable(-0.15, -0.35));
   down.add(makeChair(-0.15, 0.55, 0));
   down.add(makeChair(-0.15, -1.22, Math.PI));
