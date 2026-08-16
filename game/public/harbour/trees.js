@@ -734,6 +734,55 @@ function plantNorthPortLeaf(root) {
   nest.add(leaf);
 }
 
+function markFrond(mesh) {
+  mesh.userData.part = "frond";
+  mesh.userData.dress = "frond";
+  mesh.userData.provenance = "PAPER";
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+}
+
+/**
+ * One small kraft PAPER frond tip (one box) on a north-port palm —
+ * not instead of the coconut, bird, nest, egg, or leaf. Hexes already
+ * in this file: leaf green. Reuses the nest twig box so geometry count
+ * stays put. Unique mesh — one box — so the phone mesh budget stays tiny.
+ * Trunks, leaves, coconuts, bird, nest, egg, and leaf stay put.
+ */
+function plantNorthPortFrond(root) {
+  let nest = null;
+  root.traverse((obj) => {
+    if (!nest && obj.userData.kind === "nest") nest = obj;
+  });
+  if (!nest) return;
+
+  let geo = null;
+  nest.traverse((obj) => {
+    if (geo) return;
+    if (obj.isMesh && obj.geometry && obj.userData.part === "nest") geo = obj.geometry;
+  });
+  if (!geo) return;
+
+  const mat = new THREE.MeshLambertMaterial({ color: LEAF });
+  const frond = new THREE.Group();
+  frond.name = "frond";
+  frond.userData.kind = "frond";
+  frond.userData.part = "frond";
+  frond.userData.dress = "frond";
+  frond.userData.provenance = "PAPER";
+  // Sit on the palm nest as a tiny tip, opposite the kraft leaf.
+  frond.position.set(-0.07, 0.048, -0.03);
+  frond.rotation.set(-0.25, -0.55, 0.4);
+
+  const box = new THREE.Mesh(geo, mat);
+  box.name = "frond-box";
+  markFrond(box);
+  box.scale.set(0.4, 0.28, 0.95);
+
+  frond.add(box);
+  nest.add(frond);
+}
+
 /**
  * Low-poly PAPER trees on hills, inland slopes, and behind street lots.
  * Palms stay on the quay (makePalms). helpers: { scene, specOf, heightAt }.
@@ -757,6 +806,7 @@ export function makeTrees(map, helpers) {
   plantNorthPortNest(root, placed, map || {}, specOf, heightAt);
   plantNorthPortEgg(root);
   plantNorthPortLeaf(root);
+  plantNorthPortFrond(root);
   scene.add(root);
   return root;
 }
