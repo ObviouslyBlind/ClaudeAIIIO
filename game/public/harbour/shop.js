@@ -179,6 +179,7 @@ function kraftBag(x, y, z) {
   g.name = "shop-bag";
   g.userData.kind = "shop-bag";
   g.userData.mode = "PAPER";
+  g.userData.provenance = "SIMULATED";
   g.position.set(x, y, z);
   const w = 0.14;
   const h = 0.2;

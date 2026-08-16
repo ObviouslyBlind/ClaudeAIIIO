@@ -135,6 +135,7 @@ describe("shop PAPER kraft bag", () => {
     const bag = bags[0];
     expect(bag.userData.kind).toBe("shop-bag");
     expect(bag.userData.mode).toBe("PAPER");
+    expect(bag.userData.provenance).toBe("SIMULATED");
 
     const top = counter!.children.find((c) => {
       const mesh = c as THREE.Mesh;
