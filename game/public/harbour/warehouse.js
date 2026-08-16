@@ -56,11 +56,12 @@ function crateBox(w, h, d, color, x, y, z) {
   return g;
 }
 
-function crateStack(x, z, yaw, layers, y0 = 0.16) {
+function crateStack(x, z, yaw, layers, y0 = 0.16, name = "crate-stack") {
   const g = new THREE.Group();
-  g.name = "crate-stack";
+  g.name = name;
   g.userData.kind = "warehouse-crate";
   g.userData.mode = "PAPER";
+  if (name === "warehouse-floor-crate") g.userData.part = "floor-crate";
   g.position.set(x, 0, z);
   g.rotation.y = yaw;
   let y = y0;
@@ -125,6 +126,16 @@ function makeWarehouseDress() {
     [1.35, 0.7, 0.88, WOOD],
     [1.22, 0.7, 0.8, WOOD_DARK],
   ];
+  const floorA = [
+    [1.22, 0.92, 1.08, WOOD_LIGHT],
+    [0.95, 0.62, 0.85, WOOD, -0.05, 0.04],
+  ];
+  const floorB = [[1.12, 0.85, 0.98, WOOD]];
+  const floorC = [
+    [1.05, 0.78, 0.92, WOOD_DARK],
+    [0.82, 0.52, 0.72, WOOD_LIGHT, 0.04, -0.03],
+  ];
+  const floorD = [[1.18, 0.88, 1.02, WOOD]];
 
   g.add(crateStack(-2.85, -2.52, 0.06, mid));
   g.add(crateStack(-1.35, -2.58, -0.08, low));
@@ -136,7 +147,12 @@ function makeWarehouseDress() {
   g.add(crateStack(-3.18, 2.15, 0.18, long));
   g.add(crateStack(3.32, -0.55, -0.28, mid));
   g.add(crateStack(3.22, 1.05, -0.22, low));
-  g.add(crateStack(1.55, 0.15, 0.14, low));
+
+  // Open downstairs floor, in the enter-camera cone (player at 0, 1.6 looking −Z).
+  g.add(crateStack(-1.35, -0.45, 0.08, floorA, 0.16, "warehouse-floor-crate"));
+  g.add(crateStack(1.12, 0.05, -0.12, floorB, 0.16, "warehouse-floor-crate"));
+  g.add(crateStack(-0.42, -1.72, 0.14, floorC, 0.16, "warehouse-floor-crate"));
+  g.add(crateStack(1.28, -1.48, -0.06, floorD, 0.16, "warehouse-floor-crate"));
 
   const loftY = 2.94;
   g.add(crateStack(-2.4, -2.35, 0.08, low, loftY));
