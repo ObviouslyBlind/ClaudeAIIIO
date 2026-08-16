@@ -135,6 +135,47 @@ describe("paper building catalogue", () => {
       expect(colors.some((c) => !isGrey(c) && lum(c) > 0.12)).toBe(true);
     }
   });
+
+  it("puts a brick/kraft chimney on the House so plots read as buildings", () => {
+    const house = meshForUse("house", { area: 400 });
+    const chimneyHexes: number[] = [];
+    const parts: string[] = [];
+    house.traverse((obj: unknown) => {
+      const mesh = obj as {
+        userData?: { part?: string };
+        material?: { color?: { getHex: () => number } };
+      };
+      const part = mesh.userData?.part;
+      if (part !== "chimney" && part !== "stack") return;
+      parts.push(part);
+      if (mesh.material?.color) chimneyHexes.push(mesh.material.color.getHex());
+    });
+    expect(parts).toContain("chimney");
+    expect(parts).toContain("stack");
+    expect(chimneyHexes).toContain(0x8a6a55);
+    expect(chimneyHexes).toContain(0xf4ead8);
+    expect(chimneyHexes.every((c) => c === 0x8a6a55 || c === 0xf4ead8)).toBe(true);
+  });
+
+  it("keeps a brick/kraft chimney and tiny stack on the warehouse shell", () => {
+    const warehouse = meshForUse("warehouse", { area: 400 });
+    const parts: string[] = [];
+    const hexes: number[] = [];
+    warehouse.traverse((obj: unknown) => {
+      const mesh = obj as {
+        userData?: { part?: string };
+        material?: { color?: { getHex: () => number } };
+      };
+      const part = mesh.userData?.part;
+      if (part !== "chimney" && part !== "stack") return;
+      parts.push(part);
+      if (mesh.material?.color) hexes.push(mesh.material.color.getHex());
+    });
+    expect(parts).toContain("chimney");
+    expect(parts).toContain("stack");
+    expect(hexes).toContain(0x8a6a55);
+    expect(hexes).toContain(0xf4ead8);
+  });
 });
 
 function catalogCost(id: "house" | "shop" | "farm") {
