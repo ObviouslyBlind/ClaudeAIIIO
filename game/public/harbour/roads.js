@@ -6,7 +6,10 @@ export const PAVED_WIDTH_M = 7.2;
 export const DIRT_WIDTH_M = 2.6;
 /** Black tarmac. */
 export const ASPHALT = 0x141414;
+/** Packed earth — same kraft family as crates, not grey pavement. */
 export const DIRT = 0x8a6238;
+/** Dusty lift so field tracks do not crush to paved black under Lambert. */
+const DIRT_DUST = 0x9a6a40;
 
 /**
  * Linear fog (metres). Ports are ~13.9 km apart after the island scale-up.
@@ -45,7 +48,7 @@ function ribbonStations(points) {
  * One prism along the polyline: mitered left/right edges, world-up
  * (no Frenet twist). Reads as a continuous ribbon, not paving slabs.
  */
-function drawRibbon(scene, spec, road, heightAt, widthM, color, roadKind) {
+function drawRibbon(scene, spec, road, heightAt, widthM, color, roadKind, matOpts = {}) {
   const pts = ribbonStations(road.points);
   if (pts.length < 2) return;
 
@@ -121,7 +124,7 @@ function drawRibbon(scene, spec, road, heightAt, widthM, color, roadKind) {
   geo.setIndex(indices);
   geo.computeVertexNormals();
 
-  const m = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ color }));
+  const m = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ color, ...matOpts }));
   m.castShadow = false;
   m.receiveShadow = true;
   m.userData.kind = "ground";
@@ -135,11 +138,14 @@ function drawPaved(scene, spec, road, heightAt) {
 }
 
 function drawDirt(scene, spec, road, heightAt) {
-  drawRibbon(scene, spec, road, heightAt, DIRT_WIDTH_M, DIRT, "dirt");
+  drawRibbon(scene, spec, road, heightAt, DIRT_WIDTH_M, DIRT, "dirt", {
+    emissive: DIRT_DUST,
+    emissiveIntensity: 0.24,
+  });
 }
 
 /**
- * Draw `/api/map` roads. Paved = asphalt street. Dirt = thin brown on fields only.
+ * Draw `/api/map` roads. Paved = asphalt street. Dirt = thin packed earth on fields only.
  */
 export function makeRoads(map, helpers) {
   const { scene, specOf, heightAt } = helpers;
