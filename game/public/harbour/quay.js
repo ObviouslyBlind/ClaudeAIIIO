@@ -198,6 +198,44 @@ function lifeRing() {
   return g;
 }
 
+/**
+ * Short kraft wooden brow from the north timber lip toward the basin.
+ * Paper boxes, wood hexes already in this file. Stops short of the ferry.
+ */
+function gangplank() {
+  const g = new THREE.Group();
+  g.userData.dress = "brow";
+
+  const sill = part(2.35, 0.18, 0.48, 0x6a4a2a);
+  sill.position.set(0, 0.09, 0.04);
+  g.add(sill);
+
+  const plank = part(2.05, 0.12, 6.6, 0x8a6238);
+  plank.rotation.x = -0.22;
+  plank.position.set(0, -0.56, 3.25);
+  g.add(plank);
+
+  const wear = part(1.88, 0.04, 6.4, 0x9a6a40, false);
+  wear.rotation.x = -0.22;
+  wear.position.set(0, -0.48, 3.25);
+  g.add(wear);
+
+  for (const sx of [-1.02, 1.02]) {
+    const postA = part(0.12, 0.72, 0.12, 0x5a3a22, false);
+    postA.position.set(sx, 0.4, 0.28);
+    const postB = part(0.12, 0.72, 0.12, 0x5a3a22, false);
+    postB.position.set(sx, -0.18, 5.25);
+    g.add(postA, postB);
+
+    const rail = part(0.1, 0.08, 5.15, 0x7a5230, false);
+    rail.rotation.x = -0.22;
+    rail.position.set(sx, 0.22, 2.72);
+    g.add(rail);
+  }
+
+  return g;
+}
+
 /** Crate with a canvas tarp lashed over it. */
 function canvasCrate() {
   const g = new THREE.Group();
@@ -351,6 +389,12 @@ export function makeQuay(spec, helpers) {
   d2.position.set(x - 10.6, 0.36, z + toward * 82);
   d2.rotation.y = spec.id === "north" ? -0.14 : Math.PI - 0.14;
   root.add(d2);
+
+  if (spec.id === "north") {
+    const brow = gangplank();
+    brow.position.set(x + 1.55, deckY, pierZ + 40);
+    root.add(brow);
+  }
 
   for (const along of [-24, -8, 10, 26]) {
     for (const side of [-5.15, 5.15]) {
