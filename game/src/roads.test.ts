@@ -20,12 +20,26 @@ function lum(hex: number) {
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
 
+type RoadMesh = {
+  userData: { roadKind?: string; widthM?: number };
+  geometry: {
+    parameters?: { width: number };
+    attributes: { position: { count: number; getX: (i: number) => number; getZ: (i: number) => number } };
+    index: { count: number } | null;
+  };
+  material: { color: { getHex: () => number } };
+};
+
+function ribbonWidthM(mesh: RoadMesh) {
+  const pos = mesh.geometry.attributes.position;
+  return Math.hypot(pos.getX(0) - pos.getX(1), pos.getZ(0) - pos.getZ(1));
+}
+
 describe("paved street from spawn", () => {
   it("draws a black tarmac ribbon 6–8 m wide, no kerb kit; dirt stays thin and brown", () => {
     const map = createLandBoard();
-    const added: { userData: { roadKind?: string }; geometry: { parameters: { width: number } }; material: { color: { getHex: () => number } } }[] =
-      [];
-    const scene = { add(obj: (typeof added)[number]) { added.push(obj); } };
+    const added: RoadMesh[] = [];
+    const scene = { add(obj: RoadMesh) { added.push(obj); } };
     makeRoads(map, { scene, specOf: (id: "north" | "south") => ISLANDS[id], heightAt });
 
     const paved = added.filter((m) => m.userData.roadKind === "paved");
@@ -33,15 +47,18 @@ describe("paved street from spawn", () => {
     const extras = added.filter((m) =>
       m.userData.roadKind === "centre-line" || m.userData.roadKind === "verge" || m.userData.roadKind === "curb",
     );
+    const pavedRoads = map.roads.filter((r) => r.kind === "paved");
 
-    expect(paved.length).toBeGreaterThan(8);
+    expect(paved.length).toBe(pavedRoads.length);
     expect(extras.length).toBe(0);
     expect(dirt.length).toBeGreaterThan(4);
 
     expect(PAVED_WIDTH_M).toBeGreaterThanOrEqual(6);
     expect(PAVED_WIDTH_M).toBeLessThanOrEqual(8);
-    expect(paved[0].geometry.parameters.width).toBe(PAVED_WIDTH_M);
-    expect(dirt[0].geometry.parameters.width).toBe(DIRT_WIDTH_M);
+    expect(paved[0].geometry.parameters).toBeUndefined();
+    expect(ribbonWidthM(paved[0])).toBeCloseTo(PAVED_WIDTH_M, 3);
+    expect(paved[0].userData.widthM).toBe(PAVED_WIDTH_M);
+    expect(dirt[0].geometry.parameters?.width).toBe(DIRT_WIDTH_M);
     expect(DIRT_WIDTH_M).toBeLessThan(4);
 
     expect(paved[0].material.color.getHex()).toBe(ASPHALT);
@@ -50,9 +67,53 @@ describe("paved street from spawn", () => {
 
     const dirtKinds = new Set(map.roads.filter((r) => r.kind === "dirt").map((r) => r.kind));
     expect(dirtKinds.has("dirt")).toBe(true);
-    expect(added.some((m) => m.userData.roadKind === "dirt" && m.geometry.parameters.width >= 6)).toBe(
+    expect(added.some((m) => m.userData.roadKind === "dirt" && (m.geometry.parameters?.width ?? 0) >= 6)).toBe(
       false,
     );
+  });
+
+  it("extrudes each paved polyline as one mesh, not a chain of box slabs", () => {
+    const map = createLandBoard();
+    const added: RoadMesh[] = [];
+    const scene = { add(obj: RoadMesh) { added.push(obj); } };
+    makeRoads(map, { scene, specOf: (id: "north" | "south") => ISLANDS[id], heightAt });
+
+    const paved = added.filter((m) => m.userData.roadKind === "paved");
+    const pavedRoads = map.roads.filter((r) => r.kind === "paved");
+    expect(paved.length).toBe(pavedRoads.length);
+    expect(paved.length).toBe(2);
+
+    for (let i = 0; i < paved.length; i++) {
+      const mesh = paved[i];
+      const pts = pavedRoads[i].points;
+      const pos = mesh.geometry.attributes.position;
+      expect(pos.count).toBeGreaterThan(8);
+      expect(mesh.geometry.index?.count ?? 0).toBeGreaterThan(24);
+      expect(ribbonWidthM(mesh)).toBeCloseTo(PAVED_WIDTH_M, 3);
+
+      const start = { x: pos.getX(0), z: pos.getZ(0) };
+      const last = pos.count - 4;
+      const end = { x: pos.getX(last), z: pos.getZ(last) };
+      const midL = { x: (start.x + end.x) / 2, z: (start.z + end.z) / 2 };
+      const midR = {
+        x: (pos.getX(1) + pos.getX(last + 1)) / 2,
+        z: (pos.getZ(1) + pos.getZ(last + 1)) / 2,
+      };
+      expect(Math.hypot(midR.x - midL.x, midR.z - midL.z)).toBeGreaterThan(PAVED_WIDTH_M * 0.5);
+
+      const firstPt = pts[0];
+      const lastPt = pts[pts.length - 1];
+      const startDist = Math.min(
+        Math.hypot(start.x - firstPt.x, start.z - firstPt.z),
+        Math.hypot(start.x - lastPt.x, start.z - lastPt.z),
+      );
+      const endDist = Math.min(
+        Math.hypot(end.x - firstPt.x, end.z - firstPt.z),
+        Math.hypot(end.x - lastPt.x, end.z - lastPt.z),
+      );
+      expect(startDist).toBeLessThan(PAVED_WIDTH_M);
+      expect(endDist).toBeLessThan(PAVED_WIDTH_M);
+    }
   });
 
   it("places the spawn camera high, looking inland across the island mass", () => {
