@@ -7,9 +7,11 @@ import {
   NAMETAG_NEAR_M,
   NAMETAG_PIN,
   NAMETAG_STRING,
+  NAMETAG_TAB,
   makeNametagClip,
   makeNametagPin,
   makeNametagString,
+  makeNametagTab,
   makePaperNametag,
   paintPaperNametagCard,
 } from "../public/harbour/nametags.js";
@@ -52,12 +54,13 @@ function mockCtx() {
 }
 
 describe("outdoor PAPER nametags", () => {
-  it("keeps a kraft folded corner, punch-hole, clip, string, pin, and still stamps PAPER", () => {
+  it("keeps a kraft folded corner, punch-hole, clip, string, pin, tab, and still stamps PAPER", () => {
     expect(NAMETAG_FOLD).toBe(true);
     expect(NAMETAG_HOLE).toBe(true);
     expect(NAMETAG_CLIP).toBe(true);
     expect(NAMETAG_STRING).toBe(true);
     expect(NAMETAG_PIN).toBe(true);
+    expect(NAMETAG_TAB).toBe(true);
     expect(NAMETAG_NEAR_M).toBeGreaterThanOrEqual(200);
     const ctx = mockCtx();
     paintPaperNametagCard(ctx, 512, 128, "Ferry clerk");
@@ -110,6 +113,24 @@ describe("outdoor PAPER nametags", () => {
     expect(pin.position.y).toBeLessThan(cord.position.y);
     expect(pin.position.distanceTo(clip.position)).toBeGreaterThan(0.3);
     expect(pin.position.distanceTo(cord.position)).toBeGreaterThan(0.3);
+
+    const tab = makeNametagTab();
+    expect(tab.userData.part).toBe("tab");
+    expect(tab.userData.mode).toBe("PAPER");
+    expect(tab.geometry.type).toBe("BoxGeometry");
+    expect((tab.material as THREE.MeshLambertMaterial).color.getHex()).toBe(0xf2d2a8);
+    const t = (tab.geometry as THREE.BoxGeometry).parameters;
+    expect(t.width).toBeLessThan(0.12);
+    expect(t.height).toBeLessThan(0.12);
+    expect(t.depth).toBeLessThan(0.06);
+    expect(tab.position.x).not.toBe(clip.position.x);
+    expect(tab.position.x).not.toBe(cord.position.x);
+    expect(tab.position.x).not.toBe(pin.position.x);
+    expect(tab.position.x).toBeLessThan(-0.2);
+    expect(tab.position.y).toBeLessThan(clip.position.y);
+    expect(tab.position.distanceTo(clip.position)).toBeGreaterThan(0.3);
+    expect(tab.position.distanceTo(cord.position)).toBeGreaterThan(0.3);
+    expect(tab.position.distanceTo(pin.position)).toBeGreaterThan(0.3);
 
     expect(makePaperNametag("Ferry clerk")).toBeNull();
   });
