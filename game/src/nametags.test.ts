@@ -5,8 +5,10 @@ import {
   NAMETAG_FOLD,
   NAMETAG_HOLE,
   NAMETAG_NEAR_M,
+  NAMETAG_PIN,
   NAMETAG_STRING,
   makeNametagClip,
+  makeNametagPin,
   makeNametagString,
   makePaperNametag,
   paintPaperNametagCard,
@@ -50,11 +52,12 @@ function mockCtx() {
 }
 
 describe("outdoor PAPER nametags", () => {
-  it("keeps a kraft folded corner, punch-hole, clip, string, and still stamps PAPER", () => {
+  it("keeps a kraft folded corner, punch-hole, clip, string, pin, and still stamps PAPER", () => {
     expect(NAMETAG_FOLD).toBe(true);
     expect(NAMETAG_HOLE).toBe(true);
     expect(NAMETAG_CLIP).toBe(true);
     expect(NAMETAG_STRING).toBe(true);
+    expect(NAMETAG_PIN).toBe(true);
     expect(NAMETAG_NEAR_M).toBeGreaterThanOrEqual(200);
     const ctx = mockCtx();
     paintPaperNametagCard(ctx, 512, 128, "Ferry clerk");
@@ -91,6 +94,22 @@ describe("outdoor PAPER nametags", () => {
     expect(Math.abs(cord.position.x)).toBeLessThan(0.3);
     expect(cord.position.y).toBeLessThan(clip.position.y);
     expect(cord.position.distanceTo(clip.position)).toBeGreaterThan(0.3);
+
+    const pin = makeNametagPin();
+    expect(pin.userData.part).toBe("pin");
+    expect(pin.userData.mode).toBe("PAPER");
+    expect(pin.geometry.type).toBe("BoxGeometry");
+    expect((pin.material as THREE.MeshLambertMaterial).color.getHex()).toBe(0x4a3220);
+    const p = (pin.geometry as THREE.BoxGeometry).parameters;
+    expect(p.width).toBeLessThan(0.06);
+    expect(p.height).toBeLessThan(0.2);
+    expect(p.depth).toBeLessThan(0.06);
+    expect(pin.position.x).not.toBe(clip.position.x);
+    expect(pin.position.x).not.toBe(cord.position.x);
+    expect(pin.position.x).toBeGreaterThan(0.2);
+    expect(pin.position.y).toBeLessThan(cord.position.y);
+    expect(pin.position.distanceTo(clip.position)).toBeGreaterThan(0.3);
+    expect(pin.position.distanceTo(cord.position)).toBeGreaterThan(0.3);
 
     expect(makePaperNametag("Ferry clerk")).toBeNull();
   });
