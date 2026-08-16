@@ -12,7 +12,7 @@ npm test
 npm run play
 ```
 
-Open `http://localhost:8787/g/fend53` — critics must use a unique `/g/` path, not a reused `/?g=` tab. Do not ask computerUse critics to RMB-orbit.
+Open `http://localhost:8787/g/fend54` — critics must use a unique `/g/` path, not a reused `/?g=` tab. Do not ask computerUse critics to RMB-orbit.
 
 - Port **8787**. Restart: `game/scripts/restart-play.sh` (tmux `two-harbors-play`).
 - Do **not** restart play while a critic is on the page.

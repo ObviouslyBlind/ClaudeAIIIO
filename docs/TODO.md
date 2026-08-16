@@ -24,7 +24,7 @@ Politics frozen. See `game/reports/GAUNTLET_STATUS.md`.
 - [x] Pixel HUD sheet (`/g/near50` PASS — `250 m PAPER cell · 4 nearby`)
 - [x] Pixel HUD sheet (`/g/flow51` PASS — flow Faucet 0 · sink 0, tax 0%, goods PAPER · SIMULATED)
 - [x] Pixel HUD sheet (`/g/hud52` PASS — staff PAPER · SIMULATED · Staff —, ferry spread N/S numbers)
-- [ ] Pixel ferry fender (`http://localhost:8787/g/fend53`). Shells deferred: seaward spawn, no RMB)
+- [ ] Pixel ferry fender (`http://localhost:8787/g/fend54` after `/g/fend53` FAIL FENDER). Shells deferred: seaward spawn, no RMB)
 
 ## Polymarket paper bot
 

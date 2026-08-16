@@ -220,10 +220,10 @@ function deckBucket(x, y, z) {
 }
 
 /**
- * Small kraft PAPER tyre fender on the hull side. Short BOOT/DECK
- * cylinders + a STRIPE band — hangs on the cream hull, not the rail,
- * not the cleat, not the wheelhouse lantern, not the funnel smoke,
- * not the door handle.
+ * Kraft PAPER tyre fender on the hull side. BOOT/DECK/HULL/STRIPE
+ * cylinders. Spawn camera sits north of the berth (z ≈ -6888 looking at
+ * HOME_Z), so hang this on the north face (local -z), not the south
+ * face hidden behind the cream hull. Large enough to read at ~50 m.
  */
 function hullFender(x, y, z) {
   const g = new THREE.Group();
@@ -231,15 +231,15 @@ function hullFender(x, y, z) {
   g.userData.part = "fender";
   g.userData.mode = "PAPER";
   g.position.set(x, y, z);
-  const tyre = cyl(0.46, 0.46, 0.2, BOOT, false);
+  const tyre = cyl(1.55, 1.55, 0.62, BOOT, false);
   tyre.rotation.x = Math.PI / 2;
-  const kraft = cyl(0.28, 0.28, 0.14, DECK, false);
+  const kraft = cyl(0.95, 0.95, 0.44, DECK, false);
   kraft.rotation.x = Math.PI / 2;
-  kraft.position.z = 0.02;
-  const hub = cyl(0.12, 0.12, 0.1, HULL, false);
+  kraft.position.z = 0.04;
+  const hub = cyl(0.42, 0.42, 0.32, HULL, false);
   hub.rotation.x = Math.PI / 2;
-  hub.position.z = 0.03;
-  const band = cyl(0.48, 0.48, 0.06, STRIPE, false);
+  hub.position.z = 0.06;
+  const band = cyl(1.62, 1.62, 0.16, STRIPE, false);
   band.rotation.x = Math.PI / 2;
   g.add(tyre, kraft, hub, band);
   return g;
@@ -347,8 +347,8 @@ export function makeFerry() {
   g.add(deckRail(13.4, 1.95, 3.4));
   // PAPER cleat sits on the port cream deck, clear of rail/lantern/smoke/handle.
   g.add(deckCleat(13.4, 1.95, -3.4));
-  // PAPER tyre fender hangs on the starboard hull side, clear of rail/cleat/lantern/smoke/handle.
-  g.add(hullFender(-3.7, 0.62, 6.02));
+  // PAPER tyre fender hangs on the north hull face (camera-facing at spawn).
+  g.add(hullFender(-3.7, 1.05, -6.35));
   // PAPER bucket sits on the starboard aft cream deck, clear of rail/cleat/fender/lantern/smoke/handle.
   g.add(deckBucket(-13.6, 1.81, 2.55));
   // PAPER oar sits on the port aft cream deck, clear of bucket/rail/cleat/fender/lantern/smoke/handle.
