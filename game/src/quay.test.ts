@@ -46,6 +46,7 @@ describe("quay harbour dressing", () => {
       const spec = ISLANDS[id];
       for (const spot of [...PIER_PALM_OFFSETS, ...QUAY_LAND_SPOTS]) {
         expect(Math.abs(spot.x)).toBeGreaterThanOrEqual(ROAD_CLEAR);
+        expect(Math.abs(spot.x)).toBeLessThan(16);
         expect(Math.hypot(spot.x, spot.along)).toBeLessThan(45);
         const at = quayWorldPoint(spec, spot.x, spot.along);
         expect(distToPaved(spec, at.x, at.z)).toBeGreaterThanOrEqual(ROAD_CLEAR);

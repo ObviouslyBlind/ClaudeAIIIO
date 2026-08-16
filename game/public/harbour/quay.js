@@ -249,27 +249,27 @@ function pierPalm(lean) {
  * Local x is east of the port; +along is toward the water.
  */
 export const PIER_PALM_OFFSETS = Object.freeze([
-  Object.freeze({ x: -16, along: 8 }),
-  Object.freeze({ x: -22, along: 2 }),
-  Object.freeze({ x: -18, along: -6 }),
-  Object.freeze({ x: -28, along: -8 }),
-  Object.freeze({ x: -14, along: 18 }),
-  Object.freeze({ x: -26, along: 12 }),
-  Object.freeze({ x: 16, along: 8 }),
-  Object.freeze({ x: 22, along: 14 }),
-  Object.freeze({ x: 28, along: 4 }),
-  Object.freeze({ x: 32, along: -10 }),
+  Object.freeze({ x: -14.5, along: 10 }),
+  Object.freeze({ x: -12.6, along: 2 }),
+  Object.freeze({ x: -15.2, along: -8 }),
+  Object.freeze({ x: -12.8, along: -20 }),
+  Object.freeze({ x: -15.0, along: 16 }),
+  Object.freeze({ x: -13.4, along: 22 }),
+  Object.freeze({ x: 14.5, along: 8 }),
+  Object.freeze({ x: 12.6, along: 14 }),
+  Object.freeze({ x: 15.2, along: 4 }),
+  Object.freeze({ x: 13.5, along: -22 }),
 ]);
 
 /** Land-side kit kept off the paved corridor. Same local axes as the palms. */
 export const QUAY_LAND_SPOTS = Object.freeze([
-  Object.freeze({ x: -22, along: -14, kind: "lean-to" }),
-  Object.freeze({ x: -16.5, along: -8, kind: "stack" }),
-  Object.freeze({ x: -26, along: -18, kind: "rope-box" }),
-  Object.freeze({ x: -17.5, along: 4, kind: "canvas" }),
-  Object.freeze({ x: 32, along: 0, kind: "canvas" }),
-  Object.freeze({ x: 31, along: -18, kind: "stack" }),
-  Object.freeze({ x: 30.5, along: 8, kind: "rope-box" }),
+  Object.freeze({ x: -13.6, along: -13, kind: "lean-to" }),
+  Object.freeze({ x: -12.4, along: -6, kind: "stack" }),
+  Object.freeze({ x: -15.3, along: -20, kind: "rope-box" }),
+  Object.freeze({ x: -12.5, along: 12, kind: "canvas" }),
+  Object.freeze({ x: 15.3, along: 6, kind: "canvas" }),
+  Object.freeze({ x: 12.4, along: -22, kind: "stack" }),
+  Object.freeze({ x: 15.1, along: 12, kind: "rope-box" }),
 ]);
 
 export function quayWorldPoint(spec, localX, along) {
