@@ -113,6 +113,16 @@ function shopReceipts(root: THREE.Object3D) {
   return out;
 }
 
+function shopCoins(root: THREE.Object3D) {
+  const out: THREE.Object3D[] = [];
+  root.traverse((obj) => {
+    if (obj.userData?.kind === "shop-coin" && obj.name === "shop-coin") {
+      out.push(obj);
+    }
+  });
+  return out;
+}
+
 describe("shop PAPER wrapped parcel", () => {
   it("matches shop plots only", () => {
     expect(isShopPlot({ use: "shop" })).toBe(true);
@@ -835,6 +845,109 @@ describe("shop PAPER kraft receipt", () => {
     expect(shopReceipts(interior).length).toBe(1);
     expect(shopStamps(interior).length).toBe(1);
     expect(shopScales(interior).length).toBe(1);
+    expect(interior.getObjectByName("shop-till")).toBeTruthy();
+    expect(interior.userData.interiorUse).toBe("house");
+  });
+});
+
+describe("shop PAPER kraft coin", () => {
+  it("puts a tiny kraft PAPER coin on the shop counter beside the till", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressShop(scene);
+
+    const dress = interior.getObjectByName("shop-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+
+    const counter = dress!.getObjectByName("shop-counter");
+    expect(counter).toBeTruthy();
+    const till = counter!.getObjectByName("shop-till");
+    expect(till).toBeTruthy();
+    expect(till!.userData.kind).toBe("shop-till");
+
+    const coins = shopCoins(counter!);
+    expect(coins.length).toBe(1);
+
+    const coin = coins[0];
+    expect(coin.userData.kind).toBe("shop-coin");
+    expect(coin.userData.part).toBe("coin");
+    expect(coin.userData.mode).toBe("PAPER");
+    expect(coin.parent?.name).toBe("shop-counter");
+    // On the counter beside the till — not on the scale / stamp / receipt /
+    // slip / parcel / bag. Not a wallet.
+    expect(coin.position.y).toBeGreaterThan(1.0);
+    expect(coin.position.y).toBeLessThan(1.4);
+    expect(Math.abs(coin.position.x)).toBeLessThan(1.5);
+    expect(Math.abs(coin.position.z)).toBeLessThan(0.5);
+
+    const neighbors = [
+      till,
+      shopScales(counter!)[0],
+      shopStamps(counter!)[0],
+      shopReceipts(counter!)[0],
+      shopSlips(counter!)[0],
+      shopParcels(counter!)[0],
+      shopBags(counter!)[0],
+    ];
+    for (const other of neighbors) {
+      expect(other).toBeTruthy();
+      const dx = coin.position.x - other.position.x;
+      const dz = coin.position.z - other.position.z;
+      expect(Math.hypot(dx, dz)).toBeGreaterThan(0.12);
+    }
+
+    expect(shopStamps(counter!).length).toBe(1);
+    const receipts = shopReceipts(counter!);
+    if (receipts.length) expect(receipts.length).toBe(1);
+    expect(till!.userData.kind).toBe("shop-till");
+
+    const colors = hexes(coin);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.every((c) => KRAFT.has(c))).toBe(true);
+    expect(colors.some((c) => c === CREAM)).toBe(true);
+    expect(colors.some((c) => c === WOOD)).toBe(true);
+    expect(colors.every((c) => !isGrey(c))).toBe(true);
+
+    let boxes = 0;
+    coin.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        boxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.kind).toBe("shop-coin");
+        expect(mesh.userData.part).toBe("coin");
+        expect(mesh.userData.mode).toBe("PAPER");
+        const box = mesh.geometry as THREE.BoxGeometry;
+        expect(box.parameters.height).toBeLessThan(0.02);
+        expect(Math.max(box.parameters.width, box.parameters.height, box.parameters.depth)).toBeLessThan(
+          0.08,
+        );
+      }
+    });
+    expect(boxes).toBeGreaterThanOrEqual(1);
+  });
+
+  it("keeps dress idempotent and hides the coin on undress", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressShop(scene);
+    dressShop(scene);
+    expect(interior.children.filter((c) => c.name === "shop-dress").length).toBe(1);
+    expect(shopCoins(interior).length).toBe(1);
+    expect(shopStamps(interior).length).toBe(1);
+    expect(shopReceipts(interior).length).toBe(1);
+    expect(interior.getObjectByName("shop-till")).toBeTruthy();
+
+    undressShop(scene);
+    const dress = interior.getObjectByName("shop-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.visible).toBe(false);
+    expect(shopCoins(interior).length).toBe(1);
+    expect(shopStamps(interior).length).toBe(1);
+    expect(shopReceipts(interior).length).toBe(1);
     expect(interior.getObjectByName("shop-till")).toBeTruthy();
     expect(interior.userData.interiorUse).toBe("house");
   });
