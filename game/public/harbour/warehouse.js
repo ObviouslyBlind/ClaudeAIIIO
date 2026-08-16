@@ -162,6 +162,30 @@ function paperMark(x, y, z) {
  * Small iron wall hook — plate + arm + downturned tip, optional rope loop
  * and a tiny hanging sack. PAPER boxes only. Not a crate, not a lamp.
  */
+/**
+ * Kraft clipboard on the wall — wood board, cream sheet, strap clip.
+ * PAPER boxes only. Not a crate, not the door paper mark.
+ */
+function wallClipboard(x, y, z, yaw = 0) {
+  const g = new THREE.Group();
+  g.name = "warehouse-clipboard";
+  g.userData.kind = "warehouse-clipboard";
+  g.userData.mode = "PAPER";
+  g.position.set(x, y, z);
+  g.rotation.y = yaw;
+  const board = paperBox(0.36, 0.48, 0.03, WOOD, "warehouse-clipboard");
+  const sheet = paperBox(0.3, 0.38, 0.02, PAPER_CARD, "warehouse-clipboard");
+  sheet.position.set(0, -0.02, 0.025);
+  const clip = paperBox(0.2, 0.07, 0.05, WOOD_DARK, "warehouse-clipboard");
+  clip.position.set(0, 0.18, 0.04);
+  const jaw = paperBox(0.08, 0.04, 0.04, STRAP, "warehouse-clipboard");
+  jaw.position.set(0, 0.2, 0.07);
+  const nail = paperBox(0.035, 0.035, 0.04, STRAP, "warehouse-clipboard");
+  nail.position.set(0, 0.26, 0.01);
+  g.add(board, sheet, clip, jaw, nail);
+  return g;
+}
+
 function wallHook(x, y, z, yaw = 0) {
   const g = new THREE.Group();
   g.name = "warehouse-hook";
@@ -259,6 +283,8 @@ function makeWarehouseDress() {
   g.add(paperMark(-2.15, 1.55, 3.38));
   // Iron hook on the back wall, in the gap between the low and mid stacks.
   g.add(wallHook(-0.58, 1.62, -3.38));
+  // Kraft clipboard on the back wall, in the gap between the mid and low stacks.
+  g.add(wallClipboard(1.02, 1.58, -3.38));
 
   const postL = paperBox(0.16, 2.45, 0.16, STRAP, "warehouse-prop");
   postL.position.set(-2.05, 1.38, 1.85);

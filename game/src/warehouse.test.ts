@@ -131,3 +131,47 @@ describe("warehouse PAPER wall hook", () => {
     });
   });
 });
+
+describe("warehouse PAPER wall clipboard", () => {
+  it("hangs a kraft PAPER clipboard on the warehouse wall", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressWarehouse(scene);
+
+    const dress = interior.getObjectByName("warehouse-dress");
+    expect(dress).toBeTruthy();
+
+    const boards: THREE.Object3D[] = [];
+    dress!.traverse((obj) => {
+      if (obj.userData?.kind === "warehouse-clipboard" && obj.name === "warehouse-clipboard") {
+        boards.push(obj);
+      }
+    });
+    expect(boards.length).toBeGreaterThanOrEqual(1);
+
+    const clipboard = boards[0];
+    expect(clipboard.userData.kind).toBe("warehouse-clipboard");
+    expect(clipboard.userData.mode).toBe("PAPER");
+    expect(clipboard.position.y).toBeGreaterThan(1.2);
+    expect(clipboard.position.y).toBeLessThan(2.4);
+    const onBack = Math.abs(clipboard.position.z) > 3.0;
+    const onSide = Math.abs(clipboard.position.x) > 3.5;
+    expect(onBack || onSide).toBe(true);
+
+    const colors = hexes(clipboard);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.some((c) => c === 0x8a6238)).toBe(true);
+    expect(colors.some((c) => c === 0xf3efe4)).toBe(true);
+    expect(colors.every((c) => !isGrey(c))).toBe(true);
+
+    clipboard.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.kind).toBe("warehouse-clipboard");
+        expect(mesh.userData.mode).toBe("PAPER");
+      }
+    });
+  });
+});
