@@ -4,6 +4,7 @@ import { heightAt, ISLANDS } from "./land.ts";
 import { makeSouthSign, SIGN_LINE } from "../public/harbour/south-sign.js";
 
 const WOOD = 0x8a6238;
+const WOOD_DARK = 0x6a4a2a;
 
 function collectPart(root: THREE.Object3D, name: string) {
   const out: THREE.Object3D[] = [];
@@ -56,6 +57,32 @@ describe("south port sign", () => {
       expect(mesh.geometry).toBeInstanceOf(THREE.BoxGeometry);
       const mat = mesh.material as THREE.MeshLambertMaterial;
       expect(mat.color.getHex()).toBe(WOOD);
+    }
+  });
+
+  it("puts a tiny kraft PAPER nail on the south sign board, caps and braces remain", () => {
+    const sign = makeSouthSign(ISLANDS.south, { heightAt });
+    expect(sign).not.toBeNull();
+    expect(sign!.userData.mode).toBe("PAPER");
+
+    const braces = collectPart(sign!, "brace");
+    expect(braces.length).toBeGreaterThanOrEqual(1);
+    const caps = collectPart(sign!, "cap");
+    expect(caps.length).toBeGreaterThanOrEqual(1);
+
+    const nails = collectPart(sign!, "nail");
+    expect(nails.length).toBeGreaterThanOrEqual(1);
+    for (const n of nails) {
+      expect(n.userData.part).toBe("nail");
+      expect(n.userData.mode).toBe("PAPER");
+      const mesh = n as THREE.Mesh;
+      expect(mesh.geometry).toBeInstanceOf(THREE.BoxGeometry);
+      const mat = mesh.material as THREE.MeshLambertMaterial;
+      expect(mat.color.getHex()).toBe(WOOD_DARK);
+      const { width, height, depth } = (mesh.geometry as THREE.BoxGeometry).parameters;
+      expect(width).toBeLessThan(0.12);
+      expect(height).toBeLessThan(0.12);
+      expect(depth).toBeLessThan(0.12);
     }
   });
 });

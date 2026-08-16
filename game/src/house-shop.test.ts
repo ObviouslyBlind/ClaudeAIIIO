@@ -452,3 +452,67 @@ describe("house-shop PAPER counter cup", () => {
     expect(interior.userData.interiorUse).toBe("house");
   });
 });
+
+describe("house-shop PAPER cup saucer", () => {
+  it("sits a small kraft PAPER saucer under the house-shop cup", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressHouseShop(scene);
+
+    const dress = interior.getObjectByName("house-shop-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+
+    const cup = dress!.getObjectByName("house-shop-cup");
+    const kettle = dress!.getObjectByName("house-shop-kettle");
+    const bell = dress!.getObjectByName("house-shop-bell");
+    const pad = dress!.getObjectByName("house-shop-pad");
+    expect(cup).toBeTruthy();
+    expect(kettle).toBeTruthy();
+    expect(bell).toBeTruthy();
+    expect(pad).toBeTruthy();
+
+    const saucers: THREE.Object3D[] = [];
+    dress!.traverse((obj) => {
+      if (obj.userData?.part === "saucer") saucers.push(obj);
+    });
+    expect(saucers.length).toBe(1);
+
+    const saucer = saucers[0] as THREE.Mesh;
+    expect(saucer.userData.part).toBe("saucer");
+    expect(saucer.userData.mode).toBe("PAPER");
+    expect(saucer.isMesh).toBe(true);
+    expect(saucer.geometry.type).toBe("BoxGeometry");
+
+    const geo = saucer.geometry as THREE.BoxGeometry;
+    expect(geo.parameters.height).toBeLessThan(0.04);
+    expect(geo.parameters.width).toBeGreaterThan(geo.parameters.height);
+    expect(geo.parameters.depth).toBeGreaterThan(geo.parameters.height);
+    expect(geo.parameters.width).toBeLessThan(0.3);
+    expect(geo.parameters.depth).toBeLessThan(0.3);
+
+    const cupWorld = new THREE.Vector3();
+    const saucerWorld = new THREE.Vector3();
+    cup!.getWorldPosition(cupWorld);
+    saucer.getWorldPosition(saucerWorld);
+    expect(Math.hypot(saucerWorld.x - cupWorld.x, saucerWorld.z - cupWorld.z)).toBeLessThan(0.05);
+
+    const bodies: THREE.Mesh[] = [];
+    cup!.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh && mesh.userData?.part !== "saucer") bodies.push(mesh);
+    });
+    expect(bodies.length).toBeGreaterThan(0);
+    for (const body of bodies) {
+      const bodyWorld = new THREE.Vector3();
+      body.getWorldPosition(bodyWorld);
+      expect(saucerWorld.y).toBeLessThan(bodyWorld.y);
+    }
+
+    const colors = hexes(saucer);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.every((c) => c === WOOD || c === CREAM || c === LINEN)).toBe(true);
+    expect(colors.every((c) => !isGrey(c))).toBe(true);
+  });
+});
