@@ -92,7 +92,7 @@ describe("player PAPER handcart", () => {
     const cart = player.getObjectByName("paper-cart")!;
     expect(cart.children.length).toBe(CART_MESH_COUNT);
     expect(meshCount(cart)).toBe(CART_MESH_COUNT);
-    expect(CART_MESH_COUNT).toBe(34);
+    expect(CART_MESH_COUNT).toBe(35);
 
     const p = parts(cart);
     expect(p).toContain("bed");
@@ -386,6 +386,51 @@ describe("player PAPER handcart", () => {
     expect([0x8a6238, 0x7a5230, 0x9a6a40, 0xc4b496, 0xf4ead8]).toContain(hex);
     expect(isGrey(hex)).toBe(false);
     const { width, height, depth } = (turnip.geometry as THREE.BoxGeometry).parameters;
+    expect(width).toBeLessThan(0.12);
+    expect(height).toBeLessThan(0.12);
+    expect(depth).toBeLessThan(0.12);
+  });
+
+  it("puts one tiny kraft PAPER beet on the cart bed; turnip, leek, cabbage, garlic, onion, potato, carrot, apple remain", () => {
+    const player = makePlayer();
+    dressCart(player);
+    const cart = player.getObjectByName("paper-cart")!;
+    const p = parts(cart);
+    expect(p.filter((k) => k === "beet").length).toBe(1);
+    expect(p.filter((k) => k === "turnip").length).toBeGreaterThanOrEqual(1);
+    expect(p.filter((k) => k === "leek").length).toBeGreaterThanOrEqual(1);
+    expect(p.filter((k) => k === "cabbage").length).toBeGreaterThanOrEqual(1);
+    expect(p.filter((k) => k === "garlic").length).toBeGreaterThanOrEqual(1);
+    expect(p.filter((k) => k === "onion").length).toBeGreaterThanOrEqual(1);
+    expect(p.filter((k) => k === "potato").length).toBeGreaterThanOrEqual(1);
+    expect(p.filter((k) => k === "carrot").length).toBeGreaterThanOrEqual(1);
+    expect(p.filter((k) => k === "apple").length).toBeGreaterThanOrEqual(1);
+
+    const beet = cart.children.find((c) => c.userData.part === "beet") as THREE.Mesh;
+    const turnip = cart.children.find((c) => c.userData.part === "turnip") as THREE.Mesh;
+    const leek = cart.children.find((c) => c.userData.part === "leek") as THREE.Mesh;
+    const cabbage = cart.children.find((c) => c.userData.part === "cabbage") as THREE.Mesh;
+    const garlic = cart.children.find((c) => c.userData.part === "garlic") as THREE.Mesh;
+    const onion = cart.children.find((c) => c.userData.part === "onion") as THREE.Mesh;
+    const potato = cart.children.find((c) => c.userData.part === "potato") as THREE.Mesh;
+    const carrot = cart.children.find((c) => c.userData.part === "carrot") as THREE.Mesh;
+    const apple = cart.children.find((c) => c.userData.part === "apple") as THREE.Mesh;
+    const bed = cart.children.find((c) => c.userData.part === "bed")!;
+    expect(beet.userData.mode).toBe("PAPER");
+    expect(beet.geometry.type).toBe("BoxGeometry");
+    expect(beet.position.y).toBeGreaterThan(bed.position.y);
+    expect(Math.hypot(beet.position.x - turnip.position.x, beet.position.z - turnip.position.z)).toBeGreaterThan(0.12);
+    expect(Math.hypot(beet.position.x - leek.position.x, beet.position.z - leek.position.z)).toBeGreaterThan(0.12);
+    expect(Math.hypot(beet.position.x - cabbage.position.x, beet.position.z - cabbage.position.z)).toBeGreaterThan(0.12);
+    expect(Math.hypot(beet.position.x - garlic.position.x, beet.position.z - garlic.position.z)).toBeGreaterThan(0.12);
+    expect(Math.hypot(beet.position.x - onion.position.x, beet.position.z - onion.position.z)).toBeGreaterThan(0.12);
+    expect(Math.hypot(beet.position.x - potato.position.x, beet.position.z - potato.position.z)).toBeGreaterThan(0.12);
+    expect(Math.hypot(beet.position.x - carrot.position.x, beet.position.z - carrot.position.z)).toBeGreaterThan(0.12);
+    expect(Math.hypot(beet.position.x - apple.position.x, beet.position.z - apple.position.z)).toBeGreaterThan(0.12);
+    const hex = (beet.material as THREE.MeshLambertMaterial).color.getHex();
+    expect([0x8a6238, 0x7a5230, 0x9a6a40, 0xc4b496, 0xf4ead8]).toContain(hex);
+    expect(isGrey(hex)).toBe(false);
+    const { width, height, depth } = (beet.geometry as THREE.BoxGeometry).parameters;
     expect(width).toBeLessThan(0.12);
     expect(height).toBeLessThan(0.12);
     expect(depth).toBeLessThan(0.12);
