@@ -295,6 +295,41 @@ describe("taxi roof lamp", () => {
     expect(handles.length).toBeGreaterThanOrEqual(2);
   });
 
+  it("puts a kraft cream PAPER door number plate on each taxi door", () => {
+    const mesh = makeTaxiMesh();
+    const doorPlates: THREE.Mesh[] = [];
+    const checks: THREE.Mesh[] = [];
+    const caps: THREE.Mesh[] = [];
+    const wipers: THREE.Mesh[] = [];
+    const spares: THREE.Mesh[] = [];
+    const mirrors: THREE.Mesh[] = [];
+    const aerials: THREE.Mesh[] = [];
+    mesh.traverse((obj) => {
+      const m = obj as THREE.Mesh & { userData: { part?: string; mode?: string } };
+      if (m.userData?.part === "door-plate") doorPlates.push(m);
+      if (m.userData?.part === "check") checks.push(m);
+      if (m.userData?.part === "aerial-cap" || m.userData?.part === "cap") caps.push(m);
+      if (m.userData?.part === "wiper") wipers.push(m);
+      if (m.userData?.part === "spare") spares.push(m);
+      if (m.userData?.part === "mirror") mirrors.push(m);
+      if (m.userData?.part === "aerial") aerials.push(m);
+    });
+    expect(checks.length).toBeGreaterThan(0);
+    expect(doorPlates.length).toBeGreaterThanOrEqual(2);
+    expect(doorPlates.every((p) => p.geometry.type === "BoxGeometry")).toBe(true);
+    expect(doorPlates.every((p) => p.userData.mode === "PAPER")).toBe(true);
+    expect(
+      doorPlates.every((p) => (p.material as THREE.MeshLambertMaterial).color.getHex() === 0xf4ead8),
+    ).toBe(true);
+    expect(doorPlates.every((p) => Math.abs(p.position.x) > 1.22)).toBe(true);
+    expect(doorPlates.every((p) => p.position.y > 0.6 && p.position.y < 1.2)).toBe(true);
+    expect(caps.length).toBeGreaterThanOrEqual(1);
+    expect(wipers.length).toBeGreaterThanOrEqual(2);
+    expect(spares.length).toBeGreaterThanOrEqual(1);
+    expect(mirrors.length).toBeGreaterThanOrEqual(2);
+    expect(aerials.length).toBeGreaterThanOrEqual(1);
+  });
+
   it("puts two thin kraft cream PAPER wipers on the taxi windscreen", () => {
     const mesh = makeTaxiMesh();
     const wipers: THREE.Mesh[] = [];
