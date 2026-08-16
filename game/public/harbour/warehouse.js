@@ -232,6 +232,31 @@ function kraftLantern(x, y, z) {
   return g;
 }
 
+
+/**
+ * Small kraft rope coil on the floor — short stack of squat boxes, not a
+ * crate and not a new grey. PAPER boxes only (helpers already in this file).
+ */
+function kraftCoil(x, z, yaw = 0) {
+  const g = new THREE.Group();
+  g.name = "warehouse-coil";
+  g.userData.kind = "warehouse-coil";
+  g.userData.mode = "PAPER";
+  g.position.set(x, 0, z);
+  g.rotation.y = yaw;
+  const y0 = 0.16;
+  const outer = paperBox(0.36, 0.1, 0.36, WOOD, "warehouse-coil");
+  outer.position.set(0, y0 + 0.05, 0);
+  const mid = paperBox(0.28, 0.08, 0.28, WOOD_DARK, "warehouse-coil");
+  mid.position.set(0, y0 + 0.12, 0);
+  const core = paperBox(0.12, 0.05, 0.12, STRAP, "warehouse-coil");
+  core.position.set(0, y0 + 0.175, 0);
+  const tail = paperBox(0.06, 0.04, 0.16, WOOD_LIGHT, "warehouse-coil");
+  tail.position.set(0.14, y0 + 0.04, 0.12);
+  g.add(outer, mid, core, tail);
+  return g;
+}
+
 function wallHook(x, y, z, yaw = 0) {
   const g = new THREE.Group();
   g.name = "warehouse-hook";
@@ -336,6 +361,9 @@ function makeWarehouseDress() {
   // Small kraft hanging lantern off the left post — wood bail + cream glass.
   // Clear of the back-wall clipboard/hook and the right-wall broom.
   g.add(kraftLantern(-1.88, 2.32, 1.85));
+  // Small kraft rope coil on the downstairs floor, right of the aisle.
+  // Clear of floor crates, broom, lantern, clipboard, and hook.
+  g.add(kraftCoil(1.58, 1.48, 0.22));
 
   const postL = paperBox(0.16, 2.45, 0.16, STRAP, "warehouse-prop");
   postL.position.set(-2.05, 1.38, 1.85);
