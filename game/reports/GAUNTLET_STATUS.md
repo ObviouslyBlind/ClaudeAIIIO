@@ -12,7 +12,7 @@ Inland spawn, paved ribbon, dirt, cars, yellow taxi, trees+cart, lease → House
 
 ## Held (code, live on the same page as the ferry)
 
-Building shells + window lights (warmer glow) — **not in the seaward spawn frame**; computerUse cannot RMB-orbit and spawn framing stays until orbit, so shells wait. Stalls (awning stripes + lantern + melon), pedestrians (cloth colours + kerchief + gloves) — **next pixel**, nametags (larger kraft cards + fold), warehouse (floor crates + clipboard)/factory (floor machines + wrench)/shop (counter + parcel)/farm (crop beds + churn)/house-shop (shelves + bell) interiors, presence, cart (crate + canvas strap + hubs), staff hire/fire, bid/ask/sell/cancel + market cancel button, North/South books, upkeep, persist dump + restore control, lease afford, player "You · PAPER" tag + satchel + kraft fold, north and south port signs, calendar, develop afford, ferry fare + ticket serial `NO. 15 · PAPER`, taxi fare + roof aerial, sales tax, held-goods, faucet/sink, stall last-print, quay lamp posts, street verge lamps, House chimney + porch slab + shutters + door knocker, deeper quay-channel water, spawn verge trees, taxi roof sign + door handles, sedan paint + mirrors + kraft rear plate, warmer sky haze, House downstairs table + clock + framed picture, extra quay coils, verge crate seats + fish crate, kraft ferry-ticket stamp, ferry deck bollards + cabin life ring, quay tyre fenders.
+Building shells + window lights (warmer glow) — **not in the seaward spawn frame**; computerUse cannot RMB-orbit and spawn framing stays until orbit, so shells wait. Stalls (awning stripes + lantern + melon), pedestrians (cloth colours — `/g/peds42` FAIL PEDS, seaward shirts next), nametags (larger kraft cards + fold), warehouse (floor crates + clipboard)/factory (floor machines + wrench)/shop (counter + parcel)/farm (crop beds + churn)/house-shop (shelves + bell) interiors, presence, cart (crate + canvas strap + hubs), staff hire/fire, bid/ask/sell/cancel + market cancel button, North/South books, upkeep, persist dump + restore control, lease afford, player "You · PAPER" tag + satchel + kraft fold, north and south port signs, calendar, develop afford, ferry fare + ticket serial `NO. 15 · PAPER`, taxi fare + roof aerial, sales tax, held-goods, faucet/sink, stall last-print, quay lamp posts, street verge lamps, House chimney + porch slab + shutters + door knocker, deeper quay-channel water, spawn verge trees, taxi roof sign + door handles, sedan paint + mirrors + kraft rear plate, warmer sky haze, House downstairs table + clock + framed picture, extra quay coils, verge crate seats + fish crate, kraft ferry-ticket stamp, ferry deck bollards + cabin life ring, quay tyre fenders.
 
 ## Pixel ferry
 
@@ -34,11 +34,15 @@ Building shells + window lights (warmer glow) — **not in the seaward spawn fra
 
 `/g/quay41` **PASS**: kraft timber pier with visible crates / cargo on the deck (working harbour, not a bare slab). Cream hull + foam still in frame.
 
+## Pixel pedestrians
+
+`/g/peds42` **FAIL PEDS**: pier/ferry/crates in frame, but no readable box people (inland along sat on the visitor; kraft aprons faced the camera). Quay walkers now stand seaward of the port with lit terracotta/teal shirts. Next `/g/peds43`.
+
 ## In flight (not ferry-only)
 
-Pixel: kraft **pedestrians** on the north quay `http://localhost:8787/g/peds42`. No RMB. Close other Two Harbors tabs. Address bar must be `/g/peds42`. Do not restart play while the critic is on the page.
+Pixel: kraft **pedestrians** on the north quay `http://localhost:8787/g/peds43`. No RMB. Close other Two Harbors tabs. Address bar must be `/g/peds43`. Do not restart play while the critic is on the page.
 
-## Next pixel (after peds42 PASS, immediately, no wait)
+## Next pixel (after peds43 PASS, immediately, no wait)
 
 Nametags, econ/nearby/staff HUD lines. Shells+lights stay deferred until a human can orbit (spawn look is seaward; walking does not turn the camera).
 
