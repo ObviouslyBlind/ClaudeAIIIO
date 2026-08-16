@@ -361,6 +361,28 @@ function factoryRag(x, z, yaw = 0) {
 }
 
 /**
+ * Tiny kraft PAPER rivet (peg): KRAFT shank, BENCH_WOOD head. Boxes only.
+ * Sits on a workbench top — not the rag, mallet, oil can, vise, floor bucket, or wrench.
+ */
+function factoryRivet(x, z, yaw = 0) {
+  const g = new THREE.Group();
+  g.name = "factory-rivet";
+  g.userData.kind = "factory-rivet";
+  g.userData.mode = "PAPER";
+  g.userData.part = "rivet";
+  // First workbench lip top: y0 0.16 + 0.78, lip centre +0.05, half lip 0.015.
+  const sitY = 0.16 + 0.78 + 0.05 + 0.015;
+  g.position.set(x, sitY, z);
+  g.rotation.y = yaw;
+  const shank = paperBox(0.028, 0.04, 0.028, KRAFT, "factory-rivet");
+  shank.position.y = 0.02;
+  const head = paperBox(0.05, 0.018, 0.05, BENCH_WOOD, "factory-rivet");
+  head.position.y = 0.049;
+  g.add(shank, head);
+  return g;
+}
+
+/**
  * Small kraft PAPER mallet: KRAFT / BENCH_WOOD head, BENCH_LEG handle.
  * Sits on a workbench top — not the vise, oil can, floor bucket, or wrench.
  */
@@ -508,6 +530,8 @@ function makeFactoryDress() {
   g.add(factoryMallet(-1.42, -2.56, 0.18));
   // Right of the vise on the first bench top. Off the oil can, mallet, floor bucket, and hanging wrench.
   g.add(factoryRag(-0.28, -2.68, 0.22));
+  // Left-south corner of the first bench. Off the rag, mallet, oil can, vise, floor bucket, and hanging wrench.
+  g.add(factoryRivet(-2.42, -2.74, 0.08));
   g.add(workbench(-3.08, 0.15, 2.15, 0.68, Math.PI / 2));
   g.add(woodWorkbench(3.1, -1.18, 1.92, 0.64, Math.PI / 2));
   // Left wall, opposite the wood bench. Off the centre aisle (x≈0).
