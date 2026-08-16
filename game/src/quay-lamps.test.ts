@@ -47,6 +47,14 @@ function collectRing(root: THREE.Object3D) {
   return out;
 }
 
+function collectBase(root: THREE.Object3D) {
+  const out: THREE.Object3D[] = [];
+  root.traverse((obj) => {
+    if (obj.userData?.part === "base") out.push(obj);
+  });
+  return out;
+}
+
 describe("quay paper lamps", () => {
   it("plants a few wooden kraft-glass posts on both timber piers", () => {
     expect(QUAY_LAMP_SPOTS.length).toBeGreaterThanOrEqual(4);
@@ -68,6 +76,8 @@ describe("quay paper lamps", () => {
         expect(Math.abs(lamp.position.x - spec.port.x)).toBeLessThan(5.5);
         expect(Math.abs(lamp.position.z - pierZ)).toBeLessThan(43);
         expect(lamp.position.y).toBeCloseTo(y + 0.5, 5);
+        const basesOnLamp = collectBase(lamp);
+        expect(basesOnLamp.length).toBe(1);
       }
 
       const colors = hexes(group!);
@@ -81,6 +91,19 @@ describe("quay paper lamps", () => {
       for (const pane of glass) {
         const mat = (pane as THREE.Mesh).material as THREE.MeshLambertMaterial;
         expect(mat.emissive.getHex()).toBe(GLOW);
+      }
+
+      const bases = collectBase(group!);
+      expect(bases.length).toBe(QUAY_LAMP_SPOTS.length);
+      for (const b of bases) {
+        expect(b.userData.part).toBe("base");
+        expect(b.userData.mode).toBe("PAPER");
+        expect(b.position.y).toBeGreaterThanOrEqual(0.04);
+        expect(b.position.y).toBeLessThanOrEqual(0.12);
+        const mesh = b as THREE.Mesh;
+        expect(mesh.geometry).toBeInstanceOf(THREE.BoxGeometry);
+        const mat = mesh.material as THREE.MeshLambertMaterial;
+        expect([WOOD, WOOD_DARK]).toContain(mat.color.getHex());
       }
 
       const braces = collectBrace(group!);
