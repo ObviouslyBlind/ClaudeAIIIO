@@ -1,8 +1,9 @@
 import * as THREE from "three";
 
 /**
- * PAPER shop interior dress. Kraft-paper counter (cream top, wood body) plus
- * two shelf boxes — not the house living room and not the warehouse. No WASD.
+ * PAPER shop interior dress. Kraft-paper counter (cream top, wood body), a
+ * small wooden till, plus two shelf boxes — not the house living room and
+ * not the warehouse. No WASD.
  * Tap-to-walk stays in interior.js.
  *
  * Call dressShop(scene) when plot.kind or plot.use is "shop" or "house_shop".
@@ -126,6 +127,25 @@ function shelfBay(x, z, yaw, width = 1.35) {
   return g;
 }
 
+/** Small wooden till on the counter: wood body, kraft lid. Paper boxes only. */
+function cashBox(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "shop-till";
+  g.userData.kind = "shop-till";
+  g.userData.mode = "PAPER";
+  g.position.set(x, y, z);
+  const h = 0.16;
+  const body = paperBox(0.42, h, 0.3, WOOD, "shop-till");
+  g.add(body);
+  const band = paperBox(0.45, 0.04, 0.33, WOOD_DARK, "shop-till");
+  band.position.y = -0.02;
+  g.add(band);
+  const lid = paperBox(0.44, 0.05, 0.32, LINEN, "shop-till");
+  lid.position.y = h / 2 + 0.02;
+  g.add(lid);
+  return g;
+}
+
 function makeCounter(x, z) {
   const g = new THREE.Group();
   g.name = "shop-counter";
@@ -148,12 +168,8 @@ function makeCounter(x, z) {
   const stripe = paperBox(2.82, 0.1, 0.08, CORAL, "shop-counter");
   stripe.position.set(0, topY + 0.02, 0.44);
   g.add(stripe);
-  const till = paperBox(0.44, 0.2, 0.34, STRAP, "shop-till");
-  till.position.set(0.88, topY + 0.15, -0.08);
-  g.add(till);
-  const tillTop = paperBox(0.4, 0.07, 0.3, CORAL, "shop-till");
-  tillTop.position.set(0.88, topY + 0.28, -0.08);
-  g.add(tillTop);
+  // Wooden cash box on the linen top — kraft lid, wood body. Not a wallet.
+  g.add(cashBox(0.88, topY + 0.13, -0.08));
   const jar = paperBox(0.18, 0.24, 0.18, TEAL, "shop-goods");
   jar.position.set(-0.95, topY + 0.17, 0.12);
   g.add(jar);
