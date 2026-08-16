@@ -18,7 +18,7 @@
   </head>
   <body>
     <header class="bar">
-      <p class="badge">BASE · 3D HARBOUR · PAPER · SIMULATED</p>
+      <p class="badge" id="boot-badge">BASE · 3D HARBOUR · PAPER · SIMULATED</p>
       <h1 id="place">North port</h1>
       <p id="status">North port · PAPER</p>
     </header>
@@ -70,6 +70,10 @@
       (function () {
         var status = document.getElementById("status");
         var cash = document.getElementById("cash");
+        var badge = document.getElementById("boot-badge");
+        var boot = location.pathname + location.search;
+        if (status) status.textContent = "North port · PAPER · " + boot;
+        if (badge) badge.textContent = "BASE · 3D HARBOUR · PAPER · SIMULATED · " + boot;
         function stillBooting() {
           if (!status) return false;
           var t = status.textContent || "";

@@ -14,7 +14,7 @@ Politics frozen. See `game/reports/GAUNTLET_STATUS.md`.
 - [x] Staff slots on developed plots
 - [x] Pixel remaining meshes (cars `/?g=cars26` PASS, taxi cab `/?g=taxi27` PASS)
 - [x] Shop + farm interiors, hire/fire HTTP, land upkeep, North/South buy+sell, cart HUD (code)
-- [ ] Pixel remaining meshes (ferry `/?g=ferry33` FAIL — still Loading/body teal; next `/?g=ferry34` after first-frame.js sky paint; then shore, quay, shells)
+- [ ] Pixel remaining meshes (ferry `/?g=ferry34` FAIL BOOT — critic sat on stale `/?g=ferry32` tab; next `http://localhost:8787/g/ferry35`; then shore, quay, shells)
 
 ## Polymarket paper bot
 
