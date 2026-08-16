@@ -2,6 +2,8 @@
 
 import { GOOD_IDS, type GoodId } from "./goods.ts";
 import { BOOK_ISLANDS, type BookIsland } from "./books.ts";
+import { afterBuyFillCart } from "./buyCart.ts";
+import type { CartLine } from "./visitorCart.ts";
 
 export const BUY_NOTE =
   "PAPER buy at island lastPrice. SIMULATED. Not a live exchange.";
@@ -36,6 +38,7 @@ export type BuyResult = BuyOk | BuyFail;
 type PaperVisitor = {
   cash: number;
   stock: Record<GoodId, number>;
+  cart?: CartLine[];
 };
 
 type PaperWorld = {
@@ -96,7 +99,7 @@ export function buyAtIsland(
   world.ledger.consumed += qty;
   world.tradeCount += 1;
 
-  return {
+  const result: BuyOk = {
     ok: true,
     paid,
     island: intent.island,
@@ -106,4 +109,6 @@ export function buyAtIsland(
     provenance: "SIMULATED",
     note: BUY_NOTE,
   };
+  if (visitor.cart) afterBuyFillCart(visitor, result);
+  return result;
 }
