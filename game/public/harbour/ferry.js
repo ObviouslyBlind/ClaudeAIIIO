@@ -1,8 +1,12 @@
 import * as THREE from "three";
 
-/** Channel midpoint is the origin. Sit in the water south of North port so the side profile reads from the quay. */
-/** North port is z=-6950. Sit in the channel just south of that quay so spawn/orbit can see the hull. */
-export const HOME_Z = -6400;
+/** Channel midpoint is the origin. +Z is south. North port is z=-6950. */
+/**
+ * Berth in the channel immediately off the north pier, past the dinghies
+ * (along ~88 m) and still inside a quay orbit. `/?g=ferry30` FAIL: hull at
+ * z=-6400 sat 550 m out, so the cream boat never entered the critic frame.
+ */
+export const HOME_Z = -6835;
 const SLIDE = 42;
 const SLIDE_SPEED = 0.07;
 
@@ -210,7 +214,8 @@ export function makeFerry() {
   rudder.position.set(-20.55, -0.15, 0);
   g.add(rudder);
 
-  g.position.set(0, 0, HOME_Z);
+  g.position.set(0, 0.4, HOME_Z);
+  g.scale.set(1.35, 1.35, 1.35);
   return g;
 }
 

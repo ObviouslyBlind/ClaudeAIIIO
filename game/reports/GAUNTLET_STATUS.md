@@ -12,13 +12,17 @@ Inland spawn, paved ribbon, dirt, cars, yellow taxi, trees+cart, lease → House
 
 ## Held (code, live on the same page as the ferry)
 
-Shore foam, quay clutter, building shells, window lights, stalls, pedestrians, nametags, warehouse/factory/shop/farm/house-shop interiors, presence, cart, staff hire/fire, bid/ask/sell/cancel + market cancel button, North/South books, upkeep, persist dump + restore, lease afford, player "You · PAPER" tag.
+Shore foam, quay clutter, building shells, window lights, stalls, pedestrians, nametags, warehouse/factory/shop/farm/house-shop interiors, presence, cart, staff hire/fire, bid/ask/sell/cancel + market cancel button, North/South books, upkeep, persist dump + restore, lease afford, player "You · PAPER" tag, north port sign, calendar, develop afford, ferry fare, sales tax, held-goods, faucet/sink.
+
+## Pixel ferry
+
+`/?g=ferry30` **FAIL**: Cash $1000, harbour water visible, no cream hull. Cause: `HOME_Z=-6400` was 550 m south of the north pier. Fix: berth at `HOME_Z=-6835` (just past the dinghies). Next critic: `/?g=ferry31`.
 
 ## In flight (not ferry-only)
 
-Pixel: ferry hull at north quay `/?g=ferry30`. Also building: calendar, develop afford, port sign, sales tax, ferry fare.
+South port sign, stall last-price, and other one-file harbour builders. Do not restart play while a critic is on the page.
 
-## Next pixel (after ferry30, immediately, no wait)
+## Next pixel (after ferry31 PASS, immediately, no wait)
 
 Shore foam, quay, shells+lights, stalls, econ/nearby/staff lines, pedestrians, nametags, interiors.
 

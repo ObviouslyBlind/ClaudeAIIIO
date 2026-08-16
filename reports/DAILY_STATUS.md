@@ -7,8 +7,8 @@
 ### Harbour (PAPER / SIMULATED)
 
 - Pixel-held: inland spawn, paved ribbon, dirt ribbons, traffic, taxi overlay, ferry $15, RMB orbit, lease → House → Enter → Exit, trees + cart (`/?g=tree25`)
-- Code-held: econ HUD, NPC stall buy, pedestrians, nametags, warehouse interior, presence cells, cart persist
-- In flight: trees+cart critic, visitor orders, staff slots
+- Pixel ferry `/?g=ferry30` FAIL (no hull in quay frame). Berth moved to `HOME_Z=-6835`. Next `/?g=ferry31`.
+- Code-held: econ HUD, stalls, pedestrians, nametags, interiors, presence, persist, north port sign, calendar / fare / tax / held-goods / faucet lines
 - Play: `http://localhost:8787/` (port 8787). New critic queries use `?g=`
 - Do not clone Capital Rift UI / Earth / OSM / wallet
 
