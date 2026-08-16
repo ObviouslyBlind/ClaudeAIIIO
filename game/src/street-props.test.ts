@@ -354,6 +354,69 @@ describe("street prop setback", () => {
     }
   });
 
+  it("props a kraft PAPER lid on the open fish crate, off ROAD_CLEAR", () => {
+    const map = createLandBoard();
+    const scene = { add(_obj: THREE.Object3D) {} };
+    const root = makeStreetProps(map, {
+      scene,
+      specOf: (id: "north" | "south") => ISLANDS[id],
+      heightAt,
+    });
+
+    const placed = (root.userData.placed || []) as {
+      kind: string;
+      island: string;
+      x: number;
+      z: number;
+      setback: number;
+      along: number;
+    }[];
+    const port = ISLANDS.north.port;
+    const crates = placed.filter(
+      (p) =>
+        p.kind === "fish-crate" &&
+        p.island === "north" &&
+        p.along <= NORTH_PORT_STRETCH_M &&
+        Math.hypot(p.x - port.x, p.z - port.z) < 220,
+    );
+    expect(crates.length).toBeGreaterThanOrEqual(1);
+
+    const groups: THREE.Object3D[] = [];
+    root.traverse((obj) => {
+      if (obj.userData?.prop === "fish-crate") groups.push(obj);
+    });
+    expect(groups.length).toBeGreaterThanOrEqual(1);
+
+    const wood = new Set([0x8a6238, 0x9a6a40, 0x6a4a2a]);
+    for (const crate of groups) {
+      expect(crate.userData.mode).toBe("PAPER");
+      const lids: THREE.Object3D[] = [];
+      crate.traverse((obj) => {
+        if (obj.userData?.part === "lid") lids.push(obj);
+      });
+      expect(lids.length).toBeGreaterThanOrEqual(1);
+      for (const lid of lids) {
+        expect(lid.userData.part).toBe("lid");
+        expect(lid.userData.mode === "PAPER" || crate.userData.mode === "PAPER").toBe(true);
+        const mesh = lid as THREE.Mesh;
+        expect(mesh.isMesh).toBe(true);
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        const mat = mesh.material as THREE.MeshLambertMaterial;
+        expect(mat.type).toBe("MeshLambertMaterial");
+        expect(wood.has(mat.color.getHex())).toBe(true);
+        expect(Math.abs(mesh.rotation.x) + Math.abs(mesh.rotation.z)).toBeGreaterThan(0.3);
+        expect(mesh.position.y).toBeGreaterThan(0.28);
+        expect(mesh.position.y).toBeLessThan(0.7);
+        expect(Math.hypot(mesh.position.x, mesh.position.z)).toBeLessThan(0.5);
+      }
+    }
+
+    for (const p of crates) {
+      expect(p.setback).toBeGreaterThanOrEqual(STREET_SETBACK_MIN_M);
+      expect(distToPaved(ISLANDS.north, p.x, p.z)).toBeGreaterThanOrEqual(ROAD_CLEAR);
+    }
+  });
+
   it("sits a kraft PAPER dipper in the village pump trough, off ROAD_CLEAR", () => {
     const map = createLandBoard();
     const scene = { add(_obj: THREE.Object3D) {} };

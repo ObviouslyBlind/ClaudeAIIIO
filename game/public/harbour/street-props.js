@@ -449,9 +449,9 @@ function fishingNetRack(_side) {
 }
 
 /**
- * Small kraft open fish crate on the verge: wood box (floor + walls, no lid)
- * and two fish-shaped paper boxes in harbour silver-teal. Not a closed
- * crate, not a cylinder fish.
+ * Small kraft open fish crate on the verge: wood box (floor + walls), a
+ * kraft lid propped on the rim, and two fish-shaped paper boxes in harbour
+ * silver-teal. Not a closed crate, not a cylinder fish.
  */
 function fishCrate(_side) {
   const g = new THREE.Group();
@@ -500,7 +500,15 @@ function fishCrate(_side) {
   tailB.userData.part = "fish";
   tailB.userData.dress = "fish-crate";
 
-  g.add(floor, wallN, wallS, wallE, wallW, bodyA, tailA, bodyB, tailB);
+  const lid = part(0.76, 0.05, 0.52, WOOD, false);
+  lid.userData.part = "lid";
+  lid.userData.mode = "PAPER";
+  lid.userData.dress = "fish-crate";
+  // Propped on the south rim — tilted so the crate stays open.
+  lid.position.set(0.04, 0.44, 0.26);
+  lid.rotation.x = -0.72;
+
+  g.add(floor, wallN, wallS, wallE, wallW, bodyA, tailA, bodyB, tailB, lid);
   return g;
 }
 
@@ -672,7 +680,7 @@ function placeOne(map, road, spec, heightAt, slot, root) {
 }
 
 /**
- * Paper lamp posts, kraft crate seats, hawser drums, one wood stool, one village pump with a kraft crank on the head and a kraft dipper in the trough, one fishing-net rack, one open fish crate, and signs along the paved spline, on the grass verge.
+ * Paper lamp posts, kraft crate seats, hawser drums, one wood stool, one village pump with a kraft crank on the head and a kraft dipper in the trough, one fishing-net rack, one open fish crate with a kraft lid propped on the rim, and signs along the paved spline, on the grass verge.
  * North port stretch is packed first so spawn looking inland actually sees them.
  */
 export function makeStreetProps(map, helpers) {
