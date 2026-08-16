@@ -2,12 +2,15 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import * as THREE from "three";
 import { createLandBoard, heightAt, ISLANDS } from "./land.ts";
 import {
+  awningStyleFor,
   createStalls,
   FOOD_GOODS,
   makeStallMesh,
   stallGoodFor,
   STALL_KIND,
 } from "../public/harbour/stalls.js";
+
+const CLOTH = new Set([0xc45c3a, 0xf4ead8, 0x2a7a72]);
 
 function isGrey(hex: number) {
   const r = (hex >> 16) & 255;
@@ -34,6 +37,17 @@ function parts(root: THREE.Object3D) {
     if (obj.userData?.part) out.push(obj.userData.part);
   });
   return out;
+}
+
+function stripeHexes(root: THREE.Object3D) {
+  const colors: number[] = [];
+  root.traverse((obj) => {
+    if (!obj.userData?.stripe) return;
+    const mesh = obj as THREE.Mesh;
+    const mat = mesh.material as THREE.MeshLambertMaterial | undefined;
+    if (mat?.color) colors.push(mat.color.getHex());
+  });
+  return colors;
 }
 
 function meshCount(root: THREE.Object3D) {
@@ -109,9 +123,26 @@ describe("NPC harbour stalls", () => {
     const colors = hexes(mesh);
     expect(colors.length).toBeGreaterThan(4);
     expect(colors.every(isGrey)).toBe(false);
-    expect(colors).toContain(0xc45c3a);
-    expect(colors).toContain(0xf4ead8);
     expect(colors).toContain(0x8a6238);
+    const stripes = stripeHexes(mesh);
+    expect(stripes.length).toBeGreaterThan(6);
+    expect(stripes.every((c) => CLOTH.has(c))).toBe(true);
+  });
+
+  it("varies kraft / terracotta / teal canvas stripes across stalls", () => {
+    const a = makeStallMesh({ id: "north-street-0", use: "stall", island: "north" });
+    const b = makeStallMesh({ id: "south-street-3", use: "stall", island: "south" });
+    const c = makeStallMesh({ id: "n-field-1", use: "farm", island: "north", band: "field" });
+    const seqA = stripeHexes(a);
+    const seqB = stripeHexes(b);
+    const seqC = stripeHexes(c);
+    expect(seqA).not.toEqual(seqB);
+    expect(awningStyleFor({ id: "north-street-0" })).not.toEqual(awningStyleFor({ id: "south-street-3" }));
+    const seen = new Set([...seqA, ...seqB, ...seqC]);
+    expect(seen.has(0xc45c3a)).toBe(true);
+    expect(seen.has(0xf4ead8)).toBe(true);
+    expect(seen.has(0x2a7a72)).toBe(true);
+    expect([...seen].every((hex) => CLOTH.has(hex))).toBe(true);
   });
 
   it("farms sell corn; other NPC stalls sell a food good", () => {

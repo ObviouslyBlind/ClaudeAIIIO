@@ -8,14 +8,25 @@ import * as THREE from "three";
 const WOOD = 0x5a3a22;
 const WOOD_POST = 0x6a4a2a;
 const DECK = 0xc4a574;
-const AWNING_A = 0xc45c3a;
-const AWNING_B = 0xf4ead8;
+/** Original stall cloth: terracotta, kraft cream, harbour teal. */
+const TERRACOTTA = 0xc45c3a;
+const KRAFT = 0xf4ead8;
+const TEAL = 0x2a7a72;
 const CRATE_A = 0x8a6238;
 const CRATE_B = 0x7a5230;
 const CORN = 0xd4b83a;
 const LEAF = 0x5f8a32;
 const PLASTER = 0xe8d7b8;
 const FRAME = 0x3d2a1c;
+
+/** PAPER canvas pairs. Same three hexes, swapped per stall. */
+const AWNING_PAIRS = [
+  [TERRACOTTA, KRAFT],
+  [TEAL, KRAFT],
+  [TERRACOTTA, TEAL],
+  [KRAFT, TEAL],
+  [TEAL, TERRACOTTA],
+];
 
 /** Food goods a farm-stand can sell. Default is corn. */
 export const FOOD_GOODS = ["corn", "potato", "lettuce", "beans"];
@@ -37,6 +48,13 @@ function hashId(id) {
   let n = 0;
   for (let i = 0; i < s.length; i++) n = (n + s.charCodeAt(i) * (i + 1)) | 0;
   return Math.abs(n);
+}
+
+/** Stripe pair + count keyed to the plot, not a new palette. */
+export function awningStyleFor(plot) {
+  const h = hashId(plot && plot.id);
+  const pair = AWNING_PAIRS[h % AWNING_PAIRS.length];
+  return { a: pair[0], b: pair[1], n: 5 + (h % 3) };
 }
 
 /** Farm plots sell corn. Other NPC stalls sell a food good keyed to the plot. */
@@ -96,15 +114,27 @@ export function makeStallMesh(plot) {
     }
   }
 
-  const n = 6;
+  const { a: clothA, b: clothB, n } = awningStyleFor(plot);
   const stripW = 3.8 / n;
   for (let i = 0; i < n; i++) {
-    const strip = paperBox(stripW - 0.04, 0.08, 2.6, i % 2 ? AWNING_B : AWNING_A, false);
+    const cloth = i % 2 ? clothB : clothA;
+    const strip = paperBox(stripW - 0.04, 0.08, 2.6, cloth, false);
     strip.position.set(-1.9 + stripW * (i + 0.5), 2.35, 0.15);
     strip.rotation.x = 0.22;
     strip.userData.part = "awning";
+    strip.userData.stripe = true;
     strip.userData.roof = true;
     g.add(strip);
+  }
+
+  const flapN = n + 1;
+  const flapSpan = 3.6;
+  for (let i = 0; i < flapN; i++) {
+    const flap = paperBox(flapSpan / flapN - 0.06, 0.28, 0.08, i % 2 ? clothB : clothA, false);
+    flap.position.set(-flapSpan / 2 + (flapSpan / (flapN - 1)) * i, 2.04, 1.38);
+    flap.userData.part = "awning";
+    flap.userData.stripe = true;
+    g.add(flap);
   }
 
   const ridge = paperBox(4.0, 0.1, 0.18, FRAME, false);
@@ -131,7 +161,7 @@ export function makeStallMesh(plot) {
   const sign = paperBox(1.8, 0.42, 0.06, FRAME, false);
   sign.position.set(0, 2.05, 1.2);
   sign.userData.part = "sign";
-  const face = paperBox(1.55, 0.28, 0.04, AWNING_A, false);
+  const face = paperBox(1.55, 0.28, 0.04, clothA, false);
   face.position.set(0, 2.05, 1.25);
   face.userData.part = "sign";
   g.add(sign, face);
