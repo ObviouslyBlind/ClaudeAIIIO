@@ -106,6 +106,37 @@ describe("owned building interiors", () => {
     expect(chair).toBeTruthy();
     expect(chair!.userData.mode).toBe("PAPER");
 
+    const lamp = down!.getObjectByName("lamp");
+    expect(lamp).toBeTruthy();
+    expect(lamp!.userData.mode).toBe("PAPER");
+    expect(lamp!.userData.kind).toBe("interior-lamp");
+    const lampPos = new THREE.Vector3();
+    lamp!.getWorldPosition(lampPos);
+    expect(Math.abs(lampPos.x)).toBeLessThan(1);
+    expect(lampPos.z).toBeLessThan(1.2);
+    expect(lampPos.z).toBeGreaterThan(-2);
+    expect(lampPos.y).toBeGreaterThan(1.6);
+    let kraftShade = false;
+    let glowing = false;
+    let shadeW = 0;
+    lamp!.traverse((o) => {
+      if ((o as THREE.Mesh).isMesh && (o as THREE.Mesh).material && "color" in (o as THREE.Mesh).material) {
+        const mat = (o as THREE.Mesh).material as THREE.MeshLambertMaterial;
+        const hex = mat.color.getHex();
+        if (hex === 0xf3efe4) {
+          kraftShade = true;
+          o.geometry.computeBoundingBox();
+          const bb = o.geometry.boundingBox!;
+          shadeW = bb.max.x - bb.min.x;
+        }
+        if (mat.emissive && mat.emissive.getHex() !== 0) glowing = true;
+      }
+    });
+    expect(kraftShade).toBe(true);
+    expect(glowing).toBe(true);
+    expect(shadeW).toBeGreaterThan(0.2);
+    expect(shadeW).toBeLessThan(0.5);
+
     let exitDoors = 0;
     g.traverse((o) => {
       if (o.userData?.kind === "exit" && (o as THREE.Mesh).isMesh) exitDoors += 1;
