@@ -406,6 +406,30 @@ function factoryMallet(x, z, yaw = 0) {
 }
 
 /**
+ * Tiny kraft PAPER oilcan: KRAFT body, KRAFT_LIGHT spout. Boxes only.
+ * Sits on the left-wall bench — not the rag, rivet, wrench, scrap-bin, or grate.
+ */
+function paperOilcan(x, z, yaw = 0) {
+  const g = new THREE.Group();
+  g.name = "factory-paper-oilcan";
+  g.userData.kind = "factory-paper-oilcan";
+  g.userData.mode = "PAPER";
+  g.userData.part = "oilcan";
+  // Second workbench lip top: y0 0.16 + 0.78, lip centre +0.05, half lip 0.015.
+  const sitY = 0.16 + 0.78 + 0.05 + 0.015;
+  g.position.set(x, sitY, z);
+  g.rotation.y = yaw;
+  const body = paperBox(0.07, 0.08, 0.055, KRAFT, "factory-paper-oilcan");
+  body.position.y = 0.04;
+  const spout = paperBox(0.08, 0.016, 0.016, KRAFT_LIGHT, "factory-paper-oilcan");
+  spout.position.set(0.055, 0.07, 0);
+  const cap = paperBox(0.028, 0.018, 0.028, BENCH_WOOD, "factory-paper-oilcan");
+  cap.position.set(0, 0.089, 0);
+  g.add(body, spout, cap);
+  return g;
+}
+
+/**
  * Small kraft/iron PAPER oil can: short box body, thinner spout.
  * Sits on the first workbench top — not a mill, not the hanging wrench.
  */
@@ -533,6 +557,8 @@ function makeFactoryDress() {
   // Left-south corner of the first bench. Off the rag, mallet, oil can, vise, floor bucket, and hanging wrench.
   g.add(factoryRivet(-2.42, -2.74, 0.08));
   g.add(workbench(-3.08, 0.15, 2.15, 0.68, Math.PI / 2));
+  // Left-wall bench top. Off the rag, rivet, wrench, scrap-bin, and floor grate.
+  g.add(paperOilcan(-3.02, 0.72, 0.1));
   g.add(woodWorkbench(3.1, -1.18, 1.92, 0.64, Math.PI / 2));
   // Left wall, opposite the wood bench. Off the centre aisle (x≈0).
   g.add(scrapBin(-3.22, -2.62, 0.08));
