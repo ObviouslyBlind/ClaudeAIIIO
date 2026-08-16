@@ -608,3 +608,130 @@ describe("factory PAPER bench rag", () => {
     expect(interior.userData.interiorUse).toBe("house");
   });
 });
+
+const RIVET_PALETTE = new Set([KRAFT, 0x6a4a32]);
+
+function factoryRivets(root: THREE.Object3D) {
+  const out: THREE.Object3D[] = [];
+  root.traverse((obj) => {
+    if (obj.userData?.part === "rivet") {
+      out.push(obj);
+    }
+  });
+  return out;
+}
+
+describe("factory PAPER bench rivet", () => {
+  it("puts one small kraft PAPER rivet on a factory workbench", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressFactory(scene);
+
+    const dress = interior.getObjectByName("factory-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+    expect(dress!.visible).toBe(true);
+
+    const rivets = factoryRivets(dress!);
+    expect(rivets.length).toBe(1);
+
+    const rivet = rivets[0];
+    expect(rivet.userData.part).toBe("rivet");
+    expect(rivet.userData.mode).toBe("PAPER");
+    // First workbench lip top is ~1.005; rivet sits on it, not the floor.
+    expect(rivet.position.y).toBeGreaterThan(0.95);
+    expect(rivet.position.y).toBeLessThan(1.12);
+    expect(Math.abs(rivet.position.x - -1.35)).toBeLessThan(1.15);
+    expect(Math.abs(rivet.position.z - -2.48)).toBeLessThan(0.4);
+
+    const rags = factoryRags(dress!);
+    expect(rags.length).toBe(1);
+    const toRag = Math.hypot(
+      rivet.position.x - rags[0].position.x,
+      rivet.position.z - rags[0].position.z,
+    );
+    expect(toRag).toBeGreaterThan(0.5);
+
+    const mallets = factoryMallets(dress!);
+    expect(mallets.length).toBe(1);
+    const toMallet = Math.hypot(
+      rivet.position.x - mallets[0].position.x,
+      rivet.position.z - mallets[0].position.z,
+    );
+    expect(toMallet).toBeGreaterThan(0.5);
+
+    const cans = factoryOilCans(dress!);
+    expect(cans.length).toBe(1);
+    const toCan = Math.hypot(
+      rivet.position.x - cans[0].position.x,
+      rivet.position.z - cans[0].position.z,
+    );
+    expect(toCan).toBeGreaterThan(0.5);
+
+    const vises = factoryVises(dress!);
+    expect(vises.length).toBe(1);
+    const toVise = Math.hypot(
+      rivet.position.x - vises[0].position.x,
+      rivet.position.z - vises[0].position.z,
+    );
+    expect(toVise).toBeGreaterThan(0.5);
+
+    const buckets = factoryBuckets(dress!);
+    expect(buckets.length).toBe(1);
+    const toBucket = Math.hypot(
+      rivet.position.x - buckets[0].position.x,
+      rivet.position.z - buckets[0].position.z,
+    );
+    expect(toBucket).toBeGreaterThan(2);
+
+    const tools = factoryTools(dress!);
+    expect(tools.length).toBe(1);
+    const toWrench = Math.hypot(
+      rivet.position.x - tools[0].position.x,
+      rivet.position.z - tools[0].position.z,
+    );
+    expect(toWrench).toBeGreaterThan(2);
+
+    const colors = hexes(rivet);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.every((c) => RIVET_PALETTE.has(c))).toBe(true);
+    expect(colors.some((c) => c === KRAFT)).toBe(true);
+
+    const size = new THREE.Box3().setFromObject(rivet).getSize(new THREE.Vector3());
+    expect(size.x).toBeLessThan(0.12);
+    expect(size.y).toBeLessThan(0.08);
+    expect(size.z).toBeLessThan(0.12);
+
+    let boxes = 0;
+    rivet.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        boxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.mode).toBe("PAPER");
+      }
+    });
+    expect(boxes).toBeGreaterThanOrEqual(1);
+  });
+
+  it("keeps dress idempotent and hides the rivet on undress", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressFactory(scene);
+    dressFactory(scene);
+    expect(interior.children.filter((c) => c.name === "factory-dress").length).toBe(1);
+    expect(factoryRivets(interior).length).toBe(1);
+    expect(factoryRags(interior).length).toBe(1);
+    expect(factoryMallets(interior).length).toBe(1);
+    expect(factoryOilCans(interior).length).toBe(1);
+    expect(factoryTools(interior).length).toBe(1);
+
+    undressFactory(scene);
+    const dress = interior.getObjectByName("factory-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.visible).toBe(false);
+    expect(interior.userData.interiorUse).toBe("house");
+  });
+});
