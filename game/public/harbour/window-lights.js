@@ -6,7 +6,8 @@ import * as THREE from "three";
  *
  * Reuse the glass boxes from buildings.js `windowPane`. One shared Lambert
  * pane material. A couple of street panes also get a tiny kraft sill planter
- * (three paper boxes). No PointLights, no bloom, no extra lamps.
+ * (trough, soil, leaf tuft, one extra leaf/coral bloom). No PointLights,
+ * no post-process bloom, no extra lamps.
  *
  * Hook from buildings.js `meshForUse` only. Do not import from main.js.
  *
@@ -25,6 +26,8 @@ const KRAFT = 0x8a6238;
 const SOIL = 0x5a3a22;
 /** Same crop green as buildings.js CROP[0]. */
 const LEAF = 0x5f8a32;
+/** Same stall/shop coral already used in harbour — not a new hex. */
+const CORAL = 0xc45c3a;
 
 const paneMat = new THREE.MeshLambertMaterial({
   color: PANE,
@@ -34,10 +37,12 @@ const paneMat = new THREE.MeshLambertMaterial({
 const kraftMat = new THREE.MeshLambertMaterial({ color: KRAFT });
 const soilMat = new THREE.MeshLambertMaterial({ color: SOIL });
 const leafMat = new THREE.MeshLambertMaterial({ color: LEAF });
+const coralMat = new THREE.MeshLambertMaterial({ color: CORAL });
 
 const troughGeo = new THREE.BoxGeometry(0.52, 0.1, 0.13);
 const soilGeo = new THREE.BoxGeometry(0.4, 0.035, 0.08);
 const leafGeo = new THREE.BoxGeometry(0.11, 0.13, 0.07);
+const bloomGeo = new THREE.BoxGeometry(0.07, 0.09, 0.05);
 
 function isShellGlass(mesh) {
   const mat = mesh.material;
@@ -46,12 +51,12 @@ function isShellGlass(mesh) {
   return mat.color.getHex() === SHELL_GLASS;
 }
 
-function paperBox(geo, mat) {
+function paperBox(geo, mat, part = "sill-planter") {
   const m = new THREE.Mesh(geo, mat);
   m.castShadow = false;
   m.receiveShadow = false;
   m.userData.kind = "window-box";
-  m.userData.part = "sill-planter";
+  m.userData.part = part;
   m.userData.mode = "PAPER";
   return m;
 }
@@ -100,7 +105,7 @@ function pickStreetPanes(panes) {
   return scored.slice(0, 2);
 }
 
-/** Three tiny kraft boxes on the stone sill — trough, soil, one leaf tuft. */
+/** Kraft boxes on the stone sill — trough, soil, leaf tuft, one extra bloom. */
 function addSillPlanter(pane, alongZ, n) {
   const parent = pane.parent;
   if (!parent || !parent.add) return;
@@ -117,7 +122,9 @@ function addSillPlanter(pane, alongZ, n) {
   soil.position.y = 0.055;
   const leaf = paperBox(leafGeo, leafMat);
   leaf.position.set(-0.08, 0.12, 0.01);
-  g.add(trough, soil, leaf);
+  const bloom = paperBox(bloomGeo, coralMat, "sill-bloom");
+  bloom.position.set(0.09, 0.1, 0.01);
+  g.add(trough, soil, leaf, bloom);
   const y = pane.position.y - h / 2 - 0.03;
   if (alongZ) {
     g.position.set(pane.position.x, y, pane.position.z + n * 0.08);
