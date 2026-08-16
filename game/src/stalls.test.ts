@@ -127,6 +127,7 @@ describe("NPC harbour stalls", () => {
     expect(kinds).toContain("fish");
     expect(kinds).toContain("ground-crate");
     expect(kinds).toContain("stool");
+    expect(kinds).toContain("cup");
     const colors = hexes(mesh);
     expect(colors.length).toBeGreaterThan(4);
     expect(colors.every(isGrey)).toBe(false);
@@ -509,6 +510,80 @@ describe("NPC harbour stalls", () => {
     expect(stalls.group.children.length).toBeGreaterThan(0);
     for (const child of stalls.group.children) {
       expect(child.children.filter((c) => c.userData.part === "stool").length).toBe(1);
+    }
+  });
+
+  it("puts one tiny kraft PAPER cup on each NPC stall counter", () => {
+    const mesh = makeStallMesh({ id: "n-test", use: "farm", island: "north", band: "field" });
+    const counter = mesh.children.find((c) => c.userData.part === "counter") as THREE.Mesh;
+    const cups = mesh.children.filter((c) => c.userData.part === "cup");
+    expect(cups.length).toBe(1);
+    const cup = cups[0]!;
+    expect(cup.userData.mode).toBe("PAPER");
+    expect(cup.userData.paper).toBe(true);
+    const box = counter.geometry as THREE.BoxGeometry;
+    const counterTop = counter.position.y + box.parameters.height / 2;
+    expect(cup.position.y).toBeCloseTo(counterTop, 5);
+    expect(cup.position.z).toBeCloseTo(counter.position.z, 5);
+    expect(Math.abs(cup.position.x)).toBeLessThan(1.7);
+
+    const melon = mesh.children.find((c) => c.userData.part === "melon")!;
+    const cone = mesh.children.find((c) => c.userData.part === "cone")!;
+    const lantern = mesh.children.find((c) => c.userData.part === "lantern")!;
+    const fish = mesh.children.find((c) => c.userData.part === "fish")!;
+    const slate = mesh.children.find((c) => c.userData.part === "slate")!;
+    const stool = mesh.children.find((c) => c.userData.part === "stool")!;
+    const scale = mesh.children.find((c) => c.userData.part === "hanging-scale")!;
+    expect(melon.position.x).toBeCloseTo(-0.88, 5);
+    expect(melon.position.y).toBeCloseTo(0.9, 5);
+    expect(cone.position.x).toBeCloseTo(-0.42, 5);
+    expect(cone.position.y).toBeCloseTo(0.9, 5);
+    expect(slate.userData.part).toBe("slate");
+    expect(stool.userData.part).toBe("stool");
+    expect(Math.abs(cup.position.x - melon.position.x)).toBeGreaterThan(0.25);
+    expect(Math.abs(cup.position.x - cone.position.x)).toBeGreaterThan(0.25);
+    expect(
+      Math.hypot(cup.position.x - lantern.position.x, cup.position.z - lantern.position.z),
+    ).toBeGreaterThan(0.25);
+    expect(
+      Math.hypot(cup.position.x - fish.position.x, cup.position.z - fish.position.z),
+    ).toBeGreaterThan(0.25);
+    expect(
+      Math.hypot(cup.position.x - slate.position.x, cup.position.z - slate.position.z),
+    ).toBeGreaterThan(0.2);
+    expect(Math.abs(cup.position.x - stool.position.x)).toBeGreaterThan(1.5);
+    expect(
+      Math.hypot(cup.position.x - scale.position.x, cup.position.z - scale.position.z),
+    ).toBeGreaterThan(0.25);
+
+    const kraft = new Set([0xf4ead8, 0x5a3a22]);
+    const colors = hexes(cup);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.every((c) => kraft.has(c))).toBe(true);
+    expect(colors).toContain(0xf4ead8);
+    expect(colors).toContain(0x5a3a22);
+    expect(colors.every((c) => !isGrey(c))).toBe(true);
+    let boxes = 0;
+    cup.traverse((obj) => {
+      const m = obj as THREE.Mesh;
+      if (!m.isMesh) return;
+      boxes += 1;
+      expect(m.geometry.type).toBe("BoxGeometry");
+      const g = m.geometry as THREE.BoxGeometry;
+      expect(g.parameters.width).toBeLessThan(0.2);
+      expect(g.parameters.height).toBeLessThan(0.2);
+      expect(g.parameters.depth).toBeLessThan(0.2);
+    });
+    expect(boxes).toBeGreaterThanOrEqual(2);
+
+    const { stalls } = boot();
+    expect(stalls.group.children.length).toBeGreaterThan(0);
+    for (const child of stalls.group.children) {
+      expect(child.children.filter((c) => c.userData.part === "cup").length).toBe(1);
+      expect(child.children.filter((c) => c.userData.part === "stool").length).toBe(1);
+      expect(child.children.filter((c) => c.userData.part === "slate").length).toBe(1);
+      expect(child.children.filter((c) => c.userData.part === "melon").length).toBe(1);
+      expect(child.children.filter((c) => c.userData.part === "cone").length).toBe(1);
     }
   });
 
