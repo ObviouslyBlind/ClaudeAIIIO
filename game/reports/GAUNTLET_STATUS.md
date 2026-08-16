@@ -1,20 +1,23 @@
 # Gauntlet status
 
-Loop is **autonomous**. Critic = pixels only. Tests = lead/builder. No user hard-refresh.
+Loop is **autonomous**. Critic = pixels only. Tests = lead/builder.
 
-**Held:** inland spawn, black tarmac, PAPER HUD (when boot finishes).
-**Shipped (code, not yet pixel-ratified):** taxi wait+map, RMB orbit, ferry ticket, building catalogue, interiors.
+**Held:** inland spawn, black tarmac, PAPER HUD — only when a **fresh** document actually boots.
+**Shipped (code):** taxi, RMB orbit, ferry ticket, catalogue, interiors.
 
-## Round 12 — traffic critic (root URL)
+## Round 12–13 — traffic critic
 
-[Traffic critic](bc-5aa4bebd-6229-574b-860e-c8a899bdbf91) **FAIL**: HUD shell only. Viewport was the CSS teal (`#0e4a55`). Cash stayed **$0** (HTML default). That is “JS never finished boot / WebGL context failed”, not “cars missing on a live island.”
+Both pixel critics **FAIL** on a blank teal viewport + Cash $0.
 
-Headless log: `THREE.WebGLRenderer: Error creating WebGL context.` GPU process was pegged on leftover critic tabs. Animation loop used to start **after** every mesh, so an 8s critic never saw a frame.
+Round 13 still showed the **old** status line (“Tap a piece of land…”) and no Enter button. That is a **stale tab**, not a live load of the boot-fix HTML (which starts as `Loading 3D harbour…` and stamps the tab title with a nonce).
 
-**Fix in this round:** show cash as soon as `/api/map` returns; first-frame water+spawn before parcels; catch WebGL onto the HUD; status starts as `Loading 3D harbour…`.
+**This round:** classic (non-module) `fetch("/api/map")` writes Cash even if three.js never runs; tab title includes the asset nonce; critics must open a **new query** so Chrome does not reuse the dead tab.
 
-## Next critic bar (traffic, still)
+## Next critic
 
-Open **exactly** `http://localhost:8787/` (root). Wait until Cash is not `$0` (up to ~20s). Then wait a few more seconds. **PASS** only if colored vehicle meshes move on the black road. Inferring cars from tarmac does not count.
+Open **exactly** `http://localhost:8787/?g=13`  
+(not `/harbour/index.html`, not a tab that is already on `/`).
+
+Wait until Cash is not `$0`. Then wait ~6s. PASS traffic only if colored vehicle meshes are visible on black tarmac.
 
 Do not rewrite `traffic.js`, island centres, or PLAN.md.

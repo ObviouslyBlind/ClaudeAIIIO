@@ -37,19 +37,48 @@
       <a class="ghost" href="/market/">Market</a>
     </nav>
     <script>
-      window.addEventListener("error", function (e) {
-        var el = document.getElementById("status");
-        if (!el || !e.message) return;
-        if (el.textContent.indexOf("Loading") !== 0 && el.textContent.indexOf("BOOT FAIL") !== 0) return;
-        el.textContent = "BOOT FAIL: " + e.message;
-      });
-      window.addEventListener("unhandledrejection", function (e) {
-        var el = document.getElementById("status");
-        var r = e.reason;
-        if (!el) return;
-        if (el.textContent.indexOf("Loading") !== 0 && el.textContent.indexOf("BOOT FAIL") !== 0) return;
-        el.textContent = "BOOT FAIL: " + (r && r.message ? r.message : String(r));
-      });
+      (function () {
+        var status = document.getElementById("status");
+        var cash = document.getElementById("cash");
+        function stillBooting() {
+          if (!status) return false;
+          var t = status.textContent || "";
+          return t.indexOf("Loading") === 0 || t.indexOf("BOOT FAIL") === 0;
+        }
+        function fail(msg) {
+          if (status && stillBooting()) status.textContent = "BOOT FAIL: " + msg;
+        }
+        window.addEventListener(
+          "error",
+          function (e) {
+            var msg = (e && e.message) || "";
+            if (!msg && e && e.filename) msg = "load " + e.filename;
+            if (!msg && e && e.target && e.target.src) msg = "load " + e.target.src;
+            if (msg) fail(msg);
+          },
+          true,
+        );
+        window.addEventListener("unhandledrejection", function (e) {
+          var r = e.reason;
+          fail(r && r.message ? r.message : String(r));
+        });
+        // Classic fetch: cash must update even if the three.js module never runs.
+        fetch("/api/map")
+          .then(function (r) {
+            if (!r.ok) throw new Error("map " + r.status);
+            return r.json();
+          })
+          .then(function (d) {
+            if (cash && d && d.visitor) {
+              cash.textContent =
+                "Cash $" +
+                Number(d.visitor.cash).toLocaleString("en-US", { maximumFractionDigits: 0 });
+            }
+          })
+          .catch(function (e) {
+            fail("map " + (e && e.message ? e.message : e));
+          });
+      })();
     </script>
     <script type="importmap">
       { "imports": { "three": "/vendor/three.module.js" } }

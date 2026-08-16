@@ -168,7 +168,9 @@ const server = createServer(async (req, res) => {
       "content-type": types[ext] ?? "application/octet-stream",
     };
     if (ext === ".js" || ext === ".css" || ext === ".html") {
-      headers["cache-control"] = "no-store";
+      headers["cache-control"] = "no-store, no-cache, must-revalidate";
+      headers["pragma"] = "no-cache";
+      headers["expires"] = "0";
     }
     if (ext === ".html") {
       data = bustHarbourAssets(data.toString("utf8"));
