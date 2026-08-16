@@ -2,11 +2,13 @@ import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { GOOD_IDS, type GoodId } from "./goods.ts";
+import { GOOD_IDS } from "./goods.ts";
 import { createLandBoard, developPlot, landSnapshot, leasePlot } from "./land.ts";
 import { parseLandUse } from "./buildings.ts";
-import { buyFromStall, createVisitor, createWorld, hud, tick } from "./sim.ts";
+import { buyAtIsland } from "./buy.ts";
+import { createVisitor, createWorld, hud, tick } from "./sim.ts";
 import { listOpenOrders, placeAsk, placeBid } from "./orders.ts";
+import { postStaff, staffMapSnapshot } from "./staff-http.ts";
 import { bustHarbourAssets, bustModuleImports } from "./cache-bust.ts";
 import { confirmFerry, listFerryRoutes } from "./ferry-routes.ts";
 import { calendarHud } from "./calendar.ts";
@@ -96,7 +98,7 @@ const server = createServer(async (req, res) => {
   }
 
   if (req.method === "GET" && url.pathname === "/api/map") {
-    json(res, 200, landSnapshot(land, visitor));
+    json(res, 200, staffMapSnapshot(land, visitor));
     return;
   }
 
@@ -107,7 +109,7 @@ const server = createServer(async (req, res) => {
       return;
     }
     const result = leasePlot(land, visitor, String(body.plotId ?? ""));
-    json(res, result.ok ? 200 : 400, { ...result, snapshot: landSnapshot(land, visitor) });
+    json(res, result.ok ? 200 : 400, { ...result, snapshot: staffMapSnapshot(land, visitor) });
     return;
   }
 
@@ -119,11 +121,22 @@ const server = createServer(async (req, res) => {
     }
     const use = parseLandUse(body.use);
     if (!use) {
-      json(res, 400, { ok: false, reason: "bad_use", snapshot: landSnapshot(land, visitor) });
+      json(res, 400, { ok: false, reason: "bad_use", snapshot: staffMapSnapshot(land, visitor) });
       return;
     }
     const result = developPlot(land, visitor, String(body.plotId ?? ""), use);
-    json(res, result.ok ? 200 : 400, { ...result, snapshot: landSnapshot(land, visitor) });
+    json(res, result.ok ? 200 : 400, { ...result, snapshot: staffMapSnapshot(land, visitor) });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/staff") {
+    const body = await readJsonBody(req);
+    if (!body) {
+      json(res, 400, { ok: false, reason: "bad_json", mode: "PAPER" });
+      return;
+    }
+    const result = postStaff(land, visitor, body);
+    json(res, result.ok ? 200 : 400, result);
     return;
   }
 
@@ -151,7 +164,7 @@ const server = createServer(async (req, res) => {
       },
       world.statutes,
     );
-    json(res, result.ok ? 200 : 400, { ...result, snapshot: landSnapshot(land, visitor) });
+    json(res, result.ok ? 200 : 400, { ...result, snapshot: staffMapSnapshot(land, visitor) });
     return;
   }
 
@@ -183,9 +196,11 @@ const server = createServer(async (req, res) => {
       json(res, 400, { ok: false, reason: "bad_json" });
       return;
     }
-    const good = body.good as GoodId;
-    const qty = Number(body.qty ?? 1);
-    const result = buyFromStall(world, visitor, good, qty);
+    const result = buyAtIsland(world, visitor, {
+      island: body.island ?? "north",
+      goodId: body.goodId ?? body.good,
+      qty: body.qty ?? 1,
+    });
     json(res, result.ok ? 200 : 400, { ...result, snapshot: snapshot() });
     return;
   }
