@@ -12,8 +12,9 @@ import * as THREE from "three";
  * Bed load: two small kraft crates + one canvas roll + a short kraft rope coil
  * + a thin kraft canvas strap over the visitor crate.
  * Wheels: kraft cream hub discs (paper boxes) on the outer face of each wheel.
+ * Grip: a short kraft hitch pin (paper box) through the handle.
  */
-export const CART_MESH_COUNT = 18;
+export const CART_MESH_COUNT = 19;
 /** Metres from player.position down to the soles. Same as player.js SOLE_Y. */
 const SOLE_Y = -1.15;
 
@@ -103,6 +104,11 @@ function makeHandcart() {
   grip.position.set(0, 0.95, -0.26);
   grip.userData.part = "grip";
 
+  // Short kraft hitch pin through the grip — paper box only, reads at spawn.
+  const pin = paperBox(0.03, 0.14, 0.03, WHEEL, false);
+  pin.position.set(0, 0.95, -0.26);
+  pin.userData.part = "pin";
+
   // Two small kraft crates + canvas roll + a short kraft rope coil on the bed
   // so spawn reads as a loaded market cart, not an empty wood frame.
   // Sit on the bed top (y = 0.53). Coil is paper boxes, not a cylinder.
@@ -131,7 +137,7 @@ function makeHandcart() {
   coilTop.position.set(-0.16, 0.645, -0.84);
   coilTop.userData.part = "coil";
 
-  g.add(bed, sideL, sideR, tail, head, wheelL, wheelR, hubL, hubR, handleL, handleR, grip, crate, strap, crate2, roll, coil, coilTop);
+  g.add(bed, sideL, sideR, tail, head, wheelL, wheelR, hubL, hubR, handleL, handleR, grip, pin, crate, strap, crate2, roll, coil, coilTop);
   return g;
 }
 
