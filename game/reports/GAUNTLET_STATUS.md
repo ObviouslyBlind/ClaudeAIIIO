@@ -8,17 +8,17 @@ Inland spawn, paved asphalt ribbon (`/?g=rib23`), dirt ribbons (`/?g=dirt24`), t
 
 ## Held (code, not all re-critic’d)
 
-- Econ HUD strip, NPC stall buy, outdoor nametags, warehouse interior, presence cells, nearby names on the sheet, visitor cart persist, quay pedestrians, staff slots, visitor bid/ask
+- Econ HUD strip, NPC stall buy, outdoor nametags, warehouse interior, factory interior (`0061723d`), presence cells, nearby names on the sheet, visitor cart persist, quay pedestrians, staff slots, visitor bid/ask, market bid/ask strip (`ebb83db4`)
 
 ## In flight (base)
 
-Pixel: ferry boat (`/?g=ferry28`). Shop / farm / factory interiors, hire/fire HTTP, market order strip, cart HUD, North/South buy.
+Pixel: ferry boat (`/?g=ferry28`). Shop / farm interiors, hire/fire HTTP, cart HUD, North/South buy, land upkeep.
 
 Politics stays frozen — do not resume House/Senate/councils.
 
 ## Next pixel queue (one critic at a time)
 
-Ferry boat, shore, quay, shells, stalls, econ line, nearby names, pedestrians, nametags, warehouse interior.
+Ferry boat, shore, quay, shells, stalls, econ line, nearby names, pedestrians, nametags, warehouse interior, factory interior.
 
 ## Frozen
 
