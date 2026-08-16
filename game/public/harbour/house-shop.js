@@ -252,6 +252,28 @@ function makeCoffeeTable(x, z) {
   g.add(makeTableCoaster(x + 0.42, topY + 0.03, z + 0.12));
   // Tiny kraft PAPER blotter — offset from the coaster, cup, knife, spoon, napkin.
   g.add(makeTableBlotter(x + 0.02, topY + 0.03, z - 0.18));
+  // Tiny kraft PAPER stamp — offset from the blotter, coaster, cup, knife, spoon, napkin, saucer.
+  g.add(makeTableStamp(x - 0.44, topY + 0.03, z + 0.24));
+  return g;
+}
+
+/**
+ * Tiny kraft PAPER stamp on the living-room table — wood handle, cream pad.
+ * Offset from the blotter, coaster, cup, knife, spoon, napkin, and saucer.
+ * PAPER boxes only. No new hexes.
+ */
+function makeTableStamp(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "house-shop-stamp";
+  g.userData.kind = "house-shop-stamp";
+  g.userData.mode = "PAPER";
+  g.userData.part = "stamp";
+  g.position.set(x, y, z);
+  const pad = paperBox(0.07, 0.01, 0.05, CREAM, "house-shop-stamp");
+  pad.position.set(0, 0.005, 0);
+  const handle = paperBox(0.04, 0.028, 0.03, WOOD, "house-shop-stamp");
+  handle.position.set(0, 0.024, 0);
+  g.add(pad, handle);
   return g;
 }
 
