@@ -19,6 +19,8 @@ const STAMP = "#7a2e22";
 export const NAMETAG_FOLD = true;
 /** Canvas-card punch-hole / string grommet is on. Not a 3D mesh. */
 export const NAMETAG_HOLE = true;
+/** Tiny kraft PAPER clip on the card. 3D box, existing walker hex. */
+export const NAMETAG_CLIP = true;
 
 const SKIN = 0xf2d2a8;
 const PANTS = 0x6e4a32;
@@ -52,6 +54,24 @@ function paperBox(w, h, d, color) {
   mesh.castShadow = true;
   mesh.receiveShadow = true;
   return mesh;
+}
+
+/**
+ * Tiny kraft PAPER clip at the top-left of the name card. PANTS brown box —
+ * not grey metal. Sprite-local size so it stays a clip on the kraft card.
+ */
+export function makeNametagClip() {
+  const clip = paperBox(0.04, 0.15, 0.03, PANTS);
+  clip.name = "paper-nametag-clip";
+  clip.userData.part = "clip";
+  clip.userData.mode = "PAPER";
+  clip.castShadow = false;
+  clip.receiveShadow = false;
+  clip.frustumCulled = false;
+  clip.renderOrder = 4;
+  clip.material.depthTest = false;
+  clip.position.set(-0.4, 0.9, 0.06);
+  return clip;
 }
 
 /** Tracked letters so PAPER reads as a stamp even without canvas letterSpacing. */
@@ -194,6 +214,7 @@ export function makePaperNametag(name) {
   sprite.userData.mode = "PAPER";
   sprite.userData.kind = "nametag";
   sprite.userData.paperName = name;
+  if (NAMETAG_CLIP) sprite.add(makeNametagClip());
   return sprite;
 }
 
