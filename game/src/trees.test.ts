@@ -212,8 +212,8 @@ describe("hill and verge trees", () => {
       if (!mesh.isMesh) return;
       if (mesh.userData.part === "coconut" || mesh.userData.dress === "coconut") nuts.push(mesh);
     });
-    expect(nuts.length).toBeGreaterThanOrEqual(3);
-    expect(nuts.length).toBeLessThanOrEqual(NORTH_PORT_PALM_OFFSETS.length);
+    expect(nuts.length).toBeGreaterThanOrEqual(4);
+    expect(nuts.length).toBeLessThanOrEqual(NORTH_PORT_PALM_OFFSETS.length + 1);
 
     const kraft = new Set([0x8a6238, 0x9a6a40]);
     const port = ISLANDS.north.port;
