@@ -65,15 +65,16 @@ First HTML no longer ships `Faucet — · sink —`. Flow / tax / goods now pain
 
 ## Pixel HUD (staff / ferry spread)
 
-Spawn has no selected plot, so staff is `PAPER · SIMULATED · Staff —` (the dash after Staff is the empty state, not a missing HUD). Spread first HTML no longer ships `Ferry spread · PAPER`. Next `/g/hud52`.
+Spawn has no selected plot, so staff is `PAPER · SIMULATED · Staff —` (the dash after Staff is the empty state, not a missing HUD). Spread first HTML no longer ships `Ferry spread · PAPER`.
+`/g/hud52` **PASS HUD**: `PAPER · SIMULATED · Staff —`, `PAPER · SIMULATED · Ferry spread · N 0.00 · S 5.00`. Address `/g/hud52`.
 
 ## In flight (not ferry-only)
 
-Pixel: **staff + ferry spread** on the spawn sheet `http://localhost:8787/g/hud52`. Expect `PAPER · SIMULATED · Staff —` and `PAPER · SIMULATED · Ferry spread · N x.xx · S x.xx`. FAIL HUD if staff is still `Staff — · PAPER` or spread still uses `N — · S —`. No RMB. Close other Two Harbors tabs. Address bar must be `/g/hud52`. Do not restart play while the critic is on the page.
+Pixel: **kraft tyre fender on the cream ferry hull** at `http://localhost:8787/g/fend53`. Seaward spawn, no RMB. Close other Two Harbors tabs. Address bar must be `/g/fend53`. Do not restart play while the critic is on the page.
 
-## Next pixel (after hud52 PASS, immediately, no wait)
+## Next pixel (after fend53 PASS, immediately, no wait)
 
-Shells+lights stay deferred until a human can orbit. Remaining spawn-sheet dashes: econ `Index —` is already live after JS (`/g/hud47` PASS).
+Quay lamps on the pier if they read in the seaward frame. Shells+lights stay deferred until a human can orbit.
 
 ## Frozen
 
