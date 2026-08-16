@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { attachPlayerTag } from "./player-tag.js";
 
 /** Warm PAPER craft — same family as cottage walls / kraft roofs. */
 const SKIN = 0xf2d2a8;
@@ -99,4 +100,5 @@ export function dressPlayer(player) {
 
   figure.add(leftShoe, rightShoe, leftLeg, rightLeg, body, belt, leftArm, rightArm, head, hair);
   player.add(figure);
+  attachPlayerTag(player);
 }
