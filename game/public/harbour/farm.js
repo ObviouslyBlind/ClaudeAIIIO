@@ -2,8 +2,9 @@ import * as THREE from "three";
 
 /**
  * PAPER farm-shed interior dress. Tools, grain sacks, kraft planter beds,
- * a small wood-post scarecrow at the back of the crop beds, and dim warm
- * light — not the house living room, warehouse crates, shop, or factory.
+ * a small wood-post scarecrow at the back of the crop beds, a short wood
+ * fence rail behind it, and dim warm light — not the house living room,
+ * warehouse crates, shop, or factory.
  * No WASD. Tap-to-walk stays in interior.js.
  *
  * Call dressFarm(scene) when plot.kind or plot.use is "farm".
@@ -258,6 +259,29 @@ function scarecrow() {
   return g;
 }
 
+/**
+ * Short PAPER wood fence: three posts + one rail.
+ * Hexes already in this file (WOOD, WOOD_DARK). Sits behind the scarecrow
+ * as a back edge for the crop beds; centre aisle stays clear.
+ */
+function cropFence() {
+  const g = new THREE.Group();
+  g.name = "farm-fence";
+  g.userData.kind = "farm-fence";
+  g.userData.mode = "PAPER";
+  const y0 = 0.16;
+  const postH = 0.78;
+  for (const dx of [-0.52, 0, 0.52]) {
+    const post = paperBox(0.07, postH, 0.07, WOOD, "farm-fence");
+    post.position.set(dx, y0 + postH / 2, 0);
+    g.add(post);
+  }
+  const rail = paperBox(1.12, 0.06, 0.05, WOOD_DARK, "farm-fence");
+  rail.position.set(0, y0 + 0.52, 0);
+  g.add(rail);
+  return g;
+}
+
 function workbench(x, z) {
   const g = new THREE.Group();
   g.name = "farm-bench";
@@ -322,6 +346,9 @@ function makeFarmDress() {
   const crow = scarecrow();
   crow.position.set(2.92, 0, -2.18);
   g.add(crow);
+  const fence = cropFence();
+  fence.position.set(2.68, 0, -2.62);
+  g.add(fence);
 
   const loftY = 2.94;
   g.add(sack(0.46, 0.56, 0.36, SACK, -2.55, loftY + 0.28, -2.35, 0.1));
@@ -403,8 +430,8 @@ function dimSceneLights(scene, farm) {
 
 /**
  * Dress an interior (or a scene that contains one) as a PAPER farm shed.
- * Hides living-room furniture, adds tools, sacks, planter beds, and a
- * scarecrow, warms and dims lights.
+ * Hides living-room furniture, adds tools, sacks, planter beds, a
+ * scarecrow and a short back-edge fence, warms and dims lights.
  * @param {THREE.Object3D} scene
  */
 export function dressFarm(scene) {
