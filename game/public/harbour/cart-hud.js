@@ -1,5 +1,6 @@
 /**
- * Harbour PAPER cart strip: visitor cart lines (goodId × qty).
+ * Harbour PAPER cart strip: visitor cart lines (goodId × qty) on #cart.
+ * Empty stays PAPER. Non-empty e.g. "corn × 2 · beans × 1 · PAPER".
  * Polls GET /api/snapshot ~1/s. PAPER / SIMULATED. Never a wallet.
  */
 
@@ -25,14 +26,32 @@ function linesOf(data) {
 
 export function formatCartLine(data) {
   const mode = (data && data.mode) || "PAPER";
-  const provenance = (data && data.provenance) || "SIMULATED";
   const bits = linesOf(data);
-  const goods = bits.length ? bits.join(", ") : "—";
-  return `${mode} · ${provenance} · Cart ${goods}`;
+  if (!bits.length) return mode;
+  return `${bits.join(" · ")} · ${mode}`;
+}
+
+function ensureCart() {
+  if (typeof document === "undefined" || !document.getElementById) return null;
+  let el = document.getElementById("cart");
+  if (el) return el;
+  el = document.createElement("p");
+  el.id = "cart";
+  el.title = "PAPER · SIMULATED";
+  const goods = document.getElementById("goods");
+  const nearby = document.getElementById("nearby");
+  const cash = document.getElementById("cash");
+  const sheet = document.getElementById("sheet");
+  if (goods && goods.parentNode) goods.parentNode.insertBefore(el, goods);
+  else if (nearby && nearby.parentNode) nearby.parentNode.insertBefore(el, nearby.nextSibling);
+  else if (cash && cash.parentNode) cash.parentNode.insertBefore(el, cash.nextSibling);
+  else if (sheet) sheet.appendChild(el);
+  else return null;
+  return el;
 }
 
 export function mountCartHud(opts = {}) {
-  const el = opts.el;
+  const el = opts.el !== undefined ? opts.el : ensureCart();
   const fetchImpl = opts.fetch || globalThis.fetch;
   let timer = 0;
 
@@ -43,7 +62,7 @@ export function mountCartHud(opts = {}) {
       if (!res || !res.ok) return;
       el.textContent = formatCartLine(await res.json());
     } catch {
-      /* keep the last painted line */
+      /* keep the last painted PAPER line */
     }
   }
 
@@ -61,4 +80,12 @@ export function mountCartHud(opts = {}) {
       timer = 0;
     },
   };
+}
+
+if (
+  typeof document !== "undefined" &&
+  document.getElementById &&
+  (document.getElementById("cart") || document.getElementById("sheet"))
+) {
+  mountCartHud();
 }
