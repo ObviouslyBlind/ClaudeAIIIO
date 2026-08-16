@@ -94,6 +94,13 @@ function dinghy() {
   knot.userData.part = "knot";
   painter.add(knot);
 
+  // Tiny kraft hook on the painter. PAPER box, hex already in this file.
+  // Hangs below the far end — offset from knot, painter, bollard-cap, crates.
+  const hook = part(0.07, 0.12, 0.07, 0x8a6238, false);
+  hook.position.set(0, -0.14, -0.55);
+  hook.userData.part = "hook";
+  painter.add(hook);
+
   return g;
 }
 
