@@ -4,6 +4,7 @@ import { extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { GOOD_IDS, type GoodId } from "./goods.ts";
 import { createLandBoard, developPlot, landSnapshot, leasePlot } from "./land.ts";
+import { parseLandUse } from "./buildings.ts";
 import { buyFromStall, createVisitor, createWorld, hud, tick } from "./sim.ts";
 import { bustHarbourAssets, bustModuleImports } from "./cache-bust.ts";
 import { confirmFerry, listFerryRoutes } from "./ferry-routes.ts";
@@ -87,7 +88,11 @@ const server = createServer(async (req, res) => {
       json(res, 400, { ok: false, reason: "bad_json" });
       return;
     }
-    const use = body.use === "farm" ? "farm" : "stall";
+    const use = parseLandUse(body.use);
+    if (!use) {
+      json(res, 400, { ok: false, reason: "bad_use", snapshot: landSnapshot(land, visitor) });
+      return;
+    }
     const result = developPlot(land, visitor, String(body.plotId ?? ""), use);
     json(res, result.ok ? 200 : 400, { ...result, snapshot: landSnapshot(land, visitor) });
     return;
