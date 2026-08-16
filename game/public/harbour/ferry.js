@@ -423,6 +423,15 @@ export function makeFerry() {
   scupper.userData.mode = "PAPER";
   scupper.position.set(-8.0, 1.86, -4.85);
   g.add(scupper);
+  // Tiny kraft PAPER deck chock (wedge) on the aft cream deck. Existing DECK
+  // hex, one box, not grey. Clear of grommet/hatch/scupper/hawser/bucket/oar/
+  // cleat/rail/fender/bollard/lantern/handle/smoke/horn.
+  const wedge = part(0.24, 0.07, 0.16, DECK, false);
+  wedge.name = "wedge";
+  wedge.userData.part = "wedge";
+  wedge.userData.mode = "PAPER";
+  wedge.position.set(-16.8, 1.86, 1.2);
+  g.add(wedge);
 
   const cabin = part(16.5, 3.35, 7.6, CABIN);
   cabin.position.set(-2.4, 3.52, 0);
