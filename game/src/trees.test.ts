@@ -5,6 +5,7 @@ import {
   DIRT_CLEAR_M,
   LEAVES_PER_TREE,
   MAX_UNIQUE_MESHES,
+  NORTH_PORT_PALM_OFFSETS,
   PAVED_CLEAR_M,
   WATER_MIN_M,
   makeTrees,
@@ -182,5 +183,55 @@ describe("hill and verge trees", () => {
     expect(colors.every(isGrey)).toBe(false);
     expect(colors).toContain(0x8a6238);
     expect(colors).toContain(0x3f7a38);
+  });
+
+  it("sits kraft PAPER coconut boxes at the base of north-port verge palms, off PAVED_CLEAR", () => {
+    const map = createLandBoard();
+    const scene = { add(_obj: THREE.Object3D) {} };
+    const root = makeTrees(map, {
+      scene,
+      specOf: (id: "north" | "south") => ISLANDS[id],
+      heightAt,
+    });
+
+    const placed = (root.userData.placed || []) as {
+      island: "north" | "south";
+      x: number;
+      z: number;
+      y: number;
+      role: string;
+      dress?: string;
+    }[];
+    const northPalms = placed.filter((p) => p.island === "north" && p.dress === "north-port-palm");
+    expect(northPalms.length).toBeGreaterThan(0);
+    expect(northPalms.length).toBeLessThanOrEqual(NORTH_PORT_PALM_OFFSETS.length);
+
+    const nuts: THREE.Mesh[] = [];
+    root.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (!mesh.isMesh) return;
+      if (mesh.userData.part === "coconut" || mesh.userData.dress === "coconut") nuts.push(mesh);
+    });
+    expect(nuts.length).toBeGreaterThanOrEqual(3);
+    expect(nuts.length).toBeLessThanOrEqual(NORTH_PORT_PALM_OFFSETS.length);
+
+    const kraft = new Set([0x8a6238, 0x9a6a40]);
+    const port = ISLANDS.north.port;
+    for (const nut of nuts) {
+      expect(nut.userData.part === "coconut" || nut.userData.dress === "coconut").toBe(true);
+      expect(nut.userData.provenance).toBe("PAPER");
+      expect(nut.geometry.type).toBe("BoxGeometry");
+      const mat = nut.material as THREE.MeshLambertMaterial;
+      expect(mat.type).toBe("MeshLambertMaterial");
+      expect(kraft.has(mat.color.getHex())).toBe(true);
+      const pos = new THREE.Vector3();
+      nut.getWorldPosition(pos);
+      expect(distToPaved(ISLANDS.north, pos.x, pos.z)).toBeGreaterThanOrEqual(PAVED_CLEAR_M);
+      expect(onPublicQuay(ISLANDS.north, pos.x, pos.z)).toBe(false);
+      expect(heightAt(ISLANDS.north, pos.x, pos.z)).toBeGreaterThanOrEqual(WATER_MIN_M);
+      expect(Math.hypot(pos.x - port.x, pos.z - port.z)).toBeLessThan(400);
+      const atBase = northPalms.some((p) => Math.hypot(p.x - pos.x, p.z - pos.z) < 1.2);
+      expect(atBase).toBe(true);
+    }
   });
 });

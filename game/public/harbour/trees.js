@@ -246,7 +246,9 @@ function alongPavedVerge(placed, seen, map, spec, heightAt) {
       extra.side,
       extra.setback,
     );
-    tryPlace(placed, seen, map, spec, heightAt, at.x, at.z, "spawn", 10);
+    if (tryPlace(placed, seen, map, spec, heightAt, at.x, at.z, "spawn", 10)) {
+      if (spec.id === "north") placed[placed.length - 1].dress = "north-port-palm";
+    }
   }
 
   // A few PAPER trees on the grass strip beside the tarmac (street lots begin
@@ -442,6 +444,53 @@ function plantInstanced(root, placed) {
 }
 
 /**
+ * A few kraft PAPER coconut boxes at the base of north-port verge palms.
+ * Original wood browns only. Off the tarmac (PAVED_CLEAR). Unique meshes —
+ * one small box per palm — so the phone mesh budget stays tiny.
+ */
+function plantNorthPortCoconuts(root, placed, map, specOf, heightAt) {
+  const sites = placed.filter((p) => p.island === "north" && p.dress === "north-port-palm");
+  if (!sites.length) return;
+  const spec = specOf("north");
+  if (!spec) return;
+
+  const geo = new THREE.BoxGeometry(0.2, 0.16, 0.18);
+  const matA = new THREE.MeshLambertMaterial({ color: TRUNK });
+  const matB = new THREE.MeshLambertMaterial({ color: TRUNK_WARM });
+  const group = new THREE.Group();
+  group.name = "coconuts";
+  group.userData.kind = "coconuts";
+  group.userData.provenance = "PAPER";
+
+  for (let i = 0; i < sites.length; i++) {
+    const p = sites[i];
+    const yaw = hash(i * 4.1 + p.x) * Math.PI * 2;
+    const rad = 0.38 + hash(i * 2.3) * 0.22;
+    let x = p.x + Math.cos(yaw) * rad;
+    let z = p.z + Math.sin(yaw) * rad;
+    if (distToKind(map, "north", x, z, "paved") < PAVED_CLEAR_M) {
+      x = p.x;
+      z = p.z;
+    }
+    if (distToKind(map, "north", x, z, "paved") < PAVED_CLEAR_M) continue;
+    if (onPublicQuay(spec, x, z)) continue;
+    const y = heightAt(spec, x, z);
+    if (y < WATER_MIN_M) continue;
+    const nut = new THREE.Mesh(geo, hash(i * 3) > 0.45 ? matA : matB);
+    nut.name = "coconut";
+    nut.userData.part = "coconut";
+    nut.userData.dress = "coconut";
+    nut.userData.provenance = "PAPER";
+    nut.castShadow = true;
+    nut.receiveShadow = true;
+    nut.position.set(x, y + 0.08, z);
+    nut.rotation.y = yaw;
+    group.add(nut);
+  }
+  if (group.children.length) root.add(group);
+}
+
+/**
  * Low-poly PAPER trees on hills, inland slopes, and behind street lots.
  * Palms stay on the quay (makePalms). helpers: { scene, specOf, heightAt }.
  */
@@ -459,6 +508,7 @@ export function makeTrees(map, helpers) {
   root.userData.counts = counts;
 
   plantInstanced(root, placed);
+  plantNorthPortCoconuts(root, placed, map || {}, specOf, heightAt);
   scene.add(root);
   return root;
 }
