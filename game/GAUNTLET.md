@@ -51,7 +51,9 @@ Also: a critic verdict from a **bad screenshot** is worse than no verdict. Keep 
 
 ## Two Harbors
 
-We do **not** set the bar to Capital Rift, Call of Duty, or OSM Earth. That is a clone prompt.
+We do **not** clone Capital Rift’s client, Earth, OSM, or wallet. That is a clone prompt. We **do** use the same *kind* of shard: one world, sim owns numbers, leases, cart, market, nearby outdoor presence, persist.
+
+Politics (House / Senate / councils / elections / amendments) is **frozen** until the harbour loop is the inspectable bar.
 
 We do **not** Gauntlet the whole MMO in one run.
 
