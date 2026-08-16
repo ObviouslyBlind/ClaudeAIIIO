@@ -536,4 +536,74 @@ describe("ferry berth", () => {
     new THREE.Box3().setFromObject(fender).getSize(fenderSize);
     expect(Math.max(fenderSize.x, fenderSize.y, fenderSize.z)).toBeGreaterThan(2.4);
   });
+
+  it("sits one tiny kraft PAPER scupper on the cream deck edge; other PAPER parts remain", () => {
+    expect(HOME_Z).toBe(-6835);
+    const mesh = makeFerry();
+    expect(mesh.position.z).toBe(-6835);
+    const tagged: THREE.Object3D[] = [];
+    mesh.traverse((obj) => {
+      if (obj.userData?.part) tagged.push(obj);
+    });
+    const scuppers = tagged.filter((o) => o.userData.part === "scupper");
+    expect(scuppers.length).toBeGreaterThanOrEqual(1);
+    for (const name of [
+      "fender",
+      "bucket",
+      "oar",
+      "cleat",
+      "rail",
+      "hawser",
+      "horn",
+      "grommet",
+      "hatch",
+    ]) {
+      expect(tagged.some((o) => o.userData.part === name)).toBe(true);
+    }
+
+    const scupper = scuppers[0];
+    expect(scupper.userData.part).toBe("scupper");
+    expect(scupper.userData.mode).toBe("PAPER");
+    expect(scupper.position.y).toBeGreaterThan(1.5);
+    expect(scupper.position.y).toBeLessThan(2.3);
+    expect(Math.abs(scupper.position.z)).toBeGreaterThan(4);
+    const scupperSize = new THREE.Vector3();
+    new THREE.Box3().setFromObject(scupper).getSize(scupperSize);
+    expect(scupperSize.x).toBeLessThan(0.8);
+    expect(scupperSize.y).toBeLessThan(0.5);
+    expect(scupperSize.z).toBeLessThan(0.8);
+    scupper.traverse((child) => {
+      const m = child as THREE.Mesh;
+      if (!m.isMesh) return;
+      expect(m.geometry.type).toBe("BoxGeometry");
+      const hex = (m.material as THREE.MeshLambertMaterial).color.getHex();
+      expect(HAWSER_HEXES.has(hex)).toBe(true);
+    });
+
+    for (const name of [
+      "fender",
+      "bucket",
+      "oar",
+      "cleat",
+      "rail",
+      "hawser",
+      "horn",
+      "grommet",
+      "hatch",
+    ]) {
+      for (const other of tagged) {
+        if (other === scupper) continue;
+        if (other.userData.part !== name) continue;
+        const dx = scupper.position.x - other.position.x;
+        const dz = scupper.position.z - other.position.z;
+        expect(Math.hypot(dx, dz)).toBeGreaterThan(1.5);
+      }
+    }
+
+    const fender = tagged.find((o) => o.userData.part === "fender")!;
+    expect(fender.position.z).toBeLessThan(-5.5);
+    const fenderSize = new THREE.Vector3();
+    new THREE.Box3().setFromObject(fender).getSize(fenderSize);
+    expect(Math.max(fenderSize.x, fenderSize.y, fenderSize.z)).toBeGreaterThan(2.4);
+  });
 });

@@ -415,6 +415,14 @@ export function makeFerry() {
   hatch.userData.mode = "PAPER";
   hatch.position.set(-14.6, 1.86, 0);
   g.add(hatch);
+  // Tiny kraft PAPER scupper on the north cream deck edge. Existing DECK
+  // hex, one box, not grey. Clear of fender/bucket/oar/cleat/rail/hawser/horn/grommet/hatch.
+  const scupper = part(0.16, 0.05, 0.1, DECK, false);
+  scupper.name = "scupper";
+  scupper.userData.part = "scupper";
+  scupper.userData.mode = "PAPER";
+  scupper.position.set(-8.0, 1.86, -4.85);
+  g.add(scupper);
 
   const cabin = part(16.5, 3.35, 7.6, CABIN);
   cabin.position.set(-2.4, 3.52, 0);
