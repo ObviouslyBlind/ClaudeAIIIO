@@ -291,8 +291,9 @@ function makeNapkin(x, y, z) {
   g.name = "napkin";
   g.userData.kind = "interior-napkin";
   g.userData.mode = "PAPER";
+  g.userData.part = "napkin";
   g.position.set(x, y, z);
-  const paper = { mode: "PAPER" };
+  const paper = { mode: "PAPER", part: "napkin" };
   g.add(box(0.15, 0.008, 0.15, LINEN, 0, 0.004, 0, "interior-napkin", paper));
   const fold = box(0.13, 0.008, 0.13, PAPER_CARD, 0.006, 0.012, 0.004, "interior-napkin", paper);
   fold.rotation.y = Math.PI / 8;

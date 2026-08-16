@@ -551,6 +551,7 @@ describe("house PAPER napkin", () => {
     const napkin = napkins[0];
     expect(napkin.userData.kind).toBe("interior-napkin");
     expect(napkin.userData.mode).toBe("PAPER");
+    expect(napkin.userData.part).toBe("napkin");
 
     const tablePos = new THREE.Vector3();
     table.getWorldPosition(tablePos);
@@ -590,6 +591,7 @@ describe("house PAPER napkin", () => {
         expect(mesh.geometry.type).toBe("BoxGeometry");
         expect(mesh.userData.kind).toBe("interior-napkin");
         expect(mesh.userData.mode).toBe("PAPER");
+        expect(mesh.userData.part).toBe("napkin");
       }
     });
     expect(colors.length).toBeGreaterThan(0);
