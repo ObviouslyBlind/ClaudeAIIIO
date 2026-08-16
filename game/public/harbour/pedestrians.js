@@ -10,6 +10,8 @@ const SHOES = 0x4a3220;
 const BELT = 0x7a2e22;
 /** Deck kraft — straw brim. Same hex as stall timber / ferry deck. */
 const STRAW = 0xc4a574;
+/** Quay tarp / cart canvas — original kraft tan, reads over coloured shirts. */
+const CANVAS = 0xc4b496;
 
 /** Cream kraft first so seed 0 matches the player. Then stall / nametag cloth. */
 const SHIRTS = [SHIRT, 0xc45c3a, 0x4a6e8a, 0x6a8f44, 0xe8d7b8, 0x2a7a72];
@@ -126,6 +128,17 @@ function addKraftStrawHat(figure) {
   crown.position.set(0, 1.93, 0);
   crown.userData.part = "hat";
   figure.add(brim, crown);
+}
+
+/**
+ * Kraft canvas vest/apron over the shirt so quay hands read as dock workers.
+ * Original tarp hex only. Sits in front of the body box; straw hat stays.
+ */
+function addKraftCanvasApron(figure) {
+  const apron = paperBox(0.42, 0.5, 0.12, CANVAS);
+  apron.position.set(0, 1.1, 0.16);
+  apron.userData.part = "apron";
+  figure.add(apron);
 }
 
 function polylineLength(points) {
@@ -262,7 +275,10 @@ export function makePedestrians(map, helpers) {
       mesh: makePaperPerson(seed),
     };
     person.mesh.userData.lane = lane;
-    if (lane === "quay") addKraftStrawHat(person.mesh);
+    if (lane === "quay") {
+      addKraftStrawHat(person.mesh);
+      addKraftCanvasApron(person.mesh);
+    }
     const at = samplePerson(spec, heightAt, person, along);
     if (!onLand(at)) return;
     pose(person, at);
