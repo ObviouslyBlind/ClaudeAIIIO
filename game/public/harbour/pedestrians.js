@@ -252,7 +252,7 @@ export function makePedestrians(map, helpers) {
     people.push(person);
   }
 
-  const quayAlong = [-18, -6, 8, 22, 40];
+  const quayAlong = [-18, -6, 8, 22, 40, 54];
   for (let i = 0; i < quayAlong.length; i++) {
     spawn("quay", quayAlong[i], i % 2 === 0 ? -1 : 1, QUAY_ALONG_MIN, QUAY_ALONG_MAX, null, i);
   }
@@ -263,7 +263,7 @@ export function makePedestrians(map, helpers) {
     for (let i = 0; i < vergeAlong.length; i++) {
       const along = vergeAlong[i];
       if (along > maxAlong) continue;
-      spawn("verge", along, i % 2 === 0 ? 1 : -1, VERGE_ALONG_MIN, maxAlong, paved.points, i + 5);
+      spawn("verge", along, i % 2 === 0 ? 1 : -1, VERGE_ALONG_MIN, maxAlong, paved.points, i + 6);
     }
   }
 
