@@ -2,9 +2,10 @@ import * as THREE from "three";
 
 /**
  * PAPER shop interior dress. Kraft-paper counter (cream top, wood body), a
- * small wooden till, a kraft wrapped parcel, a short wall shelf with two
- * kraft boxes, plus two shelf bays — not the house living room and not the
- * warehouse. No WASD. Tap-to-walk stays in interior.js.
+ * small wooden till, a kraft wrapped parcel, a standing kraft shopping bag,
+ * a short wall shelf with two kraft boxes, plus two shelf bays — not the
+ * house living room and not the warehouse. No WASD. Tap-to-walk stays in
+ * interior.js.
  *
  * Call dressShop(scene) when plot.kind or plot.use is "shop" or "house_shop".
  * Idempotent: a second call only shows the existing dress.
@@ -170,6 +171,31 @@ function wrappedParcel(x, y, z) {
 }
 
 /**
+ * Small standing kraft PAPER shopping bag on the counter: cream body + two
+ * thin strap handles. Paper boxes only. Beside the parcel / till, not on them.
+ */
+function kraftBag(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "shop-bag";
+  g.userData.kind = "shop-bag";
+  g.userData.mode = "PAPER";
+  g.position.set(x, y, z);
+  const w = 0.14;
+  const h = 0.2;
+  const d = 0.1;
+  const body = paperBox(w, h, d, CREAM, "shop-bag");
+  g.add(body);
+  const handleH = 0.09;
+  const handleL = paperBox(0.02, handleH, 0.02, STRAP, "shop-bag");
+  handleL.position.set(-0.035, h / 2 + handleH / 2, 0);
+  g.add(handleL);
+  const handleR = paperBox(0.02, handleH, 0.02, STRAP, "shop-bag");
+  handleR.position.set(0.035, h / 2 + handleH / 2, 0);
+  g.add(handleR);
+  return g;
+}
+
+/**
  * Short wall shelf above the counter: one plank, two kraft boxes.
  * Original WOOD / WOOD_DARK / WOOD_TOP / TIN. Not a till, not jars.
  */
@@ -221,6 +247,8 @@ function makeCounter(x, z) {
   g.add(cashBox(0.88, topY + 0.13, -0.08));
   // Kraft wrapped parcel beside the till — cream box + strap. Not a wallet.
   g.add(wrappedParcel(1.22, topY + 0.11, 0.08));
+  // Standing kraft shopping bag beside the parcel / till — cream body + straps.
+  g.add(kraftBag(1.38, topY + 0.15, -0.18));
   // Two small kraft / terracotta jars beside the till. Original TIN + CORAL.
   const kraftJar = paperBox(0.12, 0.16, 0.12, TIN, "shop-goods");
   kraftJar.position.set(0.48, topY + 0.13, -0.04);

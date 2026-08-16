@@ -35,6 +35,16 @@ function shopParcels(root: THREE.Object3D) {
   return out;
 }
 
+function shopBags(root: THREE.Object3D) {
+  const out: THREE.Object3D[] = [];
+  root.traverse((obj) => {
+    if (obj.userData?.kind === "shop-bag" && obj.name === "shop-bag") {
+      out.push(obj);
+    }
+  });
+  return out;
+}
+
 describe("shop PAPER wrapped parcel", () => {
   it("matches shop plots only", () => {
     expect(isShopPlot({ use: "shop" })).toBe(true);
@@ -100,6 +110,80 @@ describe("shop PAPER wrapped parcel", () => {
     const dress = interior.getObjectByName("shop-dress");
     expect(dress).toBeTruthy();
     expect(dress!.visible).toBe(false);
+    expect(interior.userData.interiorUse).toBe("house");
+  });
+});
+
+describe("shop PAPER kraft bag", () => {
+  it("puts one kraft PAPER shopping bag on the shop counter", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressShop(scene);
+
+    const dress = interior.getObjectByName("shop-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+    expect(dress!.userData.provenance).toBe("SIMULATED");
+
+    const counter = dress!.getObjectByName("shop-counter");
+    expect(counter).toBeTruthy();
+
+    const bags = shopBags(counter!);
+    expect(bags.length).toBe(1);
+
+    const bag = bags[0];
+    expect(bag.userData.kind).toBe("shop-bag");
+    expect(bag.userData.mode).toBe("PAPER");
+
+    const top = counter!.children.find((c) => {
+      const mesh = c as THREE.Mesh;
+      const mat = mesh.material as THREE.MeshLambertMaterial | undefined;
+      return mesh.isMesh && mat?.color?.getHex() === 0xf4ead8;
+    }) as THREE.Mesh;
+    expect(top).toBeTruthy();
+    expect(bag.position.y).toBeGreaterThan(top.position.y);
+    expect(bag.position.y - top.position.y).toBeLessThan(0.35);
+    expect(Math.abs(bag.position.x)).toBeLessThan(1.5);
+    expect(Math.abs(bag.position.z)).toBeLessThan(0.5);
+
+    const parcels = shopParcels(counter!);
+    expect(parcels.length).toBe(1);
+    const dx = bag.position.x - parcels[0].position.x;
+    const dz = bag.position.z - parcels[0].position.z;
+    expect(Math.hypot(dx, dz)).toBeGreaterThan(0.15);
+
+    const colors = hexes(bag);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.every((c) => KRAFT.has(c))).toBe(true);
+    expect(colors.some((c) => c === CREAM)).toBe(true);
+    expect(colors.some((c) => c === STRAP)).toBe(true);
+    expect(colors.every((c) => !isGrey(c))).toBe(true);
+
+    bag.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.kind).toBe("shop-bag");
+        expect(mesh.userData.mode).toBe("PAPER");
+      }
+    });
+  });
+
+  it("keeps dress idempotent and hides the bag on undress", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressShop(scene);
+    dressShop(scene);
+    expect(interior.children.filter((c) => c.name === "shop-dress").length).toBe(1);
+    expect(shopBags(interior).length).toBe(1);
+
+    undressShop(scene);
+    const dress = interior.getObjectByName("shop-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.visible).toBe(false);
+    expect(shopBags(interior).length).toBe(1);
     expect(interior.userData.interiorUse).toBe("house");
   });
 });

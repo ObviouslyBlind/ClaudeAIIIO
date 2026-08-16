@@ -122,6 +122,7 @@ describe("NPC harbour stalls", () => {
     expect(kinds).toContain("produce");
     expect(kinds).toContain("lantern");
     expect(kinds).toContain("melon");
+    expect(kinds).toContain("cone");
     const colors = hexes(mesh);
     expect(colors.length).toBeGreaterThan(4);
     expect(colors.every(isGrey)).toBe(false);
@@ -199,6 +200,45 @@ describe("NPC harbour stalls", () => {
     expect(stalls.group.children.length).toBeGreaterThan(0);
     for (const child of stalls.group.children) {
       expect(child.children.filter((c) => c.userData.part === "melon").length).toBe(1);
+    }
+  });
+
+  it("puts one small kraft produce cone on each NPC stall counter", () => {
+    const mesh = makeStallMesh({ id: "n-test", use: "farm", island: "north", band: "field" });
+    const counter = mesh.children.find((c) => c.userData.part === "counter") as THREE.Mesh;
+    const cones = mesh.children.filter((c) => c.userData.part === "cone");
+    expect(cones.length).toBe(1);
+    const cone = cones[0]!;
+    expect(cone.userData.mode).toBe("PAPER");
+    expect(cone.userData.paper).toBe(true);
+    const box = counter.geometry as THREE.BoxGeometry;
+    const counterTop = counter.position.y + box.parameters.height / 2;
+    expect(cone.position.y).toBeCloseTo(counterTop, 5);
+    expect(cone.position.z).toBeCloseTo(counter.position.z, 5);
+    expect(Math.abs(cone.position.x)).toBeLessThan(1.7);
+
+    const melon = mesh.children.find((c) => c.userData.part === "melon")!;
+    expect(Math.abs(cone.position.x - melon.position.x)).toBeGreaterThan(0.25);
+
+    const wrap = new Set([0xf4ead8, 0x5f8a32]);
+    const colors = hexes(cone);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.every((c) => wrap.has(c))).toBe(true);
+    expect(colors).toContain(0xf4ead8);
+    expect(colors).toContain(0x5f8a32);
+    cone.traverse((obj) => {
+      const m = obj as THREE.Mesh;
+      if (!m.isMesh || m.geometry.type !== "BoxGeometry") return;
+      const g = m.geometry as THREE.BoxGeometry;
+      expect(g.parameters.width).toBeLessThan(0.4);
+      expect(g.parameters.height).toBeLessThan(0.3);
+      expect(g.parameters.depth).toBeLessThan(0.4);
+    });
+
+    const { stalls } = boot();
+    expect(stalls.group.children.length).toBeGreaterThan(0);
+    for (const child of stalls.group.children) {
+      expect(child.children.filter((c) => c.userData.part === "cone").length).toBe(1);
     }
   });
 
