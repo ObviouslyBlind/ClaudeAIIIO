@@ -6,17 +6,18 @@ Critics must open a **new query** (`/?g=…`). Do not reuse a tab already on `/`
 ## Held (pixel-ratified)
 
 - Inland spawn + black tarmac + PAPER HUD
-- Traffic: colored meshes + red masts on paved
-- Taxi overlay: island ellipse + paved polyline
-- Ferry ticket: PAPER $15 North ↔ South; Cancel keeps cash
-- **RMB orbit:** hold-drag yaws/pitches around the player; left click still walks (`/?g=cam16`)
+- Traffic, taxi overlay, ferry ticket, RMB orbit
 
-## Shipped (code, not yet pixel-ratified)
+## Catalogue (round 17 FAIL — retry)
 
-Catalogue · interiors
+[Catalogue critic](bc-1199ff62-bac5-59c7-be11-13966d7862ee) saw `Could not lease: no cash` while the HUD still said $1,000. Shared PAPER visitor cash had already been spent by other tabs. Unhiding `#catalog-picker` in the console showed an empty grid — that is the HTML shell; `open()` fills it.
+
+**Fix:** apply `/api/lease` snapshot on failure so Cash matches the server. Restart play to reset visitor to $1,000.
 
 ## Next piece
 
-**Develop catalogue.** In flight on `/?g=cat17`. Lease was staying off on big fields because “near” meant 22 m from the centroid. Fix shipped: standing *in* the ring counts; lots you cannot afford say **need cash**. Exit stays off the dock until you are inside.
+**Develop catalogue** on a fresh `/?g=cat18`. Tap a **cheap** north lot (shore/street under ~$500). Lease, then Develop. PASS only if the picker lists House / Shop / House with shop / Farm / Warehouse / Factory with PAPER costs. Do not use the console to unhide the shell.
+
+Then: interiors.
 
 Do not rewrite `traffic.js`, island centres, or PLAN.md.
