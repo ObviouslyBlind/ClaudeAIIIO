@@ -15,6 +15,7 @@ import { mulberry32 } from "./rng.ts";
 import { createStatuteCatalog, salesTaxRate, type Statute } from "./statutes.ts";
 import { matchVisitorOrders } from "./orders.ts";
 import { tickStaff, type StaffSlot } from "./staff.ts";
+import { tickUpkeep, type UpkeepLand } from "./upkeep.ts";
 import { createVisitorCart, type CartLine } from "./visitorCart.ts";
 
 export {
@@ -208,7 +209,7 @@ function refreshIndex(world: World): void {
   world.moneySupply = world.npcCash;
 }
 
-export function tick(world: World, visitor?: Visitor): void {
+export function tick(world: World, visitor?: Visitor, land?: UpkeepLand): void {
   restockNpc(world);
   npcQuote(world);
   matchVisitorOrders(world);
@@ -219,10 +220,11 @@ export function tick(world: World, visitor?: Visitor): void {
   refreshIndex(world);
   world.tick += 1;
   if (visitor) tickStaff(world, visitor);
+  if (visitor && land) tickUpkeep(world, visitor, land);
 }
 
-export function fastForward(world: World, n: number, visitor?: Visitor): void {
-  for (let i = 0; i < n; i++) tick(world, visitor);
+export function fastForward(world: World, n: number, visitor?: Visitor, land?: UpkeepLand): void {
+  for (let i = 0; i < n; i++) tick(world, visitor, land);
 }
 
 export type Visitor = {
