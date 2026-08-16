@@ -466,8 +466,9 @@ describe("quay harbour dressing", () => {
     expect(plank).not.toBeNull();
     const pg = (plank as THREE.Mesh).geometry as THREE.BoxGeometry;
     expect(pg.parameters.width).toBeGreaterThanOrEqual(6);
-    expect(pg.parameters.depth).toBeGreaterThanOrEqual(8);
-    expect(pg.parameters.depth).toBeLessThan(14);
+    expect(pg.parameters.height).toBeGreaterThanOrEqual(2);
+    expect(pg.parameters.depth).toBeGreaterThanOrEqual(10);
+    expect(pg.parameters.depth).toBeLessThan(16);
     const pm = (plank as THREE.Mesh).material as THREE.MeshLambertMaterial;
     expect(pm.color.getHex()).toBe(0x4a3220);
     expect(brow!.position.y).toBeGreaterThan(1.2);

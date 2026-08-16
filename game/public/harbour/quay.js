@@ -249,28 +249,20 @@ function gangplank() {
   g.userData.dress = "brow";
   g.userData.mode = "PAPER";
 
-  /** Centered on the group so world position is the plank, not 7 m into the dinghies. */
-  const plank = part(7.4, 0.55, 10, 0x4a3220);
-  plank.rotation.x = -0.16;
+  /** /g/brow67 FAIL BROW: 0.55 m slab was a line from spawn. Dinghy hulls
+   *  that passed are 2.4 m tall — match that height, keep dark vs teal. */
+  const plank = part(7.4, 2.4, 12, 0x4a3220);
   plank.position.set(0, 0, 0);
   plank.userData.part = "plank";
   g.add(plank);
 
-  const wear = part(6.6, 0.22, 9.2, 0xc4b496, false);
-  wear.rotation.x = -0.16;
-  wear.position.set(0, 0.32, 0);
+  const wear = part(6.8, 0.35, 11.2, 0xc4b496, false);
+  wear.position.set(0, 1.3, 0);
   g.add(wear);
 
-  for (const sx of [-3.4, 3.4]) {
-    const postA = part(0.35, 1.4, 0.35, 0x5a3a22, false);
-    postA.position.set(sx, 0.7, -4.4);
-    const postB = part(0.35, 1.4, 0.35, 0x5a3a22, false);
-    postB.position.set(sx, 0.7, 4.4);
-    g.add(postA, postB);
-
-    const rail = part(0.28, 0.22, 9.0, 0x7a5230, false);
-    rail.rotation.x = -0.16;
-    rail.position.set(sx, 1.15, 0);
+  for (const sx of [-3.5, 3.5]) {
+    const rail = part(0.32, 0.28, 11.4, 0x7a5230, false);
+    rail.position.set(sx, 1.55, 0);
     g.add(rail);
   }
 
@@ -469,10 +461,9 @@ export function makeQuay(spec, helpers) {
 
   if (spec.id === "north") {
     const brow = gangplank();
-    /** /g/brow66 FAIL BROW: kraft on the pier lip read as decking.
-     *  toward*100 + local z=7.4 sat inside the sage dinghies. Water gap
-     *  between pier lip (along 81) and dinghy near-face (along ~97). */
-    brow.position.set(x, 1.9, z + toward * 84);
+    /** /g/brow67 FAIL BROW: flat slab at the lip vanished. Same water gap,
+     *  dinghy-tall so it reads against teal between pier and ferry. */
+    brow.position.set(x, 1.7, z + toward * 86);
     root.add(brow);
 
     // Extra kraft stack on the north timber, west of the walk, short of the brow.

@@ -104,7 +104,11 @@ Pixel: **kraft gangplank / brow** from the north pier toward the basin at `http:
 
 Pixel: **kraft gangplank / brow** at `http://localhost:8787/g/brow67`. Center water channel (same as ding65), dark plank + kraft wear. No RMB. Address bar must be `/g/brow67`. Do not restart play while the critic is on the page.
 
-## Next pixel (after brow67 PASS, immediately, no wait)
+`/g/brow67` **FAIL BROW**: pier, teal water, cream ferry, pier NPCs in frame; the 0.55 m slab at the lip read as empty water.
+
+Pixel: **kraft gangplank / brow** at `http://localhost:8787/g/brow68`. Dinghy-tall dark plank in the water gap past the north pier lip. No RMB. Address bar must be `/g/brow68`. Do not restart play while the critic is on the page.
+
+## Next pixel (after brow68 PASS, immediately, no wait)
 
 ## Frozen
 
