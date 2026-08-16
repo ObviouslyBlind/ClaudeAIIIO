@@ -4,7 +4,7 @@ const CAR_COUNT = 6;
 const SPEED = 9;
 const Y_LIFT = 0.45;
 /** Metres from the port along the spline. Spawn must see cars here. */
-export const SPAWN_SPAN_M = 380;
+export const SPAWN_SPAN_M = 160;
 
 export function polylineLength(points) {
   let acc = 0;
@@ -40,24 +40,25 @@ export function pointAlongPolyline(points, dist) {
 
 function makeCar(color) {
   const g = new THREE.Group();
-  const body = new THREE.Mesh(
-    new THREE.BoxGeometry(2.4, 0.85, 4.6),
-    new THREE.MeshLambertMaterial({ color }),
-  );
-  body.position.y = 0.7;
+  g.frustumCulled = false;
+  const mat = new THREE.MeshLambertMaterial({ color, emissive: color, emissiveIntensity: 0.35 });
+  const body = new THREE.Mesh(new THREE.BoxGeometry(3.2, 1.4, 7.2), mat);
+  body.position.y = 1.0;
   body.castShadow = true;
+  body.frustumCulled = false;
   g.add(body);
   const cabin = new THREE.Mesh(
-    new THREE.BoxGeometry(2.05, 0.7, 2.1),
-    new THREE.MeshLambertMaterial({ color: 0x2a3340 }),
+    new THREE.BoxGeometry(2.8, 1.1, 3.2),
+    new THREE.MeshLambertMaterial({ color: 0x1a2430, emissive: 0x1a2430, emissiveIntensity: 0.2 }),
   );
-  cabin.position.set(0, 1.35, -0.2);
+  cabin.position.set(0, 2.0, -0.3);
+  cabin.frustumCulled = false;
   g.add(cabin);
   g.userData.kind = "traffic";
   return g;
 }
 
-const COLORS = [0xe23b2e, 0x2f6fb5, 0xf4f0e4, 0x222222, 0xf0c430, 0x2f6b32];
+const COLORS = [0xff2a1a, 0x1a6dff, 0xffe14a, 0xffffff, 0xff2a1a, 0x1a6dff];
 
 /**
  * PAPER NPC cars that loop the paved spline. They never leave `kind === "paved"`.
@@ -88,7 +89,7 @@ export function createTraffic({ scene, getMap, specOf, heightAt }) {
     const span = Math.min(SPAWN_SPAN_M, polylineLength(road.points) * 0.25);
     for (let i = 0; i < CAR_COUNT; i++) {
       const mesh = makeCar(COLORS[i % COLORS.length]);
-      const along = 30 + (i / Math.max(1, CAR_COUNT - 1)) * span;
+      const along = 40 + (i / Math.max(1, CAR_COUNT - 1)) * span;
       const dir = i % 2 === 0 ? 1 : -1;
       const car = {
         mesh,

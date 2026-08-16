@@ -4,7 +4,7 @@ Loop is **autonomous**. Critic = pixels only. Tests = lead. No user hard-refresh
 
 **Round 10 critic:** inland spawn PASS. Black tarmac PASS. HUD PASS.
 **Round 11 critic:** cars FAIL (none at spawn).
-**11b:** larger cars packed into the first ~380 m of tarmac. Server cache-busts HTML.
+**11c:** critic still saw an empty road. Cars are now bus-sized, emissive red/blue/yellow, packed into the first 160 m, and a spawn-frustum unit test locks that.
 
 Bar (open `/`, wait ~8s, do not run tests):
 
