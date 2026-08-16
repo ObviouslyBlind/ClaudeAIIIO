@@ -109,7 +109,11 @@ function makeCar(color) {
   return g;
 }
 
-const COLORS = [0xff2a1a, 0x1a6dff, 0xffe14a, 0xffffff, 0xff2a1a, 0x1a6dff];
+/**
+ * Original harbour paint — stall terracotta, slate, field, plaster, teal, brick.
+ * Not one cream clone. Taxi yellow (0xf0c430) stays on the cab.
+ */
+export const COLORS = [0xc45c3a, 0x4a6e8a, 0x6a8f44, 0xe8d7b8, 0x2a7a72, 0x6e2e22];
 
 /**
  * PAPER NPC cars that loop the paved spline. They never leave `kind === "paved"`.
