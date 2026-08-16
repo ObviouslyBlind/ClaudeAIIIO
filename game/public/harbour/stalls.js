@@ -85,7 +85,7 @@ function labelGood(g) {
   return String(g).replace(/_/g, " ");
 }
 
-/** Visible PAPER market stand: deck, posts, price board, striped awning, counter, crates, hanging scale, produce basket, oil lantern, melon. */
+/** Visible PAPER market stand: deck, posts, price board, striped awning, counter, crates, hanging scale, produce basket, oil lantern, melon, kraft cone. */
 export function makeStallMesh(plot) {
   const g = new THREE.Group();
   g.name = "npc-stall";
@@ -146,6 +146,27 @@ export function makeStallMesh(plot) {
   melonStem.userData.part = "melon";
   melon.add(melonBody, melonStem);
   g.add(melon);
+
+  // One small kraft produce cone on the counter so the stall reads as a
+  // farm stand with wrapped greens, not only melon + crate. Local offset
+  // only — stall world pose stays put. PAPER boxes. Kraft wrap + leaf nub.
+  const cone = new THREE.Group();
+  cone.name = "cone";
+  cone.userData.part = "cone";
+  cone.userData.mode = "PAPER";
+  cone.userData.paper = true;
+  cone.position.set(-0.42, 0.9, 1.05);
+  const coneBase = paperBox(0.14, 0.08, 0.14, KRAFT, false);
+  coneBase.position.y = 0.04;
+  coneBase.userData.part = "cone";
+  const coneMid = paperBox(0.1, 0.08, 0.1, KRAFT, false);
+  coneMid.position.y = 0.12;
+  coneMid.userData.part = "cone";
+  const coneNub = paperBox(0.05, 0.06, 0.05, LEAF, false);
+  coneNub.position.y = 0.19;
+  coneNub.userData.part = "cone";
+  cone.add(coneBase, coneMid, coneNub);
+  g.add(cone);
 
   for (const x of [-1.85, 1.85]) {
     for (const z of [-1.05, 1.05]) {
