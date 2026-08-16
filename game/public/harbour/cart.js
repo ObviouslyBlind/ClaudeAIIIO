@@ -9,9 +9,9 @@ import * as THREE from "three";
  * Person faces +Z; the cart trails on -Z with handles toward the hands.
  *
  * Warm wood — harbour crate family: 0x8a6238 / 0x7a5230 / 0x9a6a40.
- * Bed load: two small kraft crates + one canvas roll (quay tarp 0xc4b496).
+ * Bed load: two small kraft crates + one canvas roll + a short kraft rope coil.
  */
-export const CART_MESH_COUNT = 13;
+export const CART_MESH_COUNT = 15;
 /** Metres from player.position down to the soles. Same as player.js SOLE_Y. */
 const SOLE_Y = -1.15;
 
@@ -93,8 +93,9 @@ function makeHandcart() {
   grip.position.set(0, 0.95, -0.26);
   grip.userData.part = "grip";
 
-  // Two small kraft crates + canvas roll on the bed so spawn reads as a
-  // loaded market cart, not an empty wood frame. Sit on the bed top (y = 0.53).
+  // Two small kraft crates + canvas roll + a short kraft rope coil on the bed
+  // so spawn reads as a loaded market cart, not an empty wood frame.
+  // Sit on the bed top (y = 0.53). Coil is paper boxes, not a cylinder.
   const crate = paperBox(0.3, 0.32, 0.28, WOOD_CRATE, false);
   crate.position.set(-0.13, 0.69, -1.2);
   crate.userData.part = "crate";
@@ -108,7 +109,14 @@ function makeHandcart() {
   roll.position.set(0.14, 0.65, -0.86);
   roll.userData.part = "roll";
 
-  g.add(bed, sideL, sideR, tail, head, wheelL, wheelR, handleL, handleR, grip, crate, crate2, roll);
+  const coil = paperBox(0.2, 0.08, 0.2, CANVAS, false);
+  coil.position.set(-0.16, 0.57, -0.84);
+  coil.userData.part = "coil";
+  const coilTop = paperBox(0.16, 0.07, 0.16, CANVAS, false);
+  coilTop.position.set(-0.16, 0.645, -0.84);
+  coilTop.userData.part = "coil";
+
+  g.add(bed, sideL, sideR, tail, head, wheelL, wheelR, handleL, handleR, grip, crate, crate2, roll, coil, coilTop);
   return g;
 }
 
