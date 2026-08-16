@@ -189,9 +189,68 @@ function crateSeat(_side) {
   return g;
 }
 
+/**
+ * Kraft wooden hawser drum / rope reel. Paper boxes: wood flanges and
+ * cradle, kraft cream wound hawser. Not an iron cable reel, not a cylinder coil.
+ */
+function hawserDrum(_side) {
+  const g = new THREE.Group();
+  g.name = "hawser-drum";
+  g.userData.kind = "street-prop";
+  g.userData.prop = "hawser-drum";
+  g.userData.dress = "hawser-drum";
+  g.userData.mode = "PAPER";
+
+  const axleY = 0.62;
+
+  const runnerA = part(0.22, 0.14, 1.05, WOOD_DARK, false);
+  runnerA.position.set(-0.32, 0.07, 0);
+  runnerA.userData.part = "cradle";
+  const runnerB = part(0.22, 0.14, 1.05, WOOD_DARK, false);
+  runnerB.position.set(0.32, 0.07, 0);
+  runnerB.userData.part = "cradle";
+
+  const chockA = part(0.78, 0.16, 0.16, WOOD, false);
+  chockA.position.set(0, 0.22, -0.38);
+  const chockB = part(0.78, 0.16, 0.16, WOOD, false);
+  chockB.position.set(0, 0.22, 0.38);
+
+  const flangeN = part(0.92, 0.92, 0.1, WOOD);
+  flangeN.position.set(0, axleY, -0.42);
+  flangeN.userData.part = "flange";
+  flangeN.userData.dress = "hawser-drum";
+  const flangeS = part(0.92, 0.92, 0.1, WOOD);
+  flangeS.position.set(0, axleY, 0.42);
+  flangeS.userData.part = "flange";
+  flangeS.userData.dress = "hawser-drum";
+
+  const barrel = part(0.42, 0.42, 0.72, WOOD_LIGHT, false);
+  barrel.position.set(0, axleY, 0);
+  barrel.userData.part = "barrel";
+
+  const wrap = part(0.72, 0.72, 0.64, LAMP_GLASS, false);
+  wrap.position.set(0, axleY, 0);
+  wrap.userData.kind = "hawser-drum";
+  wrap.userData.dress = "hawser-drum";
+  wrap.userData.part = "hawser";
+
+  const band = part(0.76, 0.18, 0.66, WOOD_DARK, false);
+  band.position.set(0, axleY, 0);
+  band.userData.part = "band";
+
+  const tail = part(0.14, 0.12, 0.48, LAMP_GLASS, false);
+  tail.position.set(0.38, 0.18, 0.22);
+  tail.userData.part = "hawser";
+  tail.userData.dress = "hawser-drum";
+
+  g.add(runnerA, runnerB, chockA, chockB, flangeN, flangeS, barrel, wrap, band, tail);
+  return g;
+}
+
 function makeProp(kind, side) {
   if (kind === "bench") return crateSeat(side);
   if (kind === "sign") return streetSign(side);
+  if (kind === "hawser-drum") return hawserDrum(side);
   return lampPost(side);
 }
 
@@ -288,6 +347,14 @@ function planForIsland(island, length) {
     ]) {
       plan.push({ along: s.along, side: s.side, kind: "bench", setback: streetSetbackM(idx++) });
     }
+    // Kraft hawser drums on the spawn verge — off the tarmac, inside the dense stretch.
+    for (const s of [
+      { along: 48, side: -1 },
+      { along: 118, side: 1 },
+      { along: 188, side: -1 },
+    ]) {
+      plan.push({ along: s.along, side: s.side, kind: "hawser-drum", setback: streetSetbackM(idx++) });
+    }
   } else {
     for (let along = 38, n = 0; along <= portM; along += 72, n++) {
       plan.push({ along, side: n % 2 ? 1 : -1, kind: "bench", setback: streetSetbackM(idx++) });
@@ -333,7 +400,7 @@ function placeOne(map, road, spec, heightAt, slot, root) {
 }
 
 /**
- * Paper lamp posts, kraft crate seats, and signs along the paved spline, on the grass verge.
+ * Paper lamp posts, kraft crate seats, hawser drums, and signs along the paved spline, on the grass verge.
  * North port stretch is packed first so spawn looking inland actually sees them.
  */
 export function makeStreetProps(map, helpers) {
