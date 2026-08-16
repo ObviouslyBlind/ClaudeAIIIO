@@ -77,24 +77,28 @@ describe("player PAPER handcart", () => {
     const cart = player.getObjectByName("paper-cart")!;
     expect(cart.children.length).toBe(CART_MESH_COUNT);
     expect(meshCount(cart)).toBe(CART_MESH_COUNT);
-    expect(CART_MESH_COUNT).toBe(11);
+    expect(CART_MESH_COUNT).toBe(12);
 
     const p = parts(cart);
     expect(p).toContain("bed");
     expect(p.filter((k) => k === "wheel").length).toBe(2);
     expect(p.filter((k) => k === "handle").length).toBe(2);
     expect(p).toContain("grip");
-    expect(p).toContain("crate");
+    expect(p.filter((k) => k === "crate").length).toBe(1);
+    expect(p.filter((k) => k === "roll").length).toBe(1);
     expect(p.filter((k) => k === "side").length).toBe(2);
     expect(p.filter((k) => k === "end").length).toBe(2);
 
     const wheels = cart.children.filter((c) => c.userData.part === "wheel") as THREE.Mesh[];
     expect(wheels.every((w) => w.geometry.type === "CylinderGeometry")).toBe(true);
+    const roll = cart.children.find((c) => c.userData.part === "roll") as THREE.Mesh;
+    expect(roll.geometry.type).toBe("CylinderGeometry");
 
     const colors = hexes(cart);
     expect(colors).toContain(0x8a6238);
     expect(colors).toContain(0x7a5230);
     expect(colors).toContain(0x9a6a40);
+    expect(colors).toContain(0xc4b496);
     expect(colors.every(isGrey)).toBe(false);
 
     expect(cart.position.y).toBeCloseTo(-1.15, 5);
@@ -104,6 +108,11 @@ describe("player PAPER handcart", () => {
     const grip = cart.children.find((c) => c.userData.part === "grip")!;
     expect(grip.position.z).toBeGreaterThan(bed.position.z);
     expect(grip.position.z).toBeLessThan(0);
+    const crate = cart.children.find((c) => c.userData.part === "crate")!;
+    expect(crate.position.y).toBeGreaterThan(bed.position.y);
+    expect(roll.position.y).toBeGreaterThan(bed.position.y);
+    expect(crate.position.z).toBeLessThan(bed.position.z + 0.5);
+    expect(crate.position.z).toBeGreaterThan(bed.position.z - 0.5);
   });
 
   it("is idempotent and never writes player.position", () => {
