@@ -5,8 +5,9 @@ import * as THREE from "three";
  * a small wood-post scarecrow at the back of the crop beds, a short wood
  * fence rail behind it, a small wood water trough beside the beds, a kraft
  * milk churn beside the trough, a short wood pail beside the churn, a small
- * kraft pitchfork leaning by the trough and pail, and dim warm light — not
- * the house living room, warehouse crates, shop, or factory.
+ * kraft pitchfork leaning by the trough and pail, a small kraft PAPER egg
+ * basket beside the trough, and dim warm light — not the house living room,
+ * warehouse crates, shop, or factory.
  * No WASD. Tap-to-walk stays in interior.js.
  *
  * Call dressFarm(scene) when plot.kind or plot.use is "farm".
@@ -418,6 +419,45 @@ function farmFork() {
   return g;
 }
 
+/**
+ * Small PAPER kraft egg basket: wood body, handle hoop, cream kraft eggs.
+ * Hexes already in this file (WOOD, HANDLE, KRAFT). PAPER boxes only.
+ * Sits beside the trough on the wall side, offset from the churn, pail,
+ * and pitchfork; centre aisle stays clear.
+ */
+function farmBasket() {
+  const g = new THREE.Group();
+  g.name = "farm-basket";
+  g.userData.kind = "farm-basket";
+  g.userData.mode = "PAPER";
+  const y0 = 0.16;
+  const body = paperBox(0.22, 0.1, 0.16, WOOD, "farm-basket");
+  body.position.y = y0 + 0.05;
+  g.add(body);
+  const rim = paperBox(0.24, 0.025, 0.18, HANDLE, "farm-basket");
+  rim.position.y = y0 + 0.1;
+  g.add(rim);
+  const postL = paperBox(0.02, 0.1, 0.02, HANDLE, "farm-basket");
+  postL.position.set(-0.07, y0 + 0.16, 0);
+  g.add(postL);
+  const postR = paperBox(0.02, 0.1, 0.02, HANDLE, "farm-basket");
+  postR.position.set(0.07, y0 + 0.16, 0);
+  g.add(postR);
+  const hoop = paperBox(0.16, 0.02, 0.02, HANDLE, "farm-basket");
+  hoop.position.set(0, y0 + 0.22, 0);
+  g.add(hoop);
+  const eggA = paperBox(0.055, 0.045, 0.045, KRAFT, "farm-basket");
+  eggA.position.set(-0.04, y0 + 0.13, 0.02);
+  g.add(eggA);
+  const eggB = paperBox(0.05, 0.042, 0.042, KRAFT, "farm-basket");
+  eggB.position.set(0.035, y0 + 0.125, -0.015);
+  g.add(eggB);
+  const eggC = paperBox(0.048, 0.04, 0.04, KRAFT, "farm-basket");
+  eggC.position.set(0, y0 + 0.128, 0.03);
+  g.add(eggC);
+  return g;
+}
+
 function workbench(x, z) {
   const g = new THREE.Group();
   g.name = "farm-bench";
@@ -500,6 +540,9 @@ function makeFarmDress() {
   fork.rotation.z = -0.36;
   fork.rotation.y = 0.12;
   g.add(fork);
+  const basket = farmBasket();
+  basket.position.set(3.16, 0, -0.06);
+  g.add(basket);
 
   const loftY = 2.94;
   g.add(sack(0.46, 0.56, 0.36, SACK, -2.55, loftY + 0.28, -2.35, 0.1));
@@ -584,8 +627,8 @@ function dimSceneLights(scene, farm) {
  * Hides living-room furniture, adds tools, sacks, planter beds, a
  * scarecrow, a short back-edge fence, a small wood water trough, a
  * kraft milk churn beside the trough, a short wood pail beside the
- * churn, and a small kraft pitchfork leaning by the trough and pail,
- * warms and dims lights.
+ * churn, a small kraft pitchfork leaning by the trough and pail, and a
+ * small kraft egg basket beside the trough, warms and dims lights.
  * @param {THREE.Object3D} scene
  */
 export function dressFarm(scene) {

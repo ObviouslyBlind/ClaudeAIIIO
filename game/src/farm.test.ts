@@ -233,3 +233,92 @@ describe("farm PAPER kraft pitchfork", () => {
     expect(scene.userData.interiorUse).toBe("house");
   });
 });
+
+describe("farm PAPER kraft egg basket", () => {
+  it("puts one kraft PAPER egg basket beside the trough", () => {
+    const scene = new THREE.Scene();
+    dressFarm(scene);
+
+    const dress = scene.getObjectByName("farm-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+    expect(dress!.visible).toBe(true);
+
+    const baskets: THREE.Object3D[] = [];
+    dress!.traverse((obj) => {
+      if (obj.userData?.kind === "farm-basket" && obj.name === "farm-basket") {
+        baskets.push(obj);
+      }
+    });
+    expect(baskets.length).toBe(1);
+
+    const basket = baskets[0];
+    expect(basket.userData.kind).toBe("farm-basket");
+    expect(basket.userData.mode).toBe("PAPER");
+
+    const trough = dress!.getObjectByName("farm-trough")!;
+    expect(trough).toBeTruthy();
+    const toTrough = Math.hypot(basket.position.x - trough.position.x, basket.position.z - trough.position.z);
+    expect(toTrough).toBeGreaterThan(0.25);
+    expect(toTrough).toBeLessThan(0.75);
+
+    const churn = dress!.getObjectByName("farm-churn")!;
+    expect(churn).toBeTruthy();
+    const toChurn = Math.hypot(basket.position.x - churn.position.x, basket.position.z - churn.position.z);
+    expect(toChurn).toBeGreaterThan(0.5);
+
+    const pail = dress!.getObjectByName("farm-pail")!;
+    expect(pail).toBeTruthy();
+    const toPail = Math.hypot(basket.position.x - pail.position.x, basket.position.z - pail.position.z);
+    expect(toPail).toBeGreaterThan(0.5);
+
+    const fork = dress!.getObjectByName("farm-fork")!;
+    expect(fork).toBeTruthy();
+    const toFork = Math.hypot(basket.position.x - fork.position.x, basket.position.z - fork.position.z);
+    expect(toFork).toBeGreaterThan(0.5);
+
+    expect(basket.position.x).toBeGreaterThan(2.8);
+
+    const colors = hexes(basket);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.some((c) => c === WOOD)).toBe(true);
+    expect(colors.some((c) => c === HANDLE)).toBe(true);
+    expect(colors.some((c) => c === KRAFT)).toBe(true);
+    expect(colors.every((c) => [WOOD, HANDLE, KRAFT].includes(c))).toBe(true);
+
+    let boxes = 0;
+    let eggs = 0;
+    basket.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        boxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.kind).toBe("farm-basket");
+        expect(mesh.userData.mode).toBe("PAPER");
+        const mat = mesh.material as THREE.MeshLambertMaterial;
+        if (mat?.color?.getHex() === KRAFT) eggs += 1;
+      }
+    });
+    expect(boxes).toBeGreaterThanOrEqual(6);
+    expect(eggs).toBe(3);
+  });
+
+  it("keeps dress idempotent and hides the basket on undress", () => {
+    const scene = new THREE.Scene();
+    dressFarm(scene);
+    dressFarm(scene);
+    expect(scene.children.filter((c) => c.name === "farm-dress").length).toBe(1);
+    const dressed = scene.getObjectByName("farm-dress")!;
+    const baskets: THREE.Object3D[] = [];
+    dressed.traverse((obj) => {
+      if (obj.name === "farm-basket") baskets.push(obj);
+    });
+    expect(baskets.length).toBe(1);
+
+    undressFarm(scene);
+    const dress = scene.getObjectByName("farm-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.visible).toBe(false);
+    expect(scene.userData.interiorUse).toBe("house");
+  });
+});
