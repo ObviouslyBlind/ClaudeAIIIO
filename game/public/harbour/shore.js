@@ -146,6 +146,15 @@ export function makeShoreFoam(spec, heightAtFn, scene) {
       portCount++;
     }
   }
+  // North pier seaward lip: a few extra kraft dashes in the basin, not on timber.
+  // Deck ends at along ~81 (11×86 box centred 38 m out); 15 m dashes sit past that.
+  if (spec.id === "north") {
+    for (const localX of [-3.8, 0, 3.8]) {
+      if (portCount >= PORT_FOAM_SAMPLES) break;
+      addPierWaterFoam(group, portGeo, mat, spec, localX, 89);
+      portCount++;
+    }
+  }
   for (const side of [-1, 1]) {
     for (let i = 0; i <= 12 && portCount < PORT_FOAM_SAMPLES; i++) {
       const hit = walkContour(spec, heightAtFn, spec.port.x + side * (18 + i * 12), -50, 90, 2);
