@@ -1,0 +1,65 @@
+:root {
+  --bg: #12141a;
+  --ink: #e8e4d8;
+  --muted: #9a9488;
+  --panel: #1c2028;
+  --accent: #c4a574;
+  --green: #7dba8a;
+  --radius: 8px;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+}
+main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+.badge {
+  display: inline-block;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 12px;
+}
+h1 { font-size: 28px; margin: 0 0 8px; font-weight: 650; }
+.lede { color: var(--muted); line-height: 1.45; margin: 0 0 20px; }
+.hud {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.hud div, .row {
+  background: var(--panel);
+  border-radius: var(--radius);
+  padding: 12px;
+}
+.hud span { display: block; font-size: 11px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
+.hud strong { font-size: 20px; font-variant-numeric: tabular-nums; }
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.row button {
+  min-width: 88px;
+  min-height: 44px;
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--accent);
+  color: #1a140c;
+  font-weight: 700;
+  font-size: 15px;
+}
+.row button:disabled { opacity: 0.4; }
+.name { font-weight: 650; }
+.px { font-variant-numeric: tabular-nums; color: var(--green); }
+.err { color: #e09080; font-size: 13px; min-height: 1.2em; }
