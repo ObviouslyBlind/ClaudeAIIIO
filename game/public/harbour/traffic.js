@@ -46,7 +46,7 @@ function part(mesh, name) {
   return mesh;
 }
 
-/** Sedan: painted body, glass cabin, bumpers, kraft lamps, four wheels with kraft hub boxes. No debug masts. */
+/** Sedan: painted body, glass cabin, bumpers, kraft lamps, chrome side mirrors, four wheels with kraft hub boxes. No debug masts. */
 function makeCar(color) {
   const g = new THREE.Group();
   g.frustumCulled = false;
@@ -107,6 +107,17 @@ function makeCar(color) {
     const tail = part(new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.12, 0.08), brick), "taillight");
     tail.position.set(x, 0.72, -2.16);
     g.add(tail);
+  }
+
+  /** PAPER side mirrors — chrome housing, glass face, A-pillar, two boxes named mirror. */
+  for (const x of [-1.16, 1.16]) {
+    const housing = part(new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.14, 0.22), chrome), "mirror");
+    housing.position.set(x, 1.18, 0.52);
+    g.add(housing);
+    const outward = x > 0 ? 1 : -1;
+    const face = part(new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.1, 0.16), glass), "glass");
+    face.position.set(x + outward * 0.1, 1.18, 0.52);
+    g.add(face);
   }
 
   const wheelGeo = new THREE.CylinderGeometry(0.34, 0.34, 0.28, 10);

@@ -113,6 +113,7 @@ describe("road node traffic", () => {
     expect(parts.get("glass")).toBeGreaterThanOrEqual(2);
     expect(parts.get("bumper")).toBe(2);
     expect(parts.get("wheel")).toBe(4);
+    expect(parts.get("mirror")).toBe(2);
     expect(colors).toContain(0xc45c3a);
     expect(mast).toBe(0);
     expect(mesh.children.length).toBeGreaterThan(6);
