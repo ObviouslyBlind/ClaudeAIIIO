@@ -132,6 +132,7 @@ describe("NPC harbour stalls", () => {
     expect(kinds).toContain("napkin");
     expect(kinds).toContain("plate");
     expect(kinds).toContain("lemon");
+    expect(kinds).toContain("lime");
     const colors = hexes(mesh);
     expect(colors.length).toBeGreaterThan(4);
     expect(colors.every(isGrey)).toBe(false);
@@ -837,6 +838,80 @@ describe("NPC harbour stalls", () => {
     const { stalls } = boot();
     expect(stalls.group.children.length).toBeGreaterThan(0);
     for (const child of stalls.group.children) {
+      expect(child.children.filter((c) => c.userData.part === "lemon").length).toBe(1);
+      expect(child.children.filter((c) => c.userData.part === "plate").length).toBe(1);
+      expect(child.children.filter((c) => c.userData.part === "napkin").length).toBe(1);
+      expect(child.children.filter((c) => c.userData.part === "knife").length).toBe(1);
+      expect(child.children.filter((c) => c.userData.part === "cup").length).toBe(1);
+      expect(child.children.filter((c) => c.userData.part === "stool").length).toBe(1);
+    }
+  });
+
+  it("puts one tiny kraft PAPER lime on each NPC stall counter; lemon, plate, napkin, knife, cup, stool remain", () => {
+    const mesh = makeStallMesh({ id: "n-test", use: "farm", island: "north", band: "field" });
+    const counter = mesh.children.find((c) => c.userData.part === "counter") as THREE.Mesh;
+    const limes = mesh.children.filter((c) => c.userData.part === "lime");
+    expect(limes.length).toBe(1);
+    const lime = limes[0]!;
+    expect(lime.userData.mode).toBe("PAPER");
+    expect(lime.userData.paper).toBe(true);
+    const box = counter.geometry as THREE.BoxGeometry;
+    const counterTop = counter.position.y + box.parameters.height / 2;
+    expect(lime.position.y).toBeCloseTo(counterTop, 5);
+    expect(lime.position.z).toBeCloseTo(counter.position.z, 5);
+    expect(Math.abs(lime.position.x)).toBeLessThan(1.7);
+
+    const lemon = mesh.children.find((c) => c.userData.part === "lemon")!;
+    const plate = mesh.children.find((c) => c.userData.part === "plate")!;
+    const napkin = mesh.children.find((c) => c.userData.part === "napkin")!;
+    const knife = mesh.children.find((c) => c.userData.part === "knife")!;
+    const cup = mesh.children.find((c) => c.userData.part === "cup")!;
+    const stool = mesh.children.find((c) => c.userData.part === "stool")!;
+    expect(lemon.userData.part).toBe("lemon");
+    expect(plate.userData.part).toBe("plate");
+    expect(napkin.userData.part).toBe("napkin");
+    expect(knife.userData.part).toBe("knife");
+    expect(cup.userData.part).toBe("cup");
+    expect(stool.userData.part).toBe("stool");
+    expect(lemon.position.x).toBeCloseTo(-0.08, 5);
+    expect(lemon.position.y).toBeCloseTo(0.9, 5);
+    expect(plate.position.x).toBeCloseTo(1.36, 5);
+    expect(plate.position.y).toBeCloseTo(0.9, 5);
+    expect(napkin.position.x).toBeCloseTo(0.64, 5);
+    expect(knife.position.x).toBeCloseTo(-0.72, 5);
+    expect(cup.position.x).toBeCloseTo(0.38, 5);
+    expect(stool.position.x).toBeCloseTo(-2.42, 5);
+    expect(Math.abs(lime.position.x - lemon.position.x)).toBeGreaterThan(0.25);
+    expect(Math.abs(lime.position.x - plate.position.x)).toBeGreaterThan(0.25);
+    expect(Math.abs(lime.position.x - napkin.position.x)).toBeGreaterThan(0.25);
+    expect(Math.abs(lime.position.x - knife.position.x)).toBeGreaterThan(0.25);
+    expect(Math.abs(lime.position.x - cup.position.x)).toBeGreaterThan(0.2);
+    expect(Math.abs(lime.position.x - stool.position.x)).toBeGreaterThan(1.5);
+
+    const kraft = new Set([0x5f8a32, 0xc45c3a]);
+    const colors = hexes(lime);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.every((c) => kraft.has(c))).toBe(true);
+    expect(colors).toContain(0x5f8a32);
+    expect(colors).toContain(0xc45c3a);
+    expect(colors.every((c) => !isGrey(c))).toBe(true);
+    let boxes = 0;
+    lime.traverse((obj) => {
+      const m = obj as THREE.Mesh;
+      if (!m.isMesh) return;
+      boxes += 1;
+      expect(m.geometry.type).toBe("BoxGeometry");
+      const g = m.geometry as THREE.BoxGeometry;
+      expect(g.parameters.width).toBeLessThan(0.2);
+      expect(g.parameters.height).toBeLessThan(0.15);
+      expect(g.parameters.depth).toBeLessThan(0.2);
+    });
+    expect(boxes).toBeGreaterThanOrEqual(2);
+
+    const { stalls } = boot();
+    expect(stalls.group.children.length).toBeGreaterThan(0);
+    for (const child of stalls.group.children) {
+      expect(child.children.filter((c) => c.userData.part === "lime").length).toBe(1);
       expect(child.children.filter((c) => c.userData.part === "lemon").length).toBe(1);
       expect(child.children.filter((c) => c.userData.part === "plate").length).toBe(1);
       expect(child.children.filter((c) => c.userData.part === "napkin").length).toBe(1);
