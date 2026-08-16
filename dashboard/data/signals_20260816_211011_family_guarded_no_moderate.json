@@ -1,18 +1,22 @@
 {
   "strategy": {
-    "strategy_id": "no_side",
-    "strategy_version": "1.0",
-    "strategy_description": "Original NO-side timer strategy: bet NO on bracket markets where event is unlikely by deadline.",
-    "engine": "default",
+    "strategy_id": "family_guarded_no",
+    "strategy_version": "0.1",
+    "strategy_description": "Stricter NO-side with family-level risk controls and position-aware thresholds. Research strategy \u2014 paper only.",
+    "engine": "family_guarded",
     "profile_id": "moderate",
-    "profile_description": "Balanced: standard thresholds from Phase 4.",
+    "profile_description": "Family-guarded moderate: tail-friendly, adjacent-strict, hot-blocked.",
     "no_price_min": 0.5,
     "no_price_max": 0.95,
     "no_price_trade_min": 0.7,
     "mixed_evidence_low": 0.4,
     "mixed_evidence_high": 0.6,
     "max_hours_to_expiry": 72.0,
-    "default_stake": 100.0
+    "default_stake": 100.0,
+    "tail_no_price_trade_min": 0.65,
+    "adjacent_no_price_trade_min": 0.8,
+    "hot_no_price_trade_min": 0.92,
+    "hot_allowed": false
   },
   "input_file": "relevant_markets_20260816_211011.json",
   "results": [
@@ -21,532 +25,560 @@
       "question": "Will Elon Musk tweet \"Hyperliquid\" by October 31, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Expiry in 1830.8h \u2014 exceeds 72.0h max."
       ],
       "score": 15,
       "no_price": 0.935,
       "yes_price": 0.065,
-      "hours_until_expiry": 1830.8290316172222,
+      "hours_until_expiry": 1830.8289919155557,
       "market_type": "musk_posting",
       "event_slug": "will-elon-musk-tweet-about-hyperliquid-by",
       "event_title": "Will Elon Musk tweet \"Hyperliquid\" by ___?",
       "bracket_label": "October 31, 2026",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-08-16T21:10:15.486052"
+      "timestamp": "2026-08-16T21:10:15.628872"
     },
     {
       "condition_id": "0xf93d688a9ad0c04cab8ce8144d34da5d6e78f0c0439c8c9c86980d00797e0315",
       "question": "Will Elon Musk tweet \"Hyperliquid\" by November 30, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=adjacent",
         "Expiry in 2551.8h \u2014 exceeds 72.0h max."
       ],
       "score": 15,
       "no_price": 0.905,
       "yes_price": 0.095,
-      "hours_until_expiry": 2551.829031615556,
+      "hours_until_expiry": 2551.8289919133335,
       "market_type": "musk_posting",
       "event_slug": "will-elon-musk-tweet-about-hyperliquid-by",
       "event_title": "Will Elon Musk tweet \"Hyperliquid\" by ___?",
       "bracket_label": "November 30, 2026",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-08-16T21:10:15.486098"
-    },
-    {
-      "condition_id": "0xf52464db4365608f6f135248f83cd1e98e6232bce4917e6cd7d94d911ca8f51a",
-      "question": "Will Elon Musk tweet \"Hyperliquid\" by December 31, 2026?",
-      "signal": "SKIP",
-      "reasons": [
-        "Expiry in 3295.8h \u2014 exceeds 72.0h max."
-      ],
-      "score": 15,
-      "no_price": 0.875,
-      "yes_price": 0.125,
-      "hours_until_expiry": 3295.829031613611,
-      "market_type": "musk_posting",
-      "event_slug": "will-elon-musk-tweet-about-hyperliquid-by",
-      "event_title": "Will Elon Musk tweet \"Hyperliquid\" by ___?",
-      "bracket_label": "December 31, 2026",
-      "strategy_id": "no_side",
-      "profile_id": "moderate",
-      "timestamp": "2026-08-16T21:10:15.486135"
+      "timestamp": "2026-08-16T21:10:15.628957"
     },
     {
       "condition_id": "0x784aad9ba3f0aa5f8c2e6c4dc9314d8899cd147d6b289e6eb289e66a5b569082",
       "question": "Will Elon Musk tweet \"Hyperliquid\" by August 31, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 0.98 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9825,
       "yes_price": 0.0175,
-      "hours_until_expiry": 366.8290316127777,
+      "hours_until_expiry": 366.82899191166666,
       "market_type": "musk_posting",
       "event_slug": "will-elon-musk-tweet-about-hyperliquid-by",
       "event_title": "Will Elon Musk tweet \"Hyperliquid\" by ___?",
       "bracket_label": "August 31, 2026",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-08-16T21:10:15.485975"
+      "timestamp": "2026-08-16T21:10:15.628702"
     },
     {
       "condition_id": "0xd5fb8ad874064360478b115db715e10997e03ec8a03c29e3d061d25c3f9418bb",
       "question": "Will Elon Musk tweet \"Hyperliquid\" by September 30, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "NO price 0.99 > 0.95 \u2014 not enough upside."
       ],
       "score": 10,
       "no_price": 0.9855,
       "yes_price": 0.0145,
-      "hours_until_expiry": 1086.8290316119444,
+      "hours_until_expiry": 1086.8289919102779,
       "market_type": "musk_posting",
       "event_slug": "will-elon-musk-tweet-about-hyperliquid-by",
       "event_title": "Will Elon Musk tweet \"Hyperliquid\" by ___?",
       "bracket_label": "September 30, 2026",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-08-16T21:10:15.486011"
+      "timestamp": "2026-08-16T21:10:15.628785"
+    },
+    {
+      "condition_id": "0xf52464db4365608f6f135248f83cd1e98e6232bce4917e6cd7d94d911ca8f51a",
+      "question": "Will Elon Musk tweet \"Hyperliquid\" by December 31, 2026?",
+      "signal": "SKIP",
+      "reasons": [
+        "position=hot",
+        "SKIP: hot bracket blocked by family_guarded policy."
+      ],
+      "score": 5,
+      "no_price": 0.875,
+      "yes_price": 0.125,
+      "hours_until_expiry": 3295.828991908889,
+      "market_type": "musk_posting",
+      "event_slug": "will-elon-musk-tweet-about-hyperliquid-by",
+      "event_title": "Will Elon Musk tweet \"Hyperliquid\" by ___?",
+      "bracket_label": "December 31, 2026",
+      "strategy_id": "family_guarded_no",
+      "profile_id": "moderate",
+      "timestamp": "2026-08-16T21:10:15.629033"
     },
     {
       "condition_id": "0x02cb83794f5c64731b73a1d5f8d0d3b21858773d29526bb1f837918fa9f3dc15",
       "question": "Will Elon Musk post <40 tweets from March 19 to March 21, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -3557.1709683888885,
+      "hours_until_expiry": -3557.171008092778,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-march-19-march-21",
       "event_title": "Elon Musk # tweets March 19 - March 21, 2026?",
       "bracket_label": "<40",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-08-16T21:10:15.484546"
+      "timestamp": "2026-08-16T21:10:15.626973"
     },
     {
       "condition_id": "0x3f98f4506374a11b5d4deacf051e3b6192ec58e0f2036d18edb03d5b3985d3a3",
       "question": "Will Elon Musk post 40-64 tweets from March 19 to March 21, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -3557.17096839,
+      "hours_until_expiry": -3557.1710080941666,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-march-19-march-21",
       "event_title": "Elon Musk # tweets March 19 - March 21, 2026?",
       "bracket_label": "40-64",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-08-16T21:10:15.484644"
+      "timestamp": "2026-08-16T21:10:15.627082"
     },
     {
       "condition_id": "0x47e3bb0616a698b284145759f805bea5c760acf889e66da0506937698b417c95",
       "question": "Will Elon Musk post 65-89 tweets from March 19 to March 21, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -3557.1709683905556,
+      "hours_until_expiry": -3557.1710080955554,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-march-19-march-21",
       "event_title": "Elon Musk # tweets March 19 - March 21, 2026?",
       "bracket_label": "65-89",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-08-16T21:10:15.484719"
+      "timestamp": "2026-08-16T21:10:15.627175"
     },
     {
       "condition_id": "0x53d9bfa100ba711e08bcca20564890da16531a4ef3092efd88449bbbe8fbf19c",
       "question": "Will Elon Musk post 90-114 tweets from March 19 to March 21, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=adjacent",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -3557.1709683913887,
+      "hours_until_expiry": -3557.171008096944,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-march-19-march-21",
       "event_title": "Elon Musk # tweets March 19 - March 21, 2026?",
       "bracket_label": "90-114",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-08-16T21:10:15.484789"
+      "timestamp": "2026-08-16T21:10:15.627247"
     },
     {
       "condition_id": "0xfb2eec2e72db2cdd9d3813d59b0d5766c10ea3873d422b19fc428fbed27a20f9",
       "question": "Will Elon Musk post 115-139 tweets from March 19 to March 21, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=hot",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 0.0,
       "yes_price": 1.0,
-      "hours_until_expiry": -3557.170968392222,
+      "hours_until_expiry": -3557.1710080980556,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-march-19-march-21",
       "event_title": "Elon Musk # tweets March 19 - March 21, 2026?",
       "bracket_label": "115-139",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-08-16T21:10:15.484857"
+      "timestamp": "2026-08-16T21:10:15.627321"
     },
     {
       "condition_id": "0x1f9057f191479f1fc34c3539c3fff9deadb30440c68cbdbdc60e2f66f6448a88",
       "question": "Will Elon Musk post 140-164 tweets from March 19 to March 21, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=adjacent",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -3557.1709683930553,
+      "hours_until_expiry": -3557.1710080994444,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-march-19-march-21",
       "event_title": "Elon Musk # tweets March 19 - March 21, 2026?",
       "bracket_label": "140-164",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-08-16T21:10:15.484924"
+      "timestamp": "2026-08-16T21:10:15.627390"
     },
     {
       "condition_id": "0x0d0f9c7ff9ec578157fb56c2d7cba7b9d6f32b2bc112ebc49b75e185ea510f63",
       "question": "Will Elon Musk post 165-189 tweets from March 19 to March 21, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -3557.170968393611,
+      "hours_until_expiry": -3557.1710081019446,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-march-19-march-21",
       "event_title": "Elon Musk # tweets March 19 - March 21, 2026?",
       "bracket_label": "165-189",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-08-16T21:10:15.484995"
+      "timestamp": "2026-08-16T21:10:15.627484"
     },
     {
       "condition_id": "0x03b5078ec7b3aeeb46d206037277dfef675fbc3d4c4b7cf37464193778ab6208",
       "question": "Will Elon Musk post 190-214 tweets from March 19 to March 21, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -3557.1709683950003,
+      "hours_until_expiry": -3557.171008103333,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-march-19-march-21",
       "event_title": "Elon Musk # tweets March 19 - March 21, 2026?",
       "bracket_label": "190-214",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-08-16T21:10:15.485059"
+      "timestamp": "2026-08-16T21:10:15.627567"
     },
     {
       "condition_id": "0x8d1517cf62d2234f03be8d5fa4188ef00f504d78147de77cf012e4787c83c171",
       "question": "Will Elon Musk post 215-239 tweets from March 19 to March 21, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -3557.1709683958334,
+      "hours_until_expiry": -3557.171008104722,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-march-19-march-21",
       "event_title": "Elon Musk # tweets March 19 - March 21, 2026?",
       "bracket_label": "215-239",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-08-16T21:10:15.485126"
+      "timestamp": "2026-08-16T21:10:15.627637"
     },
     {
       "condition_id": "0xea8bf021ab22f94aeb33ee3b4aac74863b3e72a91a304fb476ba04639ba52c7d",
       "question": "Will Elon Musk post 240+ tweets from March 19 to March 21, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -3557.170968396667,
+      "hours_until_expiry": -3557.171008105833,
       "market_type": "musk_posting",
       "event_slug": "elon-musk-of-tweets-march-19-march-21",
       "event_title": "Elon Musk # tweets March 19 - March 21, 2026?",
       "bracket_label": "240+",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-08-16T21:10:15.485191"
+      "timestamp": "2026-08-16T21:10:15.627703"
     },
     {
       "condition_id": "0x7290b1aa1bf5b262bd60abd03564601131dbcfd500a6206a97da914cdcac1403",
       "question": "Will Donald Trump post 0-19 Truth Social posts from March 17 to March 24, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -3485.1709683972226,
+      "hours_until_expiry": -3485.1710081072224,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-march-17-march-24",
       "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?",
       "bracket_label": "<20",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-08-16T21:10:15.485262"
+      "timestamp": "2026-08-16T21:10:15.627772"
     },
     {
       "condition_id": "0x4e2d1b6e2e794c8b7009ff51d581fc719b8561868330cab0103c0e06906e2200",
       "question": "Will Donald Trump post 20-39 Truth Social posts from March 17 to March 24, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -3485.1709683980553,
+      "hours_until_expiry": -3485.171008108611,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-march-17-march-24",
       "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?",
       "bracket_label": "20-39",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-08-16T21:10:15.485332"
+      "timestamp": "2026-08-16T21:10:15.627838"
     },
     {
       "condition_id": "0xdc3f1159806894cb57c514544395d61899c8d9b69e2a9ae42810a60ee04b9ce1",
       "question": "Will Donald Trump post 40-59 Truth Social posts from March 17 to March 24, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -3485.170968398889,
+      "hours_until_expiry": -3485.171008109722,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-march-17-march-24",
       "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?",
       "bracket_label": "40-59",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-08-16T21:10:15.485391"
+      "timestamp": "2026-08-16T21:10:15.627904"
     },
     {
       "condition_id": "0x5048059030b1b6f73783f63ebe091a7a8d1c2a62cdcacfc6c05d12595609cb36",
       "question": "Will Donald Trump post 60-79 Truth Social posts from March 17 to March 24, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=adjacent",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -3485.170968399722,
+      "hours_until_expiry": -3485.1710081111114,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-march-17-march-24",
       "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?",
       "bracket_label": "60-79",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-08-16T21:10:15.485450"
+      "timestamp": "2026-08-16T21:10:15.627969"
     },
     {
       "condition_id": "0xbafc6b93f7eab35ca46eac426c8e66700d3182d26c976865d1f9c1932b790daf",
       "question": "Will Donald Trump post 80-99 Truth Social posts from March 17 to March 24, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=hot",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 0.0,
       "yes_price": 1.0,
-      "hours_until_expiry": -3485.1709684005555,
+      "hours_until_expiry": -3485.1710081124997,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-march-17-march-24",
       "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?",
       "bracket_label": "80-99",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-08-16T21:10:15.485543"
+      "timestamp": "2026-08-16T21:10:15.628037"
     },
     {
       "condition_id": "0xc5a605a47cade5cb82d4eb37a3d3aab9d18a68060c78bd9ca379410675799384",
       "question": "Will Donald Trump post 100-119 Truth Social posts from March 17 to March 24, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=adjacent",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -3485.170968401111,
+      "hours_until_expiry": -3485.171008113611,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-march-17-march-24",
       "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?",
       "bracket_label": "100-119",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-08-16T21:10:15.485616"
+      "timestamp": "2026-08-16T21:10:15.628102"
     },
     {
       "condition_id": "0x92c74e9ab5383ddb3b7350e515beeecdc905078c58bc46d926d655fc9c1cbf43",
       "question": "Will Donald Trump post 120-139 Truth Social posts from March 17 to March 24, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -3485.1709684019443,
+      "hours_until_expiry": -3485.1710081158335,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-march-17-march-24",
       "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?",
       "bracket_label": "120-139",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-08-16T21:10:15.485692"
+      "timestamp": "2026-08-16T21:10:15.628168"
     },
     {
       "condition_id": "0x80b37fac9896d0867c76aa2b70d8781e014ebe09ff0a3cbe649e3454bf51a461",
       "question": "Will Donald Trump post 140-159 Truth Social posts from March 17 to March 24, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -3485.1709684030557,
+      "hours_until_expiry": -3485.1710081169444,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-march-17-march-24",
       "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?",
       "bracket_label": "140-159",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-08-16T21:10:15.485754"
+      "timestamp": "2026-08-16T21:10:15.628232"
     },
     {
       "condition_id": "0xe2d9fbd3898231df8eb62c2f0af39e2a80528719d40acad6b6a4e03d84ab321a",
       "question": "Will Donald Trump post 160-179 Truth Social posts from March 17 to March 24, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -3485.1709684038888,
+      "hours_until_expiry": -3485.1710081183332,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-march-17-march-24",
       "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?",
       "bracket_label": "160-179",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-08-16T21:10:15.485818"
+      "timestamp": "2026-08-16T21:10:15.628297"
     },
     {
       "condition_id": "0xdee27a3b55df80a6ba16b88c9c9c2ba5df2893c7d56c0b2244c66979ac4063ad",
       "question": "Will Donald Trump post 180-199 Truth Social posts from March 17 to March 24, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -3485.1709684047223,
+      "hours_until_expiry": -3485.1710081197225,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-march-17-march-24",
       "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?",
       "bracket_label": "180-199",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-08-16T21:10:15.485855"
+      "timestamp": "2026-08-16T21:10:15.628361"
     },
     {
       "condition_id": "0x6a9af49e4d04d69c1d8be844267ddc798af37aec44c1ad06d09c16fb19c0846e",
       "question": "Will Donald Trump post 200+ Truth Social posts from March 17 to March 24, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -3485.170968405556,
+      "hours_until_expiry": -3485.171008120833,
       "market_type": "trump_posting",
       "event_slug": "donald-trump-of-truth-social-posts-march-17-march-24",
       "event_title": "Donald Trump # Truth Social posts March 17 - March 24, 2026?",
       "bracket_label": "200+",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-08-16T21:10:15.485886"
+      "timestamp": "2026-08-16T21:10:15.628426"
     },
     {
       "condition_id": "0x11de17d292e277b81a6e3b1e3c45a3435e2189aa224d1ed52d8eedf943e6ed5a",
       "question": "Will Elon Musk tweet \"Hyperliquid\" by June 30, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -1121.1709684061111,
+      "hours_until_expiry": -1121.1710081222222,
       "market_type": "musk_posting",
       "event_slug": "will-elon-musk-tweet-about-hyperliquid-by",
       "event_title": "Will Elon Musk tweet \"Hyperliquid\" by ___?",
       "bracket_label": "June 30, 2026",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-08-16T21:10:15.485914"
+      "timestamp": "2026-08-16T21:10:15.628541"
     },
     {
       "condition_id": "0x0fa7b9d6d793a5d36512e2f0d09f68fb8100072d4c2dbafd42c15e3cfe40618e",
       "question": "Will Elon Musk tweet \"Hyperliquid\" by July 31, 2026?",
       "signal": "SKIP",
       "reasons": [
+        "position=tail",
         "Market is closed."
       ],
       "score": 0.0,
       "no_price": 1.0,
       "yes_price": 0.0,
-      "hours_until_expiry": -377.17096840694444,
+      "hours_until_expiry": -377.1710081233333,
       "market_type": "musk_posting",
       "event_slug": "will-elon-musk-tweet-about-hyperliquid-by",
       "event_title": "Will Elon Musk tweet \"Hyperliquid\" by ___?",
       "bracket_label": "July 31, 2026",
-      "strategy_id": "no_side",
+      "strategy_id": "family_guarded_no",
       "profile_id": "moderate",
-      "timestamp": "2026-08-16T21:10:15.485940"
+      "timestamp": "2026-08-16T21:10:15.628619"
     }
   ]
 }
