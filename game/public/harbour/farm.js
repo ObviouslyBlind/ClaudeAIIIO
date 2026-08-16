@@ -10,7 +10,8 @@ import * as THREE from "three";
  * a small kraft PAPER lantern on the workbench, a small kraft PAPER seed
  * packet on the workbench, a tiny kraft PAPER pail lid on the pail, a tiny
  * kraft PAPER mug on the workbench, a tiny kraft PAPER egg on the
- * workbench, a tiny kraft PAPER pail on the workbench, and
+ * workbench, a tiny kraft PAPER pail on the workbench, a tiny kraft PAPER
+ * broom leaning by the workbench, and
  * dim warm light — not the
  * house living room, warehouse crates, shop, or factory.
  * No WASD. Tap-to-walk stays in interior.js.
@@ -642,6 +643,30 @@ function farmTablePail() {
   return g;
 }
 
+/**
+ * Tiny kraft PAPER broom: wood shaft, kraft bristle head.
+ * Hexes already in this file (WOOD, KRAFT). PAPER boxes only — no grey.
+ * Leans by the farm workbench; offset from seed, lid, mug, egg, pail,
+ * lantern, scoop, and the floor trough cluster.
+ */
+function farmBroom() {
+  const g = new THREE.Group();
+  g.name = "farm-broom";
+  g.userData.kind = "farm-broom";
+  g.userData.part = "broom";
+  g.userData.mode = "PAPER";
+  const y0 = 0.16;
+  const shaft = paperBox(0.022, 0.28, 0.022, WOOD, "farm-broom");
+  shaft.userData.part = "broom";
+  shaft.position.y = y0 + 0.14;
+  g.add(shaft);
+  const head = paperBox(0.08, 0.07, 0.036, KRAFT, "farm-broom");
+  head.userData.part = "broom";
+  head.position.y = y0 + 0.035;
+  g.add(head);
+  return g;
+}
+
 function workbench(x, z) {
   const g = new THREE.Group();
   g.name = "farm-bench";
@@ -764,6 +789,12 @@ function makeFarmDress() {
   // scoop, and seed; not the floor farm-pail or trough cluster.
   tablePail.position.set(-3.62, 0.16 + 0.78 + 0.04, -0.02);
   g.add(tablePail);
+  const broom = farmBroom();
+  // Floor beside the 1.55 × 0.58 bench — leans by the front-right
+  // corner, not on the top (seed, mug, egg, pail, lantern, scoop).
+  broom.position.set(-2.88, 0, 0.28);
+  broom.rotation.z = -0.32;
+  g.add(broom);
 
   const loftY = 2.94;
   g.add(sack(0.46, 0.56, 0.36, SACK, -2.55, loftY + 0.28, -2.35, 0.1));
@@ -853,7 +884,8 @@ function dimSceneLights(scene, farm) {
  * on the workbench, a small kraft lantern on the workbench, a small
  * kraft seed packet on the workbench, a tiny kraft pail lid on the
  * pail, a tiny kraft mug on the workbench, a tiny kraft egg on
- * the workbench, and a tiny kraft pail on the workbench, warms and dims lights.
+ * the workbench, a tiny kraft pail on the workbench, and a tiny kraft
+ * broom leaning by the workbench, warms and dims lights.
  * @param {THREE.Object3D} scene
  */
 export function dressFarm(scene) {
