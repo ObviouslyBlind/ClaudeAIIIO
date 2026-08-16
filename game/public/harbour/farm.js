@@ -6,8 +6,9 @@ import * as THREE from "three";
  * fence rail behind it, a small wood water trough beside the beds, a kraft
  * milk churn beside the trough, a short wood pail beside the churn, a small
  * kraft pitchfork leaning by the trough and pail, a small kraft PAPER egg
- * basket beside the trough, and dim warm light — not the house living room,
- * warehouse crates, shop, or factory.
+ * basket beside the trough, a small kraft PAPER grain scoop on the workbench,
+ * and dim warm light — not the house living room, warehouse crates, shop, or
+ * factory.
  * No WASD. Tap-to-walk stays in interior.js.
  *
  * Call dressFarm(scene) when plot.kind or plot.use is "farm".
@@ -458,6 +459,33 @@ function farmBasket() {
   return g;
 }
 
+
+/**
+ * Small PAPER kraft grain scoop: wood handle, kraft bowl, dark rim.
+ * Hexes already in this file (WOOD, KRAFT, WOOD_DARK). PAPER boxes only.
+ * Sits on the farm workbench top; not on the trough, churn, pail, fork,
+ * or basket.
+ */
+function farmScoop() {
+  const g = new THREE.Group();
+  g.name = "farm-scoop";
+  g.userData.kind = "farm-scoop";
+  g.userData.mode = "PAPER";
+  const floor = paperBox(0.16, 0.025, 0.11, KRAFT, "farm-scoop");
+  floor.position.y = 0.013;
+  g.add(floor);
+  const rim = paperBox(0.17, 0.03, 0.12, WOOD_DARK, "farm-scoop");
+  rim.position.y = 0.04;
+  g.add(rim);
+  const back = paperBox(0.03, 0.07, 0.11, WOOD_DARK, "farm-scoop");
+  back.position.set(-0.07, 0.04, 0);
+  g.add(back);
+  const handle = paperBox(0.16, 0.03, 0.03, WOOD, "farm-scoop");
+  handle.position.set(-0.16, 0.05, 0);
+  g.add(handle);
+  return g;
+}
+
 function workbench(x, z) {
   const g = new THREE.Group();
   g.name = "farm-bench";
@@ -543,6 +571,12 @@ function makeFarmDress() {
   const basket = farmBasket();
   basket.position.set(3.16, 0, -0.06);
   g.add(basket);
+  const scoop = farmScoop();
+  // Bench top surface: y0 0.16 + 0.78 + half top 0.04. Offset on the
+  // 1.55 × 0.58 top at (-3.28, -0.15) — not the trough cluster.
+  scoop.position.set(-3.08, 0.16 + 0.78 + 0.04, -0.06);
+  scoop.rotation.y = 0.28;
+  g.add(scoop);
 
   const loftY = 2.94;
   g.add(sack(0.46, 0.56, 0.36, SACK, -2.55, loftY + 0.28, -2.35, 0.1));
@@ -627,8 +661,9 @@ function dimSceneLights(scene, farm) {
  * Hides living-room furniture, adds tools, sacks, planter beds, a
  * scarecrow, a short back-edge fence, a small wood water trough, a
  * kraft milk churn beside the trough, a short wood pail beside the
- * churn, a small kraft pitchfork leaning by the trough and pail, and a
- * small kraft egg basket beside the trough, warms and dims lights.
+ * churn, a small kraft pitchfork leaning by the trough and pail, a
+ * small kraft egg basket beside the trough, and a small kraft grain
+ * scoop on the workbench, warms and dims lights.
  * @param {THREE.Object3D} scene
  */
 export function dressFarm(scene) {
