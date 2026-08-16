@@ -182,6 +182,34 @@ describe("paper building catalogue", () => {
     expect(zs.every((z) => z > 2.6)).toBe(true);
   });
 
+  it("puts a small kraft PAPER knocker on the House door", () => {
+    const house = meshForUse("house", { area: 400 });
+    const parts: string[] = [];
+    const hexes: number[] = [];
+    house.traverse((obj: unknown) => {
+      const mesh = obj as {
+        userData?: { part?: string; mode?: string };
+        material?: { color?: { getHex: () => number } };
+      };
+      if (mesh.userData?.part !== "knocker") return;
+      parts.push("knocker");
+      expect(mesh.userData?.mode).toBe("PAPER");
+      if (mesh.material?.color) hexes.push(mesh.material.color.getHex());
+    });
+    expect(parts.length).toBeGreaterThanOrEqual(1);
+    expect(hexes.length).toBeGreaterThan(0);
+    expect(hexes).toContain(0xf4ead8);
+    expect(hexes.every((c) => c === 0x5a3a22 || c === 0xf4ead8)).toBe(true);
+
+    const shop = meshForUse("shop", { area: 400 });
+    let shopKnockers = 0;
+    shop.traverse((obj: unknown) => {
+      const mesh = obj as { userData?: { part?: string } };
+      if (mesh.userData?.part === "knocker") shopKnockers += 1;
+    });
+    expect(shopKnockers).toBe(0);
+  });
+
   it("puts paired kraft PAPER shutter boxes beside House windows", () => {
     const house = meshForUse("house", { area: 400 });
     const parts: string[] = [];

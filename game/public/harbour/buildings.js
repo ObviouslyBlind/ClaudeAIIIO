@@ -247,6 +247,27 @@ function addDoor(g, x, y, z, w, h) {
   g.add(surround, leaf, handle, lintel);
 }
 
+/**
+ * Small kraft PAPER knocker on the House door so the leaf reads as a
+ * front door, not a blank plank. Original WOOD / KRAFT — not a new hex.
+ * House door only — shop, shed, and factory hall doors stay bare.
+ */
+function addKnocker(g, x, y, z) {
+  const knocker = new THREE.Group();
+  knocker.name = "knocker";
+  knocker.userData.part = "knocker";
+  knocker.userData.mode = "PAPER";
+
+  const plate = tagPaper(part(0.22, 0.28, 0.04, KRAFT, false), "knocker");
+  plate.position.set(x, y, z);
+  const boss = tagPaper(part(0.08, 0.08, 0.06, WOOD, false), "knocker");
+  boss.position.set(x, y + 0.07, z + 0.04);
+  const ring = tagPaper(part(0.14, 0.16, 0.05, WOOD, false), "knocker");
+  ring.position.set(x, y - 0.03, z + 0.05);
+  knocker.add(plate, boss, ring);
+  g.add(knocker);
+}
+
 function addShopAwning(g, W, D, y) {
   for (const px of [-W * 0.4, W * 0.4]) {
     const post = part(0.16, y - 0.15, 0.16, WOOD, false);
@@ -319,7 +340,10 @@ function cottage(kind) {
   addChimney(g, -W * 0.34, 0.38 + H + (shed ? 0.28 : 0.42), -D * 0.06, shed ? 1.2 : 1.9);
   addDoor(g, -W * 0.12, shed ? 1.15 : 1.42, D / 2 + 0.08, shed ? 0.85 : 1.05, shed ? 1.55 : 1.95);
   addSteps(g, -W * 0.12, D / 2, shed ? 1.2 : 1.55, shed ? 2 : 3);
-  if (!shop && !shed) addPorch(g, -W * 0.12, D / 2, 2.2);
+  if (!shop && !shed) {
+    addPorch(g, -W * 0.12, D / 2, 2.2);
+    addKnocker(g, -W * 0.12, 1.72, D / 2 + 0.18);
+  }
   if (shop) {
     windowPane(g, W * 0.34, 1.9, D / 2 + 0.08, 1.55, 1.35);
     windowPane(g, -W * 0.42, 1.9, D / 2 + 0.08, 1.45, 1.35);
