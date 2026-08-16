@@ -8,7 +8,7 @@ Not a Capital Rift clone. No new politics.
 
 ## Held (pixel-ratified)
 
-Inland spawn, paved ribbon, dirt, cars, yellow taxi, trees+cart, lease → House → Enter → Exit, ferry ticket $15, RMB orbit, cream ferry hull at north quay (`/g/ferry37` PASS, no orbit), kraft/cream shore foam bars in the north-quay basin (`/g/shore40` PASS), working-harbour quay clutter on the north timber pier (`/g/quay41` PASS), crate-scale coloured pedestrians on the north pier (`/g/peds44` PASS — teal / slate / green / terracotta shirts), kraft nametag cards above those walkers (`/g/tags46` PASS), spawn-sheet econ/nearby/staff (`/g/hud47` PASS).
+Inland spawn, paved ribbon, dirt, cars, yellow taxi, trees+cart, lease → House → Enter → Exit, ferry ticket $15, RMB orbit, cream ferry hull at north quay (`/g/ferry37` PASS, no orbit), kraft/cream shore foam bars in the north-quay basin (`/g/shore40` PASS), working-harbour quay clutter on the north timber pier (`/g/quay41` PASS), crate-scale coloured pedestrians on the north pier (`/g/peds44` PASS — teal / slate / green / terracotta shirts), kraft nametag cards above those walkers (`/g/tags46` PASS), spawn-sheet econ/nearby/staff (`/g/hud47` PASS), sage dinghies in the north basin (`/g/ding65` PASS).
 
 ## Held (code, live on the same page as the ferry)
 
@@ -92,9 +92,15 @@ Pixel: **sage dinghies** in the north basin at `http://localhost:8787/g/ding63`.
 
 Pixel: **sage dinghies** at `http://localhost:8787/g/ding65`. Center channel between kraft pier and cream ferry. Seaward spawn, no RMB. Close other Two Harbors tabs. Address bar must be `/g/ding65`. Do not restart play while the critic is on the page.
 
-## Next pixel (after ding65 PASS, immediately, no wait)
+`/g/ding65` **PASS DINGHY**: cyan sky, loaded harbour, sage/olive dinghy in the center water between pier and cream ferry.
 
-Sage dinghies in the basin, or another spawn-visible kraft bar. Shells+lights stay deferred until a human can orbit. Do not restart the lamp round.
+## Held (pixel-ratified, dinghies)
+
+Sage dinghies in the north basin (`/g/ding65` PASS).
+
+Pixel: **kraft gangplank / brow** from the north pier toward the basin at `http://localhost:8787/g/brow66`. Seaward spawn, no RMB. Close other Two Harbors tabs. Address bar must be `/g/brow66`. Do not restart play while the critic is on the page.
+
+## Next pixel (after brow66 PASS, immediately, no wait)
 
 ## Frozen
 

@@ -451,4 +451,24 @@ describe("quay harbour dressing", () => {
       expect(gm.color.getHex()).toBe(0xc4b496);
     }
   });
+
+  it("keeps a spawn-readable kraft brow from the north pier toward the basin", () => {
+    const spec = ISLANDS.north;
+    const added: THREE.Object3D[] = [];
+    const scene = { add(obj: THREE.Object3D) { added.push(obj); } };
+    const root = makeQuay(spec, { scene, heightAt });
+    const brow = root.children.find((c) => c.userData?.dress === "brow");
+    expect(brow).toBeTruthy();
+    let plank: THREE.Mesh | null = null;
+    brow!.traverse((obj) => {
+      if (obj.userData?.part === "plank") plank = obj as THREE.Mesh;
+    });
+    expect(plank).not.toBeNull();
+    const pg = (plank as THREE.Mesh).geometry as THREE.BoxGeometry;
+    expect(pg.parameters.width).toBeGreaterThanOrEqual(4);
+    expect(pg.parameters.depth).toBeGreaterThanOrEqual(14);
+    const pm = (plank as THREE.Mesh).material as THREE.MeshLambertMaterial;
+    expect(pm.color.getHex()).toBe(0x8a6238);
+    expect(makeQuay(ISLANDS.south, { scene, heightAt }).children.find((c) => c.userData?.dress === "brow")).toBeFalsy();
+  });
 });
