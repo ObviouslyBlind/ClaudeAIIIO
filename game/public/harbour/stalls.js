@@ -105,6 +105,26 @@ export function makeStallMesh(plot) {
   counter.userData.part = "counter";
   g.add(counter);
 
+  // One small kraft goods crate on the counter so the stall reads as a shop,
+  // not an empty awning. Local offset only — stall world pose stays put.
+  const goods = new THREE.Group();
+  goods.name = "goods-crate";
+  goods.userData.part = "goods-crate";
+  goods.userData.mode = "PAPER";
+  goods.userData.paper = true;
+  goods.position.set(0.95, 0.9, 1.05);
+  const crateBody = paperBox(0.36, 0.22, 0.34, CRATE_A, false);
+  crateBody.position.y = 0.11;
+  crateBody.userData.part = "goods-crate";
+  const crateRim = paperBox(0.38, 0.03, 0.36, WOOD, false);
+  crateRim.position.y = 0.205;
+  crateRim.userData.part = "goods-crate";
+  const crateGoods = paperBox(0.2, 0.1, 0.2, KRAFT, false);
+  crateGoods.position.y = 0.27;
+  crateGoods.userData.part = "goods-crate";
+  goods.add(crateBody, crateRim, crateGoods);
+  g.add(goods);
+
   for (const x of [-1.85, 1.85]) {
     for (const z of [-1.05, 1.05]) {
       const post = paperBox(0.14, 2.2, 0.14, WOOD_POST, false);
