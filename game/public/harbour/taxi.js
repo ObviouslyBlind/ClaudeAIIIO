@@ -208,9 +208,27 @@ function addTaxiPlate(g, kraftCreamMat) {
 }
 
 /**
+ * One small kraft PAPER spare on the boot — short rubber cylinder + cream hub box.
+ * Same 0x1a1a1e / 0xf4ead8 as the road wheels. Not a new grey. Roof aerial stays.
+ */
+function addTaxiSpare(g, tyreMat, hubMat) {
+  const tyreGeo = new THREE.CylinderGeometry(0.32, 0.32, 0.14, 10);
+  tyreGeo.rotateX(Math.PI / 2);
+  const spare = new THREE.Mesh(tyreGeo, tyreMat);
+  spare.position.set(0, 1.22, -2.6);
+  spare.castShadow = true;
+  spare.receiveShadow = true;
+  spare.frustumCulled = false;
+  tagPart(spare, "spare");
+  const hub = tagPart(taxiBox(0.2, 0.2, 0.05, hubMat, false), "spare");
+  hub.position.set(0, 1.22, -2.68);
+  g.add(spare, hub);
+}
+
+/**
  * Yellow cab that reads from the quay: wheels with kraft cream hub boxes, glass, roof lamp, checker belt,
- * iron bumper, door handles, short kraft roof aerial, kraft cream rear plate. Compact warm PAPER
- * taxi-sign box — original cream lamp, not a sedan lid, not a debug mast, not a cop lightbar.
+ * iron bumper, door handles, short kraft roof aerial, kraft cream rear plate, kraft spare on the boot.
+ * Compact warm PAPER taxi-sign box — original cream lamp, not a sedan lid, not a debug mast, not a cop lightbar.
  */
 export function makeTaxiMesh() {
   const g = new THREE.Group();
@@ -237,6 +255,7 @@ export function makeTaxiMesh() {
   addTaxiBumpers(g, lampSide);
   addTaxiDoorHandles(g, kraft);
   addTaxiPlate(g, kraftHub);
+  addTaxiSpare(g, dark, kraftHub);
 
   const roof = taxiBox(2.18, 0.92, 2.45, cabin);
   roof.position.set(0, 1.68, -0.22);

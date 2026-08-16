@@ -175,6 +175,40 @@ describe("taxi roof lamp", () => {
     expect(plates.every((p) => p.position.z < -2.4)).toBe(true);
   });
 
+  it("puts a kraft PAPER spare tyre on the taxi boot", () => {
+    const mesh = makeTaxiMesh();
+    const spares: THREE.Mesh[] = [];
+    const plates: THREE.Mesh[] = [];
+    const hubs: THREE.Mesh[] = [];
+    const aerials: THREE.Mesh[] = [];
+    const handles: THREE.Mesh[] = [];
+    const checks: THREE.Mesh[] = [];
+    const rubberKraft = new Set([0x1a1a1e, 0xc4a574, 0xf4ead8]);
+    mesh.traverse((obj) => {
+      const m = obj as THREE.Mesh & { userData: { part?: string; mode?: string } };
+      if (m.userData?.part === "spare") spares.push(m);
+      if (m.userData?.part === "plate") plates.push(m);
+      if (m.userData?.part === "hub") hubs.push(m);
+      if (m.userData?.part === "aerial") aerials.push(m);
+      if (m.userData?.part === "handle") handles.push(m);
+      if (m.userData?.part === "check") checks.push(m);
+    });
+    expect(spares.length).toBeGreaterThanOrEqual(1);
+    expect(spares.every((s) => s.userData.mode === "PAPER")).toBe(true);
+    expect(
+      spares.every((s) => ["BoxGeometry", "CylinderGeometry"].includes(s.geometry.type)),
+    ).toBe(true);
+    expect(
+      spares.every((s) => rubberKraft.has((s.material as THREE.MeshLambertMaterial).color.getHex())),
+    ).toBe(true);
+    expect(spares.every((s) => s.position.z < -2.2)).toBe(true);
+    expect(plates.length).toBeGreaterThanOrEqual(1);
+    expect(hubs.length).toBe(4);
+    expect(aerials.length).toBeGreaterThanOrEqual(1);
+    expect(handles.length).toBeGreaterThanOrEqual(2);
+    expect(checks.length).toBeGreaterThan(0);
+  });
+
   it("parks the cab on paved at spawn so the roof lamp is in the first frame", () => {
     const board = createLandBoard();
     const spec = ISLANDS.north;
