@@ -15,6 +15,8 @@ const PAPER_FACE = "#efe4c8";
 const PAPER_EDGE = "#8a6238";
 const INK = "#3d2a1c";
 const STAMP = "#7a2e22";
+/** Canvas-card fold is on. Not a 3D mesh. */
+export const NAMETAG_FOLD = true;
 
 const SKIN = 0xf2d2a8;
 const PANTS = 0x6e4a32;
@@ -65,6 +67,30 @@ function fillSpaced(ctx, text, x, y, tracking) {
 }
 
 /**
+ * Tiny folded kraft triangle in the top-right of the card. Canvas only —
+ * PAPER_EDGE face + INK crease. Not a 3D mesh.
+ */
+function drawFoldedCorner(ctx, w) {
+  if (!NAMETAG_FOLD) return;
+  const s = 26;
+  ctx.save();
+  ctx.fillStyle = PAPER_EDGE;
+  ctx.beginPath();
+  ctx.moveTo(w - s, 0);
+  ctx.lineTo(w, 0);
+  ctx.lineTo(w, s);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = INK;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(w - s, 0);
+  ctx.lineTo(w, s);
+  ctx.stroke();
+  ctx.restore();
+}
+
+/**
  * Kraft rubber stamp: dashed box + tracked PAPER. Same ink family as the
  * ferry ticket. Sits under the name so brown name ink stays readable.
  */
@@ -89,7 +115,26 @@ function drawPaperStamp(ctx, cx, cy) {
   ctx.restore();
 }
 
-/** Simple canvas card: name in ink, PAPER stamp. */
+/** Paint kraft card: face, edge, folded corner, name, PAPER stamp. */
+export function paintPaperNametagCard(ctx, w, h, name) {
+  ctx.fillStyle = PAPER_FACE;
+  ctx.fillRect(0, 0, w, h);
+  ctx.strokeStyle = PAPER_EDGE;
+  ctx.lineWidth = 8;
+  ctx.strokeRect(6, 6, w - 12, h - 12);
+
+  drawFoldedCorner(ctx, w);
+
+  ctx.fillStyle = INK;
+  ctx.font = "600 44px Georgia, 'Times New Roman', serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(String(name || "PAPER"), w / 2, 48);
+
+  drawPaperStamp(ctx, w / 2, h - 36);
+}
+
+/** Simple canvas card: name in ink, PAPER stamp, folded kraft corner. */
 export function makePaperNametag(name) {
   if (typeof document === "undefined") return null;
   const w = 512;
@@ -99,19 +144,7 @@ export function makePaperNametag(name) {
   canvas.height = h;
   const ctx = canvas.getContext("2d");
 
-  ctx.fillStyle = PAPER_FACE;
-  ctx.fillRect(0, 0, w, h);
-  ctx.strokeStyle = PAPER_EDGE;
-  ctx.lineWidth = 8;
-  ctx.strokeRect(6, 6, w - 12, h - 12);
-
-  ctx.fillStyle = INK;
-  ctx.font = "600 44px Georgia, 'Times New Roman', serif";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText(String(name || "PAPER"), w / 2, 48);
-
-  drawPaperStamp(ctx, w / 2, h - 36);
+  paintPaperNametagCard(ctx, w, h, name);
 
   const tex = new THREE.CanvasTexture(canvas);
   tex.colorSpace = THREE.SRGBColorSpace;
