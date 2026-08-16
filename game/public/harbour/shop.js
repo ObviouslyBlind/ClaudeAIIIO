@@ -1,9 +1,9 @@
 import * as THREE from "three";
 
 /**
- * PAPER shop interior dress. Counter, shelves, and goods crates — not the
- * house living room and not the warehouse. No WASD. Tap-to-walk stays in
- * interior.js.
+ * PAPER shop interior dress. Kraft-paper counter (cream top, wood body) plus
+ * two shelf boxes — not the house living room and not the warehouse. No WASD.
+ * Tap-to-walk stays in interior.js.
  *
  * Call dressShop(scene) when plot.kind or plot.use is "shop" or "house_shop".
  * Idempotent: a second call only shows the existing dress.
@@ -132,36 +132,40 @@ function makeCounter(x, z) {
   g.userData.kind = "shop-counter";
   g.userData.mode = "PAPER";
   const y0 = 0.16;
-  const topY = y0 + 0.92;
-  g.add(paperBox(3.15, 0.08, 0.78, WOOD_TOP, "shop-counter"));
-  g.children[0].position.set(0, topY, 0);
-  const body = paperBox(3.05, 0.82, 0.7, WOOD, "shop-counter");
-  body.position.set(0, y0 + 0.41, 0);
+  const topY = y0 + 0.94;
+  const top = paperBox(2.95, 0.1, 0.92, LINEN, "shop-counter");
+  top.position.set(0, topY, 0);
+  g.add(top);
+  const body = paperBox(2.82, 0.86, 0.8, WOOD, "shop-counter");
+  body.position.set(0, y0 + 0.43, 0);
   g.add(body);
-  const kick = paperBox(3.05, 0.12, 0.08, WOOD_DARK, "shop-counter");
-  kick.position.set(0, y0 + 0.06, 0.38);
+  const face = paperBox(2.82, 0.64, 0.05, CREAM, "shop-counter");
+  face.position.set(0, y0 + 0.5, 0.42);
+  g.add(face);
+  const kick = paperBox(2.82, 0.12, 0.08, WOOD_DARK, "shop-counter");
+  kick.position.set(0, y0 + 0.06, 0.42);
   g.add(kick);
-  const till = paperBox(0.42, 0.18, 0.32, STRAP, "shop-till");
-  till.position.set(0.85, topY + 0.13, -0.08);
+  const stripe = paperBox(2.82, 0.1, 0.08, CORAL, "shop-counter");
+  stripe.position.set(0, topY + 0.02, 0.44);
+  g.add(stripe);
+  const till = paperBox(0.44, 0.2, 0.34, STRAP, "shop-till");
+  till.position.set(0.88, topY + 0.15, -0.08);
   g.add(till);
-  const tillTop = paperBox(0.38, 0.06, 0.28, CORAL, "shop-till");
-  tillTop.position.set(0.85, topY + 0.24, -0.08);
+  const tillTop = paperBox(0.4, 0.07, 0.3, CORAL, "shop-till");
+  tillTop.position.set(0.88, topY + 0.28, -0.08);
   g.add(tillTop);
-  const scaleBase = paperBox(0.28, 0.06, 0.28, WOOD_DARK, "shop-prop");
-  scaleBase.position.set(-0.95, topY + 0.05, 0.05);
-  g.add(scaleBase);
-  const scalePost = paperBox(0.05, 0.22, 0.05, TIN, "shop-prop");
-  scalePost.position.set(-0.95, topY + 0.18, 0.05);
-  g.add(scalePost);
-  const scalePan = paperBox(0.32, 0.03, 0.32, TIN, "shop-prop");
-  scalePan.position.set(-0.95, topY + 0.3, 0.05);
-  g.add(scalePan);
-  const jar = paperBox(0.16, 0.22, 0.16, TEAL, "shop-goods");
-  jar.position.set(-0.35, topY + 0.15, 0.12);
+  const jar = paperBox(0.18, 0.24, 0.18, TEAL, "shop-goods");
+  jar.position.set(-0.95, topY + 0.17, 0.12);
   g.add(jar);
-  const stack = paperBox(0.22, 0.08, 0.18, LINEN, "shop-goods");
-  stack.position.set(0.2, topY + 0.08, 0.18);
+  const tin = paperBox(0.2, 0.16, 0.2, CORAL, "shop-goods");
+  tin.position.set(-0.58, topY + 0.13, 0.14);
+  g.add(tin);
+  const stack = paperBox(0.26, 0.09, 0.2, PAPER_CARD, "shop-goods");
+  stack.position.set(-0.18, topY + 0.09, 0.16);
   g.add(stack);
+  const green = paperBox(0.16, 0.2, 0.16, GREEN, "shop-goods");
+  green.position.set(0.28, topY + 0.15, 0.12);
+  g.add(green);
   g.position.set(x, 0, z);
   return g;
 }
@@ -201,28 +205,14 @@ function makeShopDress() {
   g.userData.mode = "PAPER";
   g.userData.provenance = "SIMULATED";
 
-  g.add(makeCounter(-0.35, 0.42));
-  g.add(shelfBay(-2.55, -2.55, 0));
-  g.add(shelfBay(-0.95, -2.55, 0));
-  g.add(shelfBay(0.65, -2.55, 0, 1.15));
-  g.add(shelfBay(-3.32, -0.55, Math.PI / 2, 1.25));
-  g.add(shelfBay(-3.32, 1.15, Math.PI / 2, 1.15));
+  // Spawn is (0, 1.15, 1.6); camera looks from +z. Counter sits in that view.
+  g.add(makeCounter(-0.15, 0.48));
+  g.add(shelfBay(-3.28, 0.15, Math.PI / 2, 1.45));
+  g.add(shelfBay(-0.35, -2.52, 0, 1.55));
+  g.add(crateWithGoods(2.35, 0.55, -0.18, WOOD, [CORAL, GREEN, TIN]));
 
-  g.add(crateWithGoods(-2.55, 2.15, 0.12, WOOD, [CORAL, GREEN, TIN]));
-  g.add(crateWithGoods(-1.55, 2.28, -0.08, WOOD_DARK, [TEAL, LINEN]));
-  g.add(crateWithGoods(1.25, 2.18, 0.18, WOOD, [GREEN, CORAL, LINEN]));
-  g.add(crateWithGoods(1.55, -0.15, -0.22, WOOD_DARK, [TIN, TEAL]));
-
-  g.add(hangingLamp(-0.35, 2.18, 0.42));
+  g.add(hangingLamp(-0.15, 2.18, 0.48));
   g.add(paperMark(-2.15, 1.62, 3.38));
-
-  const loftY = 2.94;
-  const upShelf = shelfBay(-1.85, -2.45, 0, 1.4);
-  upShelf.position.y = loftY - 0.16;
-  g.add(upShelf);
-  const upCrate = crateWithGoods(0.15, -2.15, 0.1, WOOD, [CORAL, TIN]);
-  upCrate.position.y = loftY - 0.16;
-  g.add(upCrate);
 
   return g;
 }
