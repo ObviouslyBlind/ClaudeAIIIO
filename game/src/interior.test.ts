@@ -77,6 +77,7 @@ describe("owned building interiors", () => {
     expect(downKinds).toContain("interior-picture");
     expect(downKinds).toContain("interior-vase");
     expect(downKinds).toContain("interior-mug");
+    expect(downKinds).toContain("interior-book");
     expect(downKinds).toContain("interior-stool");
     expect(downKinds).toContain("interior-window");
     expect(downKinds).toContain("exit");
@@ -93,6 +94,7 @@ describe("owned building interiors", () => {
     expect(upKinds).not.toContain("interior-picture");
     expect(upKinds).not.toContain("interior-vase");
     expect(upKinds).not.toContain("interior-mug");
+    expect(upKinds).not.toContain("interior-book");
     expect(upKinds).not.toContain("interior-stool");
 
     const table = down!.getObjectByName("table");
@@ -449,5 +451,75 @@ describe("house PAPER mug", () => {
     expect(clock).toBeTruthy();
     expect(clock!.userData.kind).toBe("interior-clock");
     expect(up.getObjectByName("mug")).toBeFalsy();
+  });
+});
+
+const BOOK_HEX = new Set([0x5a3a22, 0xf3efe4, 0xf4ead8]);
+
+describe("house PAPER book", () => {
+  it("puts one kraft PAPER book on the downstairs table, not upstairs", () => {
+    const g = makeInteriorScene();
+    const down = g.getObjectByName("downstairs")!;
+    const up = g.getObjectByName("upstairs")!;
+    const table = down.getObjectByName("table")!;
+    expect(table).toBeTruthy();
+
+    const books = collectKind(down, "interior-book");
+    expect(books.length).toBe(1);
+    expect(collectKind(up, "interior-book").length).toBe(0);
+
+    const book = books[0];
+    expect(book.userData.kind).toBe("interior-book");
+    expect(book.userData.mode).toBe("PAPER");
+
+    const tablePos = new THREE.Vector3();
+    table.getWorldPosition(tablePos);
+    const bookPos = new THREE.Vector3();
+    book.getWorldPosition(bookPos);
+    expect(Math.hypot(bookPos.x - tablePos.x, bookPos.z - tablePos.z)).toBeLessThan(0.85);
+    expect(bookPos.y).toBeGreaterThan(0.9);
+    expect(bookPos.y).toBeLessThan(1.2);
+
+    const mug = down.getObjectByName("mug");
+    expect(mug).toBeTruthy();
+    const mugPos = new THREE.Vector3();
+    mug!.getWorldPosition(mugPos);
+    expect(Math.hypot(bookPos.x - mugPos.x, bookPos.z - mugPos.z)).toBeGreaterThan(0.25);
+
+    const vase = down.getObjectByName("vase");
+    expect(vase).toBeTruthy();
+    const vasePos = new THREE.Vector3();
+    vase!.getWorldPosition(vasePos);
+    expect(Math.hypot(bookPos.x - vasePos.x, bookPos.z - vasePos.z)).toBeGreaterThan(0.25);
+
+    const colors: number[] = [];
+    book.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      const mat = mesh.material as THREE.MeshLambertMaterial | undefined;
+      if (mesh.isMesh && mat?.color) {
+        const hex = mat.color.getHex();
+        colors.push(hex);
+        expect(BOOK_HEX.has(hex)).toBe(true);
+        expect(isGrey(hex)).toBe(false);
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.kind).toBe("interior-book");
+        expect(mesh.userData.mode).toBe("PAPER");
+      }
+    });
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.some((c) => c === 0x5a3a22)).toBe(true);
+    expect(colors.some((c) => c === 0xf3efe4 || c === 0xf4ead8)).toBe(true);
+
+    const stool = down.getObjectByName("stool");
+    expect(stool).toBeTruthy();
+    expect(stool!.userData.kind).toBe("interior-stool");
+    expect(stool!.userData.mode).toBe("PAPER");
+    const picture = down.getObjectByName("picture");
+    expect(picture).toBeTruthy();
+    expect(picture!.userData.kind).toBe("interior-picture");
+    const clock = down.getObjectByName("clock");
+    expect(clock).toBeTruthy();
+    expect(clock!.userData.kind).toBe("interior-clock");
+    expect(up.getObjectByName("book")).toBeFalsy();
   });
 });
