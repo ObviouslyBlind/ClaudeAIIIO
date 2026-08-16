@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { GOOD_IDS, GOODS } from "./goods.ts";
-import { createWorld, fastForward, hud } from "./sim.ts";
+import { buyFromStall, createVisitor, createWorld, fastForward, hud } from "./sim.ts";
 
 describe("headless sim step A", () => {
   it("runs an empty hour without NaN prices or a dead market", () => {
@@ -29,5 +29,20 @@ describe("headless sim step A", () => {
     fastForward(b, 250);
     expect(hud(a)).toEqual(hud(b));
     expect(a.lastPrice).toEqual(b.lastPrice);
+  });
+
+  it("lets a paper visitor buy from the stall at lastPrice", () => {
+    const world = createWorld(3);
+    fastForward(world, 30);
+    const visitor = createVisitor(1_000);
+    const beforeNpc = world.npcCash;
+    const beforeStock = world.npcStock.corn;
+    const result = buyFromStall(world, visitor, "corn", 4);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(visitor.stock.corn).toBe(4);
+    expect(visitor.cash).toBeCloseTo(1_000 - result.paid, 4);
+    expect(world.npcCash).toBeCloseTo(beforeNpc + result.paid, 4);
+    expect(world.npcStock.corn).toBeCloseTo(beforeStock - 4, 4);
   });
 });

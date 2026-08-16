@@ -186,6 +186,40 @@ export function fastForward(world: World, n: number): void {
   for (let i = 0; i < n; i++) tick(world);
 }
 
+export type Visitor = {
+  cash: number;
+  stock: Record<GoodId, number>;
+};
+
+export function createVisitor(cash = 1_000): Visitor {
+  const stock = {} as Record<GoodId, number>;
+  for (const id of GOOD_IDS) stock[id] = 0;
+  return { cash, stock };
+}
+
+export function buyFromStall(
+  world: World,
+  visitor: Visitor,
+  good: GoodId,
+  qty = 1,
+): { ok: true; paid: number } | { ok: false; reason: string } {
+  if (!GOOD_IDS.includes(good)) return { ok: false, reason: "unknown_good" };
+  const want = roundMoney(qty);
+  if (want <= 0) return { ok: false, reason: "bad_qty" };
+  const price = world.lastPrice[good];
+  const paid = roundMoney(want * price);
+  if (visitor.cash < paid) return { ok: false, reason: "no_cash" };
+  if (world.npcStock[good] < want) return { ok: false, reason: "no_stock" };
+  visitor.cash = roundMoney(visitor.cash - paid);
+  visitor.stock[good] = roundMoney(visitor.stock[good] + want);
+  world.npcStock[good] = roundMoney(world.npcStock[good] - want);
+  world.npcCash = roundMoney(world.npcCash + paid);
+  world.ledger.consumed += want;
+  world.tradeCount += 1;
+  refreshIndex(world);
+  return { ok: true, paid };
+}
+
 export function hud(world: World): {
   tick: number;
   moneySupply: number;
