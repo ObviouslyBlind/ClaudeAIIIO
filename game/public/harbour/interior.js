@@ -218,6 +218,30 @@ function makeTableLamp(x, y, z) {
   return g;
 }
 
+/** Small kraft paper wall clock — wood rim, cream face, wood hands. Not a till. */
+function makeWallClock(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "clock";
+  g.userData.kind = "interior-clock";
+  g.userData.mode = "PAPER";
+  g.position.set(x, y, z);
+  const paper = { mode: "PAPER" };
+  const rim = box(0.38, 0.38, 0.05, WOOD, 0, 0, 0, "interior-clock", paper);
+  g.add(rim);
+  const rimTurn = box(0.38, 0.38, 0.05, WOOD, 0, 0, 0, "interior-clock", paper);
+  rimTurn.rotation.z = Math.PI / 4;
+  g.add(rimTurn);
+  const face = box(0.3, 0.3, 0.04, PAPER_CARD, 0, 0, 0.03, "interior-clock", paper);
+  g.add(face);
+  const faceTurn = box(0.3, 0.3, 0.04, PAPER_CARD, 0, 0, 0.03, "interior-clock", paper);
+  faceTurn.rotation.z = Math.PI / 4;
+  g.add(faceTurn);
+  g.add(box(0.03, 0.11, 0.02, WOOD, 0.015, 0.035, 0.055, "interior-prop", paper));
+  g.add(box(0.022, 0.14, 0.02, WOOD, -0.012, 0.05, 0.058, "interior-prop", paper));
+  g.add(box(0.045, 0.045, 0.03, WOOD, 0, 0, 0.062, "interior-prop", paper));
+  return g;
+}
+
 function makeBed(cx, floorY, cz) {
   const g = new THREE.Group();
   g.name = "bed";
@@ -237,7 +261,7 @@ function makeBed(cx, floorY, cz) {
 
 /**
  * PAPER Caribbean house: plaster walls, wood floors, window openings,
- * downstairs table/chairs/lamp, upstairs bed. Low-poly boxes only.
+ * downstairs table/chairs/lamp/clock, upstairs bed. Low-poly boxes only.
  */
 export function makeInteriorScene() {
   const group = new THREE.Group();
@@ -289,6 +313,8 @@ export function makeInteriorScene() {
   down.add(makeChair(-0.15, -1.22, Math.PI));
   down.add(makeChair(-1.28, -0.35, Math.PI / 2));
   down.add(makeHangingLamp(-0.15, 2.12, -0.35));
+  // Kraft wall clock on the back wall, right of the windows — not a shop till.
+  down.add(makeWallClock(2.72, 1.78, -3.38));
 
   down.add(box(1.35, 0.72, 0.38, WOOD, -3.35, 0.52, -2.55, "interior-prop"));
   down.add(box(1.28, 0.06, 0.36, WOOD_TOP, -3.35, 0.9, -2.55, "interior-prop"));
