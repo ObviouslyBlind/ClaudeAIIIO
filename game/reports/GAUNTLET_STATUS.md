@@ -12,7 +12,7 @@ Inland spawn, paved ribbon, dirt, cars, yellow taxi, trees+cart, lease → House
 
 ## Held (code, live on the same page as the ferry)
 
-Shore foam, quay clutter, building shells, window lights, stalls, pedestrians, nametags, warehouse/factory/shop/farm/house-shop interiors, presence, cart, staff hire/fire, bid/ask/sell/cancel + market cancel button, North/South books, upkeep, persist dump + restore, lease afford, player "You · PAPER" tag, north port sign, calendar, develop afford, ferry fare, sales tax, held-goods, faucet/sink.
+Shore foam, quay clutter, building shells, window lights, stalls, pedestrians, nametags, warehouse/factory/shop/farm/house-shop interiors, presence, cart, staff hire/fire, bid/ask/sell/cancel + market cancel button, North/South books, upkeep, persist dump + restore, lease afford, player "You · PAPER" tag, north and south port signs, calendar, develop afford, ferry fare, sales tax, held-goods, faucet/sink, stall last-print.
 
 ## Pixel ferry
 
