@@ -8,6 +8,8 @@ const PANTS = 0x6e4a32;
 const HAIR = 0x3d2a1c;
 const SHOES = 0x4a3220;
 const BELT = 0x7a2e22;
+/** Deck kraft — straw brim. Same hex as stall timber / ferry deck. */
+const STRAW = 0xc4a574;
 
 /** Cream kraft first so seed 0 matches the player. Then stall / nametag cloth. */
 const SHIRTS = [SHIRT, 0xc45c3a, 0x4a6e8a, 0x6a8f44, 0xe8d7b8, 0x2a7a72];
@@ -109,6 +111,21 @@ export function makePaperPerson(seed = 0) {
   figure.add(leftShoe, rightShoe, leftLeg, rightLeg, body, belt, leftArm, rightArm, head, hair);
   figure.userData.legs = [leftLeg, rightLeg];
   return figure;
+}
+
+/**
+ * Kraft straw hat for quay hands: wide flat brim + short crown.
+ * Original wood/kraft hexes only. Sits on the hair box so the capsule
+ * reads as a dock worker, not a bald mannequin.
+ */
+function addKraftStrawHat(figure) {
+  const brim = paperBox(0.52, 0.04, 0.52, STRAW);
+  brim.position.set(0, 1.86, 0);
+  brim.userData.part = "hat";
+  const crown = paperBox(0.28, 0.1, 0.28, SHIRT);
+  crown.position.set(0, 1.93, 0);
+  crown.userData.part = "hat";
+  figure.add(brim, crown);
 }
 
 function polylineLength(points) {
@@ -245,6 +262,7 @@ export function makePedestrians(map, helpers) {
       mesh: makePaperPerson(seed),
     };
     person.mesh.userData.lane = lane;
+    if (lane === "quay") addKraftStrawHat(person.mesh);
     const at = samplePerson(spec, heightAt, person, along);
     if (!onLand(at)) return;
     pose(person, at);
