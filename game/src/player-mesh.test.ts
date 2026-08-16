@@ -61,6 +61,7 @@ describe("player PAPER visor", () => {
     expect(p.filter((k) => k === "badge").length).toBe(1);
     expect(p.filter((k) => k === "lanyard").length).toBe(1);
     expect(p.filter((k) => k === "kerchief").length).toBe(1);
+    expect(p.filter((k) => k === "ticket").length).toBe(1);
 
     const visor = figure.children.find((c) => c.userData.part === "visor") as THREE.Mesh;
     const hats = figure.children.filter((c) => c.userData.part === "hat") as THREE.Mesh[];
@@ -192,6 +193,41 @@ describe("player PAPER kerchief", () => {
     expect(kerchief.position.x).not.toBeCloseTo(pocket.position.x, 1);
     expect(kerchief.position.y).not.toBeCloseTo(visor.position.y, 1);
     const box = kerchief.geometry as THREE.BoxGeometry;
+    expect(box.parameters.width).toBeLessThan(0.12);
+    expect(box.parameters.height).toBeLessThan(0.08);
+    expect(box.parameters.depth).toBeLessThan(0.06);
+  });
+});
+
+describe("player PAPER ticket", () => {
+  it("tucks one tiny kraft PAPER ticket on the satchel; badge and visor remain", () => {
+    const player = makePlayer();
+    expect(player.position.x).toBe(12);
+    expect(player.position.y).toBe(3.4);
+    expect(player.position.z).toBe(-6950);
+    expect(player.userData.mode).toBe("PAPER");
+
+    const figure = player.getObjectByName("paper-figure")!;
+    const p = parts(figure);
+    expect(p.filter((k) => k === "ticket").length).toBe(1);
+    expect(p.filter((k) => k === "badge").length).toBe(1);
+    expect(p.filter((k) => k === "button").length).toBe(1);
+    expect(p.filter((k) => k === "lanyard").length).toBe(1);
+    expect(p.filter((k) => k === "kerchief").length).toBe(1);
+    expect(p.filter((k) => k === "visor").length).toBe(1);
+    expect(p).toContain("satchel");
+
+    const ticket = figure.children.find((c) => c.userData.part === "ticket") as THREE.Mesh;
+    const satchel = figure.children.find((c) => c.userData.part === "satchel") as THREE.Mesh;
+    expect(ticket).toBeTruthy();
+    expect(satchel).toBeTruthy();
+    expect(ticket.userData.mode).toBe("PAPER");
+    expect(ticket.geometry.type).toBe("BoxGeometry");
+    expect((ticket.material as THREE.MeshLambertMaterial).color.getHex()).toBe(KRAFT);
+    expect(ticket.position.x).toBeCloseTo(satchel.position.x, 1);
+    expect(ticket.position.y).toBeGreaterThan(0.6);
+    expect(ticket.position.y).toBeLessThan(1.05);
+    const box = ticket.geometry as THREE.BoxGeometry;
     expect(box.parameters.width).toBeLessThan(0.12);
     expect(box.parameters.height).toBeLessThan(0.08);
     expect(box.parameters.depth).toBeLessThan(0.06);

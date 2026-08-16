@@ -57,6 +57,7 @@ function paperBox(w, h, d, color) {
  *   kerchief y 1.42–1.46  (0, 1.44, 0.16)       0.08×0.04×0.03   kraft, collar
  *   satchel y 0.64–0.92   (0.38, 0.78, 0.08)    0.18×0.28×0.14   kraft
  *   flap    y 0.88–0.96   (0.38, 0.92, 0.09)    0.18×0.08×0.16   kraft
+ *   ticket  y 0.84–0.88   (0.38, 0.86, 0.16)    0.07×0.04×0.01   kraft, satchel
  *   strap   y 0.92–1.40   (0.05, 1.14, 0.16)    0.04×0.82×0.02   cross-body
  *
  * Hat crown ≈ 1.98 m. Eyes ≈ 1.62 m local → world y ≈ player.y + 0.47.
@@ -161,6 +162,11 @@ export function dressPlayer(player) {
   const flap = paperBox(0.18, 0.08, 0.16, KRAFT);
   flap.position.set(0.38, 0.92, 0.09);
   flap.userData.part = "flap";
+  // Tiny kraft PAPER ticket tucked on the satchel face. Same tan as the flap.
+  const ticket = paperBox(0.07, 0.04, 0.01, KRAFT);
+  ticket.position.set(0.38, 0.86, 0.16);
+  ticket.userData.mode = "PAPER";
+  ticket.userData.part = "ticket";
   const strap = paperBox(0.04, 0.82, 0.02, STRAP);
   strap.position.set(0.05, 1.14, 0.16);
   strap.rotation.z = -Math.atan2(0.7, 0.44);
@@ -203,6 +209,7 @@ export function dressPlayer(player) {
     visor,
     satchel,
     flap,
+    ticket,
     strap,
   );
   player.add(figure);

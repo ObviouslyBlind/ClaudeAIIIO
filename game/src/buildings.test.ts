@@ -309,6 +309,60 @@ describe("paper building catalogue", () => {
     expect(zs.every((z) => z > 2.6)).toBe(true);
   });
 
+  it("puts one tiny kraft PAPER hinge on the House door", () => {
+    const house = meshForUse("house", { area: 400 });
+    const hinges: Array<{
+      userData?: { part?: string; mode?: string };
+      material?: { color?: { getHex: () => number } };
+      geometry?: { type?: string; parameters?: { width: number; height: number; depth: number } };
+    }> = [];
+    const parts = new Set<string>();
+    const hexes: number[] = [];
+    house.traverse((obj: unknown) => {
+      const mesh = obj as {
+        userData?: { part?: string; mode?: string };
+        material?: { color?: { getHex: () => number } };
+        geometry?: { type?: string; parameters?: { width: number; height: number; depth: number } };
+      };
+      const part = mesh.userData?.part;
+      if (part) parts.add(part);
+      if (part !== "hinge") return;
+      hinges.push(mesh);
+      if (mesh.material?.color) hexes.push(mesh.material.color.getHex());
+    });
+    expect(hinges.length).toBeGreaterThanOrEqual(1);
+    expect(parts.has("chimney")).toBe(true);
+    expect(parts.has("mailbox")).toBe(true);
+    expect(parts.has("shutter")).toBe(true);
+    expect(parts.has("knocker")).toBe(true);
+    expect(parts.has("stoop")).toBe(true);
+    expect(parts.has("doormat")).toBe(true);
+    for (const mesh of hinges) {
+      expect(mesh.userData?.mode).toBe("PAPER");
+      expect(mesh.geometry?.type).toBe("BoxGeometry");
+      const box = mesh.geometry?.parameters;
+      if (box) {
+        expect(box.width).toBeLessThan(0.2);
+        expect(box.height).toBeLessThan(0.28);
+        expect(box.depth).toBeLessThan(0.12);
+      }
+    }
+    expect(hexes.length).toBeGreaterThan(0);
+    expect(hexes.every((c) => c === 0xf4ead8)).toBe(true);
+    expect(hexes.every((c) => !isGrey(c))).toBe(true);
+
+    const shop = meshForUse("shop", { area: 400 });
+    const shopParts = new Set<string>();
+    shop.traverse((obj: unknown) => {
+      const mesh = obj as { userData?: { part?: string } };
+      const part = mesh.userData?.part;
+      if (part) shopParts.add(part);
+    });
+    expect(shopParts.has("hinge")).toBe(false);
+    expect(shopParts.has("latch")).toBe(true);
+    expect(shopParts.has("sign")).toBe(true);
+  });
+
   it("puts a small kraft PAPER knocker on the House door", () => {
     const house = meshForUse("house", { area: 400 });
     const parts: string[] = [];
