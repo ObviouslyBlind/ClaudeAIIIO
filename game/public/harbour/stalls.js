@@ -85,7 +85,7 @@ function labelGood(g) {
   return String(g).replace(/_/g, " ");
 }
 
-/** Visible PAPER market stand: deck, posts, price board, striped awning, counter, crates, hanging scale, produce basket, oil lantern, melon, kraft cone, hanging fish, ground crate, kraft price slate. */
+/** Visible PAPER market stand: deck, posts, price board, striped awning, counter, crates, hanging scale, produce basket, oil lantern, melon, kraft cone, hanging fish, ground crate, kraft price slate, kraft stool. */
 export function makeStallMesh(plot) {
   const g = new THREE.Group();
   g.name = "npc-stall";
@@ -387,6 +387,36 @@ export function makeStallMesh(plot) {
   groundLid.userData.part = "ground-crate";
   groundCrate.add(groundBody, groundRim, groundLid);
   g.add(groundCrate);
+
+  // One small kraft stool on the ground beside the stall so the stand
+  // reads as a working market, not only counter goods. WOOD seat + legs.
+  // Local offset only — stall world pose stays put. PAPER boxes. Existing
+  // hexes. Opposite the ground crate. Melon, cone, lantern, hanging fish,
+  // ground crate, and price slate stay put.
+  if (!g.children.some((c) => c.userData.part === "stool")) {
+    const stool = new THREE.Group();
+    stool.name = "stool";
+    stool.userData.part = "stool";
+    stool.userData.mode = "PAPER";
+    stool.userData.paper = true;
+    stool.position.set(-2.42, 0, 1.05);
+    const seat = paperBox(0.28, 0.05, 0.28, WOOD, false);
+    seat.position.y = 0.36;
+    seat.userData.part = "stool";
+    stool.add(seat);
+    for (const [dx, dz] of [
+      [-0.09, -0.09],
+      [0.09, -0.09],
+      [-0.09, 0.09],
+      [0.09, 0.09],
+    ]) {
+      const leg = paperBox(0.05, 0.34, 0.05, WOOD, false);
+      leg.position.set(dx, 0.17, dz);
+      leg.userData.part = "stool";
+      stool.add(leg);
+    }
+    g.add(stool);
+  }
 
   const back = paperBox(3.9, 1.6, 0.12, PLASTER);
   back.position.set(0, 1.05, -1.28);

@@ -126,6 +126,7 @@ describe("NPC harbour stalls", () => {
     expect(kinds).toContain("cone");
     expect(kinds).toContain("fish");
     expect(kinds).toContain("ground-crate");
+    expect(kinds).toContain("stool");
     const colors = hexes(mesh);
     expect(colors.length).toBeGreaterThan(4);
     expect(colors.every(isGrey)).toBe(false);
@@ -450,6 +451,64 @@ describe("NPC harbour stalls", () => {
     expect(stalls.group.children.length).toBeGreaterThan(0);
     for (const child of stalls.group.children) {
       expect(child.children.filter((c) => c.userData.part === "ground-crate").length).toBe(1);
+    }
+  });
+
+  it("puts one small kraft stool on the ground beside each NPC stall", () => {
+    const mesh = makeStallMesh({ id: "n-test", use: "farm", island: "north", band: "field" });
+    const counter = mesh.children.find((c) => c.userData.part === "counter") as THREE.Mesh;
+    const stools = mesh.children.filter((c) => c.userData.part === "stool");
+    expect(stools.length).toBe(1);
+    const stool = stools[0]!;
+    expect(stool.userData.mode).toBe("PAPER");
+    expect(stool.userData.paper).toBe(true);
+
+    const box = counter.geometry as THREE.BoxGeometry;
+    const counterTop = counter.position.y + box.parameters.height / 2;
+    expect(stool.position.y).toBeLessThan(counter.position.y);
+    expect(stool.position.y).toBeLessThan(0.2);
+    expect(stool.position.y).toBeGreaterThanOrEqual(0);
+    expect(stool.position.y).not.toBeCloseTo(counterTop, 5);
+    expect(Math.abs(stool.position.x)).toBeGreaterThan(2.0);
+    expect(Math.abs(stool.position.z)).toBeLessThan(1.5);
+
+    const melon = mesh.children.find((c) => c.userData.part === "melon")!;
+    const cone = mesh.children.find((c) => c.userData.part === "cone")!;
+    const lantern = mesh.children.find((c) => c.userData.part === "lantern")!;
+    const fish = mesh.children.find((c) => c.userData.part === "fish")!;
+    const ground = mesh.children.find((c) => c.userData.part === "ground-crate")!;
+    const slate = mesh.children.find((c) => c.userData.part === "slate")!;
+    expect(melon.position.x).toBeCloseTo(-0.88, 5);
+    expect(cone.position.x).toBeCloseTo(-0.42, 5);
+    expect(lantern.position.y).toBeCloseTo(1.9, 5);
+    expect(fish.userData.part).toBe("fish");
+    expect(ground.userData.part).toBe("ground-crate");
+    expect(slate.userData.part).toBe("slate");
+    expect(Math.abs(stool.position.x - ground.position.x)).toBeGreaterThan(1.5);
+
+    const wood = new Set([0x5a3a22]);
+    const colors = hexes(stool);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.every((c) => wood.has(c))).toBe(true);
+    expect(colors).toContain(0x5a3a22);
+    expect(colors.every((c) => !isGrey(c))).toBe(true);
+    let boxes = 0;
+    stool.traverse((obj) => {
+      const m = obj as THREE.Mesh;
+      if (!m.isMesh) return;
+      boxes += 1;
+      expect(m.geometry.type).toBe("BoxGeometry");
+      const g = m.geometry as THREE.BoxGeometry;
+      expect(g.parameters.width).toBeLessThan(0.45);
+      expect(g.parameters.height).toBeLessThan(0.4);
+      expect(g.parameters.depth).toBeLessThan(0.45);
+    });
+    expect(boxes).toBeGreaterThanOrEqual(3);
+
+    const { stalls } = boot();
+    expect(stalls.group.children.length).toBeGreaterThan(0);
+    for (const child of stalls.group.children) {
+      expect(child.children.filter((c) => c.userData.part === "stool").length).toBe(1);
     }
   });
 
