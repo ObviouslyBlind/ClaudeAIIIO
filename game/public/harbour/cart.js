@@ -9,9 +9,10 @@ import * as THREE from "three";
  * Person faces +Z; the cart trails on -Z with handles toward the hands.
  *
  * Warm wood — harbour crate family: 0x8a6238 / 0x7a5230 / 0x9a6a40.
- * Bed load: two small kraft crates + one canvas roll + a short kraft rope coil.
+ * Bed load: two small kraft crates + one canvas roll + a short kraft rope coil
+ * + a thin kraft canvas strap over the visitor crate.
  */
-export const CART_MESH_COUNT = 15;
+export const CART_MESH_COUNT = 16;
 /** Metres from player.position down to the soles. Same as player.js SOLE_Y. */
 const SOLE_Y = -1.15;
 
@@ -96,9 +97,14 @@ function makeHandcart() {
   // Two small kraft crates + canvas roll + a short kraft rope coil on the bed
   // so spawn reads as a loaded market cart, not an empty wood frame.
   // Sit on the bed top (y = 0.53). Coil is paper boxes, not a cylinder.
+  // Thin kraft canvas strap sits on the visitor crate lid — paper box only.
   const crate = paperBox(0.3, 0.32, 0.28, WOOD_CRATE, false);
   crate.position.set(-0.13, 0.69, -1.2);
   crate.userData.part = "crate";
+
+  const strap = paperBox(0.32, 0.04, 0.08, CANVAS, false);
+  strap.position.set(-0.13, 0.87, -1.2);
+  strap.userData.part = "strap";
 
   const crate2 = paperBox(0.2, 0.16, 0.2, WOOD_LIGHT, false);
   crate2.position.set(0.16, 0.61, -1.24);
@@ -116,7 +122,7 @@ function makeHandcart() {
   coilTop.position.set(-0.16, 0.645, -0.84);
   coilTop.userData.part = "coil";
 
-  g.add(bed, sideL, sideR, tail, head, wheelL, wheelR, handleL, handleR, grip, crate, crate2, roll, coil, coilTop);
+  g.add(bed, sideL, sideR, tail, head, wheelL, wheelR, handleL, handleR, grip, crate, strap, crate2, roll, coil, coilTop);
   return g;
 }
 
