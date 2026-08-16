@@ -427,4 +427,78 @@ describe("street prop setback", () => {
       expect(distToPaved(ISLANDS.north, p.x, p.z)).toBeGreaterThanOrEqual(ROAD_CLEAR);
     }
   });
+
+  it("sits a kraft PAPER crank on the village pump head, off ROAD_CLEAR", () => {
+    const map = createLandBoard();
+    const scene = { add(_obj: THREE.Object3D) {} };
+    const root = makeStreetProps(map, {
+      scene,
+      specOf: (id: "north" | "south") => ISLANDS[id],
+      heightAt,
+    });
+
+    const placed = (root.userData.placed || []) as {
+      kind: string;
+      island: string;
+      x: number;
+      z: number;
+      setback: number;
+      along: number;
+    }[];
+    const port = ISLANDS.north.port;
+    const pumps = placed.filter(
+      (p) =>
+        p.kind === "pump" &&
+        p.island === "north" &&
+        p.along <= NORTH_PORT_STRETCH_M &&
+        Math.hypot(p.x - port.x, p.z - port.z) < 220,
+    );
+    expect(pumps.length).toBeGreaterThanOrEqual(1);
+
+    const pumpGroups: THREE.Object3D[] = [];
+    const cranks: THREE.Object3D[] = [];
+    root.traverse((obj) => {
+      if (obj.userData?.prop === "pump") pumpGroups.push(obj);
+      if (obj.userData?.part === "crank" || obj.userData?.dress === "crank") {
+        if (obj.userData?.prop === "crank" || obj.name === "crank") cranks.push(obj);
+      }
+    });
+    expect(pumpGroups.length).toBeGreaterThanOrEqual(1);
+    expect(cranks.length).toBeGreaterThanOrEqual(1);
+
+    const wood = new Set([0x8a6238, 0x9a6a40, 0x6a4a2a]);
+    for (const crank of cranks) {
+      expect(crank.userData.mode === "PAPER" || crank.userData.part === "crank").toBe(true);
+      expect(crank.userData.part === "crank" || crank.userData.dress === "crank").toBe(true);
+      let boxes = 0;
+      crank.traverse((obj) => {
+        const mesh = obj as THREE.Mesh;
+        if (!mesh.isMesh) return;
+        boxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        const mat = mesh.material as THREE.MeshLambertMaterial;
+        expect(mat.type).toBe("MeshLambertMaterial");
+        const hex = mat.color.getHex();
+        expect(wood.has(hex)).toBe(true);
+      });
+      expect(boxes).toBeGreaterThanOrEqual(2);
+      expect(crank.position.y).toBeGreaterThan(1.1);
+      expect(crank.position.y).toBeLessThan(1.5);
+      expect(Math.hypot(crank.position.x, crank.position.z)).toBeLessThan(0.3);
+    }
+
+    for (const pump of pumpGroups) {
+      let found = false;
+      pump.traverse((obj) => {
+        if (obj.userData?.part === "crank" || obj.userData?.dress === "crank") found = true;
+      });
+      expect(found).toBe(true);
+      expect(pump.userData.mode).toBe("PAPER");
+    }
+
+    for (const p of pumps) {
+      expect(p.setback).toBeGreaterThanOrEqual(STREET_SETBACK_MIN_M);
+      expect(distToPaved(ISLANDS.north, p.x, p.z)).toBeGreaterThanOrEqual(ROAD_CLEAR);
+    }
+  });
 });
