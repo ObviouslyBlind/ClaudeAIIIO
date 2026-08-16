@@ -287,9 +287,39 @@ function hawserDrum(_side) {
 }
 
 /**
+ * Small kraft PAPER dipper: cup + short handle. Wood boxes only — not a
+ * cylinder ladle, not iron. Sits in the pump trough with the handle on the rim.
+ */
+function kraftDipper() {
+  const g = new THREE.Group();
+  g.name = "dipper";
+  g.userData.kind = "street-prop";
+  g.userData.prop = "dipper";
+  g.userData.mode = "PAPER";
+  g.userData.part = "dipper";
+  g.userData.dress = "dipper";
+
+  const cup = part(0.12, 0.08, 0.12, WOOD, false);
+  cup.userData.part = "dipper";
+  cup.userData.dress = "dipper";
+  cup.position.y = 0.04;
+  const lip = part(0.14, 0.02, 0.14, WOOD_DARK, false);
+  lip.userData.part = "dipper";
+  lip.userData.dress = "dipper";
+  lip.position.y = 0.09;
+  const grip = part(0.16, 0.03, 0.03, WOOD_LIGHT, false);
+  grip.userData.part = "dipper";
+  grip.userData.dress = "dipper";
+  grip.position.set(0.12, 0.07, 0);
+
+  g.add(cup, lip, grip);
+  return g;
+}
+
+/**
  * Small kraft village pump: square wood post, wood handle/spout, wood trough
- * with a kraft-cream basin. Paper boxes only — not an iron standpipe, not
- * cyan water.
+ * with a kraft-cream basin, and a kraft dipper in the trough. Paper boxes
+ * only — not an iron standpipe, not cyan water.
  */
 function villagePump(_side) {
   const g = new THREE.Group();
@@ -322,7 +352,10 @@ function villagePump(_side) {
   water.userData.part = "water";
   water.position.set(0, 0.24, 0.46);
 
-  g.add(shoe, post, head, handle, spout, basin, rim, water);
+  const dipper = kraftDipper();
+  dipper.position.set(0.18, 0.26, 0.56);
+
+  g.add(shoe, post, head, handle, spout, basin, rim, water, dipper);
   return g;
 }
 
@@ -602,7 +635,7 @@ function placeOne(map, road, spec, heightAt, slot, root) {
 }
 
 /**
- * Paper lamp posts, kraft crate seats, hawser drums, one wood stool, one village pump, one fishing-net rack, one open fish crate, and signs along the paved spline, on the grass verge.
+ * Paper lamp posts, kraft crate seats, hawser drums, one wood stool, one village pump with a kraft dipper in the trough, one fishing-net rack, one open fish crate, and signs along the paved spline, on the grass verge.
  * North port stretch is packed first so spawn looking inland actually sees them.
  */
 export function makeStreetProps(map, helpers) {

@@ -317,4 +317,78 @@ describe("street prop setback", () => {
       expect(distToPaved(ISLANDS.north, p.x, p.z)).toBeGreaterThanOrEqual(ROAD_CLEAR);
     }
   });
+
+  it("sits a kraft PAPER dipper in the village pump trough, off ROAD_CLEAR", () => {
+    const map = createLandBoard();
+    const scene = { add(_obj: THREE.Object3D) {} };
+    const root = makeStreetProps(map, {
+      scene,
+      specOf: (id: "north" | "south") => ISLANDS[id],
+      heightAt,
+    });
+
+    const placed = (root.userData.placed || []) as {
+      kind: string;
+      island: string;
+      x: number;
+      z: number;
+      setback: number;
+      along: number;
+    }[];
+    const port = ISLANDS.north.port;
+    const pumps = placed.filter(
+      (p) =>
+        p.kind === "pump" &&
+        p.island === "north" &&
+        p.along <= NORTH_PORT_STRETCH_M &&
+        Math.hypot(p.x - port.x, p.z - port.z) < 220,
+    );
+    expect(pumps.length).toBeGreaterThanOrEqual(1);
+
+    const pumpGroups: THREE.Object3D[] = [];
+    const dippers: THREE.Object3D[] = [];
+    root.traverse((obj) => {
+      if (obj.userData?.prop === "pump") pumpGroups.push(obj);
+      if (obj.userData?.part === "dipper" || obj.userData?.dress === "dipper") {
+        if (obj.userData?.prop === "dipper" || obj.name === "dipper") dippers.push(obj);
+      }
+    });
+    expect(pumpGroups.length).toBeGreaterThanOrEqual(1);
+    expect(dippers.length).toBeGreaterThanOrEqual(1);
+
+    const woodKraft = new Set([0x8a6238, 0x9a6a40, 0x6a4a2a, 0xf3d6a0]);
+    for (const dipper of dippers) {
+      expect(dipper.userData.mode === "PAPER" || dipper.userData.part === "dipper").toBe(true);
+      expect(dipper.userData.part === "dipper" || dipper.userData.dress === "dipper").toBe(true);
+      let boxes = 0;
+      dipper.traverse((obj) => {
+        const mesh = obj as THREE.Mesh;
+        if (!mesh.isMesh) return;
+        boxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        const mat = mesh.material as THREE.MeshLambertMaterial;
+        expect(mat.type).toBe("MeshLambertMaterial");
+        const hex = mat.color.getHex();
+        expect(woodKraft.has(hex)).toBe(true);
+      });
+      expect(boxes).toBeGreaterThanOrEqual(2);
+      expect(dipper.position.y).toBeGreaterThan(0.15);
+      expect(dipper.position.y).toBeLessThan(0.5);
+      expect(Math.hypot(dipper.position.x, dipper.position.z - 0.46)).toBeLessThan(0.5);
+    }
+
+    for (const pump of pumpGroups) {
+      let found = false;
+      pump.traverse((obj) => {
+        if (obj.userData?.part === "dipper" || obj.userData?.dress === "dipper") found = true;
+      });
+      expect(found).toBe(true);
+      expect(pump.userData.mode).toBe("PAPER");
+    }
+
+    for (const p of pumps) {
+      expect(p.setback).toBeGreaterThanOrEqual(STREET_SETBACK_MIN_M);
+      expect(distToPaved(ISLANDS.north, p.x, p.z)).toBeGreaterThanOrEqual(ROAD_CLEAR);
+    }
+  });
 });
