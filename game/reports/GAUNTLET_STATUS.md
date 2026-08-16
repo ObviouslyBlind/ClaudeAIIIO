@@ -20,7 +20,7 @@ Shore foam, quay clutter, building shells, window lights, stalls, pedestrians, n
 
 ## In flight (not ferry-only)
 
-South port sign, stall last-price, and other one-file harbour builders. Do not restart play while a critic is on the page.
+Pixel: ferry hull at north quay `/?g=ferry31` (do not restart play). Also building: denser quay foam, quay lamps, street lamps, taxi fare HUD, persist restore HUD, ped clothing, channel water, house chimney.
 
 ## Next pixel (after ferry31 PASS, immediately, no wait)
 
