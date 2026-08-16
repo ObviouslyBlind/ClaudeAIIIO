@@ -175,8 +175,8 @@ describe("quay harbour dressing", () => {
       }
 
       const dinghySpots = [
-        { x: spec.port.x + 9.4, y: 0.42, z: spec.port.z + toward * 88 },
-        { x: spec.port.x - 10.6, y: 0.36, z: spec.port.z + toward * 82 },
+        { x: spec.port.x + 14, y: 1.4, z: spec.port.z + toward * 88 },
+        { x: spec.port.x - 14.5, y: 1.32, z: spec.port.z + toward * 82 },
       ];
       for (const spot of dinghySpots) {
         const boat = root.children.find((c) => {
@@ -419,6 +419,36 @@ describe("quay harbour dressing", () => {
         expect(height).toBeLessThan(0.2);
         expect(depth).toBeLessThan(0.2);
       }
+    }
+  });
+
+  it("keeps spawn-readable sage dinghy hulls with kraft gunwales in the basin", () => {
+    const spec = ISLANDS.north;
+    const added: THREE.Object3D[] = [];
+    const scene = { add(obj: THREE.Object3D) { added.push(obj); } };
+    const root = makeQuay(spec, { scene, heightAt });
+
+    const boats = root.children.filter((c) => c.userData?.kind === "dinghy");
+    expect(boats.length).toBe(2);
+    for (const boat of boats) {
+      expect(boat.position.y).toBeGreaterThan(1);
+      expect(Math.abs(boat.position.x)).toBeGreaterThan(10);
+      let hull: THREE.Mesh | null = null;
+      let gunwale: THREE.Mesh | null = null;
+      boat.traverse((obj) => {
+        if (obj.userData?.part === "hull") hull = obj as THREE.Mesh;
+        if (obj.userData?.part === "gunwale") gunwale = obj as THREE.Mesh;
+      });
+      expect(hull).not.toBeNull();
+      expect(gunwale).not.toBeNull();
+      const hg = (hull as THREE.Mesh).geometry as THREE.BoxGeometry;
+      expect(hg.parameters.width).toBeGreaterThanOrEqual(6);
+      expect(hg.parameters.height).toBeGreaterThanOrEqual(2);
+      expect(hg.parameters.depth).toBeGreaterThanOrEqual(14);
+      const hm = (hull as THREE.Mesh).material as THREE.MeshLambertMaterial;
+      expect(hm.color.getHex()).toBe(0x5c6e52);
+      const gm = (gunwale as THREE.Mesh).material as THREE.MeshLambertMaterial;
+      expect(gm.color.getHex()).toBe(0xc4b496);
     }
   });
 });
