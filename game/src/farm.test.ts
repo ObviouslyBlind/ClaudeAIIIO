@@ -922,3 +922,75 @@ describe("farm PAPER kraft table pail", () => {
     expect(boxes).toBeLessThanOrEqual(4);
   });
 });
+
+describe("farm PAPER kraft broom", () => {
+  it("leans one tiny kraft PAPER broom by the workbench; seed lid mug egg pail lantern remain", () => {
+    const scene = new THREE.Scene();
+    dressFarm(scene);
+
+    const dress = scene.getObjectByName("farm-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+
+    const brooms: THREE.Object3D[] = [];
+    dress!.traverse((obj) => {
+      if (obj.userData?.part === "broom" && obj.name === "farm-broom") brooms.push(obj);
+    });
+    expect(brooms.length).toBe(1);
+    const broom = brooms[0];
+    expect(broom.userData.part).toBe("broom");
+    expect(broom.userData.mode).toBe("PAPER");
+    expect(Math.abs(broom.rotation.z) > 0.15 || Math.abs(broom.rotation.x) > 0.15).toBe(true);
+
+    const seed = dress!.getObjectByName("farm-seed")!;
+    const lid = dress!.getObjectByName("farm-lid")!;
+    const mug = dress!.getObjectByName("farm-mug")!;
+    const egg = dress!.getObjectByName("farm-egg")!;
+    const tablePail = dress!.getObjectByName("farm-table-pail")!;
+    const lantern = dress!.getObjectByName("farm-lantern")!;
+    expect(seed).toBeTruthy();
+    expect(lid).toBeTruthy();
+    expect(mug).toBeTruthy();
+    expect(egg).toBeTruthy();
+    expect(tablePail).toBeTruthy();
+    expect(lantern).toBeTruthy();
+    expect(seed.userData.part).toBe("seed");
+    expect(lid.userData.part).toBe("lid");
+    expect(mug.userData.part).toBe("mug");
+    expect(egg.userData.part).toBe("egg");
+    expect(tablePail.userData.part).toBe("pail");
+
+    expect(broom.position.y).toBeLessThan(0.5);
+    const toBench = Math.hypot(broom.position.x - -3.28, broom.position.z - -0.15);
+    expect(toBench).toBeGreaterThan(0.2);
+    expect(toBench).toBeLessThan(0.8);
+
+    expect(Math.hypot(broom.position.x - seed.position.x, broom.position.z - seed.position.z)).toBeGreaterThan(0.2);
+    expect(Math.hypot(broom.position.x - mug.position.x, broom.position.z - mug.position.z)).toBeGreaterThan(0.2);
+    expect(Math.hypot(broom.position.x - egg.position.x, broom.position.z - egg.position.z)).toBeGreaterThan(0.2);
+    expect(Math.hypot(broom.position.x - tablePail.position.x, broom.position.z - tablePail.position.z)).toBeGreaterThan(0.2);
+    expect(Math.hypot(broom.position.x - lantern.position.x, broom.position.z - lantern.position.z)).toBeGreaterThan(0.2);
+    expect(Math.hypot(broom.position.x - lid.position.x, broom.position.z - lid.position.z)).toBeGreaterThan(4);
+
+    const colors = hexes(broom);
+    expect(colors.some((c) => c === KRAFT)).toBe(true);
+    expect(colors.every((c) => [KRAFT, WOOD, WOOD_DARK, HANDLE].includes(c))).toBe(true);
+
+    let boxes = 0;
+    broom.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        boxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.part).toBe("broom");
+        expect(mesh.userData.mode).toBe("PAPER");
+        const geo = mesh.geometry as THREE.BoxGeometry;
+        expect(geo.parameters.width).toBeLessThan(0.16);
+        expect(geo.parameters.height).toBeLessThan(0.4);
+        expect(geo.parameters.depth).toBeLessThan(0.16);
+      }
+    });
+    expect(boxes).toBeGreaterThanOrEqual(1);
+    expect(boxes).toBeLessThanOrEqual(3);
+  });
+});
