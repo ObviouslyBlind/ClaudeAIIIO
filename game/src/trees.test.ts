@@ -127,6 +127,13 @@ describe("hill and verge trees", () => {
     const nearNorthPort = north.filter((p) => Math.hypot(p.x - port.x, p.z - port.z) < 400);
     expect(nearNorthPort.length).toBeGreaterThanOrEqual(20);
 
+    const tarmacVerge = north.filter((p) => {
+      const d = distToPaved(ISLANDS.north, p.x, p.z);
+      return d >= PAVED_CLEAR_M && d < 18 && Math.hypot(p.x - port.x, p.z - port.z) < 400;
+    });
+    expect(tarmacVerge.length).toBeGreaterThanOrEqual(8);
+    expect(tarmacVerge.length).toBeLessThan(36);
+
     expect(placed.some((p) => p.role === "hill")).toBe(true);
     expect(placed.some((p) => p.role === "slope")).toBe(true);
     expect(placed.some((p) => p.role === "lot-back" || p.role === "spawn")).toBe(true);
