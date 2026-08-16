@@ -71,13 +71,17 @@ Spawn has no selected plot, so staff is `PAPER · SIMULATED · Staff —` (the d
 `/g/fend53` **FAIL FENDER**: cream hull in frame, but the tyre sat on the south face (`z = +6`) behind the hull from the spawn camera at `z ≈ -6888`.
 `/g/fend54` **PASS FENDER**: dark circular tyre with a kraft/cream band on the camera-facing (north) cream hull. Address `/g/fend54`.
 
+## Pixel quay lamps
+
+`/g/lamps55` **FAIL LAMPS**: pier and cream ferry in frame, but 0.4 m kraft glass on inland `along` values read as empty deck from the 24 m spawn camera. Lamps are now seaward (`along` 8–40) with fender-scale cream lanterns.
+
 ## In flight (not ferry-only)
 
-Pixel: **quay lamps on the north timber pier** at `http://localhost:8787/g/lamps55`. Seaward spawn, no RMB. Close other Two Harbors tabs. Address bar must be `/g/lamps55`. Do not restart play while the critic is on the page.
+Pixel: **quay lamps on the north timber pier (seaward, large kraft glass)** at `http://localhost:8787/g/lamps56`. Seaward spawn, no RMB. Close other Two Harbors tabs. Address bar must be `/g/lamps56`. Do not restart play while the critic is on the page.
 
-## Next pixel (after lamps55 PASS, immediately, no wait)
+## Next pixel (after lamps56 PASS, immediately, no wait)
 
-If lamps fail because they sit behind the seaward camera, pick the next spawn-visible kraft bar (not shells+lights). Shells+lights stay deferred until a human can orbit.
+If lamps fail again, one more size/contrast pass. If they pass, next spawn-visible kraft bar. Shells+lights stay deferred until a human can orbit.
 
 ## Frozen
 
