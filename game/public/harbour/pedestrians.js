@@ -112,6 +112,7 @@ export function makePaperPerson(seed = 0) {
 
   figure.add(leftShoe, rightShoe, leftLeg, rightLeg, body, belt, leftArm, rightArm, head, hair);
   figure.userData.legs = [leftLeg, rightLeg];
+  addKraftWorkBoots(figure);
   return figure;
 }
 
@@ -181,6 +182,21 @@ function addKraftWorkGloves(figure) {
   rightGlove.position.set(0.32, 0.78, 0);
   rightGlove.userData.part = "glove";
   figure.add(leftGlove, rightGlove);
+}
+
+/**
+ * Short kraft work-boot shafts above each shoe so dock hands read as
+ * boots, not socks on boxes. Original shoe hex already in this file —
+ * no new grey. PAPER boxes only. Existing shoes stay.
+ */
+function addKraftWorkBoots(figure) {
+  const leftBoot = paperBox(0.17, 0.22, 0.2, SHOES);
+  leftBoot.position.set(-0.11, 0.2, 0);
+  leftBoot.userData.part = "boot";
+  const rightBoot = paperBox(0.17, 0.22, 0.2, SHOES);
+  rightBoot.position.set(0.11, 0.2, 0);
+  rightBoot.userData.part = "boot";
+  figure.add(leftBoot, rightBoot);
 }
 
 function polylineLength(points) {

@@ -71,6 +71,7 @@ describe("harbour PAPER pedestrians", () => {
     expect(figure.userData.kind).toBe("pedestrian");
     const parts = partsOf(figure);
     expect(parts.get("shoe")).toBe(2);
+    expect(parts.get("boot")).toBe(2);
     expect(parts.get("leg")).toBe(2);
     expect(parts.get("arm")).toBe(2);
     expect(parts.get("body")).toBe(1);
@@ -93,7 +94,7 @@ describe("harbour PAPER pedestrians", () => {
       expect(mesh.geometry.type).toBe("BoxGeometry");
       expect((mesh.material as THREE.MeshLambertMaterial).type).toBe("MeshLambertMaterial");
     });
-    expect(boxes).toBe(10);
+    expect(boxes).toBe(12);
   });
 
   it("gives walkers a few original-palette cloth colours, not one cream clone", () => {
@@ -257,6 +258,31 @@ describe("harbour PAPER pedestrians", () => {
 
     for (const p of verge) {
       expect(partsOf(p.mesh).get("glove")).toBeUndefined();
+    }
+  });
+
+  it("puts kraft work-boot shafts above each shoe", () => {
+    const kraftShoe = new Set([0x4a3220, 0xc4b496]);
+    const figure = makePaperPerson(0);
+    expect(partsOf(figure).get("shoe")).toBe(2);
+    expect(partsOf(figure).get("boot")).toBe(2);
+
+    figure.traverse((obj) => {
+      if (obj.userData?.part !== "boot") return;
+      const mesh = obj as THREE.Mesh;
+      expect(mesh.geometry.type).toBe("BoxGeometry");
+      const hex = (mesh.material as THREE.MeshLambertMaterial).color.getHex();
+      expect(isGrey(hex)).toBe(false);
+      expect(kraftShoe.has(hex)).toBe(true);
+      expect(mesh.position.y).toBeGreaterThan(0.08);
+      expect(mesh.position.y).toBeLessThan(0.4);
+      expect(Math.abs(mesh.position.x)).toBeCloseTo(0.11, 5);
+    });
+
+    const { people } = spawn();
+    for (const p of people) {
+      expect(partsOf(p.mesh).get("boot")).toBe(2);
+      expect(partsOf(p.mesh).get("shoe")).toBe(2);
     }
   });
 });
