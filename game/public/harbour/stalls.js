@@ -81,7 +81,7 @@ function labelGood(g) {
   return String(g).replace(/_/g, " ");
 }
 
-/** Visible PAPER market stand: deck, posts, striped awning, counter, crates, hanging scale, produce basket. */
+/** Visible PAPER market stand: deck, posts, price board, striped awning, counter, crates, hanging scale, produce basket. */
 export function makeStallMesh(plot) {
   const g = new THREE.Group();
   g.name = "npc-stall";
@@ -132,6 +132,29 @@ export function makeStallMesh(plot) {
       post.userData.part = "post";
       g.add(post);
     }
+  }
+
+  // Small kraft price board on each front stall post so the stand reads as a
+  // shop, not only an awning. Wood frame + cream face. Local offset only —
+  // stall world pose stays put. Buy API unchanged.
+  for (const x of [-1.85, 1.85]) {
+    const price = new THREE.Group();
+    price.name = "price-board";
+    price.userData.part = "price-board";
+    price.userData.mode = "PAPER";
+    price.userData.paper = true;
+    price.position.set(x, 1.38, 1.16);
+    const peg = paperBox(0.05, 0.05, 0.12, WOOD, false);
+    peg.position.set(0, 0.14, -0.02);
+    peg.userData.part = "price-board";
+    const frame = paperBox(0.36, 0.48, 0.05, WOOD, false);
+    frame.position.set(0, 0, 0.08);
+    frame.userData.part = "price-board";
+    const face = paperBox(0.28, 0.38, 0.03, KRAFT, false);
+    face.position.set(0, 0, 0.12);
+    face.userData.part = "price-board";
+    price.add(peg, frame, face);
+    g.add(price);
   }
 
   const { a: clothA, b: clothB, n } = awningStyleFor(plot);
