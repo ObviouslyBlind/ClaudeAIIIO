@@ -13,7 +13,22 @@ const IRON_DARK = 0x2a2420;
 const WOOD = 0x8a6238;
 const WOOD_LIGHT = 0x9a6a40;
 const WOOD_DARK = 0x6a4a2a;
+/** Kraft cream pane — same family as window-lights, not cyan glass. */
+export const LAMP_GLASS = 0xf3d6a0;
+/** Paper-lamp amber, not CoD neon. */
+export const LAMP_GLOW = 0xe8a45a;
 const LANTERN = 0xe0b86a;
+
+const glassMat = new THREE.MeshLambertMaterial({
+  color: LAMP_GLASS,
+  emissive: LAMP_GLOW,
+  emissiveIntensity: 0.42,
+});
+const glowMat = new THREE.MeshLambertMaterial({
+  color: LANTERN,
+  emissive: LAMP_GLOW,
+  emissiveIntensity: 0.35,
+});
 
 /**
  * 12 / 14 / 16 m. Always off the tarmac and outside ROAD_CLEAR.
@@ -62,31 +77,71 @@ function cyl(rTop, rBot, h, color, segments = 6, shadow = true) {
   return m;
 }
 
-/** Iron post, short arm toward the road, warm lantern. */
-function lampPost(side) {
+function glassPane(w, h, d) {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), glassMat);
+  m.castShadow = false;
+  m.receiveShadow = true;
+  m.userData.part = "glass";
+  return m;
+}
+
+/**
+ * Paper verge lamp: square wood post, iron shoe, warm glass box on top.
+ * No cobra arm, no highway kit, lantern stays on the verge.
+ */
+function lampPost(_side) {
   const g = new THREE.Group();
   g.userData.kind = "street-prop";
   g.userData.prop = "lamp";
-  const toward = side < 0 ? -1 : 1;
+  g.userData.mode = "PAPER";
 
-  const base = cyl(0.22, 0.28, 0.16, IRON_DARK, 6, false);
-  base.position.y = 0.08;
-  const post = cyl(0.07, 0.1, 3.15, IRON, 6);
-  post.position.y = 1.7;
-  g.add(base, post);
+  const base = part(0.34, 0.14, 0.34, IRON_DARK, false);
+  base.position.y = 0.07;
+  const shoe = part(0.22, 0.1, 0.22, IRON, false);
+  shoe.position.y = 0.18;
+  const post = part(0.14, 2.72, 0.14, WOOD);
+  post.userData.part = "post";
+  post.position.y = 1.56;
+  const neck = part(0.16, 0.18, 0.16, WOOD_DARK, false);
+  neck.position.y = 2.78;
+  const collar = part(0.2, 0.1, 0.2, IRON, false);
+  collar.position.y = 2.9;
+  g.add(base, shoe, post, neck, collar);
 
-  const arm = part(0.95, 0.07, 0.07, IRON, false);
-  arm.position.set(toward * 0.48, 3.18, 0);
-  const brace = part(0.08, 0.55, 0.08, IRON, false);
-  brace.position.set(toward * 0.18, 2.88, 0);
-  brace.rotation.z = toward * 0.55;
-  g.add(arm, brace);
+  const tray = part(0.4, 0.06, 0.4, IRON_DARK, false);
+  tray.position.y = 2.98;
+  g.add(tray);
 
-  const lantern = part(0.28, 0.38, 0.28, LANTERN);
-  lantern.position.set(toward * 0.88, 2.92, 0);
-  const cap = part(0.34, 0.08, 0.34, IRON_DARK, false);
-  cap.position.set(toward * 0.88, 3.14, 0);
-  g.add(lantern, cap);
+  const glassY = 3.22;
+  for (const dx of [-0.16, 0.16]) {
+    for (const dz of [-0.16, 0.16]) {
+      const upright = part(0.05, 0.44, 0.05, IRON, false);
+      upright.position.set(dx, glassY, dz);
+      g.add(upright);
+    }
+  }
+  const east = glassPane(0.04, 0.38, 0.28);
+  east.position.set(0.16, glassY, 0);
+  const west = glassPane(0.04, 0.38, 0.28);
+  west.position.set(-0.16, glassY, 0);
+  const north = glassPane(0.28, 0.38, 0.04);
+  north.position.set(0, glassY, 0.16);
+  const south = glassPane(0.28, 0.38, 0.04);
+  south.position.set(0, glassY, -0.16);
+  const core = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.28, 0.18), glowMat);
+  core.castShadow = false;
+  core.receiveShadow = true;
+  core.userData.part = "glow";
+  core.position.set(0, glassY, 0);
+  g.add(east, west, north, south, core);
+
+  const cap = part(0.42, 0.08, 0.42, IRON_DARK, false);
+  cap.position.y = 3.46;
+  const hat = part(0.28, 0.06, 0.28, WOOD_LIGHT, false);
+  hat.position.y = 3.52;
+  const finial = part(0.06, 0.14, 0.06, IRON, false);
+  finial.position.y = 3.62;
+  g.add(cap, hat, finial);
   return g;
 }
 
@@ -258,7 +313,7 @@ function placeOne(map, road, spec, heightAt, slot, root) {
 }
 
 /**
- * Lamp posts, benches, and signs along the paved spline, on the grass verge.
+ * Paper lamp posts, benches, and signs along the paved spline, on the grass verge.
  * North port stretch is packed first so spawn looking inland actually sees them.
  */
 export function makeStreetProps(map, helpers) {
