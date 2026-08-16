@@ -170,11 +170,11 @@ function refreshHud() {
 
 function parcelTint(p, isSel) {
   if (isSel) return 0xf0d060;
-  if (p.owner === "visitor") return 0xb24a32;
-  if (p.owner) return 0x6d7380;
+  if (p.owner === "visitor") return 0xc47848;
+  if (p.owner) return 0x7e9458;
   if (p.band === "shore") return 0xd4b483;
   if (p.band === "field") return 0x6a8f44;
-  return 0xc4a574;
+  return 0xb7c47a;
 }
 
 function makeTerrain(spec) {
