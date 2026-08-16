@@ -13,6 +13,7 @@ Politics frozen. See `game/reports/GAUNTLET_STATUS.md`.
 - [x] Visitor PAPER bid/ask vs NPC books
 - [x] Staff slots on developed plots
 - [x] Pixel remaining meshes (cars `/?g=cars26` PASS, taxi cab `/?g=taxi27` PASS)
+- [x] Shop + farm interiors, hire/fire HTTP, land upkeep, North/South buy+sell, cart HUD (code)
 - [ ] Pixel remaining meshes (ferry, shore, quay, shells)
 
 ## Polymarket paper bot
