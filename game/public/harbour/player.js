@@ -41,6 +41,7 @@ function paperBox(w, h, d, color) {
  *   shoes   y 0.00–0.08   (±0.11, 0.04, 0.04)   0.18×0.08×0.28
  *   legs    y 0.08–0.82   (±0.11, 0.45, 0)      0.16×0.74×0.18
  *   belt    y 0.80–0.88   (0, 0.84, 0)          0.48×0.08×0.30
+ *   buckle  y 0.81–0.87   (0, 0.84, 0.17)       0.10×0.06×0.04   kraft
  *   body    y 0.82–1.42   (0, 1.12, 0)          0.46×0.60×0.28
  *   arms    y 0.80–1.36   (±0.32, 1.08, 0)      0.12×0.56×0.12
  *   head    y 1.46–1.78   (0, 1.62, 0.01)       0.30×0.32×0.28
@@ -92,6 +93,11 @@ export function dressPlayer(player) {
   belt.position.set(0, 0.84, 0);
   belt.userData.part = "belt";
 
+  // Tiny kraft buckle on the belt face. Same tan as the satchel / hat brim.
+  const buckle = paperBox(0.1, 0.06, 0.04, KRAFT);
+  buckle.position.set(0, 0.84, 0.17);
+  buckle.userData.part = "buckle";
+
   const leftArm = paperBox(0.12, 0.56, 0.12, SHIRT);
   leftArm.position.set(-0.32, 1.08, 0);
   leftArm.userData.part = "arm";
@@ -136,6 +142,7 @@ export function dressPlayer(player) {
     rightLeg,
     body,
     belt,
+    buckle,
     leftArm,
     rightArm,
     head,

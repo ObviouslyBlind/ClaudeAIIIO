@@ -48,6 +48,21 @@ function makePlayer() {
   return player;
 }
 
+describe("player PAPER figure", () => {
+  it("wears one kraft belt buckle on the visitor mesh", () => {
+    const player = makePlayer();
+    const figure = player.getObjectByName("paper-figure")!;
+    const p = parts(figure);
+    expect(p.filter((k) => k === "buckle").length).toBe(1);
+    expect(p).toContain("belt");
+    expect(p).toContain("hat");
+    expect(p).toContain("satchel");
+    const buckle = figure.children.find((c) => c.userData.part === "buckle") as THREE.Mesh;
+    expect(buckle.geometry.type).toBe("BoxGeometry");
+    expect((buckle.material as THREE.MeshLambertMaterial).color.getHex()).toBe(0xc4b496);
+  });
+});
+
 describe("player PAPER handcart", () => {
   it("parents a cart on the player mesh without moving position or replacing the person", () => {
     const player = makePlayer();
