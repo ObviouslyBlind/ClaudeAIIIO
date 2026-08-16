@@ -18,14 +18,15 @@ import { createPresence, presenceQuery } from "./presence.ts";
 import { walkSeededPresence } from "./presenceWalk.ts";
 import { dumpCart } from "./visitorCart.ts";
 import { startPersistLoop } from "./persistLoop.ts";
+import { restoreLive } from "./persistRestore.ts";
 
 const root = join(fileURLToPath(new URL(".", import.meta.url)), "..");
 const publicDir = join(root, "public");
 const port = Number(process.env.PORT ?? 8787);
 
-const world = createWorld(7);
-const visitor = createVisitor(1_000);
-const land = createLandBoard();
+let world = createWorld(7);
+let visitor = createVisitor(1_000);
+let land = createLandBoard();
 const presence = createPresence();
 setInterval(() => tick(world, visitor, land), 1000);
 setInterval(() => walkSeededPresence(presence), 1000);
@@ -107,6 +108,22 @@ const server = createServer(async (req, res) => {
       return;
     }
     json(res, 200, persist.lastBlob);
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/persist/restore") {
+    const result = restoreLive(() => persist.lastBlob, {
+      setWorld: (next) => {
+        world = next;
+      },
+      setLand: (next) => {
+        land = next;
+      },
+      setVisitor: (next) => {
+        visitor = next;
+      },
+    });
+    json(res, result.ok ? 200 : 400, result);
     return;
   }
 
