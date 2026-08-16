@@ -22,6 +22,7 @@ const GLOW = 0xe8a45a;
 export const QUAY_LAMP_SPOTS = Object.freeze([
   Object.freeze({ side: -4.55, along: -28 }),
   Object.freeze({ side: 4.55, along: -20 }),
+  Object.freeze({ side: 4.55, along: -12 }),
   Object.freeze({ side: -4.55, along: -4 }),
   Object.freeze({ side: 4.55, along: 4 }),
   Object.freeze({ side: -4.55, along: 20 }),
