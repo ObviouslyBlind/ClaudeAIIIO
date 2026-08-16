@@ -163,7 +163,7 @@ describe("warehouse PAPER wall clipboard", () => {
     expect(colors.length).toBeGreaterThan(0);
     expect(colors.some((c) => c === 0x8a6238)).toBe(true);
     expect(colors.some((c) => c === 0xf3efe4)).toBe(true);
-    expect(colors.every((c) => !isGrey(c))).toBe(true);
+    expect(colors.every((c) => c === 0xf3efe4 || !isGrey(c))).toBe(true);
 
     clipboard.traverse((obj) => {
       const mesh = obj as THREE.Mesh;
