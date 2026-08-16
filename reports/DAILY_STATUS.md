@@ -6,10 +6,10 @@
 
 ### Harbour (PAPER / SIMULATED)
 
-- Pixel-held: inland spawn, paved ribbon, dirt ribbons, traffic, taxi overlay, ferry $15, RMB orbit, lease → House → Enter → Exit, trees + cart (`/?g=tree25`)
-- Pixel ferry `/g/ferry36` FAIL NO ORBIT (computerUse cannot RMB). Spawn now looks seaward at `HOME_Z=-6835`. Next critic `http://localhost:8787/g/ferry37` (no orbit).
+- Pixel-held: inland spawn, paved ribbon, dirt ribbons, traffic, taxi overlay, ferry $15, RMB orbit, lease → House → Enter → Exit, trees + cart (`/?g=tree25`), cream ferry hull (`/g/ferry37` PASS)
+- Pixel next: shore foam `http://localhost:8787/g/shore38` (no orbit)
 - Code-held: econ HUD, stalls, pedestrians, nametags, interiors, presence, persist, north port sign, calendar / fare / tax / held-goods / faucet lines
-- Play: `http://localhost:8787/` (port 8787). New critic queries use `/g/ferryNN`
+- Play: `http://localhost:8787/` (port 8787). New critic queries use `/g/` paths. Do not ask computerUse to RMB-orbit.
 - Do not clone Capital Rift UI / Earth / OSM / wallet
 
 ### Polymarket bot
