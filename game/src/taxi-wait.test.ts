@@ -464,6 +464,39 @@ describe("taxi roof lamp", () => {
     expect(fares.length).toBeGreaterThanOrEqual(1);
   });
 
+  it("puts one tiny kraft PAPER hubcap on a taxi wheel; visor, flag, fare, plate, and mirror remain", () => {
+    const mesh = makeTaxiMesh();
+    const hubcaps: THREE.Mesh[] = [];
+    const visors: THREE.Mesh[] = [];
+    const flags: THREE.Mesh[] = [];
+    const fares: THREE.Mesh[] = [];
+    const plates: THREE.Mesh[] = [];
+    const mirrors: THREE.Mesh[] = [];
+    const kraftHubcap = new Set([0xc4a574, 0xf4ead8]);
+    mesh.traverse((obj) => {
+      const m = obj as THREE.Mesh & { userData: { part?: string; mode?: string } };
+      if (m.userData?.part === "hubcap") hubcaps.push(m);
+      if (m.userData?.part === "visor") visors.push(m);
+      if (m.userData?.part === "flag") flags.push(m);
+      if (m.userData?.part === "fare") fares.push(m);
+      if (m.userData?.part === "plate") plates.push(m);
+      if (m.userData?.part === "mirror") mirrors.push(m);
+    });
+    expect(hubcaps.length).toBeGreaterThanOrEqual(1);
+    expect(hubcaps.every((h) => h.geometry.type === "BoxGeometry")).toBe(true);
+    expect(hubcaps.every((h) => h.userData.mode === "PAPER")).toBe(true);
+    expect(
+      hubcaps.every((h) => kraftHubcap.has((h.material as THREE.MeshLambertMaterial).color.getHex())),
+    ).toBe(true);
+    expect(hubcaps.every((h) => Math.abs(h.position.x) > 1.28)).toBe(true);
+    expect(hubcaps.every((h) => h.position.y > 0.2 && h.position.y < 0.9)).toBe(true);
+    expect(visors.length).toBeGreaterThanOrEqual(1);
+    expect(flags.length).toBeGreaterThanOrEqual(1);
+    expect(fares.length).toBeGreaterThanOrEqual(1);
+    expect(plates.length).toBeGreaterThanOrEqual(1);
+    expect(mirrors.length).toBeGreaterThanOrEqual(2);
+  });
+
   it("parks the cab on paved at spawn so the roof lamp is in the first frame", () => {
     const board = createLandBoard();
     const spec = ISLANDS.north;
