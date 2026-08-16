@@ -68,15 +68,16 @@ First HTML no longer ships `Faucet — · sink —`. Flow / tax / goods now pain
 Spawn has no selected plot, so staff is `PAPER · SIMULATED · Staff —` (the dash after Staff is the empty state, not a missing HUD). Spread first HTML no longer ships `Ferry spread · PAPER`.
 `/g/hud52` **PASS HUD**: `PAPER · SIMULATED · Staff —`, `PAPER · SIMULATED · Ferry spread · N 0.00 · S 5.00`. Address `/g/hud52`.
 
-`/g/fend53` **FAIL FENDER**: cream hull in frame, but the tyre sat on the south face (`z = +6`) behind the hull from the spawn camera at `z ≈ -6888`. Fender now hangs on the north face and is larger.
+`/g/fend53` **FAIL FENDER**: cream hull in frame, but the tyre sat on the south face (`z = +6`) behind the hull from the spawn camera at `z ≈ -6888`.
+`/g/fend54` **PASS FENDER**: dark circular tyre with a kraft/cream band on the camera-facing (north) cream hull. Address `/g/fend54`.
 
 ## In flight (not ferry-only)
 
-Pixel: **kraft tyre fender on the cream ferry hull (north face)** at `http://localhost:8787/g/fend54`. Seaward spawn, no RMB. Close other Two Harbors tabs. Address bar must be `/g/fend54`. Do not restart play while the critic is on the page.
+Pixel: **quay lamps on the north timber pier** at `http://localhost:8787/g/lamps55`. Seaward spawn, no RMB. Close other Two Harbors tabs. Address bar must be `/g/lamps55`. Do not restart play while the critic is on the page.
 
-## Next pixel (after fend54 PASS, immediately, no wait)
+## Next pixel (after lamps55 PASS, immediately, no wait)
 
-Quay lamps on the pier if they read in the seaward frame. Shells+lights stay deferred until a human can orbit.
+If lamps fail because they sit behind the seaward camera, pick the next spawn-visible kraft bar (not shells+lights). Shells+lights stay deferred until a human can orbit.
 
 ## Frozen
 
