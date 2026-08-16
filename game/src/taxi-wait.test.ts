@@ -397,6 +397,28 @@ describe("taxi roof lamp", () => {
     expect(wipers.length).toBeGreaterThanOrEqual(2);
   });
 
+  it("puts a tiny kraft PAPER fare card on the taxi dash", () => {
+    const mesh = makeTaxiMesh();
+    const fares: THREE.Mesh[] = [];
+    const plates: THREE.Mesh[] = [];
+    const caps: THREE.Mesh[] = [];
+    const kraftFare = new Set([0xc4a574, 0xf4ead8]);
+    mesh.traverse((obj) => {
+      const m = obj as THREE.Mesh & { userData: { part?: string; mode?: string } };
+      if (m.userData?.part === "fare") fares.push(m);
+      if (m.userData?.part === "plate") plates.push(m);
+      if (m.userData?.part === "aerial-cap" || m.userData?.part === "cap") caps.push(m);
+    });
+    expect(fares.length).toBeGreaterThanOrEqual(1);
+    expect(fares.every((f) => f.geometry.type === "BoxGeometry")).toBe(true);
+    expect(fares.every((f) => f.userData.mode === "PAPER")).toBe(true);
+    expect(
+      fares.every((f) => kraftFare.has((f.material as THREE.MeshLambertMaterial).color.getHex())),
+    ).toBe(true);
+    expect(plates.length).toBeGreaterThanOrEqual(1);
+    expect(caps.length).toBeGreaterThanOrEqual(1);
+  });
+
   it("parks the cab on paved at spawn so the roof lamp is in the first frame", () => {
     const board = createLandBoard();
     const spec = ISLANDS.north;
