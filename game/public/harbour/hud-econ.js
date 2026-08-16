@@ -1,7 +1,10 @@
 /**
  * Harbour economy strip: NPC money supply, price index, output.
  * Polls GET /api/snapshot ~1/s. PAPER / SIMULATED. Never a wallet.
+ * Also paints #cart via cart-hud (goodId × qty).
  */
+
+import { formatCartLine } from "./cart-hud.js";
 
 export const POLL_MS = 1000;
 
@@ -28,6 +31,12 @@ export function formatEconLine(data) {
 
 export function mountEconHud(opts = {}) {
   const el = opts.el;
+  const cartEl =
+    opts.cartEl !== undefined
+      ? opts.cartEl
+      : typeof document !== "undefined" && document.getElementById
+        ? document.getElementById("cart")
+        : null;
   const fetchImpl = opts.fetch || globalThis.fetch;
   let timer = 0;
 
@@ -36,7 +45,9 @@ export function mountEconHud(opts = {}) {
     try {
       const res = await fetchImpl("/api/snapshot");
       if (!res || !res.ok) return;
-      el.textContent = formatEconLine(await res.json());
+      const data = await res.json();
+      el.textContent = formatEconLine(data);
+      if (cartEl) cartEl.textContent = formatCartLine(data);
     } catch {
       /* keep the last painted line */
     }
@@ -47,6 +58,10 @@ export function mountEconHud(opts = {}) {
     if (el.setAttribute) el.setAttribute("title", "PAPER · SIMULATED");
     refresh();
     timer = setInterval(refresh, POLL_MS);
+  }
+  if (cartEl) {
+    cartEl.textContent = formatCartLine(null);
+    if (cartEl.setAttribute) cartEl.setAttribute("title", "PAPER · SIMULATED");
   }
 
   return {
