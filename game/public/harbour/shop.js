@@ -7,7 +7,8 @@ import * as THREE from "three";
  * kraft wrapped parcel, a standing kraft shopping bag, a small kraft
  * receipt slip, a small kraft receipt, a small kraft ink stamp, a tiny
  * kraft coin, a tiny kraft blotter, a tiny kraft pencil, a tiny kraft
- * ink pad, a tiny kraft ribbon, a tiny kraft twine coil, a short wall shelf with two kraft boxes,
+ * ink pad, a tiny kraft ribbon, a tiny kraft twine coil, a tiny kraft wax
+ * seal, a short wall shelf with two kraft boxes,
  * plus two shelf bays
  * — not the house living room and not the warehouse. No WASD.
  * Tap-to-walk stays in interior.js.
@@ -449,6 +450,28 @@ function kraftTwine(x, y, z) {
 }
 
 /**
+ * Tiny kraft PAPER wax seal on the counter: wood wafer + coral blob.
+ * Paper boxes only. Beside the till — not on the twine, ribbon, inkpad,
+ * pencil, blotter, coin, or receipt. Existing hexes only.
+ */
+function kraftSeal(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "shop-seal";
+  g.userData.kind = "shop-seal";
+  g.userData.mode = "PAPER";
+  g.userData.part = "seal";
+  g.position.set(x, y, z);
+  const wafer = paperBox(0.04, 0.006, 0.04, WOOD, "shop-seal");
+  wafer.userData.part = "seal";
+  g.add(wafer);
+  const blob = paperBox(0.032, 0.01, 0.032, CORAL, "shop-seal");
+  blob.userData.part = "seal";
+  blob.position.y = 0.007;
+  g.add(blob);
+  return g;
+}
+
+/**
  * Small standing kraft PAPER shopping bag on the counter: cream body + two
  * thin strap handles. Paper boxes only. Beside the parcel / till, not on them.
  */
@@ -550,6 +573,8 @@ function makeCounter(x, z) {
   g.add(kraftRibbon(-0.95, topY + 0.054, -0.26));
   // Tiny kraft twine coil beside the till — wood winding + strap wrap.
   g.add(kraftTwine(-0.58, topY + 0.054, -0.28));
+  // Tiny kraft wax seal beside the till — wood wafer + coral blob.
+  g.add(kraftSeal(1.10, topY + 0.054, -0.28));
   // Two small kraft / terracotta jars beside the till. Original TIN + CORAL.
   const kraftJar = paperBox(0.12, 0.16, 0.12, TIN, "shop-goods");
   kraftJar.position.set(0.48, topY + 0.13, -0.04);
