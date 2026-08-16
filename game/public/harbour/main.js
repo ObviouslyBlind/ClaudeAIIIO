@@ -3,6 +3,7 @@ import { createTaxi } from "./taxi.js";
 import { makeFerry, tickFerry } from "./ferry.js";
 import { paintShoreColor, makeShoreFoam } from "./shore.js";
 import { makeQuay } from "./quay.js";
+import { createTraffic } from "./traffic.js";
 import {
   CAMERA_FAR_M,
   FOG_FAR_M,
@@ -59,6 +60,7 @@ let selected = null;
 let walking = false;
 let lastTap = 0;
 let taxi = null;
+let traffic = null;
 
 const player = new THREE.Mesh(
   new THREE.CapsuleGeometry(0.55, 1.15, 4, 8),
@@ -688,6 +690,7 @@ function onResize() {
 
 function tick(dt) {
   if (taxi) taxi.tick(dt);
+  if (traffic) traffic.tick(dt);
   if (walking) {
     const dx = walkTarget.x - player.position.x;
     const dz = walkTarget.z - player.position.z;
@@ -750,6 +753,12 @@ async function boot() {
     },
     setStatus,
     button: btnTaxi,
+  });
+  traffic = createTraffic({
+    scene,
+    getMap: () => map,
+    specOf,
+    heightAt,
   });
   spawnAt("north");
   setStatus("Tap a piece of land. Lease it, then develop it.");

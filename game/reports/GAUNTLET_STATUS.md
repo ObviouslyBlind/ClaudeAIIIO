@@ -1,15 +1,15 @@
-# Gauntlet status — harbour land (round 10)
+# Gauntlet status — harbour land (round 11)
 
-**Round 9 critic (live page):** HUD PASS. Islands FAIL (read as thin cays from spawn). Road FAIL (critic still reported a highway kit — treat as untrusted vs current spline, but spawn framing was wrong either way).
+**Round 10 critic:** inland spawn PASS. Black tarmac PASS. HUD PASS.
 
-**This round:** Spawn camera high, looking **inland** across the island body and the black tarmac. Do not look off the beach at the channel. Cache-bust harbour JS.
+**This round:** PAPER cars loop the paved spline (road nodes). They stay on tarmac. Visible from spawn looking inland.
 
-Bar:
+Bar (live page, hard-refresh `?v=11`):
 
-1. From spawn, the landmass reads as a large island (inland hill + curving black road), not a postage-stamp beach.
-2. Paved road is a black ribbon. No kerbs/dashes in the mesh.
-3. PAPER HUD still there. Tap-walk still works.
+1. Several small vehicles move along the black road. They do not cut across fields.
+2. Round 10 still holds: inland island read, black ribbon, PAPER HUD.
+3. Tap-walk still works. Cars are decoration, not a second move scheme.
 
-Queued (not this round): traffic, taxi map, RMB camera, ferry quote, building catalog, interiors.
+Queued: taxi timeout + top-down dest, RMB camera, ferry quote, building catalog, interiors.
 
 **You are the brake.**
