@@ -182,6 +182,26 @@ describe("paper building catalogue", () => {
     expect(zs.every((z) => z > 2.6)).toBe(true);
   });
 
+  it("puts paired kraft PAPER shutter boxes beside House windows", () => {
+    const house = meshForUse("house", { area: 400 });
+    const parts: string[] = [];
+    const hexes: number[] = [];
+    house.traverse((obj: unknown) => {
+      const mesh = obj as {
+        userData?: { part?: string; mode?: string };
+        material?: { color?: { getHex: () => number } };
+      };
+      if (mesh.userData?.part !== "shutter") return;
+      parts.push("shutter");
+      expect(mesh.userData?.mode).toBe("PAPER");
+      if (mesh.material?.color) hexes.push(mesh.material.color.getHex());
+    });
+    expect(parts.length).toBeGreaterThanOrEqual(2);
+    expect(hexes.length).toBeGreaterThan(0);
+    expect(hexes).toContain(0xf4ead8);
+    expect(hexes.every((c) => c === 0x5a3a22 || c === 0xf4ead8 || c === 0x3d2a1c)).toBe(true);
+  });
+
   it("keeps a brick/kraft chimney and tiny stack on the warehouse shell", () => {
     const warehouse = meshForUse("warehouse", { area: 400 });
     const parts: string[] = [];

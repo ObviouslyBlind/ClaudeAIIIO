@@ -188,6 +188,53 @@ function addPorch(g, x, zFace, width = 2.2) {
   g.add(porch);
 }
 
+/**
+ * Paired kraft PAPER shutter boxes beside a House window so the facade
+ * reads as a cottage, not a bare pane. Original WOOD / KRAFT / FRAME —
+ * not a new hex.
+ */
+function addShutters(g, x, y, z, w = 1.05, h = 0.9, face = "+z") {
+  const alongZ = face === "+z" || face === "-z";
+  const n = face === "+z" || face === "+x" ? 1 : -1;
+  const leafW = Math.max(0.3, w * 0.36);
+  const leafH = h + 0.08;
+  const reach = w / 2 + 0.08 + leafW / 2 + 0.1;
+
+  const pair = new THREE.Group();
+  pair.name = "shutters";
+  pair.userData.part = "shutter";
+  pair.userData.mode = "PAPER";
+
+  function leaf(cx, cy, cz) {
+    if (alongZ) {
+      const board = tagPaper(part(leafW, leafH, 0.06, WOOD, false), "shutter");
+      board.position.set(cx, cy, cz);
+      const panel = tagPaper(part(leafW - 0.1, leafH - 0.12, 0.04, KRAFT, false), "shutter");
+      panel.position.set(cx, cy, cz + n * 0.03);
+      const bar = tagPaper(part(leafW - 0.08, 0.05, 0.03, FRAME, false), "shutter");
+      bar.position.set(cx, cy, cz + n * 0.05);
+      pair.add(board, panel, bar);
+    } else {
+      const board = tagPaper(part(0.06, leafH, leafW, WOOD, false), "shutter");
+      board.position.set(cx, cy, cz);
+      const panel = tagPaper(part(0.04, leafH - 0.12, leafW - 0.1, KRAFT, false), "shutter");
+      panel.position.set(cx + n * 0.03, cy, cz);
+      const bar = tagPaper(part(0.03, 0.05, leafW - 0.08, FRAME, false), "shutter");
+      bar.position.set(cx + n * 0.05, cy, cz);
+      pair.add(board, panel, bar);
+    }
+  }
+
+  if (alongZ) {
+    leaf(x - reach, y, z + n * 0.02);
+    leaf(x + reach, y, z + n * 0.02);
+  } else {
+    leaf(x + n * 0.02, y, z - reach);
+    leaf(x + n * 0.02, y, z + reach);
+  }
+  g.add(pair);
+}
+
 function addDoor(g, x, y, z, w, h) {
   const surround = part(w + 0.28, h + 0.22, 0.08, WOOD, false);
   surround.position.set(x, y, z);
@@ -284,6 +331,10 @@ function cottage(kind) {
       windowPane(g, -W * 0.38, 2.15, D / 2 + 0.08, 0.85, 0.8);
       windowPane(g, W * 0.12, 2.05, -D / 2 - 0.08, 0.9, 0.8, "-z");
       windowPane(g, W / 2 + 0.08, 2.05, 0, 0.85, 0.75, "+x");
+      addShutters(g, W * 0.28, 2.15, D / 2 + 0.08, 1.05, 0.9);
+      addShutters(g, -W * 0.38, 2.15, D / 2 + 0.08, 0.85, 0.8);
+      addShutters(g, W * 0.12, 2.05, -D / 2 - 0.08, 0.9, 0.8, "-z");
+      addShutters(g, W / 2 + 0.08, 2.05, 0, 0.85, 0.75, "+x");
     }
   }
   if (shop) {
