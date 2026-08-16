@@ -129,6 +129,42 @@ describe("NPC harbour stalls", () => {
     expect(stripes.every((c) => CLOTH.has(c))).toBe(true);
   });
 
+  it("puts one small kraft goods crate on each NPC stall counter", () => {
+    const mesh = makeStallMesh({ id: "n-test", use: "farm", island: "north", band: "field" });
+    const counter = mesh.children.find((c) => c.userData.part === "counter") as THREE.Mesh;
+    const goods = mesh.children.filter((c) => c.userData.part === "goods-crate");
+    expect(goods.length).toBe(1);
+    const crate = goods[0]!;
+    expect(crate.userData.mode).toBe("PAPER");
+    expect(crate.userData.paper).toBe(true);
+    const box = counter.geometry as THREE.BoxGeometry;
+    const counterTop = counter.position.y + box.parameters.height / 2;
+    expect(crate.position.y).toBeCloseTo(counterTop, 5);
+    expect(crate.position.z).toBeCloseTo(counter.position.z, 5);
+    expect(Math.abs(crate.position.x)).toBeLessThan(1.7);
+
+    const kraft = new Set([0x8a6238, 0x7a5230, 0x5a3a22, 0xf4ead8]);
+    const colors = hexes(crate);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.every((c) => kraft.has(c))).toBe(true);
+    expect(colors).toContain(0x8a6238);
+    expect(colors).toContain(0xf4ead8);
+    crate.traverse((obj) => {
+      const m = obj as THREE.Mesh;
+      if (!m.isMesh || m.geometry.type !== "BoxGeometry") return;
+      const g = m.geometry as THREE.BoxGeometry;
+      expect(g.parameters.width).toBeLessThan(0.55);
+      expect(g.parameters.height).toBeLessThan(0.4);
+      expect(g.parameters.depth).toBeLessThan(0.5);
+    });
+
+    const { stalls } = boot();
+    expect(stalls.group.children.length).toBeGreaterThan(0);
+    for (const child of stalls.group.children) {
+      expect(child.children.filter((c) => c.userData.part === "goods-crate").length).toBe(1);
+    }
+  });
+
   it("varies kraft / terracotta / teal canvas stripes across stalls", () => {
     const a = makeStallMesh({ id: "north-street-0", use: "stall", island: "north" });
     const b = makeStallMesh({ id: "south-street-3", use: "stall", island: "south" });
