@@ -78,3 +78,49 @@ h1 { margin: 2px 0; font-size: 20px; }
 #btn-taxi { background: #e2c04a; }
 .dock button:disabled { opacity: 0.35; }
 .dock .ghost { background: #24444c; color: var(--ink); }
+
+.taxi-map {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: 56px;
+  bottom: calc(64px + env(safe-area-inset-bottom));
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  background: rgba(8, 28, 32, 0.92);
+  border-radius: var(--radius);
+  pointer-events: auto;
+}
+.taxi-map[hidden] { display: none; }
+.taxi-map-badge {
+  margin: 0;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--btn);
+}
+.taxi-map-hint {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+#taxi-map-canvas {
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 160px;
+  height: auto;
+  touch-action: none;
+  background: #1d7a86;
+  border-radius: 6px;
+}
+#taxi-map-close {
+  min-height: 44px;
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--btn);
+  color: #1a140c;
+  font-weight: 700;
+}
