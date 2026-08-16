@@ -151,6 +151,12 @@ export function makePortSign(spec, helpers) {
   nail.userData.part = "nail";
   g.add(nail);
 
+  /** Tiny kraft screw, second fastener, offset from the nail. WOOD already in this file — PAPER box, not grey iron. */
+  const screw = part(0.05, 0.05, 0.04, WOOD, false);
+  screw.position.set(1.62, 2.52, 0.1);
+  screw.userData.part = "screw";
+  g.add(screw);
+
   g.position.set(wx, gy, wz);
   g.rotation.y = 0.42;
   return g;
