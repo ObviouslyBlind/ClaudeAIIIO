@@ -854,3 +854,64 @@ describe("factory PAPER kraft funnel", () => {
     expect(boxes).toBeGreaterThanOrEqual(2);
   });
 });
+
+function factoryPaperCorks(root: THREE.Object3D) {
+  const out: THREE.Object3D[] = [];
+  root.traverse((obj) => {
+    if (obj.userData?.part === "cork") {
+      out.push(obj);
+    }
+  });
+  return out;
+}
+
+describe("factory PAPER kraft cork", () => {
+  it("puts one tiny kraft PAPER cork on a factory bench, funnel and oilcan remain", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressFactory(scene);
+
+    const dress = interior.getObjectByName("factory-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+
+    const corks = factoryPaperCorks(dress!);
+    expect(corks.length).toBe(1);
+    const cork = corks[0];
+    expect(cork.userData.part).toBe("cork");
+    expect(cork.userData.mode).toBe("PAPER");
+    expect(cork.userData.part).not.toBe("funnel");
+    expect(cork.userData.part).not.toBe("oilcan");
+    expect(cork.userData.part).not.toBe("rag");
+
+    expect(factoryPaperFunnels(dress!).length).toBe(1);
+    expect(factoryPaperOilcans(dress!).length).toBe(1);
+
+    const funnel = factoryPaperFunnels(dress!)[0];
+    const can = factoryPaperOilcans(dress!)[0];
+    const rag = factoryRags(dress!)[0];
+    const toFunnel = Math.hypot(cork.position.x - funnel.position.x, cork.position.z - funnel.position.z);
+    const toCan = Math.hypot(cork.position.x - can.position.x, cork.position.z - can.position.z);
+    const toRag = Math.hypot(cork.position.x - rag.position.x, cork.position.z - rag.position.z);
+    expect(toFunnel).toBeGreaterThan(0.5);
+    expect(toCan).toBeGreaterThan(0.5);
+    expect(toRag).toBeGreaterThan(0.5);
+
+    const colors = hexes(cork);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.some((c) => c === KRAFT)).toBe(true);
+    expect(colors.every((c) => [KRAFT, 0x9a6a40, 0x6a4a32].includes(c))).toBe(true);
+
+    let boxes = 0;
+    cork.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        boxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.mode).toBe("PAPER");
+      }
+    });
+    expect(boxes).toBeGreaterThanOrEqual(2);
+  });
+});
