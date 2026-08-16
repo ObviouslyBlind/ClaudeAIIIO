@@ -175,3 +175,73 @@ describe("warehouse PAPER wall clipboard", () => {
     });
   });
 });
+
+describe("warehouse PAPER kraft broom", () => {
+  it("leans one kraft PAPER broom on the warehouse wall", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressWarehouse(scene);
+
+    const dress = interior.getObjectByName("warehouse-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+    expect(dress!.visible).toBe(true);
+
+    const brooms: THREE.Object3D[] = [];
+    dress!.traverse((obj) => {
+      if (obj.userData?.kind === "warehouse-broom" && obj.name === "warehouse-broom") {
+        brooms.push(obj);
+      }
+    });
+    expect(brooms.length).toBe(1);
+
+    const broom = brooms[0];
+    expect(broom.userData.kind).toBe("warehouse-broom");
+    expect(broom.userData.mode).toBe("PAPER");
+    expect(broom.position.y).toBe(0);
+    const onBack = Math.abs(broom.position.z) > 3.0;
+    const onSide = Math.abs(broom.position.x) > 3.0;
+    expect(onBack || onSide).toBe(true);
+
+    const colors = hexes(broom);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.every((c) => KRAFT.has(c))).toBe(true);
+    expect(colors.some((c) => c === 0x8a6238 || c === 0x7a5230 || c === 0x9a6a40)).toBe(true);
+    expect(colors.every((c) => !isGrey(c))).toBe(true);
+
+    let boxes = 0;
+    broom.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        boxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.kind).toBe("warehouse-broom");
+        expect(mesh.userData.mode).toBe("PAPER");
+      }
+    });
+    expect(boxes).toBeGreaterThanOrEqual(2);
+  });
+
+  it("keeps dress idempotent and hides the broom on undress", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressWarehouse(scene);
+    dressWarehouse(scene);
+    expect(interior.children.filter((c) => c.name === "warehouse-dress").length).toBe(1);
+
+    const dressed = interior.getObjectByName("warehouse-dress")!;
+    const brooms: THREE.Object3D[] = [];
+    dressed.traverse((obj) => {
+      if (obj.name === "warehouse-broom") brooms.push(obj);
+    });
+    expect(brooms.length).toBe(1);
+
+    undressWarehouse(scene);
+    const dress = interior.getObjectByName("warehouse-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.visible).toBe(false);
+    expect(interior.userData.interiorUse).toBe("house");
+  });
+});
