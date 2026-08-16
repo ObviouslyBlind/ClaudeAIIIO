@@ -17,9 +17,9 @@ renderer.shadowMap.type = THREE.BasicShadowMap;
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x7ec8d4);
-scene.fog = new THREE.Fog(0x7ec8d4, 900, 3200);
+scene.fog = new THREE.Fog(0x7ec8d4, 1600, 9000);
 
-const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.4, 4000);
+const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.4, 12000);
 
 scene.add(new THREE.HemisphereLight(0xb8e4ff, 0xc4a574, 1.15));
 const sun = new THREE.DirectionalLight(0xfff1d0, 2.1);
@@ -215,15 +215,87 @@ function box(w, h, d, color, x, y, z, shadow = true) {
   return m;
 }
 
+function part(w, h, d, color, shadow = true) {
+  const m = new THREE.Mesh(
+    new THREE.BoxGeometry(w, h, d),
+    new THREE.MeshLambertMaterial({ color }),
+  );
+  m.castShadow = shadow;
+  m.receiveShadow = true;
+  return m;
+}
+
+function houseAt(x, z, y, yaw, kind) {
+  const g = new THREE.Group();
+  g.position.set(x, y, z);
+  g.rotation.y = yaw;
+  const shop = kind === "shop";
+  const wall = shop ? 0xe8d7b8 : 0xf2e6d0;
+  const roof = shop ? 0x8a3b2a : 0x6a5340;
+  const W = shop ? 8.4 : 6.2;
+  const D = shop ? 6.6 : 5.0;
+  const H = shop ? 3.5 : 2.7;
+  const walls = part(W, H, D, wall);
+  walls.position.y = H / 2;
+  g.add(walls);
+  const slabW = W + 0.7;
+  const slabD = D * 0.7;
+  const left = part(slabW, 0.16, slabD, roof, false);
+  left.rotation.x = 0.52;
+  left.position.set(0, H + 0.85, -D * 0.2);
+  const right = part(slabW, 0.16, slabD, roof, false);
+  right.rotation.x = -0.52;
+  right.position.set(0, H + 0.85, D * 0.2);
+  g.add(left, right);
+  const door = part(1.15, 2.05, 0.1, 0x4a3220, false);
+  door.position.set(0, 1.02, D / 2 + 0.07);
+  g.add(door);
+  const win = part(1.05, 0.85, 0.08, 0x8ec4d4, false);
+  win.position.set(-W * 0.28, 2.05, D / 2 + 0.07);
+  const win2 = win.clone();
+  win2.position.x = W * 0.28;
+  g.add(win, win2);
+  if (shop) {
+    const awning = part(W * 0.92, 0.08, 1.7, 0xc45c3a, false);
+    awning.position.set(0, 2.55, D / 2 + 0.95);
+    awning.rotation.x = 0.28;
+    g.add(awning);
+  }
+  scene.add(g);
+  return g;
+}
+
+function farmAt(x, z, y, area) {
+  const g = new THREE.Group();
+  g.position.set(x, y, z);
+  const span = Math.min(15, Math.sqrt(area) * 0.48);
+  for (let i = 0; i < 5; i++) {
+    const row = part(span, 0.2, 0.65, i % 2 ? 0x6b8f3a : 0x8a6b38, false);
+    row.position.set(0, 0.12, -span * 0.32 + i * 1.1);
+    g.add(row);
+  }
+  scene.add(g);
+  houseAt(x + span * 0.3, z + span * 0.18, y, 0.35, "shed");
+  return g;
+}
+
 function makePort(spec) {
   const toward = spec.id === "north" ? 1 : -1;
   const { x, z } = spec.port;
   const y = heightAt(spec, x, z);
   const pier = box(10, 0.7, 78, 0x8a6238, x, y + 0.2, z + toward * 34);
   pier.userData.kind = "port";
-  const shed = box(16, 7, 10, 0x7b818c, x + 16, y + 3.6, z - toward * 8);
+  const wx = x + 16;
+  const wz = z - toward * 10;
+  const shed = box(18, 6.2, 11, 0xd9cbb3, wx, y + 3.2, wz);
   shed.userData.kind = "port";
-  box(16.4, 1.2, 10.4, 0xb24a32, x + 16, y + 7.4, z - toward * 8, false);
+  const roofA = box(19, 0.2, 7.2, 0x7a3a2c, wx, y + 7.1, wz - 2.2, false);
+  roofA.rotation.x = 0.42;
+  const roofB = box(19, 0.2, 7.2, 0x7a3a2c, wx, y + 7.1, wz + 2.2, false);
+  roofB.rotation.x = -0.42;
+  box(3.2, 3.6, 0.2, 0x3d2a1c, wx, y + 1.9, wz + toward * 5.6, false);
+  box(1.4, 1.1, 0.12, 0x8ec4d4, wx - 5, y + 4.2, wz + toward * 5.55, false);
+  box(1.4, 1.1, 0.12, 0x8ec4d4, wx + 5, y + 4.2, wz + toward * 5.55, false);
   for (let i = -2; i <= 2; i++) {
     box(0.35, 1.6, 0.35, 0x5a3a22, x + i * 2.2, y + 1.1, z + toward * 70, false);
   }
@@ -308,14 +380,10 @@ function useFor(p) {
   if (!p.use || useMeshes.has(p.id)) return;
   const spec = specOf(p.island);
   const y = heightAt(spec, p.x, p.z);
-  if (p.use === "farm") {
-    const patch = box(Math.min(14, Math.sqrt(p.area) * 0.45), 0.35, Math.min(14, Math.sqrt(p.area) * 0.45), 0x7a8f3d, p.x, y + 0.25, p.z, false);
-    useMeshes.set(p.id, patch);
-  } else {
-    const color = p.owner === "visitor" ? 0xb24a32 : 0x6d7380;
-    const body = box(7, 3.1, 7, color, p.x, y + 1.65, p.z);
-    useMeshes.set(p.id, body);
-  }
+  const yaw = spec.id === "north" ? 0.15 : 3.3;
+  const built =
+    p.use === "farm" ? farmAt(p.x, p.z, y, p.area) : houseAt(p.x, p.z, y, yaw, "shop");
+  useMeshes.set(p.id, built);
 }
 
 function makeParcels() {
@@ -499,7 +567,7 @@ async function boot() {
   const res = await fetch("/api/map");
   map = await res.json();
   const water = new THREE.Mesh(
-    new THREE.PlaneGeometry(5200, 5200),
+    new THREE.PlaneGeometry(18000, 18000),
     new THREE.MeshLambertMaterial({ color: 0x1d7a86 }),
   );
   water.rotation.x = -Math.PI / 2;

@@ -3,11 +3,13 @@ import {
   buildPlots,
   createLandBoard,
   developPlot,
+  distToPaved,
   findParcelAt,
   heightAt,
   ISLANDS,
   leasePlot,
   pointInRing,
+  ROAD_CLEAR,
 } from "./land.ts";
 import { createVisitor } from "./sim.ts";
 
@@ -17,7 +19,8 @@ describe("harbour land board", () => {
     const s = ISLANDS.south;
     expect(n.rx * 2).toBeGreaterThanOrEqual(1800);
     expect(s.rx * 2).toBeGreaterThanOrEqual(1800);
-    expect(s.port.z - n.port.z).toBeGreaterThan(400);
+    expect(s.port.z - n.port.z).toBeGreaterThan(3000);
+    expect(s.cz - n.cz).toBeGreaterThan(4000);
     expect(heightAt(n, n.port.x, n.port.z)).toBeGreaterThan(0.5);
     expect(heightAt(s, s.port.x, s.port.z)).toBeGreaterThan(0.5);
     expect(heightAt(n, 0, 0)).toBeLessThan(0);
@@ -40,6 +43,16 @@ describe("harbour land board", () => {
     const nMin = Math.min(...northStreet.map((p) => p.price / p.area));
     const sMax = Math.max(...southStreet.map((p) => p.price / p.area));
     expect(nMin).toBeGreaterThan(sMax);
+  });
+
+  it("keeps parcel corners off the paved road", () => {
+    const board = createLandBoard();
+    for (const p of board.plots) {
+      const spec = ISLANDS[p.island];
+      for (const [x, z] of p.ring) {
+        expect(distToPaved(spec, x, z)).toBeGreaterThanOrEqual(ROAD_CLEAR - 0.05);
+      }
+    }
   });
 
   it("lets you lease a piece of ground underfoot and then develop it", () => {
