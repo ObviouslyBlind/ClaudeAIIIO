@@ -81,7 +81,7 @@ function labelGood(g) {
   return String(g).replace(/_/g, " ");
 }
 
-/** Visible PAPER market stand: deck, posts, striped awning, counter, crates. */
+/** Visible PAPER market stand: deck, posts, striped awning, counter, crates, hanging scale. */
 export function makeStallMesh(plot) {
   const g = new THREE.Group();
   g.name = "npc-stall";
@@ -161,6 +161,39 @@ export function makeStallMesh(plot) {
   ridge.position.set(0, 2.52, -0.9);
   ridge.userData.part = "awning";
   g.add(ridge);
+
+  // Brass/wood hanging scale under the awning so the counter reads as a
+  // working stand, not an empty table. Left of the sign, over the counter.
+  // Local offset only — stall world pose stays put.
+  const scale = new THREE.Group();
+  scale.name = "hanging-scale";
+  scale.userData.part = "hanging-scale";
+  scale.userData.mode = "PAPER";
+  scale.userData.paper = true;
+  scale.position.set(-1.12, 1.78, 0.86);
+  const cord = paperBox(0.03, 0.28, 0.03, FRAME, false);
+  cord.position.y = 0.16;
+  cord.userData.part = "hanging-scale";
+  const beam = paperBox(0.48, 0.04, 0.05, WOOD, false);
+  beam.position.y = -0.02;
+  beam.userData.part = "hanging-scale";
+  const hangL = paperBox(0.02, 0.14, 0.02, FRAME, false);
+  hangL.position.set(-0.2, -0.11, 0);
+  hangL.userData.part = "hanging-scale";
+  const hangR = paperBox(0.02, 0.14, 0.02, FRAME, false);
+  hangR.position.set(0.2, -0.11, 0);
+  hangR.userData.part = "hanging-scale";
+  const panL = paperBox(0.14, 0.025, 0.14, DECK, false);
+  panL.position.set(-0.2, -0.19, 0);
+  panL.userData.part = "hanging-scale";
+  const panR = paperBox(0.14, 0.025, 0.14, DECK, false);
+  panR.position.set(0.2, -0.19, 0);
+  panR.userData.part = "hanging-scale";
+  const weight = paperBox(0.05, 0.04, 0.05, KRAFT, false);
+  weight.position.set(-0.2, -0.158, 0);
+  weight.userData.part = "hanging-scale";
+  scale.add(cord, beam, hangL, hangR, panL, panR, weight);
+  g.add(scale);
 
   const back = paperBox(3.9, 1.6, 0.12, PLASTER);
   back.position.set(0, 1.05, -1.28);
