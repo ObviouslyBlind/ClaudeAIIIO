@@ -115,7 +115,7 @@ const server = createServer(async (req, res) => {
       mode: "PAPER",
       provenance: "SIMULATED",
       note: "Quote only. Confirm deducts visitor cash, then the client spawnAt the other quay.",
-      routes: listFerryRoutes(),
+      routes: listFerryRoutes(world.statutes),
     });
     return;
   }
@@ -126,10 +126,14 @@ const server = createServer(async (req, res) => {
       json(res, 400, { ok: false, reason: "bad_json" });
       return;
     }
-    const result = confirmFerry(visitor, {
-      routeId: body.routeId != null ? String(body.routeId) : undefined,
-      from: body.from != null ? String(body.from) : undefined,
-    });
+    const result = confirmFerry(
+      visitor,
+      {
+        routeId: body.routeId != null ? String(body.routeId) : undefined,
+        from: body.from != null ? String(body.from) : undefined,
+      },
+      world.statutes,
+    );
     json(res, result.ok ? 200 : 400, { ...result, snapshot: landSnapshot(land, visitor) });
     return;
   }
