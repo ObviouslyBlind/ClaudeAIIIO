@@ -9,7 +9,6 @@ import {
   SPAWN_SPAN_M,
 } from "../public/harbour/traffic.js";
 import { projectOnPolyline } from "../public/harbour/taxi.js";
-import { CAMERA_FAR_M, spawnCameraOffset, spawnLookAtOffset } from "../public/harbour/roads.js";
 
 describe("road node traffic", () => {
   it("keeps sampled cars on the paved spline, never on dirt", () => {
@@ -57,7 +56,7 @@ describe("road node traffic", () => {
     expect(nearest).toBeLessThan(120);
   });
 
-  it("puts at least three north cars inside the spawn camera frame", () => {
+  it("keeps north cars on the first paved stretch after a tick, not in the seaward channel", () => {
     const board = createLandBoard();
     const scene = { add() {} };
     const spec = ISLANDS.north;
@@ -73,21 +72,16 @@ describe("road node traffic", () => {
       getIslandId: () => "north" as const,
     });
     traffic.tick(0.2);
-    const o = spawnCameraOffset("north");
-    const l = spawnLookAtOffset("north");
-    const px = spec.port.x;
-    const pz = spec.port.z - 8;
-    const py = heightAt(spec, px, pz) + 1.15;
-    const cam = new THREE.PerspectiveCamera(55, 16 / 9, 0.4, CAMERA_FAR_M);
-    cam.position.set(px + o.x, py + o.y, pz + o.z);
-    cam.lookAt(px + l.x, py + l.y, pz + l.z);
-    cam.updateMatrixWorld();
-    const inFrame = (c: { mesh: { position: THREE.Vector3 } }) => {
-      const v = c.mesh.position.clone().project(cam);
-      return Math.abs(v.x) < 0.92 && Math.abs(v.y) < 0.92 && v.z < 1;
-    };
-    const visible = traffic.cars.filter((c) => c.islandId === "north" && inFrame(c));
-    expect(visible.length).toBeGreaterThanOrEqual(3);
+    const north = traffic.cars.filter((c) => c.islandId === "north");
+    expect(north.length).toBeGreaterThanOrEqual(5);
+    const nearest = Math.min(
+      ...north.map((c) => Math.hypot(c.mesh.position.x - spec.port.x, c.mesh.position.z - spec.port.z)),
+    );
+    expect(nearest).toBeLessThan(120);
+    for (const car of north) {
+      expect(car.along).toBeLessThanOrEqual(SPAWN_SPAN_M + 40);
+      expect(car.mesh.position.z).toBeLessThan(spec.port.z + 40);
+    }
   });
 
   it("builds a sedan mesh: painted body, cabin glass, bumpers, wheels — no debug mast", () => {

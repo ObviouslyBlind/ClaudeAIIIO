@@ -137,6 +137,11 @@ Record of architecture and strategy decisions with reasoning.
 **Decision:** `first-frame.js` is the only HTML module script. It imports three.js, paints sky cyan `#7ec8d4`, looks at the north ferry berth, then dynamically imports `main.js`. Sheet HUD modules load after the animation loop starts. Canvas has inline `#7ec8d4` so a critic never sees body teal `#0e4a55` as “the scene.”
 **Reason:** Pixel critics `/?g=ferry31`–`ferry33` sat 25s on “Loading 3D harbour…” with body teal showing through. Twelve HUD module tags plus `main.js` static imports delayed the first WebGL frame past the critic timeout. This is a boot-order fix, not a strategy change.
 
+## D029 — Spawn camera looks seaward at the ferry berth (2026-08-16)
+
+**Decision:** North spawn camera sits inland of the visitor (`z: -40`) and looks seaward (`look-at z: +90`) so the cream hull at `HOME_Z=-6835` is in the first frame. Do not ask computerUse critics to RMB-orbit.
+**Reason:** `/g/ferry35` FAIL HULL: inland look hid the boat behind the camera. `/g/ferry36` FAIL NO ORBIT: the critic environment cannot emit trusted right-button pointer events. Player still spawns 8 m inland of the north port. PAPER / SIMULATED. Not a live-trading change.
+
 ## D015 — Supplemental merge before save (2026-03-18)
 
 **Decision:** Move `relevant_markets_*.json` save to AFTER supplemental /markets merge.

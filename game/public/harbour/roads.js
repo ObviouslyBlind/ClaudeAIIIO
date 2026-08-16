@@ -21,17 +21,18 @@ export const CAMERA_FAR_M = 52000;
 /**
  * Spawn camera, metres from the player.
  *
- * Round 9 looked at the channel from 54 m, so the island read as a beach strip.
- * Round 10 is a third-person view from the quay looking INLAND along the tarmac
- * toward the hill, so the landmass fills the frame.
+ * Camera sits slightly inland of the visitor. Look-at aims at the channel
+ * (`spawnLookAtOffset`) so the cream ferry is in the first frame without RMB.
+ * `/g/ferry35` FAIL HULL: inland look-at hid the hull behind the camera.
+ * `/g/ferry36` FAIL NO ORBIT: computerUse cannot emit trusted RMB.
  */
 export function spawnCameraOffset(islandId) {
-  return islandId === "north" ? { x: 20, y: 24, z: 40 } : { x: 20, y: 24, z: -40 };
+  return islandId === "north" ? { x: 20, y: 24, z: -40 } : { x: 20, y: 24, z: 40 };
 }
 
-/** Metres from the player. Inland along the spine, not out to sea. */
+/** Metres from the player. Toward the channel so a critic sees the ferry without RMB. */
 export function spawnLookAtOffset(islandId) {
-  return islandId === "north" ? { x: 0, y: 5, z: -120 } : { x: 0, y: 5, z: 120 };
+  return islandId === "north" ? { x: 0, y: 1.2, z: 90 } : { x: 0, y: 1.2, z: -90 };
 }
 
 /** Drop near-duplicates so the ribbon does not fold on itself. */
