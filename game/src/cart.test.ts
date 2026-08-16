@@ -92,7 +92,7 @@ describe("player PAPER handcart", () => {
     const cart = player.getObjectByName("paper-cart")!;
     expect(cart.children.length).toBe(CART_MESH_COUNT);
     expect(meshCount(cart)).toBe(CART_MESH_COUNT);
-    expect(CART_MESH_COUNT).toBe(29);
+    expect(CART_MESH_COUNT).toBe(30);
 
     const p = parts(cart);
     expect(p).toContain("bed");
@@ -110,6 +110,7 @@ describe("player PAPER handcart", () => {
     expect(p.filter((k) => k === "apple").length).toBeGreaterThanOrEqual(1);
     expect(p.filter((k) => k === "carrot").length).toBeGreaterThanOrEqual(1);
     expect(p.filter((k) => k === "potato").length).toBeGreaterThanOrEqual(1);
+    expect(p.filter((k) => k === "onion").length).toBeGreaterThanOrEqual(1);
     expect(p.filter((k) => k === "side").length).toBe(2);
     expect(p.filter((k) => k === "end").length).toBe(2);
 
@@ -219,6 +220,28 @@ describe("player PAPER handcart", () => {
     ).toBe(true);
     expect(p.filter((k) => k === "carrot").length).toBeGreaterThanOrEqual(1);
     expect(p.filter((k) => k === "apple").length).toBeGreaterThanOrEqual(1);
+    const onions = cart.children.filter((c) => c.userData.part === "onion") as THREE.Mesh[];
+    expect(onions.length).toBeGreaterThanOrEqual(1);
+    expect(onions.every((o) => o.geometry.type === "BoxGeometry")).toBe(true);
+    expect(onions.every((o) => o.position.y > bed.position.y)).toBe(true);
+    const onionHexes = onions.map((o) => (o.material as THREE.MeshLambertMaterial).color.getHex());
+    expect(onionHexes.every((h) => h === 0x8a6238 || h === 0x7a5230 || h === 0x9a6a40 || h === 0xc4b496)).toBe(true);
+    for (const o of onions) {
+      const { width, height, depth } = (o.geometry as THREE.BoxGeometry).parameters;
+      expect(width).toBeLessThan(0.12);
+      expect(height).toBeLessThan(0.12);
+      expect(depth).toBeLessThan(0.12);
+    }
+    const onionOccupied = cart.children.filter((c) =>
+      ["potato", "carrot", "apple", "jug", "lantern"].includes(c.userData.part as string),
+    );
+    expect(
+      onions.every((o) =>
+        onionOccupied.every((x) => Math.hypot(o.position.x - x.position.x, o.position.z - x.position.z) > 0.12),
+      ),
+    ).toBe(true);
+    expect(p.filter((k) => k === "potato").length).toBeGreaterThanOrEqual(1);
+    expect(p.filter((k) => k === "carrot").length).toBeGreaterThanOrEqual(1);
   });
 
   it("is idempotent and never writes player.position", () => {
