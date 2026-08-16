@@ -129,7 +129,7 @@ describe("harbour PAPER pedestrians", () => {
 
     const quay = people.filter((p) => p.lane === "quay");
     const verge = people.filter((p) => p.lane === "verge");
-    expect(quay.length).toBeGreaterThanOrEqual(3);
+    expect(quay.length).toBeGreaterThanOrEqual(6);
     expect(verge.length).toBeGreaterThanOrEqual(4);
 
     const port = ISLANDS.north.port;
