@@ -17,6 +17,8 @@ const INK = "#3d2a1c";
 const STAMP = "#7a2e22";
 /** Canvas-card fold is on. Not a 3D mesh. */
 export const NAMETAG_FOLD = true;
+/** Canvas-card punch-hole / string grommet is on. Not a 3D mesh. */
+export const NAMETAG_HOLE = true;
 
 const SKIN = 0xf2d2a8;
 const PANTS = 0x6e4a32;
@@ -91,6 +93,29 @@ function drawFoldedCorner(ctx, w) {
 }
 
 /**
+ * Tiny kraft punch-hole / string grommet at the top-centre of the card.
+ * Canvas only — PAPER_EDGE washer + INK hole. Not a 3D mesh.
+ */
+function drawPunchHole(ctx, w) {
+  if (!NAMETAG_HOLE) return;
+  const cx = w / 2;
+  const cy = 16;
+  ctx.save();
+  ctx.fillStyle = PAPER_EDGE;
+  ctx.beginPath();
+  ctx.arc(cx, cy, 8, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = INK;
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  ctx.fillStyle = INK;
+  ctx.beginPath();
+  ctx.arc(cx, cy, 4, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+/**
  * Kraft rubber stamp: dashed box + tracked PAPER. Same ink family as the
  * ferry ticket. Sits under the name so brown name ink stays readable.
  */
@@ -115,7 +140,7 @@ function drawPaperStamp(ctx, cx, cy) {
   ctx.restore();
 }
 
-/** Paint kraft card: face, edge, folded corner, name, PAPER stamp. */
+/** Paint kraft card: face, edge, folded corner, punch-hole, name, PAPER stamp. */
 export function paintPaperNametagCard(ctx, w, h, name) {
   ctx.fillStyle = PAPER_FACE;
   ctx.fillRect(0, 0, w, h);
@@ -124,6 +149,7 @@ export function paintPaperNametagCard(ctx, w, h, name) {
   ctx.strokeRect(6, 6, w - 12, h - 12);
 
   drawFoldedCorner(ctx, w);
+  drawPunchHole(ctx, w);
 
   ctx.fillStyle = INK;
   ctx.font = "600 44px Georgia, 'Times New Roman', serif";
@@ -134,7 +160,7 @@ export function paintPaperNametagCard(ctx, w, h, name) {
   drawPaperStamp(ctx, w / 2, h - 36);
 }
 
-/** Simple canvas card: name in ink, PAPER stamp, folded kraft corner. */
+/** Simple canvas card: name in ink, PAPER stamp, folded kraft corner, punch-hole. */
 export function makePaperNametag(name) {
   if (typeof document === "undefined") return null;
   const w = 512;
