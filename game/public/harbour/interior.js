@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { dressFactory, isFactoryPlot, undressFactory } from "./factory.js";
 import { dressWarehouse, isWarehousePlot, undressWarehouse } from "./warehouse.js";
 import { dressShop, isShopPlot, undressShop } from "./shop.js";
+import { dressHouseShop, isHouseShopPlot, undressHouseShop } from "./house-shop.js";
 
 /** Player eye-height on the downstairs floor, metres. */
 export const DOWNSTAIRS_Y = 1.15;
@@ -443,22 +444,34 @@ export function createInterior({ scene, player, setStatus, heightAt, specOf }) {
     if (isFactoryPlot(p)) {
       undressWarehouse(scene);
       undressShop(scene);
+      undressHouseShop(scene);
       dressFactory(scene);
       if (setStatus) setStatus("Inside factory (PAPER). Tap the door or Exit to leave.");
     } else if (isWarehousePlot(p)) {
       undressFactory(scene);
       undressShop(scene);
+      undressHouseShop(scene);
       dressWarehouse(scene);
       if (setStatus) setStatus("Inside warehouse (PAPER). Tap the door or Exit to leave.");
+    } else if (isHouseShopPlot(p)) {
+      undressWarehouse(scene);
+      undressFactory(scene);
+      undressShop(scene);
+      dressHouseShop(scene);
+      if (setStatus) {
+        setStatus("Inside house-shop (PAPER). Counter downstairs, living room at the back. Exit at the door.");
+      }
     } else if (isShopPlot(p)) {
       undressWarehouse(scene);
       undressFactory(scene);
+      undressHouseShop(scene);
       dressShop(scene);
       if (setStatus) setStatus("Inside shop (PAPER). Tap the door or Exit to leave.");
     } else {
       undressWarehouse(scene);
       undressFactory(scene);
       undressShop(scene);
+      undressHouseShop(scene);
       if (setStatus) {
         setStatus("Inside downstairs (PAPER). Tap stairs for upstairs. Exit returns to your plot.");
       }
@@ -471,6 +484,7 @@ export function createInterior({ scene, player, setStatus, heightAt, specOf }) {
     undressWarehouse(scene);
     undressFactory(scene);
     undressShop(scene);
+    undressHouseShop(scene);
     const left = plot;
     inside = false;
     group.visible = false;
