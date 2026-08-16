@@ -55,13 +55,6 @@ function makeCar(color) {
   cabin.position.set(0, 2.0, -0.3);
   cabin.frustumCulled = false;
   g.add(cabin);
-  const mast = new THREE.Mesh(
-    new THREE.BoxGeometry(0.35, 10, 0.35),
-    new THREE.MeshLambertMaterial({ color: 0xff2a1a, emissive: 0xff2a1a, emissiveIntensity: 0.5 }),
-  );
-  mast.position.y = 6.5;
-  mast.frustumCulled = false;
-  g.add(mast);
   g.userData.kind = "traffic";
   return g;
 }

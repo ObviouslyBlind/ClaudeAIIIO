@@ -8,6 +8,7 @@ import {
   heightAt,
   ISLANDS,
   leasePlot,
+  DEVELOP_COST,
   pavedPolyline,
   pointInRing,
   roadNodes,
@@ -101,6 +102,19 @@ describe("harbour land board", () => {
 
     const again = developPlot(board, visitor, vacant.id, "stall");
     expect(again.ok).toBe(false);
+  });
+
+  it("refuses a lease that would leave too little PAPER to develop", () => {
+    const board = createLandBoard();
+    const visitor = createVisitor(1_000);
+    const plot = board.plots.find((p) => !p.owner && p.class === "by_right")!;
+    plot.price = 1_000 - DEVELOP_COST + 1;
+    const result = leasePlot(board, visitor, plot.id);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.reason).toBe("need_develop_cash");
+    expect(visitor.cash).toBe(1_000);
+    expect(plot.owner).toBeNull();
   });
 
   it("counts standing inside a large field as on that parcel, not only the centroid", () => {
