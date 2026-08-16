@@ -57,6 +57,7 @@ describe("player PAPER visor", () => {
     expect(p).toContain("buckle");
     expect(p.filter((k) => k === "pocket").length).toBeGreaterThanOrEqual(1);
     expect(p.filter((k) => k === "cuff").length).toBeGreaterThanOrEqual(2);
+    expect(p.filter((k) => k === "button").length).toBe(1);
 
     const visor = figure.children.find((c) => c.userData.part === "visor") as THREE.Mesh;
     const hats = figure.children.filter((c) => c.userData.part === "hat") as THREE.Mesh[];
@@ -81,6 +82,19 @@ describe("player PAPER visor", () => {
     expect(pocket.position.z).toBeGreaterThan(0.12);
     const pocketBox = pocket.geometry as THREE.BoxGeometry;
     expect(pocketBox.parameters.depth).toBeLessThan(0.08);
+
+    const button = figure.children.find((c) => c.userData.part === "button") as THREE.Mesh;
+    expect(button).toBeTruthy();
+    expect(button.geometry.type).toBe("BoxGeometry");
+    expect((button.material as THREE.MeshLambertMaterial).color.getHex()).toBe(KRAFT);
+    expect(button.position.y).toBeGreaterThan(1.2);
+    expect(button.position.y).toBeLessThan(1.42);
+    expect(button.position.z).toBeGreaterThan(0.12);
+    expect(Math.abs(button.position.x)).toBeLessThan(0.2);
+    const buttonBox = button.geometry as THREE.BoxGeometry;
+    expect(buttonBox.parameters.width).toBeLessThan(0.08);
+    expect(buttonBox.parameters.height).toBeLessThan(0.08);
+    expect(buttonBox.parameters.depth).toBeLessThan(0.06);
 
     const cuffs = figure.children.filter((c) => c.userData.part === "cuff") as THREE.Mesh[];
     expect(cuffs.length).toBeGreaterThanOrEqual(2);
