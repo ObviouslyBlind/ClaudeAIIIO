@@ -255,6 +255,20 @@ function addKraftPaperParcel(figure) {
 }
 
 /**
+ * Tiny kraft PAPER flask on the left hip. Original straw hex already
+ * in this file — no new grey. PAPER box only. Hat, apron, satchel,
+ * gloves, tin, pin, basket, loaf, parcel, boots stay. Offset from the
+ * lunch tin and the right-hand parcel.
+ */
+function addKraftPaperFlask(figure) {
+  const flask = paperBox(0.06, 0.1, 0.05, STRAW);
+  flask.position.set(-0.38, 0.86, 0.16);
+  flask.userData.mode = "PAPER";
+  flask.userData.part = "flask";
+  figure.add(flask);
+}
+
+/**
  * Short kraft work-boot shafts above each shoe so dock hands read as
  * boots, not socks on boxes. Original shoe hex already in this file —
  * no new grey. PAPER boxes only. Existing shoes stay.
@@ -436,6 +450,7 @@ export function makePedestrians(map, helpers) {
       addKraftPaperBasket(person.mesh);
       addKraftPaperLoaf(person.mesh);
       addKraftPaperParcel(person.mesh);
+      addKraftPaperFlask(person.mesh);
       lightQuayShirt(person.mesh);
     }
     const at = samplePerson(spec, heightAt, person, along);
