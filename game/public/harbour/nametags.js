@@ -21,6 +21,8 @@ export const NAMETAG_FOLD = true;
 export const NAMETAG_HOLE = true;
 /** Tiny kraft PAPER clip on the card. 3D box, existing walker hex. */
 export const NAMETAG_CLIP = true;
+/** Tiny kraft PAPER string/cord on the card. 3D box, existing walker hex. */
+export const NAMETAG_STRING = true;
 
 const SKIN = 0xf2d2a8;
 const PANTS = 0x6e4a32;
@@ -72,6 +74,25 @@ export function makeNametagClip() {
   clip.material.depthTest = false;
   clip.position.set(-0.4, 0.9, 0.06);
   return clip;
+}
+
+/**
+ * Tiny kraft PAPER string/cord hanging near the punch-hole. HAIR brown box —
+ * not grey twine. Offset from the clip (top-left), fold (top-right), and
+ * punch-hole (top-centre). Sprite-local so it stays a cord on the kraft card.
+ */
+export function makeNametagString() {
+  const cord = paperBox(0.018, 0.2, 0.018, HAIR);
+  cord.name = "paper-nametag-string";
+  cord.userData.part = "string";
+  cord.userData.mode = "PAPER";
+  cord.castShadow = false;
+  cord.receiveShadow = false;
+  cord.frustumCulled = false;
+  cord.renderOrder = 4;
+  cord.material.depthTest = false;
+  cord.position.set(0.16, 0.58, 0.05);
+  return cord;
 }
 
 /** Tracked letters so PAPER reads as a stamp even without canvas letterSpacing. */
@@ -215,6 +236,7 @@ export function makePaperNametag(name) {
   sprite.userData.kind = "nametag";
   sprite.userData.paperName = name;
   if (NAMETAG_CLIP) sprite.add(makeNametagClip());
+  if (NAMETAG_STRING) sprite.add(makeNametagString());
   return sprite;
 }
 

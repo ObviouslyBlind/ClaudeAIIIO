@@ -357,4 +357,50 @@ describe("ferry berth", () => {
     new THREE.Box3().setFromObject(fender).getSize(fenderSize);
     expect(Math.max(fenderSize.x, fenderSize.y, fenderSize.z)).toBeGreaterThan(2.4);
   });
+
+  it("sits one tiny kraft PAPER horn on the ferry; fender stays north and large", () => {
+    expect(HOME_Z).toBe(-6835);
+    const mesh = makeFerry();
+    expect(mesh.position.z).toBe(-6835);
+    const tagged: THREE.Object3D[] = [];
+    mesh.traverse((obj) => {
+      if (obj.userData?.part) tagged.push(obj);
+    });
+    const horns = tagged.filter((o) => o.userData.part === "horn");
+    const fenders = tagged.filter((o) => o.userData.part === "fender");
+    expect(horns.length).toBeGreaterThanOrEqual(1);
+    expect(fenders.length).toBeGreaterThanOrEqual(1);
+
+    const horn = horns[0];
+    expect(horn.userData.part).toBe("horn");
+    expect(horn.userData.mode).toBe("PAPER");
+    const hornSize = new THREE.Vector3();
+    new THREE.Box3().setFromObject(horn).getSize(hornSize);
+    expect(hornSize.x).toBeLessThan(0.8);
+    expect(hornSize.y).toBeLessThan(0.5);
+    expect(hornSize.z).toBeLessThan(0.8);
+    horn.traverse((child) => {
+      const m = child as THREE.Mesh;
+      if (!m.isMesh) return;
+      expect(m.geometry.type).toBe("BoxGeometry");
+      const hex = (m.material as THREE.MeshLambertMaterial).color.getHex();
+      expect(HAWSER_HEXES.has(hex)).toBe(true);
+    });
+
+    for (const name of ["hawser", "fender", "bucket", "oar", "cleat", "rail"]) {
+      for (const other of tagged) {
+        if (other === horn) continue;
+        if (other.userData.part !== name) continue;
+        const dx = horn.position.x - other.position.x;
+        const dz = horn.position.z - other.position.z;
+        expect(Math.hypot(dx, dz)).toBeGreaterThan(1.5);
+      }
+    }
+
+    const fender = fenders[0];
+    expect(fender.position.z).toBeLessThan(-5.5);
+    const fenderSize = new THREE.Vector3();
+    new THREE.Box3().setFromObject(fender).getSize(fenderSize);
+    expect(Math.max(fenderSize.x, fenderSize.y, fenderSize.z)).toBeGreaterThan(2.4);
+  });
 });

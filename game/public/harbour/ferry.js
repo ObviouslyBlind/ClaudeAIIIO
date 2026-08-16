@@ -194,6 +194,27 @@ function deckOar(x, y, z) {
 }
 
 /**
+ * Tiny kraft PAPER ship's horn on the wheelhouse roof. POST base,
+ * BOOT body, DECK bell. Boxes only — not the hawser, fender, bucket,
+ * oar, cleat, or rail. No grey.
+ */
+function roofHorn(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "horn";
+  g.userData.part = "horn";
+  g.userData.mode = "PAPER";
+  g.position.set(x, y, z);
+  const base = part(0.1, 0.06, 0.1, POST, false);
+  base.position.y = 0.03;
+  const body = part(0.28, 0.08, 0.08, BOOT, false);
+  body.position.set(0.08, 0.1, 0);
+  const bell = part(0.1, 0.12, 0.12, DECK, false);
+  bell.position.set(0.24, 0.1, 0);
+  g.add(base, body, bell);
+  return g;
+}
+
+/**
  * Tiny kraft PAPER hawser coil: stacked DECK/POST/BOOT boxes on the
  * timber deck. Boxes only — not the fender, bucket, oar, cleat, rail,
  * bollard, life ring, lantern, handle, or funnel smoke. No grey.
@@ -401,6 +422,8 @@ export function makeFerry() {
   g.add(wheelRoof);
   // PAPER lantern sits on the starboard wheelhouse roof, clear of the funnel.
   g.add(roofLantern(8.6, 6.52, 2.55));
+  // PAPER horn sits on the wheelhouse bow, clear of hawser/fender/bucket/oar/cleat/rail.
+  g.add(roofHorn(10.2, 6.28, 0));
 
   const door = part(1.15, 2.05, 0.12, DOOR, false);
   door.position.set(-9.4, 2.88, -3.86);
