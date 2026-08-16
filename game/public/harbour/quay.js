@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { makePortSign } from "./port-sign.js";
 import { makeSouthSign } from "./south-sign.js";
+import { makeQuayLamps } from "./quay-lamps.js";
 
 function part(w, h, d, color, shadow = true) {
   const m = new THREE.Mesh(
@@ -401,6 +402,9 @@ export function makeQuay(spec, helpers) {
 
   const southSign = makeSouthSign(spec, helpers);
   if (southSign) root.add(southSign);
+
+  const lamps = makeQuayLamps(spec, helpers);
+  if (lamps) root.add(lamps);
 
   helpers.scene.add(root);
   return root;
