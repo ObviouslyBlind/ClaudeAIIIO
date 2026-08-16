@@ -85,7 +85,7 @@ function labelGood(g) {
   return String(g).replace(/_/g, " ");
 }
 
-/** Visible PAPER market stand: deck, posts, price board, striped awning, counter, crates, hanging scale, produce basket, oil lantern, melon, kraft cone. */
+/** Visible PAPER market stand: deck, posts, price board, striped awning, counter, crates, hanging scale, produce basket, oil lantern, melon, kraft cone, hanging fish. */
 export function makeStallMesh(plot) {
   const g = new THREE.Group();
   g.name = "npc-stall";
@@ -320,6 +320,29 @@ export function makeStallMesh(plot) {
   lanternBase.userData.part = "lantern";
   lantern.add(lanternCord, lanternBail, lanternHood, lanternGlass, lanternPane, lanternBase);
   g.add(lantern);
+
+  // One small kraft hanging fish under the awning, offset from the lantern,
+  // so the stall reads as a harbour stand. PAPER body + tail boxes. Harbour
+  // teal already in this file (silver-teal 0x8ec4d4 is not imported here).
+  // Local offset only — stall world pose stays put. Melon, cone, lantern,
+  // scale, and basket stay put.
+  const fish = new THREE.Group();
+  fish.name = "fish";
+  fish.userData.part = "fish";
+  fish.userData.mode = "PAPER";
+  fish.userData.paper = true;
+  fish.position.set(0.58, 1.86, 0.18);
+  const fishCord = paperBox(0.02, 0.16, 0.02, FRAME, false);
+  fishCord.position.y = 0.12;
+  fishCord.userData.part = "fish";
+  const fishBody = paperBox(0.2, 0.07, 0.1, TEAL, false);
+  fishBody.position.set(0.02, -0.02, 0);
+  fishBody.userData.part = "fish";
+  const fishTail = paperBox(0.08, 0.06, 0.08, TEAL, false);
+  fishTail.position.set(-0.12, -0.02, 0);
+  fishTail.userData.part = "fish";
+  fish.add(fishCord, fishBody, fishTail);
+  g.add(fish);
 
   const back = paperBox(3.9, 1.6, 0.12, PLASTER);
   back.position.set(0, 1.05, -1.28);
