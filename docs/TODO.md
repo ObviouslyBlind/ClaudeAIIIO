@@ -12,8 +12,8 @@ Politics frozen. See `game/reports/GAUNTLET_STATUS.md`.
 - [x] Pixel: dirt ribbons (`/?g=dirt24` PASS)
 - [x] Visitor PAPER bid/ask vs NPC books
 - [x] Staff slots on developed plots
-- [x] Pixel remaining meshes (cars `/?g=cars26` PASS)
-- [ ] Pixel remaining meshes (taxi, ferry, shore, quay, shells)
+- [x] Pixel remaining meshes (cars `/?g=cars26` PASS, taxi cab `/?g=taxi27` PASS)
+- [ ] Pixel remaining meshes (ferry, shore, quay, shells)
 
 ## Polymarket paper bot
 
