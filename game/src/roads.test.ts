@@ -4,6 +4,7 @@ import { createLandBoard, heightAt, ISLANDS } from "./land.ts";
 import {
   ASPHALT,
   CAMERA_FAR_M,
+  DIRT,
   DIRT_WIDTH_M,
   FOG_FAR_M,
   FOG_NEAR_M,
@@ -48,9 +49,11 @@ describe("paved street from spawn", () => {
       m.userData.roadKind === "centre-line" || m.userData.roadKind === "verge" || m.userData.roadKind === "curb",
     );
     const pavedRoads = map.roads.filter((r) => r.kind === "paved");
+    const dirtRoads = map.roads.filter((r) => r.kind === "dirt");
 
     expect(paved.length).toBe(pavedRoads.length);
     expect(extras.length).toBe(0);
+    expect(dirt.length).toBe(dirtRoads.length);
     expect(dirt.length).toBeGreaterThan(4);
 
     expect(PAVED_WIDTH_M).toBeGreaterThanOrEqual(6);
@@ -58,18 +61,60 @@ describe("paved street from spawn", () => {
     expect(paved[0].geometry.parameters).toBeUndefined();
     expect(ribbonWidthM(paved[0])).toBeCloseTo(PAVED_WIDTH_M, 3);
     expect(paved[0].userData.widthM).toBe(PAVED_WIDTH_M);
-    expect(dirt[0].geometry.parameters?.width).toBe(DIRT_WIDTH_M);
+    expect(dirt[0].geometry.parameters).toBeUndefined();
+    expect(ribbonWidthM(dirt[0])).toBeCloseTo(DIRT_WIDTH_M, 3);
+    expect(dirt[0].userData.widthM).toBe(DIRT_WIDTH_M);
+    expect(DIRT_WIDTH_M).toBe(2.6);
     expect(DIRT_WIDTH_M).toBeLessThan(4);
 
     expect(paved[0].material.color.getHex()).toBe(ASPHALT);
+    expect(dirt[0].material.color.getHex()).toBe(DIRT);
+    expect(DIRT).toBe(0x8a6238);
     expect(lum(ASPHALT)).toBeLessThan(0.12);
     expect(lum(dirt[0].material.color.getHex())).toBeGreaterThan(lum(ASPHALT));
 
     const dirtKinds = new Set(map.roads.filter((r) => r.kind === "dirt").map((r) => r.kind));
     expect(dirtKinds.has("dirt")).toBe(true);
-    expect(added.some((m) => m.userData.roadKind === "dirt" && (m.geometry.parameters?.width ?? 0) >= 6)).toBe(
-      false,
-    );
+    expect(added.some((m) => m.userData.roadKind === "dirt" && ribbonWidthM(m) >= 6)).toBe(false);
+  });
+
+  it("extrudes each dirt polyline as one brown ribbon, not a chain of box slabs", () => {
+    const map = createLandBoard();
+    const added: RoadMesh[] = [];
+    const scene = { add(obj: RoadMesh) { added.push(obj); } };
+    makeRoads(map, { scene, specOf: (id: "north" | "south") => ISLANDS[id], heightAt });
+
+    const dirt = added.filter((m) => m.userData.roadKind === "dirt");
+    const dirtRoads = map.roads.filter((r) => r.kind === "dirt");
+    expect(dirt.length).toBe(dirtRoads.length);
+
+    for (let i = 0; i < dirt.length; i++) {
+      const mesh = dirt[i];
+      const pts = dirtRoads[i].points;
+      const pos = mesh.geometry.attributes.position;
+      expect(mesh.geometry.parameters).toBeUndefined();
+      expect(pos.count).toBeGreaterThanOrEqual(8);
+      expect(mesh.geometry.index?.count ?? 0).toBeGreaterThan(24);
+      expect(ribbonWidthM(mesh)).toBeCloseTo(DIRT_WIDTH_M, 3);
+      expect(mesh.userData.widthM).toBe(DIRT_WIDTH_M);
+      expect(mesh.material.color.getHex()).toBe(DIRT);
+
+      const start = { x: pos.getX(0), z: pos.getZ(0) };
+      const last = pos.count - 4;
+      const end = { x: pos.getX(last), z: pos.getZ(last) };
+      const firstPt = pts[0];
+      const lastPt = pts[pts.length - 1];
+      const startDist = Math.min(
+        Math.hypot(start.x - firstPt.x, start.z - firstPt.z),
+        Math.hypot(start.x - lastPt.x, start.z - lastPt.z),
+      );
+      const endDist = Math.min(
+        Math.hypot(end.x - firstPt.x, end.z - firstPt.z),
+        Math.hypot(end.x - lastPt.x, end.z - lastPt.z),
+      );
+      expect(startDist).toBeLessThan(DIRT_WIDTH_M);
+      expect(endDist).toBeLessThan(DIRT_WIDTH_M);
+    }
   });
 
   it("extrudes each paved polyline as one mesh, not a chain of box slabs", () => {

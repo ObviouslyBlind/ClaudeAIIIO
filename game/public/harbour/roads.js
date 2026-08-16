@@ -31,21 +31,6 @@ export function spawnLookAtOffset(islandId) {
   return islandId === "north" ? { x: 0, y: 5, z: -120 } : { x: 0, y: 5, z: 120 };
 }
 
-function addBox(scene, w, h, d, color, x, y, z, yaw, roadKind) {
-  const m = new THREE.Mesh(
-    new THREE.BoxGeometry(w, h, d),
-    new THREE.MeshLambertMaterial({ color }),
-  );
-  m.position.set(x, y, z);
-  m.rotation.y = yaw;
-  m.castShadow = false;
-  m.receiveShadow = true;
-  m.userData.kind = "ground";
-  m.userData.roadKind = roadKind;
-  scene.add(m);
-  return m;
-}
-
 /** Drop near-duplicates so the ribbon does not fold on itself. */
 function ribbonStations(points) {
   const pts = [];
@@ -57,14 +42,14 @@ function ribbonStations(points) {
 }
 
 /**
- * One asphalt prism along the polyline: mitered left/right edges, world-up
- * (no Frenet twist). Reads as a continuous tarmac ribbon, not paving slabs.
+ * One prism along the polyline: mitered left/right edges, world-up
+ * (no Frenet twist). Reads as a continuous ribbon, not paving slabs.
  */
-function drawPaved(scene, spec, road, heightAt) {
+function drawRibbon(scene, spec, road, heightAt, widthM, color, roadKind) {
   const pts = ribbonStations(road.points);
   if (pts.length < 2) return;
 
-  const half = PAVED_WIDTH_M / 2;
+  const half = widthM / 2;
   const thick = 0.14;
   const n = pts.length;
   const positions = new Float32Array(n * 12);
@@ -136,27 +121,21 @@ function drawPaved(scene, spec, road, heightAt) {
   geo.setIndex(indices);
   geo.computeVertexNormals();
 
-  const m = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ color: ASPHALT }));
+  const m = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ color }));
   m.castShadow = false;
   m.receiveShadow = true;
   m.userData.kind = "ground";
-  m.userData.roadKind = "paved";
-  m.userData.widthM = PAVED_WIDTH_M;
+  m.userData.roadKind = roadKind;
+  m.userData.widthM = widthM;
   scene.add(m);
 }
 
+function drawPaved(scene, spec, road, heightAt) {
+  drawRibbon(scene, spec, road, heightAt, PAVED_WIDTH_M, ASPHALT, "paved");
+}
+
 function drawDirt(scene, spec, road, heightAt) {
-  for (let i = 0; i < road.points.length - 1; i++) {
-    const a = road.points[i];
-    const b = road.points[i + 1];
-    const len = Math.hypot(b.x - a.x, b.z - a.z);
-    if (len < 1) continue;
-    const mx = (a.x + b.x) / 2;
-    const mz = (a.z + b.z) / 2;
-    const y = heightAt(spec, mx, mz) + 0.07;
-    const yaw = Math.atan2(b.x - a.x, b.z - a.z);
-    addBox(scene, DIRT_WIDTH_M, 0.1, len + 0.3, DIRT, mx, y, mz, yaw, "dirt");
-  }
+  drawRibbon(scene, spec, road, heightAt, DIRT_WIDTH_M, DIRT, "dirt");
 }
 
 /**
