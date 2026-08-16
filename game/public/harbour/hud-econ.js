@@ -29,43 +29,28 @@ export function formatEconLine(data) {
 export function mountEconHud(opts = {}) {
   const el = opts.el;
   const fetchImpl = opts.fetch || globalThis.fetch;
-  let lastPoll = 0;
-  let busy = false;
   let timer = 0;
 
   async function refresh() {
-    if (!el || busy || typeof fetchImpl !== "function") return;
-    busy = true;
+    if (!el || typeof fetchImpl !== "function") return;
     try {
       const res = await fetchImpl("/api/snapshot");
       if (!res || !res.ok) return;
-      const body = await res.json();
-      el.textContent = formatEconLine(body);
+      el.textContent = formatEconLine(await res.json());
     } catch {
       /* keep the last painted line */
-    } finally {
-      busy = false;
     }
-  }
-
-  function maybeRefresh(force) {
-    const now = Date.now();
-    if (!force && now - lastPoll < POLL_MS) return;
-    lastPoll = now;
-    refresh();
   }
 
   if (el) {
     el.textContent = formatEconLine(null);
     if (el.setAttribute) el.setAttribute("title", "PAPER · SIMULATED");
-    maybeRefresh(true);
-    timer = setInterval(() => maybeRefresh(), POLL_MS);
+    refresh();
+    timer = setInterval(refresh, POLL_MS);
   }
 
   return {
-    tick() {
-      maybeRefresh();
-    },
+    tick() {},
     stop() {
       if (timer) clearInterval(timer);
       timer = 0;

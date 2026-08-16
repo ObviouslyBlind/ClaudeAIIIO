@@ -67,9 +67,8 @@ describe("harbour PAPER econ strip", () => {
     expect(node.textContent).not.toContain("7777");
   });
 
-  it("polls about once a second from tick and the interval", async () => {
+  it("polls about once a second", async () => {
     vi.useFakeTimers();
-    vi.setSystemTime(1_000);
     let n = 0;
     const node = el();
     const hud = mountEconHud({
@@ -83,18 +82,14 @@ describe("harbour PAPER econ strip", () => {
     mounted.push(hud);
     await Promise.resolve();
     expect(n).toBe(1);
-
+    expect(hud.tick).toBeTypeOf("function");
     hud.tick();
     await Promise.resolve();
     expect(n).toBe(1);
 
-    vi.setSystemTime(1_000 + POLL_MS);
-    hud.tick();
-    await Promise.resolve();
+    await vi.advanceTimersByTimeAsync(POLL_MS);
     expect(n).toBe(2);
-
-    vi.advanceTimersByTime(POLL_MS);
-    await Promise.resolve();
+    await vi.advanceTimersByTimeAsync(POLL_MS);
     expect(n).toBe(3);
   });
 
