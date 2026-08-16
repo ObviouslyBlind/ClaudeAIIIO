@@ -135,4 +135,33 @@ describe("north port sign", () => {
     const screw = screws[0] as THREE.Mesh;
     expect(screw.position.distanceTo(nail.position)).toBeGreaterThan(0.05);
   });
+
+  it("faces inland with a spawn-readable two-post kraft board", () => {
+    const sign = makePortSign(ISLANDS.north, { heightAt });
+    expect(sign).not.toBeNull();
+    expect(sign!.rotation.y).toBe(0);
+
+    let board: THREE.Mesh | null = null;
+    let face: THREE.Mesh | null = null;
+    const posts: THREE.Mesh[] = [];
+    sign!.traverse((obj) => {
+      if (obj.userData?.part === "board") board = obj as THREE.Mesh;
+      if (obj.userData?.kind === "port-sign-face") face = obj as THREE.Mesh;
+      if (obj.userData?.part === "post") posts.push(obj as THREE.Mesh);
+    });
+    expect(board).not.toBeNull();
+    expect(face).not.toBeNull();
+    expect(posts.length).toBe(2);
+
+    const boardGeom = (board as THREE.Mesh).geometry as THREE.BoxGeometry;
+    expect(boardGeom.parameters.width).toBeGreaterThanOrEqual(10);
+    expect(boardGeom.parameters.height).toBeGreaterThanOrEqual(5);
+
+    const postGeom = posts[0].geometry as THREE.BoxGeometry;
+    expect(postGeom.parameters.height).toBeGreaterThanOrEqual(12);
+    expect(postGeom.parameters.width).toBeGreaterThanOrEqual(1);
+
+    expect(face!.position.z).toBeLessThan(0);
+    expect(Math.abs(face!.rotation.y)).toBeGreaterThan(3);
+  });
 });

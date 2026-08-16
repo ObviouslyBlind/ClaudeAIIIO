@@ -78,13 +78,15 @@ Spawn has no selected plot, so staff is `PAPER · SIMULATED · Staff —` (the d
 `/g/lamps57` **FAIL LAMPS**: 8 m cream cubes read as flat white pier planks, not posts with lanterns.
 `/g/lamps58` **FAIL LAMPS**: still only flat cream rectangles on the deck; no vertical dark posts with amber lanterns. **Lamp round stopped.** Code stays; not pixel-held.
 
-## In flight (not ferry-only)
+## Pixel north port sign
 
-Pixel: **north port kraft sign** (`North port · PAPER` board, east of the pier) at `http://localhost:8787/g/sign59`. Seaward spawn, no RMB. Close other Two Harbors tabs. Address bar must be `/g/sign59`. Do not restart play while the critic is on the page.
+`/g/sign59` **FAIL SIGN**: cyan sky, cream ferry, HUD `North port · PAPER`, but no standalone two-post kraft board on land east of the pier. The 4 m seaward-facing board at ~70 m read as ferry furniture. Face is now inland, board ~11×5.6 m on 14 m WOOD_DARK posts.
 
-## Next pixel (after sign59 PASS, immediately, no wait)
+Pixel: **north port kraft sign** at `http://localhost:8787/g/sign60`. Seaward spawn, no RMB. Close other Two Harbors tabs. Address bar must be `/g/sign60`. Do not restart play while the critic is on the page.
 
-Sage dinghies in the basin, or another spawn-visible kraft bar. Shells+lights stay deferred until a human can orbit.
+## Next pixel (after sign60 PASS, immediately, no wait)
+
+Sage dinghies in the basin, or another spawn-visible kraft bar. Shells+lights stay deferred until a human can orbit. Do not restart the lamp round.
 
 ## Frozen
 
