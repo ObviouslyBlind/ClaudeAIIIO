@@ -239,6 +239,33 @@ function makeCoffeeTable(x, z) {
   const cup = paperBox(0.1, 0.08, 0.1, CREAM, "house-shop-prop");
   cup.position.set(x + 0.12, topY + 0.07, z);
   g.add(cup);
+  // Kraft napkin on the table top — offset from the cup.
+  // Table-top surface is topY + half the 0.06 top.
+  g.add(makeTableNapkin(x - 0.22, topY + 0.03, z + 0.08));
+  return g;
+}
+
+/**
+ * Tiny kraft PAPER napkin on the living-room table — folded LINEN / CREAM / WOOD
+ * boxes. Offset from the table cup and from the counter cup, saucer, kettle,
+ * bell, and pad. PAPER boxes only. No new hexes.
+ */
+function makeTableNapkin(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "house-shop-napkin";
+  g.userData.kind = "house-shop-napkin";
+  g.userData.mode = "PAPER";
+  g.userData.part = "napkin";
+  g.position.set(x, y, z);
+  const sheet = paperBox(0.14, 0.01, 0.12, LINEN, "house-shop-napkin");
+  sheet.position.set(0, 0.005, 0);
+  const fold = paperBox(0.1, 0.012, 0.09, CREAM, "house-shop-napkin");
+  fold.position.set(0.015, 0.016, 0.008);
+  fold.rotation.y = 0.22;
+  const hem = paperBox(0.07, 0.01, 0.06, WOOD, "house-shop-napkin");
+  hem.position.set(-0.02, 0.022, -0.01);
+  hem.rotation.y = -0.16;
+  g.add(sheet, fold, hem);
   return g;
 }
 

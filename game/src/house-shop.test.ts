@@ -516,3 +516,95 @@ describe("house-shop PAPER cup saucer", () => {
     expect(colors.every((c) => !isGrey(c))).toBe(true);
   });
 });
+
+describe("house-shop PAPER table napkin", () => {
+  it("sits a small kraft PAPER napkin on the living-room table", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressHouseShop(scene);
+
+    const dress = interior.getObjectByName("house-shop-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+
+    const cup = dress!.getObjectByName("house-shop-cup");
+    const kettle = dress!.getObjectByName("house-shop-kettle");
+    const bell = dress!.getObjectByName("house-shop-bell");
+    const pad = dress!.getObjectByName("house-shop-pad");
+    expect(cup).toBeTruthy();
+    expect(kettle).toBeTruthy();
+    expect(bell).toBeTruthy();
+    expect(pad).toBeTruthy();
+
+    const saucers: THREE.Object3D[] = [];
+    dress!.traverse((obj) => {
+      if (obj.userData?.part === "saucer") saucers.push(obj);
+    });
+    expect(saucers.length).toBe(1);
+
+    const napkins: THREE.Object3D[] = [];
+    dress!.traverse((obj) => {
+      if (obj.userData?.part === "napkin" || obj.name === "house-shop-napkin") {
+        napkins.push(obj);
+      }
+    });
+    expect(napkins.length).toBe(1);
+
+    const napkin = napkins[0];
+    expect(napkin.userData.part).toBe("napkin");
+    expect(napkin.userData.kind).toBe("house-shop-napkin");
+    expect(napkin.userData.mode).toBe("PAPER");
+
+    const table = dress!.getObjectByName("house-shop-table");
+    expect(table).toBeTruthy();
+    expect(napkin.parent?.name).toBe("house-shop-table");
+    const top = table!.children.find((obj) => {
+      const mesh = obj as THREE.Mesh;
+      return mesh.isMesh && mesh.geometry.type === "BoxGeometry";
+    }) as THREE.Mesh;
+    expect(top).toBeTruthy();
+    const tablePos = new THREE.Vector3();
+    const napkinPos = new THREE.Vector3();
+    top.getWorldPosition(tablePos);
+    napkin.getWorldPosition(napkinPos);
+    expect(Math.hypot(napkinPos.x - tablePos.x, napkinPos.z - tablePos.z)).toBeLessThan(0.6);
+    // Coffee-table top sits near y 0.58; napkin rests on it, not the counter.
+    expect(napkinPos.y).toBeGreaterThan(0.5);
+    expect(napkinPos.y).toBeLessThan(0.75);
+
+    const xzOffset = (other: THREE.Object3D) => {
+      const otherPos = new THREE.Vector3();
+      other.getWorldPosition(otherPos);
+      return Math.hypot(napkinPos.x - otherPos.x, napkinPos.z - otherPos.z);
+    };
+    expect(xzOffset(cup!)).toBeGreaterThan(0.25);
+    expect(xzOffset(saucers[0])).toBeGreaterThan(0.25);
+    expect(xzOffset(kettle!)).toBeGreaterThan(0.25);
+    expect(xzOffset(bell!)).toBeGreaterThan(0.25);
+    expect(xzOffset(pad!)).toBeGreaterThan(0.25);
+
+    const colors = hexes(napkin);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.every((c) => c === WOOD || c === CREAM || c === LINEN)).toBe(true);
+    expect(colors.some((c) => c === LINEN || c === CREAM)).toBe(true);
+    expect(colors.every((c) => !isGrey(c))).toBe(true);
+
+    const size = new THREE.Box3().setFromObject(napkin).getSize(new THREE.Vector3());
+    expect(size.x).toBeLessThan(0.28);
+    expect(size.y).toBeLessThan(0.08);
+    expect(size.z).toBeLessThan(0.22);
+
+    let boxes = 0;
+    napkin.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        boxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.kind).toBe("house-shop-napkin");
+        expect(mesh.userData.mode).toBe("PAPER");
+      }
+    });
+    expect(boxes).toBeGreaterThanOrEqual(2);
+  });
+});
