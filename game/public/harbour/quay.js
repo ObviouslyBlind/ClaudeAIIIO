@@ -247,31 +247,33 @@ function lifeRing() {
 function gangplank() {
   const g = new THREE.Group();
   g.userData.dress = "brow";
+  g.userData.mode = "PAPER";
 
-  const sill = part(2.35, 0.18, 0.48, 0x6a4a2a);
-  sill.position.set(0, 0.09, 0.04);
+  const sill = part(4.4, 0.35, 0.9, 0x6a4a2a);
+  sill.position.set(0, 0.18, 0.08);
   g.add(sill);
 
-  const plank = part(2.05, 0.12, 6.6, 0x8a6238);
+  const plank = part(4.2, 0.4, 16, 0x8a6238);
   plank.rotation.x = -0.22;
-  plank.position.set(0, -0.56, 3.25);
+  plank.position.set(0, -0.7, 7.4);
+  plank.userData.part = "plank";
   g.add(plank);
 
-  const wear = part(1.88, 0.04, 6.4, 0x9a6a40, false);
+  const wear = part(3.8, 0.12, 15.4, 0x9a6a40, false);
   wear.rotation.x = -0.22;
-  wear.position.set(0, -0.48, 3.25);
+  wear.position.set(0, -0.48, 7.4);
   g.add(wear);
 
-  for (const sx of [-1.02, 1.02]) {
-    const postA = part(0.12, 0.72, 0.12, 0x5a3a22, false);
-    postA.position.set(sx, 0.4, 0.28);
-    const postB = part(0.12, 0.72, 0.12, 0x5a3a22, false);
-    postB.position.set(sx, -0.18, 5.25);
+  for (const sx of [-2.0, 2.0]) {
+    const postA = part(0.35, 1.6, 0.35, 0x5a3a22, false);
+    postA.position.set(sx, 0.85, 0.4);
+    const postB = part(0.35, 1.6, 0.35, 0x5a3a22, false);
+    postB.position.set(sx, -0.35, 12.6);
     g.add(postA, postB);
 
-    const rail = part(0.1, 0.08, 5.15, 0x7a5230, false);
+    const rail = part(0.28, 0.22, 12.4, 0x7a5230, false);
     rail.rotation.x = -0.22;
-    rail.position.set(sx, 0.22, 2.72);
+    rail.position.set(sx, 0.45, 6.5);
     g.add(rail);
   }
 
