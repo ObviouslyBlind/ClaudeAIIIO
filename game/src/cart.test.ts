@@ -92,7 +92,7 @@ describe("player PAPER handcart", () => {
     const cart = player.getObjectByName("paper-cart")!;
     expect(cart.children.length).toBe(CART_MESH_COUNT);
     expect(meshCount(cart)).toBe(CART_MESH_COUNT);
-    expect(CART_MESH_COUNT).toBe(24);
+    expect(CART_MESH_COUNT).toBe(26);
 
     const p = parts(cart);
     expect(p).toContain("bed");
@@ -107,6 +107,7 @@ describe("player PAPER handcart", () => {
     expect(p.filter((k) => k === "coil").length).toBe(2);
     expect(p.filter((k) => k === "lantern").length).toBe(2);
     expect(p.filter((k) => k === "jug").length).toBeGreaterThanOrEqual(1);
+    expect(p.filter((k) => k === "apple").length).toBeGreaterThanOrEqual(1);
     expect(p.filter((k) => k === "side").length).toBe(2);
     expect(p.filter((k) => k === "end").length).toBe(2);
 
@@ -158,6 +159,20 @@ describe("player PAPER handcart", () => {
     expect(
       jugs.every((j) =>
         occupied.every((o) => Math.hypot(j.position.x - o.position.x, j.position.z - o.position.z) > 0.12),
+      ),
+    ).toBe(true);
+    const apples = cart.children.filter((c) => c.userData.part === "apple") as THREE.Mesh[];
+    expect(apples.length).toBeGreaterThanOrEqual(1);
+    expect(apples.every((a) => a.geometry.type === "BoxGeometry")).toBe(true);
+    expect(apples.every((a) => a.position.y > bed.position.y)).toBe(true);
+    const appleHexes = apples.map((a) => (a.material as THREE.MeshLambertMaterial).color.getHex());
+    expect(appleHexes.every((h) => h === 0x9a6a40 || h === 0xc4b496)).toBe(true);
+    const appleOccupied = cart.children.filter((c) =>
+      ["crate", "roll", "coil", "lantern", "jug"].includes(c.userData.part as string),
+    );
+    expect(
+      apples.every((a) =>
+        appleOccupied.every((o) => Math.hypot(a.position.x - o.position.x, a.position.z - o.position.z) > 0.12),
       ),
     ).toBe(true);
   });
