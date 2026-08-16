@@ -419,6 +419,29 @@ describe("taxi roof lamp", () => {
     expect(caps.length).toBeGreaterThanOrEqual(1);
   });
 
+  it("puts one tiny kraft PAPER flag on the taxi roof; fare and plate remain", () => {
+    const mesh = makeTaxiMesh();
+    const flags: THREE.Mesh[] = [];
+    const fares: THREE.Mesh[] = [];
+    const plates: THREE.Mesh[] = [];
+    const kraftFlag = new Set([0xc4a574, 0xf4ead8]);
+    mesh.traverse((obj) => {
+      const m = obj as THREE.Mesh & { userData: { part?: string; mode?: string } };
+      if (m.userData?.part === "flag") flags.push(m);
+      if (m.userData?.part === "fare") fares.push(m);
+      if (m.userData?.part === "plate") plates.push(m);
+    });
+    expect(flags.length).toBeGreaterThanOrEqual(1);
+    expect(flags.every((f) => f.geometry.type === "BoxGeometry")).toBe(true);
+    expect(flags.every((f) => f.userData.mode === "PAPER")).toBe(true);
+    expect(
+      flags.every((f) => kraftFlag.has((f.material as THREE.MeshLambertMaterial).color.getHex())),
+    ).toBe(true);
+    expect(flags.every((f) => f.position.y > 2.0)).toBe(true);
+    expect(fares.length).toBeGreaterThanOrEqual(1);
+    expect(plates.length).toBeGreaterThanOrEqual(1);
+  });
+
   it("parks the cab on paved at spawn so the roof lamp is in the first frame", () => {
     const board = createLandBoard();
     const spec = ISLANDS.north;
