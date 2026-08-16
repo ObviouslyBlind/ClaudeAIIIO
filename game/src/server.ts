@@ -3,21 +3,24 @@ import { readFile } from "node:fs/promises";
 import { extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { GOOD_IDS, type GoodId } from "./goods.ts";
+import { createLandBoard, landSnapshot, leasePlot } from "./land.ts";
 import { buyFromStall, createVisitor, createWorld, hud, tick } from "./sim.ts";
 
 const root = join(fileURLToPath(new URL(".", import.meta.url)), "..");
 const publicDir = join(root, "public");
+const threeModule = join(root, "node_modules/three/build/three.module.js");
 const port = Number(process.env.PORT ?? 8787);
 
 const world = createWorld(7);
 const visitor = createVisitor(1_000);
+const land = createLandBoard();
 setInterval(() => tick(world), 1000);
 
 function snapshot() {
   return {
     mode: "PAPER",
     provenance: "SIMULATED",
-    note: "Live sim HUD. Not the 3D harbour. Visitor cash is paper.",
+    note: "Live sim HUD. Visitor cash is paper. Shared with harbour leases.",
     hud: hud(world),
     lastPrices: world.lastPrice,
     visitor: {
@@ -34,37 +37,81 @@ const types: Record<string, string> = {
   ".js": "text/javascript; charset=utf-8",
   ".json": "application/json; charset=utf-8",
   ".svg": "image/svg+xml",
+  ".png": "image/png",
+  ".woff2": "font/woff2",
 };
+
+function json(res: { writeHead: Function; end: Function }, code: number, body: unknown) {
+  res.writeHead(code, { "content-type": "application/json; charset=utf-8" });
+  res.end(JSON.stringify(body));
+}
+
+async function readJsonBody(req: { [Symbol.asyncIterator]: () => AsyncIterator<unknown> }) {
+  const chunks: Buffer[] = [];
+  for await (const chunk of req) chunks.push(chunk as Buffer);
+  try {
+    return JSON.parse(Buffer.concat(chunks).toString("utf8") || "{}");
+  } catch {
+    return null;
+  }
+}
 
 const server = createServer(async (req, res) => {
   const url = new URL(req.url ?? "/", `http://${req.headers.host ?? "localhost"}`);
 
   if (req.method === "GET" && url.pathname === "/api/snapshot") {
-    res.writeHead(200, { "content-type": "application/json; charset=utf-8" });
-    res.end(JSON.stringify(snapshot()));
+    json(res, 200, snapshot());
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname === "/api/map") {
+    json(res, 200, landSnapshot(land, visitor));
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/lease") {
+    const body = await readJsonBody(req);
+    if (!body) {
+      json(res, 400, { ok: false, reason: "bad_json" });
+      return;
+    }
+    const result = leasePlot(land, visitor, String(body.plotId ?? ""));
+    json(res, result.ok ? 200 : 400, { ...result, snapshot: landSnapshot(land, visitor) });
     return;
   }
 
   if (req.method === "POST" && url.pathname === "/api/buy") {
-    const chunks: Buffer[] = [];
-    for await (const chunk of req) chunks.push(chunk as Buffer);
-    let body: { good?: string; qty?: number } = {};
-    try {
-      body = JSON.parse(Buffer.concat(chunks).toString("utf8") || "{}");
-    } catch {
-      res.writeHead(400, { "content-type": "application/json" });
-      res.end(JSON.stringify({ ok: false, reason: "bad_json" }));
+    const body = await readJsonBody(req);
+    if (!body) {
+      json(res, 400, { ok: false, reason: "bad_json" });
       return;
     }
     const good = body.good as GoodId;
     const qty = Number(body.qty ?? 1);
     const result = buyFromStall(world, visitor, good, qty);
-    res.writeHead(result.ok ? 200 : 400, { "content-type": "application/json" });
-    res.end(JSON.stringify({ ...result, snapshot: snapshot() }));
+    json(res, result.ok ? 200 : 400, { ...result, snapshot: snapshot() });
     return;
   }
 
-  let filePath = join(publicDir, url.pathname === "/" ? "index.html" : url.pathname);
+  if (url.pathname === "/vendor/three.module.js") {
+    try {
+      const data = await readFile(threeModule);
+      res.writeHead(200, { "content-type": "text/javascript; charset=utf-8" });
+      res.end(data);
+    } catch {
+      res.writeHead(404);
+      res.end("three.js missing — run npm install in game/");
+    }
+    return;
+  }
+
+  let pathname = url.pathname;
+  if (pathname === "/") pathname = "/harbour/index.html";
+  if (pathname === "/harbour" || pathname === "/harbour/") pathname = "/harbour/index.html";
+  if (pathname === "/market" || pathname === "/market/") pathname = "/market/index.html";
+  if (pathname === "/play" || pathname === "/play/") pathname = "/harbour/index.html";
+
+  let filePath = join(publicDir, pathname);
   if (!filePath.startsWith(publicDir)) {
     res.writeHead(403);
     res.end("forbidden");
@@ -81,5 +128,5 @@ const server = createServer(async (req, res) => {
 });
 
 server.listen(port, "0.0.0.0", () => {
-  console.log(`Two Harbors paper HUD on http://0.0.0.0:${port}`);
+  console.log(`Two Harbors harbour on http://0.0.0.0:${port}`);
 });

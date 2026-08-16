@@ -9,3 +9,10 @@ export {
   type World,
   type Visitor,
 } from "./sim.ts";
+export {
+  createLandBoard,
+  leasePlot,
+  landSnapshot,
+  ISLANDS,
+  type Plot,
+} from "./land.ts";
