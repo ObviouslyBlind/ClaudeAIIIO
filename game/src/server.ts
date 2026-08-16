@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { GOOD_IDS, type GoodId } from "./goods.ts";
 import { createLandBoard, developPlot, landSnapshot, leasePlot } from "./land.ts";
 import { buyFromStall, createVisitor, createWorld, hud, tick } from "./sim.ts";
-import { bustHarbourAssets } from "./cache-bust.ts";
+import { bustHarbourAssets, bustModuleImports } from "./cache-bust.ts";
 
 const root = join(fileURLToPath(new URL(".", import.meta.url)), "..");
 const publicDir = join(root, "public");
@@ -141,6 +141,9 @@ const server = createServer(async (req, res) => {
     }
     if (ext === ".html") {
       data = bustHarbourAssets(data.toString("utf8"));
+    }
+    if (ext === ".js" && pathname.startsWith("/harbour/")) {
+      data = bustModuleImports(data.toString("utf8"));
     }
     res.writeHead(200, headers);
     res.end(data);
