@@ -296,8 +296,8 @@ function makeHouseShopDress() {
   // Door is at +z; enter camera looks through it at x≈0. Counter + two
   // shelf boxes sit in that strip so downstairs is not an empty dining room.
   g.add(makeCounter(0, 0.48));
-  // Six kraft/terracotta jars across the two door-facing cabinets.
-  g.add(makeShelfBox(-0.78, -0.52, 0, [[CORAL, TIN], [LINEN]]));
+  // Seven kraft/terracotta jars across the two door-facing cabinets.
+  g.add(makeShelfBox(-0.78, -0.52, 0, [[CORAL, TIN, TIN], [LINEN]]));
   g.add(makeShelfBox(0.78, -0.52, 0, [[TIN, CORAL], [CREAM]]));
   g.add(makeShortShelf(-3.28, 0.45, Math.PI / 2));
   g.add(hangingLamp(0, 2.18, 0.48));
