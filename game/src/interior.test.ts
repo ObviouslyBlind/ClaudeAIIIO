@@ -54,7 +54,7 @@ describe("owned building interiors", () => {
     expect(boxes).toBeGreaterThan(12);
   });
 
-  it("dresses PAPER rooms as a Caribbean house: windows, table, chairs, lamp, clock, picture, vase, bed", () => {
+  it("dresses PAPER rooms as a Caribbean house: windows, table, chairs, stool, lamp, clock, picture, vase, bed", () => {
     const g = makeInteriorScene();
     const down = g.getObjectByName("downstairs");
     const up = g.getObjectByName("upstairs");
@@ -76,6 +76,7 @@ describe("owned building interiors", () => {
     expect(downKinds).toContain("interior-clock");
     expect(downKinds).toContain("interior-picture");
     expect(downKinds).toContain("interior-vase");
+    expect(downKinds).toContain("interior-stool");
     expect(downKinds).toContain("interior-window");
     expect(downKinds).toContain("exit");
     expect(downKinds).toContain("interior-floor");
@@ -90,6 +91,7 @@ describe("owned building interiors", () => {
     expect(upKinds).not.toContain("interior-clock");
     expect(upKinds).not.toContain("interior-picture");
     expect(upKinds).not.toContain("interior-vase");
+    expect(upKinds).not.toContain("interior-stool");
 
     const table = down!.getObjectByName("table");
     expect(table).toBeTruthy();
@@ -310,5 +312,76 @@ describe("house PAPER vase", () => {
     expect(clockPos.z).toBeCloseTo(-3.38, 5);
     expect(up.getObjectByName("picture")).toBeFalsy();
     expect(up.getObjectByName("clock")).toBeFalsy();
+  });
+});
+
+const STOOL_HEX = new Set([0x5a3a22, 0x6e4428, 0xf3efe4]);
+
+describe("house PAPER stool", () => {
+  it("puts one kraft PAPER stool beside the downstairs table, not upstairs", () => {
+    const g = makeInteriorScene();
+    const down = g.getObjectByName("downstairs")!;
+    const up = g.getObjectByName("upstairs")!;
+    const table = down.getObjectByName("table")!;
+    expect(table).toBeTruthy();
+
+    const stools = collectKind(down, "interior-stool");
+    expect(stools.length).toBe(1);
+    expect(collectKind(up, "interior-stool").length).toBe(0);
+
+    const stool = stools[0];
+    expect(stool.userData.kind).toBe("interior-stool");
+    expect(stool.userData.mode).toBe("PAPER");
+
+    const tablePos = new THREE.Vector3();
+    table.getWorldPosition(tablePos);
+    const stoolPos = new THREE.Vector3();
+    stool.getWorldPosition(stoolPos);
+    const beside = Math.hypot(stoolPos.x - tablePos.x, stoolPos.z - tablePos.z);
+    expect(beside).toBeGreaterThan(0.7);
+    expect(beside).toBeLessThan(1.6);
+    expect(stoolPos.y).toBeLessThan(0.3);
+
+    const colors: number[] = [];
+    let legs = 0;
+    let seats = 0;
+    stool.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      const mat = mesh.material as THREE.MeshLambertMaterial | undefined;
+      if (mesh.isMesh && mat?.color) {
+        const hex = mat.color.getHex();
+        colors.push(hex);
+        expect(STOOL_HEX.has(hex)).toBe(true);
+        expect(isGrey(hex)).toBe(false);
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.kind).toBe("interior-stool");
+        expect(mesh.userData.mode).toBe("PAPER");
+        mesh.geometry.computeBoundingBox();
+        const bb = mesh.geometry.boundingBox!;
+        const h = bb.max.y - bb.min.y;
+        const w = bb.max.x - bb.min.x;
+        if (h > w * 2) legs += 1;
+        else seats += 1;
+      }
+    });
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.some((c) => c === 0xf3efe4)).toBe(true);
+    expect(colors.some((c) => c === 0x5a3a22)).toBe(true);
+    expect(legs).toBe(3);
+    expect(seats).toBeGreaterThanOrEqual(1);
+
+    const vase = down.getObjectByName("vase");
+    expect(vase).toBeTruthy();
+    expect(vase!.userData.kind).toBe("interior-vase");
+    const picture = down.getObjectByName("picture");
+    expect(picture).toBeTruthy();
+    expect(picture!.userData.kind).toBe("interior-picture");
+    const clock = down.getObjectByName("clock");
+    expect(clock).toBeTruthy();
+    expect(clock!.userData.kind).toBe("interior-clock");
+    const lamp = down.getObjectByName("lamp");
+    expect(lamp).toBeTruthy();
+    expect(lamp!.userData.kind).toBe("interior-lamp");
+    expect(up.getObjectByName("stool")).toBeFalsy();
   });
 });
