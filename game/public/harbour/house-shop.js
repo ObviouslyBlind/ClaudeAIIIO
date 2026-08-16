@@ -242,6 +242,8 @@ function makeCoffeeTable(x, z) {
   // Kraft napkin on the table top — offset from the cup.
   // Table-top surface is topY + half the 0.06 top.
   g.add(makeTableNapkin(x - 0.22, topY + 0.03, z + 0.08));
+  // Kraft spoon on the table top — offset from the cup, napkin, saucer, jars.
+  g.add(makeTableSpoon(x + 0.32, topY + 0.03, z - 0.16));
   return g;
 }
 
@@ -266,6 +268,28 @@ function makeTableNapkin(x, y, z) {
   hem.position.set(-0.02, 0.022, -0.01);
   hem.rotation.y = -0.16;
   g.add(sheet, fold, hem);
+  return g;
+}
+
+/**
+ * Tiny kraft PAPER spoon on the living-room table — wood handle, linen bowl.
+ * Offset from the table cup and napkin, and from the counter saucer / shelf
+ * jars. PAPER boxes only. No new hexes.
+ */
+function makeTableSpoon(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "house-shop-spoon";
+  g.userData.kind = "house-shop-spoon";
+  g.userData.mode = "PAPER";
+  g.userData.part = "spoon";
+  g.position.set(x, y, z);
+  const handle = paperBox(0.012, 0.008, 0.09, WOOD, "house-shop-spoon");
+  handle.position.set(0, 0.006, 0.028);
+  const neck = paperBox(0.016, 0.007, 0.018, CREAM, "house-shop-spoon");
+  neck.position.set(0, 0.007, -0.022);
+  const bowl = paperBox(0.032, 0.01, 0.03, LINEN, "house-shop-spoon");
+  bowl.position.set(0, 0.008, -0.048);
+  g.add(handle, neck, bowl);
   return g;
 }
 
