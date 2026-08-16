@@ -118,6 +118,7 @@ describe("road node traffic", () => {
     expect(parts.get("hub")).toBe(4);
     expect(parts.get("aerial")).toBe(1);
     expect(parts.get("wiper")).toBeGreaterThanOrEqual(2);
+    expect(parts.get("bolt")).toBe(1);
     expect(colors).toContain(0xc45c3a);
     expect(mast).toBe(0);
     expect(mesh.children.length).toBeGreaterThan(6);
@@ -233,6 +234,54 @@ describe("road node traffic", () => {
         expect(wiper.position.y).toBeGreaterThan(0.9);
         expect(wiper.position.y).toBeLessThan(1.5);
       }
+    }
+  });
+
+  it("puts a tiny kraft PAPER spare-tyre bolt on every sedan boot", () => {
+    const board = createLandBoard();
+    const scene = { add() {} };
+    const traffic = createTraffic({
+      scene,
+      getMap: () => board,
+      specOf: (id: "north" | "south") => ISLANDS[id],
+      heightAt,
+    });
+    expect(traffic.cars.length).toBeGreaterThan(0);
+    const wheelRubber = 0x1c1c20;
+    for (const car of traffic.cars) {
+      const bolts: THREE.Mesh[] = [];
+      let bodyHex = -1;
+      const wheelHexes: number[] = [];
+      let hubs = 0;
+      car.mesh.traverse((obj: THREE.Object3D) => {
+        const name = obj.userData?.part;
+        if (name === "bolt") bolts.push(obj as THREE.Mesh);
+        if (name === "hub") hubs += 1;
+        if (name === "body") {
+          const mat = (obj as THREE.Mesh).material as THREE.MeshLambertMaterial;
+          if (mat?.color) bodyHex = mat.color.getHex();
+        }
+        if (name === "wheel") {
+          const mat = (obj as THREE.Mesh).material as THREE.MeshLambertMaterial;
+          if (mat?.color) wheelHexes.push(mat.color.getHex());
+        }
+      });
+      expect(bolts.length).toBe(1);
+      expect(hubs).toBe(4);
+      const bolt = bolts[0]!;
+      expect(bolt.geometry.type).toBe("BoxGeometry");
+      const mat = bolt.material as THREE.MeshLambertMaterial;
+      expect(mat.color.getHex()).toBe(0xf4ead8);
+      const geo = bolt.geometry as THREE.BoxGeometry;
+      expect(geo.parameters.width).toBeLessThan(0.16);
+      expect(geo.parameters.height).toBeLessThan(0.16);
+      expect(geo.parameters.depth).toBeLessThan(0.16);
+      expect(bolt.position.z).toBeLessThan(-1.2);
+      expect(bolt.position.y).toBeGreaterThan(0.9);
+      expect(bolt.position.y).toBeLessThan(1.4);
+      expect(COLORS).toContain(bodyHex);
+      expect(wheelHexes.length).toBe(4);
+      expect(wheelHexes.every((h) => h === wheelRubber)).toBe(true);
     }
   });
 });
