@@ -2,10 +2,10 @@ import * as THREE from "three";
 
 /**
  * PAPER shop interior dress. Kraft-paper counter (cream top, wood body), a
- * small wooden till, a kraft wrapped parcel, a standing kraft shopping bag,
- * a short wall shelf with two kraft boxes, plus two shelf bays — not the
- * house living room and not the warehouse. No WASD. Tap-to-walk stays in
- * interior.js.
+ * small wooden till with a kraft drawer slightly pulled out, a kraft wrapped
+ * parcel, a standing kraft shopping bag, a short wall shelf with two kraft
+ * boxes, plus two shelf bays — not the house living room and not the
+ * warehouse. No WASD. Tap-to-walk stays in interior.js.
  *
  * Call dressShop(scene) when plot.kind or plot.use is "shop" or "house_shop".
  * Idempotent: a second call only shows the existing dress.
@@ -128,7 +128,30 @@ function shelfBay(x, z, yaw, width = 1.35) {
   return g;
 }
 
-/** Small wooden till on the counter: wood body, kraft lid. Paper boxes only. */
+/**
+ * Small kraft PAPER till drawer: thin cream tray slightly pulled toward +z
+ * (camera), wood lip + strap pull. Paper boxes only. Child of the till.
+ */
+function kraftDrawer() {
+  const g = new THREE.Group();
+  g.name = "shop-drawer";
+  g.userData.kind = "shop-drawer";
+  g.userData.mode = "PAPER";
+  const w = 0.34;
+  const h = 0.05;
+  const d = 0.2;
+  const tray = paperBox(w, h, d, CREAM, "shop-drawer");
+  g.add(tray);
+  const lip = paperBox(w + 0.02, 0.03, 0.03, WOOD, "shop-drawer");
+  lip.position.z = d / 2 + 0.005;
+  g.add(lip);
+  const pull = paperBox(0.07, 0.025, 0.03, STRAP, "shop-drawer");
+  pull.position.z = d / 2 + 0.02;
+  g.add(pull);
+  return g;
+}
+
+/** Small wooden till on the counter: wood body, kraft lid, kraft drawer. Paper boxes only. */
 function cashBox(x, y, z) {
   const g = new THREE.Group();
   g.name = "shop-till";
@@ -144,6 +167,10 @@ function cashBox(x, y, z) {
   const lid = paperBox(0.44, 0.05, 0.32, LINEN, "shop-till");
   lid.position.y = h / 2 + 0.02;
   g.add(lid);
+  // Kraft till drawer — thin box slightly pulled toward the camera.
+  const drawer = kraftDrawer();
+  drawer.position.set(0, -0.02, 0.12);
+  g.add(drawer);
   return g;
 }
 
