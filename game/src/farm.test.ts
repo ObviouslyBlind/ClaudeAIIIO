@@ -797,3 +797,61 @@ describe("farm PAPER kraft mug", () => {
     expect(boxes).toBeLessThanOrEqual(4);
   });
 });
+
+describe("farm PAPER kraft egg", () => {
+  it("puts one tiny kraft PAPER egg on the workbench; mug and lid remain", () => {
+    const scene = new THREE.Scene();
+    dressFarm(scene);
+
+    const dress = scene.getObjectByName("farm-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+
+    const eggs: THREE.Object3D[] = [];
+    dress!.traverse((obj) => {
+      if (obj.userData?.part === "egg" && obj.name === "farm-egg") eggs.push(obj);
+    });
+    expect(eggs.length).toBe(1);
+    const egg = eggs[0];
+    expect(egg.userData.part).toBe("egg");
+    expect(egg.userData.mode).toBe("PAPER");
+
+    const mug = dress!.getObjectByName("farm-mug")!;
+    const lid = dress!.getObjectByName("farm-lid")!;
+    expect(mug).toBeTruthy();
+    expect(lid).toBeTruthy();
+    expect(mug.userData.part).toBe("mug");
+    expect(lid.userData.part).toBe("lid");
+
+    expect(egg.position.y).toBeGreaterThan(0.9);
+    expect(egg.position.y).toBeLessThan(1.15);
+    const toBench = Math.hypot(egg.position.x - -3.28, egg.position.z - -0.15);
+    expect(toBench).toBeLessThan(0.55);
+
+    const seed = dress!.getObjectByName("farm-seed")!;
+    const lantern = dress!.getObjectByName("farm-lantern")!;
+    const scoop = dress!.getObjectByName("farm-scoop")!;
+    expect(Math.hypot(egg.position.x - mug.position.x, egg.position.z - mug.position.z)).toBeGreaterThan(0.2);
+    expect(Math.hypot(egg.position.x - lid.position.x, egg.position.z - lid.position.z)).toBeGreaterThan(4);
+    expect(Math.hypot(egg.position.x - seed.position.x, egg.position.z - seed.position.z)).toBeGreaterThan(0.2);
+    expect(Math.hypot(egg.position.x - lantern.position.x, egg.position.z - lantern.position.z)).toBeGreaterThan(0.2);
+    expect(Math.hypot(egg.position.x - scoop.position.x, egg.position.z - scoop.position.z)).toBeGreaterThan(0.2);
+
+    const colors = hexes(egg);
+    expect(colors.some((c) => c === KRAFT)).toBe(true);
+    expect(colors.every((c) => [KRAFT, WOOD, WOOD_DARK, HANDLE].includes(c))).toBe(true);
+
+    let boxes = 0;
+    egg.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        boxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.part).toBe("egg");
+        expect(mesh.userData.mode).toBe("PAPER");
+      }
+    });
+    expect(boxes).toBeGreaterThanOrEqual(1);
+    expect(boxes).toBeLessThanOrEqual(3);
+  });
+});
