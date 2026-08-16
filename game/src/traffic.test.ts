@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import * as THREE from "three";
 import { createLandBoard, heightAt, ISLANDS } from "./land.ts";
 import {
+  COLORS,
   createTraffic,
   pointAlongPolyline,
   polylineLength,
@@ -118,8 +119,40 @@ describe("road node traffic", () => {
     expect(parts.get("glass")).toBeGreaterThanOrEqual(2);
     expect(parts.get("bumper")).toBe(2);
     expect(parts.get("wheel")).toBe(4);
-    expect(colors).toContain(0xff2a1a);
+    expect(colors).toContain(0xc45c3a);
     expect(mast).toBe(0);
     expect(mesh.children.length).toBeGreaterThan(6);
+  });
+
+  it("gives paved sedans a few original-palette body colours, not taxi yellow", () => {
+    const board = createLandBoard();
+    const scene = { add() {} };
+    const traffic = createTraffic({
+      scene,
+      getMap: () => board,
+      specOf: (id: "north" | "south") => ISLANDS[id],
+      heightAt,
+    });
+    function bodyHex(root: THREE.Object3D) {
+      let hex = -1;
+      root.traverse((obj) => {
+        if (obj.userData?.part !== "body") return;
+        const mat = (obj as THREE.Mesh).material as THREE.MeshLambertMaterial;
+        if (mat?.color) hex = mat.color.getHex();
+      });
+      return hex;
+    }
+    const north = traffic.cars.filter((c) => c.islandId === "north");
+    const paints = north.map((c) => bodyHex(c.mesh));
+    expect(paints.length).toBe(6);
+    expect(new Set(paints).size).toBe(paints.length);
+    expect(paints).toEqual(COLORS);
+    expect(paints).toContain(0xc45c3a);
+    expect(paints).toContain(0x4a6e8a);
+    expect(paints).toContain(0x6a8f44);
+    expect(paints).toContain(0x2a7a72);
+    const taxiYellow = new Set([0xf0c430, 0xf6d65a, 0xffe14a]);
+    expect(paints.some((h) => taxiYellow.has(h))).toBe(false);
+    expect(paints.every((h) => h === 0xf4ead8 || h === 0xe8d7b8)).toBe(false);
   });
 });
