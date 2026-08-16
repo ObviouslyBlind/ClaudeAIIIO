@@ -189,6 +189,19 @@ function addPorch(g, x, zFace, width = 2.2) {
 }
 
 /**
+ * Tiny kraft PAPER stoop step at the House door so the threshold reads
+ * as a stoop, not a blank plank. Original KRAFT — not a new hex.
+ * House door only — shop and shed stay bare. Sits on the top tread;
+ * does not replace chimney, shutters, knocker, latch, or sign.
+ */
+function addStoop(g, x, zFace) {
+  const stoop = tagPaper(part(0.78, 0.05, 0.32, KRAFT, false), "stoop");
+  stoop.name = "stoop";
+  stoop.position.set(x, 0.5, zFace + 0.28);
+  g.add(stoop);
+}
+
+/**
  * Paired kraft PAPER shutter boxes beside a House window so the facade
  * reads as a cottage, not a bare pane. Original WOOD / KRAFT / FRAME —
  * not a new hex.
@@ -363,6 +376,7 @@ function cottage(kind) {
   addSteps(g, -W * 0.12, D / 2, shed ? 1.2 : 1.55, shed ? 2 : 3);
   if (!shop && !shed) {
     addPorch(g, -W * 0.12, D / 2, 2.2);
+    addStoop(g, -W * 0.12, D / 2);
     addKnocker(g, -W * 0.12, 1.72, D / 2 + 0.18);
   }
   if (shop) {
