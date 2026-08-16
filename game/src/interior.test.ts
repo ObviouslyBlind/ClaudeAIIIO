@@ -402,7 +402,7 @@ describe("house PAPER stool", () => {
   });
 });
 
-const MUG_HEX = new Set([0x5a3a22, 0x6e4428, 0xf4ead8, 0xefe0c8, 0xf3efe4]);
+const MUG_HEX = new Set([0x5a3a22, 0x6e4428, 0xf4ead8]);
 
 describe("house PAPER mug", () => {
   it("puts one kraft PAPER mug on the downstairs table, not upstairs", () => {
@@ -419,6 +419,7 @@ describe("house PAPER mug", () => {
     const mug = mugs[0];
     expect(mug.userData.kind).toBe("interior-mug");
     expect(mug.userData.mode).toBe("PAPER");
+    expect(mug.userData.part).toBe("mug");
 
     const tablePos = new THREE.Vector3();
     table.getWorldPosition(tablePos);
@@ -434,6 +435,25 @@ describe("house PAPER mug", () => {
     vase!.getWorldPosition(vasePos);
     expect(Math.hypot(mugPos.x - vasePos.x, mugPos.z - vasePos.z)).toBeGreaterThan(0.25);
 
+    const cup = down.getObjectByName("cup");
+    expect(cup).toBeTruthy();
+    expect(cup!.userData.part).toBe("cup");
+    const napkin = down.getObjectByName("napkin");
+    expect(napkin).toBeTruthy();
+    expect(napkin!.userData.part).toBe("napkin");
+    const spoon = down.getObjectByName("spoon");
+    expect(spoon).toBeTruthy();
+    expect(spoon!.userData.part).toBe("spoon");
+    const fork = down.getObjectByName("fork");
+    expect(fork).toBeTruthy();
+    expect(fork!.userData.part).toBe("fork");
+    const knife = down.getObjectByName("knife");
+    expect(knife).toBeTruthy();
+    expect(knife!.userData.part).toBe("knife");
+    const plate = down.getObjectByName("plate");
+    expect(plate).toBeTruthy();
+    expect(plate!.userData.part).toBe("plate");
+
     const colors: number[] = [];
     mug.traverse((obj) => {
       const mesh = obj as THREE.Mesh;
@@ -443,13 +463,14 @@ describe("house PAPER mug", () => {
         colors.push(hex);
         expect(MUG_HEX.has(hex)).toBe(true);
         expect(isGrey(hex)).toBe(false);
-        expect(["BoxGeometry", "CylinderGeometry"]).toContain(mesh.geometry.type);
+        expect(mesh.geometry.type).toBe("BoxGeometry");
         expect(mesh.userData.kind).toBe("interior-mug");
         expect(mesh.userData.mode).toBe("PAPER");
+        expect(mesh.userData.part).toBe("mug");
       }
     });
     expect(colors.length).toBeGreaterThan(0);
-    expect(colors.some((c) => c === 0xf3efe4 || c === 0xf4ead8 || c === 0xefe0c8)).toBe(true);
+    expect(colors.some((c) => c === 0xf4ead8)).toBe(true);
     expect(colors.some((c) => c === 0x5a3a22 || c === 0x6e4428)).toBe(true);
 
     const stool = down.getObjectByName("stool");
@@ -463,6 +484,7 @@ describe("house PAPER mug", () => {
     expect(clock).toBeTruthy();
     expect(clock!.userData.kind).toBe("interior-clock");
     expect(up.getObjectByName("mug")).toBeFalsy();
+    expect(up.getObjectByName("cup")).toBeFalsy();
   });
 });
 

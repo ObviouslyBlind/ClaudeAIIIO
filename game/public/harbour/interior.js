@@ -268,20 +268,18 @@ function makeStool(x, z) {
   return g;
 }
 
-/** Small kraft PAPER mug on the table — cream card body, wood foot, rim, handle. */
+/** Tiny kraft PAPER mug on the table — wood foot, plaster body, wood rim. Boxes only. */
 function makeMug(x, y, z) {
   const g = new THREE.Group();
   g.name = "mug";
   g.userData.kind = "interior-mug";
   g.userData.mode = "PAPER";
+  g.userData.part = "mug";
   g.position.set(x, y, z);
-  const paper = { mode: "PAPER" };
-  g.add(cyl(0.032, 0.036, 0.018, WOOD, 0, 0.009, 0, "interior-mug", paper));
-  g.add(cyl(0.038, 0.044, 0.08, PLASTER, 0, 0.058, 0, "interior-mug", paper));
-  g.add(cyl(0.04, 0.036, 0.016, WOOD_TOP, 0, 0.106, 0, "interior-mug", paper));
-  g.add(box(0.014, 0.048, 0.014, WOOD, 0.05, 0.06, 0, "interior-mug", paper));
-  g.add(box(0.028, 0.014, 0.014, WOOD, 0.036, 0.082, 0, "interior-mug", paper));
-  g.add(box(0.028, 0.014, 0.014, WOOD, 0.036, 0.038, 0, "interior-mug", paper));
+  const paper = { mode: "PAPER", part: "mug" };
+  g.add(box(0.048, 0.01, 0.048, WOOD, 0, 0.005, 0, "interior-mug", paper));
+  g.add(box(0.044, 0.056, 0.044, PLASTER, 0, 0.038, 0, "interior-mug", paper));
+  g.add(box(0.048, 0.01, 0.048, WOOD_TOP, 0, 0.071, 0, "interior-mug", paper));
   return g;
 }
 
