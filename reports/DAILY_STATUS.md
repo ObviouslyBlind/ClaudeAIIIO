@@ -6,8 +6,8 @@
 
 ### Harbour (PAPER / SIMULATED)
 
-- Pixel-held: inland spawn, paved ribbon, dirt ribbons, traffic, taxi overlay, ferry $15, RMB orbit, lease → House → Enter → Exit, trees + cart (`/?g=tree25`), cream ferry hull (`/g/ferry37` PASS)
-- Pixel next: shore foam `http://localhost:8787/g/shore40` after `/g/shore39` FAIL FOAM (dashes beside the pier, not in the basin)
+- Pixel-held: inland spawn, paved ribbon, dirt ribbons, traffic, taxi overlay, ferry $15, RMB orbit, lease → House → Enter → Exit, trees + cart (`/?g=tree25`), cream ferry hull (`/g/ferry37` PASS), kraft shore foam (`/g/shore40` PASS)
+- Pixel next: quay clutter `http://localhost:8787/g/quay41` (crates / bollards / dinghies on the timber pier)
 - Code-held: econ HUD, stalls, pedestrians, nametags, interiors, presence, persist, north port sign, calendar / fare / tax / held-goods / faucet lines
 - Play: `http://localhost:8787/` (port 8787). New critic queries use `/g/` paths. Do not ask computerUse to RMB-orbit.
 - Do not clone Capital Rift UI / Earth / OSM / wallet
