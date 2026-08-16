@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
+import * as THREE from "three";
 import {
+  NAMETAG_CLIP,
   NAMETAG_FOLD,
   NAMETAG_HOLE,
   NAMETAG_NEAR_M,
+  makeNametagClip,
   makePaperNametag,
   paintPaperNametagCard,
 } from "../public/harbour/nametags.js";
@@ -45,9 +48,10 @@ function mockCtx() {
 }
 
 describe("outdoor PAPER nametags", () => {
-  it("keeps a kraft folded corner, punch-hole, and still stamps PAPER", () => {
+  it("keeps a kraft folded corner, punch-hole, clip, and still stamps PAPER", () => {
     expect(NAMETAG_FOLD).toBe(true);
     expect(NAMETAG_HOLE).toBe(true);
+    expect(NAMETAG_CLIP).toBe(true);
     expect(NAMETAG_NEAR_M).toBeGreaterThanOrEqual(200);
     const ctx = mockCtx();
     paintPaperNametagCard(ctx, 512, 128, "Ferry clerk");
@@ -57,6 +61,19 @@ describe("outdoor PAPER nametags", () => {
     expect(ctx.arcs.length).toBeGreaterThanOrEqual(2);
     expect(ctx.arcs[0].x).toBe(256);
     expect(ctx.arcs[0].y).toBeLessThan(32);
+
+    const clip = makeNametagClip();
+    expect(clip.userData.part).toBe("clip");
+    expect(clip.userData.mode).toBe("PAPER");
+    expect(clip.geometry.type).toBe("BoxGeometry");
+    expect((clip.material as THREE.MeshLambertMaterial).color.getHex()).toBe(0x6e4a32);
+    const { width, height, depth } = (clip.geometry as THREE.BoxGeometry).parameters;
+    expect(width).toBeLessThan(0.08);
+    expect(height).toBeLessThan(0.25);
+    expect(depth).toBeLessThan(0.08);
+    expect(clip.position.y).toBeGreaterThan(0.5);
+    expect(Math.abs(clip.position.x)).toBeGreaterThan(0.2);
+
     expect(makePaperNametag("Ferry clerk")).toBeNull();
   });
 });
