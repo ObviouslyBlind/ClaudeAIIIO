@@ -37,6 +37,8 @@ export type Road = {
   island: IslandId;
   kind: "paved" | "dirt";
   points: { x: number; z: number }[];
+  /** Spline control points. Paved only. Traffic and taxi follow `points`. */
+  nodes?: { x: number; z: number }[];
 };
 
 export type LandBoard = {
@@ -45,32 +47,32 @@ export type LandBoard = {
 };
 
 /**
- * Small inhabited Caribbean cay scale, not Jamaica.
- * Each ellipse is about 2.0 km east-west by 1.2 km north-south (~1.9 km²).
- * Centres sit 9.6 km apart so the other shore is a distant line, not a neighbouring beach.
+ * Inhabited Caribbean island scale, not a pocket cay.
+ * Each ellipse is about 8.0 km east-west by 4.4 km north-south.
+ * Centres sit 18 km apart so the channel stays a crossing, not a ditch.
  */
 export const ISLANDS: Record<IslandId, IslandSpec> = {
   north: {
     id: "north",
     name: "North",
     cx: 0,
-    cz: -4800,
-    rx: 1000,
-    rz: 580,
-    peak: 92,
-    port: { x: 0, z: -4290 },
-    hill: { x: -280, z: -4980 },
+    cz: -9000,
+    rx: 4000,
+    rz: 2200,
+    peak: 140,
+    port: { x: 0, z: -6950 },
+    hill: { x: -900, z: -10200 },
   },
   south: {
     id: "south",
     name: "South",
     cx: 0,
-    cz: 4800,
-    rx: 1000,
-    rz: 580,
-    peak: 74,
-    port: { x: 0, z: 4290 },
-    hill: { x: 260, z: 4980 },
+    cz: 9000,
+    rx: 4000,
+    rz: 2200,
+    peak: 110,
+    port: { x: 0, z: 6950 },
+    hill: { x: 900, z: 10200 },
   },
 };
 
@@ -88,18 +90,58 @@ function hash(n: number): number {
   return x - Math.floor(x);
 }
 
-export function roadPoint(spec: IslandSpec, t: number): { x: number; z: number } {
-  const clamped = Math.max(0, Math.min(1, t));
-  return {
-    x: spec.port.x + Math.sin(clamped * 3.2) * 5,
-    z: spec.port.z + inlandSign(spec) * (48 + clamped * 430),
-  };
+export function roadNodes(spec: IslandSpec): { x: number; z: number }[] {
+  const s = inlandSign(spec);
+  const p = spec.port;
+  return [
+    { x: p.x, z: p.z + s * 50 },
+    { x: p.x + 160, z: p.z + s * 720 },
+    { x: p.x - 220, z: p.z + s * 1480 },
+    { x: p.x + 280, z: p.z + s * 2280 },
+    { x: p.x - 90, z: p.z + s * 3180 },
+  ];
+}
+
+function catmull(p0: number, p1: number, p2: number, p3: number, t: number): number {
+  const t2 = t * t;
+  const t3 = t2 * t;
+  return 0.5 * (2 * p1 + (-p0 + p2) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2 + (-p0 + 3 * p1 - 3 * p2 + p3) * t3);
+}
+
+function sampleSpline(nodes: { x: number; z: number }[], perSeg = 8): { x: number; z: number }[] {
+  if (nodes.length < 2) return nodes.slice();
+  const out: { x: number; z: number }[] = [];
+  for (let i = 0; i < nodes.length - 1; i++) {
+    const p0 = nodes[Math.max(0, i - 1)];
+    const p1 = nodes[i];
+    const p2 = nodes[i + 1];
+    const p3 = nodes[Math.min(nodes.length - 1, i + 2)];
+    const n = i === nodes.length - 2 ? perSeg : perSeg - 1;
+    for (let s = 0; s <= n; s++) {
+      const t = s / perSeg;
+      out.push({
+        x: catmull(p0.x, p1.x, p2.x, p3.x, t),
+        z: catmull(p0.z, p1.z, p2.z, p3.z, t),
+      });
+    }
+  }
+  return out;
 }
 
 export function pavedPolyline(spec: IslandSpec): { x: number; z: number }[] {
-  const pts = [];
-  for (let i = 0; i <= 16; i++) pts.push(roadPoint(spec, i / 16));
-  return pts;
+  return sampleSpline(roadNodes(spec), 8);
+}
+
+export function roadPoint(spec: IslandSpec, t: number): { x: number; z: number } {
+  const pts = pavedPolyline(spec);
+  const clamped = Math.max(0, Math.min(1, t));
+  const f = clamped * (pts.length - 1);
+  const i = Math.min(pts.length - 2, Math.floor(f));
+  const u = f - i;
+  return {
+    x: pts[i].x + (pts[i + 1].x - pts[i].x) * u,
+    z: pts[i].z + (pts[i + 1].z - pts[i].z) * u,
+  };
 }
 
 export function distToSegment(
@@ -237,7 +279,7 @@ function pushParcel(
 function lotsAlongRoad(spec: IslandSpec): { lots: Parcel[]; dirt: Road[] } {
   const lots: Parcel[] = [];
   const dirt: Road[] = [];
-  const steps = 12;
+  const steps = 18;
   for (let i = 0; i < steps; i++) {
     const a = roadPoint(spec, i / steps);
     const b = roadPoint(spec, (i + 1) / steps);
@@ -310,7 +352,7 @@ export function createLandBoard(): LandBoard {
     p.use = p.band === "field" ? "farm" : "stall";
   }
   const roads = Object.values(ISLANDS).flatMap((spec) => [
-    { island: spec.id, kind: "paved" as const, points: pavedPolyline(spec) },
+    { island: spec.id, kind: "paved" as const, nodes: roadNodes(spec), points: pavedPolyline(spec) },
     ...dirt.filter((d) => d.island === spec.id),
   ]);
   return { plots, roads };
@@ -329,7 +371,9 @@ export function getPlot(board: LandBoard, id: string): Parcel | undefined {
 }
 
 export function findParcelAt(board: LandBoard, x: number, z: number): Parcel | undefined {
-  return board.plots.find((p) => pointInRing(x, z, p.ring));
+  const hits = board.plots.filter((p) => pointInRing(x, z, p.ring));
+  if (!hits.length) return undefined;
+  return hits.reduce((a, b) => (a.area <= b.area ? a : b));
 }
 
 export function leasePlot(
@@ -381,7 +425,7 @@ export function heightAt(spec: IslandSpec, x: number, z: number): number {
   const portD = Math.hypot(x - spec.port.x, z - spec.port.z);
   const hillD = Math.hypot(x - spec.hill.x, z - spec.hill.z);
   let h = (1 - t) * (1 - t) * spec.peak * 0.35;
-  h += spec.peak * 0.7 * Math.max(0, 1 - hillD / 320) ** 2;
+  h += spec.peak * 0.7 * Math.max(0, 1 - hillD / 900) ** 2;
   if (portD < 160) {
     const flatten = 1.15 + portD * 0.002;
     h = Math.min(Math.max(h, 1.05), flatten);

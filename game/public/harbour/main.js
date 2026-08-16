@@ -96,7 +96,7 @@ function heightAt(spec, x, z) {
   const portD = Math.hypot(x - spec.port.x, z - spec.port.z);
   const hillD = Math.hypot(x - spec.hill.x, z - spec.hill.z);
   let h = (1 - t) * (1 - t) * spec.peak * 0.35;
-  h += spec.peak * 0.7 * Math.max(0, 1 - hillD / 320) ** 2;
+  h += spec.peak * 0.7 * Math.max(0, 1 - hillD / 900) ** 2;
   if (portD < 160) {
     const flatten = 1.15 + portD * 0.002;
     h = Math.min(Math.max(h, 1.05), flatten);
@@ -134,7 +134,9 @@ function pointInRing(x, z, ring) {
 }
 
 function findParcelAt(x, z) {
-  return map.plots.find((p) => pointInRing(x, z, p.ring));
+  const hits = map.plots.filter((p) => pointInRing(x, z, p.ring));
+  if (!hits.length) return undefined;
+  return hits.reduce((a, b) => (a.area <= b.area ? a : b));
 }
 
 function setStatus(t) {
@@ -716,7 +718,7 @@ async function boot() {
   const res = await fetch("/api/map");
   map = await res.json();
   const water = new THREE.Mesh(
-    new THREE.PlaneGeometry(36000, 36000),
+    new THREE.PlaneGeometry(80000, 80000),
     new THREE.MeshLambertMaterial({ color: 0x1d7a86 }),
   );
   water.rotation.x = -Math.PI / 2;

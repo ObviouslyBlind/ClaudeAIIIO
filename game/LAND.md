@@ -17,11 +17,11 @@ Mechanic we copy: you do not receive a lot from a menu. You walk the world, tap 
 
 ## What we do instead
 
-Two fictional Caribbean-scale islands (~2.0 × 1.2 km each), **ports about 8.6 km apart** across a channel. Metres, origin at the channel.
+Two fictional Caribbean-scale islands (~8.0 × 4.4 km each), **ports about 13.9 km apart** across a channel. Metres, origin at the channel.
 
 - **Port** is public (pier + warehouse). You cannot buy the quay.
 - **Parcels** are irregular pieces of the island: street lots along a paved spine, fields behind them, a few shore lots. They are the dirt, not a numbered card. Vacant lots draw as faint **outlines** inset from the road, not translucent slabs over the pavement.
-- **Paved road** from the port inland, with a grass verge; **dirt tracks** out to fields. Parcel rings are rejected if any edge comes within 11 m of the paved centreline.
+- **Paved road** is a **black tarmac spline** (control `nodes`, sampled `points`) from the port inland. No kerbs or dashed centre line. **Dirt tracks** out to fields. Parcel rings are rejected if any edge comes within 11 m of the paved centreline.
 - **North** costs more per m². Shore costs more than street; street more than field.
 - **Walk (PAPER):** tap-to-walk only where height is above 0.25 m. Water is forbidden. A straight path through the harbour channel is refused (`Stay on land.`).
 - Tap the land → inspect (area, price). **Lease** (PAPER) → it is yours. **Develop** → farm on a field, stall on street/shore.

@@ -21,7 +21,7 @@ function lum(hex: number) {
 }
 
 describe("paved street from spawn", () => {
-  it("draws dark asphalt 6–8 m wide with a dashed centre line; dirt stays thin and brown", () => {
+  it("draws a black tarmac ribbon 6–8 m wide, no kerb kit; dirt stays thin and brown", () => {
     const map = createLandBoard();
     const added: { userData: { roadKind?: string }; geometry: { parameters: { width: number } }; material: { color: { getHex: () => number } } }[] =
       [];
@@ -30,14 +30,12 @@ describe("paved street from spawn", () => {
 
     const paved = added.filter((m) => m.userData.roadKind === "paved");
     const dirt = added.filter((m) => m.userData.roadKind === "dirt");
-    const lines = added.filter((m) => m.userData.roadKind === "centre-line");
-    const verge = added.filter((m) => m.userData.roadKind === "verge");
-    const curb = added.filter((m) => m.userData.roadKind === "curb");
+    const extras = added.filter((m) =>
+      m.userData.roadKind === "centre-line" || m.userData.roadKind === "verge" || m.userData.roadKind === "curb",
+    );
 
     expect(paved.length).toBeGreaterThan(8);
-    expect(lines.length).toBeGreaterThan(8);
-    expect(verge.length).toBe(paved.length);
-    expect(curb.length).toBe(paved.length * 2);
+    expect(extras.length).toBe(0);
     expect(dirt.length).toBeGreaterThan(4);
 
     expect(PAVED_WIDTH_M).toBeGreaterThanOrEqual(6);
@@ -47,7 +45,7 @@ describe("paved street from spawn", () => {
     expect(DIRT_WIDTH_M).toBeLessThan(4);
 
     expect(paved[0].material.color.getHex()).toBe(ASPHALT);
-    expect(lum(ASPHALT)).toBeLessThan(0.22);
+    expect(lum(ASPHALT)).toBeLessThan(0.12);
     expect(lum(dirt[0].material.color.getHex())).toBeGreaterThan(lum(ASPHALT));
 
     const dirtKinds = new Set(map.roads.filter((r) => r.kind === "dirt").map((r) => r.kind));

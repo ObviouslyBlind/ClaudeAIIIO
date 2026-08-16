@@ -65,8 +65,8 @@ describe("shoreline read", () => {
 
   it("does not move island centres", () => {
     expect(ISLANDS.north.cx).toBe(0);
-    expect(ISLANDS.north.cz).toBe(-4800);
-    expect(ISLANDS.south.cz).toBe(4800);
-    expect(ISLANDS.south.port.z - ISLANDS.north.port.z).toBeGreaterThan(8000);
+    expect(ISLANDS.north.cz).toBe(-9000);
+    expect(ISLANDS.south.cz).toBe(9000);
+    expect(ISLANDS.south.port.z - ISLANDS.north.port.z).toBeGreaterThan(12000);
   });
 });

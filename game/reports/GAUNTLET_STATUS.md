@@ -1,24 +1,22 @@
-# Gauntlet status — harbour land (round 8)
+# Gauntlet status — harbour land (round 9)
 
-**Goal:** Two distant Caribbean-scale islands. Land is ground you claim. A paved road is visible. Buildings read as harbour shops/farms, not cubes.
+**This round (inspect the live page, do not trust prior scores):**
 
-**Bar (critic inspects the running page):**
+1. Each island reads as kilometres across, not a pocket cay. Channel still a crossing.
+2. The paved road is a **black tarmac line** that curves. No kerb/dash kit.
+3. Base still works: tap-walk on land, PAPER HUD, two islands, lease/develop still exist.
 
-1. Two original 3D islands with a wide channel. Ports about 8.6 km apart. From one port the other is a distant shore.
-2. Port on each: pier, warehouse, quay kit, ferry in the channel. Ferry button when close.
-3. A **paved asphalt spine** is obvious from spawn: dark carriageway, grass verge, lots beside it not on it. Dirt tracks stay on the fields.
-4. Developed land shows a gable-roof shop or a farm, not a grey cube.
-5. Lease then Develop (PAPER). Tap-walk. No WASD. HUD BASE / PAPER / SIMULATED.
+Forbidden bar: Capital Rift, Call of Duty, OSM. Do not assume round 6–8 critic passes still hold.
 
-Forbidden bar: Capital Rift screenshots, Call of Duty, OSM.
+**Queued (not this round — do not ship as a bundle):**
 
-**Round 1:** `three.core.js` 404.
-**Round 2:** Camera faced inland.
-**Round 3:** Given 20 m cards → cadastral parcels.
-**Round 4:** Plots through road; cube buildings; islands too close.
-**Round 5:** Taxi HUD button. Yellow mesh pathfollows `/api/map` paved polylines only.
-**Round 6:** Ports ~8.6 km apart. Parcel fills removed. Gable shops. **Critic:** channel PASS, HUD PASS, ferry PASS. **FAIL: no visible paved road** from spawn (camera looks at quay/channel; spine runs inland). Buildings only partial (warehouse seen).
-**Round 7:** Dashed asphalt spine + side-on spawn camera. **Critic:** road PASS, port PASS, buildings PASS, HUD PASS. **FAIL: second island not in spawn view** (camera looks along this shore; far island is 8.6 km off-frame, not missing).
-**Round 8:** Spawn camera `{ x: 56, y: 54, z: -132 }` (north), lookAt `{ x: 0, y: 2, z: 240 }` toward the channel. Far shore on the **left** of the north spawn frame. Fog 5200–28000. Islands not moved. **Awaiting critic.**
+3. Node traffic on the tarmac
+4. Taxi: drives off after 60s if you do not board; boarded → top-down island map, tap destination
+5. Right-hold camera (Roblox-style). Own agent + critic. Left click still walk.
+6. Ferry button: show route + PAPER cost before travel (more routes later)
+7. Develop: pick a building type and place it (catalog agent)
+8. Interiors: enter owned buildings, up/down stairs (interior agent)
+
+**History (untrusted until re-inspected):** Rounds 1–8 in git. Round 8 claimed street + far shore in one spawn frame.
 
 **You are the brake.**
