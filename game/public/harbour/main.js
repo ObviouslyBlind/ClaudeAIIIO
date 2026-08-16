@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { makeFerry, tickFerry } from "./ferry.js";
 
 const canvas = document.getElementById("c");
 const statusEl = document.getElementById("status");
@@ -56,6 +57,7 @@ scene.add(player);
 const plotMeshes = new Map();
 const useMeshes = new Map();
 const ground = [];
+let ferryMesh = null;
 
 function money(n) {
   return Number(n).toLocaleString("en-US", { maximumFractionDigits: 0 });
@@ -553,6 +555,7 @@ function tick(dt) {
       player.position.y = landHeight(player.position.x, player.position.z) + 1.15;
     }
   }
+  if (ferryMesh) tickFerry(ferryMesh, dt);
   btnFerry.disabled = !nearPort();
   refreshHud();
   tmp.copy(player.position).add(cameraOffset());
@@ -578,6 +581,8 @@ async function boot() {
   makeRoads();
   makePort(specOf("north"));
   makePort(specOf("south"));
+  ferryMesh = makeFerry();
+  scene.add(ferryMesh);
   makePalms(specOf("north"));
   makePalms(specOf("south"));
   makeParcels();
