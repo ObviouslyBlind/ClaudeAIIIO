@@ -233,3 +233,44 @@ describe("player PAPER ticket", () => {
     expect(box.parameters.depth).toBeLessThan(0.06);
   });
 });
+
+describe("player PAPER coin", () => {
+  it("tucks one tiny kraft PAPER coin on the satchel; ticket and flap remain", () => {
+    const player = makePlayer();
+    expect(player.position.x).toBe(12);
+    expect(player.position.y).toBe(3.4);
+    expect(player.position.z).toBe(-6950);
+    expect(player.userData.mode).toBe("PAPER");
+
+    const figure = player.getObjectByName("paper-figure")!;
+    const p = parts(figure);
+    expect(p.filter((k) => k === "coin").length).toBe(1);
+    expect(p.filter((k) => k === "ticket").length).toBe(1);
+    expect(p.filter((k) => k === "flap").length).toBe(1);
+    expect(p).toContain("satchel");
+
+    const coin = figure.children.find((c) => c.userData.part === "coin") as THREE.Mesh;
+    const ticket = figure.children.find((c) => c.userData.part === "ticket") as THREE.Mesh;
+    const satchel = figure.children.find((c) => c.userData.part === "satchel") as THREE.Mesh;
+    const flap = figure.children.find((c) => c.userData.part === "flap") as THREE.Mesh;
+    expect(coin).toBeTruthy();
+    expect(ticket).toBeTruthy();
+    expect(satchel).toBeTruthy();
+    expect(flap).toBeTruthy();
+    expect(coin.userData.mode).toBe("PAPER");
+    expect(coin.geometry.type).toBe("BoxGeometry");
+    const coinHex = (coin.material as THREE.MeshLambertMaterial).color.getHex();
+    expect(coinHex).toBe(KRAFT);
+    expect(isGrey(coinHex)).toBe(false);
+    expect(coin.position.x).not.toBeCloseTo(ticket.position.x, 1);
+    expect(coin.position.y).not.toBeCloseTo(ticket.position.y, 1);
+    expect(coin.position.x).toBeGreaterThan(satchel.position.x - 0.12);
+    expect(coin.position.x).toBeLessThan(satchel.position.x + 0.12);
+    expect(coin.position.y).toBeGreaterThan(0.6);
+    expect(coin.position.y).toBeLessThan(1.05);
+    const box = coin.geometry as THREE.BoxGeometry;
+    expect(box.parameters.width).toBeLessThan(0.12);
+    expect(box.parameters.height).toBeLessThan(0.08);
+    expect(box.parameters.depth).toBeLessThan(0.06);
+  });
+});
