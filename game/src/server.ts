@@ -9,6 +9,7 @@ import { buyFromStall, createVisitor, createWorld, hud, tick } from "./sim.ts";
 import { bustHarbourAssets, bustModuleImports } from "./cache-bust.ts";
 import { confirmFerry, listFerryRoutes } from "./ferry-routes.ts";
 import { calendarHud } from "./calendar.ts";
+import { createPresence, presenceQuery } from "./presence.ts";
 
 const root = join(fileURLToPath(new URL(".", import.meta.url)), "..");
 const publicDir = join(root, "public");
@@ -17,6 +18,7 @@ const port = Number(process.env.PORT ?? 8787);
 const world = createWorld(7);
 const visitor = createVisitor(1_000);
 const land = createLandBoard();
+const presence = createPresence();
 setInterval(() => tick(world), 1000);
 
 function snapshot() {
@@ -77,6 +79,15 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "GET" && url.pathname === "/api/snapshot") {
     json(res, 200, snapshot());
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname === "/api/presence") {
+    json(res, 200, presenceQuery(presence, {
+      x: url.searchParams.get("x"),
+      z: url.searchParams.get("z"),
+      radius: url.searchParams.get("radius"),
+    }));
     return;
   }
 
