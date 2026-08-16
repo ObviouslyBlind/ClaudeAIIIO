@@ -20,9 +20,9 @@ renderer.shadowMap.type = THREE.BasicShadowMap;
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x7ec8d4);
-scene.fog = new THREE.Fog(0x7ec8d4, 1600, 9000);
+scene.fog = new THREE.Fog(0x7ec8d4, 2800, 16000);
 
-const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.4, 12000);
+const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.4, 22000);
 
 scene.add(new THREE.HemisphereLight(0xb8e4ff, 0xc4a574, 1.15));
 const sun = new THREE.DirectionalLight(0xfff1d0, 2.1);
@@ -230,41 +230,88 @@ function part(w, h, d, color, shadow = true) {
   return m;
 }
 
+function windowPane(g, x, y, z, w = 1.05, h = 0.9) {
+  const frame = part(w + 0.16, h + 0.16, 0.08, 0x3d2a1c, false);
+  frame.position.set(x, y, z);
+  const glass = part(w, h, 0.06, 0x8ec4d4, false);
+  glass.position.set(x, y, z + 0.03);
+  g.add(frame, glass);
+}
+
+function gableEnd(w, h, color) {
+  const geo = new THREE.BufferGeometry();
+  const hw = w / 2;
+  geo.setAttribute("position", new THREE.Float32BufferAttribute([-hw, 0, 0, hw, 0, 0, 0, h, 0], 3));
+  geo.computeVertexNormals();
+  return new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ color, side: THREE.DoubleSide }));
+}
+
 function houseAt(x, z, y, yaw, kind) {
   const g = new THREE.Group();
   g.position.set(x, y, z);
   g.rotation.y = yaw;
   const shop = kind === "shop";
-  const wall = shop ? 0xe8d7b8 : 0xf2e6d0;
-  const roof = shop ? 0x8a3b2a : 0x6a5340;
-  const W = shop ? 8.4 : 6.2;
-  const D = shop ? 6.6 : 5.0;
-  const H = shop ? 3.5 : 2.7;
+  const wall = shop ? 0xe8d7b8 : 0xf4ead8;
+  const roof = shop ? 0x7a2e22 : 0x6e4a32;
+  const W = shop ? 8.8 : 6.4;
+  const D = shop ? 6.8 : 5.2;
+  const H = shop ? 3.35 : 2.55;
+  const plinth = part(W + 0.5, 0.38, D + 0.7, 0x9a8a72, false);
+  plinth.position.y = 0.19;
+  g.add(plinth);
   const walls = part(W, H, D, wall);
-  walls.position.y = H / 2;
+  walls.position.y = 0.38 + H / 2;
   g.add(walls);
-  const slabW = W + 0.7;
-  const slabD = D * 0.7;
-  const left = part(slabW, 0.16, slabD, roof, false);
-  left.rotation.x = 0.52;
-  left.position.set(0, H + 0.85, -D * 0.2);
-  const right = part(slabW, 0.16, slabD, roof, false);
-  right.rotation.x = -0.52;
-  right.position.set(0, H + 0.85, D * 0.2);
+  const rake = 1.55;
+  const left = part(W + 0.9, 0.14, D * 0.62, roof, false);
+  left.rotation.x = 0.48;
+  left.position.set(0, 0.38 + H + 0.72, -D * 0.22);
+  const right = part(W + 0.9, 0.14, D * 0.62, roof, false);
+  right.rotation.x = -0.48;
+  right.position.set(0, 0.38 + H + 0.72, D * 0.22);
   g.add(left, right);
-  const door = part(1.15, 2.05, 0.1, 0x4a3220, false);
-  door.position.set(0, 1.02, D / 2 + 0.07);
+  const gA = gableEnd(D, rake, wall);
+  gA.rotation.y = Math.PI / 2;
+  gA.position.set(-W / 2 - 0.01, 0.38 + H, 0);
+  const gB = gableEnd(D, rake, wall);
+  gB.rotation.y = -Math.PI / 2;
+  gB.position.set(W / 2 + 0.01, 0.38 + H, 0);
+  g.add(gA, gB);
+  const ridge = part(W + 1.0, 0.12, 0.22, roof, false);
+  ridge.position.y = 0.38 + H + rake - 0.08;
+  g.add(ridge);
+  const chimney = part(0.55, 1.7, 0.55, 0x8a6a55);
+  chimney.position.set(-W * 0.28, 0.38 + H + 1.5, -D * 0.12);
+  g.add(chimney);
+  const door = part(1.05, 2.05, 0.1, 0x4a3220, false);
+  door.position.set(-W * 0.12, 1.4, D / 2 + 0.08);
   g.add(door);
-  const win = part(1.05, 0.85, 0.08, 0x8ec4d4, false);
-  win.position.set(-W * 0.28, 2.05, D / 2 + 0.07);
-  const win2 = win.clone();
-  win2.position.x = W * 0.28;
-  g.add(win, win2);
+  const step = part(1.35, 0.18, 0.7, 0x9a8a72, false);
+  step.position.set(-W * 0.12, 0.28, D / 2 + 0.55);
+  g.add(step);
+  windowPane(g, W * 0.28, 2.15, D / 2 + 0.08);
+  windowPane(g, -W * 0.38, 2.15, D / 2 + 0.08, 0.85, 0.8);
   if (shop) {
-    const awning = part(W * 0.92, 0.08, 1.7, 0xc45c3a, false);
-    awning.position.set(0, 2.55, D / 2 + 0.95);
-    awning.rotation.x = 0.28;
+    const porch = part(W * 0.95, 0.1, 2.1, 0xc4a574, false);
+    porch.position.set(0, 2.35, D / 2 + 1.05);
+    g.add(porch);
+    for (const px of [-W * 0.38, W * 0.38]) {
+      const post = part(0.16, 2.2, 0.16, 0x5a3a22, false);
+      post.position.set(px, 1.25, D / 2 + 1.85);
+      g.add(post);
+    }
+    const awning = part(W * 0.9, 0.07, 1.85, 0xc45c3a, false);
+    awning.position.set(0, 2.55, D / 2 + 1.15);
+    awning.rotation.x = 0.22;
     g.add(awning);
+    const sign = part(2.8, 0.7, 0.08, 0x3d2a1c, false);
+    sign.position.set(W * 0.08, 3.15, D / 2 + 0.12);
+    g.add(sign);
+    for (let i = 0; i < 3; i++) {
+      const crate = part(0.7, 0.55, 0.7, 0x8a6238, false);
+      crate.position.set(W * 0.42 - i * 0.85, 0.65, D / 2 + 1.35);
+      g.add(crate);
+    }
   }
   scene.add(g);
   return g;
@@ -273,14 +320,28 @@ function houseAt(x, z, y, yaw, kind) {
 function farmAt(x, z, y, area) {
   const g = new THREE.Group();
   g.position.set(x, y, z);
-  const span = Math.min(15, Math.sqrt(area) * 0.48);
-  for (let i = 0; i < 5; i++) {
-    const row = part(span, 0.2, 0.65, i % 2 ? 0x6b8f3a : 0x8a6b38, false);
-    row.position.set(0, 0.12, -span * 0.32 + i * 1.1);
+  const span = Math.min(16, Math.sqrt(area) * 0.48);
+  for (let i = 0; i < 6; i++) {
+    const row = part(span, 0.18, 0.55, i % 2 ? 0x5f8a32 : 0x7a5a28, false);
+    row.position.set(0, 0.1, -span * 0.34 + i * 1.05);
     g.add(row);
   }
+  for (let i = -3; i <= 3; i++) {
+    const post = part(0.12, 1.05, 0.12, 0x6a4a2a, false);
+    post.position.set(-span * 0.52, 0.52, i * 1.15);
+    const postB = post.clone();
+    postB.position.x = span * 0.52;
+    g.add(post, postB);
+  }
+  const tank = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.55, 0.55, 1.4, 8),
+    new THREE.MeshLambertMaterial({ color: 0x8a9aa4 }),
+  );
+  tank.position.set(span * 0.38, 0.8, span * 0.28);
+  tank.castShadow = true;
+  g.add(tank);
   scene.add(g);
-  houseAt(x + span * 0.3, z + span * 0.18, y, 0.35, "shed");
+  houseAt(x + span * 0.32, z + span * 0.22, y, 0.4, "shed");
   return g;
 }
 
@@ -288,44 +349,78 @@ function makePort(spec) {
   const toward = spec.id === "north" ? 1 : -1;
   const { x, z } = spec.port;
   const y = heightAt(spec, x, z);
-  const pier = box(10, 0.7, 78, 0x8a6238, x, y + 0.2, z + toward * 34);
+  const pierZ = z + toward * 38;
+  const pier = box(11, 0.45, 86, 0x8a6238, x, y + 0.28, pierZ);
   pier.userData.kind = "port";
-  const wx = x + 16;
-  const wz = z - toward * 10;
-  const shed = box(18, 6.2, 11, 0xd9cbb3, wx, y + 3.2, wz);
-  shed.userData.kind = "port";
-  const roofA = box(19, 0.2, 7.2, 0x7a3a2c, wx, y + 7.1, wz - 2.2, false);
-  roofA.rotation.x = 0.42;
-  const roofB = box(19, 0.2, 7.2, 0x7a3a2c, wx, y + 7.1, wz + 2.2, false);
-  roofB.rotation.x = -0.42;
-  box(3.2, 3.6, 0.2, 0x3d2a1c, wx, y + 1.9, wz + toward * 5.6, false);
-  box(1.4, 1.1, 0.12, 0x8ec4d4, wx - 5, y + 4.2, wz + toward * 5.55, false);
-  box(1.4, 1.1, 0.12, 0x8ec4d4, wx + 5, y + 4.2, wz + toward * 5.55, false);
+  for (let i = -5; i <= 5; i++) {
+    const piling = box(0.45, 3.4, 0.45, 0x5a3a22, x - 4.6, y - 0.9, pierZ + i * 7.4, false);
+    piling.userData.kind = "port";
+    const pilingB = box(0.45, 3.4, 0.45, 0x5a3a22, x + 4.6, y - 0.9, pierZ + i * 7.4, false);
+    pilingB.userData.kind = "port";
+  }
   for (let i = -2; i <= 2; i++) {
-    box(0.35, 1.6, 0.35, 0x5a3a22, x + i * 2.2, y + 1.1, z + toward * 70, false);
+    box(0.4, 1.05, 0.4, 0x3d2a1c, x + i * 1.8, y + 0.9, z + toward * 78, false);
   }
-  for (let i = 0; i < 4; i++) {
-    box(1.6, 1.4, 1.6, 0x7a5230, x - 8 + i * 2.1, y + 1.0, z - toward * 2, false);
+  const wx = x + 18;
+  const wz = z - toward * 12;
+  const shed = box(20, 5.8, 12, 0xd9cbb3, wx, y + 3.15, wz);
+  shed.userData.kind = "port";
+  const roofA = box(21.2, 0.18, 7.6, 0x6e2e22, wx, y + 6.85, wz - 2.4, false);
+  roofA.rotation.x = 0.4;
+  const roofB = box(21.2, 0.18, 7.6, 0x6e2e22, wx, y + 6.85, wz + 2.4, false);
+  roofB.rotation.x = -0.4;
+  box(21.4, 0.14, 0.3, 0x6e2e22, wx, y + 8.15, wz, false);
+  const dock = box(8.5, 0.7, 6, 0x9a8a72, wx + toward * 0.2, y + 0.55, wz + toward * 8.2, false);
+  dock.userData.kind = "port";
+  box(4.2, 3.8, 0.18, 0x3d2a1c, wx, y + 2.2, wz + toward * 6.1, false);
+  box(1.5, 1.15, 0.1, 0x8ec4d4, wx - 6.2, y + 4.4, wz + toward * 6.05, false);
+  box(1.5, 1.15, 0.1, 0x8ec4d4, wx + 6.2, y + 4.4, wz + toward * 6.05, false);
+  for (let i = 0; i < 5; i++) {
+    box(1.5, 1.35, 1.5, 0x7a5230, x - 9 + i * 2.0, y + 0.95, z - toward * 4, false);
   }
-  box(0.9, 36, 0.9, 0xf3efe4, x - 12, y + 18, z + toward * 6, false);
+  box(0.85, 34, 0.85, 0xf3efe4, x - 14, y + 17, z + toward * 4, false);
+  box(1.4, 0.35, 1.4, 0xc45c3a, x - 14, y + 34.3, z + toward * 4, false);
+}
+
+function palmAt(x, z, y, lean = 0.12) {
+  const g = new THREE.Group();
+  g.position.set(x, y, z);
+  g.rotation.z = lean;
+  const trunk = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.16, 0.28, 5.4, 6),
+    new THREE.MeshLambertMaterial({ color: 0x7a5230 }),
+  );
+  trunk.position.y = 2.7;
+  trunk.castShadow = true;
+  g.add(trunk);
+  const leafMat = new THREE.MeshLambertMaterial({ color: 0x2f6b32 });
+  for (let i = 0; i < 5; i++) {
+    const frond = new THREE.Mesh(new THREE.ConeGeometry(0.55, 2.8, 5), leafMat);
+    frond.position.set(Math.cos((i / 5) * Math.PI * 2) * 0.35, 5.5, Math.sin((i / 5) * Math.PI * 2) * 0.35);
+    frond.rotation.z = Math.cos((i / 5) * Math.PI * 2) * 0.85;
+    frond.rotation.x = Math.sin((i / 5) * Math.PI * 2) * 0.85;
+    g.add(frond);
+  }
+  scene.add(g);
 }
 
 function makePalms(spec) {
-  const trunkMat = new THREE.MeshLambertMaterial({ color: 0x7a5230 });
-  const leafMat = new THREE.MeshLambertMaterial({ color: 0x2f6b32 });
-  const trunkGeo = new THREE.CylinderGeometry(0.18, 0.28, 4.2, 5);
-  const leafGeo = new THREE.ConeGeometry(1.6, 2.2, 5);
-  for (let i = 0; i < 18; i++) {
-    const a = (i / 18) * Math.PI * 2 + (spec.id === "north" ? 0.2 : 1.1);
-    const x = spec.cx + Math.cos(a) * spec.rx * 0.84;
-    const z = spec.cz + Math.sin(a) * spec.rz * 0.84;
+  for (let i = 0; i < 22; i++) {
+    const a = (i / 22) * Math.PI * 2 + (spec.id === "north" ? 0.2 : 1.1);
+    const x = spec.cx + Math.cos(a) * spec.rx * 0.86;
+    const z = spec.cz + Math.sin(a) * spec.rz * 0.86;
     const y = heightAt(spec, x, z);
-    if (y < 0.3) continue;
-    const t = new THREE.Mesh(trunkGeo, trunkMat);
-    t.position.set(x, y + 2.1, z);
-    const l = new THREE.Mesh(leafGeo, leafMat);
-    l.position.set(x, y + 4.6, z);
-    scene.add(t, l);
+    if (y < 0.35) continue;
+    palmAt(x, z, y, (i % 2 ? 1 : -1) * 0.08);
+  }
+  for (let i = 0; i < 8; i++) {
+    const t = 0.12 + i * 0.08;
+    const side = i % 2 ? 1 : -1;
+    const x = spec.port.x + side * (16 + (i % 3) * 3);
+    const z = spec.port.z + (spec.id === "north" ? -1 : 1) * (40 + i * 28);
+    const y = heightAt(spec, x, z);
+    if (y < 0.4) continue;
+    palmAt(x, z, y, side * 0.1);
   }
 }
 
@@ -342,11 +437,29 @@ function makeRoads() {
       const mx = (a.x + b.x) / 2;
       const mz = (a.z + b.z) / 2;
       const y = heightAt(spec, mx, mz) + 0.07;
+      const yaw = Math.atan2(b.x - a.x, b.z - a.z);
+      if (road.kind === "paved") {
+        const verge = box(18, 0.08, len + 0.5, 0x6a8f44, mx, y - 0.03, mz, false);
+        verge.rotation.y = yaw;
+        verge.userData.kind = "ground";
+      }
       const seg = box(width, 0.12, len + 0.4, color, mx, y, mz, false);
-      seg.rotation.y = Math.atan2(b.x - a.x, b.z - a.z);
+      seg.rotation.y = yaw;
       seg.userData.kind = "ground";
     }
   }
+}
+
+function insetRing(ring, t) {
+  let cx = 0;
+  let cz = 0;
+  for (const p of ring) {
+    cx += p[0];
+    cz += p[1];
+  }
+  cx /= ring.length;
+  cz /= ring.length;
+  return ring.map(([x, z]) => [x + (cx - x) * t, z + (cz - z) * t]);
 }
 
 function parcelGeometry(ring, y) {
@@ -374,11 +487,33 @@ function parcelGeometry(ring, y) {
 }
 
 function paintParcel(p) {
-  const mesh = plotMeshes.get(p.id);
-  if (!mesh) return;
+  const rec = plotMeshes.get(p.id);
+  if (!rec) return;
   const sel = p.id === selected;
-  mesh.material.color.setHex(parcelTint(p, sel));
-  mesh.material.opacity = sel ? 0.55 : p.owner ? 0.32 : 0.16;
+  rec.line.material.color.setHex(parcelTint(p, sel));
+  rec.line.material.opacity = sel ? 0.95 : p.owner ? 0.5 : 0.16;
+  if (sel) {
+    if (!rec.fill) {
+      const spec = specOf(p.island);
+      const y = heightAt(spec, p.x, p.z) + 0.05;
+      rec.fill = new THREE.Mesh(
+        parcelGeometry(insetRing(p.ring, 0.16), y),
+        new THREE.MeshLambertMaterial({
+          color: 0xf0d060,
+          transparent: true,
+          opacity: 0.28,
+          depthWrite: false,
+        }),
+      );
+      rec.fill.userData.kind = "plot";
+      rec.fill.userData.plotId = p.id;
+      scene.add(rec.fill);
+    }
+    rec.fill.visible = true;
+    rec.fill.material.color.setHex(parcelTint(p, true));
+  } else if (rec.fill) {
+    rec.fill.visible = false;
+  }
 }
 
 function useFor(p) {
@@ -394,20 +529,22 @@ function useFor(p) {
 function makeParcels() {
   for (const p of map.plots) {
     const spec = specOf(p.island);
-    const y = heightAt(spec, p.x, p.z) + 0.06;
-    const mesh = new THREE.Mesh(
-      parcelGeometry(p.ring, y),
-      new THREE.MeshLambertMaterial({
+    const y = heightAt(spec, p.x, p.z) + 0.1;
+    const ring = insetRing(p.ring, 0.08);
+    const pts = ring.map(([x, z]) => new THREE.Vector3(x, y, z));
+    pts.push(pts[0].clone());
+    const line = new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints(pts),
+      new THREE.LineBasicMaterial({
         color: parcelTint(p, false),
         transparent: true,
-        opacity: p.owner ? 0.32 : 0.16,
-        depthWrite: false,
+        opacity: p.owner ? 0.5 : 0.16,
       }),
     );
-    mesh.userData.kind = "plot";
-    mesh.userData.plotId = p.id;
-    scene.add(mesh);
-    plotMeshes.set(p.id, mesh);
+    line.userData.kind = "plot-line";
+    line.userData.plotId = p.id;
+    scene.add(line);
+    plotMeshes.set(p.id, { line, fill: null });
     if (p.use) useFor(p);
   }
 }
@@ -579,7 +716,7 @@ async function boot() {
   const res = await fetch("/api/map");
   map = await res.json();
   const water = new THREE.Mesh(
-    new THREE.PlaneGeometry(18000, 18000),
+    new THREE.PlaneGeometry(36000, 36000),
     new THREE.MeshLambertMaterial({ color: 0x1d7a86 }),
   );
   water.rotation.x = -Math.PI / 2;
