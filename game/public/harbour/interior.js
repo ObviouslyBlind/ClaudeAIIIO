@@ -227,6 +227,8 @@ function makeBed(cx, floorY, cz) {
   g.add(box(1.42, 0.08, 1.14, CORAL, cx + 0.24, floorY + 0.52, cz, "interior-prop"));
   g.add(box(0.36, 0.14, 0.5, LINEN, cx - 0.78, floorY + 0.54, cz - 0.28, "interior-prop"));
   g.add(box(0.36, 0.14, 0.5, LINEN, cx - 0.78, floorY + 0.54, cz + 0.28, "interior-prop"));
+  // Kraft pillow on the linen — original PAPER_CARD, so the bed is not only wood + coral.
+  g.add(box(0.3, 0.1, 0.4, PAPER_CARD, cx - 0.7, floorY + 0.66, cz, "interior-prop"));
   g.add(box(0.1, 0.88, 1.32, WOOD, cx - 1.12, floorY + 0.58, cz, "interior-prop"));
   g.add(box(0.08, 0.98, 0.08, WOOD, cx - 1.12, floorY + 0.62, cz - 0.6, "interior-prop"));
   g.add(box(0.08, 0.98, 0.08, WOOD, cx - 1.12, floorY + 0.62, cz + 0.6, "interior-prop"));
