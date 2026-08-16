@@ -212,6 +212,28 @@ function addShopAwning(g, W, D, y) {
   g.add(bar);
 }
 
+/**
+ * Small kraft board in a wood frame on the shop front so a Shop reads as a
+ * shop, not only an awning. Original KRAFT / WOOD — not a new hex.
+ */
+function addShopSign(g, x, y, zFace) {
+  const board = new THREE.Group();
+  board.name = "shop-sign";
+  board.userData.part = "sign";
+  board.userData.mode = "PAPER";
+
+  const frame = tagPaper(part(1.48, 0.52, 0.08, WOOD, false), "sign");
+  frame.position.set(x, y, zFace + 0.12);
+  const face = tagPaper(part(1.28, 0.36, 0.04, KRAFT, false), "sign");
+  face.position.set(x, y, zFace + 0.18);
+  const pegL = tagPaper(part(0.07, 0.07, 0.2, WOOD, false), "sign");
+  pegL.position.set(x - 0.46, y + 0.18, zFace + 0.06);
+  const pegR = tagPaper(part(0.07, 0.07, 0.2, WOOD, false), "sign");
+  pegR.position.set(x + 0.46, y + 0.18, zFace + 0.06);
+  board.add(frame, face, pegL, pegR);
+  g.add(board);
+}
+
 function cottage(kind) {
   const g = new THREE.Group();
   const shop = kind === "shop";
@@ -252,11 +274,7 @@ function cottage(kind) {
   }
   if (shop) {
     addShopAwning(g, W, D, 2.72);
-    const sign = part(2.9, 0.72, 0.08, FRAME, false);
-    sign.position.set(W * 0.08, 3.28, D / 2 + 0.14);
-    const signFace = part(2.55, 0.48, 0.04, AWNING_A, false);
-    signFace.position.set(W * 0.08, 3.28, D / 2 + 0.2);
-    g.add(sign, signFace);
+    addShopSign(g, W * 0.08, 3.28, D / 2);
     for (let i = 0; i < 4; i++) {
       const crate = part(0.7, 0.55, 0.7, i % 2 ? 0x8a6238 : 0x7a5230, false);
       crate.position.set(W * 0.44 - i * 0.82, 0.65, D / 2 + 1.42);
@@ -290,9 +308,7 @@ function stallMesh() {
   addShopAwning(g, W, D, 2.45);
   addSteps(g, 0, D / 2, 1.7, 2);
   addChimney(g, -W * 0.32, 2.7, -D * 0.18, 1.05);
-  const sign = part(2.4, 0.55, 0.08, FRAME, false);
-  sign.position.set(0, 2.85, D / 2 + 0.2);
-  g.add(sign);
+  addShopSign(g, 0, 2.85, D / 2);
   for (let i = 0; i < 3; i++) {
     const crate = part(0.65, 0.5, 0.65, i % 2 ? 0x8a6238 : 0x7a5230, false);
     crate.position.set(-1.4 + i * 1.15, 1.5, 0.35);
