@@ -173,6 +173,16 @@ function shopTwines(root: THREE.Object3D) {
   return out;
 }
 
+function shopSeals(root: THREE.Object3D) {
+  const out: THREE.Object3D[] = [];
+  root.traverse((obj) => {
+    if (obj.userData?.kind === "shop-seal" && obj.name === "shop-seal") {
+      out.push(obj);
+    }
+  });
+  return out;
+}
+
 describe("shop PAPER wrapped parcel", () => {
   it("matches shop plots only", () => {
     expect(isShopPlot({ use: "shop" })).toBe(true);
@@ -1333,6 +1343,90 @@ describe("shop PAPER kraft twine", () => {
         boxes += 1;
         expect(mesh.geometry.type).toBe("BoxGeometry");
         expect(mesh.userData.part).toBe("twine");
+        expect(mesh.userData.mode).toBe("PAPER");
+        const box = mesh.geometry as THREE.BoxGeometry;
+        expect(Math.max(box.parameters.width, box.parameters.height, box.parameters.depth)).toBeLessThan(
+          0.15,
+        );
+      }
+    });
+    expect(boxes).toBeGreaterThanOrEqual(1);
+  });
+});
+
+describe("shop PAPER kraft wax seal", () => {
+  it("puts one tiny kraft PAPER wax seal on the shop counter, twine and ribbon remain", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressShop(scene);
+
+    const dress = interior.getObjectByName("shop-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+
+    const counter = dress!.getObjectByName("shop-counter");
+    expect(counter).toBeTruthy();
+
+    const seals = shopSeals(counter!);
+    expect(seals.length).toBe(1);
+    const seal = seals[0];
+    expect(seal.userData.part).toBe("seal");
+    expect(seal.userData.mode).toBe("PAPER");
+    expect(seal.parent?.name).toBe("shop-counter");
+
+    const receipts = shopReceipts(counter!);
+    const coins = shopCoins(counter!);
+    const blotters = shopBlotters(counter!);
+    const pencils = shopPencils(counter!);
+    const inkpads = shopInkpads(counter!);
+    const ribbons = shopRibbons(counter!);
+    const twines = shopTwines(counter!);
+    expect(receipts.length).toBe(1);
+    expect(coins.length).toBe(1);
+    expect(blotters.length).toBe(1);
+    expect(pencils.length).toBe(1);
+    expect(inkpads.length).toBe(1);
+    expect(ribbons.length).toBe(1);
+    expect(twines.length).toBe(1);
+    expect(receipts[0].userData.part).toBe("receipt");
+    expect(coins[0].userData.part).toBe("coin");
+    expect(blotters[0].userData.part).toBe("blotter");
+    expect(pencils[0].userData.part).toBe("pencil");
+    expect(inkpads[0].userData.part).toBe("inkpad");
+    expect(ribbons[0].userData.part).toBe("ribbon");
+    expect(twines[0].userData.part).toBe("twine");
+
+    const neighbors = [
+      receipts[0],
+      coins[0],
+      blotters[0],
+      pencils[0],
+      inkpads[0],
+      ribbons[0],
+      twines[0],
+    ];
+    for (const other of neighbors) {
+      expect(other).toBeTruthy();
+      const dx = seal.position.x - other.position.x;
+      const dz = seal.position.z - other.position.z;
+      expect(Math.hypot(dx, dz)).toBeGreaterThan(0.12);
+    }
+
+    const colors = hexes(seal);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.every((c) => c === WOOD || c === CORAL)).toBe(true);
+    expect(colors.some((c) => c === WOOD)).toBe(true);
+    expect(colors.some((c) => c === CORAL)).toBe(true);
+    expect(colors.every((c) => !isGrey(c))).toBe(true);
+
+    let boxes = 0;
+    seal.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        boxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.part).toBe("seal");
         expect(mesh.userData.mode).toBe("PAPER");
         const box = mesh.geometry as THREE.BoxGeometry;
         expect(Math.max(box.parameters.width, box.parameters.height, box.parameters.depth)).toBeLessThan(
