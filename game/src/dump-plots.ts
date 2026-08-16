@@ -13,7 +13,7 @@ for (const id of Object.keys(ISLANDS) as IslandId[]) {
     island: id,
     units: "metres",
     origin: "channel midpoint, +Z south",
-    note: "PAPER lease grid. Generated from src/land.ts. Not OSM.",
+    note: "PAPER cadastral parcels. Generated from src/land.ts. Not OSM. Not a given lot list.",
     islandSpec: ISLANDS[id],
     plots: plots.filter((p) => p.island === id),
   };

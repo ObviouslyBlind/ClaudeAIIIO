@@ -14,9 +14,9 @@ npm run tick        # 1 simulated hour
 npm run play        # http://localhost:8787  (3D harbour)
 ```
 
-Open `/` for the harbour. `/market/` is the paper goods HUD. Cash is shared. Labelled PAPER / SIMULATED.
+Open `/` for the harbour. Tap a **piece of land** (not a given lot card), Lease, then Develop. `/market/` is the paper goods HUD; cash is shared. Labelled PAPER / SIMULATED.
 
-Visitor starts with $1,000. Tap ground to walk. Tap a vacant plot, then Lease. Tap the port to ferry. The world still ticks if nobody clicks.
+Visitor starts with $1,000. Tap ground to walk. The world still ticks if nobody clicks.
 
 ## Headless sim
 

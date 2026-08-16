@@ -3,12 +3,11 @@ import { readFile } from "node:fs/promises";
 import { extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { GOOD_IDS, type GoodId } from "./goods.ts";
-import { createLandBoard, landSnapshot, leasePlot } from "./land.ts";
+import { createLandBoard, developPlot, landSnapshot, leasePlot } from "./land.ts";
 import { buyFromStall, createVisitor, createWorld, hud, tick } from "./sim.ts";
 
 const root = join(fileURLToPath(new URL(".", import.meta.url)), "..");
 const publicDir = join(root, "public");
-const threeModule = join(root, "node_modules/three/build/three.module.js");
 const port = Number(process.env.PORT ?? 8787);
 
 const world = createWorld(7);
@@ -80,6 +79,18 @@ const server = createServer(async (req, res) => {
     return;
   }
 
+  if (req.method === "POST" && url.pathname === "/api/develop") {
+    const body = await readJsonBody(req);
+    if (!body) {
+      json(res, 400, { ok: false, reason: "bad_json" });
+      return;
+    }
+    const use = body.use === "farm" ? "farm" : "stall";
+    const result = developPlot(land, visitor, String(body.plotId ?? ""), use);
+    json(res, result.ok ? 200 : 400, { ...result, snapshot: landSnapshot(land, visitor) });
+    return;
+  }
+
   if (req.method === "POST" && url.pathname === "/api/buy") {
     const body = await readJsonBody(req);
     if (!body) {
@@ -93,9 +104,10 @@ const server = createServer(async (req, res) => {
     return;
   }
 
-  if (url.pathname === "/vendor/three.module.js") {
+  if (url.pathname.startsWith("/vendor/") && !url.pathname.includes("..")) {
+    const name = url.pathname.slice("/vendor/".length);
     try {
-      const data = await readFile(threeModule);
+      const data = await readFile(join(root, "node_modules/three/build", name));
       res.writeHead(200, { "content-type": "text/javascript; charset=utf-8" });
       res.end(data);
     } catch {

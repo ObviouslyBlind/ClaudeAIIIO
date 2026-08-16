@@ -12,7 +12,8 @@ export {
 export {
   createLandBoard,
   leasePlot,
+  developPlot,
   landSnapshot,
   ISLANDS,
-  type Plot,
+  type Parcel,
 } from "./land.ts";
