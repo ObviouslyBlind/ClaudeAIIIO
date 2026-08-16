@@ -1161,3 +1161,95 @@ describe("factory PAPER kraft awl", () => {
     expect(boxes).toBeGreaterThanOrEqual(2);
   });
 });
+
+function factoryPaperRasps(root: THREE.Object3D) {
+  const out: THREE.Object3D[] = [];
+  root.traverse((obj) => {
+    if (obj.userData?.part === "rasp") {
+      out.push(obj);
+    }
+  });
+  return out;
+}
+
+describe("factory PAPER kraft rasp", () => {
+  it("puts one tiny kraft PAPER rasp on a factory bench; awl and shaving remain", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressFactory(scene);
+
+    const dress = interior.getObjectByName("factory-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+
+    const rasps = factoryPaperRasps(dress!);
+    expect(rasps.length).toBe(1);
+    const rasp = rasps[0];
+    expect(rasp.userData.part).toBe("rasp");
+    expect(rasp.userData.mode).toBe("PAPER");
+    expect(rasp.userData.part).not.toBe("awl");
+    expect(rasp.userData.part).not.toBe("shaving");
+    expect(rasp.userData.part).not.toBe("peg");
+    expect(rasp.userData.part).not.toBe("cork");
+    expect(rasp.userData.part).not.toBe("funnel");
+    expect(rasp.userData.part).not.toBe("oilcan");
+    expect(rasp.userData.part).not.toBe("rag");
+    expect(rasp.userData.part).not.toBe("rivet");
+    expect(rasp.userData.part).not.toBe("wrench");
+
+    expect(factoryPaperAwls(dress!).length).toBe(1);
+    expect(factoryPaperShavings(dress!).length).toBe(1);
+    expect(factoryPaperPegs(dress!).length).toBe(1);
+    expect(factoryPaperCorks(dress!).length).toBe(1);
+    expect(factoryPaperFunnels(dress!).length).toBe(1);
+    expect(factoryPaperOilcans(dress!).length).toBe(1);
+    expect(factoryRags(dress!).length).toBe(1);
+    expect(factoryRivets(dress!).length).toBe(1);
+    expect(factoryTools(dress!).length).toBe(1);
+
+    const awl = factoryPaperAwls(dress!)[0];
+    const shaving = factoryPaperShavings(dress!)[0];
+    const peg = factoryPaperPegs(dress!)[0];
+    const cork = factoryPaperCorks(dress!)[0];
+    const funnel = factoryPaperFunnels(dress!)[0];
+    const can = factoryPaperOilcans(dress!)[0];
+    const rag = factoryRags(dress!)[0];
+    const rivet = factoryRivets(dress!)[0];
+    const wrench = factoryTools(dress!)[0];
+    const toAwl = Math.hypot(rasp.position.x - awl.position.x, rasp.position.z - awl.position.z);
+    const toShaving = Math.hypot(rasp.position.x - shaving.position.x, rasp.position.z - shaving.position.z);
+    const toPeg = Math.hypot(rasp.position.x - peg.position.x, rasp.position.z - peg.position.z);
+    const toCork = Math.hypot(rasp.position.x - cork.position.x, rasp.position.z - cork.position.z);
+    const toFunnel = Math.hypot(rasp.position.x - funnel.position.x, rasp.position.z - funnel.position.z);
+    const toCan = Math.hypot(rasp.position.x - can.position.x, rasp.position.z - can.position.z);
+    const toRag = Math.hypot(rasp.position.x - rag.position.x, rasp.position.z - rag.position.z);
+    const toRivet = Math.hypot(rasp.position.x - rivet.position.x, rasp.position.z - rivet.position.z);
+    const toWrench = Math.hypot(rasp.position.x - wrench.position.x, rasp.position.z - wrench.position.z);
+    expect(toAwl).toBeGreaterThan(0.5);
+    expect(toShaving).toBeGreaterThan(0.5);
+    expect(toPeg).toBeGreaterThan(0.5);
+    expect(toCork).toBeGreaterThan(0.5);
+    expect(toFunnel).toBeGreaterThan(0.5);
+    expect(toCan).toBeGreaterThan(0.5);
+    expect(toRag).toBeGreaterThan(0.5);
+    expect(toRivet).toBeGreaterThan(0.5);
+    expect(toWrench).toBeGreaterThan(0.5);
+
+    const raspColors = hexes(rasp);
+    expect(raspColors.length).toBeGreaterThan(0);
+    expect(raspColors.some((c) => c === KRAFT)).toBe(true);
+    expect(raspColors.every((c) => [KRAFT, 0x9a6a40, 0x6a4a32].includes(c))).toBe(true);
+
+    let raspBoxes = 0;
+    rasp.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        raspBoxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.mode).toBe("PAPER");
+      }
+    });
+    expect(raspBoxes).toBeGreaterThanOrEqual(2);
+  });
+});
