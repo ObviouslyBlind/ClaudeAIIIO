@@ -46,7 +46,7 @@ function part(mesh, name) {
   return mesh;
 }
 
-/** Sedan: painted body, glass cabin, bumpers, kraft lamps, chrome side mirrors, four wheels with kraft hub boxes, short kraft roof aerial, two kraft PAPER wipers. No debug masts. */
+/** Sedan: painted body, glass cabin, bumpers, kraft lamps, chrome side mirrors, four wheels with kraft hub boxes, short kraft roof aerial, two kraft PAPER wipers, one kraft spare-tyre bolt. No debug masts. */
 function makeCar(color) {
   const g = new THREE.Group();
   g.frustumCulled = false;
@@ -117,6 +117,11 @@ function makeCar(color) {
   const plate = part(new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.14, 0.04), kraft), "plate");
   plate.position.set(0, 0.62, -2.2);
   g.add(plate);
+
+  /** Tiny kraft PAPER spare-tyre bolt on the boot — hubs already exist, so this is the mount. Same 0xf4ead8. */
+  const bolt = part(new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.06, 0.08), kraft), "bolt");
+  bolt.position.set(0, 1.1, -1.62);
+  g.add(bolt);
 
   for (const x of [-0.68, 0.68]) {
     const head = part(new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.14, 0.1), kraft), "headlight");
