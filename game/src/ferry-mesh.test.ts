@@ -82,4 +82,30 @@ describe("ferry berth", () => {
     expect(rings).toBeGreaterThanOrEqual(1);
     expect(bollards).toBeGreaterThanOrEqual(2);
   });
+
+  it("sits a short kraft PAPER rail on the cream deck", () => {
+    expect(HOME_Z).toBe(-6835);
+    const mesh = makeFerry();
+    expect(mesh.position.z).toBe(-6835);
+    let rails = 0;
+    let lanterns = 0;
+    let smoke = 0;
+    let handles = 0;
+    let rings = 0;
+    let bollards = 0;
+    mesh.traverse((obj) => {
+      if (obj.userData?.part === "rail") rails += 1;
+      if (obj.userData?.part === "lantern") lanterns += 1;
+      if (obj.userData?.part === "smoke") smoke += 1;
+      if (obj.userData?.part === "handle") handles += 1;
+      if (obj.userData?.part === "lifering") rings += 1;
+      if (obj.userData?.part === "bollard" || obj.name === "bollard") bollards += 1;
+    });
+    expect(rails).toBeGreaterThanOrEqual(1);
+    expect(lanterns).toBeGreaterThanOrEqual(1);
+    expect(smoke).toBeGreaterThanOrEqual(1);
+    expect(handles).toBeGreaterThanOrEqual(1);
+    expect(rings).toBeGreaterThanOrEqual(1);
+    expect(bollards).toBeGreaterThanOrEqual(2);
+  });
 });
