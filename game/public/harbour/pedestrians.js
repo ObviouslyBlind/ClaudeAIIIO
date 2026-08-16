@@ -169,6 +169,20 @@ function addKraftKerchief(figure) {
   figure.add(kerchief);
 }
 
+/**
+ * Tiny kraft work gloves at the wrists. Same canvas tan already in this
+ * file — no new grey. PAPER boxes only. Hat, apron, satchel, kerchief stay.
+ */
+function addKraftWorkGloves(figure) {
+  const leftGlove = paperBox(0.14, 0.1, 0.14, CANVAS);
+  leftGlove.position.set(-0.32, 0.78, 0);
+  leftGlove.userData.part = "glove";
+  const rightGlove = paperBox(0.14, 0.1, 0.14, CANVAS);
+  rightGlove.position.set(0.32, 0.78, 0);
+  rightGlove.userData.part = "glove";
+  figure.add(leftGlove, rightGlove);
+}
+
 function polylineLength(points) {
   let n = 0;
   for (let i = 1; i < points.length; i++) {
@@ -308,6 +322,7 @@ export function makePedestrians(map, helpers) {
       addKraftCanvasApron(person.mesh);
       addKraftSatchel(person.mesh);
       addKraftKerchief(person.mesh);
+      addKraftWorkGloves(person.mesh);
     }
     const at = samplePerson(spec, heightAt, person, along);
     if (!onLand(at)) return;
