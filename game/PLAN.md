@@ -153,26 +153,22 @@ Full rank table is in section 7.
 - Politics and planning are **2D panels**. Walking into a chamber is optional desktop flavor.
 - Client: Three.js or PlayCanvas. Sim: authoritative Node (or similar). One logic, scaled view.
 
-### 3.10 Controls (one scheme, two devices)
+### 3.10 Controls (one scheme)
 
-Do **not** make Interact right-click-only. Phones have no right click. Browser right click is the context menu. Trackpads make it miserable.
+There are **not** PC controls and mobile controls. There is one scheme. A mouse and a finger are two ways to fire the same two actions.
 
-Use **primary / secondary**, like OSRS / Albion, not RTS (where right click is move).
+| Action | Meaning | Mouse | Finger |
+|---|---|---|---|
+| **Primary** | Ground: walk there. Thing: use it (walk into range if needed). | Left click | Tap |
+| **Secondary** | Extra menu (Examine, Hiring, Follow). Never required to shop. | Right click (suppress browser menu on the canvas) | Long-press (~400ms) |
 
-| Input | Desktop | Phone |
-|---|---|---|
-| **Primary** | Left click | Tap |
-| **Secondary** | Right click (context menu; suppress the browser menu on the canvas) | Long-press (~400ms) |
+HUD buttons (Vote, Hire, Inventory, Jobs) are the same widgets on a 27-inch monitor and a phone. They sit in a safe area so thumbs and a cursor both hit them.
 
-**Primary on ground:** walk there (click-to-move).  
-**Primary on a thing:** interact — open stall, talk, board ferry, pick up. If out of range, walk into range then use.  
-**Secondary on a thing:** small menu (Examine, Open hiring, Follow, Report). Never the only way to shop.
+No WASD. No virtual stick. Those would be a second move language. Click/tap-to-move is the only walk.
 
-Optional desktop: WASD nudges the same walk intent. It does not replace click-to-move. Phone gets a **left-side stick** as that nudge, so thumbs are not fighting a tiny ground tap while looking at a stall.
+Cursor / finger ghost uses the same hints: ground = feet, usable = hand, blocked = none.
 
-HUD buttons (Vote, Hire, Inventory) are always tap/click. No right click required to play.
-
-Cursor hint: ground = feet icon, usable = hand, blocked = none. Same icons on mobile as a brief ghost under the finger.
+If a control cannot be done with a tap, it does not ship. Right click is only a faster secondary, never a unique verb.
 
 ---
 
@@ -477,7 +473,7 @@ Persist every ~10s plus an event log for statute writes, elections, and large ap
 
 | Layer | Job |
 |---|---|
-| 3D world | Islands, carts, ferry, small vs large sites. Primary tap/click to move or use; long-press / right click for extra menu. Optional stick / WASD nudge. |
+| 3D world | Islands, carts, ferry, small vs large sites. One scheme: primary tap/click to move or use; secondary long-press / right click for extra menu. |
 | HUD | Cash, 3 inflation numbers, ferry, next election / session. |
 | Market | Orders, island toggle. |
 | Planning | File, owner/CEO signatures, vote. Thumb-sized. |
@@ -552,7 +548,6 @@ Staff tools: kick, force a session, re-appoint a vacant Senate seat, re-queue a 
 - Governor vote: single island-wide tally vs North+South with a tie-break.
 - Three.js vs PlayCanvas.
 - Constituency polygon map (10 per island).
-- Whether WASD is on from day 1 or added after click-to-move feels right (plan assumes optional nudge).
 
 Write decisions into this file.
 
