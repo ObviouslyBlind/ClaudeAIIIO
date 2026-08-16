@@ -234,6 +234,26 @@ function kraftPencil(x, y, z, yaw = 0) {
 }
 
 /**
+ * Tiny kraft inventory card on a crate — cream sheet + strap stripe.
+ * PAPER boxes only. Not a pencil, not twine, not chalk, not a broom.
+ */
+function kraftCard(x, y, z, yaw = 0) {
+  const g = new THREE.Group();
+  g.name = "warehouse-card";
+  g.userData.kind = "warehouse-card";
+  g.userData.mode = "PAPER";
+  g.userData.part = "card";
+  g.position.set(x, y, z);
+  g.rotation.y = yaw;
+  const sheet = paperBox(0.16, 0.006, 0.11, PAPER_CARD, "warehouse-card");
+  sheet.position.set(0, 0.003, 0);
+  const stripe = paperBox(0.16, 0.005, 0.02, STRAP, "warehouse-card");
+  stripe.position.set(0, 0.006, -0.04);
+  g.add(sheet, stripe);
+  return g;
+}
+
+/**
  * Tiny kraft twine ball on a warehouse crate — WOOD winding, STRAP wrap,
  * cream PAPER_CARD tag. PAPER boxes only. Not a coil, not on the clipboard.
  */
@@ -463,6 +483,9 @@ function makeWarehouseDress() {
   // Tiny kraft twine ball on the back-right crate stack. Clear of pencil,
   // chalk, clipboard, pallet, dolly, and floor crates.
   g.add(kraftTwine(3.22, 1.56, -2.38, 0.18));
+  // Tiny kraft inventory card on the left-wall crate. Clear of pencil,
+  // twine, chalk, broom, and floor crates.
+  g.add(kraftCard(-3.28, 1.46, 0.85, 0.38));
   // Kraft broom leaning on the right wall, in the gap between the mid and low stacks.
   g.add(kraftBroom(3.32, -1.52));
   // Small kraft hanging lantern off the left post — wood bail + cream glass.

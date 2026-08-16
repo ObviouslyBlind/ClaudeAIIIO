@@ -862,3 +862,72 @@ describe("warehouse PAPER kraft twine", () => {
     expect(interior.userData.interiorUse).toBe("house");
   });
 });
+
+describe("warehouse PAPER kraft inventory card", () => {
+  it("sits one tiny kraft PAPER card on a crate; pencil and twine stay", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressWarehouse(scene);
+
+    const dress = interior.getObjectByName("warehouse-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+
+    const cards: THREE.Object3D[] = [];
+    const pencils: THREE.Object3D[] = [];
+    const twines: THREE.Object3D[] = [];
+    const chalks: THREE.Object3D[] = [];
+    const brooms: THREE.Object3D[] = [];
+    const crates: THREE.Object3D[] = [];
+    dress!.traverse((obj) => {
+      if (obj.userData?.kind === "warehouse-card" && obj.name === "warehouse-card") {
+        cards.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-pencil" && obj.name === "warehouse-pencil") {
+        pencils.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-twine" && obj.name === "warehouse-twine") {
+        twines.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-chalk" && obj.name === "warehouse-chalk") {
+        chalks.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-broom" && obj.name === "warehouse-broom") {
+        brooms.push(obj);
+      }
+      if (obj.name === "warehouse-floor-crate") crates.push(obj);
+    });
+    expect(cards.length).toBe(1);
+    expect(pencils.length).toBe(1);
+    expect(twines.length).toBe(1);
+
+    const card = cards[0];
+    expect(card.userData.kind).toBe("warehouse-card");
+    expect(card.userData.mode).toBe("PAPER");
+    expect(card.userData.part).toBe("card");
+    expect(horizDist(card, pencils[0])).toBeGreaterThan(1.5);
+    expect(horizDist(card, twines[0])).toBeGreaterThan(1.5);
+    expect(horizDist(card, chalks[0])).toBeGreaterThan(1.5);
+    expect(horizDist(card, brooms[0])).toBeGreaterThan(1.5);
+    for (const crate of crates) expect(horizDist(card, crate)).toBeGreaterThan(1.2);
+
+    const colors = hexes(card);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.every((c) => c === 0xf3efe4 || c === 0x5a3a22 || c === 0x8a6238)).toBe(true);
+    expect(colors.some((c) => c === 0xf3efe4)).toBe(true);
+    expect(colors.every((c) => c === 0xf3efe4 || !isGrey(c))).toBe(true);
+
+    let boxes = 0;
+    card.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        boxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.kind).toBe("warehouse-card");
+        expect(mesh.userData.mode).toBe("PAPER");
+      }
+    });
+    expect(boxes).toBeGreaterThanOrEqual(1);
+  });
+});
