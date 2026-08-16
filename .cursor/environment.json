@@ -1,0 +1,14 @@
+{
+  "name": "Polymarket NO-Only Timer Bot",
+  "install": "sudo ln -sf /usr/bin/python3 /usr/local/bin/python && python3 -m pip install --user -r requirements.txt pytest",
+  "terminals": [
+    {
+      "name": "dashboard",
+      "command": "python scripts/serve_dashboard.py --no-export 8000",
+      "description": "Serves the SENTINEL dashboard at http://localhost:8000 using the committed dashboard/data. Run scripts/run_pipeline.sh to refresh data, then restart to serve fresh exports."
+    }
+  ],
+  "ports": [
+    { "name": "dashboard", "port": 8000 }
+  ]
+}
