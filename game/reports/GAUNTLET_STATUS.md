@@ -8,11 +8,11 @@ Inland spawn, paved asphalt ribbon (`/?g=rib23`), dirt ribbons (`/?g=dirt24` PAS
 
 ## Held (code, not all re-critic’d)
 
-- Econ HUD strip, NPC stall buy, outdoor nametags, warehouse interior, presence cells, visitor cart persist, quay pedestrians
+- Econ HUD strip, NPC stall buy, outdoor nametags, warehouse interior, presence cells, visitor cart persist, quay pedestrians, staff slots (`bf1ae1eb`), visitor bid/ask (`3059ece6`)
 
 ## In flight (base)
 
-Visitor PAPER bid/ask (`orders.ts`), staff slots (`staff.ts`). Next pixel: cars (`/?g=cars26`).
+Pixel: cars (`/?g=cars26`). Shop / farm interiors and nearby-presence HUD still building.
 
 Politics agents that already committed (House bills, councils, Senate) stay frozen — do not resume.
 
