@@ -979,3 +979,112 @@ describe("house-shop PAPER table coaster", () => {
     expect(boxes).toBeGreaterThanOrEqual(1);
   });
 });
+
+describe("house-shop PAPER table blotter", () => {
+  it("sits a tiny kraft PAPER blotter on the living-room table; coaster, cup, napkin, spoon, knife, saucer remain", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressHouseShop(scene);
+
+    const dress = interior.getObjectByName("house-shop-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+
+    const blotters: THREE.Object3D[] = [];
+    const coasters: THREE.Object3D[] = [];
+    const cups: THREE.Object3D[] = [];
+    const napkins: THREE.Object3D[] = [];
+    const spoons: THREE.Object3D[] = [];
+    const knives: THREE.Object3D[] = [];
+    const saucers: THREE.Object3D[] = [];
+    dress!.traverse((obj) => {
+      if (obj.userData?.part === "blotter" || obj.name === "house-shop-blotter") {
+        blotters.push(obj);
+      }
+      if (obj.userData?.part === "coaster" || obj.name === "house-shop-coaster") {
+        coasters.push(obj);
+      }
+      if (obj.userData?.part === "cup") cups.push(obj);
+      if (obj.userData?.part === "napkin" || obj.name === "house-shop-napkin") {
+        napkins.push(obj);
+      }
+      if (obj.userData?.part === "spoon" || obj.name === "house-shop-spoon") {
+        spoons.push(obj);
+      }
+      if (obj.userData?.part === "knife" || obj.name === "house-shop-knife") {
+        knives.push(obj);
+      }
+      if (obj.userData?.part === "saucer") saucers.push(obj);
+    });
+    expect(blotters.length).toBe(1);
+    expect(coasters.length).toBe(1);
+    expect(cups.length).toBe(1);
+    expect(napkins.length).toBe(1);
+    expect(spoons.length).toBe(1);
+    expect(knives.length).toBe(1);
+    expect(saucers.length).toBe(1);
+
+    const blotter = blotters[0];
+    expect(blotter.userData.part).toBe("blotter");
+    expect(blotter.userData.kind).toBe("house-shop-blotter");
+    expect(blotter.userData.mode).toBe("PAPER");
+    expect(coasters[0].userData.part).toBe("coaster");
+    expect(cups[0].userData.part).toBe("cup");
+    expect(napkins[0].userData.part).toBe("napkin");
+    expect(spoons[0].userData.part).toBe("spoon");
+    expect(knives[0].userData.part).toBe("knife");
+    expect(saucers[0].userData.part).toBe("saucer");
+
+    const table = dress!.getObjectByName("house-shop-table");
+    expect(table).toBeTruthy();
+    expect(blotter.parent?.name).toBe("house-shop-table");
+    const top = table!.children.find((obj) => {
+      const mesh = obj as THREE.Mesh;
+      return mesh.isMesh && mesh.geometry.type === "BoxGeometry";
+    }) as THREE.Mesh;
+    expect(top).toBeTruthy();
+    const tablePos = new THREE.Vector3();
+    const blotterPos = new THREE.Vector3();
+    top.getWorldPosition(tablePos);
+    blotter.getWorldPosition(blotterPos);
+    expect(Math.hypot(blotterPos.x - tablePos.x, blotterPos.z - tablePos.z)).toBeLessThan(0.6);
+    expect(blotterPos.y).toBeGreaterThan(0.5);
+    expect(blotterPos.y).toBeLessThan(0.75);
+
+    const xzOffset = (other: THREE.Object3D) => {
+      const otherPos = new THREE.Vector3();
+      other.getWorldPosition(otherPos);
+      return Math.hypot(blotterPos.x - otherPos.x, blotterPos.z - otherPos.z);
+    };
+    expect(xzOffset(coasters[0])).toBeGreaterThan(0.25);
+    expect(xzOffset(cups[0])).toBeGreaterThan(0.25);
+    expect(xzOffset(napkins[0])).toBeGreaterThan(0.25);
+    expect(xzOffset(spoons[0])).toBeGreaterThan(0.25);
+    expect(xzOffset(knives[0])).toBeGreaterThan(0.25);
+    expect(xzOffset(saucers[0])).toBeGreaterThan(0.25);
+
+    const colors = hexes(blotter);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.every((c) => c === WOOD || c === CREAM || c === LINEN)).toBe(true);
+    expect(colors.some((c) => c === WOOD || c === CREAM || c === LINEN)).toBe(true);
+    expect(colors.every((c) => !isGrey(c))).toBe(true);
+
+    const size = new THREE.Box3().setFromObject(blotter).getSize(new THREE.Vector3());
+    expect(size.x).toBeLessThan(0.16);
+    expect(size.y).toBeLessThan(0.06);
+    expect(size.z).toBeLessThan(0.16);
+
+    let boxes = 0;
+    blotter.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        boxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.kind).toBe("house-shop-blotter");
+        expect(mesh.userData.mode).toBe("PAPER");
+      }
+    });
+    expect(boxes).toBeGreaterThanOrEqual(1);
+  });
+});
