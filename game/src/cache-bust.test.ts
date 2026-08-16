@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bustHarbourAssets } from "./cache-bust.ts";
+import { bustHarbourAssets, bustModuleImports } from "./cache-bust.ts";
 
 describe("harbour cache bust", () => {
   it("stamps script and stylesheet so a fresh load is enough", () => {
@@ -9,5 +9,14 @@ describe("harbour cache bust", () => {
     expect(out).toContain("/harbour/style.css?v=99");
     expect(out).toContain("/harbour/main.js?v=99");
     expect(out).not.toContain("v=12");
+  });
+
+  it("stamps relative ES imports so traffic.js is not a stale module", () => {
+    const js = `import { createTraffic } from "./traffic.js";
+import { createTaxi } from "./taxi.js?v=1";`;
+    const out = bustModuleImports(js, 77);
+    expect(out).toContain('./traffic.js?v=77');
+    expect(out).toContain('./taxi.js?v=77');
+    expect(out).not.toContain("v=1");
   });
 });
