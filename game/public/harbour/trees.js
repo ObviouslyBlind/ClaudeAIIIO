@@ -499,6 +499,77 @@ function plantNorthPortCoconuts(root, placed, map, specOf, heightAt) {
   if (group.children.length) root.add(group);
 }
 
+function markBird(mesh) {
+  mesh.userData.part = "bird";
+  mesh.userData.dress = "bird";
+  mesh.userData.provenance = "PAPER";
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+}
+
+/**
+ * One small kraft PAPER bird (body + wing boxes) under a north-port verge
+ * palm. Hexes already in this file: trunk kraft + leaf greens. Off the
+ * tarmac (PAVED_CLEAR / ROAD_CLEAR). Unique meshes — three boxes — so the
+ * phone mesh budget stays tiny. Coconuts and palm count stay put.
+ */
+function plantNorthPortBird(root, placed, map, specOf, heightAt) {
+  const sites = placed.filter((p) => p.island === "north" && p.dress === "north-port-palm");
+  if (!sites.length) return;
+  const spec = specOf("north");
+  if (!spec) return;
+
+  const bodyGeo = new THREE.BoxGeometry(0.16, 0.1, 0.22);
+  const wingGeo = new THREE.BoxGeometry(0.2, 0.035, 0.08);
+  const bodyMat = new THREE.MeshLambertMaterial({ color: TRUNK });
+  const wingMat = new THREE.MeshLambertMaterial({ color: LEAF_DEEP });
+
+  for (let i = 0; i < sites.length; i++) {
+    const p = sites[i];
+    const yaw = hash(i * 6.7 + p.z) * Math.PI * 2;
+    const rad = 0.48 + hash(i * 1.9) * 0.12;
+    let x = p.x + Math.cos(yaw) * rad;
+    let z = p.z + Math.sin(yaw) * rad;
+    if (distToKind(map, "north", x, z, "paved") < PAVED_CLEAR_M) {
+      x = p.x;
+      z = p.z;
+    }
+    if (distToKind(map, "north", x, z, "paved") < PAVED_CLEAR_M) continue;
+    if (onPublicQuay(spec, x, z)) continue;
+    const y = heightAt(spec, x, z);
+    if (y < WATER_MIN_M) continue;
+
+    const bird = new THREE.Group();
+    bird.name = "bird";
+    bird.userData.kind = "bird";
+    bird.userData.part = "bird";
+    bird.userData.dress = "bird";
+    bird.userData.provenance = "PAPER";
+    bird.position.set(x, y + 0.16, z);
+    bird.rotation.y = yaw + Math.PI * 0.5;
+
+    const body = new THREE.Mesh(bodyGeo, bodyMat);
+    body.name = "bird-body";
+    markBird(body);
+
+    const wingL = new THREE.Mesh(wingGeo, wingMat);
+    wingL.name = "bird-wing";
+    markBird(wingL);
+    wingL.position.set(-0.1, 0.02, 0);
+    wingL.rotation.z = 0.38;
+
+    const wingR = new THREE.Mesh(wingGeo, wingMat);
+    wingR.name = "bird-wing";
+    markBird(wingR);
+    wingR.position.set(0.1, 0.02, 0);
+    wingR.rotation.z = -0.38;
+
+    bird.add(body, wingL, wingR);
+    root.add(bird);
+    return;
+  }
+}
+
 /**
  * Low-poly PAPER trees on hills, inland slopes, and behind street lots.
  * Palms stay on the quay (makePalms). helpers: { scene, specOf, heightAt }.
@@ -518,6 +589,7 @@ export function makeTrees(map, helpers) {
 
   plantInstanced(root, placed);
   plantNorthPortCoconuts(root, placed, map || {}, specOf, heightAt);
+  plantNorthPortBird(root, placed, map || {}, specOf, heightAt);
   scene.add(root);
   return root;
 }

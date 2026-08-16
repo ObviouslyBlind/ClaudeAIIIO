@@ -167,8 +167,8 @@ describe("hill and verge trees", () => {
 
     const { meshes, geos } = countMeshes(root);
     expect(meshes).toBeLessThan(MAX_UNIQUE_MESHES);
-    expect(meshes).toBeLessThanOrEqual(8);
-    expect(geos).toBeLessThanOrEqual(4);
+    expect(meshes).toBeLessThanOrEqual(12);
+    expect(geos).toBeLessThanOrEqual(6);
     expect(placed.length).toBeGreaterThan(meshes);
 
     const instanced = root.children.filter((c) => (c as THREE.InstancedMesh).isInstancedMesh);
@@ -232,6 +232,57 @@ describe("hill and verge trees", () => {
       expect(Math.hypot(pos.x - port.x, pos.z - port.z)).toBeLessThan(400);
       const atBase = northPalms.some((p) => Math.hypot(p.x - pos.x, p.z - pos.z) < 1.2);
       expect(atBase).toBe(true);
+    }
+  });
+
+  it("perches one kraft PAPER bird under a north-port verge palm, off PAVED_CLEAR", () => {
+    const map = createLandBoard();
+    const scene = { add(_obj: THREE.Object3D) {} };
+    const root = makeTrees(map, {
+      scene,
+      specOf: (id: "north" | "south") => ISLANDS[id],
+      heightAt,
+    });
+
+    const placed = (root.userData.placed || []) as {
+      island: "north" | "south";
+      x: number;
+      z: number;
+      y: number;
+      role: string;
+      dress?: string;
+    }[];
+    const northPalms = placed.filter((p) => p.island === "north" && p.dress === "north-port-palm");
+    expect(northPalms.length).toBeGreaterThan(0);
+    expect(northPalms.length).toBeLessThanOrEqual(NORTH_PORT_PALM_OFFSETS.length);
+
+    const birds: THREE.Mesh[] = [];
+    root.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (!mesh.isMesh) return;
+      if (mesh.userData.part === "bird" || mesh.userData.dress === "bird") birds.push(mesh);
+    });
+    expect(birds.length).toBeGreaterThanOrEqual(2);
+    expect(birds.length).toBeLessThanOrEqual(3);
+
+    const kraft = new Set([0x8a6238, 0x9a6a40, 0x3f7a38, 0x2f6b32]);
+    const port = ISLANDS.north.port;
+    for (const bird of birds) {
+      expect(bird.userData.part === "bird" || bird.userData.dress === "bird").toBe(true);
+      expect(bird.userData.provenance).toBe("PAPER");
+      expect(bird.geometry.type).toBe("BoxGeometry");
+      const mat = bird.material as THREE.MeshLambertMaterial;
+      expect(mat.type).toBe("MeshLambertMaterial");
+      expect(kraft.has(mat.color.getHex())).toBe(true);
+      expect(isGrey(mat.color.getHex())).toBe(false);
+      const pos = new THREE.Vector3();
+      bird.getWorldPosition(pos);
+      expect(distToPaved(ISLANDS.north, pos.x, pos.z)).toBeGreaterThanOrEqual(PAVED_CLEAR_M);
+      expect(onPublicQuay(ISLANDS.north, pos.x, pos.z)).toBe(false);
+      expect(heightAt(ISLANDS.north, pos.x, pos.z)).toBeGreaterThanOrEqual(WATER_MIN_M);
+      expect(Math.hypot(pos.x - port.x, pos.z - port.z)).toBeLessThan(400);
+      const atPalm = northPalms.some((p) => Math.hypot(p.x - pos.x, p.z - pos.z) < 1.2);
+      expect(atPalm).toBe(true);
     }
   });
 });
