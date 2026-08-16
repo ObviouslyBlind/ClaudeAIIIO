@@ -158,6 +158,38 @@ function paperMark(x, y, z) {
   return g;
 }
 
+/**
+ * Small iron wall hook — plate + arm + downturned tip, optional rope loop
+ * and a tiny hanging sack. PAPER boxes only. Not a crate, not a lamp.
+ */
+function wallHook(x, y, z, yaw = 0) {
+  const g = new THREE.Group();
+  g.name = "warehouse-hook";
+  g.userData.kind = "warehouse-hook";
+  g.userData.mode = "PAPER";
+  g.position.set(x, y, z);
+  g.rotation.y = yaw;
+  const plate = paperBox(0.14, 0.18, 0.04, LAMP_METAL, "warehouse-hook");
+  const arm = paperBox(0.045, 0.045, 0.18, LAMP_METAL, "warehouse-hook");
+  arm.position.set(0, 0.02, 0.1);
+  const tip = paperBox(0.045, 0.12, 0.045, LAMP_METAL, "warehouse-hook");
+  tip.position.set(0, -0.04, 0.18);
+  const loopTop = paperBox(0.07, 0.04, 0.05, STRAP, "warehouse-hook");
+  loopTop.position.set(0, -0.12, 0.18);
+  const loopL = paperBox(0.035, 0.14, 0.035, STRAP, "warehouse-hook");
+  loopL.position.set(-0.055, -0.2, 0.18);
+  const loopR = paperBox(0.035, 0.14, 0.035, STRAP, "warehouse-hook");
+  loopR.position.set(0.055, -0.2, 0.18);
+  const loopBot = paperBox(0.14, 0.035, 0.035, STRAP, "warehouse-hook");
+  loopBot.position.set(0, -0.28, 0.18);
+  const sack = paperBox(0.16, 0.2, 0.13, WOOD, "warehouse-hook");
+  sack.position.set(0, -0.4, 0.18);
+  const cinch = paperBox(0.09, 0.04, 0.08, STRAP, "warehouse-hook");
+  cinch.position.set(0, -0.29, 0.18);
+  g.add(plate, arm, tip, loopTop, loopL, loopR, loopBot, sack, cinch);
+  return g;
+}
+
 function makeWarehouseDress() {
   const g = new THREE.Group();
   g.name = "warehouse-dress";
@@ -225,6 +257,8 @@ function makeWarehouseDress() {
   g.add(hangingLamp(-0.4, 2.15, -0.2));
   g.add(hangingLamp(1.8, 2.15, 0.4));
   g.add(paperMark(-2.15, 1.55, 3.38));
+  // Iron hook on the back wall, in the gap between the low and mid stacks.
+  g.add(wallHook(-0.58, 1.62, -3.38));
 
   const postL = paperBox(0.16, 2.45, 0.16, STRAP, "warehouse-prop");
   postL.position.set(-2.05, 1.38, 1.85);

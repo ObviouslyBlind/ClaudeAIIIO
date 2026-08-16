@@ -88,3 +88,46 @@ describe("warehouse PAPER floor crates", () => {
     expect(interior.userData.interiorUse).toBe("house");
   });
 });
+
+describe("warehouse PAPER wall hook", () => {
+  it("hangs a small iron PAPER hook on the warehouse wall", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressWarehouse(scene);
+
+    const dress = interior.getObjectByName("warehouse-dress");
+    expect(dress).toBeTruthy();
+
+    const hooks: THREE.Object3D[] = [];
+    dress!.traverse((obj) => {
+      if (obj.userData?.kind === "warehouse-hook" && obj.name === "warehouse-hook") {
+        hooks.push(obj);
+      }
+    });
+    expect(hooks.length).toBeGreaterThanOrEqual(1);
+
+    const hook = hooks[0];
+    expect(hook.userData.kind).toBe("warehouse-hook");
+    expect(hook.userData.mode).toBe("PAPER");
+    expect(hook.position.y).toBeGreaterThan(1.2);
+    expect(hook.position.y).toBeLessThan(2.4);
+    const onBack = Math.abs(hook.position.z) > 3.0;
+    const onSide = Math.abs(hook.position.x) > 3.5;
+    expect(onBack || onSide).toBe(true);
+
+    const colors = hexes(hook);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.some((c) => c === 0x4a4036)).toBe(true);
+    expect(colors.every((c) => !isGrey(c))).toBe(true);
+
+    hook.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.kind).toBe("warehouse-hook");
+        expect(mesh.userData.mode).toBe("PAPER");
+      }
+    });
+  });
+});
