@@ -107,6 +107,20 @@ export function makePortSign(spec, helpers) {
   postR.position.set(1.85, 1.42, 0);
   g.add(postL, postR);
 
+  const capL = part(0.22, 0.08, 0.22, WOOD, false);
+  capL.position.set(-1.85, 2.89, 0);
+  capL.userData.part = "cap";
+  capL.userData.kind = "port-sign-cap";
+  const capR = part(0.22, 0.08, 0.22, WOOD, false);
+  capR.position.set(1.85, 2.89, 0);
+  capR.userData.part = "cap";
+  capR.userData.kind = "port-sign-cap";
+  const finL = part(0.07, 0.12, 0.07, WOOD, false);
+  finL.position.set(-1.85, 2.99, 0);
+  const finR = part(0.07, 0.12, 0.07, WOOD, false);
+  finR.position.set(1.85, 2.99, 0);
+  g.add(capL, capR, finL, finR);
+
   const braceL = part(0.09, 0.78, 0.09, WOOD);
   braceL.position.set(-1.52, 1.62, 0);
   braceL.rotation.z = -0.62;
