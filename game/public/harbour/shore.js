@@ -77,7 +77,7 @@ function addFoam(group, geo, mat, spec, x, z, h) {
 }
 
 /** Metres above the lagoon. Tall enough to read from the spawn camera. */
-export const PIER_FOAM_Y = 0.48;
+export const PIER_FOAM_Y = 0.62;
 
 /** Kraft/cream dash in the basin water, hugging the pier, not the deck. */
 function addPierWaterFoam(group, geo, mat, spec, localX, along) {
@@ -85,6 +85,8 @@ function addPierWaterFoam(group, geo, mat, spec, localX, along) {
   const m = new THREE.Mesh(geo, mat);
   m.position.set(spec.port.x + localX, PIER_FOAM_Y, spec.port.z + toward * along);
   m.userData.kind = "foam";
+  m.frustumCulled = false;
+  m.renderOrder = 2;
   m.castShadow = false;
   m.receiveShadow = false;
   group.add(m);
@@ -123,15 +125,18 @@ export function makeShoreFoam(spec, heightAtFn, scene) {
   group.name = "shore-foam-" + spec.id;
 
   const ringGeo = new THREE.BoxGeometry(2.0, 0.06, 9.0);
-  /** Chunky bars — `/g/shore38` FAIL FOAM: 0.14 m slabs vanished from spawn. */
-  const portGeo = new THREE.BoxGeometry(4.6, 0.72, 11.0);
+  /**
+   * Large basin bars. `/g/shore38`–`shore39` FAIL FOAM: side dashes sat
+   * beside the timber and read as the beige pier from spawn.
+   */
+  const portGeo = new THREE.BoxGeometry(7.4, 1.35, 9.2);
   const mat = new THREE.MeshLambertMaterial({
     color: 0xefe6c9,
     emissive: 0xefe6c9,
-    emissiveIntensity: 0.42,
+    emissiveIntensity: 0.55,
     polygonOffset: true,
-    polygonOffsetFactor: -2,
-    polygonOffsetUnits: -2,
+    polygonOffsetFactor: -4,
+    polygonOffsetUnits: -4,
   });
 
   for (let i = 0; i < FOAM_SAMPLES; i++) {
@@ -143,19 +148,20 @@ export function makeShoreFoam(spec, heightAtFn, scene) {
   }
 
   let portCount = 0;
-  // Beside the 11 m timber (half-width 5.5). Spawn looks seaward along ~80 m.
-  for (const side of [-1, 1]) {
-    for (const along of [20, 32, 44, 56, 68, 80, 92, 104]) {
+  // First: kraft bars in the basin past the seaward lip (deck ends ~81 m),
+  // between the timber and the ferry — the spawn look-at. Not under the hull.
+  for (const along of [88, 97, 106]) {
+    for (const localX of [-6.8, -2.2, 2.2, 6.8]) {
       if (portCount >= PORT_FOAM_SAMPLES) break;
-      addPierWaterFoam(group, portGeo, mat, spec, side * 8.6, along);
+      addPierWaterFoam(group, portGeo, mat, spec, localX, along);
       portCount++;
     }
   }
-  // Seaward lip of the north pier (deck ends ~81 m): bars in the basin, not on timber.
-  if (spec.id === "north") {
-    for (const localX of [-9.2, -6.4, 6.4, 9.2]) {
+  // Beside the 11 m timber (half-width 5.5).
+  for (const side of [-1, 1]) {
+    for (const along of [20, 32, 44, 56, 68, 80]) {
       if (portCount >= PORT_FOAM_SAMPLES) break;
-      addPierWaterFoam(group, portGeo, mat, spec, localX, 86);
+      addPierWaterFoam(group, portGeo, mat, spec, side * 8.6, along);
       portCount++;
     }
   }

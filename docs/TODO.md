@@ -15,7 +15,7 @@ Politics frozen. See `game/reports/GAUNTLET_STATUS.md`.
 - [x] Pixel remaining meshes (cars `/?g=cars26` PASS, taxi cab `/?g=taxi27` PASS)
 - [x] Shop + farm interiors, hire/fire HTTP, land upkeep, North/South buy+sell, cart HUD (code)
 - [x] Pixel remaining meshes (ferry `/g/ferry37` PASS — cream hull in the water, seaward spawn, no orbit)
-- [ ] Pixel remaining meshes (shore foam `/g/shore38` FAIL FOAM — hairline dashes; next `http://localhost:8787/g/shore39`; then quay, shells)
+- [ ] Pixel remaining meshes (shore foam `/g/shore39` FAIL FOAM — side dashes hidden; next `http://localhost:8787/g/shore40` basin bars; then quay, shells)
 
 ## Polymarket paper bot
 

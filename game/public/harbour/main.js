@@ -928,6 +928,8 @@ async function boot() {
   makeWater(scene);
   ferryMesh = makeFerry();
   scene.add(ferryMesh);
+  makeShoreFoam(specOf("north"), heightAt, scene);
+  makeShoreFoam(specOf("south"), heightAt, scene);
   spawnAt("north");
   startLoop();
   setStatus("North port · PAPER");
@@ -936,9 +938,6 @@ async function boot() {
   makeTerrain(specOf("north"));
   await afterPaint();
   makeTerrain(specOf("south"));
-  await afterPaint();
-  makeShoreFoam(specOf("north"), heightAt, scene);
-  makeShoreFoam(specOf("south"), heightAt, scene);
   makeRoads(map, { scene, specOf, heightAt });
   await afterPaint();
   makeStreetProps(map, { scene, specOf, heightAt });

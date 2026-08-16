@@ -26,11 +26,12 @@ Shore foam (chunky kraft bars beside the pier — `/g/shore38` FAIL FOAM was 0.1
 
 ## Pixel shore foam
 
-`/g/shore38` **FAIL FOAM**: cyan sky, pier, cream hull, but no readable kraft foam dashes (0.14 m slabs). Bars are now 0.72 m tall at `PIER_FOAM_Y=0.48` beside the pier. Next `/g/shore39`.
+`/g/shore38` **FAIL FOAM**: hairline dashes.
+`/g/shore39` **FAIL FOAM**: still no bars at the seaward waterline (side dashes read as the beige pier). Foam now sits in the basin between the timber lip and the ferry, and loads with the hull. Next `/g/shore40`.
 
 ## In flight (not ferry-only)
 
-Pixel: kraft/cream shore foam bars in the north-quay basin `http://localhost:8787/g/shore39`. No RMB. Close other Two Harbors tabs. Address bar must be `/g/shore39`. Do not restart play while the critic is on the page.
+Pixel: kraft/cream shore foam bars in the north-quay **basin** `http://localhost:8787/g/shore40`. No RMB. Close other Two Harbors tabs. Address bar must be `/g/shore40`. Do not restart play while the critic is on the page.
 
 ## Next pixel (after shore39 PASS, immediately, no wait)
 
