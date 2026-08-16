@@ -83,10 +83,11 @@ Spawn has no selected plot, so staff is `PAPER · SIMULATED · Staff —` (the d
 `/g/sign59` **FAIL SIGN**: cyan sky, cream ferry, HUD `North port · PAPER`, but no standalone two-post kraft board on land east of the pier. The 4 m seaward-facing board at ~70 m read as ferry furniture.
 `/g/sign60` **FAIL SIGN**: `/g/sign60`, cyan sky, loaded harbour; only cream boards on the ferry. The 11 m inland apron board at z ≈ -6932 sat in deck clutter below the look-at.
 `/g/sign61` **FAIL SIGN**: 24 m cream wall at x=18 sat off the port pad (`across >= 16` → water height) and read as ferry hull.
+`/g/sign62` **FAIL SIGN**: pier, cream ferry, NPCs in frame; vertical dark bits read as ferry masts, not a standalone two-post land sign. **Sign round stopped.** Code stays; not pixel-held.
 
-Pixel: **north port kraft sign** at `http://localhost:8787/g/sign62`. On the port pad (`x=12`, `along=80`), 48 m WOOD_DARK posts into cyan, modest kraft board high up. No RMB. Close other Two Harbors tabs. Address bar must be `/g/sign62`. Do not restart play while the critic is on the page.
+Pixel: **sage dinghies** in the north basin at `http://localhost:8787/g/ding63`. Between kraft pier and cream ferry, seaward spawn, no RMB. Close other Two Harbors tabs. Address bar must be `/g/ding63`. Do not restart play while the critic is on the page.
 
-## Next pixel (after sign62 PASS, immediately, no wait)
+## Next pixel (after ding63 PASS, immediately, no wait)
 
 Sage dinghies in the basin, or another spawn-visible kraft bar. Shells+lights stay deferred until a human can orbit. Do not restart the lamp round.
 

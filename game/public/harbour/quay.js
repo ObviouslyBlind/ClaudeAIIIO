@@ -101,6 +101,14 @@ function dinghy() {
   hook.userData.part = "hook";
   painter.add(hook);
 
+  // Tiny kraft splice (rope join) on the painter. PAPER box, hex already in this file.
+  // Offset from knot, hook, bollard-cap.
+  const splice = part(0.09, 0.09, 0.14, 0x8a6238, false);
+  splice.position.set(0, 0.04, -0.12);
+  splice.userData.mode = "PAPER";
+  splice.userData.part = "splice";
+  painter.add(splice);
+
   return g;
 }
 
