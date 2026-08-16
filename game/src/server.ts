@@ -4,7 +4,7 @@ import { extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { GOOD_IDS, type GoodId } from "./goods.ts";
 import { createLandBoard, developPlot, landSnapshot, leasePlot } from "./land.ts";
-import { buyFromStall, createVisitor, createWorld, hud, tick } from "./sim.ts";
+import { bustHarbourAssets } from "./cache-bust.ts";
 
 const root = join(fileURLToPath(new URL(".", import.meta.url)), "..");
 const publicDir = join(root, "public");
@@ -130,13 +130,16 @@ const server = createServer(async (req, res) => {
     return;
   }
   try {
-    const data = await readFile(filePath);
+    let data: Buffer | string = await readFile(filePath);
     const ext = extname(filePath);
     const headers: Record<string, string> = {
       "content-type": types[ext] ?? "application/octet-stream",
     };
     if (ext === ".js" || ext === ".css" || ext === ".html") {
       headers["cache-control"] = "no-store";
+    }
+    if (ext === ".html") {
+      data = bustHarbourAssets(data.toString("utf8"));
     }
     res.writeHead(200, headers);
     res.end(data);

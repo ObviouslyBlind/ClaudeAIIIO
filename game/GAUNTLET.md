@@ -65,3 +65,10 @@ We **do** have the right starting shape: a running sim, tests, a live HUD. That 
 | Harbour (L) | Live `/` page: two authored islands, ports, paper plots, tap-walk |
 
 Skill: `.cursor/skills/two-harbors-gauntlet/SKILL.md`.
+
+## How we run it (so nobody has to keep refreshing)
+
+- **Tests** = lead/builder (`cd game && npm test`). The critic does not run them.
+- **Pixels** = critic opens `http://localhost:8787/`. The server stamps harbour JS/CSS on each HTML response and sends `Cache-Control: no-store`. No manual hard-refresh.
+- **Clock** = lead. When a critic or builder finishes, the lead starts the next round without waiting for a chat nudge. The user is the brake (“stop”), not the refresh button.
+
