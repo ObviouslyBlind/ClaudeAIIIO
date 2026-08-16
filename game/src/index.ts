@@ -17,3 +17,9 @@ export {
   ISLANDS,
   type Parcel,
 } from "./land.ts";
+export {
+  FERRY_ROUTES,
+  listFerryRoutes,
+  confirmFerry,
+  type FerryRoute,
+} from "./ferry-routes.ts";

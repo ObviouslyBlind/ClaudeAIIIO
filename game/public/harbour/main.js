@@ -13,6 +13,7 @@ import {
   spawnLookAtOffset,
 } from "./roads.js";
 import { createPlayCamera } from "./camera.js";
+import { createFerryTicket } from "./ferry-ticket.js";
 
 const canvas = document.getElementById("c");
 const statusEl = document.getElementById("status");
@@ -602,7 +603,7 @@ function onPointer(ev) {
   if (Date.now() - lastTap < 180) return;
   lastTap = Date.now();
   if (taxi && taxi.mapOpen()) return;
-  if (ev.target.closest && ev.target.closest("nav, a, button, #taxi-map")) return;
+  if (ev.target.closest && ev.target.closest("nav, a, button, #taxi-map, #ferry-ticket")) return;
   pointer.x = (ev.clientX / window.innerWidth) * 2 - 1;
   pointer.y = -(ev.clientY / window.innerHeight) * 2 + 1;
   raycaster.setFromCamera(pointer, camera);
@@ -669,10 +670,19 @@ async function develop() {
   setStatus("Developed this land as a " + use + " (PAPER).");
 }
 
+const ferryTicket = createFerryTicket({
+  getIslandId: () => islandId,
+  spawnAt,
+  setStatus,
+  applyMap(snapshot) {
+    map = snapshot;
+    refreshHud();
+  },
+});
+
 function ferry() {
   if (!nearPort()) return;
-  spawnAt(islandId === "north" ? "south" : "north");
-  setStatus("Ferry across. PAPER, no ticket yet.");
+  ferryTicket.open();
 }
 
 function onResize() {

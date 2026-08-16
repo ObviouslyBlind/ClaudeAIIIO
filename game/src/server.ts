@@ -6,6 +6,7 @@ import { GOOD_IDS, type GoodId } from "./goods.ts";
 import { createLandBoard, developPlot, landSnapshot, leasePlot } from "./land.ts";
 import { buyFromStall, createVisitor, createWorld, hud, tick } from "./sim.ts";
 import { bustHarbourAssets, bustModuleImports } from "./cache-bust.ts";
+import { confirmFerry, listFerryRoutes } from "./ferry-routes.ts";
 
 const root = join(fileURLToPath(new URL(".", import.meta.url)), "..");
 const publicDir = join(root, "public");
@@ -88,6 +89,30 @@ const server = createServer(async (req, res) => {
     }
     const use = body.use === "farm" ? "farm" : "stall";
     const result = developPlot(land, visitor, String(body.plotId ?? ""), use);
+    json(res, result.ok ? 200 : 400, { ...result, snapshot: landSnapshot(land, visitor) });
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname === "/api/ferry") {
+    json(res, 200, {
+      mode: "PAPER",
+      provenance: "SIMULATED",
+      note: "Quote only. Confirm deducts visitor cash, then the client spawnAt the other quay.",
+      routes: listFerryRoutes(),
+    });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/ferry") {
+    const body = await readJsonBody(req);
+    if (!body) {
+      json(res, 400, { ok: false, reason: "bad_json" });
+      return;
+    }
+    const result = confirmFerry(visitor, {
+      routeId: body.routeId != null ? String(body.routeId) : undefined,
+      from: body.from != null ? String(body.from) : undefined,
+    });
     json(res, result.ok ? 200 : 400, { ...result, snapshot: landSnapshot(land, visitor) });
     return;
   }
