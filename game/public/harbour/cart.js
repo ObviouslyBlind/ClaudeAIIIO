@@ -14,11 +14,12 @@ import * as THREE from "three";
  * (WOOD post + cream glass box) near the headboard + a small kraft water jug
  * (WOOD body, canvas neck, wood handle) on the front-right of the bed
  * + a small kraft produce apple (WOOD_LIGHT tray + CANVAS fruit) at center-front
- * + a tiny kraft produce carrot (WOOD_LIGHT root + CANVAS greens) at bed center.
+ * + a tiny kraft produce carrot (WOOD_LIGHT root + CANVAS greens) at bed center
+ * + a tiny kraft produce potato (WOOD_CRATE box) on the right of the bed.
  * Wheels: kraft cream hub discs (paper boxes) on the outer face of each wheel.
  * Grip: a short kraft hitch pin (paper box) through the handle.
  */
-export const CART_MESH_COUNT = 28;
+export const CART_MESH_COUNT = 29;
 /** Metres from player.position down to the soles. Same as player.js SOLE_Y. */
 const SOLE_Y = -1.15;
 
@@ -185,7 +186,14 @@ function makeHandcart() {
   carrotTop.position.set(0.02, 0.575, -0.94);
   carrotTop.userData.part = "carrot";
 
-  g.add(bed, sideL, sideR, tail, head, wheelL, wheelR, hubL, hubR, handleL, handleR, grip, pin, crate, strap, crate2, roll, coil, coilTop, lanternPost, lanternGlass, jugBody, jugNeck, jugHandle, appleBox, apple, carrot, carrotTop);
+  // Tiny kraft produce potato on the bed — one WOOD_CRATE paper box.
+  // Right of bed center, inside the rails, clear of carrot, apple, crates, roll.
+  // Sits on the bed top (y = 0.53). Paper box only.
+  const potato = paperBox(0.05, 0.045, 0.055, WOOD_CRATE, false);
+  potato.position.set(0.26, 0.553, -1.04);
+  potato.userData.part = "potato";
+
+  g.add(bed, sideL, sideR, tail, head, wheelL, wheelR, hubL, hubR, handleL, handleR, grip, pin, crate, strap, crate2, roll, coil, coilTop, lanternPost, lanternGlass, jugBody, jugNeck, jugHandle, appleBox, apple, carrot, carrotTop, potato);
   return g;
 }
 
