@@ -85,7 +85,7 @@ function labelGood(g) {
   return String(g).replace(/_/g, " ");
 }
 
-/** Visible PAPER market stand: deck, posts, price board, striped awning, counter, crates, hanging scale, produce basket, oil lantern, melon, kraft cone, hanging fish. */
+/** Visible PAPER market stand: deck, posts, price board, striped awning, counter, crates, hanging scale, produce basket, oil lantern, melon, kraft cone, hanging fish, ground crate. */
 export function makeStallMesh(plot) {
   const g = new THREE.Group();
   g.name = "npc-stall";
@@ -343,6 +343,28 @@ export function makeStallMesh(plot) {
   fishTail.userData.part = "fish";
   fish.add(fishCord, fishBody, fishTail);
   g.add(fish);
+
+  // One small kraft crate on the ground beside the stall so the stand reads
+  // as a working market, not only counter goods. Local offset only — stall
+  // world pose stays put. PAPER boxes. WOOD / CRATE hexes already in this
+  // file. Not on the counter. Melon, cone, lantern, and fish stay put.
+  const groundCrate = new THREE.Group();
+  groundCrate.name = "ground-crate";
+  groundCrate.userData.part = "ground-crate";
+  groundCrate.userData.mode = "PAPER";
+  groundCrate.userData.paper = true;
+  groundCrate.position.set(2.42, 0, 1.05);
+  const groundBody = paperBox(0.38, 0.24, 0.36, CRATE_A, false);
+  groundBody.position.y = 0.12;
+  groundBody.userData.part = "ground-crate";
+  const groundRim = paperBox(0.4, 0.03, 0.38, WOOD, false);
+  groundRim.position.y = 0.225;
+  groundRim.userData.part = "ground-crate";
+  const groundLid = paperBox(0.34, 0.04, 0.32, CRATE_B, false);
+  groundLid.position.y = 0.26;
+  groundLid.userData.part = "ground-crate";
+  groundCrate.add(groundBody, groundRim, groundLid);
+  g.add(groundCrate);
 
   const back = paperBox(3.9, 1.6, 0.12, PLASTER);
   back.position.set(0, 1.05, -1.28);
