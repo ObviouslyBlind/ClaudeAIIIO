@@ -48,6 +48,18 @@ function paperBox(w, h, d, color, kind = "factory-prop") {
   return m;
 }
 
+function paperCyl(rTop, rBot, h, color, kind = "factory-prop", segments = 8) {
+  const m = new THREE.Mesh(
+    new THREE.CylinderGeometry(rTop, rBot, h, segments),
+    new THREE.MeshLambertMaterial({ color }),
+  );
+  m.castShadow = true;
+  m.receiveShadow = true;
+  m.userData.kind = kind;
+  m.userData.mode = "PAPER";
+  return m;
+}
+
 function workbench(x, z, w, d, yaw = 0) {
   const g = new THREE.Group();
   g.name = "factory-bench";
@@ -320,6 +332,35 @@ function oilCan(x, z, yaw = 0) {
 }
 
 /**
+ * Small kraft/iron PAPER bucket on the factory floor: tapered kraft body,
+ * iron hoop and bail. Boxes/cylinders only — not on the oil can or wrench.
+ */
+function factoryBucket(x, z, yaw = 0) {
+  const g = new THREE.Group();
+  g.name = "factory-bucket";
+  g.userData.kind = "factory-bucket";
+  g.userData.mode = "PAPER";
+  g.position.set(x, 0, z);
+  g.rotation.y = yaw;
+  const y0 = 0.16;
+  const bodyH = 0.2;
+  const body = paperCyl(0.09, 0.11, bodyH, KRAFT, "factory-bucket");
+  body.position.y = y0 + bodyH / 2;
+  const hoop = paperCyl(0.115, 0.115, 0.028, IRON_DARK, "factory-bucket");
+  hoop.position.y = y0 + 0.07;
+  const lip = paperCyl(0.1, 0.1, 0.028, IRON, "factory-bucket");
+  lip.position.y = y0 + bodyH;
+  const postL = paperBox(0.022, 0.11, 0.022, IRON, "factory-bucket");
+  postL.position.set(-0.08, y0 + bodyH + 0.04, 0);
+  const postR = paperBox(0.022, 0.11, 0.022, IRON, "factory-bucket");
+  postR.position.set(0.08, y0 + bodyH + 0.04, 0);
+  const bail = paperBox(0.18, 0.022, 0.022, IRON_LIGHT, "factory-bucket");
+  bail.position.set(0, y0 + bodyH + 0.1, 0);
+  g.add(body, hoop, lip, postL, postR, bail);
+  return g;
+}
+
+/**
  * Hanging iron open-end wrench on a wall peg. PAPER boxes only —
  * not a mill, not a crate, not a farm rake. Reads from the enter camera.
  */
@@ -391,6 +432,8 @@ function makeFactoryDress() {
   g.add(scrapBin(-3.22, -2.62, 0.08));
   // Right wall, door side. Off the centre aisle (x≈0). Flat on the floor.
   g.add(floorGrate(3.2, 1.48, 0.06));
+  // Right wall floor, between wood bench and grate. Not on the oil can or wrench.
+  g.add(factoryBucket(3.18, 0.42, 0.1));
   g.add(kraftMachine(-1.42, 0.58, 1.55, 0.9, 0.06));
   g.add(kraftMachine(1.18, 1.32, 1.32, 0.78, -0.1));
   g.add(kraftMachine(0.22, -0.42, 1.48, 0.86, 0.12));

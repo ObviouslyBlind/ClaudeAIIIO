@@ -173,3 +173,96 @@ describe("factory PAPER oil can", () => {
     expect(interior.userData.interiorUse).toBe("house");
   });
 });
+
+const BUCKET_PALETTE = new Set([
+  KRAFT,
+  0x9a6a40,
+  0x6a7068,
+  0x4a524c,
+  0x8a9088,
+  0x6a5a4a,
+]);
+
+function factoryBuckets(root: THREE.Object3D) {
+  const out: THREE.Object3D[] = [];
+  root.traverse((obj) => {
+    if (obj.userData?.kind === "factory-bucket" && obj.name === "factory-bucket") {
+      out.push(obj);
+    }
+  });
+  return out;
+}
+
+describe("factory PAPER bucket", () => {
+  it("puts one kraft/iron PAPER bucket on the factory floor", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressFactory(scene);
+
+    const dress = interior.getObjectByName("factory-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+    expect(dress!.visible).toBe(true);
+
+    const buckets = factoryBuckets(dress!);
+    expect(buckets.length).toBe(1);
+
+    const bucket = buckets[0];
+    expect(bucket.userData.kind).toBe("factory-bucket");
+    expect(bucket.userData.mode).toBe("PAPER");
+    // Floor, not the first-bench oil can (~1.005) or the hanging wrench.
+    expect(bucket.position.y).toBe(0);
+    expect(Math.abs(bucket.position.x)).toBeGreaterThan(2.8);
+    expect(Math.abs(bucket.position.x)).toBeLessThan(3.5);
+    expect(Math.abs(bucket.position.z)).toBeLessThan(1.2);
+
+    const cans = factoryOilCans(dress!);
+    expect(cans.length).toBe(1);
+    const toCan = Math.hypot(
+      bucket.position.x - cans[0].position.x,
+      bucket.position.z - cans[0].position.z,
+    );
+    expect(toCan).toBeGreaterThan(2);
+
+    const tools = factoryTools(dress!);
+    expect(tools.length).toBe(1);
+    expect(bucket.position.y).toBeLessThan(tools[0].position.y - 1);
+
+    const colors = hexes(bucket);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.every((c) => BUCKET_PALETTE.has(c))).toBe(true);
+    expect(colors.some((c) => c === KRAFT)).toBe(true);
+    expect(colors.some((c) => IRON.has(c))).toBe(true);
+
+    let parts = 0;
+    bucket.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        parts += 1;
+        expect(["BoxGeometry", "CylinderGeometry"]).toContain(mesh.geometry.type);
+        expect(mesh.userData.kind).toBe("factory-bucket");
+        expect(mesh.userData.mode).toBe("PAPER");
+      }
+    });
+    expect(parts).toBeGreaterThanOrEqual(4);
+  });
+
+  it("keeps dress idempotent and hides the bucket on undress", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressFactory(scene);
+    dressFactory(scene);
+    expect(interior.children.filter((c) => c.name === "factory-dress").length).toBe(1);
+    expect(factoryBuckets(interior).length).toBe(1);
+    expect(factoryOilCans(interior).length).toBe(1);
+    expect(factoryTools(interior).length).toBe(1);
+
+    undressFactory(scene);
+    const dress = interior.getObjectByName("factory-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.visible).toBe(false);
+    expect(interior.userData.interiorUse).toBe("house");
+  });
+});
