@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { createTaxi } from "./taxi.js";
 import { makeFerry, tickFerry } from "./ferry.js";
 
 const canvas = document.getElementById("c");
@@ -9,6 +10,7 @@ const plotLineEl = document.getElementById("plot-line");
 const btnLease = document.getElementById("btn-lease");
 const btnDevelop = document.getElementById("btn-develop");
 const btnFerry = document.getElementById("btn-ferry");
+const btnTaxi = document.getElementById("btn-taxi");
 
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
@@ -46,6 +48,7 @@ let islandId = "north";
 let selected = null;
 let walking = false;
 let lastTap = 0;
+let taxi = null;
 
 const player = new THREE.Mesh(
   new THREE.CapsuleGeometry(0.55, 1.15, 4, 8),
@@ -426,6 +429,7 @@ function spawnAt(id) {
   player.position.set(x, heightAt(spec, x, z) + 1.15, z);
   walking = false;
   selected = null;
+  if (taxi) taxi.hopOut();
   snapCamera();
   refreshHud();
 }
@@ -470,6 +474,10 @@ function onPointer(ev) {
   const plotHit = hits.find((h) => h.object.userData.kind === "plot");
   const portHit = hits.find((h) => h.object.userData.kind === "port");
   const groundHit = hits.find((h) => h.object.userData.kind === "ground");
+  const tapPt = plotHit?.point || groundHit?.point || portHit?.point;
+  if (tapPt && taxi && taxi.handleTap(tapPt.x, tapPt.z, nearestIsland(tapPt.x, tapPt.z))) {
+    return;
+  }
   if (plotHit) {
     const p = map.plots.find((x) => x.id === plotHit.object.userData.plotId);
     if (p) selectLand(p, true);
@@ -540,6 +548,7 @@ function onResize() {
 }
 
 function tick(dt) {
+  if (taxi) taxi.tick(dt);
   if (walking) {
     const dx = walkTarget.x - player.position.x;
     const dz = walkTarget.z - player.position.z;
@@ -586,6 +595,19 @@ async function boot() {
   makePalms(specOf("north"));
   makePalms(specOf("south"));
   makeParcels();
+  taxi = createTaxi({
+    scene,
+    player,
+    getMap: () => map,
+    specOf,
+    heightAt,
+    getIslandId: () => islandId,
+    setWalking: (v) => {
+      walking = v;
+    },
+    setStatus,
+    button: btnTaxi,
+  });
   spawnAt("north");
   setStatus("Tap a piece of land. Lease it, then develop it.");
 }
