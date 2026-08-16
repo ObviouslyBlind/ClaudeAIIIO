@@ -454,6 +454,28 @@ function paperFunnel(x, z, yaw = 0) {
 }
 
 /**
+ * Tiny kraft PAPER cork: KRAFT body, KRAFT_LIGHT lip. Boxes only.
+ * Sits on the left-wall bench — not the funnel, oilcan, or rag.
+ */
+function paperCork(x, z, yaw = 0) {
+  const g = new THREE.Group();
+  g.name = "factory-paper-cork";
+  g.userData.kind = "factory-paper-cork";
+  g.userData.mode = "PAPER";
+  g.userData.part = "cork";
+  // Second workbench lip top: y0 0.16 + 0.78, lip centre +0.05, half lip 0.015.
+  const sitY = 0.16 + 0.78 + 0.05 + 0.015;
+  g.position.set(x, sitY, z);
+  g.rotation.y = yaw;
+  const body = paperBox(0.032, 0.044, 0.032, KRAFT, "factory-paper-cork");
+  body.position.y = 0.022;
+  const lip = paperBox(0.04, 0.012, 0.04, KRAFT_LIGHT, "factory-paper-cork");
+  lip.position.y = 0.05;
+  g.add(body, lip);
+  return g;
+}
+
+/**
  * Small kraft/iron PAPER oil can: short box body, thinner spout.
  * Sits on the first workbench top — not a mill, not the hanging wrench.
  */
@@ -585,6 +607,8 @@ function makeFactoryDress() {
   g.add(paperOilcan(-3.02, 0.72, 0.1));
   // Left-wall bench, south of the oilcan. Off the rag, rivet, and wrench.
   g.add(paperFunnel(-3.14, -0.42, 0.08));
+  // Left-wall bench, between the oilcan and funnel. Off the rag.
+  g.add(paperCork(-2.86, 0.14, 0.06));
   g.add(woodWorkbench(3.1, -1.18, 1.92, 0.64, Math.PI / 2));
   // Left wall, opposite the wood bench. Off the centre aisle (x≈0).
   g.add(scrapBin(-3.22, -2.62, 0.08));
