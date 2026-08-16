@@ -54,7 +54,7 @@ describe("owned building interiors", () => {
     expect(boxes).toBeGreaterThan(12);
   });
 
-  it("dresses PAPER rooms as a Caribbean house: windows, table, chairs, lamp, clock, bed", () => {
+  it("dresses PAPER rooms as a Caribbean house: windows, table, chairs, lamp, clock, picture, bed", () => {
     const g = makeInteriorScene();
     const down = g.getObjectByName("downstairs");
     const up = g.getObjectByName("upstairs");
@@ -74,6 +74,7 @@ describe("owned building interiors", () => {
     expect(downKinds.filter((k) => k === "interior-chair").length).toBeGreaterThanOrEqual(2);
     expect(downKinds).toContain("interior-lamp");
     expect(downKinds).toContain("interior-clock");
+    expect(downKinds).toContain("interior-picture");
     expect(downKinds).toContain("interior-window");
     expect(downKinds).toContain("exit");
     expect(downKinds).toContain("interior-floor");
@@ -86,6 +87,7 @@ describe("owned building interiors", () => {
     expect(upKinds).toContain("interior-floor");
     expect(upKinds).toContain("interior-paper");
     expect(upKinds).not.toContain("interior-clock");
+    expect(upKinds).not.toContain("interior-picture");
 
     const table = down!.getObjectByName("table");
     expect(table).toBeTruthy();
