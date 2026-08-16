@@ -1,10 +1,13 @@
 /**
- * Harbour PAPER lease afford hint on inspect.
- * When #status / #plot-line shows a vacant plot, paint remaining cash vs lease price
- * (can / cannot afford). Polls GET /api/snapshot ~1/s. PAPER / SIMULATED. Never a wallet.
+ * Harbour PAPER lease leftover hint on inspect.
+ * When #status / #plot-line shows a vacant plot, paint leftover PAPER cash after
+ * the lease price, and House $40 when leftover still covers it. Numbers only.
+ * Polls GET /api/snapshot ~1/s. PAPER / SIMULATED. Never a wallet.
  */
 
 export const POLL_MS = 1000;
+export const HOUSE_COST = 40;
+export const HOUSE_LABEL = "House";
 
 function money(n) {
   return Number(n).toLocaleString("en-US", { maximumFractionDigits: 0 });
@@ -13,6 +16,20 @@ function money(n) {
 function cashOf(data) {
   const n = data && data.visitor ? Number(data.visitor.cash) : NaN;
   return Number.isFinite(n) ? n : null;
+}
+
+/** House paperCost from catalog, else developCost, else $40. */
+export function houseCostOf(data) {
+  const cat = data && Array.isArray(data.catalog) ? data.catalog : [];
+  for (const row of cat) {
+    if (!row) continue;
+    if (row.id === "house" || String(row.label) === HOUSE_LABEL) {
+      const n = Number(row.paperCost);
+      if (Number.isFinite(n) && n > 0) return n;
+    }
+  }
+  const fallback = data ? Number(data.developCost) : NaN;
+  return Number.isFinite(fallback) && fallback > 0 ? fallback : HOUSE_COST;
 }
 
 export function parseLeasePrice(plot) {
@@ -31,6 +48,10 @@ export function isVacantInspect(status, plot) {
   return /\$[\d,]+/.test(p);
 }
 
+function leftoverBit(n) {
+  return n < 0 ? "-$" + money(Math.abs(n)) : "$" + money(n);
+}
+
 export function formatLeaseHint(data, inspect) {
   const mode = (data && data.mode) || "PAPER";
   const provenance = (data && data.provenance) || "SIMULATED";
@@ -39,16 +60,15 @@ export function formatLeaseHint(data, inspect) {
   if (!isVacantInspect(status, plot)) return "";
   const price = parseLeasePrice(plot);
   const cash = cashOf(data);
-  if (price == null && cash == null) return `${mode} · ${provenance} · lease —`;
+  const house = houseCostOf(data);
   const priceBit = price == null ? "—" : "$" + money(price);
-  const cashBit = cash == null ? "—" : "$" + money(cash);
   if (price == null || cash == null) {
-    return `${mode} · ${provenance} · cash ${cashBit} vs lease ${priceBit} · remain —`;
+    return `${mode} · ${provenance} · leftover — after ${priceBit}`;
   }
-  const remain = cash - price;
-  const afford = cash >= price ? "can afford" : "cannot afford";
-  const remainBit = remain < 0 ? "-$" + money(Math.abs(remain)) : "$" + money(remain);
-  return `${mode} · ${provenance} · cash ${cashBit} vs lease ${priceBit} · remain ${remainBit} · ${afford}`;
+  const leftover = cash - price;
+  let line = `${mode} · ${provenance} · leftover ${leftoverBit(leftover)} after ${priceBit}`;
+  if (leftover >= house) line += ` · ${HOUSE_LABEL} $${money(house)}`;
+  return line;
 }
 
 function ensureLeaseHint() {
