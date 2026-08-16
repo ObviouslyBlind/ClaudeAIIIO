@@ -18,6 +18,6 @@ Forbidden bar: Capital Rift screenshots, Call of Duty, OSM.
 **Round 4:** Plots through road; cube buildings; islands too close.
 **Round 5:** Taxi HUD button. Yellow mesh pathfollows `/api/map` paved polylines only. Dirt forbidden. PAPER.
 
-**Next pieces (more agents):** ferry boat in the channel · more harbour kit.
+**Next pieces (more agents):** more harbour kit.
 
 **You are the brake.**
