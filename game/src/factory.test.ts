@@ -1074,3 +1074,90 @@ describe("factory PAPER kraft shaving", () => {
     expect(boxes).toBeGreaterThanOrEqual(1);
   });
 });
+
+function factoryPaperAwls(root: THREE.Object3D) {
+  const out: THREE.Object3D[] = [];
+  root.traverse((obj) => {
+    if (obj.userData?.part === "awl") {
+      out.push(obj);
+    }
+  });
+  return out;
+}
+
+describe("factory PAPER kraft awl", () => {
+  it("puts one tiny kraft PAPER awl on a factory bench; shaving and peg remain", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressFactory(scene);
+
+    const dress = interior.getObjectByName("factory-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+
+    const awls = factoryPaperAwls(dress!);
+    expect(awls.length).toBe(1);
+    const awl = awls[0];
+    expect(awl.userData.part).toBe("awl");
+    expect(awl.userData.mode).toBe("PAPER");
+    expect(awl.userData.part).not.toBe("shaving");
+    expect(awl.userData.part).not.toBe("peg");
+    expect(awl.userData.part).not.toBe("cork");
+    expect(awl.userData.part).not.toBe("funnel");
+    expect(awl.userData.part).not.toBe("oilcan");
+    expect(awl.userData.part).not.toBe("rag");
+    expect(awl.userData.part).not.toBe("rivet");
+    expect(awl.userData.part).not.toBe("wrench");
+
+    expect(factoryPaperShavings(dress!).length).toBe(1);
+    expect(factoryPaperPegs(dress!).length).toBe(1);
+    expect(factoryPaperCorks(dress!).length).toBe(1);
+    expect(factoryPaperFunnels(dress!).length).toBe(1);
+    expect(factoryPaperOilcans(dress!).length).toBe(1);
+    expect(factoryRags(dress!).length).toBe(1);
+    expect(factoryRivets(dress!).length).toBe(1);
+    expect(factoryTools(dress!).length).toBe(1);
+
+    const shaving = factoryPaperShavings(dress!)[0];
+    const peg = factoryPaperPegs(dress!)[0];
+    const cork = factoryPaperCorks(dress!)[0];
+    const funnel = factoryPaperFunnels(dress!)[0];
+    const can = factoryPaperOilcans(dress!)[0];
+    const rag = factoryRags(dress!)[0];
+    const rivet = factoryRivets(dress!)[0];
+    const wrench = factoryTools(dress!)[0];
+    const toShaving = Math.hypot(awl.position.x - shaving.position.x, awl.position.z - shaving.position.z);
+    const toPeg = Math.hypot(awl.position.x - peg.position.x, awl.position.z - peg.position.z);
+    const toCork = Math.hypot(awl.position.x - cork.position.x, awl.position.z - cork.position.z);
+    const toFunnel = Math.hypot(awl.position.x - funnel.position.x, awl.position.z - funnel.position.z);
+    const toCan = Math.hypot(awl.position.x - can.position.x, awl.position.z - can.position.z);
+    const toRag = Math.hypot(awl.position.x - rag.position.x, awl.position.z - rag.position.z);
+    const toRivet = Math.hypot(awl.position.x - rivet.position.x, awl.position.z - rivet.position.z);
+    const toWrench = Math.hypot(awl.position.x - wrench.position.x, awl.position.z - wrench.position.z);
+    expect(toShaving).toBeGreaterThan(0.5);
+    expect(toPeg).toBeGreaterThan(0.5);
+    expect(toCork).toBeGreaterThan(0.5);
+    expect(toFunnel).toBeGreaterThan(0.5);
+    expect(toCan).toBeGreaterThan(0.5);
+    expect(toRag).toBeGreaterThan(0.5);
+    expect(toRivet).toBeGreaterThan(0.5);
+    expect(toWrench).toBeGreaterThan(0.5);
+
+    const colors = hexes(awl);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.some((c) => c === KRAFT)).toBe(true);
+    expect(colors.every((c) => [KRAFT, 0x9a6a40, 0x6a4a32].includes(c))).toBe(true);
+
+    let boxes = 0;
+    awl.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        boxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.mode).toBe("PAPER");
+      }
+    });
+    expect(boxes).toBeGreaterThanOrEqual(2);
+  });
+});
