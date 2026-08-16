@@ -84,6 +84,16 @@ describe("taxi roof lamp", () => {
     expect(size.z).toBeLessThan(0.7);
   });
 
+  it("has two tiny kraft door handles on the cab sides", () => {
+    const mesh = makeTaxiMesh();
+    const handles: THREE.Mesh[] = [];
+    mesh.traverse((obj) => {
+      const m = obj as THREE.Mesh & { userData: { part?: string } };
+      if (m.userData?.part === "handle") handles.push(m);
+    });
+    expect(handles.length).toBeGreaterThanOrEqual(2);
+  });
+
   it("parks the cab on paved at spawn so the roof lamp is in the first frame", () => {
     const board = createLandBoard();
     const spec = ISLANDS.north;

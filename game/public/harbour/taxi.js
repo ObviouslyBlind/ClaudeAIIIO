@@ -187,7 +187,19 @@ function addTaxiBumpers(g, ironMat) {
 }
 
 /**
- * Yellow cab that reads from the quay: wheels, glass, roof lamp, checker belt, iron bumper.
+ * Two tiny kraft bars on the doors so the cab reads as a cab, not a yellow slab.
+ * Same 0xc4a574 as the checker tan — original palette. PAPER boxes only.
+ */
+function addTaxiDoorHandles(g, kraftMat) {
+  for (const side of [-1, 1]) {
+    const handle = tagPart(taxiBox(0.06, 0.07, 0.18, kraftMat, false), "handle");
+    handle.position.set(side * 1.28, 1.18, 0.38);
+    g.add(handle);
+  }
+}
+
+/**
+ * Yellow cab that reads from the quay: wheels, glass, roof lamp, checker belt, iron bumper, door handles.
  * Compact warm PAPER taxi-sign box — original cream lamp, not a sedan lid,
  * not a debug mast, not a cop lightbar.
  */
@@ -213,6 +225,7 @@ export function makeTaxiMesh() {
 
   addTaxiCheckBand(g, kraft, dark);
   addTaxiBumpers(g, lampSide);
+  addTaxiDoorHandles(g, kraft);
 
   const roof = taxiBox(2.18, 0.92, 2.45, cabin);
   roof.position.set(0, 1.68, -0.22);
