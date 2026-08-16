@@ -1,43 +1,49 @@
 # Skills to get Two Harbors rolling
 
-What this agent actually needs, what is installed in `.cursor/skills/`, and what can wait.
+What this agent needs, what is in `.cursor/skills/`, and what to ignore.
 
-Nothing named **aeiou** was in this workspace (no clone, submodule, or remote). `github.com/aeiouofficial` was not used. If that was a Cursor dashboard skill source, remove it there; it cannot be deleted from this repo because it is not here.
+Nothing named **aeiou** was in this workspace. If that was a Cursor dashboard source, remove it there.
 
 ## Install now (done)
 
 | Skill | Why |
 |---|---|
-| **two-harbors-sim** (ours) | Spec gate: follow `PLAN.md`, sim-first, no Capital Rift clone |
-| **impeccable** (`pbakaus/impeccable`) | Later UI: Hansard, market sheet, HUD. Installed, **not** used on step A |
-| **threejs-scene-setup** / **gltf** / **materials** | Step L client only |
-| **input-systems** | One mapped primary/secondary scheme (section 3.10) |
-| **save-systems** | Persist world, applications, offices |
-| **game-ui-ux** | Phone-safe HUD, safe areas |
-| **performance-optimization** | 30fps harbour on a phone |
-| **survival-crafting** | Closest genre pack: gather → craft → site, not a shooter |
+| **two-harbors-sim** | Tick, goods, statutes. Spec gate. |
+| **two-harbors-net** | One shard, HTTP + WS, interest cells. No Colyseus. |
+| **two-harbors-map** | Two authored islands. No OSM. |
+| **two-harbors-client** | Three.js harbour rules. Step L only. |
+| **impeccable** | Later HUD / Hansard. Not the tick loop. |
+| **threejs-scene-setup** / **gltf** / **materials** | Step L |
+| **input-systems** | Primary / secondary mapping |
+| **save-systems** | Persist world and offices |
+| **game-ui-ux** | Phone-safe HUD |
+| **performance-optimization** | 30fps harbour |
+| **survival-crafting** | Genre notes only |
 
-## Needed in our heads, not as a GitHub skill
+Stack research: [BACKEND.md](BACKEND.md).
 
-These are the real work. No off-the-shelf skill replaces them.
+## Needed in our heads
 
-1. **Authoritative tick** — 1Hz world, deterministic seed, no client-trusted prices
-2. **Order books** — two islands later; one island now; escrowed bids
-3. **Faucet/sink ledger** — money supply that can be audited every tick
-4. **Statute table** — catalog rows that write sim fields (step B)
-5. **Intent protocol** — buy/sell/move/vote/apply as messages
-6. **Interest management** — nearby actors only (when 3D exists)
-7. **Planning + firms** — size class, Owner vs CEO, AI workers
-8. **Election clock** — day 14 / 21 / 28-day cycle
+1. Authoritative 1Hz tick
+2. Escrowed books, two islands later
+3. Faucet/sink ledger
+4. Statute table
+5. Intent protocol + AOI cells
+6. Owner vs CEO, AI workers
+7. Election clock
+8. Chunked island meshes, not a planet
 
-## Do not install yet
+## Do not install
 
-- The full 67-skill gamedev dump (Godot, Unity, Unreal, Roblox) — noise
-- Colyseus/PlayCanvas skills — pick a net layer after the sim is real
-- Running Impeccable on the tick loop — it is a design skill, not an economy skill
+- Godot / Unity / Unreal / Roblox packs
+- Colyseus / PlayCanvas skills — wrong shape (rooms) or unused engine
+- OSM / Mapbox / Cesium skills — we are not rendering Earth
+- Impeccable on `sim.ts`
 
-## How to run skills
+## How to run
 
-- Sim/economy work → `two-harbors-sim`
-- Canvas HUD / Hansard / landing → `impeccable` then `game-ui-ux`
-- Three.js harbour → `threejs-scene-setup`
+- Economy → `two-harbors-sim`
+- Sockets / protocol → `two-harbors-net`
+- Heightmaps / plots → `two-harbors-map`
+- Canvas → `two-harbors-client` then `threejs-scene-setup`
+- HUD chrome → `impeccable` then `game-ui-ux`

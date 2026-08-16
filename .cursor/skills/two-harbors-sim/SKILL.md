@@ -5,7 +5,7 @@ description: Build the Two Harbors persistent economy and politics sim. Use when
 
 # Two Harbors sim
 
-Read `game/PLAN.md` before writing game code. That file is the spec.
+Read `game/PLAN.md` before writing game code. That file is the spec. Stack and map: `game/BACKEND.md`.
 
 ## Now
 

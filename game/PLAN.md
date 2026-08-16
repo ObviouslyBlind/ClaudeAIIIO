@@ -151,7 +151,7 @@ Full rank table is in section 7.
 - Low poly, instancing, no post-process on Low tier.
 - Sim tick 1Hz. Presence ~8–10Hz.
 - Politics and planning are **2D panels**. Walking into a chamber is optional desktop flavor.
-- Client: Three.js or PlayCanvas. Sim: authoritative Node (or similar). One logic, scaled view.
+- Client: **Three.js** + DOM HUD. Sim: authoritative **Node 22 / TypeScript**. One logic, scaled view.
 
 ### 3.10 Controls (one scheme)
 
@@ -463,13 +463,27 @@ You never have to sit in a chamber or take a shift. AI and the starter pack stil
 
 ## 10. Server and client
 
+Locked stack and the Capital Rift comparison: [BACKEND.md](BACKEND.md). Skills: [SKILLS.md](SKILLS.md).
+
+Same *kind* of server as a persistent web economy: one shard, Node owns the tick, WebSocket for nearby bodies, HTTP for sheets. Not their client, not their Earth map, not Colyseus rooms. We do not render the whole world — not Earth, and not both islands at once.
+
 ### 10.1 Sim owns
 
 Clock (1Hz); inventories; staff **AI slots**; buildings; leases; two island books; ferry queue; treasury; statute table; planning applications; House / Senate / PM / Governor / 20 councils; firm owners, ranks, hiring pools; stock auction; NPC supply and demand.
 
-Persist every ~10s plus an event log for statute writes, elections, and large applications.
+Persist every ~10s plus an event log for statute writes, elections, and large applications. In-memory until step C, then Postgres.
 
-### 10.2 Client layers
+### 10.2 Net
+
+- HTTP intents: buy, sell, apply, vote, hire.
+- WebSocket presence ~8–10Hz, **interest cells** (outdoors nearby only; indoors silent).
+- Client never trusted for prices or inventories.
+
+### 10.3 Map
+
+Two authored island templates under `game/assets/maps/` (height, collision, plots, 10 districts each, harbour glTF). Local metres. No OSM / Mapbox / Cesium in beta.
+
+### 10.4 Client layers
 
 | Layer | Job |
 |---|---|
@@ -546,8 +560,7 @@ Staff tools: kick, force a session, re-appoint a vacant Senate seat, re-queue a 
 - Officer seats per firm (plan assumes 3).
 - Whether a House member may also sit on their home council (plan assumes yes in beta).
 - Governor vote: single island-wide tally vs North+South with a tie-break.
-- Three.js vs PlayCanvas.
-- Constituency polygon map (10 per island).
+- Constituency polygons: draw 10 per island on the local metre grid (not OSM).
 
 Write decisions into this file.
 
