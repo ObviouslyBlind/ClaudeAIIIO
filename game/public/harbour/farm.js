@@ -1,9 +1,9 @@
 import * as THREE from "three";
 
 /**
- * PAPER farm-shed interior dress. Tools, grain sacks, and dim warm light —
- * not the house living room, warehouse crates, shop, or factory. No WASD.
- * Tap-to-walk stays in interior.js.
+ * PAPER farm-shed interior dress. Tools, grain sacks, kraft planter beds,
+ * and dim warm light — not the house living room, warehouse crates, shop,
+ * or factory. No WASD. Tap-to-walk stays in interior.js.
  *
  * Call dressFarm(scene) when plot.kind or plot.use is "farm".
  * Idempotent: a second call only shows the existing dress.
@@ -25,6 +25,10 @@ const WALL_SIDE_DIM = 0xa87a48;
 const LAMP_METAL = 0x5a4030;
 const LAMP_BULB = 0xffd090;
 const PAPER_CARD = 0xf3efe4;
+/** Same cream as cottage walls — PAPER kraft, not a new hex. */
+const KRAFT = 0xf4ead8;
+/** Outdoor farm crop greens from buildings.js. */
+const LEAF = [0x5f8a32, 0x7a9a3a, 0x4e7a28];
 const HOUSE_KINDS = new Set(["interior-table", "interior-chair", "interior-bed", "interior-lamp"]);
 const FARM_LIGHT = 0.48;
 const FARM_LAMP_HEX = 0xffc070;
@@ -189,6 +193,35 @@ function paperMark(x, y, z) {
   return g;
 }
 
+function planterBed(len, wid, x, z, yaw = 0, seed = 0) {
+  const g = new THREE.Group();
+  g.name = "farm-planter";
+  g.userData.kind = "farm-planter";
+  g.userData.mode = "PAPER";
+  g.position.set(x, 0, z);
+  g.rotation.y = yaw;
+  const y0 = 0.16;
+  const h = 0.2;
+  const body = paperBox(len, h, wid, KRAFT, "farm-planter");
+  body.position.y = y0 + h / 2;
+  g.add(body);
+  const band = paperBox(len + 0.03, 0.04, wid + 0.03, WOOD_DARK, "farm-planter");
+  band.position.y = y0 + 0.06;
+  g.add(band);
+  const soil = paperBox(len * 0.88, 0.06, wid * 0.72, SACK_TIE, "farm-planter");
+  soil.position.y = y0 + h + 0.01;
+  g.add(soil);
+  const n = 4;
+  for (let i = 0; i < n; i++) {
+    const t = i / (n - 1) - 0.5;
+    const cropH = 0.14 + ((i + seed) % 3) * 0.07;
+    const crop = paperBox(0.18, cropH, wid * 0.38, LEAF[(i + seed) % 3], "farm-crop");
+    crop.position.set(t * (len * 0.72), y0 + h + 0.04 + cropH / 2, (i + seed) % 2 ? 0.04 : -0.04);
+    g.add(crop);
+  }
+  return g;
+}
+
 function workbench(x, z) {
   const g = new THREE.Group();
   g.name = "farm-bench";
@@ -246,6 +279,10 @@ function makeFarmDress() {
   const bucket = paperBox(0.28, 0.32, 0.28, WOOD_DARK, "farm-prop");
   bucket.position.set(-2.45, 0.32, -0.05);
   g.add(bucket);
+
+  g.add(planterBed(1.42, 0.44, 2.58, -1.48, Math.PI / 2, 0));
+  g.add(planterBed(1.32, 0.42, 2.64, 0.12, Math.PI / 2, 1));
+  g.add(planterBed(1.05, 0.4, 2.62, 1.18, Math.PI / 2, 2));
 
   const loftY = 2.94;
   g.add(sack(0.46, 0.56, 0.36, SACK, -2.55, loftY + 0.28, -2.35, 0.1));
@@ -327,7 +364,7 @@ function dimSceneLights(scene, farm) {
 
 /**
  * Dress an interior (or a scene that contains one) as a PAPER farm shed.
- * Hides living-room furniture, adds tools and sacks, warms and dims lights.
+ * Hides living-room furniture, adds tools, sacks, and planter beds, warms and dims lights.
  * @param {THREE.Object3D} scene
  */
 export function dressFarm(scene) {
