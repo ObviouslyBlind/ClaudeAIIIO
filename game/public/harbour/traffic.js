@@ -46,7 +46,7 @@ function part(mesh, name) {
   return mesh;
 }
 
-/** Sedan: painted body, glass cabin, bumpers, kraft lamps, four wheels. No debug masts. */
+/** Sedan: painted body, glass cabin, bumpers, kraft lamps, four wheels with kraft hub boxes. No debug masts. */
 function makeCar(color) {
   const g = new THREE.Group();
   g.frustumCulled = false;
@@ -111,6 +111,9 @@ function makeCar(color) {
 
   const wheelGeo = new THREE.CylinderGeometry(0.34, 0.34, 0.28, 10);
   wheelGeo.rotateZ(Math.PI / 2);
+  /** Small kraft cream box on the outer face — reads as a hub, not a black slab. */
+  const hubGeo = new THREE.BoxGeometry(0.08, 0.24, 0.24);
+  const kraftHub = new THREE.MeshLambertMaterial({ color: 0xf4ead8 });
   for (const [x, z] of [
     [1.05, 1.28],
     [-1.05, 1.28],
@@ -120,6 +123,10 @@ function makeCar(color) {
     const wheel = part(new THREE.Mesh(wheelGeo, rubber), "wheel");
     wheel.position.set(x, 0.34, z);
     g.add(wheel);
+    const outward = x > 0 ? 1 : -1;
+    const hub = part(new THREE.Mesh(hubGeo, kraftHub), "hub");
+    hub.position.set(x + outward * 0.16, 0.34, z);
+    g.add(hub);
   }
 
   g.userData.kind = "traffic";
