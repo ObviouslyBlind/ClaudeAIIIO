@@ -252,4 +252,69 @@ describe("street prop setback", () => {
       expect(distToPaved(ISLANDS.north, p.x, p.z)).toBeGreaterThanOrEqual(ROAD_CLEAR);
     }
   });
+
+  it("sits a kraft PAPER open fish crate on the north spawn verge, off ROAD_CLEAR", () => {
+    const map = createLandBoard();
+    const scene = { add(_obj: THREE.Object3D) {} };
+    const root = makeStreetProps(map, {
+      scene,
+      specOf: (id: "north" | "south") => ISLANDS[id],
+      heightAt,
+    });
+
+    const placed = (root.userData.placed || []) as {
+      kind: string;
+      island: string;
+      x: number;
+      z: number;
+      setback: number;
+      along: number;
+    }[];
+    const port = ISLANDS.north.port;
+    const crates = placed.filter(
+      (p) =>
+        p.kind === "fish-crate" &&
+        p.island === "north" &&
+        p.along <= NORTH_PORT_STRETCH_M &&
+        Math.hypot(p.x - port.x, p.z - port.z) < 220,
+    );
+    expect(crates.length).toBeGreaterThanOrEqual(1);
+
+    const groups: THREE.Object3D[] = [];
+    root.traverse((obj) => {
+      if (obj.userData?.prop === "fish-crate") groups.push(obj);
+    });
+    expect(groups.length).toBeGreaterThanOrEqual(1);
+
+    const woodTeal = new Set([0x8a6238, 0x9a6a40, 0x6a4a2a, 0x8ec4d4, 0x2a7a72]);
+    for (const crate of groups) {
+      expect(crate.userData.mode).toBe("PAPER");
+      expect(crate.userData.part === "fish-crate" || crate.userData.dress === "fish-crate").toBe(
+        true,
+      );
+      let boxes = 0;
+      let fish = 0;
+      let crateParts = 0;
+      crate.traverse((obj) => {
+        const mesh = obj as THREE.Mesh;
+        if (!mesh.isMesh) return;
+        boxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        const mat = mesh.material as THREE.MeshLambertMaterial;
+        expect(mat.type).toBe("MeshLambertMaterial");
+        const hex = mat.color.getHex();
+        expect(woodTeal.has(hex)).toBe(true);
+        if (mesh.userData.part === "fish") fish += 1;
+        if (mesh.userData.part === "crate") crateParts += 1;
+      });
+      expect(boxes).toBeGreaterThanOrEqual(7);
+      expect(crateParts).toBeGreaterThanOrEqual(1);
+      expect(fish).toBeGreaterThanOrEqual(2);
+    }
+
+    for (const p of crates) {
+      expect(p.setback).toBeGreaterThanOrEqual(STREET_SETBACK_MIN_M);
+      expect(distToPaved(ISLANDS.north, p.x, p.z)).toBeGreaterThanOrEqual(ROAD_CLEAR);
+    }
+  });
 });

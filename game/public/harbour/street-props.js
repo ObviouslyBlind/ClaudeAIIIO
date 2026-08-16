@@ -378,6 +378,62 @@ function fishingNetRack(_side) {
   return g;
 }
 
+/**
+ * Small kraft open fish crate on the verge: wood box (floor + walls, no lid)
+ * and two fish-shaped paper boxes in harbour silver-teal. Not a closed
+ * crate, not a cylinder fish.
+ */
+function fishCrate(_side) {
+  const g = new THREE.Group();
+  g.name = "fish-crate";
+  g.userData.kind = "street-prop";
+  g.userData.prop = "fish-crate";
+  g.userData.mode = "PAPER";
+  g.userData.part = "fish-crate";
+  g.userData.dress = "fish-crate";
+
+  const FISH = 0x8ec4d4;
+
+  const floor = part(0.72, 0.08, 0.5, WOOD);
+  floor.position.y = 0.04;
+  floor.userData.part = "crate";
+  floor.userData.dress = "fish-crate";
+
+  const wallN = part(0.72, 0.28, 0.06, WOOD_DARK, false);
+  wallN.position.set(0, 0.22, -0.22);
+  wallN.userData.part = "crate";
+  const wallS = part(0.72, 0.28, 0.06, WOOD_DARK, false);
+  wallS.position.set(0, 0.22, 0.22);
+  wallS.userData.part = "crate";
+  const wallE = part(0.06, 0.28, 0.38, WOOD, false);
+  wallE.position.set(0.33, 0.22, 0);
+  wallE.userData.part = "crate";
+  const wallW = part(0.06, 0.28, 0.38, WOOD, false);
+  wallW.position.set(-0.33, 0.22, 0);
+  wallW.userData.part = "crate";
+
+  const bodyA = part(0.28, 0.08, 0.12, FISH, false);
+  bodyA.position.set(-0.08, 0.16, -0.05);
+  bodyA.userData.part = "fish";
+  bodyA.userData.dress = "fish-crate";
+  const tailA = part(0.1, 0.06, 0.1, FISH, false);
+  tailA.position.set(-0.24, 0.16, -0.05);
+  tailA.userData.part = "fish";
+  tailA.userData.dress = "fish-crate";
+
+  const bodyB = part(0.26, 0.08, 0.11, FISH, false);
+  bodyB.position.set(0.1, 0.16, 0.06);
+  bodyB.userData.part = "fish";
+  bodyB.userData.dress = "fish-crate";
+  const tailB = part(0.09, 0.06, 0.09, FISH, false);
+  tailB.position.set(0.24, 0.16, 0.06);
+  tailB.userData.part = "fish";
+  tailB.userData.dress = "fish-crate";
+
+  g.add(floor, wallN, wallS, wallE, wallW, bodyA, tailA, bodyB, tailB);
+  return g;
+}
+
 function makeProp(kind, side) {
   if (kind === "bench") return crateSeat(side);
   if (kind === "sign") return streetSign(side);
@@ -385,6 +441,7 @@ function makeProp(kind, side) {
   if (kind === "stool") return woodStool(side);
   if (kind === "pump") return villagePump(side);
   if (kind === "net-rack") return fishingNetRack(side);
+  if (kind === "fish-crate") return fishCrate(side);
   return lampPost(side);
 }
 
@@ -498,6 +555,8 @@ function planForIsland(island, length) {
     plan.push({ along: 72, side: -1, kind: "pump", setback: streetSetbackM(idx++) });
     // One kraft fishing-net rack on the spawn verge — off the tarmac.
     plan.push({ along: 80, side: 1, kind: "net-rack", setback: streetSetbackM(idx++) });
+    // One kraft open fish crate on the spawn verge — off the tarmac.
+    plan.push({ along: 102, side: -1, kind: "fish-crate", setback: streetSetbackM(idx++) });
   } else {
     for (let along = 38, n = 0; along <= portM; along += 72, n++) {
       plan.push({ along, side: n % 2 ? 1 : -1, kind: "bench", setback: streetSetbackM(idx++) });
@@ -543,7 +602,7 @@ function placeOne(map, road, spec, heightAt, slot, root) {
 }
 
 /**
- * Paper lamp posts, kraft crate seats, hawser drums, one wood stool, one village pump, one fishing-net rack, and signs along the paved spline, on the grass verge.
+ * Paper lamp posts, kraft crate seats, hawser drums, one wood stool, one village pump, one fishing-net rack, one open fish crate, and signs along the paved spline, on the grass verge.
  * North port stretch is packed first so spawn looking inland actually sees them.
  */
 export function makeStreetProps(map, helpers) {
