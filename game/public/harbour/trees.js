@@ -570,6 +570,73 @@ function plantNorthPortBird(root, placed, map, specOf, heightAt) {
   }
 }
 
+function markNest(mesh) {
+  mesh.userData.part = "nest";
+  mesh.userData.dress = "nest";
+  mesh.userData.provenance = "PAPER";
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+}
+
+/**
+ * One small kraft PAPER nest (two twig boxes) under a north-port verge
+ * palm, beside the bird — not instead of it. Hexes already in this file:
+ * trunk kraft. Off the tarmac (PAVED_CLEAR / ROAD_CLEAR). Unique meshes —
+ * two boxes — so the phone mesh budget stays tiny. Trunks, leaves,
+ * coconuts, and the bird stay put.
+ */
+function plantNorthPortNest(root, placed, map, specOf, heightAt) {
+  const sites = placed.filter((p) => p.island === "north" && p.dress === "north-port-palm");
+  if (!sites.length) return;
+  const spec = specOf("north");
+  if (!spec) return;
+
+  const twigGeo = new THREE.BoxGeometry(0.2, 0.04, 0.08);
+  const matA = new THREE.MeshLambertMaterial({ color: TRUNK });
+  const matB = new THREE.MeshLambertMaterial({ color: TRUNK_WARM });
+
+  for (let i = 0; i < sites.length; i++) {
+    const p = sites[i];
+    // Same palm as the bird, yaw-offset so the nest sits beside it.
+    const yaw = hash(i * 6.7 + p.z) * Math.PI * 2 + Math.PI * 0.85;
+    const rad = 0.5 + hash(i * 2.2) * 0.1;
+    let x = p.x + Math.cos(yaw) * rad;
+    let z = p.z + Math.sin(yaw) * rad;
+    if (distToKind(map, "north", x, z, "paved") < PAVED_CLEAR_M) {
+      x = p.x;
+      z = p.z;
+    }
+    if (distToKind(map, "north", x, z, "paved") < PAVED_CLEAR_M) continue;
+    if (onPublicQuay(spec, x, z)) continue;
+    const y = heightAt(spec, x, z);
+    if (y < WATER_MIN_M) continue;
+
+    const nest = new THREE.Group();
+    nest.name = "nest";
+    nest.userData.kind = "nest";
+    nest.userData.part = "nest";
+    nest.userData.dress = "nest";
+    nest.userData.provenance = "PAPER";
+    nest.position.set(x, y + 0.04, z);
+    nest.rotation.y = yaw;
+
+    const twigA = new THREE.Mesh(twigGeo, matA);
+    twigA.name = "nest-twig";
+    markNest(twigA);
+    twigA.rotation.y = 0.45;
+
+    const twigB = new THREE.Mesh(twigGeo, matB);
+    twigB.name = "nest-twig";
+    markNest(twigB);
+    twigB.position.y = 0.02;
+    twigB.rotation.y = -0.7;
+
+    nest.add(twigA, twigB);
+    root.add(nest);
+    return;
+  }
+}
+
 /**
  * Low-poly PAPER trees on hills, inland slopes, and behind street lots.
  * Palms stay on the quay (makePalms). helpers: { scene, specOf, heightAt }.
@@ -590,6 +657,7 @@ export function makeTrees(map, helpers) {
   plantInstanced(root, placed);
   plantNorthPortCoconuts(root, placed, map || {}, specOf, heightAt);
   plantNorthPortBird(root, placed, map || {}, specOf, heightAt);
+  plantNorthPortNest(root, placed, map || {}, specOf, heightAt);
   scene.add(root);
   return root;
 }
