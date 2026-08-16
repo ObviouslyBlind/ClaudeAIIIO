@@ -48,8 +48,8 @@ export function createFerryTicket({ getIslandId, spawnAt, setStatus, applyMap })
   el.title = "PAPER · SIMULATED";
   el.style.background = KRAFT;
   el.style.color = INK;
-  el.style.border = "2px solid " + KRAFT_EDGE;
-  el.style.boxShadow = "0 10px 28px rgba(61, 42, 28, 0.35), inset 0 0 0 1px #d9cbb3";
+  el.style.border = "2px dashed " + KRAFT_EDGE;
+  el.style.boxShadow = "0 10px 28px rgba(61, 42, 28, 0.35), inset 0 0 0 2px " + STAMP;
   document.body.appendChild(el);
 
   let route = null;
@@ -66,22 +66,23 @@ export function createFerryTicket({ getIslandId, spawnAt, setStatus, applyMap })
     const d = polylinePath(next.points, 280, 88, 18);
     const fare = money(next.cost);
     el.innerHTML = `
-      <p class="stamp" style="display:inline-block;margin:2px 0 10px;padding:7px 12px;border:2px dashed ${STAMP};color:${STAMP};background:${KRAFT};font-size:14px;font-weight:700;letter-spacing:0.14em;line-height:1.25;text-transform:uppercase;transform:rotate(-5deg);box-shadow:inset 0 0 0 1px ${STAMP}">PAPER / SIMULATED</p>
+      <p class="stamp" style="display:inline-block;margin:2px 0 10px;padding:8px 14px;border:3px dashed ${STAMP};color:${STAMP};background:${KRAFT};font-family:Georgia,'Times New Roman',serif;font-size:15px;font-weight:700;letter-spacing:0.16em;line-height:1.25;text-transform:uppercase;transform:rotate(-6deg);box-shadow:inset 0 0 0 2px ${STAMP}">PAPER / SIMULATED</p>
       <h2 id="ferry-ticket-title">${routeLabel(next)}</h2>
       <p class="mute">From ${cap(from)} port. Kraft ticket. Not a teleport until you confirm.</p>
-      <svg viewBox="0 0 280 88" aria-hidden="true" style="background:${KRAFT};border:1px solid ${KRAFT_EDGE}">
-        <rect x="1" y="1" width="278" height="86" fill="${KRAFT}" stroke="${KRAFT_EDGE}" />
+      <svg viewBox="0 0 280 88" aria-hidden="true" style="background:${KRAFT};border:1px dashed ${KRAFT_EDGE}">
+        <rect x="1" y="1" width="278" height="86" fill="${KRAFT}" stroke="${KRAFT_EDGE}" stroke-dasharray="5 3" />
         <path d="${d}" fill="none" stroke="#8a3b2a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
         <text x="18" y="16" fill="${INK}" font-size="11">${cap(next.from)}</text>
         <text x="232" y="80" fill="${INK}" font-size="11">${cap(next.to)}</text>
-        <g transform="translate(196,10) rotate(-12)">
-          <rect x="0" y="0" width="74" height="32" fill="${KRAFT}" stroke="${STAMP}" stroke-width="1.8" stroke-dasharray="4 2" rx="2" />
-          <text x="37" y="13" text-anchor="middle" fill="${STAMP}" font-size="9" font-weight="700">PAPER</text>
-          <text x="37" y="25" text-anchor="middle" fill="${STAMP}" font-size="8" font-weight="700">SIMULATED</text>
+        <g transform="translate(184,8) rotate(-12)">
+          <rect x="0" y="0" width="88" height="40" fill="${KRAFT}" stroke="${STAMP}" stroke-width="2.8" stroke-dasharray="6 3" rx="2" />
+          <rect x="5" y="5" width="78" height="30" fill="none" stroke="${STAMP}" stroke-width="1.6" rx="1" />
+          <text x="44" y="18" text-anchor="middle" fill="${STAMP}" font-size="11" font-weight="700" font-family="Georgia, Times New Roman, serif">PAPER</text>
+          <text x="44" y="32" text-anchor="middle" fill="${STAMP}" font-size="9" font-weight="700" font-family="Georgia, Times New Roman, serif">SIMULATED</text>
         </g>
       </svg>
-      <p class="fare" style="margin:8px 0 0;font-size:22px;font-weight:700;color:${INK};letter-spacing:0.02em">PAPER $${fare}</p>
-      <p class="stamp" style="margin:4px 0 0;font-size:12px;font-weight:700;letter-spacing:0.16em;color:${STAMP};text-transform:uppercase">SIMULATED · $${fare} fare</p>
+      <p class="fare" style="display:inline-block;margin:10px 0 0;padding:8px 12px;border:3px dashed ${STAMP};color:${INK};background:${KRAFT};font-family:Georgia,'Times New Roman',serif;font-size:22px;font-weight:700;letter-spacing:0.04em;transform:rotate(-2deg)">PAPER $${fare}</p>
+      <p class="stamp" style="display:inline-block;margin:8px 0 0;padding:5px 10px;border:2px dashed ${STAMP};font-size:12px;font-weight:700;letter-spacing:0.16em;color:${STAMP};text-transform:uppercase;font-family:Georgia,'Times New Roman',serif">SIMULATED · $${fare} fare</p>
       <div class="actions">
         <button type="button" class="cancel" id="ferry-cancel">Cancel</button>
         <button type="button" class="confirm" id="ferry-confirm">Confirm</button>
