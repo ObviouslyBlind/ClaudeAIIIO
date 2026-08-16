@@ -649,3 +649,106 @@ describe("warehouse PAPER kraft chalk", () => {
     expect(interior.userData.interiorUse).toBe("house");
   });
 });
+
+describe("warehouse PAPER kraft pencil", () => {
+  it("sits one small kraft PAPER pencil on the warehouse clipboard", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressWarehouse(scene);
+
+    const dress = interior.getObjectByName("warehouse-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+    expect(dress!.visible).toBe(true);
+
+    const pencils: THREE.Object3D[] = [];
+    const chalks: THREE.Object3D[] = [];
+    const crates: THREE.Object3D[] = [];
+    const pallets: THREE.Object3D[] = [];
+    const clipboards: THREE.Object3D[] = [];
+    dress!.traverse((obj) => {
+      if (obj.userData?.kind === "warehouse-pencil" && obj.name === "warehouse-pencil") {
+        pencils.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-chalk" && obj.name === "warehouse-chalk") {
+        chalks.push(obj);
+      }
+      if (obj.name === "warehouse-floor-crate") crates.push(obj);
+      if (obj.userData?.kind === "warehouse-pallet" && obj.name === "warehouse-pallet") {
+        pallets.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-clipboard" && obj.name === "warehouse-clipboard") {
+        clipboards.push(obj);
+      }
+    });
+    expect(pencils.length).toBe(1);
+    expect(chalks.length).toBe(1);
+    expect(crates.length).toBeGreaterThanOrEqual(2);
+    expect(pallets.length).toBe(1);
+    expect(clipboards.length).toBeGreaterThanOrEqual(1);
+
+    const pencil = pencils[0];
+    expect(pencil.userData.kind).toBe("warehouse-pencil");
+    expect(pencil.userData.mode).toBe("PAPER");
+    expect(pencil.userData.part).toBe("pencil");
+    expect(pencil.position.y).toBeGreaterThan(1.2);
+    expect(pencil.position.y).toBeLessThan(2.4);
+    const onBack = Math.abs(pencil.position.z) > 3.0;
+    const onSide = Math.abs(pencil.position.x) > 3.5;
+    expect(onBack || onSide).toBe(true);
+    expect(horizDist(pencil, clipboards[0])).toBeLessThan(0.5);
+    expect(horizDist(pencil, chalks[0])).toBeLessThan(0.5);
+    for (const crate of crates) expect(horizDist(pencil, crate)).toBeGreaterThan(1.2);
+    expect(horizDist(pencil, pallets[0])).toBeGreaterThan(1.5);
+
+    const colors = hexes(pencil);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.every((c) => c === 0x8a6238 || c === 0x5a3a22 || c === 0xf3efe4)).toBe(true);
+    expect(colors.some((c) => c === 0x8a6238 || c === 0x5a3a22)).toBe(true);
+    expect(colors.every((c) => c === 0xf3efe4 || !isGrey(c))).toBe(true);
+
+    let boxes = 0;
+    pencil.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        boxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.kind).toBe("warehouse-pencil");
+        expect(mesh.userData.mode).toBe("PAPER");
+        mesh.geometry.computeBoundingBox();
+        const bb = mesh.geometry.boundingBox!;
+        const w = bb.max.x - bb.min.x;
+        const h = bb.max.y - bb.min.y;
+        const d = bb.max.z - bb.min.z;
+        expect(Math.max(w, h, d)).toBeLessThan(0.25);
+      }
+    });
+    expect(boxes).toBeGreaterThanOrEqual(2);
+  });
+
+  it("keeps dress idempotent and hides the pencil on undress", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressWarehouse(scene);
+    dressWarehouse(scene);
+    expect(interior.children.filter((c) => c.name === "warehouse-dress").length).toBe(1);
+
+    const dressed = interior.getObjectByName("warehouse-dress")!;
+    const pencils: THREE.Object3D[] = [];
+    const chalks: THREE.Object3D[] = [];
+    dressed.traverse((obj) => {
+      if (obj.name === "warehouse-pencil") pencils.push(obj);
+      if (obj.name === "warehouse-chalk") chalks.push(obj);
+    });
+    expect(pencils.length).toBe(1);
+    expect(chalks.length).toBe(1);
+
+    undressWarehouse(scene);
+    const dress = interior.getObjectByName("warehouse-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.visible).toBe(false);
+    expect(interior.userData.interiorUse).toBe("house");
+  });
+});
