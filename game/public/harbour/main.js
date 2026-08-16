@@ -24,6 +24,7 @@ import { dressPlayer } from "./player.js";
 import { dressCart } from "./cart.js";
 import { mountEconHud } from "./hud-econ.js";
 import { mountPresenceHud } from "./presence-hud.js";
+import { mountStaffHud } from "./staff-hud.js";
 import { createStalls } from "./stalls.js";
 import { makePedestrians } from "./pedestrians.js";
 
@@ -128,6 +129,7 @@ let harbourGroup = null;
 let interior = null;
 let placingUse = null;
 let catalogPicker = null;
+let staffHud = null;
 
 const player = new THREE.Mesh(
   new THREE.CapsuleGeometry(0.55, 1.15, 4, 8),
@@ -272,6 +274,7 @@ function catalogLabel(id) {
 function refreshHud() {
   if (!map) return;
   cashEl.textContent = "Cash $" + money(map.visitor.cash);
+  if (staffHud) staffHud.sync();
   const inside = interior && interior.isInside();
   if (inside) {
     placeEl.textContent = interior.currentFloor() === "upstairs" ? "Upstairs" : "Downstairs";
@@ -726,6 +729,13 @@ function applySnapshot(snapshot) {
   map = snapshot;
   refreshHud();
 }
+
+staffHud = mountStaffHud({
+  getSelected: () => selected,
+  getMap: () => map,
+  applySnapshot,
+  setStatus,
+});
 
 async function lease() {
   if (!selected) return;

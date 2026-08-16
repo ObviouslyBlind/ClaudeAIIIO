@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import { extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { GOOD_IDS } from "./goods.ts";
-import { createLandBoard, developPlot, landSnapshot, leasePlot } from "./land.ts";
+import { createLandBoard, developPlot, leasePlot } from "./land.ts";
 import { parseLandUse } from "./buildings.ts";
 import { buyAtIsland } from "./buy.ts";
 import { createVisitor, createWorld, hud, tick } from "./sim.ts";
@@ -40,6 +40,7 @@ function snapshot() {
       goods: visitor.goods,
       staffSlots: visitor.staffSlots,
     },
+    staffSlots: visitor.staffSlots,
     visitorOrders: listOpenOrders(visitor),
     goods: GOOD_IDS,
   };
