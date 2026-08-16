@@ -134,6 +134,7 @@ describe("NPC harbour stalls", () => {
     expect(kinds).toContain("lemon");
     expect(kinds).toContain("lime");
     expect(kinds).toContain("orange");
+    expect(kinds).toContain("banana");
     const colors = hexes(mesh);
     expect(colors.length).toBeGreaterThan(4);
     expect(colors.every(isGrey)).toBe(false);
@@ -991,6 +992,92 @@ describe("NPC harbour stalls", () => {
     const { stalls } = boot();
     expect(stalls.group.children.length).toBeGreaterThan(0);
     for (const child of stalls.group.children) {
+      expect(child.children.filter((c) => c.userData.part === "orange").length).toBe(1);
+      expect(child.children.filter((c) => c.userData.part === "lime").length).toBe(1);
+      expect(child.children.filter((c) => c.userData.part === "lemon").length).toBe(1);
+      expect(child.children.filter((c) => c.userData.part === "plate").length).toBe(1);
+      expect(child.children.filter((c) => c.userData.part === "napkin").length).toBe(1);
+      expect(child.children.filter((c) => c.userData.part === "knife").length).toBe(1);
+      expect(child.children.filter((c) => c.userData.part === "cup").length).toBe(1);
+      expect(child.children.filter((c) => c.userData.part === "stool").length).toBe(1);
+    }
+  });
+
+  it("puts one tiny kraft PAPER banana on each NPC stall counter; orange, lime, lemon, plate, napkin, knife, cup, stool remain", () => {
+    const mesh = makeStallMesh({ id: "n-test", use: "farm", island: "north", band: "field" });
+    const counter = mesh.children.find((c) => c.userData.part === "counter") as THREE.Mesh;
+    const bananas = mesh.children.filter((c) => c.userData.part === "banana");
+    expect(bananas.length).toBe(1);
+    const banana = bananas[0]!;
+    expect(banana.userData.mode).toBe("PAPER");
+    expect(banana.userData.paper).toBe(true);
+    const box = counter.geometry as THREE.BoxGeometry;
+    const counterTop = counter.position.y + box.parameters.height / 2;
+    expect(banana.position.y).toBeCloseTo(counterTop, 5);
+    expect(banana.position.z).toBeCloseTo(counter.position.z, 5);
+    expect(Math.abs(banana.position.x)).toBeLessThan(1.7);
+
+    const orange = mesh.children.find((c) => c.userData.part === "orange")!;
+    const lime = mesh.children.find((c) => c.userData.part === "lime")!;
+    const lemon = mesh.children.find((c) => c.userData.part === "lemon")!;
+    const plate = mesh.children.find((c) => c.userData.part === "plate")!;
+    const napkin = mesh.children.find((c) => c.userData.part === "napkin")!;
+    const knife = mesh.children.find((c) => c.userData.part === "knife")!;
+    const cup = mesh.children.find((c) => c.userData.part === "cup")!;
+    const stool = mesh.children.find((c) => c.userData.part === "stool")!;
+    expect(orange.userData.part).toBe("orange");
+    expect(lime.userData.part).toBe("lime");
+    expect(lemon.userData.part).toBe("lemon");
+    expect(plate.userData.part).toBe("plate");
+    expect(napkin.userData.part).toBe("napkin");
+    expect(knife.userData.part).toBe("knife");
+    expect(cup.userData.part).toBe("cup");
+    expect(stool.userData.part).toBe("stool");
+    expect(orange.position.x).toBeCloseTo(-1.22, 5);
+    expect(orange.position.y).toBeCloseTo(0.9, 5);
+    expect(lime.position.x).toBeCloseTo(1.64, 5);
+    expect(lime.position.y).toBeCloseTo(0.9, 5);
+    expect(lemon.position.x).toBeCloseTo(-0.08, 5);
+    expect(lemon.position.y).toBeCloseTo(0.9, 5);
+    expect(plate.position.x).toBeCloseTo(1.36, 5);
+    expect(plate.position.y).toBeCloseTo(0.9, 5);
+    expect(napkin.position.x).toBeCloseTo(0.64, 5);
+    expect(knife.position.x).toBeCloseTo(-0.72, 5);
+    expect(cup.position.x).toBeCloseTo(0.38, 5);
+    expect(stool.position.x).toBeCloseTo(-2.42, 5);
+    expect(Math.abs(banana.position.x - orange.position.x)).toBeGreaterThan(0.25);
+    expect(Math.abs(banana.position.x - lime.position.x)).toBeGreaterThan(0.25);
+    expect(Math.abs(banana.position.x - lemon.position.x)).toBeGreaterThan(0.25);
+    expect(Math.abs(banana.position.x - plate.position.x)).toBeGreaterThan(0.25);
+    expect(Math.abs(banana.position.x - napkin.position.x)).toBeGreaterThan(0.25);
+    expect(Math.abs(banana.position.x - knife.position.x)).toBeGreaterThan(0.25);
+    expect(Math.abs(banana.position.x - cup.position.x)).toBeGreaterThan(0.2);
+    expect(Math.abs(banana.position.x - stool.position.x)).toBeGreaterThan(0.7);
+
+    const kraft = new Set([0xd4b83a, 0x5a3a22]);
+    const colors = hexes(banana);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.every((c) => kraft.has(c))).toBe(true);
+    expect(colors).toContain(0xd4b83a);
+    expect(colors).toContain(0x5a3a22);
+    expect(colors.every((c) => !isGrey(c))).toBe(true);
+    let boxes = 0;
+    banana.traverse((obj) => {
+      const m = obj as THREE.Mesh;
+      if (!m.isMesh) return;
+      boxes += 1;
+      expect(m.geometry.type).toBe("BoxGeometry");
+      const g = m.geometry as THREE.BoxGeometry;
+      expect(g.parameters.width).toBeLessThan(0.2);
+      expect(g.parameters.height).toBeLessThan(0.15);
+      expect(g.parameters.depth).toBeLessThan(0.2);
+    });
+    expect(boxes).toBeGreaterThanOrEqual(2);
+
+    const { stalls } = boot();
+    expect(stalls.group.children.length).toBeGreaterThan(0);
+    for (const child of stalls.group.children) {
+      expect(child.children.filter((c) => c.userData.part === "banana").length).toBe(1);
       expect(child.children.filter((c) => c.userData.part === "orange").length).toBe(1);
       expect(child.children.filter((c) => c.userData.part === "lime").length).toBe(1);
       expect(child.children.filter((c) => c.userData.part === "lemon").length).toBe(1);

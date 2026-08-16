@@ -85,7 +85,7 @@ function labelGood(g) {
   return String(g).replace(/_/g, " ");
 }
 
-/** Visible PAPER market stand: deck, posts, price board, striped awning, counter, crates, hanging scale, produce basket, oil lantern, melon, kraft cone, hanging fish, ground crate, kraft price slate, kraft stool, kraft cup, kraft knife, kraft napkin, kraft plate, kraft lemon, kraft lime, kraft orange. */
+/** Visible PAPER market stand: deck, posts, price board, striped awning, counter, crates, hanging scale, produce basket, oil lantern, melon, kraft cone, hanging fish, ground crate, kraft price slate, kraft stool, kraft cup, kraft knife, kraft napkin, kraft plate, kraft lemon, kraft lime, kraft orange, kraft banana. */
 export function makeStallMesh(plot) {
   const g = new THREE.Group();
   g.name = "npc-stall";
@@ -567,6 +567,27 @@ export function makeStallMesh(plot) {
     stem.userData.part = "orange";
     orange.add(body, stem);
     g.add(orange);
+  }
+
+  // One tiny kraft PAPER banana on the counter so the stall reads as a
+  // working stand, not only produce. Corn body + wood stem. Local
+  // offset only — stall world pose stays put. PAPER boxes. Existing
+  // hexes. Offset from orange, lime, lemon, plate, napkin, knife, cup, stool.
+  if (!g.children.some((c) => c.userData.part === "banana")) {
+    const banana = new THREE.Group();
+    banana.name = "banana";
+    banana.userData.part = "banana";
+    banana.userData.mode = "PAPER";
+    banana.userData.paper = true;
+    banana.position.set(-1.52, 0.9, 1.05);
+    const body = paperBox(0.11, 0.05, 0.05, CORN, false);
+    body.position.y = 0.025;
+    body.userData.part = "banana";
+    const stem = paperBox(0.02, 0.025, 0.02, WOOD, false);
+    stem.position.set(-0.055, 0.05, 0);
+    stem.userData.part = "banana";
+    banana.add(body, stem);
+    g.add(banana);
   }
 
   const back = paperBox(3.9, 1.6, 0.12, PLASTER);
