@@ -10,7 +10,7 @@
     <header class="bar">
       <p class="badge">BASE · 3D HARBOUR · PAPER · SIMULATED</p>
       <h1 id="place">North port</h1>
-      <p id="status">Tap a piece of land. Lease it, then develop it.</p>
+      <p id="status">Loading 3D harbour…</p>
     </header>
     <aside class="sheet" id="sheet">
       <p id="cash">Cash $0</p>
@@ -36,6 +36,21 @@
       <button type="button" id="btn-taxi" title="PAPER · SIMULATED">Taxi</button>
       <a class="ghost" href="/market/">Market</a>
     </nav>
+    <script>
+      window.addEventListener("error", function (e) {
+        var el = document.getElementById("status");
+        if (!el || !e.message) return;
+        if (el.textContent.indexOf("Loading") !== 0 && el.textContent.indexOf("BOOT FAIL") !== 0) return;
+        el.textContent = "BOOT FAIL: " + e.message;
+      });
+      window.addEventListener("unhandledrejection", function (e) {
+        var el = document.getElementById("status");
+        var r = e.reason;
+        if (!el) return;
+        if (el.textContent.indexOf("Loading") !== 0 && el.textContent.indexOf("BOOT FAIL") !== 0) return;
+        el.textContent = "BOOT FAIL: " + (r && r.message ? r.message : String(r));
+      });
+    </script>
     <script type="importmap">
       { "imports": { "three": "/vendor/three.module.js" } }
     </script>
