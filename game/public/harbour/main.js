@@ -6,6 +6,7 @@ const placeEl = document.getElementById("place");
 const cashEl = document.getElementById("cash");
 const plotLineEl = document.getElementById("plot-line");
 const btnLease = document.getElementById("btn-lease");
+const btnDevelop = document.getElementById("btn-develop");
 const btnFerry = document.getElementById("btn-ferry");
 
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
@@ -16,7 +17,7 @@ renderer.shadowMap.type = THREE.BasicShadowMap;
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x7ec8d4);
-scene.fog = new THREE.Fog(0x7ec8d4, 420, 2200);
+scene.fog = new THREE.Fog(0x7ec8d4, 900, 3200);
 
 const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.4, 4000);
 
@@ -37,7 +38,6 @@ const clock = new THREE.Clock();
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
 const walkTarget = new THREE.Vector3();
-const camOffset = new THREE.Vector3(14, 32, 42);
 const tmp = new THREE.Vector3();
 
 let map = null;
@@ -54,7 +54,7 @@ player.castShadow = true;
 scene.add(player);
 
 const plotMeshes = new Map();
-const stallMeshes = new Map();
+const useMeshes = new Map();
 const ground = [];
 
 function money(n) {
@@ -105,41 +105,71 @@ function nearestIsland(x, z) {
   return dn < ds ? "north" : "south";
 }
 
+function pointInRing(x, z, ring) {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const xi = ring[i][0];
+    const zi = ring[i][1];
+    const xj = ring[j][0];
+    const zj = ring[j][1];
+    const hit = zi > z !== zj > z && x < ((xj - xi) * (z - zi)) / (zj - zi + 1e-9) + xi;
+    if (hit) inside = !inside;
+  }
+  return inside;
+}
+
+function findParcelAt(x, z) {
+  return map.plots.find((p) => pointInRing(x, z, p.ring));
+}
+
 function setStatus(t) {
   statusEl.textContent = t;
 }
 
+function parcelLabel(p) {
+  const kind = p.band === "field" ? "field" : p.band === "shore" ? "shore land" : "street land";
+  return kind + " · " + money(p.area) + " m²";
+}
+
+function nearParcel(p) {
+  return Math.hypot(player.position.x - p.x, player.position.z - p.z) < 22;
+}
+
 function refreshHud() {
+  if (!map) return;
   cashEl.textContent = "Cash $" + money(map.visitor.cash);
-  const here = specOf(islandId);
-  placeEl.textContent = here.name + " port";
+  placeEl.textContent = specOf(islandId).name;
   if (!selected) {
-    plotLineEl.textContent = "No plot selected";
+    plotLineEl.textContent = "Tap land to inspect it";
     btnLease.disabled = true;
+    btnDevelop.disabled = true;
     return;
   }
   const p = map.plots.find((x) => x.id === selected);
   if (!p) return;
-  if (p.class === "reserved") {
-    plotLineEl.textContent = p.id + " · public quay";
+  const near = nearParcel(p);
+  if (p.owner === "visitor") {
+    plotLineEl.textContent = parcelLabel(p) + (p.use ? " · " + p.use : " · yours");
     btnLease.disabled = true;
+    btnDevelop.disabled = !near || !!p.use || map.visitor.cash < map.developCost;
   } else if (p.owner) {
-    plotLineEl.textContent = p.id + " · " + (p.owner === "visitor" ? "yours" : "taken");
+    plotLineEl.textContent = parcelLabel(p) + " · taken";
     btnLease.disabled = true;
+    btnDevelop.disabled = true;
   } else {
-    plotLineEl.textContent = p.id + " · " + p.band + " · $" + money(p.price);
-    const near = Math.hypot(player.position.x - p.x, player.position.z - p.z) < 18;
+    plotLineEl.textContent = parcelLabel(p) + " · $" + money(p.price);
     btnLease.disabled = !near || map.visitor.cash < p.price;
+    btnDevelop.disabled = true;
   }
 }
 
-function plotColor(p, isSel) {
+function parcelTint(p, isSel) {
   if (isSel) return 0xf0d060;
-  if (p.class === "reserved") return 0x7a5230;
   if (p.owner === "visitor") return 0xb24a32;
   if (p.owner) return 0x6d7380;
-  if (p.island === "north") return p.band === "quay" ? 0xd4b483 : 0xc4a574;
-  return p.band === "quay" ? 0x9bb56a : 0x7a9a4a;
+  if (p.band === "shore") return 0xd4b483;
+  if (p.band === "field") return 0x6a8f44;
+  return 0xc4a574;
 }
 
 function makeTerrain(spec) {
@@ -165,10 +195,7 @@ function makeTerrain(spec) {
   }
   geo.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
   geo.computeVertexNormals();
-  const mesh = new THREE.Mesh(
-    geo,
-    new THREE.MeshLambertMaterial({ vertexColors: true }),
-  );
+  const mesh = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ vertexColors: true }));
   mesh.position.set(spec.cx, 0, spec.cz);
   mesh.receiveShadow = true;
   mesh.userData.kind = "ground";
@@ -203,6 +230,7 @@ function makePort(spec) {
   for (let i = 0; i < 4; i++) {
     box(1.6, 1.4, 1.6, 0x7a5230, x - 8 + i * 2.1, y + 1.0, z - toward * 2, false);
   }
+  box(0.9, 36, 0.9, 0xf3efe4, x - 12, y + 18, z + toward * 6, false);
 }
 
 function makePalms(spec) {
@@ -224,37 +252,100 @@ function makePalms(spec) {
   }
 }
 
-function stallFor(plot) {
-  const spec = specOf(plot.island);
-  const y = heightAt(spec, plot.x, plot.z);
-  const color = plot.owner === "visitor" ? 0xb24a32 : 0x6d7380;
-  const body = box(8, 3.2, 8, color, plot.x, y + 1.7, plot.z);
-  body.userData.kind = "stall";
-  stallMeshes.set(plot.id, body);
+function makeRoads() {
+  for (const road of map.roads) {
+    const spec = specOf(road.island);
+    const width = road.kind === "paved" ? 6.2 : 2.8;
+    const color = road.kind === "paved" ? 0x4a4f57 : 0x8a6238;
+    for (let i = 0; i < road.points.length - 1; i++) {
+      const a = road.points[i];
+      const b = road.points[i + 1];
+      const len = Math.hypot(b.x - a.x, b.z - a.z);
+      if (len < 1) continue;
+      const mx = (a.x + b.x) / 2;
+      const mz = (a.z + b.z) / 2;
+      const y = heightAt(spec, mx, mz) + 0.07;
+      const seg = box(width, 0.12, len + 0.4, color, mx, y, mz, false);
+      seg.rotation.y = Math.atan2(b.x - a.x, b.z - a.z);
+      seg.userData.kind = "ground";
+    }
+  }
 }
 
-function makePlots() {
+function parcelGeometry(ring, y) {
+  const c = { x: 0, z: 0 };
+  for (const p of ring) {
+    c.x += p[0];
+    c.z += p[1];
+  }
+  c.x /= ring.length;
+  c.z /= ring.length;
+  const pos = [];
+  const idx = [];
+  pos.push(c.x, y, c.z);
+  for (let i = 0; i < ring.length; i++) {
+    pos.push(ring[i][0], y, ring[i][1]);
+    const a = i + 1;
+    const b = i + 1 < ring.length ? i + 2 : 1;
+    idx.push(0, a, b);
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+  geo.setIndex(idx);
+  geo.computeVertexNormals();
+  return geo;
+}
+
+function paintParcel(p) {
+  const mesh = plotMeshes.get(p.id);
+  if (!mesh) return;
+  const sel = p.id === selected;
+  mesh.material.color.setHex(parcelTint(p, sel));
+  mesh.material.opacity = sel ? 0.55 : p.owner ? 0.32 : 0.16;
+}
+
+function useFor(p) {
+  if (!p.use || useMeshes.has(p.id)) return;
+  const spec = specOf(p.island);
+  const y = heightAt(spec, p.x, p.z);
+  if (p.use === "farm") {
+    const patch = box(Math.min(14, Math.sqrt(p.area) * 0.45), 0.35, Math.min(14, Math.sqrt(p.area) * 0.45), 0x7a8f3d, p.x, y + 0.25, p.z, false);
+    useMeshes.set(p.id, patch);
+  } else {
+    const color = p.owner === "visitor" ? 0xb24a32 : 0x6d7380;
+    const body = box(7, 3.1, 7, color, p.x, y + 1.65, p.z);
+    useMeshes.set(p.id, body);
+  }
+}
+
+function makeParcels() {
   for (const p of map.plots) {
     const spec = specOf(p.island);
-    const y = heightAt(spec, p.x, p.z) + 0.08;
+    const y = heightAt(spec, p.x, p.z) + 0.06;
     const mesh = new THREE.Mesh(
-      new THREE.BoxGeometry(p.w - 0.6, 0.16, p.d - 0.6),
-      new THREE.MeshLambertMaterial({ color: plotColor(p, false) }),
+      parcelGeometry(p.ring, y),
+      new THREE.MeshLambertMaterial({
+        color: parcelTint(p, false),
+        transparent: true,
+        opacity: p.owner ? 0.32 : 0.16,
+        depthWrite: false,
+      }),
     );
-    mesh.position.set(p.x, y, p.z);
     mesh.userData.kind = "plot";
     mesh.userData.plotId = p.id;
     scene.add(mesh);
     plotMeshes.set(p.id, mesh);
-    if (p.owner) stallFor(p);
+    if (p.use) useFor(p);
   }
 }
 
-function paintPlots() {
-  for (const p of map.plots) {
-    const mesh = plotMeshes.get(p.id);
-    if (mesh) mesh.material.color.setHex(plotColor(p, p.id === selected));
-  }
+function cameraOffset() {
+  return islandId === "north" ? new THREE.Vector3(22, 36, -58) : new THREE.Vector3(22, 36, 58);
+}
+
+function snapCamera() {
+  camera.position.copy(player.position).add(cameraOffset());
+  camera.lookAt(player.position.x, player.position.y + 1.2, player.position.z);
 }
 
 function spawnAt(id) {
@@ -265,6 +356,7 @@ function spawnAt(id) {
   player.position.set(x, heightAt(spec, x, z) + 1.15, z);
   walking = false;
   selected = null;
+  snapCamera();
   refreshHud();
 }
 
@@ -285,6 +377,18 @@ function goTo(x, z) {
   setStatus("Walking.");
 }
 
+function selectLand(p, walk) {
+  selected = p.id;
+  for (const q of map.plots) paintParcel(q);
+  refreshHud();
+  if (walk && !nearParcel(p)) {
+    goTo(p.x, p.z);
+    setStatus("Walking onto that land.");
+  } else {
+    setStatus(p.owner ? "This land is taken." : "This land. Lease it to develop.");
+  }
+}
+
 function onPointer(ev) {
   if (Date.now() - lastTap < 180) return;
   lastTap = Date.now();
@@ -297,23 +401,19 @@ function onPointer(ev) {
   const portHit = hits.find((h) => h.object.userData.kind === "port");
   const groundHit = hits.find((h) => h.object.userData.kind === "ground");
   if (plotHit) {
-    selected = plotHit.object.userData.plotId;
-    paintPlots();
-    refreshHud();
-    const p = map.plots.find((x) => x.id === selected);
-    if (p && Math.hypot(player.position.x - p.x, player.position.z - p.z) > 18) {
-      goTo(p.x, p.z);
-      setStatus("Walking to " + p.id + ".");
-    } else {
-      setStatus(p.class === "reserved" ? "Public quay. Cannot lease." : "Plot selected.");
-    }
+    const p = map.plots.find((x) => x.id === plotHit.object.userData.plotId);
+    if (p) selectLand(p, true);
     return;
   }
   if (portHit && nearPort()) {
     ferry();
     return;
   }
-  if (groundHit) goTo(groundHit.point.x, groundHit.point.z);
+  if (groundHit) {
+    const p = findParcelAt(groundHit.point.x, groundHit.point.z);
+    if (p) selectLand(p, true);
+    else goTo(groundHit.point.x, groundHit.point.z);
+  }
 }
 
 async function lease() {
@@ -329,13 +429,30 @@ async function lease() {
     return;
   }
   map = body.snapshot;
-  if (!stallMeshes.has(selected)) {
-    const p = map.plots.find((x) => x.id === selected);
-    if (p) stallFor(p);
-  }
-  paintPlots();
+  paintParcel(map.plots.find((x) => x.id === selected));
   refreshHud();
-  setStatus("Leased " + selected + " for $" + money(body.paid) + " (PAPER).");
+  setStatus("This land is yours for $" + money(body.paid) + " (PAPER). Develop it.");
+}
+
+async function develop() {
+  if (!selected) return;
+  const p = map.plots.find((x) => x.id === selected);
+  const use = p && p.band === "field" ? "farm" : "stall";
+  const res = await fetch("/api/develop", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ plotId: selected, use }),
+  });
+  const body = await res.json();
+  if (!body.ok) {
+    setStatus("Could not develop: " + body.reason);
+    return;
+  }
+  map = body.snapshot;
+  useFor(map.plots.find((x) => x.id === selected));
+  paintParcel(map.plots.find((x) => x.id === selected));
+  refreshHud();
+  setStatus("Developed this land as a " + use + " (PAPER).");
 }
 
 function ferry() {
@@ -361,7 +478,7 @@ function tick(dt) {
     if (dist <= step) {
       player.position.copy(walkTarget);
       walking = false;
-      setStatus("Tap a plot to select it, or tap the port to ferry.");
+      setStatus("Tap a piece of land to inspect it.");
     } else {
       player.position.x += (dx / dist) * step;
       player.position.z += (dz / dist) * step;
@@ -370,7 +487,7 @@ function tick(dt) {
   }
   btnFerry.disabled = !nearPort();
   refreshHud();
-  tmp.copy(player.position).add(camOffset);
+  tmp.copy(player.position).add(cameraOffset());
   camera.position.lerp(tmp, 1 - Math.pow(0.001, dt));
   camera.lookAt(player.position.x, player.position.y + 1.2, player.position.z);
   sun.position.set(player.position.x + 180, 260, player.position.z + 80);
@@ -390,17 +507,19 @@ async function boot() {
   scene.add(water);
   makeTerrain(specOf("north"));
   makeTerrain(specOf("south"));
+  makeRoads();
   makePort(specOf("north"));
   makePort(specOf("south"));
   makePalms(specOf("north"));
   makePalms(specOf("south"));
-  makePlots();
+  makeParcels();
   spawnAt("north");
-  setStatus("Tap the ground to walk. Tap a plot, then Lease.");
+  setStatus("Tap a piece of land. Lease it, then develop it.");
 }
 
 canvas.addEventListener("pointerup", onPointer);
 btnLease.addEventListener("click", lease);
+btnDevelop.addEventListener("click", develop);
 btnFerry.addEventListener("click", ferry);
 window.addEventListener("resize", onResize);
 scene.add(sun.target);

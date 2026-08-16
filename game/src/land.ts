@@ -1,8 +1,10 @@
 import type { Visitor } from "./sim.ts";
 
 export type IslandId = "north" | "south";
-export type PlotBand = "quay" | "town" | "inland";
+export type PlotBand = "shore" | "street" | "field";
 export type PlotClass = "by_right" | "reserved";
+export type LandUse = "farm" | "stall" | null;
+export type Ring = [number, number][];
 
 /** Metres. Origin is the channel midpoint. +Z is south. */
 export type IslandSpec = {
@@ -15,37 +17,32 @@ export type IslandSpec = {
   peak: number;
   port: { x: number; z: number };
   hill: { x: number; z: number };
-  /** Harbour plot grid: origin is the inland-left corner. */
-  grid: {
-    originX: number;
-    originZ: number;
-    cols: number;
-    rows: number;
-    /** +1 = rows go south, -1 = rows go north (inland). */
-    rowSign: number;
-  };
 };
 
-export type Plot = {
+export type Parcel = {
   id: string;
   island: IslandId;
+  ring: Ring;
   x: number;
   z: number;
-  w: number;
-  d: number;
+  area: number;
   band: PlotBand;
   class: PlotClass;
   price: number;
   owner: string | null;
+  use: LandUse;
+};
+
+export type Road = {
+  island: IslandId;
+  kind: "paved" | "dirt";
+  points: { x: number; z: number }[];
 };
 
 export type LandBoard = {
-  plots: Plot[];
+  plots: Parcel[];
+  roads: Road[];
 };
-
-export const PLOT_SIZE = 20;
-export const PLOT_GAP = 6;
-export const CELL = PLOT_SIZE + PLOT_GAP;
 
 /**
  * Small inhabited Caribbean cay scale, not Jamaica.
@@ -62,7 +59,6 @@ export const ISLANDS: Record<IslandId, IslandSpec> = {
     peak: 92,
     port: { x: 0, z: -310 },
     hill: { x: -240, z: -980 },
-    grid: { originX: -104, originZ: -368, cols: 8, rows: 5, rowSign: -1 },
   },
   south: {
     id: "south",
@@ -74,64 +70,207 @@ export const ISLANDS: Record<IslandId, IslandSpec> = {
     peak: 74,
     port: { x: 0, z: 310 },
     hill: { x: 220, z: 980 },
-    grid: { originX: -104, originZ: 368, cols: 8, rows: 5, rowSign: 1 },
   },
 };
 
-function bandForRow(row: number): PlotBand {
-  if (row === 0) return "quay";
-  if (row <= 2) return "town";
-  return "inland";
+export const DEVELOP_COST = 40;
+
+function inlandSign(spec: IslandSpec): number {
+  return spec.id === "north" ? -1 : 1;
 }
 
-function priceFor(island: IslandId, band: PlotBand): number {
-  const base = island === "north" ? 180 : 70;
-  const mult = band === "quay" ? 1.6 : band === "town" ? 1 : 0.55;
-  return Math.round(base * mult);
+function hash(n: number): number {
+  const x = Math.sin(n * 12.9898) * 43758.5453;
+  return x - Math.floor(x);
 }
 
-export function buildPlots(): Plot[] {
-  const plots: Plot[] = [];
-  for (const spec of Object.values(ISLANDS)) {
-    const { cols, rows, originX, originZ, rowSign } = spec.grid;
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const band = bandForRow(r);
-        const reserved = r === 0 && (c === 3 || c === 4);
-        const x = originX + c * CELL + PLOT_SIZE / 2;
-        const z = originZ + rowSign * (r * CELL + PLOT_SIZE / 2);
-        plots.push({
-          id: `${spec.id[0].toUpperCase()}-${c}-${r}`,
-          island: spec.id,
-          x,
-          z,
-          w: PLOT_SIZE,
-          d: PLOT_SIZE,
-          band,
-          class: reserved ? "reserved" : "by_right",
-          price: reserved ? 0 : priceFor(spec.id, band),
-          owner: null,
-        });
-      }
+export function roadPoint(spec: IslandSpec, t: number): { x: number; z: number } {
+  const clamped = Math.max(0, Math.min(1, t));
+  return {
+    x: spec.port.x + Math.sin(clamped * 5.1) * 16,
+    z: spec.port.z + inlandSign(spec) * (48 + clamped * 430),
+  };
+}
+
+function ringArea(ring: Ring): number {
+  let a = 0;
+  for (let i = 0; i < ring.length; i++) {
+    const [x1, z1] = ring[i];
+    const [x2, z2] = ring[(i + 1) % ring.length];
+    a += x1 * z2 - x2 * z1;
+  }
+  return Math.abs(a) / 2;
+}
+
+function ringCentroid(ring: Ring): { x: number; z: number } {
+  let x = 0;
+  let z = 0;
+  for (const p of ring) {
+    x += p[0];
+    z += p[1];
+  }
+  return { x: x / ring.length, z: z / ring.length };
+}
+
+export function pointInRing(x: number, z: number, ring: Ring): boolean {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const [xi, zi] = ring[i];
+    const [xj, zj] = ring[j];
+    const hit = zi > z !== zj > z && x < ((xj - xi) * (z - zi)) / (zj - zi + 1e-9) + xi;
+    if (hit) inside = !inside;
+  }
+  return inside;
+}
+
+function publicQuay(spec: IslandSpec, x: number, z: number): boolean {
+  const along = (z - spec.port.z) * (spec.id === "north" ? 1 : -1);
+  const across = Math.abs(x - spec.port.x);
+  return across < 18 && along > -28 && along < 92;
+}
+
+function priceOf(spec: IslandSpec, area: number, band: PlotBand, portDist: number): number {
+  const rate = spec.id === "north" ? 0.32 : 0.12;
+  const bandMul = band === "shore" ? 1.55 : band === "street" ? 1 : 0.62;
+  const distMul = 1.35 - Math.min(0.7, portDist / 520);
+  return Math.max(24, Math.round(area * rate * bandMul * distMul));
+}
+
+function quad(
+  a: { x: number; z: number },
+  b: { x: number; z: number },
+  perp: { x: number; z: number },
+  setback: number,
+  depth: number,
+  skew: number,
+): Ring {
+  const dx = b.x - a.x;
+  const dz = b.z - a.z;
+  return [
+    [a.x + perp.x * setback, a.z + perp.z * setback],
+    [b.x + perp.x * setback, b.z + perp.z * setback],
+    [b.x + perp.x * (setback + depth) + dx * skew, b.z + perp.z * (setback + depth) + dz * skew],
+    [a.x + perp.x * (setback + depth) - dx * skew, a.z + perp.z * (setback + depth) - dz * skew],
+  ];
+}
+
+function pushParcel(
+  out: Parcel[],
+  spec: IslandSpec,
+  ring: Ring,
+  band: PlotBand,
+  n: number,
+): void {
+  const c = ringCentroid(ring);
+  if (heightAt(spec, c.x, c.z) < 0.4) return;
+  if (publicQuay(spec, c.x, c.z)) return;
+  const area = ringArea(ring);
+  if (area < 180 || area > 9000) return;
+  const portDist = Math.hypot(c.x - spec.port.x, c.z - spec.port.z);
+  out.push({
+    id: `${spec.id}-${band}-${n}`,
+    island: spec.id,
+    ring,
+    x: c.x,
+    z: c.z,
+    area: Math.round(area),
+    band,
+    class: "by_right",
+    price: priceOf(spec, area, band, portDist),
+    owner: null,
+    use: null,
+  });
+}
+
+function lotsAlongRoad(spec: IslandSpec): Parcel[] {
+  const lots: Parcel[] = [];
+  const steps = 12;
+  for (let i = 0; i < steps; i++) {
+    const a = roadPoint(spec, i / steps);
+    const b = roadPoint(spec, (i + 1) / steps);
+    const len = Math.hypot(b.x - a.x, b.z - a.z) || 1;
+    const perp = { x: -(b.z - a.z) / len, z: (b.x - a.x) / len };
+    for (const side of [-1, 1] as const) {
+      const p = { x: perp.x * side, z: perp.z * side };
+      const h = hash(i * 17 + side * 9 + (spec.id === "north" ? 1 : 3));
+      const street = quad(a, b, p, 7, 20 + h * 16, (h - 0.5) * 0.18);
+      pushParcel(lots, spec, street, "street", lots.length);
+      const field = quad(a, b, p, 28 + h * 8, 36 + h * 22, (h - 0.4) * 0.22);
+      pushParcel(lots, spec, field, "field", lots.length);
     }
   }
-  seedNpc(plots);
+  return lots;
+}
+
+function shoreLots(spec: IslandSpec): Parcel[] {
+  const lots: Parcel[] = [];
+  const toward = spec.id === "north" ? 1 : -1;
+  for (let i = -5; i <= 5; i++) {
+    if (Math.abs(i) < 2) continue;
+    const x0 = i * 28;
+    const z0 = spec.port.z + toward * 8;
+    const h = hash(40 + i + (spec.id === "north" ? 0 : 8));
+    const w = 22 + h * 8;
+    const d = 18 + h * 10;
+    const ring: Ring = [
+      [x0 - w / 2, z0],
+      [x0 + w / 2, z0],
+      [x0 + w / 2 + 3, z0 - toward * d],
+      [x0 - w / 2 - 2, z0 - toward * d],
+    ];
+    pushParcel(lots, spec, ring, "shore", 200 + lots.length);
+  }
+  return lots;
+}
+
+function buildRoads(spec: IslandSpec, parcels: Parcel[]): Road[] {
+  const paved = [];
+  for (let i = 0; i <= 16; i++) paved.push(roadPoint(spec, i / 16));
+  const dirt: Road[] = [];
+  for (const p of parcels.filter((x) => x.band === "field" && x.island === spec.id).slice(0, 8)) {
+    const t = Math.max(0, Math.min(1, Math.abs(p.z - spec.port.z) / 480));
+    dirt.push({
+      island: spec.id,
+      kind: "dirt",
+      points: [roadPoint(spec, t), { x: p.x, z: p.z }],
+    });
+  }
+  return [{ island: spec.id, kind: "paved", points: paved }, ...dirt];
+}
+
+export function buildPlots(): Parcel[] {
+  const plots: Parcel[] = [];
+  for (const spec of Object.values(ISLANDS)) {
+    plots.push(...lotsAlongRoad(spec), ...shoreLots(spec));
+  }
+  const leaseable = plots.filter((p) => p.class === "by_right");
+  for (const p of leaseable.slice(0, 2)) {
+    p.owner = "npc";
+    p.use = p.band === "field" ? "farm" : "stall";
+  }
+  const south = leaseable.filter((p) => p.island === "south");
+  for (const p of south.slice(0, 2)) {
+    p.owner = "npc";
+    p.use = p.band === "field" ? "farm" : "stall";
+  }
   return plots;
 }
 
-function seedNpc(plots: Plot[]): void {
-  const npcIds = ["N-0-1", "N-6-2", "S-7-1", "S-1-3"];
-  for (const plot of plots) {
-    if (npcIds.includes(plot.id)) plot.owner = "npc";
-  }
+export function buildRoadsForAll(plots: Parcel[]): Road[] {
+  return Object.values(ISLANDS).flatMap((spec) => buildRoads(spec, plots));
 }
 
 export function createLandBoard(): LandBoard {
-  return { plots: buildPlots() };
+  const plots = buildPlots();
+  return { plots, roads: buildRoadsForAll(plots) };
 }
 
-export function getPlot(board: LandBoard, id: string): Plot | undefined {
+export function getPlot(board: LandBoard, id: string): Parcel | undefined {
   return board.plots.find((p) => p.id === id);
+}
+
+export function findParcelAt(board: LandBoard, x: number, z: number): Parcel | undefined {
+  return board.plots.find((p) => pointInRing(x, z, p.ring));
 }
 
 export function leasePlot(
@@ -139,7 +278,7 @@ export function leasePlot(
   visitor: Visitor,
   plotId: string,
   owner = "visitor",
-): { ok: true; paid: number; plot: Plot } | { ok: false; reason: string } {
+): { ok: true; paid: number; plot: Parcel } | { ok: false; reason: string } {
   const plot = getPlot(board, plotId);
   if (!plot) return { ok: false, reason: "no_plot" };
   if (plot.class === "reserved") return { ok: false, reason: "reserved" };
@@ -148,6 +287,23 @@ export function leasePlot(
   visitor.cash = Math.round((visitor.cash - plot.price) * 10000) / 10000;
   plot.owner = owner;
   return { ok: true, paid: plot.price, plot };
+}
+
+export function developPlot(
+  board: LandBoard,
+  visitor: Visitor,
+  plotId: string,
+  use: Exclude<LandUse, null>,
+): { ok: true; paid: number; plot: Parcel } | { ok: false; reason: string } {
+  const plot = getPlot(board, plotId);
+  if (!plot) return { ok: false, reason: "no_plot" };
+  if (plot.owner !== "visitor") return { ok: false, reason: "not_yours" };
+  if (plot.use) return { ok: false, reason: "already_built" };
+  if (use !== "farm" && use !== "stall") return { ok: false, reason: "bad_use" };
+  if (visitor.cash < DEVELOP_COST) return { ok: false, reason: "no_cash" };
+  visitor.cash = Math.round((visitor.cash - DEVELOP_COST) * 10000) / 10000;
+  plot.use = use;
+  return { ok: true, paid: DEVELOP_COST, plot };
 }
 
 /** Same formula the harbour client uses. Keep in sync with public/harbour/main.js */
@@ -182,14 +338,14 @@ export function landSnapshot(board: LandBoard, visitor: Visitor) {
   return {
     mode: "PAPER" as const,
     provenance: "SIMULATED",
-    note: "Authored islands in metres. Not Earth. Not OSM. Leases are paper.",
+    note: "Authored island parcels in metres. Not Earth. Not OSM. Leases are paper.",
     islands: ISLANDS,
-    plotSize: PLOT_SIZE,
-    plotGap: PLOT_GAP,
+    developCost: DEVELOP_COST,
     visitor: {
       cash: visitor.cash,
       leases: board.plots.filter((p) => p.owner === "visitor").map((p) => p.id),
     },
     plots: board.plots,
+    roads: board.roads,
   };
 }
