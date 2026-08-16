@@ -246,6 +246,30 @@ function makeCoffeeTable(x, z) {
   g.add(makeTableSpoon(x + 0.32, topY + 0.03, z - 0.16));
   // Kraft knife on the table top — offset from the spoon, napkin, saucer, jars.
   g.add(makeTableKnife(x - 0.32, topY + 0.03, z - 0.18));
+  // Tiny kraft PAPER cup — offset from the knife, spoon, napkin, saucer.
+  g.add(makeTableCup(x + 0.12, topY + 0.03, z + 0.18));
+  return g;
+}
+
+/**
+ * Tiny kraft PAPER cup on the living-room table — cream body, linen rim,
+ * wood handle. Offset from the knife, spoon, napkin, and saucer.
+ * PAPER boxes only. No new hexes. Not the counter cup.
+ */
+function makeTableCup(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "house-shop-table-cup";
+  g.userData.kind = "house-shop-table-cup";
+  g.userData.mode = "PAPER";
+  g.userData.part = "cup";
+  g.position.set(x, y, z);
+  const body = paperBox(0.07, 0.06, 0.07, CREAM, "house-shop-table-cup");
+  body.position.set(0, 0.03, 0);
+  const rim = paperBox(0.078, 0.012, 0.078, LINEN, "house-shop-table-cup");
+  rim.position.set(0, 0.066, 0);
+  const handle = paperBox(0.02, 0.03, 0.02, WOOD, "house-shop-table-cup");
+  handle.position.set(0.05, 0.032, 0);
+  g.add(body, rim, handle);
   return g;
 }
 
