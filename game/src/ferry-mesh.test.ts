@@ -606,4 +606,84 @@ describe("ferry berth", () => {
     new THREE.Box3().setFromObject(fender).getSize(fenderSize);
     expect(Math.max(fenderSize.x, fenderSize.y, fenderSize.z)).toBeGreaterThan(2.4);
   });
+
+  it("sits one tiny kraft PAPER wedge on the cream deck; other PAPER parts remain", () => {
+    expect(HOME_Z).toBe(-6835);
+    const mesh = makeFerry();
+    expect(mesh.position.z).toBe(-6835);
+    const tagged: THREE.Object3D[] = [];
+    mesh.traverse((obj) => {
+      if (obj.userData?.part) tagged.push(obj);
+    });
+    const wedges = tagged.filter((o) => o.userData.part === "wedge");
+    expect(wedges.length).toBeGreaterThanOrEqual(1);
+    for (const name of [
+      "fender",
+      "bucket",
+      "oar",
+      "cleat",
+      "rail",
+      "hawser",
+      "horn",
+      "grommet",
+      "hatch",
+      "scupper",
+      "bollard",
+      "lantern",
+      "handle",
+      "smoke",
+    ]) {
+      expect(tagged.some((o) => o.userData.part === name)).toBe(true);
+    }
+
+    const wedge = wedges[0];
+    expect(wedge.userData.part).toBe("wedge");
+    expect(wedge.userData.mode).toBe("PAPER");
+    expect(wedge.position.y).toBeGreaterThan(1.5);
+    expect(wedge.position.y).toBeLessThan(2.3);
+    expect(Math.abs(wedge.position.z)).toBeLessThan(5);
+    const wedgeSize = new THREE.Vector3();
+    new THREE.Box3().setFromObject(wedge).getSize(wedgeSize);
+    expect(wedgeSize.x).toBeLessThan(0.8);
+    expect(wedgeSize.y).toBeLessThan(0.5);
+    expect(wedgeSize.z).toBeLessThan(0.8);
+    wedge.traverse((child) => {
+      const m = child as THREE.Mesh;
+      if (!m.isMesh) return;
+      expect(m.geometry.type).toBe("BoxGeometry");
+      const hex = (m.material as THREE.MeshLambertMaterial).color.getHex();
+      expect(HAWSER_HEXES.has(hex)).toBe(true);
+    });
+
+    for (const name of [
+      "grommet",
+      "hatch",
+      "scupper",
+      "hawser",
+      "bucket",
+      "oar",
+      "cleat",
+      "rail",
+      "fender",
+      "bollard",
+      "lantern",
+      "handle",
+      "smoke",
+      "horn",
+    ]) {
+      for (const other of tagged) {
+        if (other === wedge) continue;
+        if (other.userData.part !== name) continue;
+        const dx = wedge.position.x - other.position.x;
+        const dz = wedge.position.z - other.position.z;
+        expect(Math.hypot(dx, dz)).toBeGreaterThan(1.5);
+      }
+    }
+
+    const fender = tagged.find((o) => o.userData.part === "fender")!;
+    expect(fender.position.z).toBeLessThan(-5.5);
+    const fenderSize = new THREE.Vector3();
+    new THREE.Box3().setFromObject(fender).getSize(fenderSize);
+    expect(Math.max(fenderSize.x, fenderSize.y, fenderSize.z)).toBeGreaterThan(2.4);
+  });
 });
