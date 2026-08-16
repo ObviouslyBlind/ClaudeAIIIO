@@ -54,6 +54,44 @@ describe("owned building interiors", () => {
     expect(boxes).toBeGreaterThan(12);
   });
 
+  it("dresses PAPER rooms as a Caribbean house: windows, table, chairs, lamp, bed", () => {
+    const g = makeInteriorScene();
+    const down = g.getObjectByName("downstairs");
+    const up = g.getObjectByName("upstairs");
+    expect(down).toBeTruthy();
+    expect(up).toBeTruthy();
+
+    const kindsIn = (root: THREE.Object3D) => {
+      const kinds: string[] = [];
+      root.traverse((o) => {
+        if (o.userData?.kind) kinds.push(o.userData.kind);
+      });
+      return kinds;
+    };
+
+    const downKinds = kindsIn(down!);
+    expect(downKinds).toContain("interior-table");
+    expect(downKinds.filter((k) => k === "interior-chair").length).toBeGreaterThanOrEqual(2);
+    expect(downKinds).toContain("interior-lamp");
+    expect(downKinds).toContain("interior-window");
+    expect(downKinds).toContain("exit");
+    expect(downKinds).toContain("interior-floor");
+    expect(downKinds).toContain("interior-paper");
+
+    const upKinds = kindsIn(up!);
+    expect(upKinds).toContain("interior-bed");
+    expect(upKinds).toContain("interior-lamp");
+    expect(upKinds).toContain("interior-window");
+    expect(upKinds).toContain("interior-floor");
+    expect(upKinds).toContain("interior-paper");
+
+    let exitDoors = 0;
+    g.traverse((o) => {
+      if (o.userData?.kind === "exit" && (o as THREE.Mesh).isMesh) exitDoors += 1;
+    });
+    expect(exitDoors).toBeGreaterThanOrEqual(1);
+  });
+
   it("hides the harbour group without removing it, then exit restores the plot", () => {
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x7ec8d4);
