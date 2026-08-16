@@ -12,6 +12,7 @@ Nothing named **aeiou** was in this workspace. If that was a Cursor dashboard so
 | **two-harbors-net** | One shard, HTTP + WS, interest cells. No Colyseus. |
 | **two-harbors-map** | Two authored islands. No OSM. |
 | **two-harbors-client** | Three.js harbour rules. Step L only. |
+| **two-harbors-gauntlet** | Builder vs blind critic on **one** piece. Not a clone prompt. |
 | **impeccable** | Later HUD / Hansard. Not the tick loop. |
 | **threejs-scene-setup** / **gltf** / **materials** | Step L |
 | **input-systems** | Primary / secondary mapping |
@@ -20,7 +21,7 @@ Nothing named **aeiou** was in this workspace. If that was a Cursor dashboard so
 | **performance-optimization** | 30fps harbour |
 | **survival-crafting** | Genre notes only |
 
-Stack research: [BACKEND.md](BACKEND.md).
+Stack research: [BACKEND.md](BACKEND.md). Gauntlet Loop: [GAUNTLET.md](GAUNTLET.md).
 
 ## Needed in our heads
 
@@ -47,3 +48,4 @@ Stack research: [BACKEND.md](BACKEND.md).
 - Heightmaps / plots → `two-harbors-map`
 - Canvas → `two-harbors-client` then `threejs-scene-setup`
 - HUD chrome → `impeccable` then `game-ui-ux`
+- One slice, harsh critic → `two-harbors-gauntlet`
