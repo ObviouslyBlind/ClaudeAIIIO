@@ -255,8 +255,8 @@ function makeVase(x, y, z) {
   g.position.set(x, y, z);
   const paper = { mode: "PAPER" };
   g.add(cyl(0.045, 0.05, 0.03, WOOD, 0, 0.015, 0, "interior-vase", paper));
-  g.add(cyl(0.055, 0.07, 0.16, PAPER_CARD, 0, 0.11, 0, "interior-vase", paper));
-  g.add(cyl(0.04, 0.055, 0.04, PLASTER, 0, 0.21, 0, "interior-vase", paper));
+  g.add(cyl(0.055, 0.07, 0.16, PLASTER, 0, 0.11, 0, "interior-vase", paper));
+  g.add(cyl(0.04, 0.055, 0.04, PLASTER_SIDE, 0, 0.21, 0, "interior-vase", paper));
   g.add(cyl(0.042, 0.038, 0.025, WOOD_TOP, 0, 0.242, 0, "interior-vase", paper));
   g.add(box(0.02, 0.1, 0.02, WOOD, 0.07, 0.14, 0, "interior-vase", paper));
   g.add(box(0.04, 0.02, 0.02, WOOD, 0.05, 0.19, 0, "interior-vase", paper));
