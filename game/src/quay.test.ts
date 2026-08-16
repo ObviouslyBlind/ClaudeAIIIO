@@ -145,4 +145,50 @@ describe("quay harbour dressing", () => {
       }
     }
   });
+
+  it("ties a kraft painter rope off each dinghy bow", () => {
+    function collectPainter(root: THREE.Object3D) {
+      const out: THREE.Object3D[] = [];
+      root.traverse((obj) => {
+        if (obj.userData?.dress === "painter" || obj.userData?.part === "painter") {
+          out.push(obj);
+        }
+      });
+      return out;
+    }
+
+    for (const id of ["north", "south"] as const) {
+      const spec = ISLANDS[id];
+      const toward = id === "north" ? 1 : -1;
+      const added: THREE.Object3D[] = [];
+      const scene = { add(obj: THREE.Object3D) { added.push(obj); } };
+      const root = makeQuay(spec, { scene, heightAt });
+
+      const painters = collectPainter(root);
+      expect(painters.length).toBeGreaterThanOrEqual(2);
+      for (const p of painters) {
+        expect(p.userData.dress === "painter" || p.userData.part === "painter").toBe(true);
+        const mesh = p as THREE.Mesh;
+        expect(mesh.geometry).toBeInstanceOf(THREE.BoxGeometry);
+        const mat = mesh.material as THREE.MeshLambertMaterial;
+        expect(mat.color.getHex()).toBe(0xc4a06a);
+      }
+
+      const dinghySpots = [
+        { x: spec.port.x + 9.4, y: 0.42, z: spec.port.z + toward * 88 },
+        { x: spec.port.x - 10.6, y: 0.36, z: spec.port.z + toward * 82 },
+      ];
+      for (const spot of dinghySpots) {
+        const boat = root.children.find((c) => {
+          return (
+            Math.abs(c.position.x - spot.x) < 0.01 &&
+            Math.abs(c.position.y - spot.y) < 0.01 &&
+            Math.abs(c.position.z - spot.z) < 0.01
+          );
+        });
+        expect(boat).toBeTruthy();
+        expect(collectPainter(boat!).length).toBeGreaterThanOrEqual(1);
+      }
+    }
+  });
 });

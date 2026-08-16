@@ -76,6 +76,14 @@ function dinghy() {
   oarR.rotation.y = -0.16;
   g.add(oarL, oarR);
 
+  // Kraft painter: thin hawser off the bow. PAPER box, existing rope hex.
+  const painter = part(0.07, 0.07, 2.15, 0xc4a06a, false);
+  painter.position.set(0.18, 0.44, 5.02);
+  painter.rotation.x = 0.2;
+  painter.userData.dress = "painter";
+  painter.userData.part = "painter";
+  g.add(painter);
+
   return g;
 }
 
