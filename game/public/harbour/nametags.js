@@ -50,6 +50,45 @@ function paperBox(w, h, d, color) {
   return mesh;
 }
 
+/** Tracked letters so PAPER reads as a stamp even without canvas letterSpacing. */
+function fillSpaced(ctx, text, x, y, tracking) {
+  const chars = String(text).split("");
+  const widths = chars.map((c) => ctx.measureText(c).width);
+  let total = 0;
+  for (let i = 0; i < widths.length; i++) total += widths[i];
+  total += tracking * Math.max(0, chars.length - 1);
+  let cx = x - total / 2;
+  for (let i = 0; i < chars.length; i++) {
+    ctx.fillText(chars[i], cx + widths[i] / 2, y);
+    cx += widths[i] + tracking;
+  }
+}
+
+/**
+ * Kraft rubber stamp: dashed box + tracked PAPER. Same ink family as the
+ * ferry ticket. Sits under the name so brown name ink stays readable.
+ */
+function drawPaperStamp(ctx, cx, cy) {
+  const bw = 196;
+  const bh = 40;
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(-0.11);
+  ctx.strokeStyle = STAMP;
+  ctx.lineWidth = 3.5;
+  ctx.setLineDash([8, 5]);
+  ctx.strokeRect(-bw / 2, -bh / 2, bw, bh);
+  ctx.setLineDash([]);
+  ctx.lineWidth = 1.6;
+  ctx.strokeRect(-bw / 2 + 5, -bh / 2 + 5, bw - 10, bh - 10);
+  ctx.fillStyle = STAMP;
+  ctx.font = "700 22px Georgia, 'Times New Roman', serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  fillSpaced(ctx, "PAPER", 0, 1, 7);
+  ctx.restore();
+}
+
 /** Simple canvas card: name in ink, PAPER stamp. */
 export function makePaperNametag(name) {
   if (typeof document === "undefined") return null;
@@ -67,14 +106,12 @@ export function makePaperNametag(name) {
   ctx.strokeRect(6, 6, w - 12, h - 12);
 
   ctx.fillStyle = INK;
-  ctx.font = "600 46px Georgia, 'Times New Roman', serif";
+  ctx.font = "600 44px Georgia, 'Times New Roman', serif";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText(String(name || "PAPER"), w / 2, h / 2 - 10);
+  ctx.fillText(String(name || "PAPER"), w / 2, 48);
 
-  ctx.fillStyle = STAMP;
-  ctx.font = "600 20px Georgia, 'Times New Roman', serif";
-  ctx.fillText("PAPER", w / 2, h - 26);
+  drawPaperStamp(ctx, w / 2, h - 36);
 
   const tex = new THREE.CanvasTexture(canvas);
   tex.colorSpace = THREE.SRGBColorSpace;
