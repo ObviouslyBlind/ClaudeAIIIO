@@ -321,9 +321,39 @@ function kraftDipper() {
 }
 
 /**
+ * Small kraft PAPER crank: hub + arm + grip. Wood boxes only — not a
+ * cylinder wheel, not iron. Sits on the pump head.
+ */
+function kraftCrank() {
+  const g = new THREE.Group();
+  g.name = "crank";
+  g.userData.kind = "street-prop";
+  g.userData.prop = "crank";
+  g.userData.mode = "PAPER";
+  g.userData.part = "crank";
+  g.userData.dress = "crank";
+
+  const hub = part(0.08, 0.06, 0.08, WOOD_DARK, false);
+  hub.userData.part = "crank";
+  hub.userData.dress = "crank";
+  hub.position.y = 0.03;
+  const arm = part(0.22, 0.04, 0.05, WOOD, false);
+  arm.userData.part = "crank";
+  arm.userData.dress = "crank";
+  arm.position.set(0.1, 0.04, 0);
+  const grip = part(0.04, 0.12, 0.04, WOOD_LIGHT, false);
+  grip.userData.part = "crank";
+  grip.userData.dress = "crank";
+  grip.position.set(0.2, 0.08, 0);
+
+  g.add(hub, arm, grip);
+  return g;
+}
+
+/**
  * Small kraft village pump: square wood post, wood handle/spout, wood trough
- * with a kraft-cream basin, and a kraft dipper in the trough. Paper boxes
- * only — not an iron standpipe, not cyan water.
+ * with a kraft-cream basin, a kraft crank on the head, and a kraft dipper in
+ * the trough. Paper boxes only — not an iron standpipe, not cyan water.
  */
 function villagePump(_side) {
   const g = new THREE.Group();
@@ -359,7 +389,10 @@ function villagePump(_side) {
   const dipper = kraftDipper();
   dipper.position.set(0.18, 0.26, 0.56);
 
-  g.add(shoe, post, head, handle, spout, basin, rim, water, dipper);
+  const crank = kraftCrank();
+  crank.position.set(0.12, 1.32, 0);
+
+  g.add(shoe, post, head, handle, spout, basin, rim, water, dipper, crank);
   return g;
 }
 
@@ -639,7 +672,7 @@ function placeOne(map, road, spec, heightAt, slot, root) {
 }
 
 /**
- * Paper lamp posts, kraft crate seats, hawser drums, one wood stool, one village pump with a kraft dipper in the trough, one fishing-net rack, one open fish crate, and signs along the paved spline, on the grass verge.
+ * Paper lamp posts, kraft crate seats, hawser drums, one wood stool, one village pump with a kraft crank on the head and a kraft dipper in the trough, one fishing-net rack, one open fish crate, and signs along the paved spline, on the grass verge.
  * North port stretch is packed first so spawn looking inland actually sees them.
  */
 export function makeStreetProps(map, helpers) {
