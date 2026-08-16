@@ -324,6 +324,21 @@ function addHinge(g, x, y, z) {
 }
 
 /**
+ * Tiny kraft PAPER door knob on the House door so the leaf reads as
+ * opened, not a blank plank. Original KRAFT — not a new hex.
+ * House door only — shop keeps its latch; shed stays bare.
+ * Offset beside the knocker, not stacked on it.
+ * Does not replace chimney, mailbox, shutter, knocker, latch, sign, stoop,
+ * doormat, hinge, lintel, rail, or porch.
+ */
+function addKnob(g, x, y, z) {
+  const knob = tagPaper(part(0.07, 0.07, 0.06, KRAFT, false), "knob");
+  knob.name = "knob";
+  knob.position.set(x, y, z);
+  g.add(knob);
+}
+
+/**
  * Small kraft PAPER knocker on the House door so the leaf reads as a
  * front door, not a blank plank. Original WOOD / KRAFT — not a new hex.
  * House door only — shop gets a latch instead; shed and factory hall stay bare.
@@ -445,6 +460,7 @@ function cottage(kind) {
     addMailbox(g, -W * 0.12 + 0.82, 1.12, D / 2 + 0.16);
     addHinge(g, -W * 0.12 - 0.46, 1.95, D / 2 + 0.18);
     addLintel(g, -W * 0.12, 2.52, D / 2 + 0.18);
+    addKnob(g, -W * 0.12 + 0.28, 1.72, D / 2 + 0.18);
   }
   if (shop) {
     addLatch(g, -W * 0.12 + 0.28, 1.42, D / 2 + 0.18);
