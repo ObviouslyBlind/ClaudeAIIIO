@@ -60,15 +60,20 @@ Building shells + window lights — **not in the seaward spawn frame**; computer
 
 ## Pixel HUD (flow / tax / goods)
 
-First HTML no longer ships `Faucet — · sink —`. Flow / tax / goods now paint `PAPER · SIMULATED` on first frame plus classic snapshot/statutes fetches. Next `/g/flow51`.
+First HTML no longer ships `Faucet — · sink —`. Flow / tax / goods now paint `PAPER · SIMULATED` on first frame plus classic snapshot/statutes fetches.
+`/g/flow51` **PASS HUD**: `PAPER · SIMULATED · Faucet 0 · sink 0`, `PAPER · SIMULATED · Sales tax 0%`, `PAPER · SIMULATED`. Address `/g/flow51`.
+
+## Pixel HUD (staff / ferry spread)
+
+Spawn has no selected plot, so staff is `PAPER · SIMULATED · Staff —` (the dash after Staff is the empty state, not a missing HUD). Spread first HTML no longer ships `Ferry spread · PAPER`. Next `/g/hud52`.
 
 ## In flight (not ferry-only)
 
-Pixel: **flow / tax / goods** on the spawn sheet `http://localhost:8787/g/flow51`. Expect `PAPER · SIMULATED · Faucet N · sink N`, `PAPER · SIMULATED · Sales tax 0%`, and `PAPER · SIMULATED` (empty goods OK). FAIL HUD if `Faucet —` / `sink —` remain. No RMB. Close other Two Harbors tabs. Address bar must be `/g/flow51`. Do not restart play while the critic is on the page.
+Pixel: **staff + ferry spread** on the spawn sheet `http://localhost:8787/g/hud52`. Expect `PAPER · SIMULATED · Staff —` and `PAPER · SIMULATED · Ferry spread · N x.xx · S x.xx`. FAIL HUD if staff is still `Staff — · PAPER` or spread still uses `N — · S —`. No RMB. Close other Two Harbors tabs. Address bar must be `/g/hud52`. Do not restart play while the critic is on the page.
 
-## Next pixel (after flow51 PASS, immediately, no wait)
+## Next pixel (after hud52 PASS, immediately, no wait)
 
-Staff line if still `Staff —`, then shells+lights stay deferred until a human can orbit.
+Shells+lights stay deferred until a human can orbit. Remaining spawn-sheet dashes: econ `Index —` is already live after JS (`/g/hud47` PASS).
 
 ## Frozen
 
