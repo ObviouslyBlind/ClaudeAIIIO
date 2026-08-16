@@ -40,49 +40,56 @@ function bollard() {
 }
 
 /**
- * Tiny rowboat. Hull along +Z so it sits beside the pier, not bow-on.
- * Sage planks, not the ferry's mahogany.
+ * Rowboat. Hull along +Z so it sits beside the pier, not bow-on.
+ * Sage planks, kraft gunwale. Not the ferry's cream hull.
+ * /g/ding63 FAIL DINGHY: 6 m sage hull at y=0.42 read as empty teal
+ * at ~130 m. Spawn-readable beam/length, lifted into the look-at band.
  */
 function dinghy() {
   const g = new THREE.Group();
+  g.userData.kind = "dinghy";
+  g.userData.mode = "PAPER";
 
-  const hull = part(2.35, 0.72, 6.1, 0x5c6e52);
-  hull.position.y = 0.22;
+  const hull = part(7.4, 2.4, 18, 0x5c6e52);
+  hull.position.y = 0.7;
+  hull.userData.part = "hull";
+  hull.userData.mode = "PAPER";
   g.add(hull);
 
-  const keel = part(1.55, 0.22, 5.2, 0x3d4a38, false);
-  keel.position.y = -0.12;
+  const keel = part(5, 0.6, 15.5, 0x3d4a38, false);
+  keel.position.y = -0.2;
   g.add(keel);
 
-  const bow = part(1.55, 0.58, 1.35, 0x5c6e52);
-  bow.position.set(0, 0.26, 3.35);
+  const bow = part(5, 1.8, 4, 0x5c6e52);
+  bow.position.set(0, 0.8, 10);
   g.add(bow);
 
-  const stern = part(2.15, 0.5, 0.65, 0x5c6e52);
-  stern.position.set(0, 0.2, -3.15);
+  const stern = part(6.8, 1.6, 2, 0x5c6e52);
+  stern.position.set(0, 0.65, -9.2);
   g.add(stern);
 
-  const gunwale = part(2.5, 0.12, 6.25, 0xc4b496, false);
-  gunwale.position.y = 0.6;
+  const gunwale = part(8.2, 0.9, 18.6, 0xc4b496, false);
+  gunwale.position.y = 2.0;
+  gunwale.userData.part = "gunwale";
   g.add(gunwale);
 
-  for (const zz of [-1.35, 0.55]) {
-    const seat = part(2.05, 0.12, 0.42, 0x8a6238, false);
-    seat.position.set(0, 0.46, zz);
+  for (const zz of [-4.2, 1.8]) {
+    const seat = part(6.4, 0.28, 1.1, 0x8a6238, false);
+    seat.position.set(0, 1.35, zz);
     g.add(seat);
   }
 
-  const oarL = part(0.11, 0.08, 4.1, 0x6a4a2a, false);
-  oarL.position.set(-1.45, 0.7, 0.35);
+  const oarL = part(0.32, 0.22, 12, 0x6a4a2a, false);
+  oarL.position.set(-4.4, 2.15, 1.1);
   oarL.rotation.y = 0.16;
-  const oarR = part(0.11, 0.08, 4.1, 0x6a4a2a, false);
-  oarR.position.set(1.45, 0.7, 0.35);
+  const oarR = part(0.32, 0.22, 12, 0x6a4a2a, false);
+  oarR.position.set(4.4, 2.15, 1.1);
   oarR.rotation.y = -0.16;
   g.add(oarL, oarR);
 
   // Kraft painter: thin hawser off the bow. PAPER box, existing rope hex.
   const painter = part(0.07, 0.07, 2.15, 0xc4a06a, false);
-  painter.position.set(0.18, 0.44, 5.02);
+  painter.position.set(0.18, 1.35, 13.2);
   painter.rotation.x = 0.2;
   painter.userData.dress = "painter";
   painter.userData.part = "painter";
@@ -450,12 +457,12 @@ export function makeQuay(spec, helpers) {
   root.userData.kind = "quay";
 
   const d1 = dinghy();
-  d1.position.set(x + 9.4, 0.42, z + toward * 88);
+  d1.position.set(x + 14, 1.4, z + toward * 88);
   d1.rotation.y = spec.id === "north" ? 0.08 : Math.PI + 0.08;
   root.add(d1);
 
   const d2 = dinghy();
-  d2.position.set(x - 10.6, 0.36, z + toward * 82);
+  d2.position.set(x - 14.5, 1.32, z + toward * 82);
   d2.rotation.y = spec.id === "north" ? -0.14 : Math.PI - 0.14;
   root.add(d2);
 

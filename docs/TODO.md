@@ -27,7 +27,7 @@ Politics frozen. See `game/reports/GAUNTLET_STATUS.md`.
 - [x] Pixel ferry fender (`/g/fend54` PASS FENDER — dark tyre + kraft band on the north cream hull)
 - [x] Pixel quay lamps (`/g/lamps55`–`/g/lamps58` FAIL LAMPS — round stopped, not pixel-held)
 - [x] Pixel north port sign (`/g/sign59`–`/g/sign62` FAIL SIGN — round stopped, not pixel-held)
-- [ ] Pixel sage dinghies in the north basin (`http://localhost:8787/g/ding63`). Shells deferred: seaward spawn, no RMB)
+- [ ] Pixel sage dinghies in the north basin (`http://localhost:8787/g/ding64` — `/g/ding63` FAIL DINGHY). Shells deferred: seaward spawn, no RMB)
 
 ## Polymarket paper bot
 
