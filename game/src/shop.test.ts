@@ -6,7 +6,12 @@ import { dressShop, isShopPlot, undressShop } from "../public/harbour/shop.js";
 const WOOD = 0x8a6238;
 const CREAM = 0xe8d7b8;
 const STRAP = 0x5a3a22;
+const LINEN = 0xf4ead8;
+const PAPER_CARD = 0xf3efe4;
 const KRAFT = new Set([WOOD, CREAM, STRAP]);
+const SLIP_SHEET = new Set([CREAM, LINEN, PAPER_CARD]);
+const SLIP_EDGE = new Set([WOOD, STRAP]);
+const SLIP = new Set([...SLIP_SHEET, ...SLIP_EDGE]);
 
 function hexes(root: THREE.Object3D) {
   const colors: number[] = [];
@@ -69,6 +74,16 @@ function shopWeights(root: THREE.Object3D) {
   const out: THREE.Object3D[] = [];
   root.traverse((obj) => {
     if (obj.userData?.kind === "shop-weight" && obj.name === "shop-weight") {
+      out.push(obj);
+    }
+  });
+  return out;
+}
+
+function shopSlips(root: THREE.Object3D) {
+  const out: THREE.Object3D[] = [];
+  root.traverse((obj) => {
+    if (obj.userData?.kind === "shop-slip" && obj.name === "shop-slip") {
       out.push(obj);
     }
   });
@@ -462,6 +477,111 @@ describe("shop PAPER kraft scale weight", () => {
     expect(dress).toBeTruthy();
     expect(dress!.visible).toBe(false);
     expect(shopWeights(interior).length).toBe(1);
+    expect(interior.userData.interiorUse).toBe("house");
+  });
+});
+
+describe("shop PAPER kraft receipt slip", () => {
+  it("puts a small kraft PAPER slip on the shop counter beside the till", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressShop(scene);
+
+    const dress = interior.getObjectByName("shop-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+
+    const counter = dress!.getObjectByName("shop-counter");
+    expect(counter).toBeTruthy();
+    const till = counter!.getObjectByName("shop-till");
+    expect(till).toBeTruthy();
+    expect(till!.userData.kind).toBe("shop-till");
+
+    const slips = shopSlips(counter!);
+    expect(slips.length).toBe(1);
+
+    const slip = slips[0];
+    expect(slip.userData.kind).toBe("shop-slip");
+    expect(slip.userData.mode).toBe("PAPER");
+    expect(slip.parent?.name).toBe("shop-counter");
+    // On the counter beside the till — not on the drawer / scale / weight / parcel / bag.
+    expect(slip.position.y).toBeGreaterThan(1.0);
+    expect(slip.position.y).toBeLessThan(1.4);
+    expect(Math.abs(slip.position.x)).toBeLessThan(1.5);
+    expect(Math.abs(slip.position.z)).toBeLessThan(0.5);
+
+    const neighbors = [
+      till,
+      shopScales(counter!)[0],
+      shopWeights(counter!)[0],
+      shopParcels(counter!)[0],
+      shopBags(counter!)[0],
+    ];
+    for (const other of neighbors) {
+      const dx = slip.position.x - other.position.x;
+      const dz = slip.position.z - other.position.z;
+      expect(Math.hypot(dx, dz)).toBeGreaterThan(0.12);
+    }
+    const drawer = shopDrawers(till!)[0];
+    expect(drawer).toBeTruthy();
+    const ddx = slip.position.x - (till!.position.x + drawer.position.x);
+    const ddz = slip.position.z - (till!.position.z + drawer.position.z);
+    expect(Math.hypot(ddx, ddz)).toBeGreaterThan(0.12);
+    expect(shopDrawers(slip).length).toBe(0);
+    expect(shopScales(slip).length).toBe(0);
+    expect(shopWeights(slip).length).toBe(0);
+    expect(shopParcels(slip).length).toBe(0);
+    expect(shopBags(slip).length).toBe(0);
+
+    expect(shopParcels(counter!).length).toBe(1);
+    expect(shopBags(counter!).length).toBe(1);
+    expect(shopDrawers(till!).length).toBe(1);
+    expect(shopScales(counter!).length).toBe(1);
+    expect(shopWeights(counter!).length).toBe(1);
+    expect(counter!.getObjectByName("shop-wall-shelf")).toBeTruthy();
+
+    const colors = hexes(slip);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.every((c) => SLIP.has(c))).toBe(true);
+    expect(colors.some((c) => SLIP_SHEET.has(c))).toBe(true);
+    expect(colors.some((c) => SLIP_EDGE.has(c))).toBe(true);
+    expect(colors.every((c) => !isGrey(c))).toBe(true);
+
+    let boxes = 0;
+    slip.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        boxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.kind).toBe("shop-slip");
+        expect(mesh.userData.mode).toBe("PAPER");
+        const box = mesh.geometry as THREE.BoxGeometry;
+        expect(box.parameters.height).toBeLessThan(0.04);
+      }
+    });
+    expect(boxes).toBeGreaterThanOrEqual(2);
+  });
+
+  it("keeps dress idempotent and hides the slip on undress", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressShop(scene);
+    dressShop(scene);
+    expect(interior.children.filter((c) => c.name === "shop-dress").length).toBe(1);
+    expect(shopSlips(interior).length).toBe(1);
+    expect(shopWeights(interior).length).toBe(1);
+    expect(shopScales(interior).length).toBe(1);
+    expect(shopDrawers(interior).length).toBe(1);
+    expect(shopParcels(interior).length).toBe(1);
+    expect(shopBags(interior).length).toBe(1);
+
+    undressShop(scene);
+    const dress = interior.getObjectByName("shop-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.visible).toBe(false);
+    expect(shopSlips(interior).length).toBe(1);
     expect(interior.userData.interiorUse).toBe("house");
   });
 });
