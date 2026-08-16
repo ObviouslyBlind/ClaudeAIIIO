@@ -151,3 +151,85 @@ describe("farm PAPER wood pail", () => {
     expect(scene.userData.interiorUse).toBe("house");
   });
 });
+
+describe("farm PAPER kraft pitchfork", () => {
+  it("leans one kraft PAPER pitchfork by the trough and pail", () => {
+    const scene = new THREE.Scene();
+    dressFarm(scene);
+
+    const dress = scene.getObjectByName("farm-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+    expect(dress!.visible).toBe(true);
+
+    const forks: THREE.Object3D[] = [];
+    dress!.traverse((obj) => {
+      if (obj.userData?.kind === "farm-fork" && obj.name === "farm-fork") {
+        forks.push(obj);
+      }
+    });
+    expect(forks.length).toBe(1);
+
+    const fork = forks[0];
+    expect(fork.userData.kind).toBe("farm-fork");
+    expect(fork.userData.mode).toBe("PAPER");
+    expect(Math.abs(fork.rotation.z) > 0.15 || Math.abs(fork.rotation.x) > 0.15).toBe(true);
+
+    const pail = dress!.getObjectByName("farm-pail")!;
+    expect(pail).toBeTruthy();
+    const toPail = Math.hypot(fork.position.x - pail.position.x, fork.position.z - pail.position.z);
+    expect(toPail).toBeGreaterThan(0.12);
+    expect(toPail).toBeLessThan(0.7);
+
+    const trough = dress!.getObjectByName("farm-trough")!;
+    expect(trough).toBeTruthy();
+    const toTrough = Math.hypot(fork.position.x - trough.position.x, fork.position.z - trough.position.z);
+    expect(toTrough).toBeGreaterThan(0.5);
+    expect(toTrough).toBeLessThan(1.4);
+
+    const churn = dress!.getObjectByName("farm-churn")!;
+    expect(churn).toBeTruthy();
+
+    const colors = hexes(fork);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.some((c) => c === WOOD)).toBe(true);
+    expect(colors.some((c) => c === WOOD_DARK)).toBe(true);
+    expect(colors.some((c) => c === METAL)).toBe(true);
+    expect(colors.every((c) => [WOOD, WOOD_DARK, METAL].includes(c))).toBe(true);
+
+    let boxes = 0;
+    let tines = 0;
+    fork.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        boxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.kind).toBe("farm-fork");
+        expect(mesh.userData.mode).toBe("PAPER");
+        const mat = mesh.material as THREE.MeshLambertMaterial;
+        if (mat?.color?.getHex() === METAL) tines += 1;
+      }
+    });
+    expect(boxes).toBeGreaterThanOrEqual(4);
+    expect(tines).toBe(3);
+  });
+
+  it("keeps dress idempotent and hides the fork on undress", () => {
+    const scene = new THREE.Scene();
+    dressFarm(scene);
+    dressFarm(scene);
+    expect(scene.children.filter((c) => c.name === "farm-dress").length).toBe(1);
+    const dressed = scene.getObjectByName("farm-dress")!;
+    const forks: THREE.Object3D[] = [];
+    dressed.traverse((obj) => {
+      if (obj.name === "farm-fork") forks.push(obj);
+    });
+    expect(forks.length).toBe(1);
+
+    undressFarm(scene);
+    const dress = scene.getObjectByName("farm-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.visible).toBe(false);
+    expect(scene.userData.interiorUse).toBe("house");
+  });
+});
