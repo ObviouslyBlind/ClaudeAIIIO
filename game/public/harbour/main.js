@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { createTaxi } from "./taxi.js";
 import { makeFerry, tickFerry } from "./ferry.js";
+import { makeQuay } from "./quay.js";
 
 const canvas = document.getElementById("c");
 const statusEl = document.getElementById("status");
@@ -732,7 +733,9 @@ async function boot() {
   makeTerrain(specOf("south"));
   makeRoads();
   makePort(specOf("north"));
+  makeQuay(specOf("north"), { scene, heightAt });
   makePort(specOf("south"));
+  makeQuay(specOf("south"), { scene, heightAt });
   ferryMesh = makeFerry();
   scene.add(ferryMesh);
   makePalms(specOf("north"));
