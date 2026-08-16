@@ -25,6 +25,8 @@ const DOOR = 0x4a3220;
 const AWNING_A = 0xc45c3a;
 const AWNING_B = 0xf4ead8;
 const BRICK = 0x8a6a55;
+/** Same cream as cottage walls / awning stripes — PAPER kraft, not a new hex. */
+const KRAFT = 0xf4ead8;
 const CROP = [0x5f8a32, 0x7a9a3a, 0x4e7a28];
 
 function part(w, h, d, color, shadow = true) {
@@ -102,18 +104,48 @@ function addPitchedRoof(g, W, D, wallTop, wall, roof, rake = 1.55) {
   g.add(bargeL, bargeR);
 }
 
-function addChimney(g, x, baseY, z, h = 1.85) {
-  const stack = part(0.62, h, 0.62, BRICK);
-  stack.position.set(x, baseY + h / 2, z);
-  const band = part(0.72, 0.12, 0.72, 0x6a4a38, false);
-  band.position.set(x, baseY + h * 0.62, z);
-  const cap = part(0.84, 0.14, 0.84, 0x4a3220, false);
-  cap.position.set(x, baseY + h + 0.04, z);
-  const pot = part(0.2, 0.4, 0.2, FRAME, false);
-  pot.position.set(x - 0.14, baseY + h + 0.3, z);
-  const potB = part(0.18, 0.32, 0.18, FRAME, false);
-  potB.position.set(x + 0.16, baseY + h + 0.26, z);
-  g.add(stack, band, cap, pot, potB);
+function tagPaper(mesh, partName) {
+  mesh.userData.part = partName;
+  mesh.userData.mode = "PAPER";
+  return mesh;
+}
+
+/**
+ * Brick stack with kraft flashing/cap so a House reads as a building, not a lid.
+ * Optional tiny side stack for warehouse roofs.
+ */
+function addChimney(g, x, baseY, z, h = 1.85, tinyStack = false) {
+  const chimney = new THREE.Group();
+  chimney.name = "chimney";
+  chimney.userData.part = "chimney";
+  chimney.userData.mode = "PAPER";
+  chimney.position.set(x, baseY, z);
+
+  const stack = tagPaper(part(0.7, h, 0.7, BRICK), "chimney");
+  stack.position.set(0, h / 2, 0);
+  const flash = tagPaper(part(0.94, 0.14, 0.94, KRAFT, false), "chimney");
+  flash.position.set(0, 0.16, 0);
+  const course = tagPaper(part(0.78, 0.1, 0.78, KRAFT, false), "chimney");
+  course.position.set(0, h * 0.58, 0);
+  const cap = tagPaper(part(0.88, 0.12, 0.88, KRAFT, false), "chimney");
+  cap.position.set(0, h + 0.04, 0);
+  const pot = tagPaper(part(0.22, 0.38, 0.22, BRICK, false), "chimney");
+  pot.position.set(-0.14, h + 0.3, 0);
+  chimney.add(stack, flash, course, cap, pot);
+
+  if (tinyStack) {
+    const tiny = tagPaper(part(0.34, h * 0.55, 0.34, BRICK, false), "stack");
+    tiny.position.set(0.52, h * 0.28, 0.06);
+    const tinyCap = tagPaper(part(0.42, 0.08, 0.42, KRAFT, false), "stack");
+    tinyCap.position.set(0.52, h * 0.55 + 0.04, 0.06);
+    chimney.add(tiny, tinyCap);
+  } else {
+    const potB = tagPaper(part(0.18, 0.28, 0.18, KRAFT, false), "stack");
+    potB.position.set(0.16, h + 0.24, 0);
+    chimney.add(potB);
+  }
+
+  g.add(chimney);
 }
 
 function addSteps(g, x, zFace, width = 1.55, treads = 3) {
@@ -183,7 +215,7 @@ function cottage(kind) {
     g.add(quoin);
   }
   addPitchedRoof(g, W, D, 0.38 + H, wall, roof, shed ? 1.15 : 1.55);
-  addChimney(g, -W * 0.28, 0.38 + H + (shed ? 0.35 : 0.55), -D * 0.12, shed ? 1.15 : 1.7);
+  addChimney(g, -W * 0.34, 0.38 + H + (shed ? 0.28 : 0.42), -D * 0.06, shed ? 1.2 : 1.9);
   addDoor(g, -W * 0.12, shed ? 1.15 : 1.42, D / 2 + 0.08, shed ? 0.85 : 1.05, shed ? 1.55 : 1.95);
   addSteps(g, -W * 0.12, D / 2, shed ? 1.2 : 1.55, shed ? 2 : 3);
   if (shop) {
@@ -358,7 +390,7 @@ function warehouseMesh() {
   walls.position.y = 0.4 + H / 2;
   g.add(walls);
   addPitchedRoof(g, W, D, 0.4 + H, wall, roof, 2.1);
-  addChimney(g, W * 0.38, 0.4 + H + 1.1, -D * 0.15, 1.55);
+  addChimney(g, W * 0.38, 0.4 + H + 1.1, -D * 0.15, 1.55, true);
   addChimney(g, -W * 0.42, 0.4 + H + 1.1, D * 0.1, 1.25);
   const dock = part(W * 0.55, 0.28, 3.2, STONE, false);
   dock.position.set(-2.2, 0.55, D / 2 + 1.4);
