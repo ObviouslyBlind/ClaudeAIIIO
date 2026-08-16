@@ -45,11 +45,13 @@ function paperBox(w, h, d, color) {
  *   arms    y 0.80–1.36   (±0.32, 1.08, 0)      0.12×0.56×0.12
  *   head    y 1.46–1.78   (0, 1.62, 0.01)       0.30×0.32×0.28
  *   hair    y 1.74–1.86   (0, 1.80, 0)          0.32×0.12×0.30
+ *   brim    y 1.84–1.88   (0, 1.86, 0)          0.52×0.04×0.52   kraft
+ *   hat     y 1.88–1.98   (0, 1.93, 0)          0.28×0.10×0.28   cream
  *   satchel y 0.64–0.92   (0.38, 0.78, 0.08)    0.18×0.28×0.14   kraft
  *   flap    y 0.88–0.96   (0.38, 0.92, 0.09)    0.18×0.08×0.16   kraft
  *   strap   y 0.92–1.40   (0.05, 1.14, 0.16)    0.04×0.82×0.02   cross-body
  *
- * Crown ≈ 1.86 m. Eyes ≈ 1.62 m local → world y ≈ player.y + 0.47.
+ * Hat crown ≈ 1.98 m. Eyes ≈ 1.62 m local → world y ≈ player.y + 0.47.
  */
 export function dressPlayer(player) {
   player.castShadow = true;
@@ -118,7 +120,32 @@ export function dressPlayer(player) {
   strap.rotation.z = -Math.atan2(0.7, 0.44);
   strap.userData.part = "strap";
 
-  figure.add(leftShoe, rightShoe, leftLeg, rightLeg, body, belt, leftArm, rightArm, head, hair, satchel, flap, strap);
+  // Kraft straw hat — same brim + short crown as the quay walkers. Brim uses
+  // this file's kraft tan (0xc4a574 is not here); crown is the cream shirt.
+  const brim = paperBox(0.52, 0.04, 0.52, KRAFT);
+  brim.position.set(0, 1.86, 0);
+  brim.userData.part = "hat";
+  const crown = paperBox(0.28, 0.1, 0.28, SHIRT);
+  crown.position.set(0, 1.93, 0);
+  crown.userData.part = "hat";
+
+  figure.add(
+    leftShoe,
+    rightShoe,
+    leftLeg,
+    rightLeg,
+    body,
+    belt,
+    leftArm,
+    rightArm,
+    head,
+    hair,
+    brim,
+    crown,
+    satchel,
+    flap,
+    strap,
+  );
   player.add(figure);
   attachPlayerTag(player);
 }
