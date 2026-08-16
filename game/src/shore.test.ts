@@ -70,7 +70,7 @@ describe("shoreline read", () => {
     expect(added).toEqual([group]);
     expect(group.children.length).toBeGreaterThan(12);
     expect(group.children.length).toBeLessThanOrEqual(FOAM_SAMPLES + PORT_FOAM_SAMPLES);
-    expect(FOAM_SAMPLES + PORT_FOAM_SAMPLES).toBeLessThanOrEqual(56);
+    expect(FOAM_SAMPLES + PORT_FOAM_SAMPLES).toBeLessThanOrEqual(72);
 
     const port = ISLANDS.north.port;
     const nearPort = group.children.filter(
@@ -82,12 +82,33 @@ describe("shoreline read", () => {
     expect(geos.size).toBeLessThanOrEqual(2);
 
     for (const child of group.children) {
-      const h = heightAt(ISLANDS.north, child.position.x, child.position.z);
-      expect(h).toBeGreaterThanOrEqual(0.3);
-      expect(h).toBeLessThanOrEqual(0.8);
       const dn = Math.hypot(child.position.x - ISLANDS.north.cx, child.position.z - ISLANDS.north.cz);
       const ds = Math.hypot(child.position.x - ISLANDS.south.cx, child.position.z - ISLANDS.south.cz);
       expect(dn).toBeLessThan(ds);
+      if (child.position.y < 0.35) continue;
+      const h = heightAt(ISLANDS.north, child.position.x, child.position.z);
+      expect(h).toBeGreaterThanOrEqual(0.3);
+      expect(h).toBeLessThanOrEqual(0.8);
+    }
+  });
+
+  it("lays pale kraft foam dashes in the water beside the public pier", () => {
+    const scene = { add(_obj: THREE.Object3D) {} };
+    for (const id of ["north", "south"] as const) {
+      const spec = ISLANDS[id];
+      const group = makeShoreFoam(spec, heightAt, scene);
+      const toward = id === "north" ? 1 : -1;
+      const dashes = group.children.filter((child) => {
+        const across = Math.abs(child.position.x - spec.port.x);
+        const along = (child.position.z - spec.port.z) * toward;
+        return across > 5.5 && across < 14 && along > 8 && along < 120 && child.position.y < 0.35;
+      });
+      expect(dashes.length).toBeGreaterThanOrEqual(10);
+      for (const child of dashes) {
+        const mesh = child as THREE.Mesh;
+        const mat = mesh.material as THREE.MeshLambertMaterial;
+        expect(mat.color.getHex()).toBe(0xefe6c9);
+      }
     }
   });
 

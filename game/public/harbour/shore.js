@@ -9,8 +9,11 @@ const WATER = new THREE.Color(0x1d7a86);
  */
 export const FOAM_SAMPLES = 22;
 
-/** Extra foam near the public quay. Spawn actually looks here, not at a 20 km ring. */
-export const PORT_FOAM_SAMPLES = 28;
+/**
+ * Extra foam near the public quay: water dashes beside the pier plus a
+ * denser harbour-flank band. Spawn and the ferry critic look here.
+ */
+export const PORT_FOAM_SAMPLES = 44;
 
 function clamp01(x) {
   return Math.max(0, Math.min(1, x));
@@ -73,6 +76,16 @@ function addFoam(group, geo, mat, spec, x, z, h) {
   group.add(m);
 }
 
+/** Kraft/cream dash in the basin water, hugging the pier, not the deck. */
+function addPierWaterFoam(group, geo, mat, spec, localX, along) {
+  const toward = spec.id === "north" ? 1 : -1;
+  const m = new THREE.Mesh(geo, mat);
+  m.position.set(spec.port.x + localX, 0.18, spec.port.z + toward * along);
+  m.castShadow = false;
+  m.receiveShadow = false;
+  group.add(m);
+}
+
 function contourHit(spec, heightAtFn, ca, sa) {
   for (let s = 1.06; s >= 0.74; s -= 0.01) {
     const x = spec.cx + ca * spec.rx * s;
@@ -96,18 +109,25 @@ function walkContour(spec, heightAtFn, x, along0, along1, step) {
 }
 
 /**
- * Thin pale foam along the 0.3–0.8 m contour.
- * Sparse dashes around the island; a denser band on both flanks of the port
- * so spawn is not a ring of forty dots and a green cliff. One shared
- * material, two box geos (ring + harbour). Skips the public quay pad.
+ * Thin pale foam along the 0.3–0.8 m contour, plus readable dashes in the
+ * water beside the public pier (both islands). Sparse far ring; denser
+ * harbour flanks. One shared kraft/cream material, two box geos.
+ * Contour samples still skip the quay pad; pier-water dashes do not.
  */
 export function makeShoreFoam(spec, heightAtFn, scene) {
   const group = new THREE.Group();
   group.name = "shore-foam-" + spec.id;
 
   const ringGeo = new THREE.BoxGeometry(2.0, 0.06, 9.0);
-  const portGeo = new THREE.BoxGeometry(2.4, 0.07, 14.0);
-  const mat = new THREE.MeshLambertMaterial({ color: 0xefe6c9 });
+  const portGeo = new THREE.BoxGeometry(3.0, 0.14, 15.0);
+  const mat = new THREE.MeshLambertMaterial({
+    color: 0xefe6c9,
+    emissive: 0xefe6c9,
+    emissiveIntensity: 0.22,
+    polygonOffset: true,
+    polygonOffsetFactor: -2,
+    polygonOffsetUnits: -2,
+  });
 
   for (let i = 0; i < FOAM_SAMPLES; i++) {
     const ang = (i / FOAM_SAMPLES) * Math.PI * 2;
@@ -119,8 +139,16 @@ export function makeShoreFoam(spec, heightAtFn, scene) {
 
   let portCount = 0;
   for (const side of [-1, 1]) {
-    for (let i = 1; i <= 10 && portCount < PORT_FOAM_SAMPLES; i++) {
-      const hit = walkContour(spec, heightAtFn, spec.port.x + side * (22 + i * 18), -50, 90, 2);
+    for (const along of [14, 26, 38, 50, 62, 74, 96, 108]) {
+      if (portCount >= PORT_FOAM_SAMPLES) break;
+      const across = along > 80 ? 8.2 : 7.4;
+      addPierWaterFoam(group, portGeo, mat, spec, side * across, along);
+      portCount++;
+    }
+  }
+  for (const side of [-1, 1]) {
+    for (let i = 0; i <= 12 && portCount < PORT_FOAM_SAMPLES; i++) {
+      const hit = walkContour(spec, heightAtFn, spec.port.x + side * (18 + i * 12), -50, 90, 2);
       if (!hit) continue;
       addFoam(group, portGeo, mat, spec, hit.x, hit.z, hit.h);
       portCount++;
@@ -128,7 +156,7 @@ export function makeShoreFoam(spec, heightAtFn, scene) {
   }
   for (let i = -8; i <= 8 && portCount < PORT_FOAM_SAMPLES; i++) {
     const x = spec.port.x + i * 26;
-    if (Math.abs(x - spec.port.x) < 22) continue;
+    if (Math.abs(x - spec.port.x) < 18) continue;
     const hit = walkContour(spec, heightAtFn, x, 70, 260, 3);
     if (!hit) continue;
     addFoam(group, portGeo, mat, spec, hit.x, hit.z, hit.h);
