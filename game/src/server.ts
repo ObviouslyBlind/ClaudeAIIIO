@@ -8,6 +8,7 @@ import { parseLandUse } from "./buildings.ts";
 import { buyFromStall, createVisitor, createWorld, hud, tick } from "./sim.ts";
 import { bustHarbourAssets, bustModuleImports } from "./cache-bust.ts";
 import { confirmFerry, listFerryRoutes } from "./ferry-routes.ts";
+import { calendarHud } from "./calendar.ts";
 
 const root = join(fileURLToPath(new URL(".", import.meta.url)), "..");
 const publicDir = join(root, "public");
@@ -24,6 +25,7 @@ function snapshot() {
     provenance: "SIMULATED",
     note: "Live sim HUD. Visitor cash is paper. Shared with harbour leases.",
     hud: hud(world),
+    calendar: calendarHud(world.tick),
     lastPrices: world.lastPrice,
     visitor: {
       cash: visitor.cash,
@@ -60,6 +62,16 @@ async function readJsonBody(req: { [Symbol.asyncIterator]: () => AsyncIterator<u
 
 const server = createServer(async (req, res) => {
   const url = new URL(req.url ?? "/", `http://${req.headers.host ?? "localhost"}`);
+
+  if (req.method === "GET" && url.pathname === "/api/statutes") {
+    json(res, 200, {
+      mode: "PAPER",
+      provenance: "SIMULATED",
+      note: "Starter catalog. Players amend rows. They do not author from blank paper.",
+      statutes: world.statutes,
+    });
+    return;
+  }
 
   if (req.method === "GET" && url.pathname === "/api/snapshot") {
     json(res, 200, snapshot());
@@ -153,6 +165,7 @@ const server = createServer(async (req, res) => {
   if (pathname === "/") pathname = "/harbour/index.html";
   if (pathname === "/harbour" || pathname === "/harbour/") pathname = "/harbour/index.html";
   if (pathname === "/market" || pathname === "/market/") pathname = "/market/index.html";
+  if (pathname === "/hansard" || pathname === "/hansard/") pathname = "/hansard/index.html";
   if (pathname === "/play" || pathname === "/play/") pathname = "/harbour/index.html";
 
   let filePath = join(publicDir, pathname);

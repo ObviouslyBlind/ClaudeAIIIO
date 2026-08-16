@@ -1,5 +1,6 @@
 import { GOODS, GOOD_IDS, INDEX_WEIGHTS, type GoodId } from "./goods.ts";
 import { mulberry32 } from "./rng.ts";
+import { createStatuteCatalog, salesTaxRate, type Statute } from "./statutes.ts";
 
 export type Side = "bid" | "ask";
 
@@ -36,6 +37,7 @@ export type World = {
   tradeCount: number;
   /** Rolling 3600-tick produced qty for the HUD "24h" analog in tests. */
   producedRing: number[];
+  statutes: Statute[];
 };
 
 export function createWorld(seed = 1): World {
@@ -64,6 +66,7 @@ export function createWorld(seed = 1): World {
     ledger: { produced: 0, consumed: 0, faucet: 0, sink: 0 },
     tradeCount: 0,
     producedRing: [],
+    statutes: createStatuteCatalog(),
   };
 }
 
@@ -106,6 +109,11 @@ function match(world: World, good: GoodId): void {
     bid.qty = roundMoney(bid.qty - qty);
     ask.qty = roundMoney(ask.qty - qty);
     world.lastPrice[good] = fillPrice;
+    const tax = roundMoney(paid * salesTaxRate(world.statutes));
+    if (tax > 0) {
+      world.npcCash = roundMoney(world.npcCash - tax);
+      world.ledger.sink = roundMoney(world.ledger.sink + tax);
+    }
     world.ledger.consumed += qty;
     world.tradeCount += 1;
     if (bid.qty <= 1e-9) book.bids.shift();

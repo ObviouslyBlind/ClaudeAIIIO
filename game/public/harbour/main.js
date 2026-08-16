@@ -21,6 +21,7 @@ import { makeSky } from "./sky.js";
 import { makeStreetProps } from "./street-props.js";
 import { makeTrees } from "./trees.js";
 import { dressPlayer } from "./player.js";
+import { dressCart } from "./cart.js";
 
 function ensureDockButton(id, label) {
   let btn = document.getElementById(id);
@@ -130,6 +131,7 @@ const player = new THREE.Mesh(
 );
 player.castShadow = true;
 dressPlayer(player);
+dressCart(player);
 scene.add(player);
 
 const plotMeshes = new Map();
