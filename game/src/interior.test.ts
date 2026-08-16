@@ -82,6 +82,7 @@ describe("owned building interiors", () => {
     expect(downKinds).toContain("interior-spoon");
     expect(downKinds).toContain("interior-fork");
     expect(downKinds).toContain("interior-knife");
+    expect(downKinds).toContain("interior-plate");
     expect(downKinds).toContain("interior-stool");
     expect(downKinds).toContain("interior-window");
     expect(downKinds).toContain("exit");
@@ -103,6 +104,7 @@ describe("owned building interiors", () => {
     expect(upKinds).not.toContain("interior-spoon");
     expect(upKinds).not.toContain("interior-fork");
     expect(upKinds).not.toContain("interior-knife");
+    expect(upKinds).not.toContain("interior-plate");
     expect(upKinds).not.toContain("interior-stool");
 
     const table = down!.getObjectByName("table");
@@ -884,5 +886,86 @@ describe("house PAPER knife", () => {
     expect(up.getObjectByName("knife")).toBeFalsy();
     expect(up.getObjectByName("fork")).toBeFalsy();
     expect(up.getObjectByName("spoon")).toBeFalsy();
+  });
+});
+
+const PLATE_HEX = new Set([0x5a3a22, 0xf4ead8, 0xf7f1e6]);
+
+describe("house PAPER plate", () => {
+  it("puts one kraft PAPER plate on the downstairs table, not upstairs", () => {
+    const g = makeInteriorScene();
+    const down = g.getObjectByName("downstairs")!;
+    const up = g.getObjectByName("upstairs")!;
+    const table = down.getObjectByName("table")!;
+    expect(table).toBeTruthy();
+
+    const plates = collectKind(down, "interior-plate");
+    expect(plates.length).toBe(1);
+    expect(collectKind(up, "interior-plate").length).toBe(0);
+
+    const plate = plates[0];
+    expect(plate.userData.kind).toBe("interior-plate");
+    expect(plate.userData.mode).toBe("PAPER");
+    expect(plate.userData.part).toBe("plate");
+
+    const tablePos = new THREE.Vector3();
+    table.getWorldPosition(tablePos);
+    const platePos = new THREE.Vector3();
+    plate.getWorldPosition(platePos);
+    expect(Math.hypot(platePos.x - tablePos.x, platePos.z - tablePos.z)).toBeLessThan(0.85);
+    expect(platePos.y).toBeGreaterThan(0.9);
+    expect(platePos.y).toBeLessThan(1.2);
+
+    const knife = down.getObjectByName("knife");
+    expect(knife).toBeTruthy();
+    expect(knife!.userData.part).toBe("knife");
+    const knifePos = new THREE.Vector3();
+    knife!.getWorldPosition(knifePos);
+    expect(Math.hypot(platePos.x - knifePos.x, platePos.z - knifePos.z)).toBeGreaterThan(0.25);
+    expect(collectKind(down, "interior-knife").length).toBe(1);
+
+    const fork = down.getObjectByName("fork");
+    expect(fork).toBeTruthy();
+    expect(fork!.userData.part).toBe("fork");
+    const forkPos = new THREE.Vector3();
+    fork!.getWorldPosition(forkPos);
+    expect(Math.hypot(platePos.x - forkPos.x, platePos.z - forkPos.z)).toBeGreaterThan(0.25);
+    expect(collectKind(down, "interior-fork").length).toBe(1);
+
+    const spoon = down.getObjectByName("spoon");
+    expect(spoon).toBeTruthy();
+    const spoonPos = new THREE.Vector3();
+    spoon!.getWorldPosition(spoonPos);
+    expect(Math.hypot(platePos.x - spoonPos.x, platePos.z - spoonPos.z)).toBeGreaterThan(0.25);
+
+    const napkin = down.getObjectByName("napkin");
+    expect(napkin).toBeTruthy();
+    const napkinPos = new THREE.Vector3();
+    napkin!.getWorldPosition(napkinPos);
+    expect(Math.hypot(platePos.x - napkinPos.x, platePos.z - napkinPos.z)).toBeGreaterThan(0.25);
+
+    const colors: number[] = [];
+    plate.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      const mat = mesh.material as THREE.MeshLambertMaterial | undefined;
+      if (mesh.isMesh && mat?.color) {
+        const hex = mat.color.getHex();
+        colors.push(hex);
+        expect(PLATE_HEX.has(hex)).toBe(true);
+        if (hex !== 0xf7f1e6) expect(isGrey(hex)).toBe(false);
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.kind).toBe("interior-plate");
+        expect(mesh.userData.mode).toBe("PAPER");
+        expect(mesh.userData.part).toBe("plate");
+      }
+    });
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.some((c) => c === 0x5a3a22)).toBe(true);
+    expect(colors.some((c) => c === 0xf4ead8)).toBe(true);
+    expect(colors.some((c) => c === 0xf7f1e6)).toBe(true);
+
+    expect(up.getObjectByName("plate")).toBeFalsy();
+    expect(up.getObjectByName("knife")).toBeFalsy();
+    expect(up.getObjectByName("fork")).toBeFalsy();
   });
 });
