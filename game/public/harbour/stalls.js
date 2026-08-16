@@ -85,7 +85,7 @@ function labelGood(g) {
   return String(g).replace(/_/g, " ");
 }
 
-/** Visible PAPER market stand: deck, posts, price board, striped awning, counter, crates, hanging scale, produce basket, oil lantern, melon, kraft cone, hanging fish, ground crate, kraft price slate, kraft stool, kraft cup. */
+/** Visible PAPER market stand: deck, posts, price board, striped awning, counter, crates, hanging scale, produce basket, oil lantern, melon, kraft cone, hanging fish, ground crate, kraft price slate, kraft stool, kraft cup, kraft knife. */
 export function makeStallMesh(plot) {
   const g = new THREE.Group();
   g.name = "npc-stall";
@@ -440,6 +440,28 @@ export function makeStallMesh(plot) {
     cupHandle.userData.part = "cup";
     cup.add(cupBody, cupRim, cupHandle);
     g.add(cup);
+  }
+
+  // One tiny kraft PAPER knife on the counter so the stall reads as a
+  // working stand, not only produce. WOOD handle + kraft blade. Local
+  // offset only — stall world pose stays put. PAPER boxes. Existing
+  // hexes. Offset from stool, cup, melon, cone, lantern, fish, slate,
+  // scale, and ground crate.
+  if (!g.children.some((c) => c.userData.part === "knife")) {
+    const knife = new THREE.Group();
+    knife.name = "knife";
+    knife.userData.part = "knife";
+    knife.userData.mode = "PAPER";
+    knife.userData.paper = true;
+    knife.position.set(-0.72, 0.9, 1.05);
+    const blade = paperBox(0.14, 0.015, 0.03, KRAFT, false);
+    blade.position.set(0.05, 0.015, 0);
+    blade.userData.part = "knife";
+    const handle = paperBox(0.06, 0.025, 0.03, WOOD, false);
+    handle.position.set(-0.05, 0.018, 0);
+    handle.userData.part = "knife";
+    knife.add(blade, handle);
+    g.add(knife);
   }
 
   const back = paperBox(3.9, 1.6, 0.12, PLASTER);
