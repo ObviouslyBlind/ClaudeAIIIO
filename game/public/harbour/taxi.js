@@ -174,7 +174,20 @@ function addTaxiWheels(g, tyreMat, hubMat) {
 }
 
 /**
- * Yellow cab that reads from the quay: wheels, glass, roof lamp, checker belt.
+ * Dark iron bumper strip on the nose (and tail) so the cab has a front edge.
+ * Same 0x2a2a2e as the lamp ends — original palette, not chrome sedan bumpers.
+ * PAPER boxes only. Roof sign and checker belt stay.
+ */
+function addTaxiBumpers(g, ironMat) {
+  const front = tagPart(taxiBox(2.58, 0.2, 0.2, ironMat, false), "bumper");
+  front.position.set(0, 0.54, 2.64);
+  const rear = tagPart(taxiBox(2.58, 0.2, 0.2, ironMat, false), "bumper");
+  rear.position.set(0, 0.54, -2.64);
+  g.add(front, rear);
+}
+
+/**
+ * Yellow cab that reads from the quay: wheels, glass, roof lamp, checker belt, iron bumper.
  * Compact warm PAPER taxi-sign box — original cream lamp, not a sedan lid,
  * not a debug mast, not a cop lightbar.
  */
@@ -199,12 +212,7 @@ export function makeTaxiMesh() {
   g.add(body);
 
   addTaxiCheckBand(g, kraft, dark);
-
-  const bumperF = taxiBox(2.52, 0.28, 0.28, dark, false);
-  bumperF.position.set(0, 0.52, 2.58);
-  const bumperR = taxiBox(2.52, 0.28, 0.28, dark, false);
-  bumperR.position.set(0, 0.52, -2.58);
-  g.add(bumperF, bumperR);
+  addTaxiBumpers(g, lampSide);
 
   const roof = taxiBox(2.18, 0.92, 2.45, cabin);
   roof.position.set(0, 1.68, -0.22);
