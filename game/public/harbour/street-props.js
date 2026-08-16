@@ -352,8 +352,9 @@ function kraftCrank() {
 
 /**
  * Small kraft village pump: square wood post, wood handle/spout, wood trough
- * with a kraft-cream basin, a kraft crank on the head, and a kraft dipper in
- * the trough. Paper boxes only — not an iron standpipe, not cyan water.
+ * with a kraft-cream basin, a kraft crank on the head, a kraft dipper in
+ * the trough, and a tiny kraft bolt on the post. Paper boxes only — not an
+ * iron standpipe, not cyan water.
  */
 function villagePump(_side) {
   const g = new THREE.Group();
@@ -392,7 +393,13 @@ function villagePump(_side) {
   const crank = kraftCrank();
   crank.position.set(0.12, 1.32, 0);
 
-  g.add(shoe, post, head, handle, spout, basin, rim, water, dipper, crank);
+  /** Tiny kraft bolt on the post, near the handle hub. WOOD_DARK already in this file — PAPER box, not grey iron. */
+  const bolt = part(0.05, 0.05, 0.04, WOOD_DARK, false);
+  bolt.userData.part = "bolt";
+  bolt.userData.mode = "PAPER";
+  bolt.position.set(0.09, 1.16, 0);
+
+  g.add(shoe, post, head, handle, spout, basin, rim, water, dipper, crank, bolt);
   return g;
 }
 
