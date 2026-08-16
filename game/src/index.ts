@@ -18,6 +18,12 @@ export {
   type Parcel,
 } from "./land.ts";
 export {
+  BUILDING_CATALOG,
+  parseLandUse,
+  paperCostFor,
+  type BuildingId,
+} from "./buildings.ts";
+export {
   FERRY_ROUTES,
   listFerryRoutes,
   confirmFerry,

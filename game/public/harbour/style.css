@@ -185,3 +185,63 @@ h1 { margin: 2px 0; font-size: 20px; }
 .paper-ticket .confirm { background: #c4a574; color: #1a140c; }
 .paper-ticket .cancel { background: #d9cbb3; color: #1a140c; }
 .paper-ticket button:disabled { opacity: 0.35; }
+
+#catalog-picker {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: calc(64px + env(safe-area-inset-bottom));
+  z-index: 5;
+  background: var(--panel);
+  border-radius: var(--radius);
+  padding: 10px;
+  pointer-events: auto;
+  max-height: 46vh;
+  overflow: auto;
+}
+#catalog-picker[hidden] { display: none !important; }
+#catalog-picker .catalog-badge {
+  margin: 0;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--btn);
+}
+#catalog-picker .catalog-hint {
+  margin: 6px 0 8px;
+  font-size: 13px;
+  color: var(--muted);
+}
+#catalog-picker .catalog-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 0 0 8px;
+}
+#catalog-picker .catalog-grid button {
+  min-height: 48px;
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--btn);
+  color: #1a140c;
+  font-weight: 700;
+  font-size: 13px;
+  text-align: left;
+  padding: 8px 10px;
+}
+#catalog-picker .catalog-grid button:disabled { opacity: 0.35; }
+#catalog-picker .catalog-cost {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: #3d2a1c;
+}
+#catalog-cancel {
+  width: 100%;
+  min-height: 44px;
+  border: 0;
+  border-radius: var(--radius);
+  background: #d9cbb3;
+  color: #1a140c;
+  font-weight: 700;
+}

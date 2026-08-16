@@ -1,9 +1,19 @@
+import {
+  BUILDING_CATALOG,
+  DEVELOP_COST,
+  isLandUse,
+  paperCostFor,
+  type LandUseId,
+} from "./buildings.ts";
 import type { Visitor } from "./sim.ts";
+
+export { BUILDING_CATALOG, DEVELOP_COST };
+export type { LandUseId };
 
 export type IslandId = "north" | "south";
 export type PlotBand = "shore" | "street" | "field";
 export type PlotClass = "by_right" | "reserved";
-export type LandUse = "farm" | "stall" | null;
+export type LandUse = LandUseId | null;
 export type Ring = [number, number][];
 
 /** Metres. Origin is the channel midpoint. +Z is south. */
@@ -78,8 +88,6 @@ export const ISLANDS: Record<IslandId, IslandSpec> = {
 
 /** Half-width of the paved carriageway plus a grass verge, metres. */
 export const ROAD_CLEAR = 11;
-
-export const DEVELOP_COST = 40;
 
 function inlandSign(spec: IslandSpec): number {
   return spec.id === "north" ? -1 : 1;
@@ -402,11 +410,12 @@ export function developPlot(
   if (!plot) return { ok: false, reason: "no_plot" };
   if (plot.owner !== "visitor") return { ok: false, reason: "not_yours" };
   if (plot.use) return { ok: false, reason: "already_built" };
-  if (use !== "farm" && use !== "stall") return { ok: false, reason: "bad_use" };
-  if (visitor.cash < DEVELOP_COST) return { ok: false, reason: "no_cash" };
-  visitor.cash = Math.round((visitor.cash - DEVELOP_COST) * 10000) / 10000;
+  if (!isLandUse(use)) return { ok: false, reason: "bad_use" };
+  const cost = paperCostFor(use);
+  if (visitor.cash < cost) return { ok: false, reason: "no_cash" };
+  visitor.cash = Math.round((visitor.cash - cost) * 10000) / 10000;
   plot.use = use;
-  return { ok: true, paid: DEVELOP_COST, plot };
+  return { ok: true, paid: cost, plot };
 }
 
 /** Same formula the harbour client uses. Keep in sync with public/harbour/main.js */
@@ -444,6 +453,7 @@ export function landSnapshot(board: LandBoard, visitor: Visitor) {
     note: "Authored island parcels in metres. Not Earth. Not OSM. Leases are paper.",
     islands: ISLANDS,
     developCost: DEVELOP_COST,
+    catalog: BUILDING_CATALOG,
     visitor: {
       cash: visitor.cash,
       leases: board.plots.filter((p) => p.owner === "visitor").map((p) => p.id),
