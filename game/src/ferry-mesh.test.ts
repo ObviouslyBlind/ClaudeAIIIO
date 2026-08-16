@@ -8,6 +8,7 @@ const BOOT = 0x2a3d44;
 const POST = 0x5a3a22;
 const HULL = 0xe6dcc8;
 const BUCKET_HEXES = new Set([DECK, BOOT, POST]);
+const OAR_HEXES = new Set([DECK, BOOT, POST]);
 
 describe("ferry berth", () => {
   it("parks the hull in the channel just off the north quay, not kilometres out", () => {
@@ -223,5 +224,83 @@ describe("ferry berth", () => {
     expect(lanterns).toBeGreaterThanOrEqual(1);
     expect(handles).toBeGreaterThanOrEqual(1);
     expect(creamHull).toBeGreaterThan(0);
+  });
+
+  it("sits a tiny kraft PAPER oar on the cream deck", () => {
+    expect(HOME_Z).toBe(-6835);
+    const mesh = makeFerry();
+    expect(mesh.position.z).toBe(-6835);
+    let oars = 0;
+    let buckets = 0;
+    let rails = 0;
+    let cleats = 0;
+    let fenders = 0;
+    let lanterns = 0;
+    let smoke = 0;
+    let handles = 0;
+    let creamHull = 0;
+    const others: THREE.Object3D[] = [];
+    mesh.traverse((obj) => {
+      if (obj.userData?.part === "oar") {
+        expect(obj.userData.part).toBe("oar");
+        expect(obj.userData.mode).toBe("PAPER");
+        expect(obj.position.y).toBeGreaterThan(1.5);
+        expect(obj.position.y).toBeLessThan(2.3);
+        expect(Math.abs(obj.position.z)).toBeLessThan(5);
+        const size = new THREE.Vector3();
+        new THREE.Box3().setFromObject(obj).getSize(size);
+        expect(size.x).toBeLessThan(2.2);
+        expect(size.y).toBeLessThan(0.6);
+        expect(size.z).toBeLessThan(0.6);
+        obj.traverse((child) => {
+          const m = child as THREE.Mesh;
+          if (!m.isMesh) return;
+          expect(m.geometry.type).toBe("BoxGeometry");
+          const hex = (m.material as THREE.MeshLambertMaterial).color.getHex();
+          expect(OAR_HEXES.has(hex)).toBe(true);
+        });
+        oars += 1;
+        others.push(obj);
+      }
+      if (obj.userData?.part === "bucket") {
+        buckets += 1;
+        others.push(obj);
+      }
+      if (obj.userData?.part === "rail") {
+        rails += 1;
+        others.push(obj);
+      }
+      if (obj.userData?.part === "cleat") {
+        cleats += 1;
+        others.push(obj);
+      }
+      if (obj.userData?.part === "fender") {
+        fenders += 1;
+        others.push(obj);
+      }
+      if (obj.userData?.part === "lantern") lanterns += 1;
+      if (obj.userData?.part === "smoke") smoke += 1;
+      if (obj.userData?.part === "handle") handles += 1;
+      const m = obj as THREE.Mesh;
+      if (m.isMesh && (m.material as THREE.MeshLambertMaterial).color?.getHex() === HULL) {
+        creamHull += 1;
+      }
+    });
+    expect(oars).toBeGreaterThanOrEqual(1);
+    expect(buckets).toBeGreaterThanOrEqual(1);
+    expect(rails).toBeGreaterThanOrEqual(1);
+    expect(cleats).toBeGreaterThanOrEqual(1);
+    expect(fenders).toBeGreaterThanOrEqual(1);
+    expect(lanterns).toBeGreaterThanOrEqual(1);
+    expect(smoke).toBeGreaterThanOrEqual(1);
+    expect(handles).toBeGreaterThanOrEqual(1);
+    expect(creamHull).toBeGreaterThan(0);
+    const oar = others.find((o) => o.userData?.part === "oar")!;
+    for (const other of others) {
+      if (other === oar) continue;
+      const dx = oar.position.x - other.position.x;
+      const dz = oar.position.z - other.position.z;
+      expect(Math.hypot(dx, dz)).toBeGreaterThan(1.5);
+    }
   });
 });

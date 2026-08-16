@@ -172,6 +172,28 @@ function deckCleat(x, y, z) {
 }
 
 /**
+ * Tiny kraft PAPER oar on the timber deck: POST shaft, BOOT collar,
+ * DECK blade. Boxes only — sits on the cream deck, not the bucket,
+ * not the rail, not the cleat, not the fender, not the wheelhouse
+ * lantern, not the funnel smoke, not the door handle.
+ */
+function deckOar(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "oar";
+  g.userData.part = "oar";
+  g.userData.mode = "PAPER";
+  g.position.set(x, y, z);
+  const shaft = part(1.05, 0.06, 0.06, POST, false);
+  shaft.position.set(0, 0.04, 0);
+  const collar = part(0.08, 0.08, 0.08, BOOT, false);
+  collar.position.set(0.38, 0.04, 0);
+  const blade = part(0.32, 0.04, 0.16, DECK, false);
+  blade.position.set(0.62, 0.04, 0);
+  g.add(shaft, collar, blade);
+  return g;
+}
+
+/**
  * Tiny kraft PAPER deck bucket: tapered DECK body, BOOT hoop, POST
  * bail. Boxes/cylinders only — sits on the cream deck, not the rail,
  * not the cleat, not the fender, not the wheelhouse lantern, not the
@@ -329,6 +351,8 @@ export function makeFerry() {
   g.add(hullFender(-3.7, 0.62, 6.02));
   // PAPER bucket sits on the starboard aft cream deck, clear of rail/cleat/fender/lantern/smoke/handle.
   g.add(deckBucket(-13.6, 1.81, 2.55));
+  // PAPER oar sits on the port aft cream deck, clear of bucket/rail/cleat/fender/lantern/smoke/handle.
+  g.add(deckOar(-13.6, 1.81, -2.55));
 
   const cabin = part(16.5, 3.35, 7.6, CABIN);
   cabin.position.set(-2.4, 3.52, 0);
