@@ -161,7 +161,8 @@ export function createStalls({
   heightAt,
   setStatus,
   applySnapshot,
-  getPlayer: _getPlayer,
+  getPlayer,
+  onNearStall,
 } = {}) {
   const group = new THREE.Group();
   group.name = "npc-stalls";
@@ -171,6 +172,42 @@ export function createStalls({
 
   let placed = false;
   let busy = false;
+  let lastNearGood = undefined;
+  const NEAR_STALL = 22;
+
+  function markStallHint(good) {
+    if (good === lastNearGood) return;
+    lastNearGood = good;
+    if (typeof onNearStall === "function") onNearStall(good || null);
+    if (typeof document === "undefined" || !document.getElementById) return;
+    const hint = document.getElementById("stall-hint");
+    if (!hint) return;
+    if (good) {
+      hint.setAttribute("data-near", "1");
+      hint.setAttribute("data-good", good);
+    } else {
+      hint.removeAttribute("data-near");
+    }
+  }
+
+  function emitNear() {
+    const player = getPlayer && getPlayer();
+    const pos = player && player.position;
+    if (!pos) {
+      markStallHint("");
+      return;
+    }
+    let best = "";
+    let bestD = NEAR_STALL;
+    for (const child of group.children) {
+      const d = Math.hypot(child.position.x - pos.x, child.position.z - pos.z);
+      if (d <= bestD) {
+        bestD = d;
+        best = child.userData.good || "corn";
+      }
+    }
+    markStallHint(best);
+  }
 
   function place() {
     if (placed) return;
@@ -235,6 +272,7 @@ export function createStalls({
     const stall = objectWithKind(hits[0].object, STALL_KIND);
     if (!stall) return false;
     const good = stall.userData.good || "corn";
+    markStallHint(good);
     if (!busy) buyOne(good);
     return true;
   }
@@ -246,6 +284,7 @@ export function createStalls({
     handleRay,
     tick() {
       place();
+      emitNear();
     },
   };
 }
