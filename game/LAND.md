@@ -25,6 +25,7 @@ Two fictional Caribbean-scale islands (~8.0 × 4.4 km each), **ports about 13.9 
 - **Traffic (PAPER):** a few NPC cars loop the paved nodes. They do not leave the tarmac.
 - **North** costs more per m². Shore costs more than street; street more than field.
 - **Walk (PAPER):** tap-to-walk only where height is above 0.25 m. Water is forbidden. A straight path through the harbour channel is refused (`Stay on land.`).
-- Tap the land → inspect (area, price). **Lease** (PAPER) → it is yours. **Develop** → farm on a field, stall on street/shore.
+- Tap the land → inspect (area, price). **Lease** (PAPER) → it is yours. **Develop** opens a catalogue (house, shop, house with shop, small farm, warehouse, factory). Then tap your leased parcel to place that type. NPC lots still show farm / stall.
 - **Taxi** (PAPER): HUD button. Drives the paved spine only (`/api/map` roads with `kind === "paved"`). Collects you if you are on/near paved, then the next tap if that tap is on paved. Dirt tracks are forbidden.
+- **Interior (PAPER):** if a plot is yours and developed, tap the building or **Enter**. Downstairs, stairs, upstairs (placeholder boxes). **Exit** returns you to that plot. The harbour world is hidden, not deleted.
 - Labelled SIMULATED. No wallet.
