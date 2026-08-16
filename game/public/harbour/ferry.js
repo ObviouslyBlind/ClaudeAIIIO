@@ -99,6 +99,36 @@ function lifeRing(x, y, z) {
   return g;
 }
 
+/**
+ * Small kraft PAPER hanging lantern on the wheelhouse roof.
+ * Cream/kraft glass box + wood bail. Boxes only — not smoke, not the
+ * door handle, not the life ring, not a bollard.
+ */
+function roofLantern(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "lantern";
+  g.userData.part = "lantern";
+  g.userData.mode = "PAPER";
+  g.position.set(x, y, z);
+  const bail = part(0.14, 0.04, 0.04, POST, false);
+  bail.userData.part = "lantern";
+  bail.position.y = 0.1;
+  const hood = part(0.18, 0.04, 0.18, FRAME, false);
+  hood.userData.part = "lantern";
+  hood.position.y = 0.06;
+  const glass = part(0.16, 0.18, 0.16, CABIN, false);
+  glass.userData.part = "lantern";
+  glass.position.y = -0.06;
+  const kraft = part(0.12, 0.14, 0.12, DECK, false);
+  kraft.userData.part = "lantern";
+  kraft.position.y = -0.06;
+  const base = part(0.18, 0.04, 0.18, POST, false);
+  base.userData.part = "lantern";
+  base.position.y = -0.17;
+  g.add(bail, hood, glass, kraft, base);
+  return g;
+}
+
 /** Posts plus top and mid rails along +X. */
 function addRail(g, x0, x1, z, y = 2.52) {
   const len = x1 - x0;
@@ -217,6 +247,8 @@ export function makeFerry() {
   const wheelRoof = part(5.8, 0.16, 6.7, ROOF, false);
   wheelRoof.position.set(8.6, 6.2, 0);
   g.add(wheelRoof);
+  // PAPER lantern sits on the starboard wheelhouse roof, clear of the funnel.
+  g.add(roofLantern(8.6, 6.52, 2.55));
 
   const door = part(1.15, 2.05, 0.12, DOOR, false);
   door.position.set(-9.4, 2.88, -3.86);
