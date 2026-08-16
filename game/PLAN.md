@@ -153,6 +153,27 @@ Full rank table is in section 7.
 - Politics and planning are **2D panels**. Walking into a chamber is optional desktop flavor.
 - Client: Three.js or PlayCanvas. Sim: authoritative Node (or similar). One logic, scaled view.
 
+### 3.10 Controls (one scheme, two devices)
+
+Do **not** make Interact right-click-only. Phones have no right click. Browser right click is the context menu. Trackpads make it miserable.
+
+Use **primary / secondary**, like OSRS / Albion, not RTS (where right click is move).
+
+| Input | Desktop | Phone |
+|---|---|---|
+| **Primary** | Left click | Tap |
+| **Secondary** | Right click (context menu; suppress the browser menu on the canvas) | Long-press (~400ms) |
+
+**Primary on ground:** walk there (click-to-move).  
+**Primary on a thing:** interact — open stall, talk, board ferry, pick up. If out of range, walk into range then use.  
+**Secondary on a thing:** small menu (Examine, Open hiring, Follow, Report). Never the only way to shop.
+
+Optional desktop: WASD nudges the same walk intent. It does not replace click-to-move. Phone gets a **left-side stick** as that nudge, so thumbs are not fighting a tiny ground tap while looking at a stall.
+
+HUD buttons (Vote, Hire, Inventory) are always tap/click. No right click required to play.
+
+Cursor hint: ground = feet icon, usable = hand, blocked = none. Same icons on mobile as a brief ghost under the finger.
+
 ---
 
 ## 4. Launch calendar
@@ -456,7 +477,7 @@ Persist every ~10s plus an event log for statute writes, elections, and large ap
 
 | Layer | Job |
 |---|---|
-| 3D world | Islands, carts, ferry, small vs large sites. Touch stick + tap. |
+| 3D world | Islands, carts, ferry, small vs large sites. Primary tap/click to move or use; long-press / right click for extra menu. Optional stick / WASD nudge. |
 | HUD | Cash, 3 inflation numbers, ferry, next election / session. |
 | Market | Orders, island toggle. |
 | Planning | File, owner/CEO signatures, vote. Thumb-sized. |
@@ -531,6 +552,7 @@ Staff tools: kick, force a session, re-appoint a vacant Senate seat, re-queue a 
 - Governor vote: single island-wide tally vs North+South with a tie-break.
 - Three.js vs PlayCanvas.
 - Constituency polygon map (10 per island).
+- Whether WASD is on from day 1 or added after click-to-move feels right (plan assumes optional nudge).
 
 Write decisions into this file.
 
