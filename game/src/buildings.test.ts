@@ -210,6 +210,47 @@ describe("paper building catalogue", () => {
     expect(shopKnockers).toBe(0);
   });
 
+  it("puts a kraft PAPER latch on the Shop door", () => {
+    const shop = meshForUse("shop", { area: 400 });
+    const parts: string[] = [];
+    const hexes: number[] = [];
+    shop.traverse((obj: unknown) => {
+      const mesh = obj as {
+        userData?: { part?: string; mode?: string };
+        material?: { color?: { getHex: () => number } };
+      };
+      if (mesh.userData?.part !== "latch") return;
+      parts.push("latch");
+      expect(mesh.userData?.mode).toBe("PAPER");
+      if (mesh.material?.color) hexes.push(mesh.material.color.getHex());
+    });
+    expect(parts.length).toBeGreaterThanOrEqual(1);
+    expect(hexes.length).toBeGreaterThan(0);
+    expect(hexes).toContain(0xf4ead8);
+    expect(hexes.every((c) => c === 0x5a3a22 || c === 0xf4ead8 || c === 0x4a3220)).toBe(true);
+
+    const house = meshForUse("house", { area: 400 });
+    let houseLatches = 0;
+    let houseKnockers = 0;
+    house.traverse((obj: unknown) => {
+      const mesh = obj as { userData?: { part?: string } };
+      if (mesh.userData?.part === "latch") houseLatches += 1;
+      if (mesh.userData?.part === "knocker") houseKnockers += 1;
+    });
+    expect(houseLatches).toBe(0);
+    expect(houseKnockers).toBeGreaterThanOrEqual(1);
+
+    for (const id of ["farm", "factory"] as const) {
+      const mesh = meshForUse(id, { area: 400 });
+      let latches = 0;
+      mesh.traverse((obj: unknown) => {
+        const m = obj as { userData?: { part?: string } };
+        if (m.userData?.part === "latch") latches += 1;
+      });
+      expect(latches).toBe(0);
+    }
+  });
+
   it("puts paired kraft PAPER shutter boxes beside House windows", () => {
     const house = meshForUse("house", { area: 400 });
     const parts: string[] = [];
