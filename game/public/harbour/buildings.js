@@ -162,6 +162,8 @@ function addSteps(g, x, zFace, width = 1.55, treads = 3) {
 /**
  * Kraft PAPER stoop past the stone treads so a House reads as entered from
  * the street, not a door in a wall. Original KRAFT — not a new hex.
+ * Short kraft wood rail (two posts + one rail) on the street edge so the
+ * stoop is not a bare plank. Original WOOD — already in this file.
  */
 function addPorch(g, x, zFace, width = 2.2) {
   const porch = new THREE.Group();
@@ -172,7 +174,17 @@ function addPorch(g, x, zFace, width = 2.2) {
   slab.position.set(x, 0.05, zFace + 1.72);
   const lip = tagPaper(part(width + 0.1, 0.12, 0.16, KRAFT, false), "doorstep");
   lip.position.set(x, 0.07, zFace + 2.16);
-  porch.add(slab, lip);
+  const postH = 0.62;
+  const postY = 0.1 + postH / 2;
+  const postZ = zFace + 2.08;
+  const inset = 0.12;
+  const postL = tagPaper(part(0.08, postH, 0.08, WOOD, false), "rail");
+  postL.position.set(x - width / 2 + inset, postY, postZ);
+  const postR = tagPaper(part(0.08, postH, 0.08, WOOD, false), "rail");
+  postR.position.set(x + width / 2 - inset, postY, postZ);
+  const rail = tagPaper(part(width - inset * 2, 0.07, 0.06, WOOD, false), "rail");
+  rail.position.set(x, 0.1 + 0.48, postZ);
+  porch.add(slab, lip, postL, postR, rail);
   g.add(porch);
 }
 
