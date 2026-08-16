@@ -1,8 +1,17 @@
 /** In-memory PAPER shard snapshot. Not Postgres. PLAN C save blob. */
 
 import { DEVELOP_COST, createLandBoard, getPlot, leasePlot, type LandBoard } from "./land.ts";
+import {
+  applyVisitorOrders,
+  dumpStaffSlots,
+  dumpVisitorOrders,
+  restoreStaffSlots,
+  restoreVisitorOrders,
+} from "./persistStaffOrders.ts";
 import { createVisitor, createWorld, type Visitor, type World } from "./sim.ts";
 import { setStatuteSlider, statuteById } from "./statutes.ts";
+import type { StaffSlot } from "./staff.ts";
+import type { VisitorOrder } from "./orders.ts";
 import { dumpCart, restoreCart, type CartLine } from "./visitorCart.ts";
 
 export type ShardInput = {
@@ -20,6 +29,8 @@ export type ShardBlob = {
     cash: number;
     leases: string[];
     cart: CartLine[];
+    staffSlots: StaffSlot[];
+    visitorOrders: VisitorOrder[];
   };
   statutes: {
     sales_tax: { rate: number };
@@ -74,12 +85,18 @@ function readBlob(raw: unknown): ShardBlob | null {
     provenance: "SIMULATED",
     note: typeof b.note === "string" ? b.note : NOTE,
     tick: b.tick,
-    visitor: { cash: v.cash, leases: [...(v.leases as string[])], cart: restoreCart(v.cart) },
+    visitor: {
+      cash: v.cash,
+      leases: [...(v.leases as string[])],
+      cart: restoreCart(v.cart),
+      staffSlots: restoreStaffSlots(v.staffSlots),
+      visitorOrders: restoreVisitorOrders(v.visitorOrders),
+    },
     statutes: { sales_tax: { rate } },
   };
 }
 
-/** Dump a JSON-safe PAPER shard. Cash, lease ids, cart lines, tick, sales_tax slider. */
+/** Dump a JSON-safe PAPER shard. Cash, leases, cart, staffSlots, open visitorOrders. */
 export function serializeShard(input: ShardInput): ShardBlob {
   return jsonSafe({
     mode: "PAPER" as const,
@@ -90,6 +107,8 @@ export function serializeShard(input: ShardInput): ShardBlob {
       cash: input.visitor.cash,
       leases: visitorLeaseIds(input.land),
       cart: dumpCart(input.visitor.cart),
+      staffSlots: dumpStaffSlots(input.visitor.staffSlots),
+      visitorOrders: dumpVisitorOrders(input.visitor),
     },
     statutes: {
       sales_tax: { rate: salesTaxSlider(input.world) },
@@ -123,6 +142,8 @@ export function restoreShard(raw: unknown): RestoreResult {
   }
   visitor.cash = blob.visitor.cash;
   visitor.cart = blob.visitor.cart;
+  visitor.staffSlots = blob.visitor.staffSlots;
+  applyVisitorOrders(world, visitor, blob.visitor.visitorOrders);
 
   return { ok: true, world, land, visitor };
 }
