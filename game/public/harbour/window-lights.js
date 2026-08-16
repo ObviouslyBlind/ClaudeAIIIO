@@ -14,15 +14,15 @@ import * as THREE from "three";
 
 /** Same hex as buildings.js GLASS — the only glass `windowPane` uses. */
 const SHELL_GLASS = 0x8ec4d4;
-/** Kraft cream, kin to cottage walls (0xf4ead8) and lamp shade (0xf0c878). */
+/** Kraft cream pane — original street-lamp glass, distinct from cottage 0xf4ead8. */
 const PANE = 0xf3d6a0;
-/** Paper-lamp amber, not hazard orange. */
-const GLOW = 0xe8a45a;
+/** Interior lamp-shade — original PAPER SHADE, warmer kraft at dusk than 0xe8a45a. */
+const GLOW = 0xf0c878;
 
 const paneMat = new THREE.MeshLambertMaterial({
   color: PANE,
   emissive: GLOW,
-  emissiveIntensity: 0.4,
+  emissiveIntensity: 0.56,
 });
 
 function isShellGlass(mesh) {
