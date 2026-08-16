@@ -216,6 +216,28 @@ function addDoormat(g, x, zFace) {
 }
 
 /**
+ * Tiny kraft PAPER mailbox beside the House door so the stoop reads as
+ * a cottage address, not a bare wall. Original WOOD / KRAFT — not a new hex.
+ * House door only — shop and farm stay bare. Offset from doormat, chimney,
+ * knocker, latch, shutters, and sign.
+ */
+function addMailbox(g, x, y, z) {
+  const mailbox = new THREE.Group();
+  mailbox.name = "mailbox";
+  mailbox.userData.part = "mailbox";
+  mailbox.userData.mode = "PAPER";
+
+  const body = tagPaper(part(0.22, 0.14, 0.12, KRAFT, false), "mailbox");
+  body.position.set(x, y, z);
+  const lid = tagPaper(part(0.24, 0.04, 0.14, WOOD, false), "mailbox");
+  lid.position.set(x, y + 0.09, z);
+  const flag = tagPaper(part(0.04, 0.1, 0.02, WOOD, false), "mailbox");
+  flag.position.set(x + 0.14, y + 0.02, z + 0.02);
+  mailbox.add(body, lid, flag);
+  g.add(mailbox);
+}
+
+/**
  * Paired kraft PAPER shutter boxes beside a House window so the facade
  * reads as a cottage, not a bare pane. Original WOOD / KRAFT / FRAME —
  * not a new hex.
@@ -393,6 +415,7 @@ function cottage(kind) {
     addStoop(g, -W * 0.12, D / 2);
     addDoormat(g, -W * 0.12, D / 2);
     addKnocker(g, -W * 0.12, 1.72, D / 2 + 0.18);
+    addMailbox(g, -W * 0.12 + 0.82, 1.12, D / 2 + 0.16);
   }
   if (shop) {
     addLatch(g, -W * 0.12 + 0.28, 1.42, D / 2 + 0.18);
