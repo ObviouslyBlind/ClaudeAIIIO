@@ -135,6 +135,7 @@ describe("taxi roof lamp", () => {
     const handles: THREE.Mesh[] = [];
     const bumpers: THREE.Mesh[] = [];
     const checks: THREE.Mesh[] = [];
+    const plates: THREE.Mesh[] = [];
     mesh.traverse((obj) => {
       const m = obj as THREE.Mesh & { userData: { part?: string; mode?: string } };
       if (m.userData?.part === "hub") hubs.push(m);
@@ -142,6 +143,7 @@ describe("taxi roof lamp", () => {
       if (m.userData?.part === "handle") handles.push(m);
       if (m.userData?.part === "bumper") bumpers.push(m);
       if (m.userData?.part === "check") checks.push(m);
+      if (m.userData?.part === "plate") plates.push(m);
     });
     expect(hubs.length).toBe(4);
     expect(hubs.every((h) => h.geometry.type === "BoxGeometry")).toBe(true);
@@ -154,6 +156,23 @@ describe("taxi roof lamp", () => {
     expect(handles.length).toBeGreaterThanOrEqual(2);
     expect(bumpers.length).toBe(2);
     expect(checks.length).toBeGreaterThan(0);
+    expect(plates.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("puts a kraft cream PAPER license plate on the taxi rear", () => {
+    const mesh = makeTaxiMesh();
+    const plates: THREE.Mesh[] = [];
+    mesh.traverse((obj) => {
+      const m = obj as THREE.Mesh & { userData: { part?: string; mode?: string } };
+      if (m.userData?.part === "plate") plates.push(m);
+    });
+    expect(plates.length).toBeGreaterThanOrEqual(1);
+    expect(plates.every((p) => p.geometry.type === "BoxGeometry")).toBe(true);
+    expect(plates.every((p) => p.userData.mode === "PAPER")).toBe(true);
+    expect(
+      plates.every((p) => (p.material as THREE.MeshLambertMaterial).color.getHex() === 0xf4ead8),
+    ).toBe(true);
+    expect(plates.every((p) => p.position.z < -2.4)).toBe(true);
   });
 
   it("parks the cab on paved at spawn so the roof lamp is in the first frame", () => {

@@ -198,9 +198,19 @@ function addTaxiDoorHandles(g, kraftMat) {
 }
 
 /**
+ * Small kraft cream plate on the rear bumper — reads as a cab, not a yellow brick.
+ * Same 0xf4ead8 as the hubs — original palette, not chrome grey. PAPER boxes only.
+ */
+function addTaxiPlate(g, kraftCreamMat) {
+  const plate = tagPart(taxiBox(0.52, 0.14, 0.04, kraftCreamMat, false), "plate");
+  plate.position.set(0, 0.62, -2.76);
+  g.add(plate);
+}
+
+/**
  * Yellow cab that reads from the quay: wheels with kraft cream hub boxes, glass, roof lamp, checker belt,
- * iron bumper, door handles, short kraft roof aerial. Compact warm PAPER taxi-sign box — original cream
- * lamp, not a sedan lid, not a debug mast, not a cop lightbar.
+ * iron bumper, door handles, short kraft roof aerial, kraft cream rear plate. Compact warm PAPER
+ * taxi-sign box — original cream lamp, not a sedan lid, not a debug mast, not a cop lightbar.
  */
 export function makeTaxiMesh() {
   const g = new THREE.Group();
@@ -226,6 +236,7 @@ export function makeTaxiMesh() {
   addTaxiCheckBand(g, kraft, dark);
   addTaxiBumpers(g, lampSide);
   addTaxiDoorHandles(g, kraft);
+  addTaxiPlate(g, kraftHub);
 
   const roof = taxiBox(2.18, 0.92, 2.45, cabin);
   roof.position.set(0, 1.68, -0.22);
