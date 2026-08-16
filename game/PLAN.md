@@ -12,7 +12,7 @@ At launch the **base economy is already law**. A curated pack of 50–100 statut
 
 A dedicated simulation server owns time, prices, inventories, votes, buildings, and planning applications. The client only shows the world and sends intents (move, buy, hire, apply, vote). That is the opposite of a Roblox-style loop, where you push the engine and the engine reacts.
 
-Players spawn as people with a cart, not as nations. Everyone may run a **small** shop, stall, farm, or artisan mine by right. Anything larger needs **constituency council** (HOA-style) planning permission — if the current planning statute says so. People may **buddy up**: cooperatives and investor groups file one application together.
+Players spawn as people with a cart, not as nations. Everyone may run a **small** shop, stall, farm, or artisan mine by right. Anything larger needs **constituency council** (HOA-style) planning permission — if the current planning statute says so. People may **buddy up** on one application: co-owners, plus a day-to-day operator if the owner does not want to run it. Firms can open a hiring pool. Humans may take shifts on jobs the sim already runs with AI. That extra work is client-side so a disconnected player cannot stall a mill.
 
 A few players sit in the **House**. After each general election the **Senate** is appointed. One **Prime Minister** and one **Governor** sit on top. Twenty **councils** (one per constituency) handle local planning with mild votes.
 
@@ -121,14 +121,19 @@ That is how you get 50–100 live statutes at launch without a law-compiler.
 - Confidence lives in the House.
 - Each constituency has a small council for **planning**, not for national tax.
 
-### 3.7 Firms: sole traders, co-ops, investors
+### 3.7 Firms: own it, run it, or work it
 
-**From Eco contracts + EVE corporations, kept small.**
+**From Eco contracts + EVE corps, plus the rule that the sim never waits on a human minigame.**
 
-- One player may always own a small business alone.
-- Several players may form a **cooperative** (shared equity, all sign the application).
-- **Investors** may put cash on an application without operating the site. They get a contracted share of output or profit, enforced by the sim.
-- Large sites almost always need a group. That is the social hook: you cannot quietly drop an industrial mine on a farm belt.
+Split **equity** from **job rank**. Owner is not a job. CEO is a job. One person may be both.
+
+- Small site: owner-operator is the default. They own it and they run it.
+- Large site: at least one **Owner** on the title, and one **CEO** (may be the same player).
+- Co-owners share equity. They are not automatically staff.
+- Hiring pool is optional on small sites, expected on large sites.
+- Worker and manager shifts can be **AI or human**. AI keeps production on the 1Hz tick. A human may run the same route or desk for extra personal cash. Payout is server-capped. The mill does not slow if they close the phone.
+
+Full rank table is in section 7.
 
 ### 3.8 Stocks as a thermometer
 
@@ -247,24 +252,24 @@ Anything **large** under the current size-class statute, for example:
 
 The size thresholds themselves are catalog statutes. Launch defaults are in the starter pack. The House may amend them later (e.g. “artisan mine cap 20 ore/hour → 12”). A council may **tighten** locally only if the national statute has `councils_may_restrict = true`. A council may not loosen past the national cap.
 
-### 6.3 Joint applications (co-ops and investors)
+### 6.3 Joint applications (owners and operators)
 
-One application, many names.
+One application, many names. Equity and jobs are different columns.
 
-| Role on the form | What they do | What the sim enforces |
+| Role on the form | What they are | What the sim enforces |
 |---|---|---|
-| **Operator** | Runs the site, hires staff | Day-to-day intents |
-| **Cooperative members** | Co-owners, all must sign | Equity split, all see books |
-| **Investors** | Cash in, optional silent | Contracted share of profit or output, paid by the sim |
+| **Owner** (one or more) | Holds equity. May be silent. | Profit share, can appoint/fire the President and CEO, signs planning |
+| **CEO** | Day-to-day runner | Hiring pool, wages, production queue. May be an Owner. |
+| **Co-owners** | Extra equity names | Must all sign. Books visible to all owners |
 
 Rules at launch (amendable):
 
-- Small sites: solo is enough. Co-op optional.
-- Large sites: at least 2 distinct players on the form (operator + one other), so industrial mines are social.
-- Cap on investor share (starter: 49% unless a statute is amended).
-- Application fee is a money sink, refunded if refused.
+- Small sites: one Owner is enough. If they also run it, they are Owner + CEO automatically. No second player required.
+- Large sites: the form needs an Owner and a CEO. Same person is allowed (owner-operator). A second distinct player is required *either* as co-owner *or* as CEO so industrial mines stay social.
+- Application fee is a money sink, partly kept on refusal.
+- Hiring pool and the five job ranks unlock with the site; they are not voted by the council.
 
-The council votes the **site**, not the friendship. If permission is granted, the share contract is locked until they file a variation (also a mild vote if it changes size class).
+The council votes the **site class and plot**, not the org chart. After permission, changing size class needs a variation. Swapping CEO does not.
 
 ### 6.4 Application loop
 
@@ -278,13 +283,105 @@ Governor island freeze: pauses **new large** applications on that island for 24h
 
 ---
 
-## 7. Starter law pack (the base economy)
+## 7. Ownership, ranks, and hiring
+
+Two layers, never mixed in the UI:
+
+1. **Owners** — who the site belongs to (equity).
+2. **Ranks** — who works it today (jobs).
+
+A player can own without working, work without owning, or both.
+
+### 7.1 Owner vs CEO
+
+| | Owner | CEO |
+|---|---|---|
+| Question | Who is this *for*? | Who runs it *today*? |
+| Count | 1+ (co-op allowed) | Exactly 1 |
+| Counts as a job? | No | Yes (uses one of the 3 job slots) |
+| Can be the same person? | Yes. That is the default small business. | |
+| Day-to-day hire/fire workers | No, unless they also hold CEO | Yes |
+| Sign planning / council liaison | Yes (or they delegate to President) | No, unless they also hold President |
+
+**President** (rank 5) is the owners’ seat inside the firm: files variations, talks to council, appoints or fires the CEO. If there is a single Owner, they are President by default. They may also be CEO. Titles stack on one character; they still only chew job slots for ranks they actually hold.
+
+There is no separate “investor” class. If you put money in and want a cut, you are an **Owner** with a share. If you put money in and want to run shifts, you also take a job.
+
+### 7.2 Five ranks (jobs)
+
+Every **large** firm has this ladder. Small firms may stop at Owner-operator plus optional rank 1 AI.
+
+| Rank | Title | Who | Hits the sim? | Typical work |
+|---|---|---|---|---|
+| 1 | **Worker** | AI and/or human | **AI does.** Human shift is extra cash only | Miller, farmer, driver, office desk |
+| 2 | **Manager** | Human preferred, AI fallback | **No.** Cannot break throughput | Assigns which AI routes are offered as human shifts, pings workers |
+| 3 | **Officer** | Human, scarce | Books and hire *recommendations* only | Board-style seat. In-game application |
+| 4 | **CEO** | Human, one per firm | **Yes, as settings** — queue, wages, open jobs | Runs the hiring pool |
+| 5 | **President** | Human, one per firm | **Yes, as legal acts** — planning, fire CEO | Owners’ face to the council |
+
+Rank 1–2 are designed so a missing human does nothing bad. Rank 4–5 are rare seats whose *decisions* persist on the server (a wage slider, a production queue). They are not minigames.
+
+### 7.3 Worker shifts (rank 1) — AI plus optional human
+
+Each worker slot is an **AI job** on the tick: a ferry route, a mill cycle, a harvest, an office ledger.
+
+- If no human takes it, AI completes it. Output is unchanged.
+- If a human takes it, they play a **client-side shift** (short route, mill timing, office minigame). The sim already counted the AI result. The human is paid a **shift bonus** from the firm’s wage pool, capped per hour by statute.
+- Disconnect, lag, or a thrown minigame never reduces output. Worst case the human misses the bonus.
+- Server grants the bonus from a signed “shift complete” with a rate limit. The minigame itself is not trusted.
+
+That is how “a human can run the same route as the AI for extra cash” works without letting a phone crash kill the business.
+
+Job *flavours* at launch (all rank 1 unless noted): farmer, miller, driver/route, office clerk (minigame), hauler. CEO opens which flavours are in the hiring pool.
+
+### 7.4 Manager (rank 2)
+
+Managers do not own production. They run a **client-side board**: which worker slots are advertised, who is on a shift, mute/kick from the firm chat.
+
+If no manager is online, the CEO’s last settings stand and AI workers continue. A manager cannot delete a factory or change the island price.
+
+### 7.5 Officer (rank 3)
+
+Scarce (starter: 3 seats per large firm). First rank that can **see the books** and **recommend** a hire to the CEO.
+
+Fill path (in-game, not Discord-gated):
+
+1. Player files an **Officer application** on the firm: short text, optional Discord name for beta staff if the firm wants a voice chat, playtime on that island.
+2. President or CEO **recommends** (one tap).
+3. If a seat is free, they sit. If not, they wait.
+
+Discord is an optional field so a board can talk off-client in beta. It is not required to work, own, or sit. The economy must function with the in-game button alone.
+
+### 7.6 Hiring pool and the 3-job cap
+
+- A CEO may open an **active hiring pool**: flavour, wage (within wage-floor statute), how many human shift slots (AI slots are separate and always filled).
+- A player may hold **at most 3 jobs** at once, across all firms.
+- Worker and Manager count. Officer, CEO, and President each count as one job.
+- Equity / Owner does **not** count.
+- You may not hold two executive seats (Officer/CEO/President) in the same firm except the allowed Owner stack of President+CEO.
+- Small Owner-operator: the stacked President+CEO counts as **one** job, so they can still take two outside shifts if they want.
+
+Example: own a stall (not a job), CEO a mill (1), night miller at a co-op (2), office clerk at the bank (3). Fourth hire is blocked.
+
+### 7.7 Who can mess up the business
+
+| Action | Who | Sim effect |
+|---|---|---|
+| Miss a minigame / drop a route | Worker | None |
+| Be offline as manager | Manager | None |
+| Set wages / queue / hiring | CEO | Next ticks use the new settings |
+| Fire CEO, file planning | President / Owners | Legal state changes |
+| Quit as Owner | Owners | Equity redistributes per statute; site does not vanish mid-tick |
+
+---
+
+## 8. Starter law pack (the base economy)
 
 On day 0 the shard is not lawless. It is a **working economy with a frozen constitution** until the first House sits. Target: **about 80 statutes** in the catalog, **about 60 enabled** at launch, room to enable the rest. Players amend; they do not author from blank paper.
 
 Each statute is a record: `id`, `title`, `enabled`, sliders, caps, `money_bill`, `council_may_restrict`, `writes` (which sim fields).
 
-### 7.1 Suggested catalog (group counts)
+### 8.1 Suggested catalog (group counts)
 
 **Money and treasury (~12)**  
 Sales tax, income tax (off at launch or 0%), deposit interest, lending rate, treasury spend lock, new-player cash cap, transfer tax (low), company registration fee, planning fee schedule, upkeep multiplier, wage floor, unemployment none.
@@ -298,11 +395,11 @@ Plot sizes, by-right list, large-class list, artisan output caps, factory output
 **Planning procedure (~8)**  
 Council vote window, quorum, majority rule, resident-poll bootstrap, neighbour notice, variation rule, freeze statute, appeal none in beta.
 
-**Firms (~8)**  
-Sole trader, cooperative, investor share cap, max names on a form, books-public-if-large, bankruptcy (site returns to unowned), NPC firm charter, stock listing gate.
+**Firms (~10)**  
+Sole trader, co-owners, Owner≠CEO allowed, Owner=CEO stack, max owners on a form, books-public-if-large, bankruptcy (site returns to unowned), NPC firm charter, stock listing gate, Officer seat count.
 
-**Labour (~6)**  
-Wage floor, staff hire cap by site class, overtime none, child none, shift hours, NPC labour pool size.
+**Labour (~10)**  
+Wage floor, 3-job cap, AI worker slots by site class, human shift bonus cap, hiring pool on/off, Officer application, President+CEO stack counts as one, staff hire cap by class, shift flavours list, NPC labour pool size.
 
 **Environment / nuisance (~8, mostly local-amendable)**  
 Noise cap, smoke cap, river spoil cap, night hours for factories, Sunday-close variant (off), forest replant rule, fishery none, quarry buffer from harbour.
@@ -318,7 +415,7 @@ Confidence rule, Senate appointment 6/3/2, money-bill certification, Senate dela
 
 That is ~84 rows. Launch enables the ones that make prices, production, tax, ferry, by-right small sites, and bootstrap polls work. Disabled rows are still visible in Hansard as “not in force,” so a later House can turn them on.
 
-### 7.2 What “amend” means
+### 8.2 What “amend” means
 
 A House bill may:
 
@@ -333,36 +430,37 @@ Councils may only touch statutes flagged `council_may_restrict`, and only for th
 
 ---
 
-## 8. Player loop
+## 9. Player loop
 
 1. Spawn North or South. Get a cart and a little cash.
-2. Open a **small** vendor, farm, or artisan mine by right. Sell into that island’s book.
-3. Hire staff when volume pays. Lease a second small plot if you want.
-4. To go large: find a co-op or investors, file planning, wait on the council (or the day-0–21 resident poll).
-5. Watch money supply, output, index, ferry spread.
-6. Optional: stand for council (local, week 3), House (week 2), Governor, or take a Senate appointment.
-7. Optional: trade the 6 stocks.
+2. Open a **small** vendor, farm, or artisan mine by right. You are Owner and CEO in one.
+3. Hire AI staff (always on). Optionally open a hiring pool so humans can take shifts for extra cash.
+4. To go large: put Owners (and a CEO, maybe yourself) on one application, file planning, wait on the council (or the day-0–21 resident poll).
+5. Work up to **3 jobs** elsewhere if you want: miller, clerk minigame, manager, etc. The mill still runs when you close the app.
+6. Watch money supply, output, index, ferry spread.
+7. Optional: stand for council (week 3), House (week 2), Governor, or take a Senate appointment.
 
-You never have to sit in a chamber. If you never vote, the starter pack and whoever did vote still move your prices.
+You never have to sit in a chamber or take a shift. AI and the starter pack still move prices.
 
 ---
 
-## 9. Server and client
+## 10. Server and client
 
-### 9.1 Sim owns
+### 10.1 Sim owns
 
-Clock (1Hz); inventories; staff; buildings; leases; two island books; ferry queue; treasury; statute table; planning applications; House / Senate / PM / Governor / 20 councils; stock auction; NPC supply and demand.
+Clock (1Hz); inventories; staff **AI slots**; buildings; leases; two island books; ferry queue; treasury; statute table; planning applications; House / Senate / PM / Governor / 20 councils; firm owners, ranks, hiring pools; stock auction; NPC supply and demand.
 
 Persist every ~10s plus an event log for statute writes, elections, and large applications.
 
-### 9.2 Client layers
+### 10.2 Client layers
 
 | Layer | Job |
 |---|---|
 | 3D world | Islands, carts, ferry, small vs large sites. Touch stick + tap. |
 | HUD | Cash, 3 inflation numbers, ferry, next election / session. |
 | Market | Orders, island toggle. |
-| Planning | File, co-op signatures, investor share, vote. Thumb-sized. |
+| Planning | File, owner/CEO signatures, vote. Thumb-sized. |
+| Jobs | Hiring pool, take a shift, Officer apply. Works in portrait. |
 | Hansard | Catalog, amendments, House/Senate/council. Portrait. |
 | Exchange | 6 stocks. |
 
@@ -372,13 +470,14 @@ Planning and voting must work in portrait without entering the 3D council hall.
 
 ---
 
-## 10. Beta slice
+## 11. Beta slice
 
 Ship:
 
 - 2 islands, 1 ferry, 12 goods
 - By-right small sites + large sites behind planning
-- Co-ops and investors on one application
+- Co-owners + Owner/CEO split on one application
+- Five job ranks; AI workers; optional human shifts; 3-job cap
 - Starter catalog (~80 rows, ~60 on)
 - Resident-poll bootstrap until day 21
 - House 20, Senate 11 (6/3/2), 1 PM, 1 Governor
@@ -392,7 +491,7 @@ Later: more islands, extra catalog rows, courts, press, live stock book, native 
 
 ---
 
-## 11. Build order
+## 12. Build order
 
 | Step | Outcome | How you know it worked |
 |---|---|---|
@@ -400,7 +499,8 @@ Later: more islands, extra catalog rows, courts, press, live stock book, native 
 | **B. Starter pack** | ~60 statutes on, sliders write sim fields | Flipping sales tax in the DB changes the next tick’s collections |
 | **C. Player small sites** | Accounts, by-right vendor/farm/artisan mine, persist | Two clients trade; offline orders still fill |
 | **D. Second island + ferry** | Two books, ticket, travel time | Arb exists; raising the ferry statute widens spread |
-| **E. Firms + large class** | Co-op / investor form, size caps | Solo cannot found an industrial mine |
+| **E. Firms + large class** | Owner vs CEO, co-owners, size caps | Solo Owner-operator still founds a stall; industrial mine needs a second name *or* a separate CEO |
+| **E2. Hiring + ranks** | AI slots, hiring pool, 3-job cap, human shift bonus | Kill the client mid-shift; mill output unchanged; bonus not paid |
 | **F. Planning** | Applications, 48h mild vote, fee sink | Fail does not place the building; pass starts the queue |
 | **G. Bootstrap poll** | Resident poll before councils exist | Quorum 3 works; below quorum the app waits |
 | **H. House + calendar** | Day-14 general, money amendments write | Passing a tax amendment changes the live rate |
@@ -413,7 +513,7 @@ Later: more islands, extra catalog rows, courts, press, live stock book, native 
 
 ---
 
-## 12. Wipe and live ops
+## 13. Wipe and live ops
 
 Wipes may clear cash, goods, buildings, and applications. Account identity and player numbers can survive. Statute **catalog** comes back from the game; player amendments die with the wipe unless you snapshot them on purpose.
 
@@ -421,11 +521,12 @@ Staff tools: kick, force a session, re-appoint a vacant Senate seat, re-queue a 
 
 ---
 
-## 13. Open decisions
+## 14. Open decisions
 
 - Final title.
 - Exact artisan vs industrial output numbers.
-- Investor cap 49% vs other.
+- Human shift bonus as % of AI wage.
+- Officer seats per firm (plan assumes 3).
 - Whether a House member may also sit on their home council (plan assumes yes in beta).
 - Governor vote: single island-wide tally vs North+South with a tie-break.
 - Three.js vs PlayCanvas.
@@ -435,6 +536,6 @@ Write decisions into this file.
 
 ---
 
-## 14. One-sentence pitch
+## 15. One-sentence pitch
 
-Two islands and a ferry, already under ~60 laws when you spawn. Small shops are yours by right. A mine takes neighbours, a co-op, and a council that does not even exist until week three.
+Two islands and a ferry, already under ~60 laws when you spawn. Small shops are yours by right. A mill runs on AI at 3am; you can take a shift for extra cash, or own it and hire a CEO, without the building ever waiting on your phone.
