@@ -1005,6 +1005,76 @@ function plantNorthPortBark(root) {
   root.add(bark);
 }
 
+function markKnot(mesh) {
+  mesh.userData.part = "knot";
+  mesh.userData.dress = "knot";
+  mesh.userData.mode = "PAPER";
+  mesh.userData.provenance = "PAPER";
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+}
+
+/**
+ * One tiny kraft PAPER knot (one box) on a north-port palm trunk —
+ * not instead of the bark, twig, vine, husk, frond, leaf, coconut, bird,
+ * nest, or egg. Hexes already in this file: trunk kraft. Reuses the nest
+ * twig box so geometry count stays put. Unique mesh — one box — so the
+ * phone mesh budget stays tiny. Trunks, leaves, coconuts, bird, nest,
+ * egg, leaf, frond, husk, vine, twig, and bark stay put.
+ */
+function plantNorthPortKnot(root) {
+  const placed = root.userData.placed || [];
+  const sites = placed.filter((p) => p.island === "north" && p.dress === "north-port-palm");
+  if (!sites.length) return;
+
+  let nest = null;
+  root.traverse((obj) => {
+    if (!nest && obj.userData.kind === "nest") nest = obj;
+  });
+  if (!nest) return;
+
+  let geo = null;
+  nest.traverse((obj) => {
+    if (geo) return;
+    if (obj.isMesh && obj.geometry && obj.userData.part === "nest") geo = obj.geometry;
+  });
+  if (!geo) return;
+
+  const nestPos = new THREE.Vector3();
+  nest.getWorldPosition(nestPos);
+  let p = sites[0];
+  let best = Infinity;
+  for (const s of sites) {
+    const d = Math.hypot(s.x - nestPos.x, s.z - nestPos.z);
+    if (d < best) {
+      best = d;
+      p = s;
+    }
+  }
+
+  const mat = new THREE.MeshLambertMaterial({ color: TRUNK });
+  const knot = new THREE.Group();
+  knot.name = "knot";
+  knot.userData.kind = "knot";
+  knot.userData.part = "knot";
+  knot.userData.dress = "knot";
+  knot.userData.mode = "PAPER";
+  knot.userData.provenance = "PAPER";
+  // Sit on the palm trunk, offset from the bark flake.
+  const yaw = 2.35;
+  const rad = 0.22;
+  knot.position.set(p.x + Math.cos(yaw) * rad, p.y + 0.72, p.z + Math.sin(yaw) * rad);
+  knot.rotation.set(0.15, yaw, -0.3);
+
+  const box = new THREE.Mesh(geo, mat);
+  box.name = "knot-box";
+  markKnot(box);
+  box.scale.set(0.24, 0.55, 0.26);
+
+  knot.add(box);
+  root.add(knot);
+}
+
 /**
  * Low-poly PAPER trees on hills, inland slopes, and behind street lots.
  * Palms stay on the quay (makePalms). helpers: { scene, specOf, heightAt }.
@@ -1033,6 +1103,7 @@ export function makeTrees(map, helpers) {
   plantNorthPortVine(root);
   plantNorthPortTwig(root);
   plantNorthPortBark(root);
+  plantNorthPortKnot(root);
   scene.add(root);
   return root;
 }
