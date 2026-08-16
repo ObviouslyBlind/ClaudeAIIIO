@@ -24,7 +24,7 @@ const world = createWorld(7);
 const visitor = createVisitor(1_000);
 const land = createLandBoard();
 const presence = createPresence();
-setInterval(() => tick(world, visitor), 1000);
+setInterval(() => tick(world, visitor, land), 1000);
 
 function snapshot() {
   return {
