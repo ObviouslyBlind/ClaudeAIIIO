@@ -17,7 +17,8 @@ Politics frozen. See `game/reports/GAUNTLET_STATUS.md`.
 - [x] Pixel remaining meshes (ferry `/g/ferry37` PASS — cream hull in the water, seaward spawn, no orbit)
 - [x] Pixel remaining meshes (shore foam `/g/shore40` PASS — kraft/cream bars in the north basin)
 - [x] Pixel remaining meshes (quay clutter `/g/quay41` PASS — crates on the kraft north pier)
-- [ ] Pixel remaining meshes (pedestrians `/g/peds43` FAIL PEDS; next `http://localhost:8787/g/peds44`. Then nametags, HUD. Shells deferred: seaward spawn, no RMB)
+- [x] Pixel remaining meshes (pedestrians `/g/peds44` PASS — crate-scale teal/slate/green/terracotta shirts on the north pier)
+- [ ] Pixel remaining meshes (nametags `http://localhost:8787/g/tags45`; then HUD. Shells deferred: seaward spawn, no RMB)
 
 ## Polymarket paper bot
 
