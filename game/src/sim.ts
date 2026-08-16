@@ -13,6 +13,7 @@ import {
 } from "./books.ts";
 import { mulberry32 } from "./rng.ts";
 import { createStatuteCatalog, salesTaxRate, type Statute } from "./statutes.ts";
+import { createVisitorCart, type CartLine } from "./visitorCart.ts";
 
 export {
   BOOK_ISLANDS,
@@ -223,12 +224,13 @@ export function fastForward(world: World, n: number): void {
 export type Visitor = {
   cash: number;
   stock: Record<GoodId, number>;
+  cart: CartLine[];
 };
 
 export function createVisitor(cash = 1_000): Visitor {
   const stock = {} as Record<GoodId, number>;
   for (const id of GOOD_IDS) stock[id] = 0;
-  return { cash, stock };
+  return { cash, stock, cart: createVisitorCart() };
 }
 
 export function buyFromStall(
