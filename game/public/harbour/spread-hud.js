@@ -51,18 +51,19 @@ function southIndex(data) {
 
 export function formatSpreadLine(data) {
   const mode = (data && data.mode) || "PAPER";
+  const provenance = (data && data.provenance) || "SIMULATED";
   const n = northIndex(data);
   const s = southIndex(data);
   if (n != null || s != null) {
-    const nBit = n == null ? "—" : fmt(n);
-    const sBit = s == null ? "—" : fmt(s);
-    return `Ferry spread · ${mode} · N ${nBit} · S ${sBit}`;
+    const nBit = n == null ? "0.00" : fmt(n);
+    const sBit = s == null ? "0.00" : fmt(s);
+    return `${mode} · ${provenance} · Ferry spread · N ${nBit} · S ${sBit}`;
   }
   const arb = meanOf(data && data.arbSpread);
   if (arb != null) {
-    return `Ferry spread · ${mode} · arb ${fmt(arb)}`;
+    return `${mode} · ${provenance} · Ferry spread · arb ${fmt(arb)}`;
   }
-  return `Ferry spread · ${mode} · N — · S —`;
+  return `${mode} · ${provenance} · Ferry spread · N 0.00 · S 0.00`;
 }
 
 function ensureSpread() {
@@ -97,7 +98,8 @@ export function mountSpreadHud(opts = {}) {
   }
 
   if (el) {
-    el.textContent = formatSpreadLine(null);
+    const already = String(el.textContent || "");
+    if (!already.includes("PAPER")) el.textContent = formatSpreadLine(null);
     if (el.setAttribute) el.setAttribute("title", "PAPER · SIMULATED");
     refresh();
     timer = setInterval(refresh, POLL_MS);

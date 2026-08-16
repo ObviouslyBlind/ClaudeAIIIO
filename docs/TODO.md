@@ -22,7 +22,8 @@ Politics frozen. See `game/reports/GAUNTLET_STATUS.md`.
 - [x] Pixel HUD sheet (`/g/hud47` PASS — econ / nearby / staff PAPER · SIMULATED; nearby count was 0)
 - [x] Pixel HUD sheet (`/g/hud49` PASS — calendar Day 0 · tick live, cart PAPER, persist PAPER · SIMULATED)
 - [x] Pixel HUD sheet (`/g/near50` PASS — `250 m PAPER cell · 4 nearby`)
-- [ ] Pixel HUD sheet (`http://localhost:8787/g/flow51` flow / tax / goods). Shells deferred: seaward spawn, no RMB)
+- [x] Pixel HUD sheet (`/g/flow51` PASS — flow Faucet 0 · sink 0, tax 0%, goods PAPER · SIMULATED)
+- [ ] Pixel HUD sheet (`http://localhost:8787/g/hud52` staff + ferry spread). Shells deferred: seaward spawn, no RMB)
 
 ## Polymarket paper bot
 
