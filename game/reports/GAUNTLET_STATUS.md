@@ -12,7 +12,7 @@ Inland spawn, paved ribbon, dirt, cars, yellow taxi, trees+cart, lease → House
 
 ## Held (code, live on the same page as the ferry)
 
-Shore foam, quay clutter, building shells, window lights, stalls, pedestrians (cloth colours), nametags, warehouse/factory/shop/farm/house-shop interiors, presence, cart, staff hire/fire, bid/ask/sell/cancel + market cancel button, North/South books, upkeep, persist dump + restore, lease afford, player "You · PAPER" tag, north and south port signs, calendar, develop afford, ferry fare, sales tax, held-goods, faucet/sink, stall last-print, quay lamp posts.
+Shore foam, quay clutter, building shells, window lights, stalls, pedestrians (cloth colours), nametags, warehouse/factory/shop/farm/house-shop interiors, presence, cart, staff hire/fire, bid/ask/sell/cancel + market cancel button, North/South books, upkeep, persist dump + restore, lease afford, player "You · PAPER" tag, north and south port signs, calendar, develop afford, ferry fare, sales tax, held-goods, faucet/sink, stall last-print, quay lamp posts, street verge lamps.
 
 ## Pixel ferry
 
@@ -20,7 +20,7 @@ Shore foam, quay clutter, building shells, window lights, stalls, pedestrians (c
 
 ## In flight (not ferry-only)
 
-Pixel: ferry hull at north quay `/?g=ferry31` (do not restart play). Also building: denser quay foam, street lamps, taxi fare HUD, persist restore HUD, channel water, house chimney, stall awnings, spawn trees.
+Pixel: ferry hull at north quay `/?g=ferry31` (do not restart play). Also building: denser quay foam, taxi fare HUD, persist restore HUD, channel water, house chimney, stall awnings, spawn trees, taxi roof lamp.
 
 ## Next pixel (after ferry31 PASS, immediately, no wait)
 
