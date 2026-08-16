@@ -261,4 +261,68 @@ describe("quay harbour dressing", () => {
       }
     }
   });
+
+  it("ties a tiny kraft PAPER knot on each dinghy painter, crates and bollard-cap remain", () => {
+    function collectPart(root: THREE.Object3D, name: string) {
+      const out: THREE.Object3D[] = [];
+      root.traverse((obj) => {
+        if (obj.userData?.part === name) out.push(obj);
+      });
+      return out;
+    }
+
+    function collectPainter(root: THREE.Object3D) {
+      const out: THREE.Object3D[] = [];
+      root.traverse((obj) => {
+        if (obj.userData?.dress === "painter" || obj.userData?.part === "painter") {
+          out.push(obj);
+        }
+      });
+      return out;
+    }
+
+    for (const id of ["north", "south"] as const) {
+      const spec = ISLANDS[id];
+      const added: THREE.Object3D[] = [];
+      const scene = { add(obj: THREE.Object3D) { added.push(obj); } };
+      const root = makeQuay(spec, { scene, heightAt });
+
+      expect(collectDress(root, "crate").length).toBeGreaterThanOrEqual(6);
+      expect(collectPart(root, "bollard-cap").length).toBeGreaterThanOrEqual(12);
+
+      const painters = collectPainter(root);
+      expect(painters.length).toBeGreaterThanOrEqual(2);
+
+      const knots = collectPart(root, "knot");
+      expect(knots.length).toBe(painters.length);
+
+      for (const painter of painters) {
+        const mesh = painter as THREE.Mesh;
+        expect(mesh.geometry).toBeInstanceOf(THREE.BoxGeometry);
+        const painterMat = mesh.material as THREE.MeshLambertMaterial;
+        expect(painterMat.color.getHex()).toBe(0xc4a06a);
+
+        const onLine = knots.filter((k) => {
+          let p: THREE.Object3D | null = k.parent;
+          while (p) {
+            if (p === painter) return true;
+            p = p.parent;
+          }
+          return false;
+        });
+        expect(onLine.length).toBe(1);
+        const knot = onLine[0] as THREE.Mesh;
+        expect(knot.userData.part).toBe("knot");
+        expect(knot.geometry).toBeInstanceOf(THREE.BoxGeometry);
+        const mat = knot.material as THREE.MeshLambertMaterial;
+        const hex = mat.color.getHex();
+        expect(isGrey(hex)).toBe(false);
+        expect(hex).toBe(0x8a6238);
+        const { width, height, depth } = (knot.geometry as THREE.BoxGeometry).parameters;
+        expect(width).toBeLessThan(0.3);
+        expect(height).toBeLessThan(0.3);
+        expect(depth).toBeLessThan(0.3);
+      }
+    }
+  });
 });
