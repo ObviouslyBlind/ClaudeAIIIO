@@ -4,6 +4,17 @@
  */
 
 export const MAX_STAFF_PER_PLOT = 2;
+/** PAPER daily wage per slot, and hire cost (one day's wage on hand). */
+export const STAFF_WAGE = 4;
+
+function money(n) {
+  return Number(n).toLocaleString("en-US", { maximumFractionDigits: 0 });
+}
+
+function num(v) {
+  const n = Number(v);
+  return Number.isFinite(n) && n >= 0 ? n : null;
+}
 
 function slotsOf(map) {
   if (!map) return [];
@@ -17,12 +28,50 @@ function countOnPlot(slots, plotId) {
   return slots.filter((s) => s && s.plotId === plotId).length;
 }
 
+function wageFromStatutes(statutes) {
+  if (!statutes) return null;
+  if (Array.isArray(statutes)) {
+    const row = statutes.find((s) => s && (s.id === "wage_floor" || s.id === "wage"));
+    if (!row) return null;
+    const sliders = row.sliders && typeof row.sliders === "object" ? row.sliders : row;
+    return num(sliders.wage ?? sliders.cost ?? sliders.floor ?? row.wage);
+  }
+  if (typeof statutes === "object") {
+    const row = statutes.wage_floor || statutes.wage;
+    if (row && typeof row === "object") {
+      const sliders = row.sliders && typeof row.sliders === "object" ? row.sliders : row;
+      return num(sliders.wage ?? sliders.cost ?? sliders.floor ?? row.wage);
+    }
+    return num(statutes.wage);
+  }
+  return null;
+}
+
+/** Slot wage, map/hud field, wage-floor statute, else $4. Never visitor cash. */
+export function wageOf(map) {
+  if (!map || typeof map !== "object") return STAFF_WAGE;
+  const slots = slotsOf(map);
+  for (const s of slots) {
+    const w = s ? num(s.wage) : null;
+    if (w != null) return w;
+  }
+  const hud = map.hud && typeof map.hud === "object" ? map.hud : null;
+  const direct = num(
+    map.staffWage ?? map.wage ?? map.hireCost ?? (hud && (hud.staffWage ?? hud.wage)),
+  );
+  if (direct != null) return direct;
+  const fromLaw = wageFromStatutes(map.statutes != null ? map.statutes : map);
+  if (fromLaw != null) return fromLaw;
+  return STAFF_WAGE;
+}
+
 export function formatStaffLine(map, plot) {
   if (!plot || plot.owner !== "visitor" || !plot.use) {
     return "PAPER · SIMULATED · Staff —";
   }
   const n = countOnPlot(slotsOf(map), plot.id);
-  return `PAPER · SIMULATED · Staff ${n}/${MAX_STAFF_PER_PLOT}`;
+  const bit = "$" + money(wageOf(map));
+  return `PAPER · SIMULATED · Staff ${n}/${MAX_STAFF_PER_PLOT} · hire ${bit} · wage ${bit}/day`;
 }
 
 function ensureStaffLine() {
