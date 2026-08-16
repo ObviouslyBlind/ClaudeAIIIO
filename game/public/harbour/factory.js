@@ -1,9 +1,9 @@
 import * as THREE from "three";
 
 /**
- * PAPER factory interior dress. Workbenches, iron stock, cooler light —
- * not the house living room, warehouse crates, shop, or farm. No WASD.
- * Tap-to-walk stays in interior.js.
+ * PAPER factory interior dress. Workbenches, kraft machine boxes, iron
+ * stock, cooler light — not the house living room, warehouse crates, shop,
+ * or farm. No WASD. Tap-to-walk stays in interior.js.
  *
  * Call dressFactory(scene) when plot.kind or plot.use is "factory".
  * Idempotent: a second call only shows the existing dress.
@@ -11,6 +11,9 @@ import * as THREE from "three";
 
 const BENCH_WOOD = 0x6a4a32;
 const BENCH_LEG = 0x5a3a22;
+/** Same crate kraft as warehouse / pier — original palette, not a new hex. */
+const KRAFT = 0x8a6238;
+const KRAFT_LIGHT = 0x9a6a40;
 const IRON = 0x6a7068;
 const IRON_DARK = 0x4a524c;
 const IRON_LIGHT = 0x8a9088;
@@ -79,6 +82,42 @@ function workbench(x, z, w, d, yaw = 0) {
   const viseJaw = paperBox(0.08, 0.16, 0.2, IRON_LIGHT, "factory-stock");
   viseJaw.position.set(w * 0.32, topY + 0.2, d * 0.08);
   g.add(viseBase, viseJaw);
+  return g;
+}
+
+/**
+ * Chunky kraft mill on the floor — wood body, small iron press.
+ * Reads from the enter camera (door +Z looking −Z). Not a warehouse crate.
+ */
+function kraftMachine(x, z, w = 1.52, d = 0.88, yaw = 0) {
+  const g = new THREE.Group();
+  g.name = "factory-machine";
+  g.userData.kind = "factory-machine";
+  g.userData.mode = "PAPER";
+  g.position.set(x, 0, z);
+  g.rotation.y = yaw;
+  const y0 = 0.16;
+  const bodyH = 0.72;
+  const base = paperBox(w, 0.16, d, BENCH_LEG, "factory-machine");
+  base.position.y = y0 + 0.08;
+  const body = paperBox(w * 0.94, bodyH, d * 0.88, KRAFT, "factory-machine");
+  body.position.y = y0 + 0.16 + bodyH / 2;
+  const apron = paperBox(w * 0.98, 0.08, d * 0.92, BENCH_WOOD, "factory-machine");
+  apron.position.y = y0 + 0.16 + bodyH + 0.04;
+  const top = paperBox(w, 0.07, d, KRAFT_LIGHT, "factory-machine");
+  top.position.y = y0 + 0.16 + bodyH + 0.1;
+  const topY = y0 + 0.16 + bodyH + 0.14;
+  const column = paperBox(0.14, 0.68, 0.14, IRON_DARK, "factory-machine");
+  column.position.set(-w * 0.28, topY + 0.34, 0);
+  const head = paperBox(0.52, 0.12, 0.38, IRON, "factory-machine");
+  head.position.set(-w * 0.14, topY + 0.68, 0);
+  const ram = paperBox(0.2, 0.16, 0.2, IRON_LIGHT, "factory-machine");
+  ram.position.set(-w * 0.14, topY + 0.16, 0);
+  const hopper = paperBox(0.42, 0.28, 0.36, KRAFT, "factory-machine");
+  hopper.position.set(w * 0.28, topY + 0.18, 0);
+  const strap = paperBox(w + 0.03, 0.05, d + 0.03, BENCH_LEG, "factory-machine");
+  strap.position.y = y0 + 0.42;
+  g.add(base, body, apron, top, column, head, ram, hopper, strap);
   return g;
 }
 
@@ -186,6 +225,9 @@ function makeFactoryDress() {
 
   g.add(workbench(-1.35, -2.48, 2.35, 0.72, 0));
   g.add(workbench(-3.08, 0.15, 2.15, 0.68, Math.PI / 2));
+  g.add(kraftMachine(-1.42, 0.58, 1.55, 0.9, 0.06));
+  g.add(kraftMachine(1.18, 1.32, 1.32, 0.78, -0.1));
+  g.add(kraftMachine(0.22, -0.42, 1.48, 0.86, 0.12));
   g.add(anvil(-0.45, -1.22, 0.18));
   g.add(barRack(-3.12, -1.55, Math.PI / 2));
   g.add(barRack(-3.12, 1.85, Math.PI / 2));
@@ -290,7 +332,7 @@ function dimSceneLights(scene, factory) {
 
 /**
  * Dress an interior (or a scene that contains one) as a PAPER factory workshop.
- * Hides living-room furniture, adds benches and iron stock, cools the light.
+ * Hides living-room furniture, adds kraft machines, benches, and iron stock.
  * @param {THREE.Object3D} scene
  */
 export function dressFactory(scene) {
