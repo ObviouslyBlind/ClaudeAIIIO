@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Two Harbors — harbour</title>
+    <link rel="stylesheet" href="/harbour/style.css" />
+  </head>
+  <body>
+    <header class="bar">
+      <p class="badge">BASE · 3D HARBOUR · PAPER · SIMULATED</p>
+      <h1 id="place">North port</h1>
+      <p id="status">Tap the ground to walk. Tap a plot, then Lease.</p>
+    </header>
+    <aside class="sheet" id="sheet">
+      <p id="cash">Cash $0</p>
+      <p id="plot-line">No plot selected</p>
+    </aside>
+    <canvas id="c"></canvas>
+    <nav class="dock">
+      <button type="button" id="btn-lease" disabled>Lease</button>
+      <button type="button" id="btn-ferry" disabled>Ferry</button>
+      <a class="ghost" href="/market/">Market</a>
+    </nav>
+    <script type="importmap">
+      { "imports": { "three": "/vendor/three.module.js" } }
+    </script>
+    <script type="module" src="/harbour/main.js"></script>
+  </body>
+</html>

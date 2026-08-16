@@ -11,7 +11,7 @@ This is Matt Shumer’s builder/critic loop with our brakes on. Same method that
 
 ## When to use
 
-Only on **one** named piece that already has a running artifact or a test the critic can execute. Examples: paper HUD tap-to-buy, a statute slider, a harbour chunk.
+Only on **one** named piece that already has a running artifact or a test the critic can execute. Current slice: two-island **harbour land** (Caribbean-scale 3D islands, port, paper plots) — not the full economy.
 
 ## Bar (pick one, inspectable)
 

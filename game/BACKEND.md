@@ -23,6 +23,8 @@ Sources used (public only): `capitalrift.com` gate comments, `/api/access/status
 
 Their public commodity board uses **pinned catalog prices** (corn 0.25, ore 8, nails 1.5, …) and treats 24h **units traded** as the mover. That is a display choice. The live game still has carts, leases, and orders.
 
+Land, from public pages only (play client is behind Google; not copied): save rows include **buildings** and **leases**; the world is real-world map data with sim coordinates, not GPS; world edits keep a player id the way OSM keeps history; deleted accounts leave buildings unowned. We copy that *shape* (pay for a discrete site, price by location) onto authored islands. Details: [LAND.md](LAND.md).
+
 Module names in their gate (`Access.v1`, `Market.v3`, `Loyalty.v1`) mean they version systems in place. We should do the same: `Sim.A`, then `Statutes.B`, not a rewrite each step.
 
 **Colyseus / room matchmaking is the wrong shape.** They run one world you join. Rooms are for matches. We will not put the economy in a Colyseus room.

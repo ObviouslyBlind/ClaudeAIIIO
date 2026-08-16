@@ -62,6 +62,6 @@ We **do** have the right starting shape: a running sim, tests, a live HUD. That 
 | Sim | `npm test`, cash conserved, prices finite, 0 players |
 | Paper HUD | Live page, phone width, PAPER label, Buy 1 fills |
 | Statutes | Flip sales tax → next tick collections change |
-| Harbour (L) | Our last-best shot + 30fps / 20 actors, original islands |
+| Harbour (L) | Live `/` page: two authored islands, ports, paper plots, tap-walk |
 
 Skill: `.cursor/skills/two-harbors-gauntlet/SKILL.md`.
