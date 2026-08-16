@@ -7,7 +7,7 @@ import * as THREE from "three";
  * kraft wrapped parcel, a standing kraft shopping bag, a small kraft
  * receipt slip, a small kraft receipt, a small kraft ink stamp, a tiny
  * kraft coin, a tiny kraft blotter, a tiny kraft pencil, a tiny kraft
- * ink pad, a tiny kraft ribbon, a short wall shelf with two kraft boxes,
+ * ink pad, a tiny kraft ribbon, a tiny kraft twine coil, a short wall shelf with two kraft boxes,
  * plus two shelf bays
  * — not the house living room and not the warehouse. No WASD.
  * Tap-to-walk stays in interior.js.
@@ -428,6 +428,27 @@ function kraftRibbon(x, y, z) {
 }
 
 /**
+ * Tiny kraft PAPER twine coil on the counter: wood winding + strap wrap.
+ * Paper boxes only. Beside the till — not on the ribbon, inkpad, pencil,
+ * blotter, coin, or receipt. Existing hexes only.
+ */
+function kraftTwine(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "shop-twine";
+  g.userData.kind = "shop-twine";
+  g.userData.mode = "PAPER";
+  g.userData.part = "twine";
+  g.position.set(x, y, z);
+  const coil = paperBox(0.055, 0.05, 0.055, WOOD, "shop-twine");
+  coil.userData.part = "twine";
+  g.add(coil);
+  const wrap = paperBox(0.062, 0.016, 0.062, STRAP, "shop-twine");
+  wrap.userData.part = "twine";
+  g.add(wrap);
+  return g;
+}
+
+/**
  * Small standing kraft PAPER shopping bag on the counter: cream body + two
  * thin strap handles. Paper boxes only. Beside the parcel / till, not on them.
  */
@@ -527,6 +548,8 @@ function makeCounter(x, z) {
   g.add(kraftInkpad(-0.42, topY + 0.054, 0.32));
   // Tiny kraft ribbon beside the till — cream strip + strap knot.
   g.add(kraftRibbon(-0.95, topY + 0.054, -0.26));
+  // Tiny kraft twine coil beside the till — wood winding + strap wrap.
+  g.add(kraftTwine(-0.58, topY + 0.054, -0.28));
   // Two small kraft / terracotta jars beside the till. Original TIN + CORAL.
   const kraftJar = paperBox(0.12, 0.16, 0.12, TIN, "shop-goods");
   kraftJar.position.set(0.48, topY + 0.13, -0.04);
