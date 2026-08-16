@@ -7,7 +7,7 @@ description: Run a constrained Gauntlet Loop on one Two Harbors piece. Builder a
 
 Read `game/GAUNTLET.md` and `game/PLAN.md` first.
 
-This is Matt Shumer’s builder/critic loop with our brakes on.
+This is Matt Shumer’s builder/critic loop with our brakes on. Same method that shipped kart racers, zombie co-op, space explorers, idle games, and (with no pixels) an SEO pass — not only Claude of Duty. See `game/GAUNTLET.md`.
 
 ## When to use
 
