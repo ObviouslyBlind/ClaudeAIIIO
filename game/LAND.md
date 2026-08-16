@@ -23,6 +23,7 @@ Two fictional Caribbean-scale islands (~2.0 × 1.2 km each), **ports about 8.6 k
 - **Parcels** are irregular pieces of the island: street lots along a paved spine, fields behind them, a few shore lots. They are the dirt, not a numbered card. Vacant lots draw as faint **outlines** inset from the road, not translucent slabs over the pavement.
 - **Paved road** from the port inland, with a grass verge; **dirt tracks** out to fields. Parcel rings are rejected if any edge comes within 11 m of the paved centreline.
 - **North** costs more per m². Shore costs more than street; street more than field.
+- **Walk (PAPER):** tap-to-walk only where height is above 0.25 m. Water is forbidden. A straight path through the harbour channel is refused (`Stay on land.`).
 - Tap the land → inspect (area, price). **Lease** (PAPER) → it is yours. **Develop** → farm on a field, stall on street/shore.
 - **Taxi** (PAPER): HUD button. Drives the paved spine only (`/api/map` roads with `kind === "paved"`). Collects you if you are on/near paved, then the next tap if that tap is on paved. Dirt tracks are forbidden.
 - Labelled SIMULATED. No wallet.
