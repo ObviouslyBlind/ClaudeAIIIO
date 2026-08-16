@@ -8,6 +8,8 @@ const NEAR_PAVED = 12;
 const ON_DIRT = 5;
 const SPEED = 42;
 const TAXI_Y = 0.04;
+/** Hailed cab leaves if nobody boards. */
+export const TAXI_WAIT_MS = 60_000;
 
 /**
  * Closest point on a polyline in XZ. Used to stay on paved points only.
@@ -57,6 +59,52 @@ export function pathAlongPolyline(points, fromX, fromZ, toX, toZ) {
   }
   path.push({ x: to.x, z: to.z });
   return compactPath(path);
+}
+
+/**
+ * True when a hailed cab (coming / waiting) has waited long enough with no board.
+ * Pass nowMs — do not sleep in tests.
+ */
+export function taxiWaitExpired(mode, startedAtMs, nowMs, limitMs = TAXI_WAIT_MS) {
+  if (mode !== "coming" && mode !== "waiting") return false;
+  if (startedAtMs == null) return false;
+  return nowMs - startedAtMs >= limitMs;
+}
+
+/** Top-down island frame. +Z is south, so canvas Y grows south (north is up). */
+export function islandMapBounds(spec, pad = 1.08) {
+  return {
+    minX: spec.cx - spec.rx * pad,
+    maxX: spec.cx + spec.rx * pad,
+    minZ: spec.cz - spec.rz * pad,
+    maxZ: spec.cz + spec.rz * pad,
+  };
+}
+
+export function worldToMapPx(bounds, x, z, w, h) {
+  return {
+    sx: ((x - bounds.minX) / (bounds.maxX - bounds.minX)) * w,
+    sy: ((z - bounds.minZ) / (bounds.maxZ - bounds.minZ)) * h,
+  };
+}
+
+export function mapPxToWorld(bounds, sx, sy, w, h) {
+  return {
+    x: bounds.minX + (sx / w) * (bounds.maxX - bounds.minX),
+    z: bounds.minZ + (sy / h) * (bounds.maxZ - bounds.minZ),
+  };
+}
+
+/** Rough map tap → closest paved point. Dirt is never a destination. */
+export function pavedDestFromMapClick(roads, islandId, spec, sx, sy, w, h) {
+  const world = mapPxToWorld(islandMapBounds(spec), sx, sy, w, h);
+  let best = null;
+  for (const r of roads) {
+    if (r.kind !== "paved" || r.island !== islandId || !r.points || r.points.length < 2) continue;
+    const proj = projectOnPolyline(r.points, world.x, world.z);
+    if (!best || proj.dist < best.proj.dist) best = { road: r, proj };
+  }
+  return best;
 }
 
 function makeTaxiMesh() {
@@ -116,12 +164,18 @@ export function createTaxi({
   mesh.visible = false;
   scene.add(mesh);
 
+  const overlayEl = typeof document !== "undefined" ? document.getElementById("taxi-map") : null;
+  const overlayCanvas = typeof document !== "undefined" ? document.getElementById("taxi-map-canvas") : null;
+  const overlayClose = typeof document !== "undefined" ? document.getElementById("taxi-map-close") : null;
+
   /** idle | coming | waiting | boarded | hauling */
   let mode = "idle";
   let island = "north";
   let road = null;
   let path = [];
   let pi = 0;
+  let waitStartedAtMs = null;
+  let overlayOpen = false;
 
   function pavedRoads(islandId) {
     const map = getMap();
@@ -191,6 +245,70 @@ export function createTaxi({
     return true;
   }
 
+  function sizeOverlayCanvas() {
+    if (!overlayCanvas) return;
+    const r = overlayCanvas.getBoundingClientRect();
+    overlayCanvas.width = Math.max(160, Math.floor(r.width) || 320);
+    overlayCanvas.height = Math.max(120, Math.floor(r.height) || 220);
+  }
+
+  function drawMap() {
+    if (!overlayCanvas || !overlayOpen) return;
+    const ctx = overlayCanvas.getContext("2d");
+    if (!ctx) return;
+    const spec = specOf(island);
+    const w = overlayCanvas.width;
+    const h = overlayCanvas.height;
+    const bounds = islandMapBounds(spec);
+    ctx.fillStyle = "#1d7a86";
+    ctx.fillRect(0, 0, w, h);
+    const c = worldToMapPx(bounds, spec.cx, spec.cz, w, h);
+    const rxPx = (spec.rx / (bounds.maxX - bounds.minX)) * w;
+    const rzPx = (spec.rz / (bounds.maxZ - bounds.minZ)) * h;
+    ctx.fillStyle = spec.id === "north" ? "#4a7a3c" : "#3d8f4a";
+    ctx.beginPath();
+    ctx.ellipse(c.sx, c.sy, rxPx, rzPx, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = "#2a2a2e";
+    ctx.lineWidth = 3;
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
+    for (const r of pavedRoads(island)) {
+      if (!r.points.length) continue;
+      ctx.beginPath();
+      r.points.forEach((p, i) => {
+        const m = worldToMapPx(bounds, p.x, p.z, w, h);
+        if (i === 0) ctx.moveTo(m.sx, m.sy);
+        else ctx.lineTo(m.sx, m.sy);
+      });
+      ctx.stroke();
+    }
+    const me = worldToMapPx(bounds, mesh.position.x, mesh.position.z, w, h);
+    ctx.fillStyle = "#f0c430";
+    ctx.beginPath();
+    ctx.arc(me.sx, me.sy, 5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function openOverlay() {
+    overlayOpen = true;
+    if (overlayEl) overlayEl.hidden = false;
+    if (typeof requestAnimationFrame === "function") {
+      requestAnimationFrame(() => {
+        sizeOverlayCanvas();
+        drawMap();
+      });
+    } else {
+      sizeOverlayCanvas();
+      drawMap();
+    }
+  }
+
+  function closeOverlay() {
+    overlayOpen = false;
+    if (overlayEl) overlayEl.hidden = true;
+  }
+
   function tryCollect() {
     const px = player.position.x;
     const pz = player.position.z;
@@ -199,8 +317,10 @@ export function createTaxi({
     if (Math.hypot(px - mesh.position.x, pz - mesh.position.z) > 16) return false;
     setWalking(false);
     mode = "boarded";
+    waitStartedAtMs = null;
     attachPlayer();
-    setStatus("Taxi collected you. Tap paved to ride. PAPER.");
+    openOverlay();
+    setStatus("Taxi collected you. Tap the map to ride. PAPER · SIMULATED.");
     return true;
   }
 
@@ -210,10 +330,23 @@ export function createTaxi({
     mode = "idle";
     path = [];
     pi = 0;
+    waitStartedAtMs = null;
+    closeOverlay();
     if (riding) {
       const spec = specOf(island);
       player.position.y = heightAt(spec, player.position.x, player.position.z) + 1.15;
     }
+  }
+
+  function dismissUnboarded() {
+    mode = "idle";
+    path = [];
+    pi = 0;
+    road = null;
+    waitStartedAtMs = null;
+    mesh.visible = false;
+    closeOverlay();
+    setStatus("Taxi drove away. PAPER.");
   }
 
   function call() {
@@ -236,6 +369,7 @@ export function createTaxi({
     mesh.visible = true;
     driveTo(hit.proj.x, hit.proj.z);
     mode = "coming";
+    waitStartedAtMs = Date.now();
     setStatus("Taxi coming along the paved road. PAPER.");
   }
 
@@ -243,28 +377,45 @@ export function createTaxi({
    * @returns {boolean} true if the tap is consumed (no walk)
    */
   function handleTap(x, z, tapIsland) {
+    if (overlayOpen) return true;
     if (mode !== "boarded" && mode !== "hauling") return false;
-    if (tapIsland !== island) {
-      setStatus("Taxi stays on this island's paved road. PAPER.");
-      return true;
-    }
-    const proj = road ? projectOnPolyline(road.points, x, z) : null;
-    if (proj && proj.dist <= ON_PAVED) {
-      driveTo(proj.x, proj.z);
-      mode = "hauling";
-      setWalking(false);
-      setStatus("Taxi on paved. PAPER.");
-      return true;
-    }
-    const onDirt = nearestDirt(x, z, island) <= ON_DIRT;
     hopOut();
+    const onDirt = nearestDirt(x, z, island) <= ON_DIRT;
     setStatus(
       onDirt ? "Taxi stays on paved. Dirt is forbidden. PAPER." : "Out of the taxi. PAPER.",
     );
     return false;
   }
 
-  function tick(dt) {
+  function pickMapDest(ev) {
+    if (!overlayOpen || !overlayCanvas) return;
+    const rect = overlayCanvas.getBoundingClientRect();
+    if (rect.width < 1 || rect.height < 1) return;
+    const sx = ((ev.clientX - rect.left) / rect.width) * overlayCanvas.width;
+    const sy = ((ev.clientY - rect.top) / rect.height) * overlayCanvas.height;
+    const spec = specOf(island);
+    const map = getMap();
+    const hit = map ? pavedDestFromMapClick(map.roads, island, spec, sx, sy, overlayCanvas.width, overlayCanvas.height) : null;
+    if (!hit) {
+      setStatus("No paved road here. PAPER.");
+      return;
+    }
+    road = hit.road;
+    if (!driveTo(hit.proj.x, hit.proj.z)) {
+      setStatus("Taxi stays on paved. Dirt is forbidden. PAPER.");
+      return;
+    }
+    mode = "hauling";
+    setWalking(false);
+    closeOverlay();
+    setStatus("Taxi on paved. PAPER · SIMULATED.");
+  }
+
+  function tick(dt, nowMs = Date.now()) {
+    if (taxiWaitExpired(mode, waitStartedAtMs, nowMs)) {
+      dismissUnboarded();
+      return;
+    }
     if (mode === "idle" || !mesh.visible) return;
 
     if (!pathDone()) {
@@ -323,7 +474,8 @@ export function createTaxi({
 
     if (mode === "hauling" && pathDone()) {
       mode = "boarded";
-      setStatus("Taxi stopped. Tap paved to go on. PAPER.");
+      setStatus("Taxi stopped. Tap the map. PAPER · SIMULATED.");
+      openOverlay();
     }
 
     if (mode === "boarded" || mode === "hauling") {
@@ -333,6 +485,18 @@ export function createTaxi({
   }
 
   button.addEventListener("click", call);
+  if (overlayCanvas) {
+    overlayCanvas.addEventListener("pointerup", (ev) => {
+      ev.stopPropagation();
+      pickMapDest(ev);
+    });
+  }
+  if (overlayClose) {
+    overlayClose.addEventListener("click", () => {
+      hopOut();
+      setStatus("Out of the taxi. PAPER.");
+    });
+  }
 
-  return { mesh, call, handleTap, hopOut, tick };
+  return { mesh, call, handleTap, hopOut, tick, mapOpen: () => overlayOpen };
 }
