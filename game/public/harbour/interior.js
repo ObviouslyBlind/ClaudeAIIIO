@@ -283,6 +283,7 @@ export function makeInteriorScene() {
   down.add(makeTable(-0.15, -0.35));
   down.add(makeChair(-0.15, 0.55, 0));
   down.add(makeChair(-0.15, -1.22, Math.PI));
+  down.add(makeChair(-1.28, -0.35, Math.PI / 2));
   down.add(makeHangingLamp(-0.15, 2.12, -0.35));
 
   down.add(box(1.35, 0.72, 0.38, WOOD, -3.35, 0.52, -2.55, "interior-prop"));

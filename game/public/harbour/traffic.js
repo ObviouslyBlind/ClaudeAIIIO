@@ -46,7 +46,7 @@ function part(mesh, name) {
   return mesh;
 }
 
-/** Sedan: painted body, glass cabin, bumpers, four wheels. No debug masts. */
+/** Sedan: painted body, glass cabin, bumpers, kraft lamps, four wheels. No debug masts. */
 function makeCar(color) {
   const g = new THREE.Group();
   g.frustumCulled = false;
@@ -61,6 +61,14 @@ function makeCar(color) {
   });
   const chrome = new THREE.MeshLambertMaterial({ color: 0xc5c8cc });
   const rubber = new THREE.MeshLambertMaterial({ color: 0x1c1c20 });
+  /** Cottage kraft cream — reads as lamps on every body paint, including plaster. */
+  const kraft = new THREE.MeshLambertMaterial({
+    color: 0xf4ead8,
+    emissive: 0xf4ead8,
+    emissiveIntensity: 0.28,
+  });
+  /** Original brick — dark PAPER tails, not neon red. */
+  const brick = new THREE.MeshLambertMaterial({ color: 0x6e2e22 });
 
   const body = part(new THREE.Mesh(new THREE.BoxGeometry(2.15, 0.72, 4.2), paint), "body");
   body.position.y = 0.7;
@@ -91,6 +99,15 @@ function makeCar(color) {
   const rearBump = part(new THREE.Mesh(new THREE.BoxGeometry(2.22, 0.28, 0.24), chrome), "bumper");
   rearBump.position.set(0, 0.48, -2.18);
   g.add(rearBump);
+
+  for (const x of [-0.68, 0.68]) {
+    const head = part(new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.14, 0.1), kraft), "headlight");
+    head.position.set(x, 0.72, 2.16);
+    g.add(head);
+    const tail = part(new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.12, 0.08), brick), "taillight");
+    tail.position.set(x, 0.72, -2.16);
+    g.add(tail);
+  }
 
   const wheelGeo = new THREE.CylinderGeometry(0.34, 0.34, 0.28, 10);
   wheelGeo.rotateZ(Math.PI / 2);
