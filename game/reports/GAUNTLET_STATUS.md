@@ -56,15 +56,19 @@ Building shells + window lights — **not in the seaward spawn frame**; computer
 
 ## Pixel HUD (nearby count)
 
-`/g/hud47` nearby was `0 nearby` because the HUD polled `{0,0}` before `spawnAt`. Origin now defaults to the north quay; first HTML fetches `/api/presence` with no coords. Next `/g/near50`.
+`/g/near50` **PASS HUD**: `PAPER · SIMULATED · 250 m PAPER cell · 4 nearby`. Address `/g/near50`.
+
+## Pixel HUD (flow / tax / goods)
+
+First HTML no longer ships `Faucet — · sink —`. Flow / tax / goods now paint `PAPER · SIMULATED` on first frame plus classic snapshot/statutes fetches. Next `/g/flow51`.
 
 ## In flight (not ferry-only)
 
-Pixel: **nearby count ≥ 1** on the spawn sheet `http://localhost:8787/g/near50`. Expect `PAPER · SIMULATED · 250 m PAPER cell · N nearby` with N ≥ 1 (ideally 4). FAIL HUD if still `0 nearby` or `Nearby —`. No RMB. Close other Two Harbors tabs. Address bar must be `/g/near50`. Do not restart play while the critic is on the page.
+Pixel: **flow / tax / goods** on the spawn sheet `http://localhost:8787/g/flow51`. Expect `PAPER · SIMULATED · Faucet N · sink N`, `PAPER · SIMULATED · Sales tax 0%`, and `PAPER · SIMULATED` (empty goods OK). FAIL HUD if `Faucet —` / `sink —` remain. No RMB. Close other Two Harbors tabs. Address bar must be `/g/flow51`. Do not restart play while the critic is on the page.
 
-## Next pixel (after near50 PASS, immediately, no wait)
+## Next pixel (after flow51 PASS, immediately, no wait)
 
-Flow / tax / goods HUD on the spawn sheet. Then shells+lights stay deferred until a human can orbit.
+Staff line if still `Staff —`, then shells+lights stay deferred until a human can orbit.
 
 ## Frozen
 
