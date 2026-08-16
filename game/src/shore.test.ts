@@ -115,6 +115,34 @@ describe("shoreline read", () => {
     }
   });
 
+  it("puts kraft foam bars in the basin past the north pier lip, in the spawn frame", () => {
+    const spec = ISLANDS.north;
+    const scene = { add(_obj: THREE.Object3D) {} };
+    const group = makeShoreFoam(spec, heightAt, scene);
+    const toward = 1;
+    const basin = group.children.filter((child) => {
+      const across = Math.abs(child.position.x - spec.port.x);
+      const along = (child.position.z - spec.port.z) * toward;
+      return across < 10 && along > 82 && along < 112 && child.userData?.kind === "foam";
+    });
+    expect(basin.length).toBeGreaterThanOrEqual(8);
+
+    const o = spawnCameraOffset("north");
+    const l = spawnLookAtOffset("north");
+    const px = spec.port.x;
+    const pz = spec.port.z - 8;
+    const py = heightAt(spec, px, pz) + 1.15;
+    const cam = new THREE.PerspectiveCamera(55, 16 / 9, 0.4, CAMERA_FAR_M);
+    cam.position.set(px + o.x, py + o.y, pz + o.z);
+    cam.lookAt(px + l.x, py + l.y, pz + l.z);
+    cam.updateMatrixWorld();
+    const inFrame = (child: THREE.Object3D) => {
+      const v = child.position.clone().project(cam);
+      return Math.abs(v.x) < 0.92 && Math.abs(v.y) < 0.92 && v.z < 1;
+    };
+    expect(basin.filter(inFrame).length).toBeGreaterThanOrEqual(6);
+  });
+
   it("puts kraft foam bars in the north spawn camera frame", () => {
     const spec = ISLANDS.north;
     const scene = { add(_obj: THREE.Object3D) {} };
