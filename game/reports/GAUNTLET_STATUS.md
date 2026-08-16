@@ -1,47 +1,32 @@
 # Gauntlet status
 
-Loop is live for the full PLAN (A–N). User is the brake. Critics one-at-a-time. Builders fan out (cap 10). Do **not** restart play while a critic is on the page.
+Loop is live for the full PLAN (A–N). User is the brake. Critics one-at-a-time. Do **not** restart play while a critic is on the page.
+
+## Held (pixel-ratified)
+
+Inland spawn, tarmac HUD, traffic-on-road, taxi overlay, ferry ticket, RMB orbit, catalogue, **lease → House → Enter → Exit** (`/?g=int22` PASS, Cash $673 PAPER, house stayed).
 
 ## In flight
 
-- Interiors critic `/?g=int22`
-- PLAN B+ wave: statutes catalog, island books, calendar, districts, cart, Hansard, planning, ferry statute
+PLAN B+ builders: statutes, books, calendar, districts, cart, Hansard, planning, ferry statute.
+
+Next critic: paved ribbon `/?g=rib23` (continuous black asphalt, not box slabs). Then dirt ribbon, trees, street props, cars, taxi cab, ferry boat, shore, quay, shells, cart.
 
 ## PLAN ladder
 
 | Step | Status |
 |---|---|
-| A Headless sim | Held (tick, 12 goods) |
-| B Starter pack | **This wave** — catalog + sales tax writes `ledger.sink` |
-| C Player small sites | Next — persist / second visitor later |
-| D Two books + ferry | Ferry ticket held; **this wave** splits books |
-| E Firms + large class | Queued |
-| E2 Hiring + ranks | Queued |
-| F Planning | **This wave** stub → file/vote |
-| G Bootstrap poll | Queued after F |
-| H House + calendar | **This wave** calendar; House seats next |
-| I Senate / PM / Governor | Queued |
-| J Councils | Queued |
-| K Stocks | Queued |
-| L 3D harbour | In progress (interiors + meshes) |
-| M Mobile Hansard | Hansard page this wave |
-| N Closed beta shard | Last |
+| A Headless sim | Held |
+| B Starter pack | This wave |
+| C Player small sites | Queued |
+| D Two books + ferry | This wave |
+| E–K | Queued in order |
+| L 3D harbour | Interiors held; mesh critics next |
+| M Hansard | This wave |
+| N Closed beta | Last |
 
-## Harbour L (meshes)
+## File lock (PLAN B wave)
 
-Dirt ribbon, interior dress, hill trees shipped. Interiors pixel bar still open. Then critic meshes one at a time.
+statutes.ts · sim.ts/books.ts · calendar.ts · districts.ts · cart.js · hansard/* · planning.ts · ferry-routes.ts
 
-## File lock (this wave)
-
-| Piece | File only |
-|---|---|
-| statute catalog | `src/statutes.ts` (+ `statutes.test.ts`) |
-| island books | `src/sim.ts` books split only + new `src/books.ts` |
-| calendar | `src/calendar.ts` |
-| districts | `src/districts.ts` |
-| cart | `public/harbour/cart.js` |
-| Hansard | `public/hansard/*` |
-| planning | `src/planning.ts` |
-| ferry statute | `src/ferry-routes.ts` |
-
-Do not edit `main.js`, `PLAN.md`, `BACKEND.md`, `land.ts` centres. Do not restart play.
+Do not edit `main.js`, `PLAN.md`, `BACKEND.md`, `land.ts` centres.
