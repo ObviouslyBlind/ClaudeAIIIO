@@ -199,8 +199,8 @@ function addTaxiDoorHandles(g, kraftMat) {
 }
 
 /**
- * Yellow cab that reads from the quay: wheels, glass, roof lamp, checker belt, iron bumper, door handles.
- * Compact warm PAPER taxi-sign box — original cream lamp, not a sedan lid,
+ * Yellow cab that reads from the quay: wheels, glass, roof lamp, checker belt, iron bumper, door handles,
+ * short kraft roof aerial. Compact warm PAPER taxi-sign box — original cream lamp, not a sedan lid,
  * not a debug mast, not a cop lightbar.
  */
 export function makeTaxiMesh() {
@@ -263,6 +263,12 @@ export function makeTaxiMesh() {
     end.position.set(x, sign.position.y, lampZ);
     g.add(end);
   }
+
+  /** Short kraft roof aerial — thin PAPER box behind the lamp, not a red debug mast. Under 0.4 m. */
+  const aerialH = 0.32;
+  const aerial = tagPart(taxiBox(0.04, aerialH, 0.04, kraft, false), "aerial");
+  aerial.position.set(0, roofTopY + aerialH / 2, lampZ - 0.36);
+  g.add(aerial);
 
   for (const x of [-0.72, 0.72]) {
     const hl = taxiBox(0.42, 0.22, 0.12, head, false);

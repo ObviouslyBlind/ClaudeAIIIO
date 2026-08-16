@@ -50,6 +50,7 @@ describe("taxi roof lamp", () => {
     expect(mesh.userData.mode).toBe("PAPER");
 
     const lamps: THREE.Mesh[] = [];
+    const aerials: THREE.Mesh[] = [];
     const colors: number[] = [];
     let mast = 0;
     mesh.traverse((obj) => {
@@ -57,6 +58,7 @@ describe("taxi roof lamp", () => {
       const mat = m.material as THREE.MeshLambertMaterial | undefined;
       if (mat?.color) colors.push(mat.color.getHex());
       if (m.userData?.part === "lamp") lamps.push(m);
+      if (m.userData?.part === "aerial") aerials.push(m);
       const geo = m.geometry as THREE.BufferGeometry & {
         parameters?: { height?: number; radiusTop?: number };
       };
@@ -68,6 +70,7 @@ describe("taxi roof lamp", () => {
     expect(colors).toContain(0xf0c430);
     expect(colors).toContain(0xfff3a0);
     expect(lamps.length).toBeGreaterThanOrEqual(3);
+    expect(aerials.length).toBeGreaterThanOrEqual(1);
     expect(mast).toBe(0);
 
     const glow = lamps.find((m) => {
@@ -82,6 +85,37 @@ describe("taxi roof lamp", () => {
     expect(size.y).toBeGreaterThan(0.35);
     expect(size.y).toBeLessThan(0.8);
     expect(size.z).toBeLessThan(0.7);
+  });
+
+  it("has a short kraft roof aerial behind the lamp, not a red debug mast", () => {
+    const mesh = makeTaxiMesh();
+    const aerials: THREE.Mesh[] = [];
+    let mast = 0;
+    mesh.traverse((obj) => {
+      const m = obj as THREE.Mesh & { userData: { part?: string } };
+      const mat = m.material as THREE.MeshLambertMaterial | undefined;
+      if (m.userData?.part === "aerial") aerials.push(m);
+      const geo = m.geometry as THREE.BufferGeometry & {
+        parameters?: { height?: number; radiusTop?: number };
+      };
+      const h = geo?.parameters?.height ?? 0;
+      const r = geo?.parameters?.radiusTop ?? 1;
+      if (h > 2.4 && r < 0.2 && mat?.color?.getHex() === 0xff0000) mast += 1;
+    });
+    expect(aerials.length).toBeGreaterThanOrEqual(1);
+    expect(mast).toBe(0);
+
+    const aerial = aerials[0];
+    const mat = aerial.material as THREE.MeshLambertMaterial;
+    expect(mat.color.getHex()).toBe(0xc4a574);
+    expect(aerial.position.z).toBeLessThan(-0.12);
+
+    const size = new THREE.Vector3();
+    new THREE.Box3().setFromObject(aerial).getSize(size);
+    expect(size.y).toBeGreaterThan(0.12);
+    expect(size.y).toBeLessThan(0.4);
+    expect(size.x).toBeLessThan(0.12);
+    expect(size.z).toBeLessThan(0.12);
   });
 
   it("has two tiny kraft door handles on the cab sides", () => {
