@@ -35,24 +35,36 @@ function ripple(geo, amp, px, pz) {
 }
 
 /**
- * Near-quay basin: two-tone Lambert (shallow → channel) plus slight waves.
- * Vertex colours multiply WATER_COLOR, so the lagoon tint stays.
+ * Vertex colour that, multiplied by WATER_COLOR, lands on CHANNEL_COLOR.
+ * Keeps the lagoon hue; Lambert only.
+ */
+function channelVertex() {
+  const water = new THREE.Color(WATER_COLOR);
+  const channel = new THREE.Color(CHANNEL_COLOR);
+  return new THREE.Color(channel.r / water.r, channel.g / water.g, channel.b / water.b);
+}
+
+/**
+ * Working harbour off each quay. Deepest in the ferry lane just seaward of
+ * the pier (HOME_Z is 115 m off the north port), fading to lagoon at the lip.
  */
 function harbourBasin(z) {
-  const w = 720;
-  const d = 560;
-  const geo = new THREE.PlaneGeometry(w, d, 36, 28);
+  const w = 360;
+  const d = 260;
+  const geo = new THREE.PlaneGeometry(w, d, 28, 20);
   const pos = geo.attributes.position;
   const colors = new Float32Array(pos.count * 3);
   const shallow = new THREE.Color(0xffffff);
-  const deep = new THREE.Color(0x8aa8ae);
+  const deep = channelVertex();
   const c = new THREE.Color();
 
   for (let i = 0; i < pos.count; i++) {
+    const lx = pos.getX(i);
     const ly = pos.getY(i);
     const worldZ = z - ly;
-    const intoChannel = Math.min(1, Math.max(0, (6950 - Math.abs(worldZ)) / 480));
-    c.copy(shallow).lerp(deep, intoChannel);
+    const seaward = Math.min(1, Math.max(0, 0.3 + (6950 - Math.abs(worldZ)) / 90));
+    const lane = Math.min(1, Math.max(0, 1 - (lx * lx) / (170 * 170)));
+    c.copy(shallow).lerp(deep, seaward * lane);
     colors[i * 3] = c.r;
     colors[i * 3 + 1] = c.g;
     colors[i * 3 + 2] = c.b;
@@ -88,7 +100,8 @@ export function makeWater(scene) {
   );
   scene.add(water);
   scene.add(channelStrip());
-  scene.add(harbourBasin(-6680));
-  scene.add(harbourBasin(6680));
+  // Centre on the water immediately off each quay (ferry berth ~115 m seaward).
+  scene.add(harbourBasin(-6860));
+  scene.add(harbourBasin(6860));
   return water;
 }
