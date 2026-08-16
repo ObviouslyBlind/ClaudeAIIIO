@@ -115,6 +115,8 @@ describe("road node traffic", () => {
     expect(parts.get("wheel")).toBe(4);
     expect(parts.get("mirror")).toBe(2);
     expect(parts.get("plate")).toBeGreaterThanOrEqual(1);
+    expect(parts.get("hub")).toBe(4);
+    expect(parts.get("aerial")).toBe(1);
     expect(colors).toContain(0xc45c3a);
     expect(mast).toBe(0);
     expect(mesh.children.length).toBeGreaterThan(6);
@@ -173,6 +175,34 @@ describe("road node traffic", () => {
       });
       expect(plates).toBeGreaterThanOrEqual(1);
       expect(plateHexes).toContain(0xf4ead8);
+    }
+  });
+
+  it("puts a short kraft cream PAPER aerial on every sedan roof", () => {
+    const board = createLandBoard();
+    const scene = { add() {} };
+    const traffic = createTraffic({
+      scene,
+      getMap: () => board,
+      specOf: (id: "north" | "south") => ISLANDS[id],
+      heightAt,
+    });
+    expect(traffic.cars.length).toBeGreaterThan(0);
+    for (const car of traffic.cars) {
+      const aerials: THREE.Mesh[] = [];
+      car.mesh.traverse((obj: THREE.Object3D) => {
+        if (obj.userData?.part === "aerial") aerials.push(obj as THREE.Mesh);
+      });
+      expect(aerials.length).toBe(1);
+      const aerial = aerials[0]!;
+      const mat = aerial.material as THREE.MeshLambertMaterial;
+      expect(mat.color.getHex()).toBe(0xf4ead8);
+      const geo = aerial.geometry as THREE.BoxGeometry;
+      expect(geo.parameters.height).toBeGreaterThan(0.12);
+      expect(geo.parameters.height).toBeLessThan(0.4);
+      expect(geo.parameters.width).toBeLessThan(0.12);
+      expect(geo.parameters.depth).toBeLessThan(0.12);
+      expect(aerial.position.y).toBeGreaterThan(1.5);
     }
   });
 });

@@ -46,7 +46,7 @@ function part(mesh, name) {
   return mesh;
 }
 
-/** Sedan: painted body, glass cabin, bumpers, kraft lamps, chrome side mirrors, four wheels with kraft hub boxes. No debug masts. */
+/** Sedan: painted body, glass cabin, bumpers, kraft lamps, chrome side mirrors, four wheels with kraft hub boxes, short kraft roof aerial. No debug masts. */
 function makeCar(color) {
   const g = new THREE.Group();
   g.frustumCulled = false;
@@ -77,6 +77,12 @@ function makeCar(color) {
   const cabin = part(new THREE.Mesh(new THREE.BoxGeometry(1.92, 0.58, 1.88), paint), "cabin");
   cabin.position.set(0, 1.26, -0.2);
   g.add(cabin);
+
+  /** Short kraft roof aerial — thin PAPER box on the cabin, like the taxi. Under 0.4 m. */
+  const aerialH = 0.32;
+  const aerial = part(new THREE.Mesh(new THREE.BoxGeometry(0.04, aerialH, 0.04), kraft), "aerial");
+  aerial.position.set(0, 1.55 + aerialH / 2, -0.85);
+  g.add(aerial);
 
   const wind = part(new THREE.Mesh(new THREE.BoxGeometry(1.78, 0.42, 0.08), glass), "glass");
   wind.position.set(0, 1.28, 0.72);
