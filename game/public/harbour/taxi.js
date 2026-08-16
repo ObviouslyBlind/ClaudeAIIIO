@@ -116,7 +116,14 @@ function taxiBox(w, h, d, mat, shadow = true) {
   m.castShadow = shadow;
   m.receiveShadow = true;
   m.frustumCulled = false;
+  m.userData.mode = "PAPER";
   return m;
+}
+
+function tagPart(mesh, part) {
+  mesh.userData.part = part;
+  mesh.userData.mode = "PAPER";
+  return mesh;
 }
 
 /** Four black tyres with a hub so the cab is not a floating box. */
@@ -144,9 +151,10 @@ function addTaxiWheels(g, tyreMat, hubMat) {
 
 /**
  * Yellow cab that reads from the quay: wheels, glass, roof lamp.
- * Short lamp box only — no debug mast.
+ * Compact warm PAPER taxi-sign box — original cream lamp, not a sedan lid,
+ * not a debug mast, not a cop lightbar.
  */
-function makeTaxiMesh() {
+export function makeTaxiMesh() {
   const g = new THREE.Group();
   g.frustumCulled = false;
   const yellow = taxiMat(0xf0c430, { emissive: 0xf0c430, emissiveIntensity: 0.18 });
@@ -154,7 +162,8 @@ function makeTaxiMesh() {
   const dark = taxiMat(0x1a1a1e);
   const chrome = taxiMat(0xc8c4b8);
   const glass = taxiMat(0x3a5a6c, { emissive: 0x1a3040, emissiveIntensity: 0.22 });
-  const lamp = taxiMat(0xfff6c8, { emissive: 0xfff3a0, emissiveIntensity: 0.55 });
+  /** Original taxi lamp cream. Warm PAPER glow, not neon. */
+  const lamp = taxiMat(0xfff3a0, { emissive: 0xfff3a0, emissiveIntensity: 0.78 });
   const lampSide = taxiMat(0x2a2a2e);
   const head = taxiMat(0xfff4d2, { emissive: 0xffe9a8, emissiveIntensity: 0.4 });
   const tail = taxiMat(0xc42a22, { emissive: 0x8a1814, emissiveIntensity: 0.35 });
@@ -191,11 +200,20 @@ function makeTaxiMesh() {
     g.add(side, sideB);
   }
 
-  const lampBase = taxiBox(0.82, 0.1, 1.12, lampSide, false);
-  lampBase.position.set(0, 2.18, -0.18);
-  const sign = taxiBox(0.72, 0.38, 1.02, lamp);
-  sign.position.set(0, 2.38, -0.18);
-  g.add(lampBase, sign);
+  const roofTopY = 1.68 + 0.46;
+  const lampZ = -0.12;
+  const lampBase = tagPart(taxiBox(0.7, 0.08, 0.42, lampSide, false), "lamp");
+  lampBase.position.set(0, roofTopY + 0.04, lampZ);
+  const sign = tagPart(taxiBox(0.92, 0.5, 0.4, lamp), "lamp");
+  sign.position.set(0, roofTopY + 0.33, lampZ);
+  const cap = tagPart(taxiBox(0.98, 0.06, 0.44, lampSide, false), "lamp");
+  cap.position.set(0, sign.position.y + 0.28, lampZ);
+  g.add(lampBase, sign, cap);
+  for (const x of [-0.48, 0.48]) {
+    const end = tagPart(taxiBox(0.06, 0.52, 0.42, lampSide, false), "lamp");
+    end.position.set(x, sign.position.y, lampZ);
+    g.add(end);
+  }
 
   for (const x of [-0.72, 0.72]) {
     const hl = taxiBox(0.42, 0.22, 0.12, head, false);
@@ -208,6 +226,7 @@ function makeTaxiMesh() {
   addTaxiWheels(g, dark, chrome);
 
   g.userData.kind = "taxi";
+  g.userData.mode = "PAPER";
   return g;
 }
 
@@ -547,6 +566,8 @@ export function createTaxi({
   }
 
   button.addEventListener("click", call);
+  if (typeof getIslandId === "function") island = getIslandId() || island;
+  parkOnPaved();
   if (overlayCanvas) {
     overlayCanvas.addEventListener("pointerup", (ev) => {
       ev.stopPropagation();
