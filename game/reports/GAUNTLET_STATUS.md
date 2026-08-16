@@ -16,7 +16,7 @@ Pixel: ferry boat (`/?g=ferry29`). Persist staff / house-shop interior / cancel 
 
 ## Next pixel queue (one critic at a time)
 
-Ferry boat, shore foam, quay clutter, building shells, stalls, econ line, nearby names, market bid/ask, pedestrians, nametags, warehouse/factory/shop/farm interiors.
+Ferry boat, shore foam, quay clutter, building shells, window lights, stalls, econ line, nearby names, market bid/ask, pedestrians, nametags, warehouse/factory/shop/farm interiors.
 
 ## Frozen
 
