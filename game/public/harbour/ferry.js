@@ -194,6 +194,29 @@ function deckOar(x, y, z) {
 }
 
 /**
+ * Tiny kraft PAPER hawser coil: stacked DECK/POST/BOOT boxes on the
+ * timber deck. Boxes only — not the fender, bucket, oar, cleat, rail,
+ * bollard, life ring, lantern, handle, or funnel smoke. No grey.
+ */
+function deckHawser(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "hawser";
+  g.userData.part = "hawser";
+  g.userData.mode = "PAPER";
+  g.position.set(x, y, z);
+  const outer = part(0.32, 0.07, 0.32, DECK, false);
+  outer.position.y = 0.035;
+  const mid = part(0.22, 0.06, 0.22, POST, false);
+  mid.position.y = 0.09;
+  const core = part(0.08, 0.04, 0.08, BOOT, false);
+  core.position.y = 0.13;
+  const tail = part(0.05, 0.03, 0.12, DECK, false);
+  tail.position.set(0.14, 0.025, 0.08);
+  g.add(outer, mid, core, tail);
+  return g;
+}
+
+/**
  * Tiny kraft PAPER deck bucket: tapered DECK body, BOOT hoop, POST
  * bail. Boxes/cylinders only — sits on the cream deck, not the rail,
  * not the cleat, not the fender, not the wheelhouse lantern, not the
@@ -353,6 +376,9 @@ export function makeFerry() {
   g.add(deckBucket(-13.6, 1.81, 2.55));
   // PAPER oar sits on the port aft cream deck, clear of bucket/rail/cleat/fender/lantern/smoke/handle.
   g.add(deckOar(-13.6, 1.81, -2.55));
+  // PAPER hawser coil sits on the aft cream deck centreline, clear of
+  // fender/bucket/oar/cleat/rail/bollard/lifering/lantern/handle/smoke.
+  g.add(deckHawser(-12.0, 1.81, 0));
 
   const cabin = part(16.5, 3.35, 7.6, CABIN);
   cabin.position.set(-2.4, 3.52, 0);

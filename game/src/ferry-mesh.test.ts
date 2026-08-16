@@ -9,6 +9,19 @@ const POST = 0x5a3a22;
 const HULL = 0xe6dcc8;
 const BUCKET_HEXES = new Set([DECK, BOOT, POST]);
 const OAR_HEXES = new Set([DECK, BOOT, POST]);
+const HAWSER_HEXES = new Set([DECK, BOOT, POST]);
+const HAWSER_CLEAR = [
+  "fender",
+  "bucket",
+  "oar",
+  "cleat",
+  "rail",
+  "bollard",
+  "lifering",
+  "lantern",
+  "handle",
+  "smoke",
+];
 
 describe("ferry berth", () => {
   it("parks the hull in the channel just off the north quay, not kilometres out", () => {
@@ -294,5 +307,54 @@ describe("ferry berth", () => {
       const dz = oar.position.z - other.position.z;
       expect(Math.hypot(dx, dz)).toBeGreaterThan(1.5);
     }
+  });
+
+  it("sits one tiny kraft PAPER hawser coil on the cream deck; fender stays north and large", () => {
+    expect(HOME_Z).toBe(-6835);
+    const mesh = makeFerry();
+    expect(mesh.position.z).toBe(-6835);
+    const tagged: THREE.Object3D[] = [];
+    mesh.traverse((obj) => {
+      if (obj.userData?.part) tagged.push(obj);
+    });
+    const hawsers = tagged.filter((o) => o.userData.part === "hawser");
+    const fenders = tagged.filter((o) => o.userData.part === "fender");
+    expect(hawsers.length).toBeGreaterThanOrEqual(1);
+    expect(fenders.length).toBeGreaterThanOrEqual(1);
+
+    const hawser = hawsers[0];
+    expect(hawser.userData.part).toBe("hawser");
+    expect(hawser.userData.mode).toBe("PAPER");
+    expect(hawser.position.y).toBeGreaterThan(1.5);
+    expect(hawser.position.y).toBeLessThan(2.3);
+    expect(Math.abs(hawser.position.z)).toBeLessThan(5);
+    const hawserSize = new THREE.Vector3();
+    new THREE.Box3().setFromObject(hawser).getSize(hawserSize);
+    expect(hawserSize.x).toBeLessThan(0.8);
+    expect(hawserSize.y).toBeLessThan(0.5);
+    expect(hawserSize.z).toBeLessThan(0.8);
+    hawser.traverse((child) => {
+      const m = child as THREE.Mesh;
+      if (!m.isMesh) return;
+      expect(m.geometry.type).toBe("BoxGeometry");
+      const hex = (m.material as THREE.MeshLambertMaterial).color.getHex();
+      expect(HAWSER_HEXES.has(hex)).toBe(true);
+    });
+
+    for (const name of HAWSER_CLEAR) {
+      for (const other of tagged) {
+        if (other === hawser) continue;
+        if (other.userData.part !== name) continue;
+        const dx = hawser.position.x - other.position.x;
+        const dz = hawser.position.z - other.position.z;
+        expect(Math.hypot(dx, dz)).toBeGreaterThan(1.5);
+      }
+    }
+
+    const fender = fenders[0];
+    expect(fender.position.z).toBeLessThan(-5.5);
+    const fenderSize = new THREE.Vector3();
+    new THREE.Box3().setFromObject(fender).getSize(fenderSize);
+    expect(Math.max(fenderSize.x, fenderSize.y, fenderSize.z)).toBeGreaterThan(2.4);
   });
 });
