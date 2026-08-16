@@ -86,6 +86,53 @@ function workbench(x, z, w, d, yaw = 0) {
 }
 
 /**
+ * Wooden wall bench with kraft tool-block boxes on the top — not an iron mill,
+ * not a warehouse floor crate. Reads from the enter camera. Centre stays open.
+ */
+function woodWorkbench(x, z, w = 1.85, d = 0.62, yaw = 0) {
+  const g = new THREE.Group();
+  g.name = "factory-wood-bench";
+  g.userData.kind = "factory-bench";
+  g.userData.mode = "PAPER";
+  g.position.set(x, 0, z);
+  g.rotation.y = yaw;
+  const y0 = 0.16;
+  const topY = y0 + 0.78;
+  const apron = paperBox(w * 0.96, 0.1, d * 0.92, BENCH_LEG, "factory-bench");
+  apron.position.y = topY - 0.12;
+  g.add(apron);
+  const top = paperBox(w, 0.08, d, BENCH_WOOD, "factory-bench");
+  top.position.y = topY;
+  g.add(top);
+  const legH = 0.74;
+  for (const [dx, dz] of [
+    [-w * 0.42, -d * 0.38],
+    [w * 0.42, -d * 0.38],
+    [-w * 0.42, d * 0.38],
+    [w * 0.42, d * 0.38],
+  ]) {
+    const leg = paperBox(0.09, legH, 0.09, BENCH_LEG, "factory-bench");
+    leg.position.set(dx, y0 + legH / 2, dz);
+    g.add(leg);
+  }
+  const blocks = [
+    [-w * 0.28, 0.04, 0.3, 0.22, 0.26, KRAFT],
+    [0.02, -0.06, 0.24, 0.18, 0.22, KRAFT_LIGHT],
+    [w * 0.3, 0.02, 0.28, 0.26, 0.24, KRAFT],
+  ];
+  for (const [bx, bz, bw, bh, bd, color] of blocks) {
+    const body = paperBox(bw, bh, bd, color, "factory-stock");
+    body.position.set(bx, topY + 0.04 + bh / 2, bz);
+    const lid = paperBox(bw * 0.92, 0.04, bd * 0.92, KRAFT_LIGHT, "factory-stock");
+    lid.position.set(bx, topY + 0.04 + bh + 0.02, bz);
+    const band = paperBox(bw + 0.02, 0.04, bd + 0.02, BENCH_LEG, "factory-stock");
+    band.position.set(bx, topY + 0.04 + bh * 0.42, bz);
+    g.add(body, lid, band);
+  }
+  return g;
+}
+
+/**
  * Chunky kraft mill on the floor — wood body, small iron press.
  * Reads from the enter camera (door +Z looking −Z). Not a warehouse crate.
  */
@@ -225,6 +272,7 @@ function makeFactoryDress() {
 
   g.add(workbench(-1.35, -2.48, 2.35, 0.72, 0));
   g.add(workbench(-3.08, 0.15, 2.15, 0.68, Math.PI / 2));
+  g.add(woodWorkbench(3.1, -1.18, 1.92, 0.64, Math.PI / 2));
   g.add(kraftMachine(-1.42, 0.58, 1.55, 0.9, 0.06));
   g.add(kraftMachine(1.18, 1.32, 1.32, 0.78, -0.1));
   g.add(kraftMachine(0.22, -0.42, 1.48, 0.86, 0.12));
