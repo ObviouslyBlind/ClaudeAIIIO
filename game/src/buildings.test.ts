@@ -6,7 +6,7 @@ import {
   parseLandUse,
 } from "./buildings.ts";
 import { BUILDING_IDS, FALLBACK_CATALOG, meshForUse } from "../public/harbour/buildings.js";
-import { createLandBoard, developPlot, leasePlot } from "./land.ts";
+import { createLandBoard, developPlot, landSnapshot, leasePlot } from "./land.ts";
 import { createVisitor } from "./sim.ts";
 
 function lum(hex: number) {
@@ -84,6 +84,15 @@ describe("paper building catalogue", () => {
       const server = BUILDING_CATALOG.find((b) => b.id === spec.id)!;
       expect(spec.paperCost).toBe(server.paperCost);
     }
+  });
+
+  it("puts the catalogue on the land snapshot the harbour fetches", () => {
+    const snap = landSnapshot(createLandBoard(), createVisitor(1_000));
+    expect(snap.catalog.length).toBeGreaterThanOrEqual(6);
+    expect(snap.visitor.cash).toBe(1_000);
+    expect(snap.catalog.map((b) => b.id).sort()).toEqual(
+      BUILDING_CATALOG.map((b) => b.id).sort(),
+    );
   });
 
   it("still leases then develops, and accepts catalogue ids at paper cost", () => {

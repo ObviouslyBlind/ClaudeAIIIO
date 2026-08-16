@@ -46,11 +46,40 @@ const btnExit = ensureDockButton("btn-exit", "Exit");
 if (btnEnter) btnEnter.hidden = false;
 if (btnExit) btnExit.hidden = true;
 
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.BasicShadowMap;
+function bootFail(err) {
+  const msg = err && err.message ? err.message : String(err);
+  if (statusEl) statusEl.textContent = "BOOT FAIL: " + msg;
+  console.error(err);
+}
+
+function makeRenderer() {
+  const opts = {
+    canvas,
+    antialias: false,
+    powerPreference: "low-power",
+    failIfMajorPerformanceCaveat: false,
+  };
+  try {
+    return new THREE.WebGLRenderer(opts);
+  } catch (first) {
+    const gl =
+      canvas.getContext("webgl2", { antialias: false, powerPreference: "low-power" }) ||
+      canvas.getContext("webgl", { antialias: false, powerPreference: "low-power" });
+    if (!gl) throw first;
+    return new THREE.WebGLRenderer({ canvas, context: gl, antialias: false });
+  }
+}
+
+let renderer = null;
+try {
+  renderer = makeRenderer();
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  // Shadow maps allocate extra WebGL targets. Swiftshader critics already sit at GPU-cap.
+  renderer.shadowMap.enabled = false;
+} catch (err) {
+  bootFail(err);
+}
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x7ec8d4);
@@ -61,7 +90,7 @@ const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerH
 scene.add(new THREE.HemisphereLight(0xb8e4ff, 0xc4a574, 1.15));
 const sun = new THREE.DirectionalLight(0xfff1d0, 2.1);
 sun.position.set(180, 260, 80);
-sun.castShadow = true;
+sun.castShadow = false;
 sun.shadow.mapSize.set(1024, 1024);
 sun.shadow.camera.left = -220;
 sun.shadow.camera.right = 220;
@@ -710,10 +739,11 @@ function onResize() {
   const h = window.innerHeight;
   camera.aspect = w / h;
   camera.updateProjectionMatrix();
-  renderer.setSize(w, h);
+  if (renderer) renderer.setSize(w, h);
 }
 
 function tick(dt) {
+  if (!map) return;
   if (interior && interior.isInside()) {
     interior.tick(dt);
     interior.updateCamera(camera, dt);
@@ -746,9 +776,25 @@ function tick(dt) {
   sun.target.updateMatrixWorld();
 }
 
+let loopStarted = false;
+function startLoop() {
+  if (!renderer || loopStarted) return;
+  loopStarted = true;
+  renderer.setAnimationLoop(() => {
+    const dt = Math.min(0.05, clock.getDelta());
+    tick(dt);
+    renderer.render(scene, camera);
+  });
+}
+
 async function boot() {
   const res = await fetch("/api/map");
   map = await res.json();
+  refreshHud();
+  if (!renderer) {
+    setStatus("Map loaded. 3D harbour failed (WebGL).");
+    return;
+  }
   const water = new THREE.Mesh(
     new THREE.PlaneGeometry(80000, 80000),
     new THREE.MeshLambertMaterial({ color: 0x1d7a86 }),
@@ -756,6 +802,8 @@ async function boot() {
   water.rotation.x = -Math.PI / 2;
   water.position.y = 0;
   scene.add(water);
+  spawnAt("north");
+  startLoop();
   makeTerrain(specOf("north"));
   makeTerrain(specOf("south"));
   makeShoreFoam(specOf("north"), heightAt, scene);
@@ -800,7 +848,6 @@ async function boot() {
     specOf,
   });
   interior.setHarbour(harbourGroup);
-  spawnAt("north");
   setStatus("Tap a piece of land. Lease it, then develop it.");
 }
 
@@ -829,10 +876,4 @@ btnFerry.addEventListener("click", ferry);
 window.addEventListener("resize", onResize);
 scene.add(sun.target);
 
-boot().then(() => {
-  renderer.setAnimationLoop(() => {
-    const dt = Math.min(0.05, clock.getDelta());
-    tick(dt);
-    renderer.render(scene, camera);
-  });
-});
+boot().catch(bootFail);

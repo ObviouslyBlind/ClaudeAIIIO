@@ -1,18 +1,20 @@
-# Gauntlet status — five parallel builders
+# Gauntlet status
 
-Loop is **autonomous**. Critic = pixels only. Tests = each builder. No user hard-refresh.
+Loop is **autonomous**. Critic = pixels only. Tests = lead/builder. No user hard-refresh.
 
-**Held:** inland spawn, black tarmac, PAPER HUD.
-**Traffic:** still under a strict pixel critic (must see colored meshes move). Do not rewrite `traffic.js`.
+**Held:** inland spawn, black tarmac, PAPER HUD (when boot finishes).
+**Shipped (code, not yet pixel-ratified):** taxi wait+map, RMB orbit, ferry ticket, building catalogue, interiors.
 
-**Live builders (one piece each, cursor grok 4.6 high fast):**
+## Round 12 — traffic critic (root URL)
 
-1. Taxi: 60s leave if not boarded; boarded → top-down island map, tap dest — `taxi.js` + overlay
-2. RMB-hold camera (Roblox-style); left click still walk — `camera.js`
-3. Ferry quote: route + PAPER cost before travel — `ferry-ticket.js`
-4. Building catalog: house / shop / house+shop / farm / factory shells — `buildings.js`
-5. Interiors: enter owned buildings, up/down — `interior.js`
+[Traffic critic](bc-5aa4bebd-6229-574b-860e-c8a899bdbf91) **FAIL**: HUD shell only. Viewport was the CSS teal (`#0e4a55`). Cash stayed **$0** (HTML default). That is “JS never finished boot / WebGL context failed”, not “cars missing on a live island.”
 
-Do not touch `traffic.js`, `land.ts` island centres, or PLAN.md. Rebase if `main.js` conflicts; keep other agents' imports.
+Headless log: `THREE.WebGLRenderer: Error creating WebGL context.` GPU process was pegged on leftover critic tabs. Animation loop used to start **after** every mesh, so an 8s critic never saw a frame.
 
-**You are the brake.**
+**Fix in this round:** show cash as soon as `/api/map` returns; first-frame water+spawn before parcels; catch WebGL onto the HUD; status starts as `Loading 3D harbour…`.
+
+## Next critic bar (traffic, still)
+
+Open **exactly** `http://localhost:8787/` (root). Wait until Cash is not `$0` (up to ~20s). Then wait a few more seconds. **PASS** only if colored vehicle meshes move on the black road. Inferring cars from tarmac does not count.
+
+Do not rewrite `traffic.js`, island centres, or PLAN.md.
