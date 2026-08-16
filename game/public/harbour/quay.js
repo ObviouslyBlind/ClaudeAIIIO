@@ -43,7 +43,9 @@ function bollard() {
  * Rowboat. Hull along +Z so it sits beside the pier, not bow-on.
  * Sage planks, kraft gunwale. Not the ferry's cream hull.
  * /g/ding63 FAIL DINGHY: 6 m sage hull at y=0.42 read as empty teal
- * at ~130 m. Spawn-readable beam/length, lifted into the look-at band.
+ * at ~130 m.
+ * /g/ding64 FAIL DINGHY: 18 m boats at x=±14 sat beside the basin the
+ * critic photographs. Sit them in the center channel between pier and ferry.
  */
 function dinghy() {
   const g = new THREE.Group();
@@ -457,12 +459,12 @@ export function makeQuay(spec, helpers) {
   root.userData.kind = "quay";
 
   const d1 = dinghy();
-  d1.position.set(x + 14, 1.4, z + toward * 88);
+  d1.position.set(x + 3.2, 1.55, z + toward * 102);
   d1.rotation.y = spec.id === "north" ? 0.08 : Math.PI + 0.08;
   root.add(d1);
 
   const d2 = dinghy();
-  d2.position.set(x - 14.5, 1.32, z + toward * 82);
+  d2.position.set(x - 3.8, 1.48, z + toward * 97);
   d2.rotation.y = spec.id === "north" ? -0.14 : Math.PI - 0.14;
   root.add(d2);
 

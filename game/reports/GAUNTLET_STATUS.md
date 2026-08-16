@@ -88,10 +88,11 @@ Spawn has no selected plot, so staff is `PAPER · SIMULATED · Staff —` (the d
 Pixel: **sage dinghies** in the north basin at `http://localhost:8787/g/ding63`. Between kraft pier and cream ferry, seaward spawn, no RMB. Close other Two Harbors tabs. Address bar must be `/g/ding63`. Do not restart play while the critic is on the page.
 
 `/g/ding63` **FAIL DINGHY**: pier, cream ferry, teal basin in frame; no small sage boats — 6 m hulls at y=0.42 read as empty water. Hulls are now 18 m sage with kraft gunwales, lifted into the look-at band.
+`/g/ding64` **FAIL DINGHY**: still only the cream ferry in the basin. 18 m boats sat at x=±14, beside the channel the critic photographs.
 
-Pixel: **sage dinghies** at `http://localhost:8787/g/ding64`. Seaward spawn, no RMB. Close other Two Harbors tabs. Address bar must be `/g/ding64`. Do not restart play while the critic is on the page.
+Pixel: **sage dinghies** at `http://localhost:8787/g/ding65`. Center channel between kraft pier and cream ferry. Seaward spawn, no RMB. Close other Two Harbors tabs. Address bar must be `/g/ding65`. Do not restart play while the critic is on the page.
 
-## Next pixel (after ding64 PASS, immediately, no wait)
+## Next pixel (after ding65 PASS, immediately, no wait)
 
 Sage dinghies in the basin, or another spawn-visible kraft bar. Shells+lights stay deferred until a human can orbit. Do not restart the lamp round.
 

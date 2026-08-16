@@ -175,8 +175,8 @@ describe("quay harbour dressing", () => {
       }
 
       const dinghySpots = [
-        { x: spec.port.x + 14, y: 1.4, z: spec.port.z + toward * 88 },
-        { x: spec.port.x - 14.5, y: 1.32, z: spec.port.z + toward * 82 },
+        { x: spec.port.x + 3.2, y: 1.55, z: spec.port.z + toward * 102 },
+        { x: spec.port.x - 3.8, y: 1.48, z: spec.port.z + toward * 97 },
       ];
       for (const spot of dinghySpots) {
         const boat = root.children.find((c) => {
@@ -432,7 +432,7 @@ describe("quay harbour dressing", () => {
     expect(boats.length).toBe(2);
     for (const boat of boats) {
       expect(boat.position.y).toBeGreaterThan(1);
-      expect(Math.abs(boat.position.x)).toBeGreaterThan(10);
+      expect(Math.abs(boat.position.x)).toBeLessThan(8);
       let hull: THREE.Mesh | null = null;
       let gunwale: THREE.Mesh | null = null;
       boat.traverse((obj) => {
