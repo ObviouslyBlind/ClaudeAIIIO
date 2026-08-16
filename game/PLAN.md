@@ -155,7 +155,7 @@ Full rank table is in section 7.
 
 ### 3.10 Controls (one scheme)
 
-There are **not** PC controls and mobile controls. There is one scheme. A mouse and a finger are two ways to fire the same two actions.
+There are **not** PC controls and mobile controls. There is one scheme. Mouse and finger are **mapped** to the same two actions: primary and secondary.
 
 | Action | Meaning | Mouse | Finger |
 |---|---|---|---|
