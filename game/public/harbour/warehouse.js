@@ -96,6 +96,40 @@ function grainSack(w, h, d, color, x, y, z, yaw = 0) {
   return g;
 }
 
+/**
+ * Small kraft hand-truck / dolly. Wood handles + iron wheels as boxes —
+ * not a cylinder cart, not a crate. Parked beside the pallet.
+ */
+function handTruck(x, z, yaw = 0) {
+  const g = new THREE.Group();
+  g.name = "warehouse-dolly";
+  g.userData.kind = "warehouse-dolly";
+  g.userData.mode = "PAPER";
+  g.position.set(x, 0, z);
+  g.rotation.y = yaw;
+  const y0 = 0.16;
+  const wheelL = paperBox(0.07, 0.14, 0.14, LAMP_METAL, "warehouse-dolly");
+  wheelL.position.set(-0.15, y0 + 0.07, 0.04);
+  const wheelR = paperBox(0.07, 0.14, 0.14, LAMP_METAL, "warehouse-dolly");
+  wheelR.position.set(0.15, y0 + 0.07, 0.04);
+  const toe = paperBox(0.36, 0.04, 0.2, WOOD, "warehouse-dolly");
+  toe.position.set(0, y0 + 0.1, 0.16);
+  const railL = paperBox(0.045, 0.78, 0.045, WOOD_DARK, "warehouse-dolly");
+  railL.position.set(-0.11, y0 + 0.48, -0.02);
+  const railR = paperBox(0.045, 0.78, 0.045, WOOD_DARK, "warehouse-dolly");
+  railR.position.set(0.11, y0 + 0.48, -0.02);
+  const brace = paperBox(0.24, 0.04, 0.04, WOOD, "warehouse-dolly");
+  brace.position.set(0, y0 + 0.42, -0.02);
+  const handleL = paperBox(0.045, 0.045, 0.26, WOOD_LIGHT, "warehouse-dolly");
+  handleL.position.set(-0.11, y0 + 0.88, -0.12);
+  const handleR = paperBox(0.045, 0.045, 0.26, WOOD_LIGHT, "warehouse-dolly");
+  handleR.position.set(0.11, y0 + 0.88, -0.12);
+  const grip = paperBox(0.26, 0.045, 0.045, WOOD_LIGHT, "warehouse-dolly");
+  grip.position.set(0, y0 + 0.88, -0.24);
+  g.add(wheelL, wheelR, toe, railL, railR, brace, handleL, handleR, grip);
+  return g;
+}
+
 function hangingLamp(x, y, z) {
   const g = new THREE.Group();
   g.name = "warehouse-lamp";
@@ -180,6 +214,8 @@ function makeWarehouseDress() {
   // Two kraft grain sacks on/beside that pallet. Aisle at x≈0 stays open.
   g.add(grainSack(0.42, 0.5, 0.34, WOOD_LIGHT, -2.08, 0.41, 0.28, 0.16));
   g.add(grainSack(0.38, 0.46, 0.32, WOOD, -1.72, 0.39, 0.16, -0.2));
+  // Small kraft dolly beside that pallet, still left of the aisle.
+  g.add(handTruck(-2.22, 1.28, 0.48));
 
   const loftY = 2.94;
   g.add(crateStack(-2.4, -2.35, 0.08, low, loftY));
