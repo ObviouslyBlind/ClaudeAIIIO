@@ -7,10 +7,12 @@ import {
   NAMETAG_NEAR_M,
   NAMETAG_PIN,
   NAMETAG_STRING,
+  NAMETAG_STUD,
   NAMETAG_TAB,
   makeNametagClip,
   makeNametagPin,
   makeNametagString,
+  makeNametagStud,
   makeNametagTab,
   makePaperNametag,
   paintPaperNametagCard,
@@ -54,13 +56,14 @@ function mockCtx() {
 }
 
 describe("outdoor PAPER nametags", () => {
-  it("keeps a kraft folded corner, punch-hole, clip, string, pin, tab, and still stamps PAPER", () => {
+  it("keeps a kraft folded corner, punch-hole, clip, string, pin, tab, stud, and still stamps PAPER", () => {
     expect(NAMETAG_FOLD).toBe(true);
     expect(NAMETAG_HOLE).toBe(true);
     expect(NAMETAG_CLIP).toBe(true);
     expect(NAMETAG_STRING).toBe(true);
     expect(NAMETAG_PIN).toBe(true);
     expect(NAMETAG_TAB).toBe(true);
+    expect(NAMETAG_STUD).toBe(true);
     expect(NAMETAG_NEAR_M).toBeGreaterThanOrEqual(200);
     const ctx = mockCtx();
     paintPaperNametagCard(ctx, 512, 128, "Ferry clerk");
@@ -131,6 +134,20 @@ describe("outdoor PAPER nametags", () => {
     expect(tab.position.distanceTo(clip.position)).toBeGreaterThan(0.3);
     expect(tab.position.distanceTo(cord.position)).toBeGreaterThan(0.3);
     expect(tab.position.distanceTo(pin.position)).toBeGreaterThan(0.3);
+
+    const stud = makeNametagStud();
+    expect(stud.userData.part).toBe("stud");
+    expect(stud.userData.mode).toBe("PAPER");
+    expect(stud.geometry.type).toBe("BoxGeometry");
+    expect((stud.material as THREE.MeshLambertMaterial).color.getHex()).toBe(0x8a6238);
+    const st = (stud.geometry as THREE.BoxGeometry).parameters;
+    expect(st.width).toBeLessThan(0.12);
+    expect(st.height).toBeLessThan(0.12);
+    expect(st.depth).toBeLessThan(0.12);
+    expect(stud.position.distanceTo(clip.position)).toBeGreaterThan(0.25);
+    expect(stud.position.distanceTo(cord.position)).toBeGreaterThan(0.25);
+    expect(stud.position.distanceTo(pin.position)).toBeGreaterThan(0.25);
+    expect(stud.position.distanceTo(tab.position)).toBeGreaterThan(0.25);
 
     expect(makePaperNametag("Ferry clerk")).toBeNull();
   });
