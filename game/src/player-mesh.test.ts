@@ -58,6 +58,7 @@ describe("player PAPER visor", () => {
     expect(p.filter((k) => k === "pocket").length).toBeGreaterThanOrEqual(1);
     expect(p.filter((k) => k === "cuff").length).toBeGreaterThanOrEqual(2);
     expect(p.filter((k) => k === "button").length).toBe(1);
+    expect(p.filter((k) => k === "badge").length).toBe(1);
 
     const visor = figure.children.find((c) => c.userData.part === "visor") as THREE.Mesh;
     const hats = figure.children.filter((c) => c.userData.part === "hat") as THREE.Mesh[];
@@ -95,6 +96,21 @@ describe("player PAPER visor", () => {
     expect(buttonBox.parameters.width).toBeLessThan(0.08);
     expect(buttonBox.parameters.height).toBeLessThan(0.08);
     expect(buttonBox.parameters.depth).toBeLessThan(0.06);
+
+    const badge = figure.children.find((c) => c.userData.part === "badge") as THREE.Mesh;
+    expect(badge).toBeTruthy();
+    expect(badge.geometry.type).toBe("BoxGeometry");
+    expect((badge.material as THREE.MeshLambertMaterial).color.getHex()).toBe(KRAFT);
+    expect(badge.position.y).toBeGreaterThan(1.15);
+    expect(badge.position.y).toBeLessThan(1.42);
+    expect(badge.position.z).toBeGreaterThan(0.12);
+    expect(Math.abs(badge.position.x)).toBeLessThan(0.23);
+    expect(badge.position.x).not.toBeCloseTo(button.position.x, 1);
+    expect(badge.position.x).not.toBeCloseTo(pocket.position.x, 1);
+    const badgeBox = badge.geometry as THREE.BoxGeometry;
+    expect(badgeBox.parameters.width).toBeLessThan(0.12);
+    expect(badgeBox.parameters.height).toBeLessThan(0.08);
+    expect(badgeBox.parameters.depth).toBeLessThan(0.06);
 
     const cuffs = figure.children.filter((c) => c.userData.part === "cuff") as THREE.Mesh[];
     expect(cuffs.length).toBeGreaterThanOrEqual(2);
