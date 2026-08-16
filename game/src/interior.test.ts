@@ -315,7 +315,7 @@ describe("house PAPER vase", () => {
   });
 });
 
-const STOOL_HEX = new Set([0x5a3a22, 0x6e4428, 0xf3efe4]);
+const STOOL_HEX = new Set([0x5a3a22, 0x6e4428]);
 
 describe("house PAPER stool", () => {
   it("puts one kraft PAPER stool beside the downstairs table, not upstairs", () => {
@@ -365,7 +365,7 @@ describe("house PAPER stool", () => {
       }
     });
     expect(colors.length).toBeGreaterThan(0);
-    expect(colors.some((c) => c === 0xf3efe4)).toBe(true);
+    expect(colors.some((c) => c === 0x6e4428)).toBe(true);
     expect(colors.some((c) => c === 0x5a3a22)).toBe(true);
     expect(legs).toBe(3);
     expect(seats).toBeGreaterThanOrEqual(1);
