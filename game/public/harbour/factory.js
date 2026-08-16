@@ -133,6 +133,38 @@ function woodWorkbench(x, z, w = 1.85, d = 0.62, yaw = 0) {
 }
 
 /**
+ * Small kraft scrap bin of wood / iron offcuts. Open crate, not a mill,
+ * not a warehouse floor stack. Sits against a wall; centre aisle stays open.
+ */
+function scrapBin(x, z, yaw = 0) {
+  const g = new THREE.Group();
+  g.name = "factory-scrap";
+  g.userData.kind = "factory-stock";
+  g.userData.mode = "PAPER";
+  g.userData.part = "scrap-bin";
+  g.position.set(x, 0, z);
+  g.rotation.y = yaw;
+  const y0 = 0.16;
+  const w = 0.56;
+  const h = 0.32;
+  const d = 0.42;
+  const body = paperBox(w, h, d, KRAFT, "factory-stock");
+  body.position.y = y0 + h / 2;
+  const rim = paperBox(w + 0.04, 0.05, d + 0.04, BENCH_LEG, "factory-stock");
+  rim.position.y = y0 + h;
+  const band = paperBox(w + 0.03, 0.04, d + 0.03, BENCH_LEG, "factory-stock");
+  band.position.y = y0 + h * 0.4;
+  const offA = paperBox(0.4, 0.07, 0.1, KRAFT_LIGHT, "factory-stock");
+  offA.position.set(-0.04, y0 + h + 0.06, -0.06);
+  const offB = paperBox(0.28, 0.06, 0.09, BENCH_WOOD, "factory-stock");
+  offB.position.set(0.08, y0 + h + 0.12, 0.05);
+  const offC = paperBox(0.22, 0.05, 0.08, IRON_RUST, "factory-stock");
+  offC.position.set(-0.06, y0 + h + 0.16, 0.04);
+  g.add(body, rim, band, offA, offB, offC);
+  return g;
+}
+
+/**
  * Chunky kraft mill on the floor — wood body, small iron press.
  * Reads from the enter camera (door +Z looking −Z). Not a warehouse crate.
  */
@@ -273,6 +305,8 @@ function makeFactoryDress() {
   g.add(workbench(-1.35, -2.48, 2.35, 0.72, 0));
   g.add(workbench(-3.08, 0.15, 2.15, 0.68, Math.PI / 2));
   g.add(woodWorkbench(3.1, -1.18, 1.92, 0.64, Math.PI / 2));
+  // Left wall, opposite the wood bench. Off the centre aisle (x≈0).
+  g.add(scrapBin(-3.22, -2.62, 0.08));
   g.add(kraftMachine(-1.42, 0.58, 1.55, 0.9, 0.06));
   g.add(kraftMachine(1.18, 1.32, 1.32, 0.78, -0.1));
   g.add(kraftMachine(0.22, -0.42, 1.48, 0.86, 0.12));
