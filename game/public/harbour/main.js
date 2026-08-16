@@ -12,6 +12,7 @@ import {
   spawnCameraOffset,
   spawnLookAtOffset,
 } from "./roads.js";
+import { createPlayCamera } from "./camera.js";
 
 const canvas = document.getElementById("c");
 const statusEl = document.getElementById("status");
@@ -537,23 +538,15 @@ function makeParcels() {
   }
 }
 
-function cameraOffset() {
-  const o = spawnCameraOffset(islandId);
-  return new THREE.Vector3(o.x, o.y, o.z);
-}
-
-function lookTarget() {
-  const l = spawnLookAtOffset(islandId);
-  return new THREE.Vector3(
-    player.position.x + l.x,
-    player.position.y + l.y,
-    player.position.z + l.z,
-  );
-}
+const playCam = createPlayCamera({
+  camera,
+  canvas,
+  getPlayer: () => player.position,
+  getIslandId: () => islandId,
+});
 
 function snapCamera() {
-  camera.position.copy(player.position).add(cameraOffset());
-  camera.lookAt(lookTarget());
+  playCam.snap();
 }
 
 function spawnAt(id) {
@@ -605,9 +598,11 @@ function selectLand(p, walk) {
 }
 
 function onPointer(ev) {
+  if (ev.button != null && ev.button !== 0) return;
   if (Date.now() - lastTap < 180) return;
   lastTap = Date.now();
-  if (ev.target.closest && ev.target.closest("nav, a, button")) return;
+  if (taxi && taxi.mapOpen()) return;
+  if (ev.target.closest && ev.target.closest("nav, a, button, #taxi-map")) return;
   pointer.x = (ev.clientX / window.innerWidth) * 2 - 1;
   pointer.y = -(ev.clientY / window.innerHeight) * 2 + 1;
   raycaster.setFromCamera(pointer, camera);
@@ -709,9 +704,7 @@ function tick(dt) {
   if (ferryMesh) tickFerry(ferryMesh, dt);
   btnFerry.disabled = !nearPort();
   refreshHud();
-  tmp.copy(player.position).add(cameraOffset());
-  camera.position.lerp(tmp, 1 - Math.pow(0.001, dt));
-  camera.lookAt(lookTarget());
+  playCam.tick(dt);
   sun.position.set(player.position.x + 180, 260, player.position.z + 80);
   sun.target.position.copy(player.position);
   sun.target.updateMatrixWorld();
