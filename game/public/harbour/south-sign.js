@@ -156,6 +156,12 @@ export function makeSouthSign(spec, helpers) {
   washer.userData.part = "washer";
   g.add(washer);
 
+  /** Tiny kraft pin on the board, offset from washer, screw and nail. WOOD_DARK already in this file — PAPER box, not grey iron. */
+  const pin = part(0.05, 0.05, 0.04, WOOD_DARK, false);
+  pin.position.set(-1.62, 1.72, 0.1);
+  pin.userData.part = "pin";
+  g.add(pin);
+
   g.position.set(wx, gy, wz);
   g.rotation.y = Math.PI + 0.42;
   return g;
