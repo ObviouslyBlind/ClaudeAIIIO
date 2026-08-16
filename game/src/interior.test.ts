@@ -228,7 +228,7 @@ describe("owned building interiors", () => {
   });
 });
 
-const VASE_HEX = new Set([0x5a3a22, 0x6e4428, 0xf4ead8, 0xf3efe4]);
+const VASE_HEX = new Set([0x5a3a22, 0x6e4428, 0xf4ead8, 0xefe0c8]);
 
 function isGrey(hex: number) {
   const r = (hex >> 16) & 255;
@@ -286,7 +286,7 @@ describe("house PAPER vase", () => {
       }
     });
     expect(colors.length).toBeGreaterThan(0);
-    expect(colors.some((c) => c === 0xf3efe4 || c === 0xf4ead8)).toBe(true);
+    expect(colors.some((c) => c === 0xf4ead8 || c === 0xefe0c8)).toBe(true);
     expect(colors.some((c) => c === 0x5a3a22 || c === 0x6e4428)).toBe(true);
 
     const picture = down.getObjectByName("picture");
