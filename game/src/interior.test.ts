@@ -54,7 +54,7 @@ describe("owned building interiors", () => {
     expect(boxes).toBeGreaterThan(12);
   });
 
-  it("dresses PAPER rooms as a Caribbean house: windows, table, chairs, stool, lamp, clock, picture, vase, mug, book, napkin, spoon, fork, knife, bed", () => {
+  it("dresses PAPER rooms as a Caribbean house: windows, table, chairs, stool, lamp, clock, picture, vase, mug, book, napkin, spoon, fork, knife, plate, cup, bed", () => {
     const g = makeInteriorScene();
     const down = g.getObjectByName("downstairs");
     const up = g.getObjectByName("upstairs");
@@ -83,6 +83,7 @@ describe("owned building interiors", () => {
     expect(downKinds).toContain("interior-fork");
     expect(downKinds).toContain("interior-knife");
     expect(downKinds).toContain("interior-plate");
+    expect(downKinds).toContain("interior-cup");
     expect(downKinds).toContain("interior-stool");
     expect(downKinds).toContain("interior-window");
     expect(downKinds).toContain("exit");
@@ -105,6 +106,7 @@ describe("owned building interiors", () => {
     expect(upKinds).not.toContain("interior-fork");
     expect(upKinds).not.toContain("interior-knife");
     expect(upKinds).not.toContain("interior-plate");
+    expect(upKinds).not.toContain("interior-cup");
     expect(upKinds).not.toContain("interior-stool");
 
     const table = down!.getObjectByName("table");
@@ -966,6 +968,98 @@ describe("house PAPER plate", () => {
     expect(colors.some((c) => c === 0xf4ead8)).toBe(true);
     expect(colors.some((c) => c === 0xf7f1e6)).toBe(true);
 
+    expect(up.getObjectByName("plate")).toBeFalsy();
+    expect(up.getObjectByName("knife")).toBeFalsy();
+    expect(up.getObjectByName("fork")).toBeFalsy();
+  });
+});
+
+const CUP_HEX = new Set([0x5a3a22, 0xf4ead8, 0xf7f1e6]);
+
+describe("house PAPER cup", () => {
+  it("puts one kraft PAPER cup on the downstairs table, not upstairs", () => {
+    const g = makeInteriorScene();
+    const down = g.getObjectByName("downstairs")!;
+    const up = g.getObjectByName("upstairs")!;
+    const table = down.getObjectByName("table")!;
+    expect(table).toBeTruthy();
+
+    const cups = collectKind(down, "interior-cup");
+    expect(cups.length).toBe(1);
+    expect(collectKind(up, "interior-cup").length).toBe(0);
+
+    const cup = cups[0];
+    expect(cup.userData.kind).toBe("interior-cup");
+    expect(cup.userData.mode).toBe("PAPER");
+    expect(cup.userData.part).toBe("cup");
+
+    const tablePos = new THREE.Vector3();
+    table.getWorldPosition(tablePos);
+    const cupPos = new THREE.Vector3();
+    cup.getWorldPosition(cupPos);
+    expect(Math.hypot(cupPos.x - tablePos.x, cupPos.z - tablePos.z)).toBeLessThan(0.85);
+    expect(cupPos.y).toBeGreaterThan(0.9);
+    expect(cupPos.y).toBeLessThan(1.2);
+
+    const plate = down.getObjectByName("plate");
+    expect(plate).toBeTruthy();
+    expect(plate!.userData.part).toBe("plate");
+    const platePos = new THREE.Vector3();
+    plate!.getWorldPosition(platePos);
+    expect(Math.hypot(cupPos.x - platePos.x, cupPos.z - platePos.z)).toBeGreaterThan(0.25);
+    expect(collectKind(down, "interior-plate").length).toBe(1);
+
+    const knife = down.getObjectByName("knife");
+    expect(knife).toBeTruthy();
+    expect(knife!.userData.part).toBe("knife");
+    const knifePos = new THREE.Vector3();
+    knife!.getWorldPosition(knifePos);
+    expect(Math.hypot(cupPos.x - knifePos.x, cupPos.z - knifePos.z)).toBeGreaterThan(0.25);
+    expect(collectKind(down, "interior-knife").length).toBe(1);
+
+    const fork = down.getObjectByName("fork");
+    expect(fork).toBeTruthy();
+    expect(fork!.userData.part).toBe("fork");
+    const forkPos = new THREE.Vector3();
+    fork!.getWorldPosition(forkPos);
+    expect(Math.hypot(cupPos.x - forkPos.x, cupPos.z - forkPos.z)).toBeGreaterThan(0.25);
+    expect(collectKind(down, "interior-fork").length).toBe(1);
+
+    const spoon = down.getObjectByName("spoon");
+    expect(spoon).toBeTruthy();
+    expect(spoon!.userData.part).toBe("spoon");
+    const spoonPos = new THREE.Vector3();
+    spoon!.getWorldPosition(spoonPos);
+    expect(Math.hypot(cupPos.x - spoonPos.x, cupPos.z - spoonPos.z)).toBeGreaterThan(0.25);
+
+    const napkin = down.getObjectByName("napkin");
+    expect(napkin).toBeTruthy();
+    expect(napkin!.userData.part).toBe("napkin");
+    const napkinPos = new THREE.Vector3();
+    napkin!.getWorldPosition(napkinPos);
+    expect(Math.hypot(cupPos.x - napkinPos.x, cupPos.z - napkinPos.z)).toBeGreaterThan(0.25);
+
+    const colors: number[] = [];
+    cup.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      const mat = mesh.material as THREE.MeshLambertMaterial | undefined;
+      if (mesh.isMesh && mat?.color) {
+        const hex = mat.color.getHex();
+        colors.push(hex);
+        expect(CUP_HEX.has(hex)).toBe(true);
+        if (hex !== 0xf7f1e6) expect(isGrey(hex)).toBe(false);
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.kind).toBe("interior-cup");
+        expect(mesh.userData.mode).toBe("PAPER");
+        expect(mesh.userData.part).toBe("cup");
+      }
+    });
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.some((c) => c === 0x5a3a22)).toBe(true);
+    expect(colors.some((c) => c === 0xf4ead8)).toBe(true);
+    expect(colors.some((c) => c === 0xf7f1e6)).toBe(true);
+
+    expect(up.getObjectByName("cup")).toBeFalsy();
     expect(up.getObjectByName("plate")).toBeFalsy();
     expect(up.getObjectByName("knife")).toBeFalsy();
     expect(up.getObjectByName("fork")).toBeFalsy();
