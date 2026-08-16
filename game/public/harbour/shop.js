@@ -170,6 +170,13 @@ function makeCounter(x, z) {
   g.add(stripe);
   // Wooden cash box on the linen top — kraft lid, wood body. Not a wallet.
   g.add(cashBox(0.88, topY + 0.13, -0.08));
+  // Two small kraft / terracotta jars beside the till. Original TIN + CORAL.
+  const kraftJar = paperBox(0.12, 0.16, 0.12, TIN, "shop-goods");
+  kraftJar.position.set(0.48, topY + 0.13, -0.04);
+  g.add(kraftJar);
+  const terraJar = paperBox(0.11, 0.2, 0.11, CORAL, "shop-goods");
+  terraJar.position.set(0.6, topY + 0.15, 0.02);
+  g.add(terraJar);
   const jar = paperBox(0.18, 0.24, 0.18, TEAL, "shop-goods");
   jar.position.set(-0.95, topY + 0.17, 0.12);
   g.add(jar);
