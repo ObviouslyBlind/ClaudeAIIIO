@@ -76,11 +76,15 @@ function addFoam(group, geo, mat, spec, x, z, h) {
   group.add(m);
 }
 
+/** Metres above the lagoon. Tall enough to read from the spawn camera. */
+export const PIER_FOAM_Y = 0.48;
+
 /** Kraft/cream dash in the basin water, hugging the pier, not the deck. */
 function addPierWaterFoam(group, geo, mat, spec, localX, along) {
   const toward = spec.id === "north" ? 1 : -1;
   const m = new THREE.Mesh(geo, mat);
-  m.position.set(spec.port.x + localX, 0.18, spec.port.z + toward * along);
+  m.position.set(spec.port.x + localX, PIER_FOAM_Y, spec.port.z + toward * along);
+  m.userData.kind = "foam";
   m.castShadow = false;
   m.receiveShadow = false;
   group.add(m);
@@ -119,11 +123,12 @@ export function makeShoreFoam(spec, heightAtFn, scene) {
   group.name = "shore-foam-" + spec.id;
 
   const ringGeo = new THREE.BoxGeometry(2.0, 0.06, 9.0);
-  const portGeo = new THREE.BoxGeometry(3.0, 0.14, 15.0);
+  /** Chunky bars — `/g/shore38` FAIL FOAM: 0.14 m slabs vanished from spawn. */
+  const portGeo = new THREE.BoxGeometry(4.6, 0.72, 11.0);
   const mat = new THREE.MeshLambertMaterial({
     color: 0xefe6c9,
     emissive: 0xefe6c9,
-    emissiveIntensity: 0.22,
+    emissiveIntensity: 0.42,
     polygonOffset: true,
     polygonOffsetFactor: -2,
     polygonOffsetUnits: -2,
@@ -138,20 +143,19 @@ export function makeShoreFoam(spec, heightAtFn, scene) {
   }
 
   let portCount = 0;
+  // Beside the 11 m timber (half-width 5.5). Spawn looks seaward along ~80 m.
   for (const side of [-1, 1]) {
-    for (const along of [14, 26, 38, 50, 62, 74, 96, 108]) {
+    for (const along of [20, 32, 44, 56, 68, 80, 92, 104]) {
       if (portCount >= PORT_FOAM_SAMPLES) break;
-      const across = along > 80 ? 8.2 : 7.4;
-      addPierWaterFoam(group, portGeo, mat, spec, side * across, along);
+      addPierWaterFoam(group, portGeo, mat, spec, side * 8.6, along);
       portCount++;
     }
   }
-  // North pier seaward lip: a few extra kraft dashes in the basin, not on timber.
-  // Deck ends at along ~81 (11×86 box centred 38 m out); 15 m dashes sit past that.
+  // Seaward lip of the north pier (deck ends ~81 m): bars in the basin, not on timber.
   if (spec.id === "north") {
-    for (const localX of [-3.8, 0, 3.8]) {
+    for (const localX of [-9.2, -6.4, 6.4, 9.2]) {
       if (portCount >= PORT_FOAM_SAMPLES) break;
-      addPierWaterFoam(group, portGeo, mat, spec, localX, 89);
+      addPierWaterFoam(group, portGeo, mat, spec, localX, 86);
       portCount++;
     }
   }

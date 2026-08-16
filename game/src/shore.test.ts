@@ -3,10 +3,12 @@ import * as THREE from "three";
 import { heightAt, ISLANDS } from "./land.ts";
 import {
   FOAM_SAMPLES,
+  PIER_FOAM_Y,
   PORT_FOAM_SAMPLES,
   makeShoreFoam,
   paintShoreColor,
 } from "../public/harbour/shore.js";
+import { CAMERA_FAR_M, spawnCameraOffset, spawnLookAtOffset } from "../public/harbour/roads.js";
 
 const grass = new THREE.Color(0x4a7a3c);
 const sand = new THREE.Color(0xe8d5a3);
@@ -85,7 +87,7 @@ describe("shoreline read", () => {
       const dn = Math.hypot(child.position.x - ISLANDS.north.cx, child.position.z - ISLANDS.north.cz);
       const ds = Math.hypot(child.position.x - ISLANDS.south.cx, child.position.z - ISLANDS.south.cz);
       expect(dn).toBeLessThan(ds);
-      if (child.position.y < 0.35) continue;
+      if (child.position.y < 0.85) continue;
       const h = heightAt(ISLANDS.north, child.position.x, child.position.z);
       expect(h).toBeGreaterThanOrEqual(0.3);
       expect(h).toBeLessThanOrEqual(0.8);
@@ -101,15 +103,39 @@ describe("shoreline read", () => {
       const dashes = group.children.filter((child) => {
         const across = Math.abs(child.position.x - spec.port.x);
         const along = (child.position.z - spec.port.z) * toward;
-        return across > 5.5 && across < 14 && along > 8 && along < 120 && child.position.y < 0.35;
+        return across > 5.5 && across < 14 && along > 8 && along < 120 && child.position.y < 0.9;
       });
       expect(dashes.length).toBeGreaterThanOrEqual(10);
       for (const child of dashes) {
         const mesh = child as THREE.Mesh;
         const mat = mesh.material as THREE.MeshLambertMaterial;
         expect(mat.color.getHex()).toBe(0xefe6c9);
+        expect(child.position.y).toBeCloseTo(PIER_FOAM_Y, 5);
       }
     }
+  });
+
+  it("puts kraft foam bars in the north spawn camera frame", () => {
+    const spec = ISLANDS.north;
+    const scene = { add(_obj: THREE.Object3D) {} };
+    const group = makeShoreFoam(spec, heightAt, scene);
+    const o = spawnCameraOffset("north");
+    const l = spawnLookAtOffset("north");
+    const px = spec.port.x;
+    const pz = spec.port.z - 8;
+    const py = heightAt(spec, px, pz) + 1.15;
+    const cam = new THREE.PerspectiveCamera(55, 16 / 9, 0.4, CAMERA_FAR_M);
+    cam.position.set(px + o.x, py + o.y, pz + o.z);
+    cam.lookAt(px + l.x, py + l.y, pz + l.z);
+    cam.updateMatrixWorld();
+    const inFrame = (child: THREE.Object3D) => {
+      const v = child.position.clone().project(cam);
+      return Math.abs(v.x) < 0.95 && Math.abs(v.y) < 0.95 && v.z < 1;
+    };
+    const visible = group.children.filter(
+      (child) => child.userData?.kind === "foam" && inFrame(child),
+    );
+    expect(visible.length).toBeGreaterThanOrEqual(4);
   });
 
   it("does not move island centres", () => {
