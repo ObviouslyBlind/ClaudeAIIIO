@@ -44,13 +44,15 @@ export const WALK_SPEED_M_S = 0.85;
 
 /** Seaward of the north port, short of the ferry. `/g/peds42` FAIL PEDS:
  * along -18/-6 sat on the visitor; kraft aprons facing the camera read as crates. */
-export const SPAWN_QUAY_ALONG = Object.freeze([18, 28, 40, 52, 64, 76]);
-const QUAY_ALONG_MIN = 12;
+export const SPAWN_QUAY_ALONG = Object.freeze([26, 40, 54, 68]);
+/** `/g/peds43` FAIL PEDS: 1.8 m shirts were specks beside the crate path. */
+export const SPAWN_QUAY_SCALE = 4.8;
+const QUAY_ALONG_MIN = 16;
 const QUAY_ALONG_MAX = 88;
 const VERGE_ALONG_MIN = 10;
 const VERGE_ALONG_MAX = 180;
 /** Shirt colours that read on kraft timber from the seaward spawn look. Skip cream seed 0. */
-const QUAY_SHIRT_SEEDS = Object.freeze([1, 2, 3, 5, 1, 2]);
+const QUAY_SHIRT_SEEDS = Object.freeze([1, 2, 3, 5]);
 
 function paperBox(w, h, d, color) {
   const mesh = new THREE.Mesh(
@@ -277,13 +279,14 @@ function sampleQuay(spec, heightAt, person, along) {
 /** Cloth must read on kraft timber from ~100 m. Cream shirts vanish into crates. */
 function lightQuayShirt(figure) {
   figure.frustumCulled = false;
+  figure.scale.setScalar(SPAWN_QUAY_SCALE);
   figure.traverse((obj) => {
     obj.frustumCulled = false;
-    if (obj.userData?.part !== "body" || !obj.material) return;
+    if (obj.userData?.part !== "body" && obj.userData?.part !== "arm") return;
     const mat = obj.material;
-    if (mat.color) {
+    if (mat?.color) {
       mat.emissive = mat.color.clone();
-      mat.emissiveIntensity = 0.48;
+      mat.emissiveIntensity = 0.72;
     }
   });
 }

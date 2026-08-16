@@ -36,13 +36,14 @@ Building shells + window lights (warmer glow) — **not in the seaward spawn fra
 
 ## Pixel pedestrians
 
-`/g/peds42` **FAIL PEDS**: pier/ferry/crates in frame, but no readable box people (inland along sat on the visitor; kraft aprons faced the camera). Quay walkers now stand seaward of the port with lit terracotta/teal shirts. Next `/g/peds43`.
+`/g/peds42` **FAIL PEDS**: inland along sat on the visitor.
+`/g/peds43` **FAIL PEDS**: pier/crates/ferry in frame; 1.8 m shirts were specks on the crate path. Quay walkers now boot with the hull and stand crate-scale with lit terracotta/teal shirts. Next `/g/peds44`.
 
 ## In flight (not ferry-only)
 
-Pixel: kraft **pedestrians** on the north quay `http://localhost:8787/g/peds43`. No RMB. Close other Two Harbors tabs. Address bar must be `/g/peds43`. Do not restart play while the critic is on the page.
+Pixel: kraft **pedestrians** on the north quay `http://localhost:8787/g/peds44`. No RMB. Close other Two Harbors tabs. Address bar must be `/g/peds44`. Do not restart play while the critic is on the page.
 
-## Next pixel (after peds43 PASS, immediately, no wait)
+## Next pixel (after peds44 PASS, immediately, no wait)
 
 Nametags, econ/nearby/staff HUD lines. Shells+lights stay deferred until a human can orbit (spawn look is seaward; walking does not turn the camera).
 

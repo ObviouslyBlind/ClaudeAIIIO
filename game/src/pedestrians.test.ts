@@ -6,6 +6,7 @@ import {
   LAND_MIN_M,
   MAX_PEOPLE,
   SPAWN_QUAY_ALONG,
+  SPAWN_QUAY_SCALE,
   VERGE_OFFSET_M,
   WALK_SPEED_M_S,
   makePaperPerson,
@@ -133,7 +134,7 @@ describe("harbour PAPER pedestrians", () => {
 
     const quay = people.filter((p) => p.lane === "quay");
     const verge = people.filter((p) => p.lane === "verge");
-    expect(quay.length).toBeGreaterThanOrEqual(6);
+    expect(quay.length).toBeGreaterThanOrEqual(4);
     expect(verge.length).toBeGreaterThanOrEqual(4);
 
     const port = ISLANDS.north.port;
@@ -212,7 +213,7 @@ describe("harbour PAPER pedestrians", () => {
     const { people } = spawn();
     const quay = people.filter((p) => p.lane === "quay");
     const verge = people.filter((p) => p.lane === "verge");
-    expect(quay.length).toBeGreaterThanOrEqual(6);
+    expect(quay.length).toBeGreaterThanOrEqual(4);
 
     for (const p of quay) {
       const parts = partsOf(p.mesh);
@@ -241,7 +242,7 @@ describe("harbour PAPER pedestrians", () => {
     const { people } = spawn();
     const quay = people.filter((p) => p.lane === "quay");
     const verge = people.filter((p) => p.lane === "verge");
-    expect(quay.length).toBeGreaterThanOrEqual(6);
+    expect(quay.length).toBeGreaterThanOrEqual(4);
 
     for (const p of quay) {
       const parts = partsOf(p.mesh);
@@ -295,7 +296,8 @@ describe("harbour PAPER pedestrians", () => {
     const lookZ = playerZ + spawnLookAtOffset("north").z;
     expect(HOME_Z).toBe(-6835);
     expect(lookZ).toBeCloseTo(HOME_Z - 33, 0);
-    expect(SPAWN_QUAY_ALONG.every((along) => along >= 18 && along <= 80)).toBe(true);
+    expect(SPAWN_QUAY_SCALE).toBeGreaterThan(4);
+    expect(SPAWN_QUAY_ALONG.every((along) => along >= 24 && along <= 80)).toBe(true);
 
     const { people } = spawn();
     const quay = people.filter((p) => p.lane === "quay");
@@ -309,6 +311,7 @@ describe("harbour PAPER pedestrians", () => {
       expect(z).toBeGreaterThan(spec.port.z + 10);
       expect(z).toBeLessThan(HOME_Z);
       expect(Math.abs(x - spec.port.x)).toBeCloseTo(VERGE_OFFSET_M, 5);
+      expect(p.mesh.scale.x).toBeCloseTo(SPAWN_QUAY_SCALE, 5);
       expect(p.mesh.frustumCulled).toBe(false);
       expect(p.mesh.rotation.y).toBeCloseTo(0, 5);
       p.mesh.traverse((obj) => {
@@ -319,6 +322,6 @@ describe("harbour PAPER pedestrians", () => {
         lit += 1;
       });
     }
-    expect(lit).toBeGreaterThanOrEqual(6);
+    expect(lit).toBeGreaterThanOrEqual(4);
   });
 });

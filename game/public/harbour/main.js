@@ -931,6 +931,7 @@ async function boot() {
   makeShoreFoam(specOf("north"), heightAt, scene);
   makeShoreFoam(specOf("south"), heightAt, scene);
   spawnAt("north");
+  pedestrians = makePedestrians(map, { scene, specOf, heightAt, getPlayer: () => player });
   startLoop();
   setStatus("North port · PAPER");
   void loadSheetHuds();
@@ -947,7 +948,9 @@ async function boot() {
   makeQuay(specOf("north"), { scene, heightAt });
   makePort(specOf("south"));
   makeQuay(specOf("south"), { scene, heightAt });
-  pedestrians = makePedestrians(map, { scene, specOf, heightAt, getPlayer: () => player });
+  if (!pedestrians) {
+    pedestrians = makePedestrians(map, { scene, specOf, heightAt, getPlayer: () => player });
+  }
   makePalms(specOf("north"));
   makePalms(specOf("south"));
   makeParcels();
