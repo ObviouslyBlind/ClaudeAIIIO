@@ -2,10 +2,11 @@ import * as THREE from "three";
 
 /**
  * PAPER shop interior dress. Kraft-paper counter (cream top, wood body), a
- * small wooden till with a kraft drawer slightly pulled out, a kraft wrapped
- * parcel, a standing kraft shopping bag, a short wall shelf with two kraft
- * boxes, plus two shelf bays — not the house living room and not the
- * warehouse. No WASD. Tap-to-walk stays in interior.js.
+ * small wooden till with a kraft drawer slightly pulled out, a kraft counter
+ * scale beside the till, a kraft wrapped parcel, a standing kraft shopping
+ * bag, a short wall shelf with two kraft boxes, plus two shelf bays — not
+ * the house living room and not the warehouse. No WASD. Tap-to-walk stays
+ * in interior.js.
  *
  * Call dressShop(scene) when plot.kind or plot.use is "shop" or "house_shop".
  * Idempotent: a second call only shows the existing dress.
@@ -175,6 +176,30 @@ function cashBox(x, y, z) {
 }
 
 /**
+ * Small kraft PAPER counter scale: wood base, cream pan, strap needle.
+ * Paper boxes only. Sits on the counter beside the till — not on the
+ * pulled drawer, not a parcel / bag / wall shelf.
+ */
+function kraftScale(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "shop-scale";
+  g.userData.kind = "shop-scale";
+  g.userData.mode = "PAPER";
+  g.position.set(x, y, z);
+  const baseH = 0.06;
+  const base = paperBox(0.16, baseH, 0.14, WOOD, "shop-scale");
+  g.add(base);
+  const pan = paperBox(0.18, 0.02, 0.16, CREAM, "shop-scale");
+  pan.position.y = baseH / 2 + 0.01;
+  g.add(pan);
+  const needle = paperBox(0.015, 0.08, 0.015, STRAP, "shop-scale");
+  needle.position.set(0.05, baseH / 2 + 0.05, 0);
+  needle.rotation.z = -0.35;
+  g.add(needle);
+  return g;
+}
+
+/**
  * Small kraft wrapped parcel on the counter: cream box + strap + wood
  * label. Paper boxes only. Not a till, not a goods crate.
  */
@@ -273,6 +298,8 @@ function makeCounter(x, z) {
   g.add(stripe);
   // Wooden cash box on the linen top — kraft lid, wood body. Not a wallet.
   g.add(cashBox(0.88, topY + 0.13, -0.08));
+  // Kraft counter scale beside the till — wood base, cream pan, strap needle.
+  g.add(kraftScale(0.68, topY + 0.08, 0.22));
   // Kraft wrapped parcel beside the till — cream box + strap. Not a wallet.
   g.add(wrappedParcel(1.22, topY + 0.11, 0.08));
   // Standing kraft shopping bag beside the parcel / till — cream body + straps.
