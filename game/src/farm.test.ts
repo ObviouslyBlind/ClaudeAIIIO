@@ -1150,3 +1150,87 @@ describe("farm PAPER kraft hoe", () => {
     expect(boxes).toBeLessThanOrEqual(3);
   });
 });
+
+describe("farm PAPER kraft sickle", () => {
+  it("leans one tiny kraft PAPER sickle by the workbench; hoe rake broom seed lid mug egg pail lantern remain", () => {
+    const scene = new THREE.Scene();
+    dressFarm(scene);
+
+    const dress = scene.getObjectByName("farm-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+
+    const sickles: THREE.Object3D[] = [];
+    dress!.traverse((obj) => {
+      if (obj.userData?.part === "sickle" && obj.name === "farm-sickle") sickles.push(obj);
+    });
+    expect(sickles.length).toBe(1);
+    const paperSickle = sickles[0];
+    expect(paperSickle.userData.part).toBe("sickle");
+    expect(paperSickle.userData.mode).toBe("PAPER");
+    expect(Math.abs(paperSickle.rotation.z) > 0.15 || Math.abs(paperSickle.rotation.x) > 0.15).toBe(true);
+
+    const paperHoe = dress!.getObjectByName("farm-hoe")!;
+    const paperRake = dress!.getObjectByName("farm-rake")!;
+    const broom = dress!.getObjectByName("farm-broom")!;
+    const seed = dress!.getObjectByName("farm-seed")!;
+    const lid = dress!.getObjectByName("farm-lid")!;
+    const mug = dress!.getObjectByName("farm-mug")!;
+    const egg = dress!.getObjectByName("farm-egg")!;
+    const tablePail = dress!.getObjectByName("farm-table-pail")!;
+    const lantern = dress!.getObjectByName("farm-lantern")!;
+    expect(paperHoe).toBeTruthy();
+    expect(paperRake).toBeTruthy();
+    expect(broom).toBeTruthy();
+    expect(seed).toBeTruthy();
+    expect(lid).toBeTruthy();
+    expect(mug).toBeTruthy();
+    expect(egg).toBeTruthy();
+    expect(tablePail).toBeTruthy();
+    expect(lantern).toBeTruthy();
+    expect(paperHoe.userData.part).toBe("hoe");
+    expect(paperRake.userData.part).toBe("rake");
+    expect(broom.userData.part).toBe("broom");
+    expect(seed.userData.part).toBe("seed");
+    expect(lid.userData.part).toBe("lid");
+    expect(mug.userData.part).toBe("mug");
+    expect(egg.userData.part).toBe("egg");
+    expect(tablePail.userData.part).toBe("pail");
+
+    expect(paperSickle.position.y).toBeLessThan(0.5);
+    const toBench = Math.hypot(paperSickle.position.x - -3.28, paperSickle.position.z - -0.15);
+    expect(toBench).toBeGreaterThan(0.2);
+    expect(toBench).toBeLessThan(0.8);
+
+    expect(Math.hypot(paperSickle.position.x - paperHoe.position.x, paperSickle.position.z - paperHoe.position.z)).toBeGreaterThan(0.2);
+    expect(Math.hypot(paperSickle.position.x - paperRake.position.x, paperSickle.position.z - paperRake.position.z)).toBeGreaterThan(0.2);
+    expect(Math.hypot(paperSickle.position.x - broom.position.x, paperSickle.position.z - broom.position.z)).toBeGreaterThan(0.2);
+    expect(Math.hypot(paperSickle.position.x - seed.position.x, paperSickle.position.z - seed.position.z)).toBeGreaterThan(0.2);
+    expect(Math.hypot(paperSickle.position.x - mug.position.x, paperSickle.position.z - mug.position.z)).toBeGreaterThan(0.2);
+    expect(Math.hypot(paperSickle.position.x - egg.position.x, paperSickle.position.z - egg.position.z)).toBeGreaterThan(0.2);
+    expect(Math.hypot(paperSickle.position.x - tablePail.position.x, paperSickle.position.z - tablePail.position.z)).toBeGreaterThan(0.2);
+    expect(Math.hypot(paperSickle.position.x - lantern.position.x, paperSickle.position.z - lantern.position.z)).toBeGreaterThan(0.2);
+    expect(Math.hypot(paperSickle.position.x - lid.position.x, paperSickle.position.z - lid.position.z)).toBeGreaterThan(4);
+
+    const colors = hexes(paperSickle);
+    expect(colors.some((c) => c === KRAFT)).toBe(true);
+    expect(colors.every((c) => [KRAFT, WOOD, WOOD_DARK, HANDLE].includes(c))).toBe(true);
+
+    let boxes = 0;
+    paperSickle.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        boxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.part).toBe("sickle");
+        expect(mesh.userData.mode).toBe("PAPER");
+        const geo = mesh.geometry as THREE.BoxGeometry;
+        expect(geo.parameters.width).toBeLessThan(0.16);
+        expect(geo.parameters.height).toBeLessThan(0.4);
+        expect(geo.parameters.depth).toBeLessThan(0.16);
+      }
+    });
+    expect(boxes).toBeGreaterThanOrEqual(1);
+    expect(boxes).toBeLessThanOrEqual(3);
+  });
+});

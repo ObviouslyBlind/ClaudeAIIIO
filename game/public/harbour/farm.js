@@ -12,7 +12,8 @@ import * as THREE from "three";
  * kraft PAPER mug on the workbench, a tiny kraft PAPER egg on the
  * workbench, a tiny kraft PAPER pail on the workbench, a tiny kraft PAPER
  * broom leaning by the workbench, a tiny kraft PAPER rake leaning by the
- * workbench, a tiny kraft PAPER hoe leaning by the workbench, and
+ * workbench, a tiny kraft PAPER hoe leaning by the workbench, a tiny
+ * kraft PAPER sickle leaning by the workbench, and
  * dim warm light — not the
  * house living room, warehouse crates, shop, or factory.
  * No WASD. Tap-to-walk stays in interior.js.
@@ -697,7 +698,7 @@ function farmRake() {
  * Hexes already in this file (WOOD, KRAFT). PAPER boxes only — no grey.
  * Leans by the farm workbench; offset from rake, broom, seed, lid, mug,
  * egg, pail, lantern, scoop, and the floor trough cluster. Not the
- * hanging farm-tool hoe by the sacks.
+ * hanging farm-tool hoe by the sacks. Not the tiny kraft PAPER sickle.
  */
 function farmHoe() {
   const g = new THREE.Group();
@@ -713,6 +714,31 @@ function farmHoe() {
   const blade = paperBox(0.08, 0.04, 0.05, KRAFT, "farm-hoe");
   blade.userData.part = "hoe";
   blade.position.y = y0 + 0.032;
+  g.add(blade);
+  return g;
+}
+
+/**
+ * Tiny kraft PAPER sickle: wood shaft, kraft hooked blade.
+ * Hexes already in this file (WOOD, KRAFT). PAPER boxes only — no grey.
+ * Leans by the farm workbench; offset from hoe, rake, broom, seed, lid,
+ * mug, egg, pail, lantern, scoop, and the floor trough cluster. Not the
+ * hanging farm-tool hoe or rake.
+ */
+function farmSickle() {
+  const g = new THREE.Group();
+  g.name = "farm-sickle";
+  g.userData.kind = "farm-sickle";
+  g.userData.part = "sickle";
+  g.userData.mode = "PAPER";
+  const y0 = 0.16;
+  const shaft = paperBox(0.022, 0.26, 0.022, WOOD, "farm-sickle");
+  shaft.userData.part = "sickle";
+  shaft.position.y = y0 + 0.13;
+  g.add(shaft);
+  const blade = paperBox(0.07, 0.03, 0.04, KRAFT, "farm-sickle");
+  blade.userData.part = "sickle";
+  blade.position.set(0.03, y0 + 0.028, 0);
   g.add(blade);
   return g;
 }
@@ -860,6 +886,13 @@ function makeFarmDress() {
   paperHoe.position.set(-3.68, 0, 0.22);
   paperHoe.rotation.z = -0.28;
   g.add(paperHoe);
+  const paperSickle = farmSickle();
+  // Floor beside the 1.55 × 0.58 bench — leans by the back-right
+  // corner, not the hoe (front-left), rake (back-left), broom
+  // (front-right), or the top (seed, mug, egg, pail, lantern, scoop).
+  paperSickle.position.set(-2.78, 0, -0.52);
+  paperSickle.rotation.z = 0.28;
+  g.add(paperSickle);
 
   const loftY = 2.94;
   g.add(sack(0.46, 0.56, 0.36, SACK, -2.55, loftY + 0.28, -2.35, 0.1));
@@ -951,7 +984,8 @@ function dimSceneLights(scene, farm) {
  * pail, a tiny kraft mug on the workbench, a tiny kraft egg on
  * the workbench, a tiny kraft pail on the workbench, a tiny kraft
  * broom leaning by the workbench, a tiny kraft rake leaning by
- * the workbench, and a tiny kraft hoe leaning by the workbench,
+ * the workbench, a tiny kraft hoe leaning by the workbench, and
+ * a tiny kraft sickle leaning by the workbench,
  * warms and dims lights.
  * @param {THREE.Object3D} scene
  */
