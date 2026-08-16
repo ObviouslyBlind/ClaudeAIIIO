@@ -256,7 +256,7 @@ function makeStool(x, z) {
   const y0 = 0.16;
   const seatY = y0 + 0.34;
   const paper = { mode: "PAPER" };
-  g.add(box(0.3, 0.05, 0.3, PAPER_CARD, 0, seatY, 0, "interior-stool", paper));
+  g.add(box(0.3, 0.05, 0.3, WOOD_TOP, 0, seatY, 0, "interior-stool", paper));
   const legH = seatY - y0;
   for (const [dx, dz] of [
     [0, -0.1],
