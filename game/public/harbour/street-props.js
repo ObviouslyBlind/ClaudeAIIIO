@@ -286,11 +286,52 @@ function hawserDrum(_side) {
   return g;
 }
 
+/**
+ * Small kraft village pump: square wood post, wood handle/spout, wood trough
+ * with a kraft-cream basin. Paper boxes only — not an iron standpipe, not
+ * cyan water.
+ */
+function villagePump(_side) {
+  const g = new THREE.Group();
+  g.name = "village-pump";
+  g.userData.kind = "street-prop";
+  g.userData.prop = "pump";
+  g.userData.mode = "PAPER";
+  g.userData.part = "village-pump";
+
+  const shoe = part(0.28, 0.1, 0.28, WOOD_DARK, false);
+  shoe.position.y = 0.05;
+  const post = part(0.14, 1.12, 0.14, WOOD);
+  post.userData.part = "post";
+  post.position.y = 0.66;
+  const head = part(0.22, 0.16, 0.18, WOOD_DARK, false);
+  head.position.y = 1.24;
+  const handle = part(0.06, 0.06, 0.4, WOOD, false);
+  handle.userData.part = "handle";
+  handle.position.set(0, 1.34, 0.1);
+  const spout = part(0.08, 0.08, 0.22, WOOD_DARK, false);
+  spout.userData.part = "spout";
+  spout.position.set(0, 1.08, 0.18);
+
+  const basin = part(0.72, 0.22, 0.5, WOOD);
+  basin.userData.part = "basin";
+  basin.position.set(0, 0.16, 0.46);
+  const rim = part(0.76, 0.05, 0.54, WOOD_DARK, false);
+  rim.position.set(0, 0.28, 0.46);
+  const water = part(0.58, 0.04, 0.38, LAMP_GLASS, false);
+  water.userData.part = "water";
+  water.position.set(0, 0.24, 0.46);
+
+  g.add(shoe, post, head, handle, spout, basin, rim, water);
+  return g;
+}
+
 function makeProp(kind, side) {
   if (kind === "bench") return crateSeat(side);
   if (kind === "sign") return streetSign(side);
   if (kind === "hawser-drum") return hawserDrum(side);
   if (kind === "stool") return woodStool(side);
+  if (kind === "pump") return villagePump(side);
   return lampPost(side);
 }
 
@@ -400,6 +441,8 @@ function planForIsland(island, length) {
         plan.push({ along: 50, side: s.side, kind: "stool", setback });
       }
     }
+    // One kraft village pump / trough on the spawn verge — off the tarmac.
+    plan.push({ along: 72, side: -1, kind: "pump", setback: streetSetbackM(idx++) });
   } else {
     for (let along = 38, n = 0; along <= portM; along += 72, n++) {
       plan.push({ along, side: n % 2 ? 1 : -1, kind: "bench", setback: streetSetbackM(idx++) });
@@ -445,7 +488,7 @@ function placeOne(map, road, spec, heightAt, slot, root) {
 }
 
 /**
- * Paper lamp posts, kraft crate seats, hawser drums, one wood stool, and signs along the paved spline, on the grass verge.
+ * Paper lamp posts, kraft crate seats, hawser drums, one wood stool, one village pump, and signs along the paved spline, on the grass verge.
  * North port stretch is packed first so spawn looking inland actually sees them.
  */
 export function makeStreetProps(map, helpers) {
