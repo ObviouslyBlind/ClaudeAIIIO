@@ -8,6 +8,10 @@ const PANTS = 0x6e4a32;
 const HAIR = 0x3d2a1c;
 const SHOES = 0x4a3220;
 const BELT = 0x7a2e22;
+/** Quay tarp / cart canvas — original kraft tan, reads against the cream shirt. */
+const KRAFT = 0xc4b496;
+/** Crate wood / nametag edge — original strap, not a new hex. */
+const STRAP = 0x8a6238;
 
 /**
  * Metres from player.position down to the soles.
@@ -41,6 +45,9 @@ function paperBox(w, h, d, color) {
  *   arms    y 0.80–1.36   (±0.32, 1.08, 0)      0.12×0.56×0.12
  *   head    y 1.46–1.78   (0, 1.62, 0.01)       0.30×0.32×0.28
  *   hair    y 1.74–1.86   (0, 1.80, 0)          0.32×0.12×0.30
+ *   satchel y 0.64–0.92   (0.38, 0.78, 0.08)    0.18×0.28×0.14   kraft
+ *   flap    y 0.88–0.96   (0.38, 0.92, 0.09)    0.18×0.08×0.16   kraft
+ *   strap   y 0.92–1.40   (0.05, 1.14, 0.16)    0.04×0.82×0.02   cross-body
  *
  * Crown ≈ 1.86 m. Eyes ≈ 1.62 m local → world y ≈ player.y + 0.47.
  */
@@ -98,7 +105,20 @@ export function dressPlayer(player) {
   hair.position.set(0, 1.8, 0);
   hair.userData.part = "hair";
 
-  figure.add(leftShoe, rightShoe, leftLeg, rightLeg, body, belt, leftArm, rightArm, head, hair);
+  // Small kraft satchel on the right hip so spawn reads a market walker, not a
+  // blank capsule. Strap crosses the chest; do not move player.position.
+  const satchel = paperBox(0.18, 0.28, 0.14, KRAFT);
+  satchel.position.set(0.38, 0.78, 0.08);
+  satchel.userData.part = "satchel";
+  const flap = paperBox(0.18, 0.08, 0.16, KRAFT);
+  flap.position.set(0.38, 0.92, 0.09);
+  flap.userData.part = "flap";
+  const strap = paperBox(0.04, 0.82, 0.02, STRAP);
+  strap.position.set(0.05, 1.14, 0.16);
+  strap.rotation.z = -Math.atan2(0.7, 0.44);
+  strap.userData.part = "strap";
+
+  figure.add(leftShoe, rightShoe, leftLeg, rightLeg, body, belt, leftArm, rightArm, head, hair, satchel, flap, strap);
   player.add(figure);
   attachPlayerTag(player);
 }
