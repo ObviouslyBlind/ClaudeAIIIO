@@ -2,22 +2,34 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Two Harbors — paper market</title>
     <link rel="stylesheet" href="/market/style.css" />
   </head>
   <body>
     <main>
       <p class="badge">PAPER · SIMULATED · not the 3D harbour</p>
-      <p><a href="/">Back to harbour</a></p>
       <h1>Two Harbors</h1>
       <p class="lede">
-        The islands are already running. You are a paper visitor. Cash is shared with harbour
-        leases. Tap a good to buy 1 unit at the last print.
+        Two island books. North and South last prints can diverge; the ferry is the only arb
+        path. You are a paper visitor. Buy 1 fills at the North stall. Cash is shared with
+        harbour leases.
       </p>
       <section class="hud" id="hud"></section>
+      <div class="islands" role="radiogroup" aria-label="Island book">
+        <button type="button" id="btn-north" data-island="north" aria-pressed="true">North</button>
+        <button type="button" id="btn-south" data-island="south" aria-pressed="false">South</button>
+      </div>
+      <p class="stall-note" id="stall-note">
+        North last prints. Buy 1 is the North stall.
+      </p>
+      <p class="err" id="err"></p>
       <section class="board" id="board"></section>
     </main>
+    <nav class="dock" aria-label="Leave market">
+      <a href="/">Harbour</a>
+      <a href="/hansard/">Hansard</a>
+    </nav>
     <script src="/market/app.js"></script>
   </body>
 </html>
