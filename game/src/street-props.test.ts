@@ -127,6 +127,42 @@ describe("street prop setback", () => {
     }
   });
 
+  it("puts a kraft PAPER finial or cap on each verge lamp post", () => {
+    const map = createLandBoard();
+    const scene = { add(_obj: THREE.Object3D) {} };
+    const root = makeStreetProps(map, {
+      scene,
+      specOf: (id: "north" | "south") => ISLANDS[id],
+      heightAt,
+    });
+
+    const lamps: THREE.Object3D[] = [];
+    root.traverse((obj) => {
+      if (obj.userData?.prop === "lamp") lamps.push(obj);
+    });
+    expect(lamps.length).toBeGreaterThan(4);
+
+    const kraft = new Set([0x8a6238, 0x9a6a40, 0x6a4a2a, 0xf3d6a0]);
+    for (const lamp of lamps) {
+      expect(lamp.userData.mode).toBe("PAPER");
+      const tops: THREE.Object3D[] = [];
+      lamp.traverse((obj) => {
+        if (obj.userData?.part === "finial" || obj.userData?.part === "cap") tops.push(obj);
+      });
+      expect(tops.length).toBeGreaterThanOrEqual(1);
+      for (const t of tops) {
+        expect(t.userData.part === "finial" || t.userData.part === "cap").toBe(true);
+        expect(t.userData.mode).toBe("PAPER");
+        const mesh = t as THREE.Mesh;
+        expect(mesh.isMesh).toBe(true);
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        const mat = mesh.material as THREE.MeshLambertMaterial;
+        expect(mat.type).toBe("MeshLambertMaterial");
+        expect(kraft.has(mat.color.getHex())).toBe(true);
+      }
+    }
+  });
+
   it("sits kraft PAPER crate seats on the north spawn verge, off ROAD_CLEAR", () => {
     const map = createLandBoard();
     const scene = { add(_obj: THREE.Object3D) {} };

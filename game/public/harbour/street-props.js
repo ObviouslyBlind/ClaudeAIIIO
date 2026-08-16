@@ -86,8 +86,8 @@ function glassPane(w, h, d) {
 }
 
 /**
- * Paper verge lamp: square wood post, iron shoe, warm glass box on top.
- * No cobra arm, no highway kit, lantern stays on the verge.
+ * Paper verge lamp: square wood post, iron shoe, warm glass box, kraft
+ * wood cap and finial. No cobra arm, no highway kit, lantern stays on the verge.
  */
 function lampPost(_side) {
   const g = new THREE.Group();
@@ -135,12 +135,16 @@ function lampPost(_side) {
   core.position.set(0, glassY, 0);
   g.add(east, west, north, south, core);
 
-  const cap = part(0.42, 0.08, 0.42, IRON_DARK, false);
+  const cap = part(0.42, 0.08, 0.42, WOOD, false);
   cap.position.y = 3.46;
+  cap.userData.part = "cap";
+  cap.userData.mode = "PAPER";
   const hat = part(0.28, 0.06, 0.28, WOOD_LIGHT, false);
   hat.position.y = 3.52;
-  const finial = part(0.06, 0.14, 0.06, IRON, false);
+  const finial = part(0.06, 0.14, 0.06, WOOD, false);
   finial.position.y = 3.62;
+  finial.userData.part = "finial";
+  finial.userData.mode = "PAPER";
   g.add(cap, hat, finial);
   return g;
 }
