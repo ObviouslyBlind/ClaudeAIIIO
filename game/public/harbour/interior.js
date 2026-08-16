@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { dressWarehouse, isWarehousePlot, undressWarehouse } from "./warehouse.js";
 
 /** Player eye-height on the downstairs floor, metres. */
 export const DOWNSTAIRS_Y = 1.15;
@@ -437,14 +438,21 @@ export function createInterior({ scene, player, setStatus, heightAt, specOf }) {
     scene.fog = null;
     scene.background = new THREE.Color(0x2c241c);
     placePlayer("downstairs");
-    if (setStatus) {
-      setStatus("Inside downstairs (PAPER). Tap stairs for upstairs. Exit returns to your plot.");
+    if (isWarehousePlot(p)) {
+      dressWarehouse(scene);
+      if (setStatus) setStatus("Inside warehouse (PAPER). Tap the door or Exit to leave.");
+    } else {
+      undressWarehouse(scene);
+      if (setStatus) {
+        setStatus("Inside downstairs (PAPER). Tap stairs for upstairs. Exit returns to your plot.");
+      }
     }
     return true;
   }
 
   function exit() {
     if (!inside) return null;
+    undressWarehouse(scene);
     const left = plot;
     inside = false;
     group.visible = false;
