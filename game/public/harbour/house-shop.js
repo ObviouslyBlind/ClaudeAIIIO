@@ -78,8 +78,18 @@ function makeCounter(x, z) {
   return g;
 }
 
-/** Freestanding kraft cabinet — two planks of tins, readable from the door. */
-function makeShelfBox(x, z, yaw) {
+/** Small kraft / terracotta jar or tin sitting on a shelf plank. */
+function shelfJar(color, h = 0.18) {
+  const m = paperBox(0.14, h, 0.14, color, "house-shop-goods");
+  m.userData.part = "shelf-jar";
+  return m;
+}
+
+/**
+ * Freestanding kraft cabinet. Back carcass + two planks — not a solid cube —
+ * so 2–3 kraft/terracotta jars sit on the boards, readable from the door.
+ */
+function makeShelfBox(x, z, yaw, rows) {
   const g = new THREE.Group();
   g.name = "house-shop-shelf";
   g.userData.kind = "house-shop-shelf";
@@ -90,27 +100,32 @@ function makeShelfBox(x, z, yaw) {
   const w = 0.98;
   const d = 0.44;
   const h = 1.48;
-  const body = paperBox(w, h, d, WOOD, "house-shop-shelf");
-  body.position.set(0, y0 + h / 2, 0);
+  const body = paperBox(w, h, 0.14, WOOD, "house-shop-shelf");
+  body.position.set(0, y0 + h / 2, -d / 2 + 0.07);
   g.add(body);
   const back = paperBox(w - 0.06, h - 0.1, 0.06, WOOD_DARK, "house-shop-shelf");
   back.position.set(0, y0 + h / 2, -d / 2 + 0.05);
   g.add(back);
-  const goods = [
-    [CORAL, TIN, GREEN],
-    [TEAL, LINEN, CORAL],
+  for (const sx of [-w / 2 + 0.04, w / 2 - 0.04]) {
+    const cheek = paperBox(0.07, h, d - 0.06, WOOD, "house-shop-shelf");
+    cheek.position.set(sx, y0 + h / 2, 0.02);
+    g.add(cheek);
+  }
+  const goods = rows || [
+    [CORAL, TIN],
+    [LINEN],
   ];
   for (let i = 0; i < 2; i++) {
     const y = y0 + 0.44 + i * 0.54;
     const plank = paperBox(w - 0.12, 0.05, d - 0.1, WOOD_TOP, "house-shop-shelf");
     plank.position.set(0, y, 0.04);
     g.add(plank);
-    const row = goods[i];
+    const row = goods[i] || [];
     for (let k = 0; k < row.length; k++) {
-      const t = k / (row.length - 1) - 0.5;
-      const gh = 0.22 + (k % 2) * 0.08;
-      const item = paperBox(0.2, gh, 0.16, row[k], "house-shop-goods");
-      item.position.set(t * 0.62, y + gh / 2 + 0.04, 0.08);
+      const t = row.length === 1 ? 0 : k / (row.length - 1) - 0.5;
+      const gh = 0.16 + (k % 2) * 0.06;
+      const item = shelfJar(row[k], gh);
+      item.position.set(t * 0.46, y + gh / 2 + 0.04, 0.1);
       g.add(item);
     }
   }
@@ -281,8 +296,9 @@ function makeHouseShopDress() {
   // Door is at +z; enter camera looks through it at x≈0. Counter + two
   // shelf boxes sit in that strip so downstairs is not an empty dining room.
   g.add(makeCounter(0, 0.48));
-  g.add(makeShelfBox(-0.78, -0.52, 0));
-  g.add(makeShelfBox(0.78, -0.52, 0));
+  // Six kraft/terracotta jars across the two door-facing cabinets.
+  g.add(makeShelfBox(-0.78, -0.52, 0, [[CORAL, TIN], [LINEN]]));
+  g.add(makeShelfBox(0.78, -0.52, 0, [[TIN, CORAL], [CREAM]]));
   g.add(makeShortShelf(-3.28, 0.45, Math.PI / 2));
   g.add(hangingLamp(0, 2.18, 0.48));
   g.add(paperMark(-2.15, 1.62, 3.38));
