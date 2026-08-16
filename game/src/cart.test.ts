@@ -92,7 +92,7 @@ describe("player PAPER handcart", () => {
     const cart = player.getObjectByName("paper-cart")!;
     expect(cart.children.length).toBe(CART_MESH_COUNT);
     expect(meshCount(cart)).toBe(CART_MESH_COUNT);
-    expect(CART_MESH_COUNT).toBe(19);
+    expect(CART_MESH_COUNT).toBe(21);
 
     const p = parts(cart);
     expect(p).toContain("bed");
@@ -105,6 +105,7 @@ describe("player PAPER handcart", () => {
     expect(p.filter((k) => k === "strap").length).toBe(1);
     expect(p.filter((k) => k === "roll").length).toBe(1);
     expect(p.filter((k) => k === "coil").length).toBe(2);
+    expect(p.filter((k) => k === "lantern").length).toBe(2);
     expect(p.filter((k) => k === "side").length).toBe(2);
     expect(p.filter((k) => k === "end").length).toBe(2);
 
@@ -119,12 +120,18 @@ describe("player PAPER handcart", () => {
     expect([0x8a6238, 0x6a4a2a, 0x5a3a22, 0x3d2a1c, 0xc4b496]).toContain(pinHex);
     const roll = cart.children.find((c) => c.userData.part === "roll") as THREE.Mesh;
     expect(roll.geometry.type).toBe("CylinderGeometry");
+    const lanterns = cart.children.filter((c) => c.userData.part === "lantern") as THREE.Mesh[];
+    expect(lanterns.every((l) => l.geometry.type === "BoxGeometry")).toBe(true);
+    expect(lanterns.map((l) => (l.material as THREE.MeshLambertMaterial).color.getHex()).sort()).toEqual(
+      [0x8a6238, 0xf4ead8].sort(),
+    );
 
     const colors = hexes(cart);
     expect(colors).toContain(0x8a6238);
     expect(colors).toContain(0x7a5230);
     expect(colors).toContain(0x9a6a40);
     expect(colors).toContain(0xc4b496);
+    expect(colors).toContain(0xf4ead8);
     expect(colors.every(isGrey)).toBe(false);
 
     expect(cart.position.y).toBeCloseTo(-1.15, 5);
@@ -139,6 +146,7 @@ describe("player PAPER handcart", () => {
     expect(roll.position.y).toBeGreaterThan(bed.position.y);
     expect(crate.position.z).toBeLessThan(bed.position.z + 0.5);
     expect(crate.position.z).toBeGreaterThan(bed.position.z - 0.5);
+    expect(lanterns.every((l) => l.position.y > bed.position.y)).toBe(true);
   });
 
   it("is idempotent and never writes player.position", () => {
