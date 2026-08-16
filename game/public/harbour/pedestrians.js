@@ -156,6 +156,19 @@ function addKraftSatchel(figure) {
   figure.add(satchel, flap);
 }
 
+/**
+ * Tiny kraft neckerchief at the collar: a folded box that reads as a
+ * cloth triangle. Original canvas hex already in this file — no new grey.
+ * Hat, apron, and satchel stay.
+ */
+function addKraftKerchief(figure) {
+  const kerchief = paperBox(0.12, 0.1, 0.04, CANVAS);
+  kerchief.position.set(0, 1.44, 0.18);
+  kerchief.rotation.z = Math.PI / 4;
+  kerchief.userData.part = "kerchief";
+  figure.add(kerchief);
+}
+
 function polylineLength(points) {
   let n = 0;
   for (let i = 1; i < points.length; i++) {
@@ -294,6 +307,7 @@ export function makePedestrians(map, helpers) {
       addKraftStrawHat(person.mesh);
       addKraftCanvasApron(person.mesh);
       addKraftSatchel(person.mesh);
+      addKraftKerchief(person.mesh);
     }
     const at = samplePerson(spec, heightAt, person, along);
     if (!onLand(at)) return;

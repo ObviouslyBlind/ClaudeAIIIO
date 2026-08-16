@@ -200,4 +200,33 @@ describe("harbour PAPER pedestrians", () => {
     }
     expect(moved).toBe(people.length);
   });
+
+  it("ties a kraft neckerchief on quay walkers, not verge strollers", () => {
+    const figure = makePaperPerson(0);
+    expect(partsOf(figure).get("kerchief")).toBeUndefined();
+
+    const { people } = spawn();
+    const quay = people.filter((p) => p.lane === "quay");
+    const verge = people.filter((p) => p.lane === "verge");
+    expect(quay.length).toBeGreaterThanOrEqual(6);
+
+    for (const p of quay) {
+      const parts = partsOf(p.mesh);
+      expect(parts.get("kerchief")).toBeGreaterThanOrEqual(1);
+      p.mesh.traverse((obj) => {
+        if (obj.userData?.part !== "kerchief") return;
+        const mesh = obj as THREE.Mesh;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        const hex = (mesh.material as THREE.MeshLambertMaterial).color.getHex();
+        expect(isGrey(hex)).toBe(false);
+        expect(hex).toBe(0xc4b496);
+        expect(mesh.position.y).toBeGreaterThan(1.3);
+        expect(mesh.position.y).toBeLessThan(1.55);
+      });
+    }
+
+    for (const p of verge) {
+      expect(partsOf(p.mesh).get("kerchief")).toBeUndefined();
+    }
+  });
 });
