@@ -232,6 +232,22 @@ function canOpenCatalog() {
   return vacant && map.visitor.cash >= cheapestDevelop();
 }
 
+function vacantMine(p) {
+  return Boolean(p && p.owner === "visitor" && !p.use);
+}
+
+/** Selected leased lot, or the parcel under the tap. Placement must not require a second hunt. */
+function plotToDevelop(hitPlotId, x, z) {
+  const hit = hitPlotId ? map.plots.find((p) => p.id === hitPlotId) : undefined;
+  if (vacantMine(hit)) return hit;
+  if (x != null && z != null) {
+    const at = findParcelAt(x, z);
+    if (vacantMine(at)) return at;
+  }
+  const sel = selected ? map.plots.find((p) => p.id === selected) : undefined;
+  return vacantMine(sel) ? sel : undefined;
+}
+
 function catalogLabel(id) {
   const cat = map && map.catalog ? map.catalog : [];
   const hit = cat.find((c) => c.id === id);
@@ -635,26 +651,28 @@ function onPointer(ev) {
   const root = harbourGroup || scene;
   const hits = raycaster.intersectObjects(root.children, true);
   const buildingHit = hits.find((h) => objectWithKind(h.object, "building"));
-  const plotHit = hits.find((h) => h.object.userData.kind === "plot");
+  const plotHit = hits.find(
+    (h) => h.object.userData.kind === "plot" || h.object.userData.kind === "plot-line",
+  );
   const portHit = hits.find((h) => h.object.userData.kind === "port");
   const groundHit = hits.find((h) => h.object.userData.kind === "ground");
-  const tapPt = plotHit?.point || groundHit?.point || portHit?.point || buildingHit?.point;
-  if (tapPt && taxi && taxi.handleTap(tapPt.x, tapPt.z, nearestIsland(tapPt.x, tapPt.z))) {
+  const tapPt = plotHit?.point || groundHit?.point || portHit?.point || buildingHit?.point || hits[0]?.point;
+  if (
+    !placingUse &&
+    tapPt &&
+    taxi &&
+    taxi.handleTap(tapPt.x, tapPt.z, nearestIsland(tapPt.x, tapPt.z))
+  ) {
     return;
   }
   if (placingUse) {
-    const tapped = plotHit
-      ? map.plots.find((x) => x.id === plotHit.object.userData.plotId)
-      : groundHit
-        ? findParcelAt(groundHit.point.x, groundHit.point.z)
-        : undefined;
-    if (tapped && tapped.owner === "visitor" && !tapped.use) {
+    const tapped = plotToDevelop(plotHit?.object.userData.plotId, tapPt?.x, tapPt?.z);
+    if (tapped) {
       developAt(tapped.id, placingUse);
       return;
     }
-    if (tapped) {
-      setStatus("Tap land you leased that has no building yet.");
-    }
+    setStatus("Tap land you leased that has no building yet.");
+    return;
   }
   if (buildingHit) {
     const b = objectWithKind(buildingHit.object, "building");
@@ -733,6 +751,17 @@ async function developAt(plotId, use) {
 function openCatalog() {
   if (!map) return;
   if (!catalogPicker) return;
+  if (placingUse) {
+    const p = plotToDevelop(selected, player.position.x, player.position.z);
+    if (p) {
+      developAt(p.id, placingUse);
+      return;
+    }
+    placingUse = null;
+    catalogPicker.close();
+    setStatus("Placement cancelled.");
+    return;
+  }
   if (catalogPicker.isOpen()) {
     catalogPicker.close();
     placingUse = null;
@@ -875,6 +904,11 @@ async function boot() {
 catalogPicker = createCatalogPicker({
   onPick(id) {
     placingUse = id;
+    const p = plotToDevelop(selected, player.position.x, player.position.z);
+    if (p) {
+      developAt(p.id, id);
+      return;
+    }
     setStatus("Tap your leased land to place a " + catalogLabel(id) + " (PAPER).");
   },
   onCancel() {

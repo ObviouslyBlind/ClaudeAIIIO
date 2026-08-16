@@ -1,29 +1,21 @@
 # Gauntlet status
 
-Loop is live. User is the brake. Critics one-at-a-time (shared Chrome + PAPER cash). Builders may fan out. Do **not** restart play while a critic is on the page.
+Loop is live. User is the brake. Critics one-at-a-time. Do **not** restart play while a critic is on the page.
 
 ## In flight
 
-- Interiors critic `/?g=int21` — lease cheap street lot, House, Enter, Exit.
+Builders: dirt ribbon (landed), interior dress, hill trees.
+
+## Interiors
+
+- `/?g=int20` BLOCKED — lots too dear on the tarmac walk. Fixed (house-frontage lots).
+- `/?g=int21` FAIL — lease $277 worked, House pick worked, **place did not**. Second tap hit the dock / missed `kind=plot`. Fix: picking House places on the selected leased lot immediately.
+- Next critic: `/?g=int22` after play restart at Cash $1000.
 
 ## Held (pixel-ratified)
 
 Inland spawn, tarmac, HUD, traffic-on-road, taxi overlay, ferry ticket, RMB orbit, catalogue.
 
-## Mesh batch (code shipped, not re-critic’d)
+## After interiors PASS
 
-Tarmac ribbon, sedan cars, taxi cab, ferry boat, shore foam, street props, player figure, sky, water, quay clutter, building shells.
-
-## Builder queue (this round)
-
-| Piece | File only | Notes |
-|---|---|---|
-| dirt ribbon | `roads.js` | Field tracks: extruded brown ribbon, not box slabs. Leave paved + spawn camera. |
-| interior dress | `interior.js` | PAPER living room. Keep enter/exit, `canEnter`, door `kind=exit`. |
-| hill trees | `trees.js` | Already wired from `main.js`. Do not edit `main.js`. |
-
-## After interiors critic
-
-Fail → one fix, retry `/?g=int22`. Pass → pixel-critic meshes one at a time (`/?g=rib22`, cars, taxi, ferry, shore, props, player, sky/water, quay, shells). Then PLAN step B (statute table).
-
-`main.js` is wired. Builders do **not** edit `main.js`, `land.ts` centres, `PLAN.md`.
+Pixel-critic meshes one at a time, then PLAN step B (statute table).
