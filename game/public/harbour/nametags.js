@@ -20,11 +20,20 @@ const SHOES = 0x4a3220;
 const WALKER_NAMES = ["Ferry clerk", "Quay hand", "Stall keep"];
 const SHIRTS = [0xc45c3a, 0x4a6e8a, 0x6a8f44];
 
+const _world = new THREE.Vector3();
+
 function playerPos(getPlayer) {
   if (!getPlayer) return null;
   const p = getPlayer();
   if (!p) return null;
   return p.position ? p.position : p;
+}
+
+function meshOf(person) {
+  if (!person) return null;
+  if (person.isObject3D) return person;
+  if (person.mesh && person.mesh.isObject3D) return person.mesh;
+  return null;
 }
 
 function paperBox(w, h, d, color) {
@@ -39,6 +48,7 @@ function paperBox(w, h, d, color) {
 
 /** Simple canvas card: name in ink, PAPER stamp. */
 export function makePaperNametag(name) {
+  if (typeof document === "undefined") return null;
   const w = 384;
   const h = 96;
   const canvas = document.createElement("canvas");
@@ -117,7 +127,8 @@ function makePaperWalker(name, shirt) {
   hair.position.set(0, 1.56, 0);
 
   g.add(leftShoe, rightShoe, leftLeg, rightLeg, body, leftArm, rightArm, head, hair);
-  g.add(makePaperNametag(name));
+  const tag = makePaperNametag(name);
+  if (tag) g.add(tag);
   return g;
 }
 
@@ -149,31 +160,41 @@ function placeDockWalkers({ scene, specOf, heightAt }) {
   return people;
 }
 
-function nametagOf(person) {
-  return person.children.find((c) => c.userData && c.userData.kind === "nametag");
+function nametagOf(mesh) {
+  if (!mesh || !mesh.children) return null;
+  return mesh.children.find((c) => c.userData && c.userData.kind === "nametag") || null;
 }
 
 /**
  * Parent a PAPER canvas sprite above each NPC mesh. Nearby only.
+ * Accepts Object3Ds or `{ mesh }` walker records from pedestrians.js.
  */
 export function dressPaperNametags(people, { getPlayer } = {}) {
   const list = people || [];
   for (const person of list) {
-    if (nametagOf(person)) continue;
-    const name = person.userData.paperName || person.userData.name || "PAPER";
-    person.add(makePaperNametag(name));
+    const mesh = meshOf(person);
+    if (!mesh || nametagOf(mesh)) continue;
+    const name =
+      (mesh.userData && (mesh.userData.paperName || mesh.userData.name)) ||
+      person.paperName ||
+      person.name ||
+      "PAPER";
+    const tag = makePaperNametag(name);
+    if (tag) mesh.add(tag);
   }
   return {
     tick() {
       const pos = playerPos(getPlayer);
       for (const person of list) {
-        const tag = nametagOf(person);
+        const mesh = meshOf(person);
+        const tag = nametagOf(mesh);
         if (!tag) continue;
         if (!pos) {
           tag.visible = true;
           continue;
         }
-        const d = Math.hypot(person.position.x - pos.x, person.position.z - pos.z);
+        mesh.getWorldPosition(_world);
+        const d = Math.hypot(_world.x - pos.x, _world.z - pos.z);
         tag.visible = d < NEAR_M;
       }
     },
@@ -196,11 +217,13 @@ export function attachOutdoorNametags(map, helpers) {
       t += dt || 0;
       tags.tick();
       for (const person of people) {
-        const span = person.userData.span || 2.2;
-        const pace = person.userData.pace || 0.4;
-        const homeZ = person.userData.homeZ;
+        const mesh = meshOf(person);
+        if (!mesh) continue;
+        const span = mesh.userData.span || 2.2;
+        const pace = mesh.userData.pace || 0.4;
+        const homeZ = mesh.userData.homeZ;
         if (homeZ == null) continue;
-        person.position.z = homeZ + Math.sin(t * pace) * span;
+        mesh.position.z = homeZ + Math.sin(t * pace) * span;
       }
     },
   };
