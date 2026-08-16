@@ -17,11 +17,12 @@ Shore foam (denser quay dashes), quay clutter, building shells, window lights (w
 ## Pixel ferry
 
 `/?g=ferry30` **FAIL**: hull 550 m off the pier. Berth `HOME_Z=-6835`.
-`/?g=ferry31` **FAIL**: Cash $1000 but canvas stayed CSS teal `#0e4a55`, status stuck on Loading (boot blocked the main thread before the first status paint). Fix: yield between boot chunks and paint "North port · PAPER" as soon as water+player exist. Next critic: `/?g=ferry32`.
+`/?g=ferry31` **FAIL**: teal canvas, stuck on Loading.
+`/?g=ferry32` **FAIL**: same (Cash $1000, CSS teal, Loading). Boot never painted before the critic gave up; ferry mesh was also added late, after trees. Fix: first WebGL sky frame during module init, canvas CSS `#7ec8d4`, water+ferry before terrain. Next: `/?g=ferry33`.
 
 ## In flight (not ferry-only)
 
-Pixel: ferry hull at north quay `/?g=ferry32` (do not restart play). Also building: house-shop shelves, player satchel, house porch, quay coils, verge benches, extra quay walker, ferry ticket stamp.
+Pixel: ferry hull at north quay `/?g=ferry33` after first-frame + early-ferry restart. Also building: house-shop shelves, player satchel, house porch, quay coils, verge benches, extra quay walker, ferry ticket stamp.
 
 ## Next pixel (after ferry32 PASS, immediately, no wait)
 

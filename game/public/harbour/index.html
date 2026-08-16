@@ -63,7 +63,7 @@
         function stillBooting() {
           if (!status) return false;
           var t = status.textContent || "";
-          return t.indexOf("Loading") === 0 || t.indexOf("BOOT FAIL") === 0;
+          return t.indexOf("Loading") === 0 || t.indexOf("BOOT FAIL") === 0 || t.indexOf("Cash loaded") === 0;
         }
         function fail(msg) {
           if (status && stillBooting()) status.textContent = "BOOT FAIL: " + msg;
@@ -94,6 +94,7 @@
                 "Cash $" +
                 Number(d.visitor.cash).toLocaleString("en-US", { maximumFractionDigits: 0 });
             }
+            if (status && stillBooting()) status.textContent = "Cash loaded · starting 3D · PAPER";
           })
           .catch(function (e) {
             fail("map " + (e && e.message ? e.message : e));
