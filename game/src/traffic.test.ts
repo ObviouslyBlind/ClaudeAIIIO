@@ -119,6 +119,7 @@ describe("road node traffic", () => {
     expect(parts.get("aerial")).toBe(1);
     expect(parts.get("wiper")).toBeGreaterThanOrEqual(2);
     expect(parts.get("bolt")).toBe(1);
+    expect(parts.get("board")).toBe(1);
     expect(colors).toContain(0xc45c3a);
     expect(mast).toBe(0);
     expect(mesh.children.length).toBeGreaterThan(6);
@@ -282,6 +283,48 @@ describe("road node traffic", () => {
       expect(COLORS).toContain(bodyHex);
       expect(wheelHexes.length).toBe(4);
       expect(wheelHexes.every((h) => h === wheelRubber)).toBe(true);
+    }
+  });
+
+  it("puts one tiny kraft PAPER running board on every sedan; aerial and wiper remain", () => {
+    const board = createLandBoard();
+    const scene = { add() {} };
+    const traffic = createTraffic({
+      scene,
+      getMap: () => board,
+      specOf: (id: "north" | "south") => ISLANDS[id],
+      heightAt,
+    });
+    expect(traffic.cars.length).toBeGreaterThan(0);
+    for (const car of traffic.cars) {
+      const boards: THREE.Mesh[] = [];
+      const aerials: THREE.Mesh[] = [];
+      const wipers: THREE.Mesh[] = [];
+      car.mesh.traverse((obj: THREE.Object3D) => {
+        const name = obj.userData?.part;
+        if (name === "board") boards.push(obj as THREE.Mesh);
+        if (name === "aerial") aerials.push(obj as THREE.Mesh);
+        if (name === "wiper") wipers.push(obj as THREE.Mesh);
+      });
+      expect(boards.length).toBe(1);
+      expect(aerials.length).toBe(1);
+      expect(wipers.length).toBeGreaterThanOrEqual(2);
+      const step = boards[0]!;
+      expect(step.geometry.type).toBe("BoxGeometry");
+      const mat = step.material as THREE.MeshLambertMaterial;
+      expect(mat.color.getHex()).toBe(0xf4ead8);
+      const geo = step.geometry as THREE.BoxGeometry;
+      expect(geo.parameters.width).toBeLessThan(0.16);
+      expect(geo.parameters.height).toBeLessThan(0.16);
+      expect(geo.parameters.depth).toBeLessThan(0.6);
+      expect(Math.abs(step.position.x)).toBeGreaterThan(1.0);
+      expect(step.position.y).toBeGreaterThan(0.2);
+      expect(step.position.y).toBeLessThan(0.7);
+      const aerial = aerials[0]!;
+      expect(Math.hypot(step.position.x - aerial.position.x, step.position.z - aerial.position.z)).toBeGreaterThan(0.8);
+      for (const wiper of wipers) {
+        expect(Math.hypot(step.position.x - wiper.position.x, step.position.z - wiper.position.z)).toBeGreaterThan(0.8);
+      }
     }
   });
 });
