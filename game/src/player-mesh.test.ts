@@ -55,6 +55,7 @@ describe("player PAPER visor", () => {
     expect(p.filter((k) => k === "hat").length).toBe(2);
     expect(p).toContain("satchel");
     expect(p).toContain("buckle");
+    expect(p.filter((k) => k === "pocket").length).toBeGreaterThanOrEqual(1);
 
     const visor = figure.children.find((c) => c.userData.part === "visor") as THREE.Mesh;
     const hats = figure.children.filter((c) => c.userData.part === "hat") as THREE.Mesh[];
@@ -69,6 +70,16 @@ describe("player PAPER visor", () => {
     expect(hats.some((h) => (h.material as THREE.MeshLambertMaterial).color.getHex() === SHIRT)).toBe(
       true,
     );
+
+    const pocket = figure.children.find((c) => c.userData.part === "pocket") as THREE.Mesh;
+    expect(pocket).toBeTruthy();
+    expect(pocket.geometry.type).toBe("BoxGeometry");
+    expect((pocket.material as THREE.MeshLambertMaterial).color.getHex()).toBe(KRAFT);
+    expect(pocket.position.y).toBeGreaterThan(1.05);
+    expect(pocket.position.y).toBeLessThan(1.3);
+    expect(pocket.position.z).toBeGreaterThan(0.12);
+    const pocketBox = pocket.geometry as THREE.BoxGeometry;
+    expect(pocketBox.parameters.depth).toBeLessThan(0.08);
 
     const brim = hats.find((h) => (h.material as THREE.MeshLambertMaterial).color.getHex() === KRAFT)!;
     expect(visor.position.z).toBeGreaterThan(brim.position.z);

@@ -49,6 +49,7 @@ function paperBox(w, h, d, color) {
  *   brim    y 1.84–1.88   (0, 1.86, 0)          0.52×0.04×0.52   kraft
  *   hat     y 1.88–1.98   (0, 1.93, 0)          0.28×0.10×0.28   cream
  *   visor   y 1.84–1.87   (0, 1.855, 0.32)      0.30×0.03×0.16   kraft, forward
+ *   pocket  y 1.13–1.25   (−0.10, 1.19, 0.16)   0.12×0.12×0.04   kraft, shirt
  *   satchel y 0.64–0.92   (0.38, 0.78, 0.08)    0.18×0.28×0.14   kraft
  *   flap    y 0.88–0.96   (0.38, 0.92, 0.09)    0.18×0.08×0.16   kraft
  *   strap   y 0.92–1.40   (0.05, 1.14, 0.16)    0.04×0.82×0.02   cross-body
@@ -89,6 +90,11 @@ export function dressPlayer(player) {
   const body = paperBox(0.46, 0.6, 0.28, SHIRT);
   body.position.set(0, 1.12, 0);
   body.userData.part = "body";
+
+  // Thin kraft pocket on the cream shirt front. Same tan as the visor / satchel.
+  const pocket = paperBox(0.12, 0.12, 0.04, KRAFT);
+  pocket.position.set(-0.1, 1.19, 0.16);
+  pocket.userData.part = "pocket";
 
   const belt = paperBox(0.48, 0.08, 0.3, BELT);
   belt.position.set(0, 0.84, 0);
@@ -146,6 +152,7 @@ export function dressPlayer(player) {
     leftLeg,
     rightLeg,
     body,
+    pocket,
     belt,
     buckle,
     leftArm,
