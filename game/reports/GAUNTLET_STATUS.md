@@ -19,11 +19,12 @@ Shore foam (denser quay dashes), quay clutter, building shells, window lights (w
 `/?g=ferry30` **FAIL**: hull 550 m off the pier. Berth `HOME_Z=-6835`.
 `/?g=ferry31` **FAIL**: teal canvas, stuck on Loading.
 `/?g=ferry33` **FAIL**: Loading + body teal.
-`/?g=ferry34` **FAIL BOOT**: critic was on stale Chrome tab `/?g=ferry32` (Loading, body teal). Next: unique path `/g/ferry35`.
+`/?g=ferry34` **FAIL BOOT**: stale tab `/?g=ferry32`.
+`/g/ferry35` **FAIL HULL**: boot worked (cyan sky, North port · PAPER, $1000) but spawn camera looks inland. Hull is seaward of the pier. Next critic `/g/ferry36` must RMB-orbit toward the water.
 
 ## In flight (not ferry-only)
 
-Pixel: ferry hull at north quay `http://localhost:8787/g/ferry35` (close other Two Harbors tabs). Do not restart play while the critic is on the page.
+Pixel: ferry hull at north quay `http://localhost:8787/g/ferry36`. Spawn looks inland; RMB-orbit toward cyan water. Do not restart play while the critic is on the page.
 
 ## Next pixel (after ferry33 PASS, immediately, no wait)
 
