@@ -8,11 +8,11 @@ Not a Capital Rift clone. No new politics.
 
 ## Held (pixel-ratified)
 
-Inland spawn, paved ribbon, dirt, cars, yellow taxi, trees+cart, lease → House → Enter → Exit, ferry ticket $15, RMB orbit, cream ferry hull at north quay (`/g/ferry37` PASS, no orbit).
+Inland spawn, paved ribbon, dirt, cars, yellow taxi, trees+cart, lease → House → Enter → Exit, ferry ticket $15, RMB orbit, cream ferry hull at north quay (`/g/ferry37` PASS, no orbit), kraft/cream shore foam bars in the north-quay basin (`/g/shore40` PASS).
 
 ## Held (code, live on the same page as the ferry)
 
-Shore foam (basin bars between pier lip and ferry — `/g/shore39` FAIL FOAM was side-only), quay clutter, building shells, window lights (warmer glow), stalls (awning stripes + lantern), pedestrians (cloth colours + kerchief), nametags (larger kraft cards), warehouse (floor crates)/factory (floor machines)/shop (counter)/farm (crop beds)/house-shop (shelves) interiors, presence, cart (crate + canvas strap), staff hire/fire, bid/ask/sell/cancel + market cancel button, North/South books, upkeep, persist dump + restore control, lease afford, player "You · PAPER" tag + satchel, north and south port signs, calendar, develop afford, ferry fare, taxi fare, sales tax, held-goods, faucet/sink, stall last-print, quay lamp posts, street verge lamps, House chimney + porch slab + shutters, deeper quay-channel water, spawn verge trees, taxi roof sign + door handles, sedan paint + mirrors, warmer sky haze, House downstairs table + clock, extra quay coils, verge crate seats, kraft ferry-ticket stamp, ferry deck bollards, quay tyre fenders.
+Quay clutter (crates, bollards, dinghies, fenders, life rings, gangplank — next pixel), building shells, window lights (warmer glow), stalls (awning stripes + lantern + melon), pedestrians (cloth colours + kerchief + gloves), nametags (larger kraft cards + fold), warehouse (floor crates + clipboard)/factory (floor machines + wrench)/shop (counter + parcel)/farm (crop beds + churn)/house-shop (shelves + bell) interiors, presence, cart (crate + canvas strap + hubs), staff hire/fire, bid/ask/sell/cancel + market cancel button, North/South books, upkeep, persist dump + restore control, lease afford, player "You · PAPER" tag + satchel + kraft fold, north and south port signs, calendar, develop afford, ferry fare + ticket serial `NO. 15 · PAPER`, taxi fare + roof aerial, sales tax, held-goods, faucet/sink, stall last-print, quay lamp posts, street verge lamps, House chimney + porch slab + shutters + door knocker, deeper quay-channel water, spawn verge trees, taxi roof sign + door handles, sedan paint + mirrors, warmer sky haze, House downstairs table + clock + framed picture, extra quay coils, verge crate seats, kraft ferry-ticket stamp, ferry deck bollards + cabin life ring, quay tyre fenders.
 
 ## Pixel ferry
 
@@ -27,15 +27,16 @@ Shore foam (basin bars between pier lip and ferry — `/g/shore39` FAIL FOAM was
 ## Pixel shore foam
 
 `/g/shore38` **FAIL FOAM**: hairline dashes.
-`/g/shore39` **FAIL FOAM**: still no bars at the seaward waterline (side dashes read as the beige pier). Foam now sits in the basin between the timber lip and the ferry, and loads with the hull. Next `/g/shore40`.
+`/g/shore39` **FAIL FOAM**: side dashes read as the beige pier.
+`/g/shore40` **PASS**: pale kraft/cream rectangular bars in the teal basin between pier lip and cream ferry.
 
 ## In flight (not ferry-only)
 
-Pixel: kraft/cream shore foam bars in the north-quay **basin** `http://localhost:8787/g/shore40`. No RMB. Close other Two Harbors tabs. Address bar must be `/g/shore40`. Do not restart play while the critic is on the page.
+Pixel: working-harbour **quay clutter** on the north timber pier `http://localhost:8787/g/quay41`. No RMB. Close other Two Harbors tabs. Address bar must be `/g/quay41`. Do not restart play while the critic is on the page.
 
-## Next pixel (after shore39 PASS, immediately, no wait)
+## Next pixel (after quay41 PASS, immediately, no wait)
 
-Quay clutter, shells+lights, stalls, econ/nearby/staff lines, pedestrians, nametags, interiors.
+Shells+lights, stalls, econ/nearby/staff lines, pedestrians, nametags, interiors.
 
 ## Frozen
 
