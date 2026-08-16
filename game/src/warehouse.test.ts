@@ -337,3 +337,100 @@ describe("warehouse PAPER kraft lantern", () => {
     expect(interior.userData.interiorUse).toBe("house");
   });
 });
+
+describe("warehouse PAPER kraft coil", () => {
+  it("sits one kraft PAPER rope coil on the warehouse floor", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressWarehouse(scene);
+
+    const dress = interior.getObjectByName("warehouse-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+    expect(dress!.visible).toBe(true);
+
+    const coils: THREE.Object3D[] = [];
+    const crates: THREE.Object3D[] = [];
+    const brooms: THREE.Object3D[] = [];
+    const lanterns: THREE.Object3D[] = [];
+    const clipboards: THREE.Object3D[] = [];
+    const hooks: THREE.Object3D[] = [];
+    dress!.traverse((obj) => {
+      if (obj.userData?.kind === "warehouse-coil" && obj.name === "warehouse-coil") {
+        coils.push(obj);
+      }
+      if (obj.name === "warehouse-floor-crate") crates.push(obj);
+      if (obj.userData?.kind === "warehouse-broom" && obj.name === "warehouse-broom") {
+        brooms.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-lantern" && obj.name === "warehouse-lantern") {
+        lanterns.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-clipboard" && obj.name === "warehouse-clipboard") {
+        clipboards.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-hook" && obj.name === "warehouse-hook") {
+        hooks.push(obj);
+      }
+    });
+    expect(coils.length).toBe(1);
+    expect(crates.length).toBeGreaterThanOrEqual(2);
+    expect(brooms.length).toBe(1);
+    expect(lanterns.length).toBe(1);
+    expect(clipboards.length).toBeGreaterThanOrEqual(1);
+    expect(hooks.length).toBeGreaterThanOrEqual(1);
+
+    const coil = coils[0];
+    expect(coil.userData.kind).toBe("warehouse-coil");
+    expect(coil.userData.mode).toBe("PAPER");
+    expect(coil.position.y).toBe(0);
+    expect(Math.abs(coil.position.x)).toBeLessThan(3.2);
+    expect(Math.abs(coil.position.z)).toBeLessThan(3.0);
+    for (const crate of crates) expect(horizDist(coil, crate)).toBeGreaterThan(1.2);
+    expect(horizDist(coil, brooms[0])).toBeGreaterThan(1.5);
+    expect(horizDist(coil, lanterns[0])).toBeGreaterThan(1.5);
+    expect(horizDist(coil, clipboards[0])).toBeGreaterThan(1.5);
+    expect(horizDist(coil, hooks[0])).toBeGreaterThan(1.5);
+
+    const colors = hexes(coil);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.every((c) => KRAFT.has(c))).toBe(true);
+    expect(colors.some((c) => c === 0x8a6238 || c === 0x7a5230 || c === 0x9a6a40)).toBe(true);
+    expect(colors.every((c) => !isGrey(c))).toBe(true);
+
+    let boxes = 0;
+    coil.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        boxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.kind).toBe("warehouse-coil");
+        expect(mesh.userData.mode).toBe("PAPER");
+      }
+    });
+    expect(boxes).toBeGreaterThanOrEqual(2);
+  });
+
+  it("keeps dress idempotent and hides the coil on undress", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressWarehouse(scene);
+    dressWarehouse(scene);
+    expect(interior.children.filter((c) => c.name === "warehouse-dress").length).toBe(1);
+
+    const dressed = interior.getObjectByName("warehouse-dress")!;
+    const coils: THREE.Object3D[] = [];
+    dressed.traverse((obj) => {
+      if (obj.name === "warehouse-coil") coils.push(obj);
+    });
+    expect(coils.length).toBe(1);
+
+    undressWarehouse(scene);
+    const dress = interior.getObjectByName("warehouse-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.visible).toBe(false);
+    expect(interior.userData.interiorUse).toBe("house");
+  });
+});
