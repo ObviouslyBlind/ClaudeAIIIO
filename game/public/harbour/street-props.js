@@ -190,6 +190,45 @@ function crateSeat(_side) {
 }
 
 /**
+ * Small kraft wood stool. Four box legs and a lid seat — not an iron
+ * café stem, not a cylinder.
+ */
+function woodStool(_side) {
+  const g = new THREE.Group();
+  g.name = "wood-stool";
+  g.userData.kind = "street-prop";
+  g.userData.prop = "stool";
+  g.userData.mode = "PAPER";
+  g.userData.part = "wood-stool";
+
+  const seat = part(0.4, 0.06, 0.4, WOOD_LIGHT, false);
+  seat.userData.part = "seat";
+  seat.position.y = 0.43;
+  const rim = part(0.38, 0.04, 0.38, WOOD_DARK, false);
+  rim.position.y = 0.38;
+
+  for (const [dx, dz] of [
+    [-0.14, -0.14],
+    [0.14, -0.14],
+    [-0.14, 0.14],
+    [0.14, 0.14],
+  ]) {
+    const leg = part(0.07, 0.4, 0.07, WOOD);
+    leg.userData.part = "leg";
+    leg.position.set(dx, 0.2, dz);
+    g.add(leg);
+  }
+
+  const railA = part(0.3, 0.04, 0.06, WOOD_DARK, false);
+  railA.position.set(0, 0.12, 0);
+  const railB = part(0.06, 0.04, 0.3, WOOD_DARK, false);
+  railB.position.set(0, 0.12, 0);
+
+  g.add(seat, rim, railA, railB);
+  return g;
+}
+
+/**
  * Kraft wooden hawser drum / rope reel. Paper boxes: wood flanges and
  * cradle, kraft cream wound hawser. Not an iron cable reel, not a cylinder coil.
  */
@@ -251,6 +290,7 @@ function makeProp(kind, side) {
   if (kind === "bench") return crateSeat(side);
   if (kind === "sign") return streetSign(side);
   if (kind === "hawser-drum") return hawserDrum(side);
+  if (kind === "stool") return woodStool(side);
   return lampPost(side);
 }
 
@@ -353,7 +393,12 @@ function planForIsland(island, length) {
       { along: 118, side: 1 },
       { along: 188, side: -1 },
     ]) {
-      plan.push({ along: s.along, side: s.side, kind: "hawser-drum", setback: streetSetbackM(idx++) });
+      const setback = streetSetbackM(idx++);
+      plan.push({ along: s.along, side: s.side, kind: "hawser-drum", setback });
+      // One small kraft wood stool beside the first spawn-verge hawser.
+      if (s.along === 48) {
+        plan.push({ along: 50, side: s.side, kind: "stool", setback });
+      }
     }
   } else {
     for (let along = 38, n = 0; along <= portM; along += 72, n++) {
@@ -400,7 +445,7 @@ function placeOne(map, road, spec, heightAt, slot, root) {
 }
 
 /**
- * Paper lamp posts, kraft crate seats, hawser drums, and signs along the paved spline, on the grass verge.
+ * Paper lamp posts, kraft crate seats, hawser drums, one wood stool, and signs along the paved spline, on the grass verge.
  * North port stretch is packed first so spawn looking inland actually sees them.
  */
 export function makeStreetProps(map, helpers) {
