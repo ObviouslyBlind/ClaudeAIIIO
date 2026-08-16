@@ -176,3 +176,88 @@ describe("house-shop PAPER receipt pad", () => {
     expect(interior.userData.interiorUse).toBe("house");
   });
 });
+
+describe("house-shop PAPER counter jar", () => {
+  it("sits a kraft PAPER jar on the house-shop counter", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressHouseShop(scene);
+
+    const dress = interior.getObjectByName("house-shop-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+
+    const jars: THREE.Object3D[] = [];
+    dress!.traverse((obj) => {
+      if (obj.userData?.kind === "house-shop-jar" && obj.name === "house-shop-jar") {
+        jars.push(obj);
+      }
+    });
+    expect(jars.length).toBe(1);
+
+    const jar = jars[0];
+    expect(jar.userData.kind).toBe("house-shop-jar");
+    expect(jar.userData.mode).toBe("PAPER");
+    // Counter top is ~1.12; jar sits on it, not hanging with the bell.
+    expect(jar.position.y).toBeGreaterThan(1.0);
+    expect(jar.position.y).toBeLessThan(1.25);
+    expect(Math.abs(jar.position.x)).toBeLessThan(1.2);
+    expect(jar.position.z).toBeGreaterThan(0.1);
+    expect(jar.position.z).toBeLessThan(0.9);
+
+    const pad = dress!.getObjectByName("house-shop-pad");
+    const bell = dress!.getObjectByName("house-shop-bell");
+    expect(pad).toBeTruthy();
+    expect(bell).toBeTruthy();
+    const padOffset = Math.hypot(
+      jar.position.x - pad!.position.x,
+      jar.position.z - pad!.position.z,
+    );
+    const bellOffset = Math.hypot(
+      jar.position.x - bell!.position.x,
+      jar.position.z - bell!.position.z,
+    );
+    expect(padOffset).toBeGreaterThan(0.25);
+    expect(bellOffset).toBeGreaterThan(0.25);
+
+    const colors = hexes(jar);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.every((c) => c === WOOD || c === TIN || c === CREAM)).toBe(true);
+    expect(colors.some((c) => c === WOOD)).toBe(true);
+    expect(colors.some((c) => c === TIN)).toBe(true);
+    expect(colors.some((c) => c === CREAM)).toBe(true);
+    expect(colors.every((c) => !isGrey(c))).toBe(true);
+
+    jar.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.kind).toBe("house-shop-jar");
+        expect(mesh.userData.mode).toBe("PAPER");
+      }
+    });
+  });
+
+  it("keeps dress idempotent and hides the jar on undress", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressHouseShop(scene);
+    dressHouseShop(scene);
+
+    const jars: THREE.Object3D[] = [];
+    interior.traverse((obj) => {
+      if (obj.name === "house-shop-jar") jars.push(obj);
+    });
+    expect(jars.length).toBe(1);
+
+    undressHouseShop(scene);
+    const dress = interior.getObjectByName("house-shop-dress");
+    const jar = interior.getObjectByName("house-shop-jar");
+    expect(dress).toBeTruthy();
+    expect(jar).toBeTruthy();
+    expect(dress!.visible).toBe(false);
+    expect(interior.userData.interiorUse).toBe("house");
+  });
+});

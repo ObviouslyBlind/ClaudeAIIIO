@@ -299,6 +299,26 @@ function makeReceiptPad(x, y, z) {
   return g;
 }
 
+/**
+ * Small kraft PAPER jar on the counter — tin body, cream band, wood lid.
+ * PAPER boxes only. Offset from the receipt pad and bell. Not a till.
+ */
+function makeCounterJar(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "house-shop-jar";
+  g.userData.kind = "house-shop-jar";
+  g.userData.mode = "PAPER";
+  g.position.set(x, y, z);
+  const body = paperBox(0.14, 0.18, 0.14, TIN, "house-shop-jar");
+  body.position.set(0, 0.09, 0);
+  const band = paperBox(0.15, 0.04, 0.15, CREAM, "house-shop-jar");
+  band.position.set(0, 0.1, 0);
+  const lid = paperBox(0.16, 0.04, 0.16, WOOD, "house-shop-jar");
+  lid.position.set(0, 0.2, 0);
+  g.add(body, band, lid);
+  return g;
+}
+
 function tableLamp(x, y, z) {
   const g = new THREE.Group();
   g.name = "house-shop-lamp";
@@ -347,6 +367,8 @@ function makeHouseShopDress() {
   g.add(hangingBell(0.62, 1.78, 0.62));
   // Kraft receipt pad on the counter top, offset from the bell so both read.
   g.add(makeReceiptPad(0.18, 1.12, 0.36));
+  // Kraft jar on the counter, offset from the pad and bell so all three read.
+  g.add(makeCounterJar(-0.28, 1.12, 0.32));
   g.add(paperMark(-2.15, 1.62, 3.38));
 
   const rug = paperBox(1.55, 0.04, 1.25, RUG, "house-shop-rug");
