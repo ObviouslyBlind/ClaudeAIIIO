@@ -10,11 +10,12 @@ import * as THREE from "three";
  *
  * Warm wood — harbour crate family: 0x8a6238 / 0x7a5230 / 0x9a6a40.
  * Bed load: two small kraft crates + one canvas roll + a short kraft rope coil
- * + a thin kraft canvas strap over the visitor crate.
+ * + a thin kraft canvas strap over the visitor crate + a small kraft lantern
+ * (WOOD post + cream glass box) near the headboard.
  * Wheels: kraft cream hub discs (paper boxes) on the outer face of each wheel.
  * Grip: a short kraft hitch pin (paper box) through the handle.
  */
-export const CART_MESH_COUNT = 19;
+export const CART_MESH_COUNT = 21;
 /** Metres from player.position down to the soles. Same as player.js SOLE_Y. */
 const SOLE_Y = -1.15;
 
@@ -26,6 +27,8 @@ const WOOD_HANDLE = 0x5a3a22;
 const WHEEL = 0x3d2a1c;
 /** Same canvas as quay tarps / dinghy gunwales — not a new hex. */
 const CANVAS = 0xc4b496;
+/** Cottage-wall cream — lantern glass (0xffd090 / 0xe8a45a not in this file). */
+const GLASS = 0xf4ead8;
 
 function paperBox(w, h, d, color, shadow = true) {
   const mesh = new THREE.Mesh(
@@ -137,7 +140,16 @@ function makeHandcart() {
   coilTop.position.set(-0.16, 0.645, -0.84);
   coilTop.userData.part = "coil";
 
-  g.add(bed, sideL, sideR, tail, head, wheelL, wheelR, hubL, hubR, handleL, handleR, grip, pin, crate, strap, crate2, roll, coil, coilTop);
+  // Small kraft lantern on the bed — WOOD post + cream glass box, paper only.
+  // Front-left corner, inside the side rail, clear of the coil.
+  const lanternPost = paperBox(0.04, 0.22, 0.04, WOOD, false);
+  lanternPost.position.set(-0.28, 0.64, -0.58);
+  lanternPost.userData.part = "lantern";
+  const lanternGlass = paperBox(0.1, 0.12, 0.1, GLASS, false);
+  lanternGlass.position.set(-0.28, 0.81, -0.58);
+  lanternGlass.userData.part = "lantern";
+
+  g.add(bed, sideL, sideR, tail, head, wheelL, wheelR, hubL, hubR, handleL, handleR, grip, pin, crate, strap, crate2, roll, coil, coilTop, lanternPost, lanternGlass);
   return g;
 }
 
