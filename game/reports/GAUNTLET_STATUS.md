@@ -1,20 +1,28 @@
 # Gauntlet status
 
-Loop is **autonomous**. Critic = pixels only. User should not have to list remaining bugs.
+Ten **builders** in parallel. Critics stay one-at-a-time (shared Chrome + PAPER cash).
 
-## Held (pixel-ratified)
+## File lock (do not cross)
 
-- Inland spawn + black tarmac + PAPER HUD
-- Traffic (cars on paved), taxi overlay, ferry ticket, RMB orbit, Develop catalogue
+| Agent | File only |
+|---|---|
+| tarmac ribbon | `roads.js` |
+| cars | `traffic.js` |
+| taxi cab | `taxi.js` (mesh only) |
+| ferry boat | `ferry.js` |
+| shore | `shore.js` |
+| building shells | `buildings.js` |
+| street props | `street-props.js` |
+| player | `player.js` |
+| sky | `sky.js` |
+| water | `water.js` |
 
-## Gaps just taken from pixels (not waiting for a punch list)
+`main.js` is wired. Builders do **not** edit `main.js`, `land.ts` centres, `PLAN.md`, or `quay.js` (harbour-kit owns it).
 
-- **Red debug masts on cars** — removed
-- **Lease can spend the whole wallet** so Develop is impossible ($983 lot → $17). Lease now refuses `need_develop_cash` if leftover < house cost. HUD: “leaves no develop cash”. **Enter** hidden unless the selected plot is yours and built
-- **Empty port** — harbour-kit builder in flight (extra quay clutter / palms)
+## Held
 
-## Next critic
+Inland spawn, tarmac, HUD, traffic-on-road, taxi overlay, ferry ticket, RMB orbit, catalogue.
 
-**Interiors retry** `/?g=int20`. Round 19 FAIL: leased a $983 lot, $17 left, House is $40. Headroom guard is live — pick a lot under $500.
+## In flight
 
-Do not rewrite PLAN.md or island centres.
+Interiors critic `/?g=int20`. Harbour-kit on `quay.js`.

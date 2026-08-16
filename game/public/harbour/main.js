@@ -16,6 +16,10 @@ import { canEnter, createInterior, objectWithKind, wrapHarbourWorld } from "./in
 import { createPlayCamera } from "./camera.js";
 import { createFerryTicket } from "./ferry-ticket.js";
 import { createCatalogPicker, meshForUse } from "./buildings.js";
+import { makeWater } from "./water.js";
+import { makeSky } from "./sky.js";
+import { makeStreetProps } from "./street-props.js";
+import { dressPlayer } from "./player.js";
 
 function ensureDockButton(id, label) {
   let btn = document.getElementById(id);
@@ -84,6 +88,7 @@ try {
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x7ec8d4);
 scene.fog = new THREE.Fog(0x7ec8d4, FOG_NEAR_M, FOG_FAR_M);
+makeSky(scene);
 
 const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.4, CAMERA_FAR_M);
 
@@ -123,6 +128,7 @@ const player = new THREE.Mesh(
   new THREE.MeshLambertMaterial({ color: 0xf2d2a8 }),
 );
 player.castShadow = true;
+dressPlayer(player);
 scene.add(player);
 
 const plotMeshes = new Map();
@@ -813,13 +819,7 @@ async function boot() {
     setStatus("Map loaded. 3D harbour failed (WebGL).");
     return;
   }
-  const water = new THREE.Mesh(
-    new THREE.PlaneGeometry(80000, 80000),
-    new THREE.MeshLambertMaterial({ color: 0x1d7a86 }),
-  );
-  water.rotation.x = -Math.PI / 2;
-  water.position.y = 0;
-  scene.add(water);
+  makeWater(scene);
   spawnAt("north");
   startLoop();
   makeTerrain(specOf("north"));
@@ -827,6 +827,7 @@ async function boot() {
   makeShoreFoam(specOf("north"), heightAt, scene);
   makeShoreFoam(specOf("south"), heightAt, scene);
   makeRoads(map, { scene, specOf, heightAt });
+  makeStreetProps(map, { scene, specOf, heightAt });
   makePort(specOf("north"));
   makeQuay(specOf("north"), { scene, heightAt });
   makePort(specOf("south"));
