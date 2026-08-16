@@ -67,17 +67,22 @@ function ensureTax() {
   return el;
 }
 
+async function readJson(fetchImpl, url) {
+  const res = await fetchImpl(url);
+  if (!res || !res.ok) return null;
+  return await res.json();
+}
+
 async function loadStatutes(fetchImpl) {
   if (typeof fetchImpl !== "function") return null;
   try {
-    const res = await fetchImpl("/api/statutes");
-    if (res && res.ok) return await res.json();
+    const data = await readJson(fetchImpl, "/api/statutes");
+    if (data && salesTaxRow(data)) return data;
   } catch {
     /* fall through to snapshot statutes */
   }
   try {
-    const res = await fetchImpl("/api/snapshot");
-    if (res && res.ok) return await res.json();
+    return await readJson(fetchImpl, "/api/snapshot");
   } catch {
     /* keep the last painted PAPER line */
   }
