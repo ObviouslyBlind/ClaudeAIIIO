@@ -44,6 +44,7 @@ function paperBox(w, h, d, color) {
  *   buckle  y 0.81–0.87   (0, 0.84, 0.17)       0.10×0.06×0.04   kraft
  *   body    y 0.82–1.42   (0, 1.12, 0)          0.46×0.60×0.28
  *   arms    y 0.80–1.36   (±0.32, 1.08, 0)      0.12×0.56×0.12
+ *   cuffs   y 0.79–0.85   (±0.32, 0.82, 0)      0.14×0.06×0.14   kraft, wrists
  *   head    y 1.46–1.78   (0, 1.62, 0.01)       0.30×0.32×0.28
  *   hair    y 1.74–1.86   (0, 1.80, 0)          0.32×0.12×0.30
  *   brim    y 1.84–1.88   (0, 1.86, 0)          0.52×0.04×0.52   kraft
@@ -112,6 +113,14 @@ export function dressPlayer(player) {
   rightArm.position.set(0.32, 1.08, 0);
   rightArm.userData.part = "arm";
 
+  // Thin kraft shirt cuffs at each wrist (arm ends). Same tan as the pocket.
+  const leftCuff = paperBox(0.14, 0.06, 0.14, KRAFT);
+  leftCuff.position.set(-0.32, 0.82, 0);
+  leftCuff.userData.part = "cuff";
+  const rightCuff = paperBox(0.14, 0.06, 0.14, KRAFT);
+  rightCuff.position.set(0.32, 0.82, 0);
+  rightCuff.userData.part = "cuff";
+
   const head = paperBox(0.3, 0.32, 0.28, SKIN);
   head.position.set(0, 1.62, 0.01);
   head.userData.part = "head";
@@ -157,6 +166,8 @@ export function dressPlayer(player) {
     buckle,
     leftArm,
     rightArm,
+    leftCuff,
+    rightCuff,
     head,
     hair,
     brim,
