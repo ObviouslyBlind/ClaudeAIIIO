@@ -442,6 +442,28 @@ describe("taxi roof lamp", () => {
     expect(plates.length).toBeGreaterThanOrEqual(1);
   });
 
+  it("puts one tiny kraft PAPER visor on the taxi; flag and fare remain", () => {
+    const mesh = makeTaxiMesh();
+    const visors: THREE.Mesh[] = [];
+    const flags: THREE.Mesh[] = [];
+    const fares: THREE.Mesh[] = [];
+    const kraftVisor = new Set([0xc4a574, 0xf4ead8]);
+    mesh.traverse((obj) => {
+      const m = obj as THREE.Mesh & { userData: { part?: string; mode?: string } };
+      if (m.userData?.part === "visor") visors.push(m);
+      if (m.userData?.part === "flag") flags.push(m);
+      if (m.userData?.part === "fare") fares.push(m);
+    });
+    expect(visors.length).toBeGreaterThanOrEqual(1);
+    expect(visors.every((v) => v.geometry.type === "BoxGeometry")).toBe(true);
+    expect(visors.every((v) => v.userData.mode === "PAPER")).toBe(true);
+    expect(
+      visors.every((v) => kraftVisor.has((v.material as THREE.MeshLambertMaterial).color.getHex())),
+    ).toBe(true);
+    expect(flags.length).toBeGreaterThanOrEqual(1);
+    expect(fares.length).toBeGreaterThanOrEqual(1);
+  });
+
   it("parks the cab on paved at spawn so the roof lamp is in the first frame", () => {
     const board = createLandBoard();
     const spec = ISLANDS.north;
