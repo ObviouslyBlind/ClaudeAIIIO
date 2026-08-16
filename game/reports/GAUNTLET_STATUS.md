@@ -17,6 +17,6 @@ Catalogue · interiors
 
 ## Next piece
 
-**Develop catalogue.** Lease a vacant parcel, click **Develop**, see the PAPER picker (house, shop, house with shop, farm, warehouse, factory) with paper costs. Do not require a finished interior this round.
+**Develop catalogue.** In flight on `/?g=cat17`. Lease was staying off on big fields because “near” meant 22 m from the centroid. Fix shipped: standing *in* the ring counts; lots you cannot afford say **need cash**. Exit stays off the dock until you are inside.
 
 Do not rewrite `traffic.js`, island centres, or PLAN.md.
