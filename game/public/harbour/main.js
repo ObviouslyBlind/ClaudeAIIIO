@@ -25,6 +25,7 @@ import { dressCart } from "./cart.js";
 import { mountEconHud } from "./hud-econ.js";
 import { mountPresenceHud } from "./presence-hud.js";
 import { mountStaffHud } from "./staff-hud.js";
+import { mountCalendarHud } from "./calendar-hud.js";
 import { createStalls } from "./stalls.js";
 import { makePedestrians } from "./pedestrians.js";
 
@@ -162,6 +163,9 @@ let stalls = null;
 let pedestrians = null;
 const econHud = mountEconHud({
   el: document.getElementById("econ"),
+});
+mountCalendarHud({
+  el: document.getElementById("calendar"),
 });
 mountPresenceHud({
   el: document.getElementById("nearby"),
@@ -896,12 +900,10 @@ const SHEET_HUD = [
   "./tax-hud.js",
   "./ferry-hud.js",
   "./taxi-hud.js",
-  "./calendar-hud.js",
   "./goods-hud.js",
   "./flow-hud.js",
   "./stall-hud.js",
   "./persist-hud.js",
-  "./cart-hud.js",
 ];
 
 function loadSheetHuds() {

@@ -49,11 +49,15 @@ Building shells + window lights — **not in the seaward spawn frame**; computer
 
 `/g/hud47` **PASS**: sheet showed `PAPER · SIMULATED · Index 1.00 · NPC $50,000 · out 19,601`, `PAPER · SIMULATED · 250 m PAPER cell · 0 nearby`, `PAPER · SIMULATED · Staff —`.
 
+## Pixel HUD (cart / persist / calendar)
+
+`/g/hud48` **FAIL HUD**: calendar still `Day — · tick — · PAPER`, cart still `Cart —` (first-frame HTML). Persist was `PAPER · SIMULATED`. First-frame now ships `PAPER · SIMULATED · Day 0 · tick 0` and `PAPER`, plus a classic `/api/snapshot` paint. Next `/g/hud49`.
+
 ## In flight (not ferry-only)
 
-Pixel: **cart / persist / calendar HUD** on the spawn sheet `http://localhost:8787/g/hud48`. No RMB. Close other Two Harbors tabs. Address bar must be `/g/hud48`. Do not restart play while the critic is on the page.
+Pixel: **cart / persist / calendar HUD** on the spawn sheet `http://localhost:8787/g/hud49`. No RMB. Close other Two Harbors tabs. Address bar must be `/g/hud49`. Do not restart play while the critic is on the page.
 
-## Next pixel (after hud48 PASS, immediately, no wait)
+## Next pixel (after hud49 PASS, immediately, no wait)
 
 Presence count is 0 at spawn (code-held walkers). Then shells+lights stay deferred until a human can orbit.
 
