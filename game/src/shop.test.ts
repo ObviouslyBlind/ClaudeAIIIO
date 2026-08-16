@@ -8,10 +8,12 @@ const CREAM = 0xe8d7b8;
 const STRAP = 0x5a3a22;
 const LINEN = 0xf4ead8;
 const PAPER_CARD = 0xf3efe4;
+const CORAL = 0xc45c3a;
 const KRAFT = new Set([WOOD, CREAM, STRAP]);
 const SLIP_SHEET = new Set([CREAM, LINEN, PAPER_CARD]);
 const SLIP_EDGE = new Set([WOOD, STRAP]);
 const SLIP = new Set([...SLIP_SHEET, ...SLIP_EDGE]);
+const STAMP = new Set([WOOD, STRAP, CORAL]);
 
 function hexes(root: THREE.Object3D) {
   const colors: number[] = [];
@@ -84,6 +86,16 @@ function shopSlips(root: THREE.Object3D) {
   const out: THREE.Object3D[] = [];
   root.traverse((obj) => {
     if (obj.userData?.kind === "shop-slip" && obj.name === "shop-slip") {
+      out.push(obj);
+    }
+  });
+  return out;
+}
+
+function shopStamps(root: THREE.Object3D) {
+  const out: THREE.Object3D[] = [];
+  root.traverse((obj) => {
+    if (obj.userData?.kind === "shop-stamp" && obj.name === "shop-stamp") {
       out.push(obj);
     }
   });
@@ -582,6 +594,113 @@ describe("shop PAPER kraft receipt slip", () => {
     expect(dress).toBeTruthy();
     expect(dress!.visible).toBe(false);
     expect(shopSlips(interior).length).toBe(1);
+    expect(interior.userData.interiorUse).toBe("house");
+  });
+});
+
+describe("shop PAPER kraft ink stamp", () => {
+  it("puts a small kraft PAPER stamp on the shop counter beside the till", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressShop(scene);
+
+    const dress = interior.getObjectByName("shop-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+
+    const counter = dress!.getObjectByName("shop-counter");
+    expect(counter).toBeTruthy();
+    const till = counter!.getObjectByName("shop-till");
+    expect(till).toBeTruthy();
+    expect(till!.userData.kind).toBe("shop-till");
+
+    const stamps = shopStamps(counter!);
+    expect(stamps.length).toBe(1);
+
+    const stamp = stamps[0];
+    expect(stamp.userData.kind).toBe("shop-stamp");
+    expect(stamp.userData.mode).toBe("PAPER");
+    expect(stamp.parent?.name).toBe("shop-counter");
+    // On the counter beside the till — not on the drawer / scale / weight / slip / parcel / bag.
+    expect(stamp.position.y).toBeGreaterThan(1.0);
+    expect(stamp.position.y).toBeLessThan(1.4);
+    expect(Math.abs(stamp.position.x)).toBeLessThan(1.5);
+    expect(Math.abs(stamp.position.z)).toBeLessThan(0.5);
+
+    const neighbors = [
+      till,
+      shopScales(counter!)[0],
+      shopWeights(counter!)[0],
+      shopSlips(counter!)[0],
+      shopParcels(counter!)[0],
+      shopBags(counter!)[0],
+    ];
+    for (const other of neighbors) {
+      const dx = stamp.position.x - other.position.x;
+      const dz = stamp.position.z - other.position.z;
+      expect(Math.hypot(dx, dz)).toBeGreaterThan(0.12);
+    }
+    const drawer = shopDrawers(till!)[0];
+    expect(drawer).toBeTruthy();
+    const ddx = stamp.position.x - (till!.position.x + drawer.position.x);
+    const ddz = stamp.position.z - (till!.position.z + drawer.position.z);
+    expect(Math.hypot(ddx, ddz)).toBeGreaterThan(0.12);
+    expect(shopDrawers(stamp).length).toBe(0);
+    expect(shopScales(stamp).length).toBe(0);
+    expect(shopWeights(stamp).length).toBe(0);
+    expect(shopSlips(stamp).length).toBe(0);
+    expect(shopParcels(stamp).length).toBe(0);
+    expect(shopBags(stamp).length).toBe(0);
+
+    expect(shopParcels(counter!).length).toBe(1);
+    expect(shopBags(counter!).length).toBe(1);
+    expect(shopDrawers(till!).length).toBe(1);
+    expect(shopScales(counter!).length).toBe(1);
+    expect(shopWeights(counter!).length).toBe(1);
+    expect(shopSlips(counter!).length).toBe(1);
+    expect(counter!.getObjectByName("shop-wall-shelf")).toBeTruthy();
+
+    const colors = hexes(stamp);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.every((c) => STAMP.has(c))).toBe(true);
+    expect(colors.some((c) => c === WOOD)).toBe(true);
+    expect(colors.some((c) => c === STRAP || c === CORAL)).toBe(true);
+    expect(colors.every((c) => !isGrey(c))).toBe(true);
+
+    let boxes = 0;
+    stamp.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        boxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.kind).toBe("shop-stamp");
+        expect(mesh.userData.mode).toBe("PAPER");
+      }
+    });
+    expect(boxes).toBeGreaterThanOrEqual(2);
+  });
+
+  it("keeps dress idempotent and hides the stamp on undress", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressShop(scene);
+    dressShop(scene);
+    expect(interior.children.filter((c) => c.name === "shop-dress").length).toBe(1);
+    expect(shopStamps(interior).length).toBe(1);
+    expect(shopSlips(interior).length).toBe(1);
+    expect(shopWeights(interior).length).toBe(1);
+    expect(shopScales(interior).length).toBe(1);
+    expect(shopDrawers(interior).length).toBe(1);
+    expect(shopParcels(interior).length).toBe(1);
+    expect(shopBags(interior).length).toBe(1);
+
+    undressShop(scene);
+    const dress = interior.getObjectByName("shop-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.visible).toBe(false);
+    expect(shopStamps(interior).length).toBe(1);
     expect(interior.userData.interiorUse).toBe("house");
   });
 });
