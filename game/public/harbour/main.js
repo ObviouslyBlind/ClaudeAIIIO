@@ -112,6 +112,13 @@ sun.shadow.camera.near = 10;
 sun.shadow.camera.far = 700;
 scene.add(sun);
 
+if (statusEl) statusEl.textContent = "North port · PAPER";
+if (renderer) {
+  camera.position.set(18, 22, -6888);
+  camera.lookAt(0, 1.2, -6835);
+  renderer.render(scene, camera);
+}
+
 const clock = new THREE.Clock();
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
@@ -891,6 +898,8 @@ async function boot() {
     return;
   }
   makeWater(scene);
+  ferryMesh = makeFerry();
+  scene.add(ferryMesh);
   spawnAt("north");
   startLoop();
   setStatus("North port · PAPER");
@@ -911,8 +920,6 @@ async function boot() {
   makePort(specOf("south"));
   makeQuay(specOf("south"), { scene, heightAt });
   pedestrians = makePedestrians(map, { scene, specOf, heightAt, getPlayer: () => player });
-  ferryMesh = makeFerry();
-  scene.add(ferryMesh);
   makePalms(specOf("north"));
   makePalms(specOf("south"));
   makeParcels();
