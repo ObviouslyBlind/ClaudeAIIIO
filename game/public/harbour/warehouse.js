@@ -256,6 +256,28 @@ function kraftClip(x, y, z, yaw = 0) {
 }
 
 /**
+ * Tiny kraft paper stamp on the clipboard — wood body + strap pad.
+ * PAPER boxes only. Not a clip, not a card, not a pencil.
+ */
+function kraftStamp(x, y, z, yaw = 0) {
+  const g = new THREE.Group();
+  g.name = "warehouse-stamp";
+  g.userData.kind = "warehouse-stamp";
+  g.userData.mode = "PAPER";
+  g.userData.part = "stamp";
+  g.position.set(x, y, z);
+  g.rotation.y = yaw;
+  // Rest on the clipboard sheet, lower-right, clear of clip, pencil, chalk.
+  g.rotation.z = -0.16;
+  const body = paperBox(0.05, 0.026, 0.02, WOOD, "warehouse-stamp");
+  body.position.set(0.09, -0.14, 0.05);
+  const pad = paperBox(0.044, 0.022, 0.008, STRAP, "warehouse-stamp");
+  pad.position.set(0.09, -0.14, 0.062);
+  g.add(body, pad);
+  return g;
+}
+
+/**
  * Tiny kraft inventory card on a crate — cream sheet + strap stripe.
  * PAPER boxes only. Not a pencil, not twine, not chalk, not a broom.
  */
@@ -505,6 +527,9 @@ function makeWarehouseDress() {
   // Tiny kraft paperclip on that clipboard sheet. Clear of card, pencil,
   // twine, chalk, and broom.
   g.add(kraftClip(1.02, 1.58, -3.38));
+  // Tiny kraft paper stamp on that clipboard sheet. Clear of clip, card,
+  // pencil, and twine.
+  g.add(kraftStamp(1.02, 1.58, -3.38));
   // Tiny kraft twine ball on the back-right crate stack. Clear of pencil,
   // chalk, clipboard, pallet, dolly, and floor crates.
   g.add(kraftTwine(3.22, 1.56, -2.38, 0.18));
