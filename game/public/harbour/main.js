@@ -23,6 +23,7 @@ import { makeTrees } from "./trees.js";
 import { dressPlayer } from "./player.js";
 import { dressCart } from "./cart.js";
 import { mountEconHud } from "./hud-econ.js";
+import { mountPresenceHud } from "./presence-hud.js";
 import { createStalls } from "./stalls.js";
 import { makePedestrians } from "./pedestrians.js";
 
@@ -145,6 +146,10 @@ let stalls = null;
 let pedestrians = null;
 const econHud = mountEconHud({
   el: document.getElementById("econ"),
+});
+mountPresenceHud({
+  el: document.getElementById("nearby"),
+  getPos: () => player.position,
 });
 
 function money(n) {
