@@ -407,6 +407,14 @@ export function makeFerry() {
   grommet.userData.mode = "PAPER";
   grommet.position.set(-11.78, 1.86, 0.18);
   g.add(grommet);
+  // Tiny kraft PAPER hatch coaming/lid on the aft cream deck. Existing DECK
+  // hex, one box, not grey. Clear of fender/bucket/oar/cleat/rail/hawser/horn/grommet.
+  const hatch = part(0.36, 0.06, 0.28, DECK, false);
+  hatch.name = "hatch";
+  hatch.userData.part = "hatch";
+  hatch.userData.mode = "PAPER";
+  hatch.position.set(-14.6, 1.86, 0);
+  g.add(hatch);
 
   const cabin = part(16.5, 3.35, 7.6, CABIN);
   cabin.position.set(-2.4, 3.52, 0);
