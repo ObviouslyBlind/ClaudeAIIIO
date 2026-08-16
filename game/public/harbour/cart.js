@@ -19,11 +19,12 @@ import * as THREE from "three";
  * + a tiny kraft produce onion (WOOD box) on the left of the bed
  * + a tiny kraft produce garlic (CANVAS box) at the tail of the bed
  * + a tiny kraft produce cabbage (WOOD_LIGHT box) left of the garlic
- * + a tiny kraft produce leek (WOOD box) right of the garlic.
+ * + a tiny kraft produce leek (WOOD box) right of the garlic
+ * + a tiny kraft produce turnip (WOOD_CRATE box) ahead of the garlic.
  * Wheels: kraft cream hub discs (paper boxes) on the outer face of each wheel.
  * Grip: a short kraft hitch pin (paper box) through the handle.
  */
-export const CART_MESH_COUNT = 33;
+export const CART_MESH_COUNT = 34;
 /** Metres from player.position down to the soles. Same as player.js SOLE_Y. */
 const SOLE_Y = -1.15;
 
@@ -227,7 +228,15 @@ function makeHandcart() {
   leek.userData.mode = "PAPER";
   leek.userData.part = "leek";
 
-  g.add(bed, sideL, sideR, tail, head, wheelL, wheelR, hubL, hubR, handleL, handleR, grip, pin, crate, strap, crate2, roll, coil, coilTop, lanternPost, lanternGlass, jugBody, jugNeck, jugHandle, appleBox, apple, carrot, carrotTop, potato, onion, garlic, cabbage, leek);
+  // Tiny kraft produce turnip on the bed — one WOOD_CRATE paper box.
+  // Ahead of garlic at bed center, inside the rails, clear of leek, cabbage, garlic, onion, potato, carrot, apple.
+  // Sits on the bed top (y = 0.53). Paper box only.
+  const turnip = paperBox(0.05, 0.045, 0.05, WOOD_CRATE, false);
+  turnip.position.set(0.08, 0.553, -1.16);
+  turnip.userData.mode = "PAPER";
+  turnip.userData.part = "turnip";
+
+  g.add(bed, sideL, sideR, tail, head, wheelL, wheelR, hubL, hubR, handleL, handleR, grip, pin, crate, strap, crate2, roll, coil, coilTop, lanternPost, lanternGlass, jugBody, jugNeck, jugHandle, appleBox, apple, carrot, carrotTop, potato, onion, garlic, cabbage, leek, turnip);
   return g;
 }
 
