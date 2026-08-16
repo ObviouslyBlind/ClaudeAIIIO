@@ -2,8 +2,8 @@ import * as THREE from "three";
 
 /**
  * PAPER shop interior dress. Kraft-paper counter (cream top, wood body), a
- * small wooden till, plus two shelf boxes — not the house living room and
- * not the warehouse. No WASD.
+ * small wooden till, a short wall shelf with two kraft boxes, plus two
+ * shelf bays — not the house living room and not the warehouse. No WASD.
  * Tap-to-walk stays in interior.js.
  *
  * Call dressShop(scene) when plot.kind or plot.use is "shop" or "house_shop".
@@ -146,6 +146,32 @@ function cashBox(x, y, z) {
   return g;
 }
 
+/**
+ * Short wall shelf above the counter: one plank, two kraft boxes.
+ * Original WOOD / WOOD_DARK / WOOD_TOP / TIN. Not a till, not jars.
+ */
+function shortWallShelf(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "shop-wall-shelf";
+  g.userData.kind = "shop-shelf";
+  g.userData.mode = "PAPER";
+  g.position.set(x, y, z);
+  const width = 0.86;
+  const back = paperBox(width, 0.26, 0.05, WOOD_DARK, "shop-shelf");
+  back.position.set(0, 0.08, -0.12);
+  g.add(back);
+  const plank = paperBox(width, 0.05, 0.26, WOOD_TOP, "shop-shelf");
+  g.add(plank);
+  for (const px of [-width / 2 + 0.07, width / 2 - 0.07]) {
+    const bracket = paperBox(0.05, 0.1, 0.2, WOOD, "shop-shelf");
+    bracket.position.set(px, -0.07, 0);
+    g.add(bracket);
+  }
+  g.add(goodsCrate(0.22, 0.16, 0.18, TIN, -0.18, 0.105, 0.02));
+  g.add(goodsCrate(0.2, 0.2, 0.16, WOOD, 0.17, 0.125, 0));
+  return g;
+}
+
 function makeCounter(x, z) {
   const g = new THREE.Group();
   g.name = "shop-counter";
@@ -189,6 +215,8 @@ function makeCounter(x, z) {
   const green = paperBox(0.16, 0.2, 0.16, GREEN, "shop-goods");
   green.position.set(0.28, topY + 0.15, 0.12);
   g.add(green);
+  // Short wall shelf above the counter — two kraft boxes, not only till + jars.
+  g.add(shortWallShelf(-0.38, topY + 0.48, -0.28));
   g.position.set(x, 0, z);
   return g;
 }
