@@ -1,23 +1,19 @@
 # Gauntlet status
 
 Loop is **autonomous**. Critic = pixels only. Tests = lead/builder.
+Critics must open a **new query** (`/?g=…`). Do not reuse a tab already on `/`.
 
-**Held:** inland spawn, black tarmac, PAPER HUD — only when a **fresh** document actually boots.
-**Shipped (code):** taxi, RMB orbit, ferry ticket, catalogue, interiors.
+## Held (pixel-ratified)
 
-## Round 12–13 — traffic critic
+- Inland spawn + black tarmac + PAPER HUD
+- **Traffic:** colored vehicle meshes with red masts on the paved spline. Round 14 critic on `/?g=13` (Cash $1,000, nonce in tab title). Inferring cars from empty tarmac does **not** count; this round saw the meshes.
 
-Both pixel critics **FAIL** on a blank teal viewport + Cash $0.
+## Shipped (code, not yet pixel-ratified)
 
-Round 13 still showed the **old** status line (“Tap a piece of land…”) and no Enter button. That is a **stale tab**, not a live load of the boot-fix HTML (which starts as `Loading 3D harbour…` and stamps the tab title with a nonce).
+Taxi wait + boarded island map · RMB orbit · ferry ticket · catalogue · interiors
 
-**This round:** classic (non-module) `fetch("/api/map")` writes Cash even if three.js never runs; tab title includes the asset nonce; critics must open a **new query** so Chrome does not reuse the dead tab.
+## Next piece
 
-## Next critic
-
-Open **exactly** `http://localhost:8787/?g=13`  
-(not `/harbour/index.html`, not a tab that is already on `/`).
-
-Wait until Cash is not `$0`. Then wait ~6s. PASS traffic only if colored vehicle meshes are visible on black tarmac.
+**Taxi overlay.** Hail from the quay (spawn is on paved). Overlay `#taxi-map` is PAPER: island ellipse + paved polyline. Dirt is not a destination.
 
 Do not rewrite `traffic.js`, island centres, or PLAN.md.
