@@ -54,6 +54,11 @@ function paperLamp() {
   g.userData.dress = "quay-lamp";
   g.userData.mode = "PAPER";
 
+  /** Timber footing under the post. PAPER box, sits on the deck. */
+  const base = part(0.36, 0.08, 0.36, WOOD);
+  base.position.y = 0.08;
+  base.userData.part = "base";
+
   const post = part(0.16, 2.55, 0.16, WOOD_DARK);
   post.position.y = 1.28;
   post.userData.part = "post";
@@ -95,7 +100,7 @@ function paperLamp() {
   right.position.set(0.05, 0, 0);
   ring.add(top, bot, left, right);
 
-  g.add(post, collar, glass, cap, brace, ring);
+  g.add(base, post, collar, glass, cap, brace, ring);
   return g;
 }
 
