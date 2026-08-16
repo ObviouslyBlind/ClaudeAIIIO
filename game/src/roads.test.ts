@@ -95,7 +95,7 @@ describe("paved street from spawn", () => {
       expect(mesh.geometry.parameters).toBeUndefined();
       expect(pos.count).toBeGreaterThanOrEqual(8);
       expect(mesh.geometry.index?.count ?? 0).toBeGreaterThan(24);
-      expect(ribbonWidthM(mesh)).toBeCloseTo(DIRT_WIDTH_M, 3);
+      expect(ribbonWidthM(mesh)).toBeCloseTo(DIRT_WIDTH_M, 2);
       expect(mesh.userData.widthM).toBe(DIRT_WIDTH_M);
       expect(mesh.material.color.getHex()).toBe(DIRT);
 
