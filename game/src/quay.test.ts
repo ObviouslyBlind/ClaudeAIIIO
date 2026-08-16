@@ -325,4 +325,40 @@ describe("quay harbour dressing", () => {
       }
     }
   });
+
+  it("hangs a tiny kraft PAPER hook on the dinghy painter, knot and bollard-cap remain", () => {
+    function collectPart(root: THREE.Object3D, name: string) {
+      const out: THREE.Object3D[] = [];
+      root.traverse((obj) => {
+        if (obj.userData?.part === name) out.push(obj);
+      });
+      return out;
+    }
+
+    for (const id of ["north", "south"] as const) {
+      const spec = ISLANDS[id];
+      const added: THREE.Object3D[] = [];
+      const scene = { add(obj: THREE.Object3D) { added.push(obj); } };
+      const root = makeQuay(spec, { scene, heightAt });
+
+      const hooks = collectPart(root, "hook");
+      expect(hooks.length).toBeGreaterThanOrEqual(1);
+      expect(collectPart(root, "knot").length).toBeGreaterThanOrEqual(2);
+      expect(collectPart(root, "bollard-cap").length).toBeGreaterThanOrEqual(12);
+
+      for (const h of hooks) {
+        const mesh = h as THREE.Mesh;
+        expect(mesh.userData.part).toBe("hook");
+        expect(mesh.geometry).toBeInstanceOf(THREE.BoxGeometry);
+        const mat = mesh.material as THREE.MeshLambertMaterial;
+        const hex = mat.color.getHex();
+        expect(isGrey(hex)).toBe(false);
+        expect(hex).toBe(0x8a6238);
+        const { width, height, depth } = (mesh.geometry as THREE.BoxGeometry).parameters;
+        expect(width).toBeLessThan(0.2);
+        expect(height).toBeLessThan(0.2);
+        expect(depth).toBeLessThan(0.2);
+      }
+    }
+  });
 });
