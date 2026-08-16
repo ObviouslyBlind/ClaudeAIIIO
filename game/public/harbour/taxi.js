@@ -150,12 +150,10 @@ function addTaxiCheckBand(g, kraftMat, blackMat) {
   }
 }
 
-/** Four black tyres with a hub so the cab is not a floating box. */
+/** Four black tyres with a kraft cream hub box on the outer face so the cab is not a floating box. */
 function addTaxiWheels(g, tyreMat, hubMat) {
   const tyreGeo = new THREE.CylinderGeometry(0.48, 0.48, 0.36, 10);
   tyreGeo.rotateZ(Math.PI / 2);
-  const hubGeo = new THREE.CylinderGeometry(0.22, 0.22, 0.38, 8);
-  hubGeo.rotateZ(Math.PI / 2);
   for (const [x, z] of [
     [1.28, 1.55],
     [-1.28, 1.55],
@@ -166,10 +164,11 @@ function addTaxiWheels(g, tyreMat, hubMat) {
     tyre.position.set(x, 0.48, z);
     tyre.castShadow = true;
     tyre.frustumCulled = false;
-    const hub = new THREE.Mesh(hubGeo, hubMat);
-    hub.position.set(x, 0.48, z);
-    hub.frustumCulled = false;
-    g.add(tyre, hub);
+    g.add(tyre);
+    const outward = x > 0 ? 1 : -1;
+    const hub = tagPart(taxiBox(0.08, 0.32, 0.32, hubMat, false), "hub");
+    hub.position.set(x + outward * 0.22, 0.48, z);
+    g.add(hub);
   }
 }
 
@@ -199,9 +198,9 @@ function addTaxiDoorHandles(g, kraftMat) {
 }
 
 /**
- * Yellow cab that reads from the quay: wheels, glass, roof lamp, checker belt, iron bumper, door handles,
- * short kraft roof aerial. Compact warm PAPER taxi-sign box — original cream lamp, not a sedan lid,
- * not a debug mast, not a cop lightbar.
+ * Yellow cab that reads from the quay: wheels with kraft cream hub boxes, glass, roof lamp, checker belt,
+ * iron bumper, door handles, short kraft roof aerial. Compact warm PAPER taxi-sign box — original cream
+ * lamp, not a sedan lid, not a debug mast, not a cop lightbar.
  */
 export function makeTaxiMesh() {
   const g = new THREE.Group();
@@ -211,7 +210,8 @@ export function makeTaxiMesh() {
   const dark = taxiMat(0x1a1a1e);
   /** Same kraft tan as quay decks / straw — original palette, not a new hex. */
   const kraft = taxiMat(0xc4a574);
-  const chrome = taxiMat(0xc8c4b8);
+  /** Same kraft cream as sedan hubs — original palette, not chrome grey. */
+  const kraftHub = taxiMat(0xf4ead8);
   const glass = taxiMat(0x3a5a6c, { emissive: 0x1a3040, emissiveIntensity: 0.22 });
   /** Original taxi lamp cream. Warm PAPER glow, not neon. */
   const lamp = taxiMat(0xfff3a0, { emissive: 0xfff3a0, emissiveIntensity: 0.78 });
@@ -278,7 +278,7 @@ export function makeTaxiMesh() {
     g.add(hl, tl);
   }
 
-  addTaxiWheels(g, dark, chrome);
+  addTaxiWheels(g, dark, kraftHub);
 
   g.userData.kind = "taxi";
   g.userData.mode = "PAPER";
