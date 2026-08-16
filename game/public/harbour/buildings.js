@@ -156,6 +156,24 @@ function addSteps(g, x, zFace, width = 1.55, treads = 3) {
   }
 }
 
+/**
+ * Kraft PAPER stoop past the stone treads so a House reads as entered from
+ * the street, not a door in a wall. Original KRAFT — not a new hex.
+ */
+function addPorch(g, x, zFace, width = 2.2) {
+  const porch = new THREE.Group();
+  porch.name = "porch";
+  porch.userData.part = "porch";
+  porch.userData.mode = "PAPER";
+
+  const slab = tagPaper(part(width, 0.1, 0.95, KRAFT, false), "porch");
+  slab.position.set(x, 0.05, zFace + 1.72);
+  const lip = tagPaper(part(width + 0.1, 0.12, 0.16, KRAFT, false), "doorstep");
+  lip.position.set(x, 0.07, zFace + 2.16);
+  porch.add(slab, lip);
+  g.add(porch);
+}
+
 function addDoor(g, x, y, z, w, h) {
   const surround = part(w + 0.28, h + 0.22, 0.08, WOOD, false);
   surround.position.set(x, y, z);
@@ -218,6 +236,7 @@ function cottage(kind) {
   addChimney(g, -W * 0.34, 0.38 + H + (shed ? 0.28 : 0.42), -D * 0.06, shed ? 1.2 : 1.9);
   addDoor(g, -W * 0.12, shed ? 1.15 : 1.42, D / 2 + 0.08, shed ? 0.85 : 1.05, shed ? 1.55 : 1.95);
   addSteps(g, -W * 0.12, D / 2, shed ? 1.2 : 1.55, shed ? 2 : 3);
+  if (!shop && !shed) addPorch(g, -W * 0.12, D / 2, 2.2);
   if (shop) {
     windowPane(g, W * 0.34, 1.9, D / 2 + 0.08, 1.55, 1.35);
     windowPane(g, -W * 0.42, 1.9, D / 2 + 0.08, 1.45, 1.35);
