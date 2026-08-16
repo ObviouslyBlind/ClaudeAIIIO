@@ -5,9 +5,9 @@ import * as THREE from "three";
  * small wooden till with a kraft drawer slightly pulled out, a kraft counter
  * scale beside the till, a small kraft scale weight beside the scale, a
  * kraft wrapped parcel, a standing kraft shopping bag, a small kraft
- * receipt slip, a small kraft ink stamp, a short wall shelf with two kraft
- * boxes, plus two shelf bays — not the house living room and not the
- * warehouse. No WASD.
+ * receipt slip, a small kraft receipt, a small kraft ink stamp, a short
+ * wall shelf with two kraft boxes, plus two shelf bays — not the house
+ * living room and not the warehouse. No WASD.
  * Tap-to-walk stays in interior.js.
  *
  * Call dressShop(scene) when plot.kind or plot.use is "shop" or "house_shop".
@@ -266,6 +266,32 @@ function kraftSlip(x, y, z) {
 }
 
 /**
+ * Tiny kraft PAPER receipt on the counter: linen sheet, paper-card face,
+ * wood stub. Paper boxes only. Beside the till — not on the drawer, scale,
+ * weight, slip, stamp, parcel, or bag. Not a wallet.
+ */
+function kraftReceipt(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "shop-receipt";
+  g.userData.kind = "shop-receipt";
+  g.userData.mode = "PAPER";
+  g.userData.part = "receipt";
+  g.position.set(x, y, z);
+  const sheet = paperBox(0.08, 0.008, 0.12, LINEN, "shop-receipt");
+  sheet.userData.part = "receipt";
+  g.add(sheet);
+  const face = paperBox(0.06, 0.005, 0.08, PAPER_CARD, "shop-receipt");
+  face.userData.part = "receipt";
+  face.position.y = 0.007;
+  g.add(face);
+  const stub = paperBox(0.085, 0.01, 0.018, WOOD, "shop-receipt");
+  stub.userData.part = "receipt";
+  stub.position.z = -0.05;
+  g.add(stub);
+  return g;
+}
+
+/**
  * Small kraft PAPER ink stamp on the counter: wood handle, strap neck,
  * coral pad. Paper boxes only. Beside the till — not on the drawer,
  * scale, weight, slip, parcel, or bag.
@@ -375,6 +401,8 @@ function makeCounter(x, z) {
   g.add(kraftBag(1.38, topY + 0.15, -0.18));
   // Kraft receipt slip beside the till — cream sheet + strap stub. Not a parcel.
   g.add(kraftSlip(1.10, topY + 0.056, 0.32));
+  // Tiny kraft receipt beside the till — linen sheet + paper-card face + wood stub.
+  g.add(kraftReceipt(-0.82, topY + 0.054, 0.30));
   // Kraft ink stamp beside the till — wood handle + strap/coral pad.
   g.add(kraftStamp(0.14, topY + 0.11, 0.34));
   // Two small kraft / terracotta jars beside the till. Original TIN + CORAL.
