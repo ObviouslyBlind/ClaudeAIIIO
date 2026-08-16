@@ -252,20 +252,22 @@ function refreshHud() {
   }
   placeEl.textContent = specOf(islandId).name;
   if (btnExit) btnExit.hidden = true;
-  if (btnEnter) btnEnter.hidden = false;
+  const pSel = selected ? map.plots.find((x) => x.id === selected) : null;
+  if (btnEnter) {
+    const show = Boolean(pSel && canEnter(pSel));
+    btnEnter.hidden = !show;
+    btnEnter.disabled = !show || !nearParcel(pSel);
+  }
   btnDevelop.disabled = !canOpenCatalog();
-  if (!selected) {
+  if (!selected || !pSel) {
     plotLineEl.textContent = placingUse
       ? "Tap your leased land to place it (PAPER)"
       : "Tap land to inspect it";
     btnLease.disabled = true;
-    if (btnEnter) btnEnter.disabled = true;
     return;
   }
-  const p = map.plots.find((x) => x.id === selected);
-  if (!p) return;
+  const p = pSel;
   const near = nearParcel(p);
-  if (btnEnter) btnEnter.disabled = !(canEnter(p) && near);
   if (p.owner === "visitor") {
     plotLineEl.textContent = parcelLabel(p) + (p.use ? " · " + p.use : " · yours");
     btnLease.disabled = true;
@@ -274,9 +276,13 @@ function refreshHud() {
     btnLease.disabled = true;
   } else {
     plotLineEl.textContent = parcelLabel(p) + " · $" + money(p.price);
-    btnLease.disabled = !near || map.visitor.cash < p.price;
+    const headroom = map.visitor.cash - p.price;
+    const need = map.developCost ?? 40;
+    btnLease.disabled = !near || map.visitor.cash < p.price || headroom < need;
     if (map.visitor.cash < p.price) {
       plotLineEl.textContent = parcelLabel(p) + " · $" + money(p.price) + " · need cash";
+    } else if (headroom < need) {
+      plotLineEl.textContent = parcelLabel(p) + " · $" + money(p.price) + " · leaves no develop cash";
     }
   }
 }

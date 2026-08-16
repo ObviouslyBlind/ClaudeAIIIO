@@ -406,6 +406,7 @@ export function leasePlot(
   if (plot.class === "reserved") return { ok: false, reason: "reserved" };
   if (plot.owner) return { ok: false, reason: "owned" };
   if (visitor.cash < plot.price) return { ok: false, reason: "no_cash" };
+  if (visitor.cash - plot.price < DEVELOP_COST) return { ok: false, reason: "need_develop_cash" };
   visitor.cash = Math.round((visitor.cash - plot.price) * 10000) / 10000;
   plot.owner = owner;
   return { ok: true, paid: plot.price, plot };
