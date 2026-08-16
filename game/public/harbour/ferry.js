@@ -36,6 +36,32 @@ function part(w, h, d, color, shadow = true) {
   return m;
 }
 
+function cyl(rTop, rBot, h, color, shadow = true) {
+  const m = new THREE.Mesh(
+    new THREE.CylinderGeometry(rTop, rBot, h, 8),
+    new THREE.MeshLambertMaterial({ color }),
+  );
+  m.castShadow = shadow;
+  m.receiveShadow = true;
+  return m;
+}
+
+/** Wood stem, iron base and cap. PAPER. Sits on the timber deck. */
+function deckBollard(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "bollard";
+  g.userData.part = "bollard";
+  g.position.set(x, y, z);
+  const base = cyl(0.2, 0.22, 0.07, BOOT, false);
+  base.position.y = 0.035;
+  const stem = cyl(0.11, 0.13, 0.48, POST, false);
+  stem.position.y = 0.31;
+  const cap = cyl(0.18, 0.14, 0.12, BOOT, false);
+  cap.position.y = 0.61;
+  g.add(base, stem, cap);
+  return g;
+}
+
 function pane(g, x, y, z, w, h) {
   const toward = z >= 0 ? 1 : -1;
   const frame = part(w + 0.18, h + 0.18, 0.08, FRAME, false);
@@ -140,6 +166,9 @@ export function makeFerry() {
   const deckFwd = part(10.5, 0.14, 8.8, DECK, false);
   deckFwd.position.set(10.4, 1.88, 0);
   g.add(deckAft, deckMid, deckFwd);
+
+  g.add(deckBollard(-16.2, 1.81, 3.85));
+  g.add(deckBollard(-16.2, 1.81, -3.85));
 
   const cabin = part(16.5, 3.35, 7.6, CABIN);
   cabin.position.set(-2.4, 3.52, 0);
