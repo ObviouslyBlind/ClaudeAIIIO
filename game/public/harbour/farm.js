@@ -4,8 +4,8 @@ import * as THREE from "three";
  * PAPER farm-shed interior dress. Tools, grain sacks, kraft planter beds,
  * a small wood-post scarecrow at the back of the crop beds, a short wood
  * fence rail behind it, a small wood water trough beside the beds, a kraft
- * milk churn beside the trough, and dim warm light — not the house living
- * room, warehouse crates, shop, or factory.
+ * milk churn beside the trough, a short wood pail beside the churn, and dim
+ * warm light — not the house living room, warehouse crates, shop, or factory.
  * No WASD. Tap-to-walk stays in interior.js.
  *
  * Call dressFarm(scene) when plot.kind or plot.use is "farm".
@@ -360,6 +360,38 @@ function milkChurn() {
   return g;
 }
 
+/**
+ * Short PAPER wood pail: tapered bucket, kraft lip, dark hoop, thin handle.
+ * Hexes already in this file (WOOD, WOOD_DARK, HANDLE, KRAFT). Sits beside
+ * the milk churn on the wall side; does not intersect the trough water.
+ */
+function farmPail() {
+  const g = new THREE.Group();
+  g.name = "farm-pail";
+  g.userData.kind = "farm-pail";
+  g.userData.mode = "PAPER";
+  const y0 = 0.16;
+  const body = paperCyl(0.08, 0.09, 0.18, WOOD, "farm-pail");
+  body.position.y = y0 + 0.09;
+  g.add(body);
+  const band = paperCyl(0.095, 0.095, 0.025, WOOD_DARK, "farm-pail");
+  band.position.y = y0 + 0.05;
+  g.add(band);
+  const lip = paperCyl(0.07, 0.075, 0.035, KRAFT, "farm-pail");
+  lip.position.y = y0 + 0.17;
+  g.add(lip);
+  const postL = paperBox(0.025, 0.12, 0.025, HANDLE, "farm-pail");
+  postL.position.set(-0.07, y0 + 0.2, 0);
+  g.add(postL);
+  const postR = paperBox(0.025, 0.12, 0.025, HANDLE, "farm-pail");
+  postR.position.set(0.07, y0 + 0.2, 0);
+  g.add(postR);
+  const hoop = paperBox(0.16, 0.025, 0.025, HANDLE, "farm-pail");
+  hoop.position.set(0, y0 + 0.27, 0);
+  g.add(hoop);
+  return g;
+}
+
 function workbench(x, z) {
   const g = new THREE.Group();
   g.name = "farm-bench";
@@ -434,6 +466,9 @@ function makeFarmDress() {
   const churn = milkChurn();
   churn.position.set(3.2, 0, 0.98);
   g.add(churn);
+  const pail = farmPail();
+  pail.position.set(3.02, 0, 1.28);
+  g.add(pail);
 
   const loftY = 2.94;
   g.add(sack(0.46, 0.56, 0.36, SACK, -2.55, loftY + 0.28, -2.35, 0.1));
@@ -516,8 +551,9 @@ function dimSceneLights(scene, farm) {
 /**
  * Dress an interior (or a scene that contains one) as a PAPER farm shed.
  * Hides living-room furniture, adds tools, sacks, planter beds, a
- * scarecrow, a short back-edge fence, a small wood water trough, and a
- * kraft milk churn beside the trough, warms and dims lights.
+ * scarecrow, a short back-edge fence, a small wood water trough, a
+ * kraft milk churn beside the trough, and a short wood pail beside the
+ * churn, warms and dims lights.
  * @param {THREE.Object3D} scene
  */
 export function dressFarm(scene) {
