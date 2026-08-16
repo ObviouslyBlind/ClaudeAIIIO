@@ -241,6 +241,49 @@ describe("paper building catalogue", () => {
     expect(shopMats).toBe(0);
   });
 
+  it("puts one tiny kraft PAPER mailbox on the House, doormat and knocker remain", () => {
+    const house = meshForUse("house", { area: 400 });
+    const boxes: Array<{
+      userData?: { part?: string; mode?: string };
+      material?: { color?: { getHex: () => number } };
+      geometry?: { type?: string };
+    }> = [];
+    const parts = new Set<string>();
+    const hexes: number[] = [];
+    house.traverse((obj: unknown) => {
+      const mesh = obj as {
+        userData?: { part?: string; mode?: string };
+        material?: { color?: { getHex: () => number } };
+        geometry?: { type?: string };
+      };
+      const part = mesh.userData?.part;
+      if (part) parts.add(part);
+      if (part !== "mailbox") return;
+      boxes.push(mesh);
+      if (mesh.material?.color) hexes.push(mesh.material.color.getHex());
+    });
+    expect(boxes.length).toBeGreaterThanOrEqual(1);
+    expect(parts.has("doormat")).toBe(true);
+    expect(parts.has("knocker")).toBe(true);
+    for (const mesh of boxes) {
+      expect(mesh.userData?.mode).toBe("PAPER");
+      expect(mesh.geometry?.type).toBe("BoxGeometry");
+    }
+    expect(hexes.length).toBeGreaterThan(0);
+    expect(hexes.every((c) => c === 0x5a3a22 || c === 0xf4ead8)).toBe(true);
+    expect(hexes.every((c) => !isGrey(c))).toBe(true);
+
+    for (const id of ["shop", "farm"] as const) {
+      const mesh = meshForUse(id, { area: 400 });
+      let n = 0;
+      mesh.traverse((obj: unknown) => {
+        const m = obj as { userData?: { part?: string } };
+        if (m.userData?.part === "mailbox") n += 1;
+      });
+      expect(n).toBe(0);
+    }
+  });
+
   it("puts a kraft PAPER porch slab on the House so plots read as entered from the street", () => {
     const house = meshForUse("house", { area: 400 });
     const parts: string[] = [];
