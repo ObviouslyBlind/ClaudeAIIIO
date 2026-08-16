@@ -136,6 +136,10 @@ function makeWarehouseDress() {
     [0.82, 0.52, 0.72, WOOD_LIGHT, 0.04, -0.03],
   ];
   const floorD = [[1.18, 0.88, 1.02, WOOD]];
+  const pallet = [
+    [1.02, 0.16, 0.78, WOOD_LIGHT],
+    [0.78, 0.48, 0.62, WOOD, 0.05, -0.04],
+  ];
 
   g.add(crateStack(-2.85, -2.52, 0.06, mid));
   g.add(crateStack(-1.35, -2.58, -0.08, low));
@@ -153,6 +157,8 @@ function makeWarehouseDress() {
   g.add(crateStack(1.12, 0.05, -0.12, floorB, 0.16, "warehouse-floor-crate"));
   g.add(crateStack(-0.42, -1.72, 0.14, floorC, 0.16, "warehouse-floor-crate"));
   g.add(crateStack(1.28, -1.48, -0.06, floorD, 0.16, "warehouse-floor-crate"));
+  // Left of the enter aisle (player at 0, 1.6), clear of the door at +Z.
+  g.add(crateStack(-1.92, 0.75, 0.1, pallet, 0.16));
 
   const loftY = 2.94;
   g.add(crateStack(-2.4, -2.35, 0.08, low, loftY));
