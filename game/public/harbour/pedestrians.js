@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { dressPaperNametags } from "./nametags.js";
 
-/** Same warm wood / cloth as player.js. */
+/** Same warm wood / cloth as player.js, plus original PAPER stall/field cloth. */
 const SKIN = 0xf2d2a8;
 const SHIRT = 0xf4ead8;
 const PANTS = 0x6e4a32;
@@ -9,9 +9,11 @@ const HAIR = 0x3d2a1c;
 const SHOES = 0x4a3220;
 const BELT = 0x7a2e22;
 
-const SHIRTS = [SHIRT, 0xead4b8, 0xe2c4a0, 0xd4b08a];
-const PANTS_SET = [PANTS, 0x5c3e2a, 0x7a5238];
-const HAIRS = [HAIR, 0x4a3220, 0x5a3a22];
+/** Cream kraft first so seed 0 matches the player. Then stall / nametag cloth. */
+const SHIRTS = [SHIRT, 0xc45c3a, 0x4a6e8a, 0x6a8f44, 0xe8d7b8, 0x2a7a72];
+const PANTS_SET = [PANTS, 0x5c3e2a, 0x7a5238, 0x3d4a38];
+const HAIRS = [HAIR, 0x4a3220, 0x5a3a22, 0x8a6a42];
+const BELTS = [BELT, 0x4a3220, 0x3d2a1c];
 const NAMES = [
   "Quay hand",
   "Ferry clerk",
@@ -59,6 +61,7 @@ export function makePaperPerson(seed = 0) {
   const shirt = SHIRTS[seed % SHIRTS.length];
   const pants = PANTS_SET[seed % PANTS_SET.length];
   const hairCol = HAIRS[seed % HAIRS.length];
+  const beltCol = BELTS[seed % BELTS.length];
 
   const figure = new THREE.Group();
   figure.name = "paper-pedestrian";
@@ -84,7 +87,7 @@ export function makePaperPerson(seed = 0) {
   body.position.set(0, 1.12, 0);
   body.userData.part = "body";
 
-  const belt = paperBox(0.48, 0.08, 0.3, BELT);
+  const belt = paperBox(0.48, 0.08, 0.3, beltCol);
   belt.position.set(0, 0.84, 0);
   belt.userData.part = "belt";
 
