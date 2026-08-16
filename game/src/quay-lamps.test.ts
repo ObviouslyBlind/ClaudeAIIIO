@@ -55,6 +55,22 @@ function collectBase(root: THREE.Object3D) {
   return out;
 }
 
+function collectDrip(root: THREE.Object3D) {
+  const out: THREE.Object3D[] = [];
+  root.traverse((obj) => {
+    if (obj.userData?.part === "drip") out.push(obj);
+  });
+  return out;
+}
+
+function collectCap(root: THREE.Object3D) {
+  const out: THREE.Object3D[] = [];
+  root.traverse((obj) => {
+    if (obj.userData?.part === "cap") out.push(obj);
+  });
+  return out;
+}
+
 describe("quay paper lamps", () => {
   it("plants a few wooden kraft-glass posts on both timber piers", () => {
     expect(QUAY_LAMP_SPOTS.length).toBeGreaterThanOrEqual(4);
@@ -136,6 +152,31 @@ describe("quay paper lamps", () => {
           const mat = mesh.material as THREE.MeshLambertMaterial;
           expect(mat.color.getHex()).toBe(KRAFT);
         }
+      }
+
+      const drips = collectDrip(group!);
+      expect(drips.length).toBe(QUAY_LAMP_SPOTS.length);
+      const caps = collectCap(group!);
+      expect(caps.length).toBe(QUAY_LAMP_SPOTS.length);
+      for (const lamp of lamps) {
+        expect(collectBase(lamp).length).toBe(1);
+        expect(collectKind(lamp, "quay-lamp-glass").length).toBe(1);
+        expect(collectCap(lamp).length).toBe(1);
+        expect(collectRing(lamp).length).toBe(1);
+        const cups = collectDrip(lamp);
+        expect(cups.length).toBe(1);
+        const cup = cups[0] as THREE.Mesh;
+        expect(cup.userData.part).toBe("drip");
+        expect(cup.userData.mode).toBe("PAPER");
+        expect(cup.geometry).toBeInstanceOf(THREE.BoxGeometry);
+        const geo = cup.geometry as THREE.BoxGeometry;
+        expect(geo.parameters.width).toBeLessThan(0.3);
+        expect(geo.parameters.height).toBeLessThan(0.08);
+        expect(geo.parameters.depth).toBeLessThan(0.3);
+        expect(cup.position.y).toBeGreaterThan(2.36);
+        expect(cup.position.y).toBeLessThan(2.62);
+        const mat = cup.material as THREE.MeshLambertMaterial;
+        expect(mat.color.getHex()).toBe(KRAFT);
       }
     }
   });

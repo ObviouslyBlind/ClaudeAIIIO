@@ -67,6 +67,11 @@ function paperLamp() {
   collar.position.y = 2.36;
   collar.userData.part = "collar";
 
+  /** Tiny kraft drip cup on the collar, just under the glass. Not a new post. */
+  const drip = part(0.22, 0.04, 0.22, KRAFT, false);
+  drip.position.y = 2.42;
+  drip.userData.part = "drip";
+
   const glass = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.48, 0.38), glassMat);
   glass.position.y = 2.62;
   glass.castShadow = false;
@@ -100,7 +105,7 @@ function paperLamp() {
   right.position.set(0.05, 0, 0);
   ring.add(top, bot, left, right);
 
-  g.add(base, post, collar, glass, cap, brace, ring);
+  g.add(base, post, collar, drip, glass, cap, brace, ring);
   return g;
 }
 
