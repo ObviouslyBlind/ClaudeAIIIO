@@ -47,34 +47,35 @@ export type LandBoard = {
 /**
  * Small inhabited Caribbean cay scale, not Jamaica.
  * Each ellipse is about 2.0 km east-west by 1.2 km north-south (~1.9 km²).
+ * Centres sit 9.6 km apart so the other shore is a distant line, not a neighbouring beach.
  */
 export const ISLANDS: Record<IslandId, IslandSpec> = {
   north: {
     id: "north",
     name: "North",
     cx: 0,
-    cz: -2400,
+    cz: -4800,
     rx: 1000,
     rz: 580,
     peak: 92,
-    port: { x: 0, z: -1890 },
-    hill: { x: -280, z: -2580 },
+    port: { x: 0, z: -4290 },
+    hill: { x: -280, z: -4980 },
   },
   south: {
     id: "south",
     name: "South",
     cx: 0,
-    cz: 2400,
+    cz: 4800,
     rx: 1000,
     rz: 580,
     peak: 74,
-    port: { x: 0, z: 1890 },
-    hill: { x: 260, z: 2580 },
+    port: { x: 0, z: 4290 },
+    hill: { x: 260, z: 4980 },
   },
 };
 
-/** Half-width of the paved carriageway plus a verge, metres. */
-export const ROAD_CLEAR = 7;
+/** Half-width of the paved carriageway plus a grass verge, metres. */
+export const ROAD_CLEAR = 11;
 
 export const DEVELOP_COST = 40;
 
@@ -124,8 +125,17 @@ export function distToPaved(spec: IslandSpec, x: number, z: number): number {
 }
 
 function ringHitsPaved(spec: IslandSpec, ring: Ring): boolean {
-  for (const [x, z] of ring) {
-    if (distToPaved(spec, x, z) < ROAD_CLEAR) return true;
+  for (let i = 0; i < ring.length; i++) {
+    const a = ring[i];
+    const b = ring[(i + 1) % ring.length];
+    const len = Math.hypot(b[0] - a[0], b[1] - a[1]);
+    const n = Math.max(2, Math.ceil(len / 2));
+    for (let s = 0; s <= n; s++) {
+      const t = s / n;
+      const x = a[0] + (b[0] - a[0]) * t;
+      const z = a[1] + (b[1] - a[1]) * t;
+      if (distToPaved(spec, x, z) < ROAD_CLEAR) return true;
+    }
   }
   for (const p of pavedPolyline(spec)) {
     if (pointInRing(p.x, p.z, ring)) return true;
@@ -237,10 +247,10 @@ function lotsAlongRoad(spec: IslandSpec): { lots: Parcel[]; dirt: Road[] } {
       const p = { x: perp.x * side, z: perp.z * side };
       const h = hash(i * 17 + side * 9 + (spec.id === "north" ? 1 : 3));
       const streetDepth = 18 + h * 14;
-      const street = quad(a, b, p, 12, streetDepth, (h - 0.5) * 0.08);
+      const street = quad(a, b, p, 18, streetDepth, (h - 0.5) * 0.08);
       const before = lots.length;
       pushParcel(lots, spec, street, "street", lots.length);
-      const fieldSetback = 12 + streetDepth + 8;
+      const fieldSetback = 18 + streetDepth + 10;
       const field = quad(a, b, p, fieldSetback, 32 + h * 18, (h - 0.4) * 0.1);
       pushParcel(lots, spec, field, "field", lots.length);
       if (lots.length > before + 1) {

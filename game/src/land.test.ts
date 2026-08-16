@@ -19,8 +19,8 @@ describe("harbour land board", () => {
     const s = ISLANDS.south;
     expect(n.rx * 2).toBeGreaterThanOrEqual(1800);
     expect(s.rx * 2).toBeGreaterThanOrEqual(1800);
-    expect(s.port.z - n.port.z).toBeGreaterThan(3000);
-    expect(s.cz - n.cz).toBeGreaterThan(4000);
+    expect(s.port.z - n.port.z).toBeGreaterThan(8000);
+    expect(s.cz - n.cz).toBeGreaterThan(9000);
     expect(heightAt(n, n.port.x, n.port.z)).toBeGreaterThan(0.5);
     expect(heightAt(s, s.port.x, s.port.z)).toBeGreaterThan(0.5);
     expect(heightAt(n, 0, 0)).toBeLessThan(0);
@@ -45,12 +45,21 @@ describe("harbour land board", () => {
     expect(nMin).toBeGreaterThan(sMax);
   });
 
-  it("keeps parcel corners off the paved road", () => {
+  it("keeps parcel corners and edges off the paved road", () => {
     const board = createLandBoard();
     for (const p of board.plots) {
       const spec = ISLANDS[p.island];
-      for (const [x, z] of p.ring) {
-        expect(distToPaved(spec, x, z)).toBeGreaterThanOrEqual(ROAD_CLEAR - 0.05);
+      for (let i = 0; i < p.ring.length; i++) {
+        const a = p.ring[i];
+        const b = p.ring[(i + 1) % p.ring.length];
+        const len = Math.hypot(b[0] - a[0], b[1] - a[1]);
+        const n = Math.max(2, Math.ceil(len / 2));
+        for (let s = 0; s <= n; s++) {
+          const t = s / n;
+          const x = a[0] + (b[0] - a[0]) * t;
+          const z = a[1] + (b[1] - a[1]) * t;
+          expect(distToPaved(spec, x, z)).toBeGreaterThanOrEqual(ROAD_CLEAR - 0.05);
+        }
       }
     }
   });
