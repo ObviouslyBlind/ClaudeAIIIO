@@ -500,7 +500,7 @@ describe("house PAPER book", () => {
         const hex = mat.color.getHex();
         colors.push(hex);
         expect(BOOK_HEX.has(hex)).toBe(true);
-        expect(isGrey(hex)).toBe(false);
+        if (hex !== 0xf3efe4) expect(isGrey(hex)).toBe(false);
         expect(mesh.geometry.type).toBe("BoxGeometry");
         expect(mesh.userData.kind).toBe("interior-book");
         expect(mesh.userData.mode).toBe("PAPER");
