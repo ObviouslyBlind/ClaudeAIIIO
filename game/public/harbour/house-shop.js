@@ -257,6 +257,30 @@ function hangingLamp(x, y, z) {
   return g;
 }
 
+/**
+ * Small kraft shop bell hanging above the counter — wood cord, tin body,
+ * wood clapper. PAPER boxes only. Not a lamp, not a till.
+ */
+function hangingBell(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "house-shop-bell";
+  g.userData.kind = "house-shop-bell";
+  g.userData.mode = "PAPER";
+  g.position.set(x, y, z);
+  const cord = paperBox(0.035, 0.28, 0.035, WOOD, "house-shop-bell");
+  cord.position.set(0, 0.22, 0);
+  const cap = paperBox(0.08, 0.045, 0.08, TIN, "house-shop-bell");
+  cap.position.set(0, 0.06, 0);
+  const body = paperBox(0.16, 0.12, 0.16, TIN, "house-shop-bell");
+  body.position.set(0, -0.02, 0);
+  const rim = paperBox(0.22, 0.04, 0.22, TIN, "house-shop-bell");
+  rim.position.set(0, -0.1, 0);
+  const clapper = paperBox(0.05, 0.08, 0.05, WOOD, "house-shop-bell");
+  clapper.position.set(0, -0.14, 0);
+  g.add(cord, cap, body, rim, clapper);
+  return g;
+}
+
 function tableLamp(x, y, z) {
   const g = new THREE.Group();
   g.name = "house-shop-lamp";
@@ -301,6 +325,8 @@ function makeHouseShopDress() {
   g.add(makeShelfBox(0.78, -0.52, 0, [[TIN, CORAL], [CREAM]]));
   g.add(makeShortShelf(-3.28, 0.45, Math.PI / 2));
   g.add(hangingLamp(0, 2.18, 0.48));
+  // Kraft tin bell above the counter, offset from the lamp so both read.
+  g.add(hangingBell(0.62, 1.78, 0.62));
   g.add(paperMark(-2.15, 1.62, 3.38));
 
   const rug = paperBox(1.55, 0.04, 1.25, RUG, "house-shop-rug");
