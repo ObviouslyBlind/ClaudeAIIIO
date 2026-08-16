@@ -11,11 +11,12 @@ import * as THREE from "three";
  * Warm wood — harbour crate family: 0x8a6238 / 0x7a5230 / 0x9a6a40.
  * Bed load: two small kraft crates + one canvas roll + a short kraft rope coil
  * + a thin kraft canvas strap over the visitor crate + a small kraft lantern
- * (WOOD post + cream glass box) near the headboard.
+ * (WOOD post + cream glass box) near the headboard + a small kraft water jug
+ * (WOOD body, canvas neck, wood handle) on the front-right of the bed.
  * Wheels: kraft cream hub discs (paper boxes) on the outer face of each wheel.
  * Grip: a short kraft hitch pin (paper box) through the handle.
  */
-export const CART_MESH_COUNT = 21;
+export const CART_MESH_COUNT = 24;
 /** Metres from player.position down to the soles. Same as player.js SOLE_Y. */
 const SOLE_Y = -1.15;
 
@@ -149,7 +150,20 @@ function makeHandcart() {
   lanternGlass.position.set(-0.28, 0.81, -0.58);
   lanternGlass.userData.part = "lantern";
 
-  g.add(bed, sideL, sideR, tail, head, wheelL, wheelR, hubL, hubR, handleL, handleR, grip, pin, crate, strap, crate2, roll, coil, coilTop, lanternPost, lanternGlass);
+  // Small kraft water jug on the bed — WOOD cylinder, canvas neck, wood handle.
+  // Front-right corner, inside the side rail, clear of crates, roll, coil, lantern.
+  // Sits on the bed top (y = 0.53). Paper box + cylinders only.
+  const jugBody = paperRoll(0.055, 0.14, WOOD);
+  jugBody.position.set(0.24, 0.6, -0.58);
+  jugBody.userData.part = "jug";
+  const jugNeck = paperRoll(0.03, 0.07, CANVAS);
+  jugNeck.position.set(0.24, 0.705, -0.58);
+  jugNeck.userData.part = "jug";
+  const jugHandle = paperBox(0.02, 0.08, 0.04, WOOD_DARK, false);
+  jugHandle.position.set(0.18, 0.64, -0.58);
+  jugHandle.userData.part = "jug";
+
+  g.add(bed, sideL, sideR, tail, head, wheelL, wheelR, hubL, hubR, handleL, handleR, grip, pin, crate, strap, crate2, roll, coil, coilTop, lanternPost, lanternGlass, jugBody, jugNeck, jugHandle);
   return g;
 }
 

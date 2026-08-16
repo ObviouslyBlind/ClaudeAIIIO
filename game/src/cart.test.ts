@@ -92,7 +92,7 @@ describe("player PAPER handcart", () => {
     const cart = player.getObjectByName("paper-cart")!;
     expect(cart.children.length).toBe(CART_MESH_COUNT);
     expect(meshCount(cart)).toBe(CART_MESH_COUNT);
-    expect(CART_MESH_COUNT).toBe(21);
+    expect(CART_MESH_COUNT).toBe(24);
 
     const p = parts(cart);
     expect(p).toContain("bed");
@@ -106,6 +106,7 @@ describe("player PAPER handcart", () => {
     expect(p.filter((k) => k === "roll").length).toBe(1);
     expect(p.filter((k) => k === "coil").length).toBe(2);
     expect(p.filter((k) => k === "lantern").length).toBe(2);
+    expect(p.filter((k) => k === "jug").length).toBeGreaterThanOrEqual(1);
     expect(p.filter((k) => k === "side").length).toBe(2);
     expect(p.filter((k) => k === "end").length).toBe(2);
 
@@ -147,6 +148,18 @@ describe("player PAPER handcart", () => {
     expect(crate.position.z).toBeLessThan(bed.position.z + 0.5);
     expect(crate.position.z).toBeGreaterThan(bed.position.z - 0.5);
     expect(lanterns.every((l) => l.position.y > bed.position.y)).toBe(true);
+    const jugs = cart.children.filter((c) => c.userData.part === "jug") as THREE.Mesh[];
+    expect(jugs.length).toBeGreaterThanOrEqual(1);
+    expect(jugs.every((j) => j.geometry.type === "BoxGeometry" || j.geometry.type === "CylinderGeometry")).toBe(true);
+    expect(jugs.every((j) => j.position.y > bed.position.y)).toBe(true);
+    const occupied = cart.children.filter((c) =>
+      ["crate", "roll", "coil", "lantern"].includes(c.userData.part as string),
+    );
+    expect(
+      jugs.every((j) =>
+        occupied.every((o) => Math.hypot(j.position.x - o.position.x, j.position.z - o.position.z) > 0.12),
+      ),
+    ).toBe(true);
   });
 
   it("is idempotent and never writes player.position", () => {
