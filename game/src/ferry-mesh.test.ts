@@ -6,6 +6,7 @@ describe("ferry berth", () => {
   it("parks the hull in the channel just off the north quay, not kilometres out", () => {
     const portZ = ISLANDS.north.port.z;
     expect(portZ).toBe(-6950);
+    expect(HOME_Z).toBe(-6835);
     expect(HOME_Z).toBeGreaterThan(portZ);
     expect(HOME_Z - portZ).toBeGreaterThan(90);
     expect(HOME_Z - portZ).toBeLessThan(160);
@@ -13,5 +14,16 @@ describe("ferry berth", () => {
     expect(mesh.position.z).toBe(HOME_Z);
     expect(mesh.position.y).toBeCloseTo(0.4, 5);
     expect(Math.abs(mesh.position.x)).toBeLessThan(1);
+  });
+
+  it("plants at least two wood/iron bollards on the cream deck", () => {
+    expect(HOME_Z).toBe(-6835);
+    const mesh = makeFerry();
+    expect(mesh.position.z).toBe(-6835);
+    let bollards = 0;
+    mesh.traverse((obj) => {
+      if (obj.userData?.part === "bollard" || obj.name === "bollard") bollards += 1;
+    });
+    expect(bollards).toBeGreaterThanOrEqual(2);
   });
 });
