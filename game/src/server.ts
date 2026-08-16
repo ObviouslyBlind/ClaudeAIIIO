@@ -17,6 +17,7 @@ import { calendarHud } from "./calendar.ts";
 import { createPresence, presenceQuery } from "./presence.ts";
 import { walkSeededPresence } from "./presenceWalk.ts";
 import { dumpCart } from "./visitorCart.ts";
+import { startPersistLoop } from "./persistLoop.ts";
 
 const root = join(fileURLToPath(new URL(".", import.meta.url)), "..");
 const publicDir = join(root, "public");
@@ -28,6 +29,10 @@ const land = createLandBoard();
 const presence = createPresence();
 setInterval(() => tick(world, visitor, land), 1000);
 setInterval(() => walkSeededPresence(presence), 1000);
+const persist = startPersistLoop({
+  getShard: () => ({ world, land, visitor }),
+  intervalMs: 10_000,
+});
 
 function snapshot() {
   return {
@@ -92,6 +97,16 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "GET" && url.pathname === "/api/snapshot") {
     json(res, 200, snapshot());
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname === "/api/persist") {
+    if (!persist.lastBlob) {
+      res.writeHead(204);
+      res.end();
+      return;
+    }
+    json(res, 200, persist.lastBlob);
     return;
   }
 
