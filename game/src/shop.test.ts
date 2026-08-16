@@ -45,6 +45,16 @@ function shopBags(root: THREE.Object3D) {
   return out;
 }
 
+function shopDrawers(root: THREE.Object3D) {
+  const out: THREE.Object3D[] = [];
+  root.traverse((obj) => {
+    if (obj.userData?.kind === "shop-drawer" && obj.name === "shop-drawer") {
+      out.push(obj);
+    }
+  });
+  return out;
+}
+
 describe("shop PAPER wrapped parcel", () => {
   it("matches shop plots only", () => {
     expect(isShopPlot({ use: "shop" })).toBe(true);
@@ -185,6 +195,83 @@ describe("shop PAPER kraft bag", () => {
     expect(dress).toBeTruthy();
     expect(dress!.visible).toBe(false);
     expect(shopBags(interior).length).toBe(1);
+    expect(interior.userData.interiorUse).toBe("house");
+  });
+});
+
+describe("shop PAPER kraft till drawer", () => {
+  it("pulls a thin kraft PAPER drawer out of the shop till", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressShop(scene);
+
+    const dress = interior.getObjectByName("shop-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+
+    const counter = dress!.getObjectByName("shop-counter");
+    expect(counter).toBeTruthy();
+    const till = counter!.getObjectByName("shop-till");
+    expect(till).toBeTruthy();
+    expect(till!.userData.kind).toBe("shop-till");
+
+    const drawers = shopDrawers(till!);
+    expect(drawers.length).toBe(1);
+
+    const drawer = drawers[0];
+    expect(drawer.userData.kind).toBe("shop-drawer");
+    expect(drawer.userData.mode).toBe("PAPER");
+    expect(drawer.parent?.name).toBe("shop-till");
+    // Thin tray, slightly pulled toward +z (camera), still on the till.
+    expect(drawer.position.z).toBeGreaterThan(0.06);
+    expect(drawer.position.z).toBeLessThan(0.22);
+    expect(Math.abs(drawer.position.x)).toBeLessThan(0.08);
+    expect(Math.abs(drawer.position.y)).toBeLessThan(0.08);
+
+    expect(shopParcels(counter!).length).toBe(1);
+    expect(shopBags(counter!).length).toBe(1);
+    expect(counter!.getObjectByName("shop-wall-shelf")).toBeTruthy();
+
+    const colors = hexes(drawer);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.every((c) => KRAFT.has(c))).toBe(true);
+    expect(colors.some((c) => c === CREAM)).toBe(true);
+    expect(colors.some((c) => c === WOOD)).toBe(true);
+    expect(colors.some((c) => c === STRAP)).toBe(true);
+    expect(colors.every((c) => !isGrey(c))).toBe(true);
+
+    let boxes = 0;
+    drawer.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        boxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.kind).toBe("shop-drawer");
+        expect(mesh.userData.mode).toBe("PAPER");
+        const box = mesh.geometry as THREE.BoxGeometry;
+        expect(box.parameters.height).toBeLessThan(0.08);
+      }
+    });
+    expect(boxes).toBeGreaterThanOrEqual(2);
+  });
+
+  it("keeps dress idempotent and hides the drawer on undress", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressShop(scene);
+    dressShop(scene);
+    expect(interior.children.filter((c) => c.name === "shop-dress").length).toBe(1);
+    expect(shopDrawers(interior).length).toBe(1);
+    expect(shopParcels(interior).length).toBe(1);
+    expect(shopBags(interior).length).toBe(1);
+
+    undressShop(scene);
+    const dress = interior.getObjectByName("shop-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.visible).toBe(false);
+    expect(shopDrawers(interior).length).toBe(1);
     expect(interior.userData.interiorUse).toBe("house");
   });
 });
