@@ -6,6 +6,7 @@ import { GOOD_IDS, type GoodId } from "./goods.ts";
 import { createLandBoard, developPlot, landSnapshot, leasePlot } from "./land.ts";
 import { parseLandUse } from "./buildings.ts";
 import { buyFromStall, createVisitor, createWorld, hud, tick } from "./sim.ts";
+import { listOpenOrders, placeAsk, placeBid } from "./orders.ts";
 import { bustHarbourAssets, bustModuleImports } from "./cache-bust.ts";
 import { confirmFerry, listFerryRoutes } from "./ferry-routes.ts";
 import { calendarHud } from "./calendar.ts";
@@ -37,6 +38,7 @@ function snapshot() {
       goods: visitor.goods,
       staffSlots: visitor.staffSlots,
     },
+    visitorOrders: listOpenOrders(visitor),
     goods: GOOD_IDS,
   };
 }
@@ -150,6 +152,28 @@ const server = createServer(async (req, res) => {
       world.statutes,
     );
     json(res, result.ok ? 200 : 400, { ...result, snapshot: landSnapshot(land, visitor) });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/order") {
+    const body = await readJsonBody(req);
+    if (!body) {
+      json(res, 400, { ok: false, reason: "bad_json", mode: "PAPER" });
+      return;
+    }
+    const intent = {
+      island: body.island,
+      goodId: body.goodId ?? body.good,
+      price: Number(body.price),
+      qty: Number(body.qty ?? 1),
+    };
+    const result =
+      body.side === "ask"
+        ? placeAsk(world, visitor, intent)
+        : body.side === "bid"
+          ? placeBid(world, visitor, intent)
+          : { ok: false as const, reason: "bad_side", mode: "PAPER" as const, provenance: "SIMULATED" as const };
+    json(res, result.ok ? 200 : 400, { ...result, snapshot: snapshot() });
     return;
   }
 

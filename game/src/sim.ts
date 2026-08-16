@@ -13,6 +13,7 @@ import {
 } from "./books.ts";
 import { mulberry32 } from "./rng.ts";
 import { createStatuteCatalog, salesTaxRate, type Statute } from "./statutes.ts";
+import { matchVisitorOrders } from "./orders.ts";
 import { tickStaff, type StaffSlot } from "./staff.ts";
 import { createVisitorCart, type CartLine } from "./visitorCart.ts";
 
@@ -210,6 +211,7 @@ function refreshIndex(world: World): void {
 export function tick(world: World, visitor?: Visitor): void {
   restockNpc(world);
   npcQuote(world);
+  matchVisitorOrders(world);
   for (const island of BOOK_ISLANDS) {
     for (const id of GOOD_IDS) match(world, island, id);
   }
