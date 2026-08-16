@@ -174,6 +174,30 @@ function ropeBox() {
   return g;
 }
 
+/**
+ * PAPER life ring: a short torus of terracotta / kraft boxes on the deck.
+ * Cream bands on a hull-family rust ring — not iron, not a cylinder.
+ */
+function lifeRing() {
+  const g = new THREE.Group();
+  g.userData.dress = "life-ring";
+  const n = 6;
+  const r = 0.34;
+  for (let layer = 0; layer < 2; layer++) {
+    const y = 0.08 + layer * 0.14;
+    const rot = layer * (Math.PI / n);
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * Math.PI * 2 + rot;
+      const cream = (i + layer) % 3 === 0;
+      const seg = part(0.28, 0.14, 0.18, cream ? 0xc4b496 : 0x6e2e22, false);
+      seg.position.set(Math.cos(a) * r, y, Math.sin(a) * r);
+      seg.rotation.y = a;
+      g.add(seg);
+    }
+  }
+  return g;
+}
+
 /** Crate with a canvas tarp lashed over it. */
 function canvasCrate() {
   const g = new THREE.Group();
@@ -285,6 +309,18 @@ export const QUAY_DECK_SPOTS = Object.freeze([
   Object.freeze({ x: 3.3, along: 22, kind: "rope" }),
 ]);
 
+/**
+ * PAPER life rings on the timber deck, on the north/south bollard lines.
+ * Local x is east of the port; along is toward the water from pier centre.
+ * Stay on the 11 m deck, off the paved road (ROAD_CLEAR 11) and centre walk.
+ */
+export const LIFE_RING_SPOTS = Object.freeze([
+  Object.freeze({ x: -4.95, along: -16 }),
+  Object.freeze({ x: 4.95, along: -16 }),
+  Object.freeze({ x: -4.95, along: 14 }),
+  Object.freeze({ x: 4.95, along: 14 }),
+]);
+
 export function quayWorldPoint(spec, localX, along) {
   const toward = spec.id === "north" ? 1 : -1;
   return { x: spec.port.x + localX, z: spec.port.z + toward * along };
@@ -390,6 +426,13 @@ export function makeQuay(spec, helpers) {
     obj.position.set(x + spot.x, deckY, pierZ + toward * spot.along);
     obj.rotation.y = spot.x > 0 ? -0.22 : 0.16;
     root.add(obj);
+  }
+
+  for (const spot of LIFE_RING_SPOTS) {
+    const ring = lifeRing();
+    ring.position.set(x + spot.x, deckY, pierZ + toward * spot.along);
+    ring.rotation.y = spot.x > 0 ? -0.12 : 0.18;
+    root.add(ring);
   }
 
   for (const spot of QUAY_LAND_SPOTS) {
