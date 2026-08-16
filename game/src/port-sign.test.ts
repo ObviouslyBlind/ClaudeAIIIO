@@ -4,6 +4,7 @@ import { heightAt, ISLANDS } from "./land.ts";
 import { makePortSign, SIGN_LINE } from "../public/harbour/port-sign.js";
 
 const WOOD = 0x8a6238;
+const WOOD_DARK = 0x6a4a2a;
 
 function collectBrace(root: THREE.Object3D) {
   const out: THREE.Object3D[] = [];
@@ -19,6 +20,14 @@ function collectCap(root: THREE.Object3D) {
   const out: THREE.Object3D[] = [];
   root.traverse((obj) => {
     if (obj.userData?.part === "cap") out.push(obj);
+  });
+  return out;
+}
+
+function collectNail(root: THREE.Object3D) {
+  const out: THREE.Object3D[] = [];
+  root.traverse((obj) => {
+    if (obj.userData?.part === "nail") out.push(obj);
   });
   return out;
 }
@@ -60,6 +69,32 @@ describe("north port sign", () => {
       expect(mesh.geometry).toBeInstanceOf(THREE.BoxGeometry);
       const mat = mesh.material as THREE.MeshLambertMaterial;
       expect(mat.color.getHex()).toBe(WOOD);
+    }
+  });
+
+  it("puts a tiny kraft PAPER nail on the north sign board, caps and braces remain", () => {
+    const sign = makePortSign(ISLANDS.north, { heightAt });
+    expect(sign).not.toBeNull();
+    expect(sign!.userData.mode).toBe("PAPER");
+
+    const braces = collectBrace(sign!);
+    expect(braces.length).toBeGreaterThanOrEqual(1);
+    const caps = collectCap(sign!);
+    expect(caps.length).toBeGreaterThanOrEqual(1);
+
+    const nails = collectNail(sign!);
+    expect(nails.length).toBeGreaterThanOrEqual(1);
+    for (const n of nails) {
+      expect(n.userData.part).toBe("nail");
+      expect(n.userData.mode).toBe("PAPER");
+      const mesh = n as THREE.Mesh;
+      expect(mesh.geometry).toBeInstanceOf(THREE.BoxGeometry);
+      const mat = mesh.material as THREE.MeshLambertMaterial;
+      expect(mat.color.getHex()).toBe(WOOD_DARK);
+      const { width, height, depth } = (mesh.geometry as THREE.BoxGeometry).parameters;
+      expect(width).toBeLessThan(0.12);
+      expect(height).toBeLessThan(0.12);
+      expect(depth).toBeLessThan(0.12);
     }
   });
 });

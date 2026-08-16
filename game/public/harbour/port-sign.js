@@ -145,6 +145,12 @@ export function makePortSign(spec, helpers) {
   face.position.set(0, 2.12, 0.08);
   g.add(face);
 
+  /** Tiny kraft nail on the board face. WOOD_DARK already in this file — PAPER box, not grey iron. */
+  const nail = part(0.05, 0.05, 0.04, WOOD_DARK, false);
+  nail.position.set(-1.62, 2.52, 0.1);
+  nail.userData.part = "nail";
+  g.add(nail);
+
   g.position.set(wx, gy, wz);
   g.rotation.y = 0.42;
   return g;
