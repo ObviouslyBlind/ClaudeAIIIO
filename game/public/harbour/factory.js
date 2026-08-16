@@ -296,6 +296,30 @@ function barRack(x, z, yaw) {
 }
 
 /**
+ * Small kraft/iron PAPER oil can: short box body, thinner spout.
+ * Sits on the first workbench top — not a mill, not the hanging wrench.
+ */
+function oilCan(x, z, yaw = 0) {
+  const g = new THREE.Group();
+  g.name = "factory-oilcan";
+  g.userData.kind = "factory-oilcan";
+  g.userData.mode = "PAPER";
+  // First workbench lip top: y0 0.16 + 0.78, lip centre +0.05, half lip 0.015.
+  const sitY = 0.16 + 0.78 + 0.05 + 0.015;
+  g.position.set(x, sitY, z);
+  g.rotation.y = yaw;
+  const bodyH = 0.15;
+  const bodyW = 0.14;
+  const bodyD = 0.12;
+  const body = paperBox(bodyW, bodyH, bodyD, KRAFT, "factory-oilcan");
+  body.position.y = bodyH / 2;
+  const spout = paperBox(0.18, 0.03, 0.03, IRON_DARK, "factory-oilcan");
+  spout.position.set(bodyW * 0.55, bodyH - 0.005, 0);
+  g.add(body, spout);
+  return g;
+}
+
+/**
  * Hanging iron open-end wrench on a wall peg. PAPER boxes only —
  * not a mill, not a crate, not a farm rake. Reads from the enter camera.
  */
@@ -359,6 +383,8 @@ function makeFactoryDress() {
   g.userData.provenance = "SIMULATED";
 
   g.add(workbench(-1.35, -2.48, 2.35, 0.72, 0));
+  // Left of the vise on the first bench top. Off the machines (z≈0.6).
+  g.add(oilCan(-2.08, -2.36, 0.12));
   g.add(workbench(-3.08, 0.15, 2.15, 0.68, Math.PI / 2));
   g.add(woodWorkbench(3.1, -1.18, 1.92, 0.64, Math.PI / 2));
   // Left wall, opposite the wood bench. Off the centre aisle (x≈0).
