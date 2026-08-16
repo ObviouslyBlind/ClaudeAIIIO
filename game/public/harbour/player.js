@@ -48,6 +48,7 @@ function paperBox(w, h, d, color) {
  *   hair    y 1.74–1.86   (0, 1.80, 0)          0.32×0.12×0.30
  *   brim    y 1.84–1.88   (0, 1.86, 0)          0.52×0.04×0.52   kraft
  *   hat     y 1.88–1.98   (0, 1.93, 0)          0.28×0.10×0.28   cream
+ *   visor   y 1.84–1.87   (0, 1.855, 0.32)      0.30×0.03×0.16   kraft, forward
  *   satchel y 0.64–0.92   (0.38, 0.78, 0.08)    0.18×0.28×0.14   kraft
  *   flap    y 0.88–0.96   (0.38, 0.92, 0.09)    0.18×0.08×0.16   kraft
  *   strap   y 0.92–1.40   (0.05, 1.14, 0.16)    0.04×0.82×0.02   cross-body
@@ -134,6 +135,10 @@ export function dressPlayer(player) {
   const crown = paperBox(0.28, 0.1, 0.28, SHIRT);
   crown.position.set(0, 1.93, 0);
   crown.userData.part = "hat";
+  // Thin kraft visor — a short brim box sticking forward of the straw hat.
+  const visor = paperBox(0.3, 0.03, 0.16, KRAFT);
+  visor.position.set(0, 1.855, 0.32);
+  visor.userData.part = "visor";
 
   figure.add(
     leftShoe,
@@ -149,6 +154,7 @@ export function dressPlayer(player) {
     hair,
     brim,
     crown,
+    visor,
     satchel,
     flap,
     strap,
