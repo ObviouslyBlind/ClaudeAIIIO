@@ -13,6 +13,7 @@ import {
 } from "./books.ts";
 import { mulberry32 } from "./rng.ts";
 import { createStatuteCatalog, salesTaxRate, type Statute } from "./statutes.ts";
+import { tickStaff, type StaffSlot } from "./staff.ts";
 import { createVisitorCart, type CartLine } from "./visitorCart.ts";
 
 export {
@@ -206,7 +207,7 @@ function refreshIndex(world: World): void {
   world.moneySupply = world.npcCash;
 }
 
-export function tick(world: World): void {
+export function tick(world: World, visitor?: Visitor): void {
   restockNpc(world);
   npcQuote(world);
   for (const island of BOOK_ISLANDS) {
@@ -215,22 +216,26 @@ export function tick(world: World): void {
   settleUnfilled(world);
   refreshIndex(world);
   world.tick += 1;
+  if (visitor) tickStaff(world, visitor);
 }
 
-export function fastForward(world: World, n: number): void {
-  for (let i = 0; i < n; i++) tick(world);
+export function fastForward(world: World, n: number, visitor?: Visitor): void {
+  for (let i = 0; i < n; i++) tick(world, visitor);
 }
 
 export type Visitor = {
   cash: number;
   stock: Record<GoodId, number>;
+  /** Same bag as stock. Staff payday writes matching goods here. */
+  goods: Record<GoodId, number>;
+  staffSlots: StaffSlot[];
   cart: CartLine[];
 };
 
 export function createVisitor(cash = 1_000): Visitor {
   const stock = {} as Record<GoodId, number>;
   for (const id of GOOD_IDS) stock[id] = 0;
-  return { cash, stock, cart: createVisitorCart() };
+  return { cash, stock, goods: stock, staffSlots: [], cart: createVisitorCart() };
 }
 
 export function buyFromStall(
@@ -256,7 +261,7 @@ export function buyFromStall(
   return { ok: true, paid };
 }
 
-export function hud(world: World): {
+export function hud(world: World, visitor?: Visitor): {
   tick: number;
   moneySupply: number;
   goodsProducedWindow: number;
@@ -264,6 +269,7 @@ export function hud(world: World): {
   tradeCount: number;
   faucet: number;
   sink: number;
+  staffSlots: StaffSlot[];
 } {
   return {
     tick: world.tick,
@@ -273,5 +279,6 @@ export function hud(world: World): {
     tradeCount: world.tradeCount,
     faucet: world.ledger.faucet,
     sink: world.ledger.sink,
+    staffSlots: visitor?.staffSlots ?? [],
   };
 }

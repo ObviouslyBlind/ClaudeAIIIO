@@ -19,14 +19,14 @@ const world = createWorld(7);
 const visitor = createVisitor(1_000);
 const land = createLandBoard();
 const presence = createPresence();
-setInterval(() => tick(world), 1000);
+setInterval(() => tick(world, visitor), 1000);
 
 function snapshot() {
   return {
     mode: "PAPER",
     provenance: "SIMULATED",
     note: "Live sim HUD. Visitor cash is paper. Shared with harbour leases.",
-    hud: hud(world),
+    hud: hud(world, visitor),
     calendar: calendarHud(world.tick),
     lastPrices: world.lastPrice,
     lastPricesSouth: world.lastPriceSouth,
@@ -34,6 +34,8 @@ function snapshot() {
     visitor: {
       cash: visitor.cash,
       stock: visitor.stock,
+      goods: visitor.goods,
+      staffSlots: visitor.staffSlots,
     },
     goods: GOOD_IDS,
   };
