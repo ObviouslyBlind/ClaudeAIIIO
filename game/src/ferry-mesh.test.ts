@@ -140,4 +140,30 @@ describe("ferry berth", () => {
     expect(rings).toBeGreaterThanOrEqual(1);
     expect(bollards).toBeGreaterThanOrEqual(2);
   });
+
+  it("hangs one kraft PAPER tyre fender on the hull side", () => {
+    expect(HOME_Z).toBe(-6835);
+    const mesh = makeFerry();
+    expect(mesh.position.z).toBe(-6835);
+    let fenders = 0;
+    let rails = 0;
+    let cleats = 0;
+    let lanterns = 0;
+    let smoke = 0;
+    mesh.traverse((obj) => {
+      if (obj.userData?.part === "fender") {
+        expect(obj.userData.part).toBe("fender");
+        fenders += 1;
+      }
+      if (obj.userData?.part === "rail") rails += 1;
+      if (obj.userData?.part === "cleat") cleats += 1;
+      if (obj.userData?.part === "lantern") lanterns += 1;
+      if (obj.userData?.part === "smoke") smoke += 1;
+    });
+    expect(fenders).toBeGreaterThanOrEqual(1);
+    expect(rails).toBeGreaterThanOrEqual(1);
+    expect(cleats).toBeGreaterThanOrEqual(1);
+    expect(lanterns).toBeGreaterThanOrEqual(1);
+    expect(smoke).toBeGreaterThanOrEqual(1);
+  });
 });
