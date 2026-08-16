@@ -18,11 +18,12 @@ import * as THREE from "three";
  * + a tiny kraft produce potato (WOOD_CRATE box) on the right of the bed
  * + a tiny kraft produce onion (WOOD box) on the left of the bed
  * + a tiny kraft produce garlic (CANVAS box) at the tail of the bed
- * + a tiny kraft produce cabbage (WOOD_LIGHT box) left of the garlic.
+ * + a tiny kraft produce cabbage (WOOD_LIGHT box) left of the garlic
+ * + a tiny kraft produce leek (WOOD box) right of the garlic.
  * Wheels: kraft cream hub discs (paper boxes) on the outer face of each wheel.
  * Grip: a short kraft hitch pin (paper box) through the handle.
  */
-export const CART_MESH_COUNT = 32;
+export const CART_MESH_COUNT = 33;
 /** Metres from player.position down to the soles. Same as player.js SOLE_Y. */
 const SOLE_Y = -1.15;
 
@@ -218,7 +219,15 @@ function makeHandcart() {
   cabbage.userData.mode = "PAPER";
   cabbage.userData.part = "cabbage";
 
-  g.add(bed, sideL, sideR, tail, head, wheelL, wheelR, hubL, hubR, handleL, handleR, grip, pin, crate, strap, crate2, roll, coil, coilTop, lanternPost, lanternGlass, jugBody, jugNeck, jugHandle, appleBox, apple, carrot, carrotTop, potato, onion, garlic, cabbage);
+  // Tiny kraft produce leek on the bed — one WOOD paper box.
+  // Right of garlic at the tail, inside the rails, clear of cabbage, garlic, onion, potato, carrot, apple.
+  // Sits on the bed top (y = 0.53). Paper box only.
+  const leek = paperBox(0.05, 0.045, 0.05, WOOD, false);
+  leek.position.set(0.22, 0.553, -1.38);
+  leek.userData.mode = "PAPER";
+  leek.userData.part = "leek";
+
+  g.add(bed, sideL, sideR, tail, head, wheelL, wheelR, hubL, hubR, handleL, handleR, grip, pin, crate, strap, crate2, roll, coil, coilTop, lanternPost, lanternGlass, jugBody, jugNeck, jugHandle, appleBox, apple, carrot, carrotTop, potato, onion, garlic, cabbage, leek);
   return g;
 }
 
