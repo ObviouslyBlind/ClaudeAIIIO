@@ -14,7 +14,7 @@ npm run tick        # 1 simulated hour
 npm run play        # http://localhost:8787  (3D harbour)
 ```
 
-Open `/` for the harbour. Tap a **piece of land** (not a given lot card), Lease, then Develop. **Taxi** rides the paved road only (PAPER). `/market/` is the paper goods HUD; cash is shared. Labelled PAPER / SIMULATED.
+Open `/` for the harbour. Tap a **piece of land** (not a given lot card), Lease, then Develop. **Ferry** near a port quotes the North ↔ South crossing (PAPER $15) before travel. **Taxi** rides the paved road only (PAPER). `/market/` is the paper goods HUD; cash is shared. Labelled PAPER / SIMULATED.
 
 Visitor starts with $1,000. Tap ground to walk. The world still ticks if nobody clicks.
 
