@@ -25,9 +25,13 @@ User is the brake, not the clock.
 
 ## Bar
 
-Current slice: harbour land. One inspectable bar per round.
+Current slice: **base harbour loop** (spawn, cart, lease, develop, market, nearby outdoor presence, persist). Genre-close to a public persistent shard: one world, sim owns numbers. One inspectable bar per round.
 
-Forbidden: Capital Rift, Call of Duty, OSM Earth, “looks AAA.”
+Forbidden: cloning Capital Rift’s client / Earth / OSM / wallet, Call of Duty, “looks AAA.”
+
+## Frozen (do not launch)
+
+House bills, Senate, councils, elections, amendments. Statute catalog is sim data only.
 
 ## Do not
 
@@ -35,3 +39,4 @@ Forbidden: Capital Rift, Call of Duty, OSM Earth, “looks AAA.”
 - Let the critic grade a summary or run the test suite
 - Rewrite `BACKEND.md` as a side effect
 - Run uncapped overnight without a status page
+- Start new politics work while the harbour loop is the bar

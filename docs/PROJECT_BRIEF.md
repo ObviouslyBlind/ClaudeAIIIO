@@ -2,6 +2,13 @@
 
 ## What we're building
 
+Two tracks live in this repo:
+
+1. **Polymarket paper bot** (unchanged): NO-only, paper trading, Musk/Trump posting markets.
+2. **Two Harbors** (current gauntlet): a PAPER harbour shard — leases, cart, market, nearby outdoor presence. Genre-close to a public persistent world. **Not** a Capital Rift clone. Politics (House/Senate/councils) is frozen.
+
+The rest of this brief is the Polymarket bot.
+
 A paper-trading bot that evaluates NO-side bets on Polymarket bracket/count markets for Elon Musk and Donald Trump posting activity. It supports multiple strategy profiles for comparative testing. It does not trade real money.
 
 ## Why NO-only on bracket markets

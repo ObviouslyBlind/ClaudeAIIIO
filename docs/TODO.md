@@ -1,5 +1,20 @@
 # TODO
 
+## Two Harbors (current gauntlet — base harbour)
+
+Politics frozen. See `game/reports/GAUNTLET_STATUS.md`.
+
+- [x] Lease → House → Enter → Exit (pixel `/?g=int22`)
+- [x] PAPER econ HUD strip (code)
+- [x] NPC stall buy + quay pedestrians (code)
+- [x] Nearby presence, cart persist, warehouse interior, nametags (code)
+- [ ] Pixel: trees + cart (`/?g=tree25`)
+- [ ] Visitor PAPER bid/ask vs NPC books
+- [ ] Staff slots on developed plots
+- [ ] Pixel remaining meshes (dirt, cars, taxi, ferry, shore, quay, shells)
+
+## Polymarket paper bot
+
 ## Completed
 
 - [x] Phase 1 — Clean planning

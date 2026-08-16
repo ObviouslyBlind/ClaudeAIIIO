@@ -2,6 +2,23 @@
 
 How to run, test, and inspect the system.
 
+## Two Harbors harbour (PAPER / SIMULATED)
+
+Politics is frozen. Play the base harbour, not House/Senate.
+
+```bash
+cd game
+npm test
+npm run play
+```
+
+Open `http://localhost:8787/` — critics must use a fresh query, e.g. `http://localhost:8787/?g=tree25`.
+
+- Port **8787**. Restart: `game/scripts/restart-play.sh` (tmux `two-harbors-play`).
+- Do **not** restart play while a critic is on the page.
+- Left click/tap = walk or use. RMB-hold = orbit. No WASD. No wallet.
+- Status: `game/reports/GAUNTLET_STATUS.md`.
+
 ## Live dashboard (public URL)
 
 **https://obviouslyblind.github.io/ClaudeAIIIO/**

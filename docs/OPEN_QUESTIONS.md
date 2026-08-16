@@ -107,7 +107,12 @@ This is additive, not structural. It doesn't require a new strategy — it's a r
 
 **When to implement:** After at least 2 of 4 Strategy B criteria are met (see `strategy_b_progress` in summary.json). Current progress: 0/4.
 
+## Q014 — Two Harbors vs Capital Rift (2026-08-16)
+
+**Resolved for v1:** Match the *genre* (one shard, sim owns numbers, leases, cart, market, nearby outdoor presence, persist). Do not clone their client, Earth, OSM, or wallet. Politics frozen until the harbour loop is inspectable.
+
 ## Resolved
 
 - Q001–Q003: Resolved during Phases 3-6 (not documented at time of resolution)
 - Q007: Resolved — GitHub Actions automation (D016)
+- Q014: Genre-close harbour; no Capital Rift clone; politics frozen (D027)

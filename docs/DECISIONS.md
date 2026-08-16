@@ -127,6 +127,11 @@ Record of architecture and strategy decisions with reasoning.
 **Decision:** Five fixes: (1) status bar monitors summary.json and pipeline_report.json, (2) freshness shows oldest source mtime across all core files, (3) summary-dependent panels distinguish FAILED from EMPTY, (4) GitHub Actions cadence reduced from 6h to 1h (stays in free tier).
 **Reason:** Dashboard audit found freshness only tracked one file, status bar ignored evaluation data failures, and FAILED/EMPTY states were indistinguishable. 1-hour cadence is the cheapest safe improvement per the cadence decision memo (D025).
 
+## D027 — Freeze politics; base harbour genre bar (2026-08-16)
+
+**Decision:** Stop new House / Senate / council / election / amendment work. Point the gauntlet at the **base harbour loop**: spawn, cart, lease, develop, NPC/market books, nearby outdoor presence, persist. Match Capital Rift only as a *genre* (one shard, sim owns numbers). Do not clone their client, Earth, OSM, or wallet.
+**Reason:** Operator redirected: do not focus on politics for now; get the harbour as close as that public persistent-shard loop. Statute catalog stays as sim data. Already-landed politics files are frozen, not expanded.
+
 ## D015 — Supplemental merge before save (2026-03-18)
 
 **Decision:** Move `relevant_markets_*.json` save to AFTER supplemental /markets merge.

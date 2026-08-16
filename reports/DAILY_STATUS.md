@@ -1,6 +1,22 @@
 # Daily Status
 
-## 2026-03-18 (latest)
+## 2026-08-16 (latest)
+
+**Current status:** Two Harbors gauntlet redirected to the **base harbour game**. Politics frozen. Ten agent slots on spawn/cart/lease/market/presence/persist — not House/Senate.
+
+### Harbour (PAPER / SIMULATED)
+
+- Pixel-held: inland spawn, paved ribbon, traffic, taxi overlay, ferry $15, RMB orbit, lease → House → Enter → Exit
+- Code-held: econ HUD, NPC stall buy, pedestrians, nametags, warehouse interior, presence cells, cart persist
+- In flight: trees+cart critic, visitor orders, staff slots
+- Play: `http://localhost:8787/` (port 8787). New critic queries use `?g=`
+- Do not clone Capital Rift UI / Earth / OSM / wallet
+
+### Polymarket bot
+
+Unchanged. Still paper-only. Not the active gauntlet.
+
+## 2026-03-18
 
 **Current status:** Pipeline end-to-end operational with multi-strategy comparative testing support.
 
