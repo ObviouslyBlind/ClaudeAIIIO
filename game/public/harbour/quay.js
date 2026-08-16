@@ -275,6 +275,16 @@ export const QUAY_LAND_SPOTS = Object.freeze([
   Object.freeze({ x: 15.1, along: 12, kind: "rope-box" }),
 ]);
 
+/**
+ * Extra kraft PAPER coils on the timber deck of each quay.
+ * Local x is east of the port; along is toward the water from pier centre.
+ * Stay on the 11 m deck, off the centre walk, short of the ferry berth.
+ */
+export const QUAY_DECK_SPOTS = Object.freeze([
+  Object.freeze({ x: -3.35, along: 6, kind: "rope" }),
+  Object.freeze({ x: 3.3, along: 22, kind: "rope" }),
+]);
+
 export function quayWorldPoint(spec, localX, along) {
   const toward = spec.id === "north" ? 1 : -1;
   return { x: spec.port.x + localX, z: spec.port.z + toward * along };
@@ -374,6 +384,13 @@ export function makeQuay(spec, helpers) {
   const ropeB = ropeCoil();
   ropeB.position.set(x + 3.15, deckY, pierZ + toward * 30);
   root.add(ropeB);
+
+  for (const spot of QUAY_DECK_SPOTS) {
+    const obj = spot.kind === "crate" ? crateStack() : ropeCoil();
+    obj.position.set(x + spot.x, deckY, pierZ + toward * spot.along);
+    obj.rotation.y = spot.x > 0 ? -0.22 : 0.16;
+    root.add(obj);
+  }
 
   for (const spot of QUAY_LAND_SPOTS) {
     const at = quayWorldPoint(spec, spot.x, spot.along);
