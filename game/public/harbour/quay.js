@@ -88,6 +88,12 @@ function dinghy() {
   painter.userData.part = "painter";
   g.add(painter);
 
+  // Tiny kraft knot on the painter line. PAPER box, hex already in this file.
+  const knot = part(0.16, 0.16, 0.18, 0x8a6238, false);
+  knot.position.set(0, 0, 0.45);
+  knot.userData.part = "knot";
+  painter.add(knot);
+
   return g;
 }
 
