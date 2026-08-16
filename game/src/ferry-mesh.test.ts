@@ -37,4 +37,15 @@ describe("ferry berth", () => {
     });
     expect(rings).toBeGreaterThanOrEqual(1);
   });
+
+  it("puts a kraft PAPER handle on the cabin door", () => {
+    expect(HOME_Z).toBe(-6835);
+    const mesh = makeFerry();
+    expect(mesh.position.z).toBe(-6835);
+    let handles = 0;
+    mesh.traverse((obj) => {
+      if (obj.userData?.part === "handle") handles += 1;
+    });
+    expect(handles).toBeGreaterThanOrEqual(1);
+  });
 });

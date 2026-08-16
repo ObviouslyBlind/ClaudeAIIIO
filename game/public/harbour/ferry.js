@@ -222,6 +222,17 @@ export function makeFerry() {
   door.position.set(-9.4, 2.88, -3.86);
   g.add(door);
 
+  /**
+   * Small kraft PAPER pull on the cabin leaf. FRAME plate + DECK lever —
+   * original palette, boxes only, not a cylinder, not iron.
+   */
+  const handlePlate = part(0.1, 0.24, 0.04, FRAME, false);
+  handlePlate.position.set(-9.06, 2.82, -3.94);
+  const handle = part(0.07, 0.28, 0.08, DECK, false);
+  handle.userData.part = "handle";
+  handle.position.set(-9.02, 2.82, -3.99);
+  g.add(handlePlate, handle);
+
   g.add(lifeRing(-8.5, 4.15, 3.92));
 
   for (const x of [-6.6, -3.6, -0.6, 2.4, 5.2]) {
