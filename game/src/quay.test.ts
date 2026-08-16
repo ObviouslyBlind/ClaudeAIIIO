@@ -191,4 +191,74 @@ describe("quay harbour dressing", () => {
       }
     }
   });
+
+  it("puts a tiny kraft PAPER cap on each quay bollard, crates and painter remain", () => {
+    function collectPart(root: THREE.Object3D, name: string) {
+      const out: THREE.Object3D[] = [];
+      root.traverse((obj) => {
+        if (obj.userData?.part === name) out.push(obj);
+      });
+      return out;
+    }
+
+    function collectPainter(root: THREE.Object3D) {
+      const out: THREE.Object3D[] = [];
+      root.traverse((obj) => {
+        if (obj.userData?.dress === "painter" || obj.userData?.part === "painter") {
+          out.push(obj);
+        }
+      });
+      return out;
+    }
+
+    for (const id of ["north", "south"] as const) {
+      const spec = ISLANDS[id];
+      const added: THREE.Object3D[] = [];
+      const scene = { add(obj: THREE.Object3D) { added.push(obj); } };
+      const root = makeQuay(spec, { scene, heightAt });
+
+      const bollards = collectDress(root, "bollard");
+      expect(bollards.length).toBeGreaterThanOrEqual(12);
+      expect(collectDress(root, "crate").length).toBeGreaterThanOrEqual(6);
+      expect(collectPainter(root).length).toBeGreaterThanOrEqual(2);
+
+      const caps = [
+        ...collectPart(root, "bollard-cap"),
+        ...collectPart(root, "cap").filter((c) => {
+          let p: THREE.Object3D | null = c.parent;
+          while (p) {
+            if (p.userData?.dress === "bollard") return true;
+            p = p.parent;
+          }
+          return false;
+        }),
+      ];
+      const unique = [...new Set(caps)];
+      expect(unique.length).toBe(bollards.length);
+
+      for (const bollard of bollards) {
+        const onPost = unique.filter((c) => {
+          let p: THREE.Object3D | null = c.parent;
+          while (p) {
+            if (p === bollard) return true;
+            p = p.parent;
+          }
+          return false;
+        });
+        expect(onPost.length).toBe(1);
+        const mesh = onPost[0] as THREE.Mesh;
+        expect(mesh.userData.part === "bollard-cap" || mesh.userData.part === "cap").toBe(true);
+        expect(mesh.geometry).toBeInstanceOf(THREE.BoxGeometry);
+        const mat = mesh.material as THREE.MeshLambertMaterial;
+        const hex = mat.color.getHex();
+        expect(isGrey(hex)).toBe(false);
+        expect(hex).toBe(0x8a6238);
+        const { width, height, depth } = (mesh.geometry as THREE.BoxGeometry).parameters;
+        expect(width).toBeLessThan(0.4);
+        expect(height).toBeLessThan(0.16);
+        expect(depth).toBeLessThan(0.4);
+        expect(mesh.position.y).toBeGreaterThan(1.0);
+      }
+    }
+  });
 });
