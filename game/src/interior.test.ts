@@ -54,7 +54,7 @@ describe("owned building interiors", () => {
     expect(boxes).toBeGreaterThan(12);
   });
 
-  it("dresses PAPER rooms as a Caribbean house: windows, table, chairs, stool, lamp, clock, picture, vase, bed", () => {
+  it("dresses PAPER rooms as a Caribbean house: windows, table, chairs, stool, lamp, clock, picture, vase, mug, bed", () => {
     const g = makeInteriorScene();
     const down = g.getObjectByName("downstairs");
     const up = g.getObjectByName("upstairs");
@@ -76,6 +76,7 @@ describe("owned building interiors", () => {
     expect(downKinds).toContain("interior-clock");
     expect(downKinds).toContain("interior-picture");
     expect(downKinds).toContain("interior-vase");
+    expect(downKinds).toContain("interior-mug");
     expect(downKinds).toContain("interior-stool");
     expect(downKinds).toContain("interior-window");
     expect(downKinds).toContain("exit");
@@ -91,6 +92,7 @@ describe("owned building interiors", () => {
     expect(upKinds).not.toContain("interior-clock");
     expect(upKinds).not.toContain("interior-picture");
     expect(upKinds).not.toContain("interior-vase");
+    expect(upKinds).not.toContain("interior-mug");
     expect(upKinds).not.toContain("interior-stool");
 
     const table = down!.getObjectByName("table");
@@ -383,5 +385,69 @@ describe("house PAPER stool", () => {
     expect(lamp).toBeTruthy();
     expect(lamp!.userData.kind).toBe("interior-lamp");
     expect(up.getObjectByName("stool")).toBeFalsy();
+  });
+});
+
+const MUG_HEX = new Set([0x5a3a22, 0x6e4428, 0xf4ead8, 0xefe0c8, 0xf3efe4]);
+
+describe("house PAPER mug", () => {
+  it("puts one kraft PAPER mug on the downstairs table, not upstairs", () => {
+    const g = makeInteriorScene();
+    const down = g.getObjectByName("downstairs")!;
+    const up = g.getObjectByName("upstairs")!;
+    const table = down.getObjectByName("table")!;
+    expect(table).toBeTruthy();
+
+    const mugs = collectKind(down, "interior-mug");
+    expect(mugs.length).toBe(1);
+    expect(collectKind(up, "interior-mug").length).toBe(0);
+
+    const mug = mugs[0];
+    expect(mug.userData.kind).toBe("interior-mug");
+    expect(mug.userData.mode).toBe("PAPER");
+
+    const tablePos = new THREE.Vector3();
+    table.getWorldPosition(tablePos);
+    const mugPos = new THREE.Vector3();
+    mug.getWorldPosition(mugPos);
+    expect(Math.hypot(mugPos.x - tablePos.x, mugPos.z - tablePos.z)).toBeLessThan(0.85);
+    expect(mugPos.y).toBeGreaterThan(0.9);
+    expect(mugPos.y).toBeLessThan(1.2);
+
+    const vase = down.getObjectByName("vase");
+    expect(vase).toBeTruthy();
+    const vasePos = new THREE.Vector3();
+    vase!.getWorldPosition(vasePos);
+    expect(Math.hypot(mugPos.x - vasePos.x, mugPos.z - vasePos.z)).toBeGreaterThan(0.25);
+
+    const colors: number[] = [];
+    mug.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      const mat = mesh.material as THREE.MeshLambertMaterial | undefined;
+      if (mesh.isMesh && mat?.color) {
+        const hex = mat.color.getHex();
+        colors.push(hex);
+        expect(MUG_HEX.has(hex)).toBe(true);
+        expect(isGrey(hex)).toBe(false);
+        expect(["BoxGeometry", "CylinderGeometry"]).toContain(mesh.geometry.type);
+        expect(mesh.userData.kind).toBe("interior-mug");
+        expect(mesh.userData.mode).toBe("PAPER");
+      }
+    });
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.some((c) => c === 0xf3efe4 || c === 0xf4ead8 || c === 0xefe0c8)).toBe(true);
+    expect(colors.some((c) => c === 0x5a3a22 || c === 0x6e4428)).toBe(true);
+
+    const stool = down.getObjectByName("stool");
+    expect(stool).toBeTruthy();
+    expect(stool!.userData.kind).toBe("interior-stool");
+    expect(stool!.userData.mode).toBe("PAPER");
+    const picture = down.getObjectByName("picture");
+    expect(picture).toBeTruthy();
+    expect(picture!.userData.kind).toBe("interior-picture");
+    const clock = down.getObjectByName("clock");
+    expect(clock).toBeTruthy();
+    expect(clock!.userData.kind).toBe("interior-clock");
+    expect(up.getObjectByName("mug")).toBeFalsy();
   });
 });

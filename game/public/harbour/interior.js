@@ -268,6 +268,23 @@ function makeStool(x, z) {
   return g;
 }
 
+/** Small kraft PAPER mug on the table — cream card body, wood foot, rim, handle. */
+function makeMug(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "mug";
+  g.userData.kind = "interior-mug";
+  g.userData.mode = "PAPER";
+  g.position.set(x, y, z);
+  const paper = { mode: "PAPER" };
+  g.add(cyl(0.032, 0.036, 0.018, WOOD, 0, 0.009, 0, "interior-mug", paper));
+  g.add(cyl(0.038, 0.044, 0.08, PAPER_CARD, 0, 0.058, 0, "interior-mug", paper));
+  g.add(cyl(0.04, 0.036, 0.016, WOOD_TOP, 0, 0.106, 0, "interior-mug", paper));
+  g.add(box(0.014, 0.048, 0.014, WOOD, 0.05, 0.06, 0, "interior-mug", paper));
+  g.add(box(0.028, 0.014, 0.014, WOOD, 0.036, 0.082, 0, "interior-mug", paper));
+  g.add(box(0.028, 0.014, 0.014, WOOD, 0.036, 0.038, 0, "interior-mug", paper));
+  return g;
+}
+
 /** Small kraft PAPER vase / jug on the table — cream body, wood foot and rim. */
 function makeVase(x, y, z) {
   const g = new THREE.Group();
@@ -329,7 +346,7 @@ function makeBed(cx, floorY, cz) {
 
 /**
  * PAPER Caribbean house: plaster walls, wood floors, window openings,
- * downstairs table/chairs/stool/lamp/clock/picture/vase, upstairs bed. Low-poly boxes only.
+ * downstairs table/chairs/stool/lamp/clock/picture/vase/mug, upstairs bed. Low-poly boxes only.
  */
 export function makeInteriorScene() {
   const group = new THREE.Group();
@@ -379,6 +396,8 @@ export function makeInteriorScene() {
   down.add(makeTable(-0.15, -0.35));
   // Kraft PAPER vase on the table top — offset so chairs still read around it.
   down.add(makeVase(0.4, 0.955, -0.18));
+  // Kraft PAPER mug on the table top — offset from the vase so both read.
+  down.add(makeMug(-0.58, 0.955, -0.52));
   down.add(makeChair(-0.15, 0.55, 0));
   down.add(makeChair(-0.15, -1.22, Math.PI));
   down.add(makeChair(-1.28, -0.35, Math.PI / 2));
