@@ -75,12 +75,13 @@ function paintOrders(data) {
   }
   list.innerHTML = orders
     .map((row) => {
-      return `<div class="row">
+      return `<div class="row" data-order-id="${row.id}">
         <div>
           <div class="name">${cap(row.side)} ${labelGood(row.goodId)}</div>
           <div class="px">$${money(row.price)} × ${row.qty}</div>
           <div class="cmp">${cap(row.island)} · ${row.mode || "PAPER"} · ${row.provenance || "SIMULATED"}</div>
         </div>
+        <button type="button" data-paper-cancel data-order-id="${row.id}" title="PAPER · SIMULATED · no wallet">Cancel PAPER</button>
       </div>`;
     })
     .join("");
