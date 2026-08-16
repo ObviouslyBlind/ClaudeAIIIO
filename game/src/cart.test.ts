@@ -92,7 +92,7 @@ describe("player PAPER handcart", () => {
     const cart = player.getObjectByName("paper-cart")!;
     expect(cart.children.length).toBe(CART_MESH_COUNT);
     expect(meshCount(cart)).toBe(CART_MESH_COUNT);
-    expect(CART_MESH_COUNT).toBe(26);
+    expect(CART_MESH_COUNT).toBe(28);
 
     const p = parts(cart);
     expect(p).toContain("bed");
@@ -108,6 +108,7 @@ describe("player PAPER handcart", () => {
     expect(p.filter((k) => k === "lantern").length).toBe(2);
     expect(p.filter((k) => k === "jug").length).toBeGreaterThanOrEqual(1);
     expect(p.filter((k) => k === "apple").length).toBeGreaterThanOrEqual(1);
+    expect(p.filter((k) => k === "carrot").length).toBeGreaterThanOrEqual(1);
     expect(p.filter((k) => k === "side").length).toBe(2);
     expect(p.filter((k) => k === "end").length).toBe(2);
 
@@ -173,6 +174,26 @@ describe("player PAPER handcart", () => {
     expect(
       apples.every((a) =>
         appleOccupied.every((o) => Math.hypot(a.position.x - o.position.x, a.position.z - o.position.z) > 0.12),
+      ),
+    ).toBe(true);
+    const carrots = cart.children.filter((c) => c.userData.part === "carrot") as THREE.Mesh[];
+    expect(carrots.length).toBeGreaterThanOrEqual(1);
+    expect(carrots.every((c) => c.geometry.type === "BoxGeometry")).toBe(true);
+    expect(carrots.every((c) => c.position.y > bed.position.y)).toBe(true);
+    const carrotHexes = carrots.map((c) => (c.material as THREE.MeshLambertMaterial).color.getHex());
+    expect(carrotHexes.every((h) => h === 0x8a6238 || h === 0x9a6a40 || h === 0xc4b496)).toBe(true);
+    for (const c of carrots) {
+      const { width, height, depth } = (c.geometry as THREE.BoxGeometry).parameters;
+      expect(width).toBeLessThan(0.12);
+      expect(height).toBeLessThan(0.12);
+      expect(depth).toBeLessThan(0.16);
+    }
+    const carrotOccupied = cart.children.filter((c) =>
+      ["crate", "apple", "lantern", "jug"].includes(c.userData.part as string),
+    );
+    expect(
+      carrots.every((c) =>
+        carrotOccupied.every((o) => Math.hypot(c.position.x - o.position.x, c.position.z - o.position.z) > 0.12),
       ),
     ).toBe(true);
   });
