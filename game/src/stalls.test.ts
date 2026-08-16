@@ -128,6 +128,7 @@ describe("NPC harbour stalls", () => {
     expect(kinds).toContain("ground-crate");
     expect(kinds).toContain("stool");
     expect(kinds).toContain("cup");
+    expect(kinds).toContain("knife");
     const colors = hexes(mesh);
     expect(colors.length).toBeGreaterThan(4);
     expect(colors.every(isGrey)).toBe(false);
@@ -584,6 +585,63 @@ describe("NPC harbour stalls", () => {
       expect(child.children.filter((c) => c.userData.part === "slate").length).toBe(1);
       expect(child.children.filter((c) => c.userData.part === "melon").length).toBe(1);
       expect(child.children.filter((c) => c.userData.part === "cone").length).toBe(1);
+    }
+  });
+
+
+  it("puts one tiny kraft PAPER knife on each NPC stall counter", () => {
+    const mesh = makeStallMesh({ id: "n-test", use: "farm", island: "north", band: "field" });
+    const counter = mesh.children.find((c) => c.userData.part === "counter") as THREE.Mesh;
+    const knives = mesh.children.filter((c) => c.userData.part === "knife");
+    expect(knives.length).toBe(1);
+    const knife = knives[0]!;
+    expect(knife.userData.mode).toBe("PAPER");
+    expect(knife.userData.paper).toBe(true);
+    const box = counter.geometry as THREE.BoxGeometry;
+    const counterTop = counter.position.y + box.parameters.height / 2;
+    expect(knife.position.y).toBeCloseTo(counterTop, 5);
+    expect(knife.position.z).toBeCloseTo(counter.position.z, 5);
+    expect(Math.abs(knife.position.x)).toBeLessThan(1.7);
+
+    const cup = mesh.children.find((c) => c.userData.part === "cup")!;
+    const stool = mesh.children.find((c) => c.userData.part === "stool")!;
+    const melon = mesh.children.find((c) => c.userData.part === "melon")!;
+    expect(cup.userData.part).toBe("cup");
+    expect(stool.userData.part).toBe("stool");
+    expect(melon.userData.part).toBe("melon");
+    expect(cup.position.x).toBeCloseTo(0.38, 5);
+    expect(cup.position.y).toBeCloseTo(0.9, 5);
+    expect(stool.position.x).toBeCloseTo(-2.42, 5);
+    expect(melon.position.x).toBeCloseTo(-0.88, 5);
+    expect(melon.position.y).toBeCloseTo(0.9, 5);
+
+    const kraft = new Set([0xf4ead8, 0x5a3a22]);
+    const colors = hexes(knife);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.every((c) => kraft.has(c))).toBe(true);
+    expect(colors).toContain(0xf4ead8);
+    expect(colors).toContain(0x5a3a22);
+    expect(colors.every((c) => !isGrey(c))).toBe(true);
+    let boxes = 0;
+    knife.traverse((obj) => {
+      const m = obj as THREE.Mesh;
+      if (!m.isMesh) return;
+      boxes += 1;
+      expect(m.geometry.type).toBe("BoxGeometry");
+      const g = m.geometry as THREE.BoxGeometry;
+      expect(g.parameters.width).toBeLessThan(0.25);
+      expect(g.parameters.height).toBeLessThan(0.1);
+      expect(g.parameters.depth).toBeLessThan(0.1);
+    });
+    expect(boxes).toBeGreaterThanOrEqual(2);
+
+    const { stalls } = boot();
+    expect(stalls.group.children.length).toBeGreaterThan(0);
+    for (const child of stalls.group.children) {
+      expect(child.children.filter((c) => c.userData.part === "knife").length).toBe(1);
+      expect(child.children.filter((c) => c.userData.part === "cup").length).toBe(1);
+      expect(child.children.filter((c) => c.userData.part === "stool").length).toBe(1);
+      expect(child.children.filter((c) => c.userData.part === "melon").length).toBe(1);
     }
   });
 
