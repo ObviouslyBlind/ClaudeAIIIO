@@ -204,6 +204,24 @@ function alongPavedVerge(placed, seen, map, spec, heightAt) {
   const paved = roadsOf(map, spec.id, "paved")[0];
   if (!paved) return;
   const length = polylineLength(paved.points);
+
+  // A few PAPER trees on the grass strip beside the tarmac (street lots begin
+  // ~18 m). 14–16 m is outside ROAD_CLEAR / PAVED_CLEAR. Skip some stations so
+  // it reads as a verge, not an avenue wall.
+  const vergeEnd = Math.min(spec.id === "north" ? 340 : 220, length * 0.14);
+  const vergeStep = spec.id === "north" ? 38 : 52;
+  for (let d = 22; d < vergeEnd; d += vergeStep) {
+    const alongJitter = (hash(d * 5 + (spec.id === "north" ? 0.7 : 1.9)) - 0.5) * 6;
+    const along = pointAlong(paved.points, Math.max(8, d + alongJitter));
+    if (!along) continue;
+    for (const side of [-1, 1]) {
+      if (hash(d * 7 + side + (spec.id === "north" ? 0.2 : 1.4)) < 0.22) continue;
+      const setback = 14 + hash(d * 3 + side + (spec.id === "north" ? 0.4 : 2.1)) * 2;
+      const at = offsetFromCentreline(along.x, along.z, along.qx, along.qz, side, setback);
+      tryPlace(placed, seen, map, spec, heightAt, at.x, at.z, "spawn", 10);
+    }
+  }
+
   const denseEnd = Math.min(420, length * 0.18);
   const denseStep = spec.id === "north" ? 20 : 28;
   for (let d = 50; d < denseEnd; d += denseStep) {
