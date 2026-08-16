@@ -560,7 +560,7 @@ Staff tools: kick, force a session, re-appoint a vacant Senate seat, re-queue a 
 - Officer seats per firm (plan assumes 3).
 - Whether a House member may also sit on their home council (plan assumes yes in beta).
 - Governor vote: single island-wide tally vs North+South with a tie-break.
-- Constituency polygons: draw 10 per island on the local metre grid (not OSM).
+- Exact district boundaries (10 polygons per island on the local metre grid).
 
 Write decisions into this file.
 
