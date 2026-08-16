@@ -522,6 +522,28 @@ function paperShaving(x, z, yaw = 0) {
 }
 
 /**
+ * Tiny kraft PAPER awl: KRAFT handle, KRAFT_LIGHT spike. Boxes only.
+ * Sits on the left-wall bench — not the shaving, peg, cork, funnel, oilcan, rag, rivet, or wrench.
+ */
+function paperAwl(x, z, yaw = 0) {
+  const g = new THREE.Group();
+  g.name = "factory-paper-awl";
+  g.userData.kind = "factory-paper-awl";
+  g.userData.mode = "PAPER";
+  g.userData.part = "awl";
+  // Second workbench lip top: y0 0.16 + 0.78, lip centre +0.05, half lip 0.015.
+  const sitY = 0.16 + 0.78 + 0.05 + 0.015;
+  g.position.set(x, sitY, z);
+  g.rotation.y = yaw;
+  const handle = paperBox(0.055, 0.022, 0.022, KRAFT, "factory-paper-awl");
+  handle.position.set(-0.012, 0.011, 0);
+  const spike = paperBox(0.048, 0.01, 0.01, KRAFT_LIGHT, "factory-paper-awl");
+  spike.position.set(0.036, 0.011, 0);
+  g.add(handle, spike);
+  return g;
+}
+
+/**
  * Small kraft/iron PAPER oil can: short box body, thinner spout.
  * Sits on the first workbench top — not a mill, not the hanging wrench.
  */
@@ -655,6 +677,8 @@ function makeFactoryDress() {
   g.add(paperFunnel(-3.14, -0.42, 0.08));
   // Left-wall bench, between the oilcan and funnel. Off the rag.
   g.add(paperCork(-2.86, 0.14, 0.06));
+  // Left-wall bench, south of the funnel. Off shaving, peg, cork, oilcan, rag, rivet, wrench.
+  g.add(paperAwl(-2.90, -0.90, 0.1));
   g.add(woodWorkbench(3.1, -1.18, 1.92, 0.64, Math.PI / 2));
   // Wood-bench north end. Off the cork, funnel, oilcan, rag, rivet, and wrench.
   g.add(paperPeg(2.96, -0.38, 0.05));
