@@ -737,3 +737,63 @@ describe("farm PAPER kraft pail lid", () => {
     expect(scene.userData.interiorUse).toBe("house");
   });
 });
+
+describe("farm PAPER kraft mug", () => {
+  it("puts one tiny kraft PAPER mug on the workbench; lid and seed remain", () => {
+    const scene = new THREE.Scene();
+    dressFarm(scene);
+
+    const dress = scene.getObjectByName("farm-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+
+    const mugs: THREE.Object3D[] = [];
+    dress!.traverse((obj) => {
+      if (obj.userData?.part === "mug" && obj.name === "farm-mug") mugs.push(obj);
+    });
+    expect(mugs.length).toBe(1);
+    const mug = mugs[0];
+    expect(mug.userData.part).toBe("mug");
+    expect(mug.userData.mode).toBe("PAPER");
+
+    const lid = dress!.getObjectByName("farm-lid")!;
+    const seed = dress!.getObjectByName("farm-seed")!;
+    expect(lid).toBeTruthy();
+    expect(seed).toBeTruthy();
+    expect(lid.userData.part).toBe("lid");
+    expect(seed.userData.part).toBe("seed");
+
+    expect(mug.position.y).toBeGreaterThan(0.9);
+    expect(mug.position.y).toBeLessThan(1.15);
+    const toBench = Math.hypot(mug.position.x - -3.28, mug.position.z - -0.15);
+    expect(toBench).toBeLessThan(0.55);
+
+    const lantern = dress!.getObjectByName("farm-lantern")!;
+    const scoop = dress!.getObjectByName("farm-scoop")!;
+    const basket = dress!.getObjectByName("farm-basket")!;
+    const fork = dress!.getObjectByName("farm-fork")!;
+    expect(Math.hypot(mug.position.x - seed.position.x, mug.position.z - seed.position.z)).toBeGreaterThan(0.2);
+    expect(Math.hypot(mug.position.x - lantern.position.x, mug.position.z - lantern.position.z)).toBeGreaterThan(0.2);
+    expect(Math.hypot(mug.position.x - scoop.position.x, mug.position.z - scoop.position.z)).toBeGreaterThan(0.2);
+    expect(Math.hypot(mug.position.x - lid.position.x, mug.position.z - lid.position.z)).toBeGreaterThan(4);
+    expect(Math.hypot(mug.position.x - basket.position.x, mug.position.z - basket.position.z)).toBeGreaterThan(4);
+    expect(Math.hypot(mug.position.x - fork.position.x, mug.position.z - fork.position.z)).toBeGreaterThan(4);
+
+    const colors = hexes(mug);
+    expect(colors.some((c) => c === KRAFT)).toBe(true);
+    expect(colors.every((c) => [KRAFT, WOOD, WOOD_DARK, HANDLE].includes(c))).toBe(true);
+
+    let boxes = 0;
+    mug.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        boxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.part).toBe("mug");
+        expect(mesh.userData.mode).toBe("PAPER");
+      }
+    });
+    expect(boxes).toBeGreaterThanOrEqual(2);
+    expect(boxes).toBeLessThanOrEqual(4);
+  });
+});
