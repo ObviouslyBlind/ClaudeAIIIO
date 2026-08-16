@@ -266,3 +266,110 @@ describe("factory PAPER bucket", () => {
     expect(interior.userData.interiorUse).toBe("house");
   });
 });
+
+const VISE_PALETTE = new Set([
+  KRAFT,
+  0x9a6a40,
+  0x6a4a32,
+  0x6a7068,
+  0x4a524c,
+  0x8a9088,
+  0x6a5a4a,
+]);
+
+function factoryVises(root: THREE.Object3D) {
+  const out: THREE.Object3D[] = [];
+  root.traverse((obj) => {
+    if (obj.userData?.kind === "factory-vise" && obj.name === "factory-vise") {
+      out.push(obj);
+    }
+  });
+  return out;
+}
+
+describe("factory PAPER bench vise", () => {
+  it("puts one kraft/iron PAPER vise on a factory workbench", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressFactory(scene);
+
+    const dress = interior.getObjectByName("factory-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+    expect(dress!.visible).toBe(true);
+
+    const vises = factoryVises(dress!);
+    expect(vises.length).toBe(1);
+
+    const vise = vises[0];
+    expect(vise.userData.kind).toBe("factory-vise");
+    expect(vise.userData.mode).toBe("PAPER");
+    // First workbench lip top is ~1.005; vise sits on it, not the floor.
+    expect(vise.position.y).toBeGreaterThan(0.95);
+    expect(vise.position.y).toBeLessThan(1.12);
+    expect(Math.abs(vise.position.x - -1.35)).toBeLessThan(1.15);
+    expect(Math.abs(vise.position.z - -2.48)).toBeLessThan(0.4);
+
+    const cans = factoryOilCans(dress!);
+    expect(cans.length).toBe(1);
+    const toCan = Math.hypot(
+      vise.position.x - cans[0].position.x,
+      vise.position.z - cans[0].position.z,
+    );
+    expect(toCan).toBeGreaterThan(0.8);
+
+    const buckets = factoryBuckets(dress!);
+    expect(buckets.length).toBe(1);
+    const toBucket = Math.hypot(
+      vise.position.x - buckets[0].position.x,
+      vise.position.z - buckets[0].position.z,
+    );
+    expect(toBucket).toBeGreaterThan(2);
+
+    const tools = factoryTools(dress!);
+    expect(tools.length).toBe(1);
+    const toWrench = Math.hypot(
+      vise.position.x - tools[0].position.x,
+      vise.position.z - tools[0].position.z,
+    );
+    expect(toWrench).toBeGreaterThan(2);
+
+    const colors = hexes(vise);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.every((c) => VISE_PALETTE.has(c))).toBe(true);
+    expect(colors.some((c) => c === KRAFT || c === 0x6a4a32)).toBe(true);
+    expect(colors.some((c) => c === 0x6a7068 || c === 0x4a524c)).toBe(true);
+
+    let boxes = 0;
+    vise.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        boxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.kind).toBe("factory-vise");
+        expect(mesh.userData.mode).toBe("PAPER");
+      }
+    });
+    expect(boxes).toBeGreaterThanOrEqual(3);
+  });
+
+  it("keeps dress idempotent and hides the vise on undress", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressFactory(scene);
+    dressFactory(scene);
+    expect(interior.children.filter((c) => c.name === "factory-dress").length).toBe(1);
+    expect(factoryVises(interior).length).toBe(1);
+    expect(factoryBuckets(interior).length).toBe(1);
+    expect(factoryOilCans(interior).length).toBe(1);
+    expect(factoryTools(interior).length).toBe(1);
+
+    undressFactory(scene);
+    const dress = interior.getObjectByName("factory-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.visible).toBe(false);
+    expect(interior.userData.interiorUse).toBe("house");
+  });
+});
