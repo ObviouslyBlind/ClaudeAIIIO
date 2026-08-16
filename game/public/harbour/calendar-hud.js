@@ -68,8 +68,9 @@ export function mountCalendarHud(opts = {}) {
   }
 
   if (el) {
-    el.textContent = formatCalendarLine(null);
     if (el.setAttribute) el.setAttribute("title", "PAPER · SIMULATED");
+    // Do not clobber the first-frame "Day 0 · tick 0" line with dashes
+    // before snapshot returns (`/g/hud48` FAIL HUD).
     refresh();
     timer = setInterval(refresh, POLL_MS);
   }
@@ -83,10 +84,3 @@ export function mountCalendarHud(opts = {}) {
   };
 }
 
-if (
-  typeof document !== "undefined" &&
-  document.getElementById &&
-  (document.getElementById("calendar") || document.getElementById("sheet"))
-) {
-  mountCalendarHud();
-}

@@ -24,13 +24,13 @@
     </header>
     <aside class="sheet" id="sheet">
       <p id="cash">Cash $0</p>
-      <p id="calendar">Day — · tick — · PAPER</p>
+      <p id="calendar">PAPER · SIMULATED · Day 0 · tick 0</p>
       <p id="econ">Index — · money — · output —</p>
       <p id="flow">Faucet — · sink — · PAPER</p>
       <p id="spread">Ferry spread · PAPER</p>
       <p id="tax">Sales tax 0% · PAPER</p>
       <p id="nearby">Nearby —</p>
-      <p id="cart">Cart —</p>
+      <p id="cart">PAPER</p>
       <p id="goods">PAPER</p>
       <p id="staff-line">Staff — · PAPER</p>
       <p id="plot-line">Tap land to inspect it</p>
@@ -115,6 +115,30 @@
           .catch(function (e) {
             fail("map " + (e && e.message ? e.message : e));
           });
+        // Calendar + cart must read PAPER before main.js. `/g/hud48` FAIL HUD:
+        // first HTML still used em-dash placeholders on those two sheet lines.
+        fetch("/api/snapshot")
+          .then(function (r) {
+            return r && r.ok ? r.json() : null;
+          })
+          .then(function (d) {
+            var calEl = document.getElementById("calendar");
+            var cartEl = document.getElementById("cart");
+            var day = 0;
+            var tick = 0;
+            if (d && d.calendar) {
+              if (d.calendar.day != null) day = Number(d.calendar.day) || 0;
+              if (d.calendar.tick != null) tick = Number(d.calendar.tick) || 0;
+            } else if (d && d.hud && d.hud.tick != null) {
+              tick = Number(d.hud.tick) || 0;
+              day = Math.floor(Math.max(0, tick) / 3600);
+            }
+            if (calEl) {
+              calEl.textContent = "PAPER · SIMULATED · Day " + day + " · tick " + tick;
+            }
+            if (cartEl) cartEl.textContent = "PAPER";
+          })
+          .catch(function () {});
       })();
     </script>
     <script type="importmap">
