@@ -277,7 +277,7 @@ function makeMug(x, y, z) {
   g.position.set(x, y, z);
   const paper = { mode: "PAPER" };
   g.add(cyl(0.032, 0.036, 0.018, WOOD, 0, 0.009, 0, "interior-mug", paper));
-  g.add(cyl(0.038, 0.044, 0.08, PAPER_CARD, 0, 0.058, 0, "interior-mug", paper));
+  g.add(cyl(0.038, 0.044, 0.08, PLASTER, 0, 0.058, 0, "interior-mug", paper));
   g.add(cyl(0.04, 0.036, 0.016, WOOD_TOP, 0, 0.106, 0, "interior-mug", paper));
   g.add(box(0.014, 0.048, 0.014, WOOD, 0.05, 0.06, 0, "interior-mug", paper));
   g.add(box(0.028, 0.014, 0.014, WOOD, 0.036, 0.082, 0, "interior-mug", paper));
