@@ -19,8 +19,9 @@ Politics frozen. See `game/reports/GAUNTLET_STATUS.md`.
 - [x] Pixel remaining meshes (quay clutter `/g/quay41` PASS — crates on the kraft north pier)
 - [x] Pixel remaining meshes (pedestrians `/g/peds44` PASS — crate-scale teal/slate/green/terracotta shirts on the north pier)
 - [x] Pixel remaining meshes (nametags `/g/tags46` PASS — kraft cards above crate-scale pier walkers)
-- [x] Pixel HUD sheet (`/g/hud47` PASS — econ / nearby / staff PAPER · SIMULATED)
-- [ ] Pixel HUD sheet (`http://localhost:8787/g/hud49` cart / persist / calendar after `/g/hud48` FAIL HUD). Shells deferred: seaward spawn, no RMB)
+- [x] Pixel HUD sheet (`/g/hud47` PASS — econ / nearby / staff PAPER · SIMULATED; nearby count was 0)
+- [x] Pixel HUD sheet (`/g/hud49` PASS — calendar Day 0 · tick live, cart PAPER, persist PAPER · SIMULATED)
+- [ ] Pixel HUD sheet (`http://localhost:8787/g/near50` nearby count ≥ 1). Shells deferred: seaward spawn, no RMB)
 
 ## Polymarket paper bot
 

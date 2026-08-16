@@ -6,8 +6,8 @@
 
 ### Harbour (PAPER / SIMULATED)
 
-- Pixel-held: inland spawn, paved ribbon, dirt ribbons, traffic, taxi overlay, ferry $15, RMB orbit, lease → House → Enter → Exit, trees + cart (`/?g=tree25`), cream ferry hull (`/g/ferry37` PASS), kraft shore foam (`/g/shore40` PASS), quay clutter (`/g/quay41` PASS), pedestrians (`/g/peds44` PASS), nametags (`/g/tags46` PASS), HUD econ/nearby/staff (`/g/hud47` PASS)
-- Pixel next: HUD sheet `http://localhost:8787/g/hud49` (cart / persist / calendar) after `/g/hud48` FAIL HUD (placeholders)
+- Pixel-held: inland spawn, paved ribbon, dirt ribbons, traffic, taxi overlay, ferry $15, RMB orbit, lease → House → Enter → Exit, trees + cart (`/?g=tree25`), cream ferry hull (`/g/ferry37` PASS), kraft shore foam (`/g/shore40` PASS), quay clutter (`/g/quay41` PASS), pedestrians (`/g/peds44` PASS), nametags (`/g/tags46` PASS), HUD econ/nearby/staff (`/g/hud47` PASS), calendar/cart/persist (`/g/hud49` PASS)
+- Pixel next: HUD nearby count `http://localhost:8787/g/near50` (N ≥ 1, not `0 nearby`)
 - Code-held: econ HUD, stalls, pedestrians, nametags, interiors, presence, persist, north port sign, calendar / fare / tax / held-goods / faucet lines
 - Play: `http://localhost:8787/` (port 8787). New critic queries use `/g/` paths. Do not ask computerUse to RMB-orbit.
 - Do not clone Capital Rift UI / Earth / OSM / wallet

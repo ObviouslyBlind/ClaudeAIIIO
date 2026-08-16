@@ -47,19 +47,24 @@ Building shells + window lights — **not in the seaward spawn frame**; computer
 
 ## Pixel HUD (econ / nearby / staff)
 
-`/g/hud47` **PASS**: sheet showed `PAPER · SIMULATED · Index 1.00 · NPC $50,000 · out 19,601`, `PAPER · SIMULATED · 250 m PAPER cell · 0 nearby`, `PAPER · SIMULATED · Staff —`.
+`/g/hud47` **PASS**: sheet showed `PAPER · SIMULATED · Index 1.00 · NPC $50,000 · out 19,601`, `PAPER · SIMULATED · 250 m PAPER cell · 0 nearby`, `PAPER · SIMULATED · Staff —`. Nearby count 0 is **not** held as a presence bar — only that the strip used PAPER · SIMULATED.
 
 ## Pixel HUD (cart / persist / calendar)
 
-`/g/hud48` **FAIL HUD**: calendar still `Day — · tick — · PAPER`, cart still `Cart —` (first-frame HTML). Persist was `PAPER · SIMULATED`. First-frame now ships `PAPER · SIMULATED · Day 0 · tick 0` and `PAPER`, plus a classic `/api/snapshot` paint. Next `/g/hud49`.
+`/g/hud48` **FAIL HUD**: calendar still `Day — · tick — · PAPER`, cart still `Cart —` (first-frame HTML). Persist was `PAPER · SIMULATED`.
+`/g/hud49` **PASS**: calendar `PAPER · SIMULATED · Day 0 · tick 71`, cart `PAPER`, persist `PAPER · SIMULATED`. Address `/g/hud49`.
+
+## Pixel HUD (nearby count)
+
+`/g/hud47` nearby was `0 nearby` because the HUD polled `{0,0}` before `spawnAt`. Origin now defaults to the north quay; first HTML fetches `/api/presence` with no coords. Next `/g/near50`.
 
 ## In flight (not ferry-only)
 
-Pixel: **cart / persist / calendar HUD** on the spawn sheet `http://localhost:8787/g/hud49`. No RMB. Close other Two Harbors tabs. Address bar must be `/g/hud49`. Do not restart play while the critic is on the page.
+Pixel: **nearby count ≥ 1** on the spawn sheet `http://localhost:8787/g/near50`. Expect `PAPER · SIMULATED · 250 m PAPER cell · N nearby` with N ≥ 1 (ideally 4). FAIL HUD if still `0 nearby` or `Nearby —`. No RMB. Close other Two Harbors tabs. Address bar must be `/g/near50`. Do not restart play while the critic is on the page.
 
-## Next pixel (after hud49 PASS, immediately, no wait)
+## Next pixel (after near50 PASS, immediately, no wait)
 
-Presence count is 0 at spawn (code-held walkers). Then shells+lights stay deferred until a human can orbit.
+Flow / tax / goods HUD on the spawn sheet. Then shells+lights stay deferred until a human can orbit.
 
 ## Frozen
 
