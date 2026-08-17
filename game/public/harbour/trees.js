@@ -1216,6 +1216,77 @@ function plantNorthPortLichen(root) {
   root.add(lichen);
 }
 
+function markNeedle(mesh) {
+  mesh.userData.part = "needle";
+  mesh.userData.dress = "needle";
+  mesh.userData.mode = "PAPER";
+  mesh.userData.provenance = "PAPER";
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+}
+
+/**
+ * One tiny kraft PAPER needle tuft (one box) on a north-port palm trunk —
+ * not instead of the lichen, moss, knot, bark, twig, vine, husk, frond,
+ * leaf, coconut, bird, nest, or egg. Hexes already in this file: trunk
+ * kraft. Reuses the nest twig box so geometry count stays put. Unique
+ * mesh — one box — so the phone mesh budget stays tiny. Trunks, leaves,
+ * coconuts, bird, nest, egg, leaf, frond, husk, vine, twig, bark, knot,
+ * moss, and lichen stay put.
+ */
+function plantNorthPortNeedle(root) {
+  const placed = root.userData.placed || [];
+  const sites = placed.filter((p) => p.island === "north" && p.dress === "north-port-palm");
+  if (!sites.length) return;
+
+  let nest = null;
+  root.traverse((obj) => {
+    if (!nest && obj.userData.kind === "nest") nest = obj;
+  });
+  if (!nest) return;
+
+  let geo = null;
+  nest.traverse((obj) => {
+    if (geo) return;
+    if (obj.isMesh && obj.geometry && obj.userData.part === "nest") geo = obj.geometry;
+  });
+  if (!geo) return;
+
+  const nestPos = new THREE.Vector3();
+  nest.getWorldPosition(nestPos);
+  let p = sites[0];
+  let best = Infinity;
+  for (const s of sites) {
+    const d = Math.hypot(s.x - nestPos.x, s.z - nestPos.z);
+    if (d < best) {
+      best = d;
+      p = s;
+    }
+  }
+
+  const mat = new THREE.MeshLambertMaterial({ color: TRUNK });
+  const needle = new THREE.Group();
+  needle.name = "needle";
+  needle.userData.kind = "needle";
+  needle.userData.part = "needle";
+  needle.userData.dress = "needle";
+  needle.userData.mode = "PAPER";
+  needle.userData.provenance = "PAPER";
+  // Sit on the palm trunk, offset from lichen, moss, knot, and bark flake.
+  const yaw = 1.45;
+  const rad = 0.22;
+  needle.position.set(p.x + Math.cos(yaw) * rad, p.y + 2.22, p.z + Math.sin(yaw) * rad);
+  needle.rotation.set(-0.28, yaw, 0.35);
+
+  const box = new THREE.Mesh(geo, mat);
+  box.name = "needle-box";
+  markNeedle(box);
+  box.scale.set(0.18, 0.7, 0.22);
+
+  needle.add(box);
+  root.add(needle);
+}
+
 /**
  * Low-poly PAPER trees on hills, inland slopes, and behind street lots.
  * Palms stay on the quay (makePalms). helpers: { scene, specOf, heightAt }.
@@ -1247,6 +1318,7 @@ export function makeTrees(map, helpers) {
   plantNorthPortKnot(root);
   plantNorthPortMoss(root);
   plantNorthPortLichen(root);
+  plantNorthPortNeedle(root);
   scene.add(root);
   return root;
 }
