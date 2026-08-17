@@ -29,7 +29,7 @@ Politics frozen. See `game/reports/GAUNTLET_STATUS.md`.
 - [x] Pixel north port sign (`/g/sign59`–`/g/sign62` FAIL SIGN — round stopped, not pixel-held)
 - [x] Pixel sage dinghies in the north basin (`/g/ding65` PASS DINGHY)
 - [x] Pixel kraft gangplank / brow (`/g/brow66`–`/g/brow68` FAIL BROW — round stopped, not pixel-held)
-- [ ] Pixel rust channel buoy (`http://localhost:8787/g/buoy69`). Shells deferred: seaward spawn, no RMB)
+- [ ] Pixel rust channel buoy (`http://localhost:8787/g/buoy70` — `/g/buoy69` FAIL BUOY). Shells deferred: seaward spawn, no RMB)
 
 ## Polymarket paper bot
 
