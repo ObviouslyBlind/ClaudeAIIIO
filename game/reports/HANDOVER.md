@@ -8,9 +8,9 @@ This is a PAPER / SIMULATED harbour game in `/workspace/game`. The Polymarket pa
 
 Operator came back to **playtest**. Bar is **`http://localhost:8787/`**, inland spawn, walkable harbour.
 
-Gauntlet live. `/g/persist109` FAIL PERSIST — restored label lasted <1 s (D046). Re-critic `/g/persist110`.
+Gauntlet live. `/g/persist110` PASS PERSIST. Next: quiet spawn taxi hint (`/g/taxi111`).
 
-Last playtest fix: D046 persist line keeps restored. D045 develop hint ignores boot copy. D044 empty goods blank / persist `no dump`.
+Last playtest fix: D047 taxi fare only while the map is open. D046 persist line keeps restored. D045 develop hint ignores boot copy. D044 empty goods blank / persist `no dump`.
 
 Last playtest fix: D045 develop hint ignores boot copy. D044 empty goods blank / persist `no dump`. D043 trickle cars+ferry only. D042 ferry-hint observer loop killed.
 

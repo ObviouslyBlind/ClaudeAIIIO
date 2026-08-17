@@ -2,7 +2,7 @@
 
 ## 2026-08-17 (latest)
 
-**Current status:** `/g/mkt108` PASS MARKET. `/g/persist109` FAIL PERSIST — restored label cleared by dump poll (D046). Re-critic `/g/persist110`. PAPER / SIMULATED. Politics frozen.
+**Current status:** `/g/persist110` PASS PERSIST. Taxi fare hint only while the map is open (D047). Critic `/g/taxi111`. PAPER / SIMULATED. Politics frozen.
 
 ## 2026-08-16
 
