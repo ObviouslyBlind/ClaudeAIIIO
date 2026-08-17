@@ -8,7 +8,8 @@ import * as THREE from "three";
  * receipt slip, a small kraft receipt, a small kraft ink stamp, a tiny
  * kraft coin, a tiny kraft blotter, a tiny kraft pencil, a tiny kraft
  * ink pad, a tiny kraft ribbon, a tiny kraft twine coil, a tiny kraft wax
- * seal, a tiny kraft paper weight, a short wall shelf with two kraft boxes,
+ * seal, a tiny kraft paper weight, a tiny kraft sponge, a short wall shelf
+ * with two kraft boxes,
  * plus two shelf bays
  * — not the house living room and not the warehouse. No WASD.
  * Tap-to-walk stays in interior.js.
@@ -494,6 +495,28 @@ function kraftPaperWeight(x, y, z) {
 }
 
 /**
+ * Tiny kraft PAPER sponge on the counter: wood tray + cream pad.
+ * Paper boxes only. Beside the weight — not on the seal, twine, ribbon,
+ * inkpad, pencil, blotter, coin, or receipt. Existing hexes only.
+ */
+function kraftSponge(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "shop-sponge";
+  g.userData.kind = "shop-sponge";
+  g.userData.mode = "PAPER";
+  g.userData.part = "sponge";
+  g.position.set(x, y, z);
+  const tray = paperBox(0.05, 0.008, 0.04, WOOD, "shop-sponge");
+  tray.userData.part = "sponge";
+  g.add(tray);
+  const pad = paperBox(0.044, 0.016, 0.034, CREAM, "shop-sponge");
+  pad.userData.part = "sponge";
+  pad.position.y = 0.011;
+  g.add(pad);
+  return g;
+}
+
+/**
  * Small standing kraft PAPER shopping bag on the counter: cream body + two
  * thin strap handles. Paper boxes only. Beside the parcel / till, not on them.
  */
@@ -599,6 +622,8 @@ function makeCounter(x, z) {
   g.add(kraftSeal(1.10, topY + 0.054, -0.28));
   // Tiny kraft paper weight beside the seal — wood base + cream stone.
   g.add(kraftPaperWeight(1.30, topY + 0.054, -0.34));
+  // Tiny kraft sponge beside the weight — wood tray + cream pad.
+  g.add(kraftSponge(1.48, topY + 0.054, -0.42));
   // Two small kraft / terracotta jars beside the till. Original TIN + CORAL.
   const kraftJar = paperBox(0.12, 0.16, 0.12, TIN, "shop-goods");
   kraftJar.position.set(0.48, topY + 0.13, -0.04);
