@@ -441,6 +441,15 @@ export function makeFerry() {
   coaming.userData.mode = "PAPER";
   coaming.position.set(-16.8, 1.86, -1.2);
   g.add(coaming);
+  // Tiny kraft PAPER deck plug on the aft cream deck. Existing DECK hex,
+  // one box, not grey. Clear of coaming/wedge/grommet/hatch/scupper/hawser/
+  // bucket/oar/cleat/rail/fender/bollard/lantern/handle/smoke/horn.
+  const plug = part(0.1, 0.05, 0.1, DECK, false);
+  plug.name = "plug";
+  plug.userData.part = "plug";
+  plug.userData.mode = "PAPER";
+  plug.position.set(-18.0, 1.86, 0);
+  g.add(plug);
 
   const cabin = part(16.5, 3.35, 7.6, CABIN);
   cabin.position.set(-2.4, 3.52, 0);
