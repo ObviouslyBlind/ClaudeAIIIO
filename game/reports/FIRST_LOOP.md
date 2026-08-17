@@ -14,7 +14,7 @@ Windows: `play.cmd` or `play-laptop.cmd`. From `game/`: `npm run play` / `npm ru
 ## UI
 - Top left: **Two Harbors** (green), players online, balance + $/min
 - Top right: **viewers** — World / **Lots** / Foot traffic / Logistics / Minerals
-- **Lots:** boundary outlines. Click the **$ title** above a lot to lease it. Buy other sections the same way.
+- **Lots:** boundary outlines. Click the **$ title** or the lot dirt to buy.
 - Foot traffic paints **green / yellow / red ribbons on each named road**
 - World: **left-click walks**. RMB-hold still orbits.
 - Logistics: tap the **roadside crate**. The van **waits** until you take it.
@@ -22,7 +22,7 @@ Windows: `play.cmd` or `play-laptop.cmd`. From `game/`: `npm run play` / `npm ru
 - Market is a marketplace: section → item → deliver-to → Buy (chirp)
 
 ## Loop
-1. **Lots** overlay. Click a **$ title**. Lease.
+1. **Lots** overlay. Click a **$ title** or the lot dirt. That buys it.
 2. Open **Market** → Street carts → Hotdog cart → pick your lot → **Buy**. Hear the chirp.
 3. Van drives paved roads, stops on the kerb, **stays** until you take the crate.
 4. Inventory → Place in world. Tap your lot or the verge out to the main road.

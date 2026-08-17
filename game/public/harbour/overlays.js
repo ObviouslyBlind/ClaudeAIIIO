@@ -5,7 +5,7 @@ import * as THREE from "three";
  * PAPER / SIMULATED.
  *
  *   world      — walk. Buildings / stands. Land does not steal the click.
- *   lots       — boundary outlines. Click a $ tag to lease another lot.
+ *   lots       — boundary outlines. Click a $ tag or the lot dirt to buy.
  *   foot       — green / yellow / red ribbons on each named paved road.
  *   logistics  — vans and roadside crates. Tap the crate.
  *   minerals   — ore catalog exists; overlay paint is next.
@@ -20,7 +20,7 @@ export const VIEWERS = {
   lots: {
     id: "lots",
     label: "Lots",
-    hint: "Outlines on. Click the $ title to lease. Buy other sections the same way.",
+    hint: "Outlines on. Click the $ title or the lot dirt to buy.",
   },
   foot: {
     id: "foot",

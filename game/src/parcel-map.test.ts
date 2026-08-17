@@ -10,6 +10,8 @@ import {
   labelTextFor,
   labelScreenBox,
   pointInLabelBox,
+  pickCoords,
+  pointerToNdc,
   plotDisplayName,
   mountParcelMap,
 } from "../public/harbour/parcel-map.js";
@@ -132,7 +134,21 @@ describe("parcel map (PAPER)", () => {
     const box = labelScreenBox(0, 0, 20, 20, 8, 800, 600, 50);
     expect(pointInLabelBox(400, 300, box)).toBe(true);
     expect(pointInLabelBox(400 + box.hw + 8, 300, box)).toBe(false);
-    expect(box.hw).toBeGreaterThanOrEqual(36);
-    expect(box.hh).toBeGreaterThanOrEqual(20);
+    expect(box.hw).toBeGreaterThanOrEqual(48);
+    expect(box.hh).toBeGreaterThanOrEqual(28);
+  });
+
+  it("maps a click through the canvas box, not the window", () => {
+    const box = {
+      getBoundingClientRect: () => ({ left: 100, top: 50, width: 200, height: 100 }),
+    };
+    const ndc = pointerToNdc({ clientX: 150, clientY: 80 }, box);
+    expect(ndc.x).toBeCloseTo(-0.5, 5);
+    expect(ndc.y).toBeCloseTo(0.4, 5);
+    const coords = pickCoords(150, 80, 800, 600, box);
+    expect(coords.x).toBe(50);
+    expect(coords.y).toBe(30);
+    expect(coords.w).toBe(200);
+    expect(coords.h).toBe(100);
   });
 });

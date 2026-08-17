@@ -24,7 +24,7 @@ import { mountEconHud } from "./hud-econ.js";
 import { mountPresenceHud } from "./presence-hud.js";
 import { mountStaffHud } from "./staff-hud.js";
 import { mountCalendarHud } from "./calendar-hud.js";
-import { mountParcelMap } from "./parcel-map.js";
+import { mountParcelMap, pointerToNdc } from "./parcel-map.js";
 
 function ensureDockButton(id, label) {
   let btn = document.getElementById(id);
@@ -288,8 +288,28 @@ function findParcelAt(x, z) {
 }
 
 function setStatus(t) {
-  statusEl.textContent = t;
+  if (statusEl) statusEl.textContent = t;
+  const hint = document.getElementById("viewer-hint");
+  if (hint) hint.textContent = t;
 }
+
+function leaseFailText(reason) {
+  if (reason === "no_cash") return "Need more PAPER for this lot.";
+  if (reason === "need_develop_cash") return "That price would leave too little PAPER to build.";
+  if (reason === "zone_locked") return "High-density land is government-locked.";
+  if (reason === "owned") return "This land is taken.";
+  if (reason === "reserved") return "Reserved land.";
+  return "Could not buy: " + reason;
+}
+
+function aimPointer(ev) {
+  const ndc = pointerToNdc(ev, canvas);
+  pointer.x = ndc.x;
+  pointer.y = ndc.y;
+}
+
+const HUD_BLOCK =
+  "nav, a, button, #taxi-map, #ferry-ticket, #catalog-picker, .float-panel, #land-card, #stand-menu";
 
 function parcelLabel(p) {
   const kind = p.band === "field" ? "field" : p.band === "shore" ? "shore land" : "street land";
@@ -1010,10 +1030,17 @@ function showLandCard(p) {
     crate,
     onTake: crate ? () => takeCrate(crate.id) : null,
   });
-  if (!p.owner) setStatus((p.name || "This lot") + " · lease or close. PAPER · SIMULATED.");
+  if (!p.owner) setStatus((p.name || "This lot") + " · click Buy, or the $ title. PAPER · SIMULATED.");
   else if (p.owner === "visitor") setStatus("Yours. PAPER.");
   else setStatus("This land is taken. PAPER.");
   return true;
+}
+
+function buyPlot(p) {
+  if (!p || !map) return;
+  showLandCard(p);
+  if (p.owner) return;
+  void lease();
 }
 
 function closeLandCard() {
@@ -1081,9 +1108,8 @@ function onPointer(ev) {
   if (Date.now() - lastTap < 180) return;
   lastTap = Date.now();
   if (taxi && typeof taxi.mapOpen === "function" && taxi.mapOpen()) return;
-  if (ev.target.closest && ev.target.closest("nav, a, button, #taxi-map, #ferry-ticket, #catalog-picker, #chrome, .float-panel, #land-card, #stand-menu")) return;
-  pointer.x = (ev.clientX / window.innerWidth) * 2 - 1;
-  pointer.y = -(ev.clientY / window.innerHeight) * 2 + 1;
+  if (ev.target.closest && ev.target.closest(HUD_BLOCK)) return;
+  aimPointer(ev);
   raycaster.setFromCamera(pointer, camera);
   if (interior && interior.isInside()) {
     interior.handleRay(raycaster);
@@ -1113,12 +1139,12 @@ function onPointer(ev) {
     (viewer === "world" || viewer === "lots") &&
     parcelMap &&
     typeof parcelMap.pickLabel === "function"
-      ? parcelMap.pickLabel(camera, ev.clientX, ev.clientY, window.innerWidth, window.innerHeight)
+      ? parcelMap.pickLabel(camera, ev.clientX, ev.clientY, window.innerWidth, window.innerHeight, canvas)
       : null;
   if (tagPick && tagPick.plotId && map) {
     const tagged = map.plots.find((x) => x.id === tagPick.plotId);
     if (tagged) {
-      showLandCard(tagged);
+      buyPlot(tagged);
       return;
     }
   }
@@ -1126,7 +1152,7 @@ function onPointer(ev) {
     const spr = objectWithKind(labelHit.object, "parcel-label");
     const id = spr && (spr.userData.plotId || (spr.userData.plot && spr.userData.plot.id));
     const p = id && map && map.plots.find((x) => x.id === id);
-    if (p) showLandCard(p);
+    if (p) buyPlot(p);
     return;
   }
   if (
@@ -1149,7 +1175,7 @@ function onPointer(ev) {
   if (viewer === "lots" && tapPt) {
     const p = findParcelAt(tapPt.x, tapPt.z);
     if (p) {
-      showLandCard(p);
+      buyPlot(p);
       return;
     }
   }
@@ -1227,7 +1253,12 @@ async function lease() {
   const body = await res.json();
   if (!body.ok) {
     applySnapshot(body.snapshot);
-    setStatus("Could not lease: " + body.reason);
+    const note = leaseFailText(body.reason);
+    setStatus(note);
+    const fail = map && selected ? map.plots.find((x) => x.id === selected) : null;
+    if (fail && chromeHud && chromeHud.paintLand) {
+      chromeHud.paintLand(fail, { band: bandForPlot(fail), note });
+    }
     return;
   }
   applySnapshot(body.snapshot);
@@ -1237,7 +1268,7 @@ async function lease() {
   lastInspectKey = "";
   const p = map.plots.find((x) => x.id === selected);
   if (p && chromeHud && chromeHud.paintLand) {
-    chromeHud.paintLand(p, { band: bandForPlot(p) });
+    chromeHud.paintLand(p, { band: bandForPlot(p), note: "Yours for $" + money(body.paid) + " PAPER." });
   }
   playPaperBuy();
   setStatus("This land is yours for $" + money(body.paid) + " (PAPER). Order from Market.");
@@ -1351,7 +1382,7 @@ function tick(dt) {
     }
   }
   if (ferryMesh && tickFerry) tickFerry(ferryMesh, dt);
-  if (parcelMap) parcelMap.tick(player.position, dt);
+  if (parcelMap) parcelMap.tick(player.position, dt, viewerMode());
   inspectNearbyLand();
   btnFerry.disabled = !nearPort();
   refreshHud();
@@ -1641,7 +1672,8 @@ async function boot() {
     },
     onPlaceMode() {},
   });
-  setStatus("World viewer. Left-click walks. Click a $ tag to lease. PAPER.");
+  setStatus("World viewer. Left-click walks. Click a $ tag to buy. PAPER.");
+  onResize();
   await idle(80);
   await ensureTaxi();
   await ensureDeliveries();
@@ -1660,9 +1692,8 @@ canvas.addEventListener("pointerup", (ev) => {
   const dist = Math.hypot(ev.clientX - rmbDown.x, ev.clientY - rmbDown.y);
   rmbDown = null;
   if (dt > 280 || dist > 10) return;
-  if (ev.target.closest && ev.target.closest("nav, a, button, #taxi-map, #ferry-ticket, #catalog-picker, #chrome, .float-panel, #land-card, #stand-menu")) return;
-  pointer.x = (ev.clientX / window.innerWidth) * 2 - 1;
-  pointer.y = -(ev.clientY / window.innerHeight) * 2 + 1;
+  if (ev.target.closest && ev.target.closest(HUD_BLOCK)) return;
+  aimPointer(ev);
   raycaster.setFromCamera(pointer, camera);
   const hits = raycaster.intersectObjects(clickTargets(), true);
   const standHit = hits.find((h) => objectWithStand(h.object));

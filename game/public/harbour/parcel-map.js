@@ -22,11 +22,15 @@ export const LINE_INK = 0x2f4a26;
 
 /** Metres. Labels only near the player; the far map stays clean geometry. */
 export const LABEL_RADIUS_M = 420;
+/** Lots overlay: show tags across the nearby town, not only the next street. */
+export const LABEL_RADIUS_LOTS_M = 2400;
 /** Pooled sprites. Bounded so a dense town cannot mint unbounded canvases. */
 export const LABEL_POOL = 72;
+export const LABEL_POOL_LOTS = 160;
 /** Metres between shown tags. Street cuts sit ~45 m apart; without a floor
  *  their tags stack into an unreadable shingle pile. */
 export const LABEL_MIN_GAP_M = 26;
+export const LABEL_MIN_GAP_LOTS_M = 12;
 /** Metres above ground. */
 const FILL_LIFT = 0.35;
 const LINE_LIFT = 0.5;
@@ -57,13 +61,42 @@ export function labelScreenBox(ndcX, ndcY, dist, scaleX, scaleY, viewW, viewH, f
   return {
     sx,
     sy,
-    hw: Math.max(36, (scaleX * m) / 2),
-    hh: Math.max(20, (scaleY * m) / 2),
+    hw: Math.max(48, (scaleX * m) / 2),
+    hh: Math.max(28, (scaleY * m) / 2),
   };
 }
 
 export function pointInLabelBox(cx, cy, box) {
   return Math.abs(cx - box.sx) <= box.hw && Math.abs(cy - box.sy) <= box.hh;
+}
+
+/** CSS box of the harbour canvas. Window size is wrong inside a letterboxed tab. */
+export function canvasBox(canvas) {
+  if (canvas && typeof canvas.getBoundingClientRect === "function") {
+    const r = canvas.getBoundingClientRect();
+    if (r.width > 0 && r.height > 0) return r;
+  }
+  const w = typeof window !== "undefined" ? window.innerWidth : 1;
+  const h = typeof window !== "undefined" ? window.innerHeight : 1;
+  return { left: 0, top: 0, width: w || 1, height: h || 1 };
+}
+
+/** Map a click onto the harbour canvas, not the whole window. */
+export function pointerToNdc(ev, canvas) {
+  const r = canvasBox(canvas);
+  return {
+    x: ((ev.clientX - r.left) / r.width) * 2 - 1,
+    y: -((ev.clientY - r.top) / r.height) * 2 + 1,
+  };
+}
+
+/** Screen-space coords inside the canvas used by pickLabel. */
+export function pickCoords(clientX, clientY, viewW, viewH, canvas) {
+  if (canvas) {
+    const r = canvasBox(canvas);
+    return { x: clientX - r.left, y: clientY - r.top, w: r.width, h: r.height };
+  }
+  return { x: clientX, y: clientY, w: viewW, h: viewH };
 }
 
 /** Card title: "14 Harbour Rd". Uses the plot's stamped name, or a fallback. */
@@ -288,10 +321,14 @@ export function mountParcelMap({ worldAdd, specOf, heightAt, getPlots }) {
   }
 
   /** Assign pooled labels to the nearest labelled plots. Throttled. */
-  function tick(playerPos, dt = 0.016) {
+  function tick(playerPos, dt = 0.016, overlay = "world") {
+    const lots = overlay === "lots";
     labelClock -= dt;
     if (labelClock > 0) return;
-    labelClock = 0.5;
+    labelClock = lots ? 0.2 : 0.5;
+    const radius = lots ? LABEL_RADIUS_LOTS_M : LABEL_RADIUS_M;
+    const gap = lots ? LABEL_MIN_GAP_LOTS_M : LABEL_MIN_GAP_M;
+    const pool = lots ? LABEL_POOL_LOTS : LABEL_POOL;
     const near = [];
     for (const p of getPlots()) {
       const rec = ranges.get(p.id);
@@ -299,24 +336,24 @@ export function mountParcelMap({ worldAdd, specOf, heightAt, getPlots }) {
       const text = labelTextFor(p);
       if (!text) continue;
       const d = Math.hypot(playerPos.x - p.x, playerPos.z - p.z);
-      if (d > LABEL_RADIUS_M) continue;
+      if (d > radius) continue;
       near.push({ p, d, text });
     }
     near.sort((a, b) => a.d - b.d);
     // Greedy spacing: nearest tags win, later tags need clear air.
     const shown = [];
     for (const cand of near) {
-      if (shown.length >= LABEL_POOL) break;
+      if (shown.length >= pool) break;
       let clear = true;
       for (const kept of shown) {
-        if (Math.hypot(cand.p.x - kept.p.x, cand.p.z - kept.p.z) < LABEL_MIN_GAP_M) {
+        if (Math.hypot(cand.p.x - kept.p.x, cand.p.z - kept.p.z) < gap) {
           clear = false;
           break;
         }
       }
       if (clear) shown.push(cand);
     }
-    for (let i = 0; i < LABEL_POOL; i++) {
+    for (let i = 0; i < LABEL_POOL_LOTS; i++) {
       const slot = shown[i];
       if (!slot) {
         if (sprites[i]) sprites[i].sprite.visible = false;
@@ -343,7 +380,7 @@ export function mountParcelMap({ worldAdd, specOf, heightAt, getPlots }) {
     }
   }
 
-  /** Visible price tags. Left-click these to open Lease / Close — not the dirt. */
+  /** Visible price tags. Left-click these to buy the lot. */
   function clickables() {
     const out = [];
     for (const rec of sprites) {
@@ -353,8 +390,9 @@ export function mountParcelMap({ worldAdd, specOf, heightAt, getPlots }) {
   }
 
   /** Hit-test a click against visible $ tags in screen space. */
-  function pickLabel(camera, clientX, clientY, viewW, viewH) {
-    if (!camera || !viewW || !viewH) return null;
+  function pickLabel(camera, clientX, clientY, viewW, viewH, canvas) {
+    const coords = pickCoords(clientX, clientY, viewW, viewH, canvas);
+    if (!camera || !coords.w || !coords.h) return null;
     const ndc = new THREE.Vector3();
     let best = null;
     const fov = camera.fov || 50;
@@ -364,9 +402,18 @@ export function mountParcelMap({ worldAdd, specOf, heightAt, getPlots }) {
       ndc.copy(spr.position).project(camera);
       if (!Number.isFinite(ndc.x) || ndc.z > 1 || ndc.z < -1) continue;
       const dist = camera.position.distanceTo(spr.position);
-      const box = labelScreenBox(ndc.x, ndc.y, dist, spr.scale.x, spr.scale.y, viewW, viewH, fov);
-      if (!pointInLabelBox(clientX, clientY, box)) continue;
-      const d = Math.hypot(clientX - box.sx, clientY - box.sy);
+      const box = labelScreenBox(
+        ndc.x,
+        ndc.y,
+        dist,
+        spr.scale.x,
+        spr.scale.y,
+        coords.w,
+        coords.h,
+        fov,
+      );
+      if (!pointInLabelBox(coords.x, coords.y, box)) continue;
+      const d = Math.hypot(coords.x - box.sx, coords.y - box.sy);
       if (!best || d < best.d) best = { d, plotId: spr.userData.plotId, sprite: spr };
     }
     return best;
