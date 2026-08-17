@@ -298,6 +298,21 @@ function makePitcher(x, y, z) {
   return g;
 }
 
+/** Tiny kraft PAPER tray on the table — wood foot/rim, plaster well, linen center. Boxes only. */
+function makeTray(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "tray";
+  g.userData.kind = "interior-tray";
+  g.userData.mode = "PAPER";
+  g.userData.part = "tray";
+  g.position.set(x, y, z);
+  const paper = { mode: "PAPER", part: "tray" };
+  g.add(box(0.12, 0.008, 0.09, WOOD, 0, 0.004, 0, "interior-tray", paper));
+  g.add(box(0.1, 0.01, 0.07, PLASTER, 0, 0.012, 0, "interior-tray", paper));
+  g.add(box(0.065, 0.006, 0.045, LINEN, 0, 0.018, 0, "interior-tray", paper));
+  return g;
+}
+
 /** Tiny kraft PAPER saucer on the table — wood rim, plaster well, linen center. Boxes only. */
 function makeSaucer(x, y, z) {
   const g = new THREE.Group();
@@ -557,6 +572,8 @@ export function makeInteriorScene() {
   down.add(makeBowl(0.1, 0.955, -0.4));
   // Kraft PAPER pitcher on the table top — offset from bowl, saucer, mug, cup, plate, knife, fork, spoon, napkin, vase, book.
   down.add(makePitcher(-0.72, 0.955, 0.18));
+  // Kraft PAPER tray on the table top — offset from pitcher, vase, mug, saucer, bowl, book, napkin, spoon, fork, knife, plate, cup.
+  down.add(makeTray(-0.18, 0.955, -0.42));
   // Kraft PAPER book on the table top — offset from the mug and vase.
   down.add(makeBook(-0.05, 0.955, 0.08));
   // Kraft PAPER napkin on the table top — offset from the mug, vase, and book.
