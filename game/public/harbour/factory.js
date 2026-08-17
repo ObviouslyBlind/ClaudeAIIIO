@@ -610,6 +610,28 @@ function paperChisel(x, z, yaw = 0) {
 }
 
 /**
+ * Tiny kraft PAPER mallet: KRAFT handle, KRAFT_LIGHT head. Boxes only.
+ * Sits on the wood bench — not the chisel, file, rasp, awl, shaving, peg, cork, funnel, oilcan, rag, rivet, or wrench.
+ */
+function paperMallet(x, z, yaw = 0) {
+  const g = new THREE.Group();
+  g.name = "factory-paper-mallet";
+  g.userData.kind = "factory-paper-mallet";
+  g.userData.mode = "PAPER";
+  g.userData.part = "mallet";
+  // Wood-bench top: y0 0.16 + 0.78, top half 0.04.
+  const sitY = 0.16 + 0.78 + 0.04;
+  g.position.set(x, sitY, z);
+  g.rotation.y = yaw;
+  const handle = paperBox(0.05, 0.016, 0.016, KRAFT, "factory-paper-mallet");
+  handle.position.set(-0.02, 0.016, 0);
+  const head = paperBox(0.032, 0.032, 0.032, KRAFT_LIGHT, "factory-paper-mallet");
+  head.position.set(0.022, 0.016, 0);
+  g.add(handle, head);
+  return g;
+}
+
+/**
  * Small kraft/iron PAPER oil can: short box body, thinner spout.
  * Sits on the first workbench top — not a mill, not the hanging wrench.
  */
@@ -756,6 +778,9 @@ function makeFactoryDress() {
   g.add(paperFile(2.80, -1.88, 0.06));
   // Wood-bench mid-east, toward the wall. Off file, rasp, awl, shaving, peg, cork, funnel, oilcan, rag, rivet, wrench.
   g.add(paperChisel(3.38, -1.54, 0.04));
+  // Wood-bench south-east. Off chisel, file, rasp, awl, shaving, peg, cork, funnel, oilcan, rag, rivet, wrench.
+  // (3.52, -2.10) sits past the rotated top (x ≤ 3.42); keep it on the wood.
+  g.add(paperMallet(3.36, -2.10, 0.05));
   // Left wall, opposite the wood bench. Off the centre aisle (x≈0).
   g.add(scrapBin(-3.22, -2.62, 0.08));
   // Right wall, door side. Off the centre aisle (x≈0). Flat on the floor.
