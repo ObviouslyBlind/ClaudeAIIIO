@@ -754,8 +754,8 @@ function makeFactoryDress() {
   g.add(paperRasp(3.20, -0.90, 0.08));
   // Wood-bench south-west. Off rasp, awl, shaving, peg, cork, funnel, oilcan, rag, rivet, wrench.
   g.add(paperFile(2.80, -1.88, 0.06));
-  // Wood-bench south-east. Off file, rasp, awl, shaving, peg, cork, funnel, oilcan, rag, rivet, wrench.
-  g.add(paperChisel(3.34, -1.92, 0.04));
+  // Wood-bench mid-east, toward the wall. Off file, rasp, awl, shaving, peg, cork, funnel, oilcan, rag, rivet, wrench.
+  g.add(paperChisel(3.38, -1.54, 0.04));
   // Left wall, opposite the wood bench. Off the centre aisle (x≈0).
   g.add(scrapBin(-3.22, -2.62, 0.08));
   // Right wall, door side. Off the centre aisle (x≈0). Flat on the floor.
