@@ -290,15 +290,17 @@ function channelBuoy() {
   return g;
 }
 
-/** Terracotta/kraft life ring on the camera-facing hull, offset from the rust buoy. */
+/** Terracotta/kraft life ring on the camera-facing hull, offset from the rust buoy.
+ *  /g/ring71 FAIL RING: 1.2 m segs at r=2.8 read as hull furniture from spawn.
+ *  Match buoy70: ~8 m tall rust/kraft cluster. */
 function basinRing() {
   const g = new THREE.Group();
   g.userData.dress = "ring";
   g.userData.mode = "PAPER";
-  const r = 2.8;
+  const r = 4.2;
   for (let i = 0; i < 8; i++) {
     const a = (i / 8) * Math.PI * 2;
-    const seg = part(1.5, 1.2, 1.5, i % 2 ? 0xc4b496 : 0x6e2e22);
+    const seg = part(3.6, 8.2, 3.6, i % 2 ? 0xc4b496 : 0x6e2e22);
     seg.position.set(Math.cos(a) * r, 0, Math.sin(a) * r);
     if (i === 0) seg.userData.part = "body";
     g.add(seg);
@@ -508,9 +510,10 @@ export function makeQuay(spec, helpers) {
     buoy.position.set(x, 5.4, z + toward * 116);
     root.add(buoy);
 
-    /** /g/buoy70 PASS BUOY: rust cube on the cream hull. Ring sits to +x, same z. */
+    /** /g/buoy70 PASS BUOY: rust cube on the cream hull. Ring sits to +x, same z.
+     *  /g/ring71 FAIL RING: x+8.4 / 1.2 m segs unread. Shift right of the 8 m buoy. */
     const ring = basinRing();
-    ring.position.set(x + 8.4, 4.8, z + toward * 116);
+    ring.position.set(x + 10.2, 5.4, z + toward * 116);
     root.add(ring);
 
     // Extra kraft stack on the north timber, west of the walk, short of the brow.
