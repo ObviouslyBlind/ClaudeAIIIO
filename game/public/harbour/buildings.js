@@ -352,6 +352,21 @@ function addSill(g, x, y, z) {
 }
 
 /**
+ * Tiny kraft PAPER sconce on the House wall so the front reads as
+ * lit from the street, not a blank plank. Original KRAFT / WOOD — not a new hex.
+ * House wall only — shop keeps its latch; shed stays bare.
+ * Offset from sill, knob, knocker, hinge, lintel, mailbox, and shutter.
+ */
+function addSconce(g, x, y, z) {
+  const plate = tagPaper(part(0.08, 0.14, 0.03, WOOD, false), "sconce");
+  plate.name = "sconce";
+  plate.position.set(x, y, z);
+  const shade = tagPaper(part(0.1, 0.1, 0.08, KRAFT, false), "sconce");
+  shade.position.set(x, y - 0.01, z + 0.05);
+  g.add(plate, shade);
+}
+
+/**
  * Small kraft PAPER knocker on the House door so the leaf reads as a
  * front door, not a blank plank. Original WOOD / KRAFT — not a new hex.
  * House door only — shop gets a latch instead; shed and factory hall stay bare.
@@ -475,6 +490,7 @@ function cottage(kind) {
     addLintel(g, -W * 0.12, 2.52, D / 2 + 0.18);
     addKnob(g, -W * 0.12 + 0.28, 1.72, D / 2 + 0.18);
     addSill(g, -W * 0.12, 0.42, D / 2 + 0.12);
+    addSconce(g, -W * 0.12 - 0.88, 1.48, D / 2 + 0.16);
   }
   if (shop) {
     addLatch(g, -W * 0.12 + 0.28, 1.42, D / 2 + 0.18);
