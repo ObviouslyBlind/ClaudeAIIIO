@@ -21,5 +21,11 @@ describe("harbour boot import graph", () => {
     }
     expect(src).toContain('from "./harbour-world.js"');
     expect(src).toContain('import("./interior.js")');
+    expect(src).not.toContain("await loadDressing(");
+    expect(src).toContain("void loadDressing()");
+    expect(src).toContain("SPAWN_PARCEL_M = 420");
+    const dressing = src.slice(src.indexOf("async function loadDressing"), src.indexOf("async function boot"));
+    expect(dressing).not.toContain("ensureInterior");
+    expect(dressing).not.toContain("ensureCatalog");
   });
 });

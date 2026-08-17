@@ -10,7 +10,7 @@ Operator came back to **playtest**. Bar is **`http://localhost:8787/`**, inland 
 
 Cube-critic rounds are **paused**. Do not launch another seaward `/g/…` critic until the operator asks.
 
-Last playtest fix: D032 — `/` paints north land before interiors/trees so Edge stops “not responding.” D031 one asset nonce. Inland look remains D030. `/g/green87` **FAIL GREEN** — round stopped.
+Last playtest fix: D033 — boot returns after north land; trees/interiors wait. Hard-refresh the tunnel. D032/D031 still apply.
 
 ## Play
 
