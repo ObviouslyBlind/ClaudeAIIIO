@@ -238,7 +238,7 @@ export function standingOnParcel(
 function publicQuay(spec: IslandSpec, x: number, z: number): boolean {
   const along = (z - spec.port.z) * (spec.id === "north" ? 1 : -1);
   const across = Math.abs(x - spec.port.x);
-  return across < 18 && along > -28 && along < 92;
+  return across < 22 && along > -18 && along < 16;
 }
 
 function priceOf(spec: IslandSpec, area: number, band: PlotBand, portDist: number): number {
@@ -459,7 +459,8 @@ export function heightAt(spec: IslandSpec, x: number, z: number): number {
   const toward = spec.id === "north" ? 1 : -1;
   const along = (z - spec.port.z) * toward;
   const across = Math.abs(x - spec.port.x);
-  if (across < 16 && along > -24 && along < 90) return 1.12;
+  if (across < 22 && along > -16 && along < 14) return 1.12;
+  if (across < 8 && along >= 14 && along < 50) return -8;
   if (r > edge) return -8;
   const t = r / edge;
   const portD = Math.hypot(x - spec.port.x, z - spec.port.z);

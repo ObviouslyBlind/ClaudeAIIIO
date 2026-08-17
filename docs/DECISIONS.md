@@ -178,6 +178,11 @@ Record of architecture and strategy decisions with reasoning.
 **Decision:** Live spawn uses person scale (~2 m visitor). Quay lamps ~3.2 m, north sign posts ~3.2 m, dinghies ~4.2 m, port shed ~8×3.4×6 m, foam dashes ~1.6 m, rust buoy ~0.9 m. Strip the 34 m cream mast and the 32 m / 48 m critic towers. `loadDressing` does not import `trees.js` / south / stalls / street-props / peds. Dressing waits until walk has been idle 45 s (120 s fallback). Develop only meshes lots that already have plot lines.
 **Reason:** Operator playtest: scale was unreadable (tiny visitor vs towers), and the tab crashed within minutes. `/g/lease92` FAIL LEASE: first click then “Page Unresponsive” while trees compiled. PAPER / SIMULATED.
 
+## D037 — Taxi at boot; pier over water (2026-08-17)
+
+**Decision:** `ensureTaxi()` runs at the end of boot so the Taxi button and yellow cab work without waiting 45–120 s. Port apron is only ~14 m seaward; the timber pier is 7×32 m with pilings over water, not an 86 m slab on the 90 m land pad.
+**Reason:** Operator: taxi dead, pier sitting on sand. D036 skipped taxi.js to avoid compile freeze. PAPER / SIMULATED.
+
 ## D015 — Supplemental merge before save (2026-03-18)
 
 **Decision:** Move `relevant_markets_*.json` save to AFTER supplemental /markets merge.

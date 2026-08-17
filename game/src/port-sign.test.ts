@@ -167,10 +167,11 @@ describe("north port sign", () => {
     expect(face!.position.z).toBeLessThan(0);
     expect(Math.abs(face!.rotation.y)).toBeGreaterThan(3);
 
-    /** Port pad (across < 16, along < 90) so heightAt is land, not water. */
+    /** Port apron (across < 22, along < 14) so heightAt is land, not water. */
     expect(sign!.position.x).toBeGreaterThan(5);
     expect(sign!.position.x).toBeLessThan(16);
-    expect(sign!.position.z).toBeGreaterThan(-6880);
+    expect(sign!.position.z).toBeGreaterThan(-6960);
+    expect(sign!.position.z).toBeLessThan(-6930);
     expect(sign!.position.y).toBeGreaterThan(1);
   });
 });

@@ -21,6 +21,7 @@ describe("harbour boot import graph", () => {
     }
     expect(src).toContain('from "./harbour-world.js"');
     expect(src).toContain('import("./interior.js")');
+    expect(src).toContain('import("./taxi.js")');
     expect(src).not.toContain("await loadDressing(");
     expect(src).toContain("void loadDressing()");
     expect(src).toContain("SPAWN_PARCEL_M = 420");

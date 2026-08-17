@@ -335,27 +335,27 @@ function pierPalm(lean) {
  * Local x is east of the port; +along is toward the water.
  */
 export const PIER_PALM_OFFSETS = Object.freeze([
-  Object.freeze({ x: -14.5, along: 10 }),
+  Object.freeze({ x: -14.5, along: -8 }),
   Object.freeze({ x: -12.6, along: 2 }),
-  Object.freeze({ x: -15.2, along: -8 }),
-  Object.freeze({ x: -12.8, along: -20 }),
-  Object.freeze({ x: -15.0, along: 16 }),
-  Object.freeze({ x: -13.4, along: 22 }),
-  Object.freeze({ x: 14.5, along: 8 }),
-  Object.freeze({ x: 12.6, along: 14 }),
-  Object.freeze({ x: 15.2, along: 4 }),
-  Object.freeze({ x: 13.5, along: -22 }),
+  Object.freeze({ x: -15.2, along: -4 }),
+  Object.freeze({ x: -12.8, along: 8 }),
+  Object.freeze({ x: -14.0, along: 6 }),
+  Object.freeze({ x: 14.5, along: -6 }),
+  Object.freeze({ x: 12.6, along: 4 }),
+  Object.freeze({ x: 15.2, along: 2 }),
+  Object.freeze({ x: 13.5, along: -12 }),
+  Object.freeze({ x: 14.2, along: 8 }),
 ]);
 
 /** Land-side kit kept off the paved corridor. Same local axes as the palms. */
 export const QUAY_LAND_SPOTS = Object.freeze([
-  Object.freeze({ x: -13.6, along: -13, kind: "lean-to" }),
-  Object.freeze({ x: -12.4, along: -6, kind: "stack" }),
-  Object.freeze({ x: -15.3, along: -20, kind: "rope-box" }),
-  Object.freeze({ x: -12.5, along: 12, kind: "canvas" }),
-  Object.freeze({ x: 15.3, along: 6, kind: "canvas" }),
-  Object.freeze({ x: 12.4, along: -22, kind: "stack" }),
-  Object.freeze({ x: 15.1, along: 12, kind: "rope-box" }),
+  Object.freeze({ x: -13.6, along: -10, kind: "lean-to" }),
+  Object.freeze({ x: -12.4, along: -4, kind: "stack" }),
+  Object.freeze({ x: -15.3, along: 6, kind: "rope-box" }),
+  Object.freeze({ x: -12.5, along: 8, kind: "canvas" }),
+  Object.freeze({ x: 15.3, along: 4, kind: "canvas" }),
+  Object.freeze({ x: 12.4, along: -8, kind: "stack" }),
+  Object.freeze({ x: 15.1, along: 8, kind: "rope-box" }),
 ]);
 
 /**
@@ -385,35 +385,35 @@ function fender() {
 /**
  * Extra kraft PAPER coils on the timber deck of each quay.
  * Local x is east of the port; along is toward the water from pier centre.
- * Stay on the 11 m deck, off the centre walk, short of the ferry berth.
+ * Stay on the 7 m deck, off the centre walk, short of the basin lip.
  */
 export const QUAY_DECK_SPOTS = Object.freeze([
-  Object.freeze({ x: -3.35, along: 6, kind: "rope" }),
-  Object.freeze({ x: 3.3, along: 22, kind: "rope" }),
+  Object.freeze({ x: -3.15, along: 6, kind: "rope" }),
+  Object.freeze({ x: 3.1, along: 10, kind: "rope" }),
 ]);
 
 /**
  * PAPER life rings on the timber deck, on the north/south bollard lines.
  * Local x is east of the port; along is toward the water from pier centre.
- * Stay on the 11 m deck, off the paved road (ROAD_CLEAR 11) and centre walk.
+ * Stay on the 7 m deck, off the paved road and centre walk.
  */
 export const LIFE_RING_SPOTS = Object.freeze([
-  Object.freeze({ x: -4.95, along: -16 }),
-  Object.freeze({ x: 4.95, along: -16 }),
-  Object.freeze({ x: -4.95, along: 14 }),
-  Object.freeze({ x: 4.95, along: 14 }),
+  Object.freeze({ x: -3.15, along: -12 }),
+  Object.freeze({ x: 3.15, along: -12 }),
+  Object.freeze({ x: -3.15, along: 12 }),
+  Object.freeze({ x: 3.15, along: 12 }),
 ]);
 
 /**
  * Rubber tyres on the seaward timber face. Local x is east of the port;
- * along is toward the water from pier centre. Just past the 43 m lip
- * (pier is 86 m long), still on the 11 m width.
+ * along is toward the water from pier centre. Just past the 16 m lip
+ * (pier is 32 m long), still on the 7 m width.
  */
 export const FENDER_SPOTS = Object.freeze([
-  Object.freeze({ x: -3.7, along: 43.22 }),
-  Object.freeze({ x: -1.25, along: 43.22 }),
-  Object.freeze({ x: 1.25, along: 43.22 }),
-  Object.freeze({ x: 3.7, along: 43.22 }),
+  Object.freeze({ x: -3.15, along: 16.15 }),
+  Object.freeze({ x: -1.05, along: 16.15 }),
+  Object.freeze({ x: 1.05, along: 16.15 }),
+  Object.freeze({ x: 3.15, along: 16.15 }),
 ]);
 
 export function quayWorldPoint(spec, localX, along) {
@@ -430,7 +430,7 @@ export function makeQuay(spec, helpers) {
   const toward = spec.id === "north" ? 1 : -1;
   const { x, z } = spec.port;
   const y = helpers.heightAt(spec, x, z);
-  const pierZ = z + toward * 38;
+  const pierZ = z + toward * 28;
   const deckY = y + 0.5;
 
   const root = new THREE.Group();
@@ -438,12 +438,12 @@ export function makeQuay(spec, helpers) {
   root.userData.kind = "quay";
 
   const d1 = dinghy();
-  d1.position.set(x + 3.2, 1.55, z + toward * 102);
+  d1.position.set(x + 5.2, 1.55, z + toward * 40);
   d1.rotation.y = spec.id === "north" ? 0.08 : Math.PI + 0.08;
   root.add(d1);
 
   const d2 = dinghy();
-  d2.position.set(x - 3.8, 1.48, z + toward * 97);
+  d2.position.set(x - 5.4, 1.48, z + toward * 36);
   d2.rotation.y = spec.id === "north" ? -0.14 : Math.PI - 0.14;
   root.add(d2);
 
@@ -460,16 +460,16 @@ export function makeQuay(spec, helpers) {
     root.add(stackN);
   }
 
-  for (const along of [-24, -8, 10, 26]) {
-    for (const side of [-5.15, 5.15]) {
+  for (const along of [-12, -6, 0, 6, 12]) {
+    for (const side of [-3.15, 3.15]) {
       const post = bollard();
       post.position.set(x + side, deckY, pierZ + toward * along);
       root.add(post);
     }
   }
 
-  for (const along of [-20, 6, 22]) {
-    for (const side of [-4.8, 4.8]) {
+  for (const along of [-10, 2, 10]) {
+    for (const side of [-3.05, 3.05]) {
       const ring = lifeRing();
       ring.position.set(x + side, deckY, pierZ + toward * along);
       ring.rotation.y = side > 0 ? -0.2 : 0.15;
@@ -478,7 +478,7 @@ export function makeQuay(spec, helpers) {
   }
 
   const cart = handcart();
-  cart.position.set(x + 2.35, deckY, pierZ - toward * 18);
+  cart.position.set(x + 2.35, deckY, pierZ - toward * 10);
   cart.rotation.y = toward > 0 ? 0.22 : Math.PI - 0.18;
   root.add(cart);
 
@@ -493,11 +493,11 @@ export function makeQuay(spec, helpers) {
   root.add(stackB);
 
   const rope = ropeCoil();
-  rope.position.set(x - 3.55, deckY, pierZ + toward * 22);
+  rope.position.set(x - 3.15, deckY, pierZ + toward * 8);
   root.add(rope);
 
-  for (const along of [-32, 0, 18]) {
-    for (const side of [-5.15, 5.15]) {
+  for (const along of [-14, 4, 14]) {
+    for (const side of [-3.15, 3.15]) {
       const post = bollard();
       post.position.set(x + side, deckY, pierZ + toward * along);
       root.add(post);
@@ -505,7 +505,7 @@ export function makeQuay(spec, helpers) {
   }
 
   const stackC = crateStack();
-  stackC.position.set(x - 3.2, deckY, pierZ - toward * 28);
+  stackC.position.set(x - 3.2, deckY, pierZ - toward * 8);
   stackC.rotation.y = -0.22;
   root.add(stackC);
 
@@ -520,7 +520,7 @@ export function makeQuay(spec, helpers) {
   root.add(tarpA);
 
   const tarpB = canvasCrate();
-  tarpB.position.set(x + 3.55, deckY, pierZ - toward * 22);
+  tarpB.position.set(x + 3.15, deckY, pierZ - toward * 12);
   tarpB.rotation.y = -0.3;
   root.add(tarpB);
 
@@ -535,7 +535,7 @@ export function makeQuay(spec, helpers) {
   root.add(boxB);
 
   const ropeB = ropeCoil();
-  ropeB.position.set(x + 3.15, deckY, pierZ + toward * 30);
+  ropeB.position.set(x + 3.15, deckY, pierZ + toward * 12);
   root.add(ropeB);
 
   for (const spot of QUAY_DECK_SPOTS) {

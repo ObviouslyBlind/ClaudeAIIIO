@@ -2,7 +2,7 @@
 
 ## 2026-08-17 (latest)
 
-**Current status:** `/g/scale93` PASS SCALE. Next `/g/lease94` (lease a vacant north lot). D036. PAPER / SIMULATED. Politics frozen.
+**Current status:** Taxi + pier playtest. D037 loads taxi at boot and puts the timber pier over water. Next `/g/play95`. PAPER / SIMULATED. Politics frozen.
 
 ## 2026-08-16
 

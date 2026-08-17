@@ -1319,7 +1319,7 @@ describe("harbour PAPER pedestrians", () => {
     expect(HOME_Z).toBe(-6835);
     expect(lookZ).toBeLessThan(playerZ - 40);
     expect(SPAWN_QUAY_SCALE).toBeGreaterThan(4);
-    expect(SPAWN_QUAY_ALONG.every((along) => along >= 24 && along <= 80)).toBe(true);
+    expect(SPAWN_QUAY_ALONG.every((along) => along >= 0 && along < 14)).toBe(true);
 
     const { people } = spawn();
     const quay = people.filter((p) => p.lane === "quay");
@@ -1329,8 +1329,9 @@ describe("harbour PAPER pedestrians", () => {
     let lit = 0;
     for (const p of quay) {
       const { x, z } = p.mesh.position;
-      expect(Math.abs(p.mesh.position.z - playerZ)).toBeGreaterThan(20);
-      expect(z).toBeGreaterThan(spec.port.z + 10);
+      expect(Math.abs(p.mesh.position.z - playerZ)).toBeGreaterThan(6);
+      expect(z).toBeGreaterThan(spec.port.z - 2);
+      expect(z).toBeLessThan(spec.port.z + 16);
       expect(z).toBeLessThan(HOME_Z);
       expect(Math.abs(x - spec.port.x)).toBeCloseTo(VERGE_OFFSET_M, 5);
       expect(p.mesh.scale.x).toBeCloseTo(SPAWN_QUAY_SCALE, 5);
