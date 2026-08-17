@@ -19,7 +19,8 @@ import * as THREE from "three";
  * kraft PAPER spade leaning by the workbench, a tiny
  * kraft PAPER trowel leaning by the workbench, a tiny
  * kraft PAPER shears leaning by the workbench, a tiny
- * kraft PAPER yoke leaning by the workbench, and
+ * kraft PAPER yoke leaning by the workbench, a tiny
+ * kraft PAPER flail leaning by the workbench, and
  * dim warm light — not the
  * house living room, warehouse crates, shop, or factory.
  * No WASD. Tap-to-walk stays in interior.js.
@@ -914,6 +915,36 @@ function farmYoke() {
   return g;
 }
 
+/**
+ * Tiny kraft PAPER flail: wood handle, kraft swipple.
+ * Hexes already in this file (WOOD, KRAFT). PAPER boxes only — no grey.
+ * Leans by the farm workbench; offset from yoke, shears, trowel, spade,
+ * ladle, scythe, sickle, hoe, rake, broom, seed, lid, mug, egg, pail,
+ * lantern, scoop, and the hanging farm-tools. Not the hanging farm-tool
+ * shovel. Not the tiny kraft PAPER yoke or shears.
+ */
+function farmFlail() {
+  const g = new THREE.Group();
+  g.name = "farm-flail";
+  g.userData.kind = "farm-flail";
+  g.userData.part = "flail";
+  g.userData.mode = "PAPER";
+  const y0 = 0.16;
+  const handle = paperBox(0.018, 0.14, 0.018, WOOD, "farm-flail");
+  handle.userData.part = "flail";
+  handle.position.y = y0 + 0.09;
+  g.add(handle);
+  const link = paperBox(0.03, 0.014, 0.014, WOOD, "farm-flail");
+  link.userData.part = "flail";
+  link.position.set(0.02, y0 + 0.02, 0);
+  g.add(link);
+  const swipple = paperBox(0.018, 0.08, 0.018, KRAFT, "farm-flail");
+  swipple.userData.part = "flail";
+  swipple.position.set(0.045, y0 + 0.04, 0);
+  g.add(swipple);
+  return g;
+}
+
 function workbench(x, z) {
   const g = new THREE.Group();
   g.name = "farm-bench";
@@ -1113,6 +1144,14 @@ function makeFarmDress() {
   paperYoke.position.set(-3.90, 0, 0.0);
   paperYoke.rotation.z = -0.26;
   g.add(paperYoke);
+  const paperFlail = farmFlail();
+  // Floor beside the 1.55 × 0.58 bench — leans by the far-left back
+  // edge, not the yoke (mid-left at -3.90, 0, 0.0), shears, trowel,
+  // spade, ladle, scythe, sickle, hoe, rake, broom, or the top
+  // (seed, mug, egg, pail, lantern, scoop). Not hanging farm-tools.
+  paperFlail.position.set(-3.95, 0, -0.32);
+  paperFlail.rotation.z = 0.26;
+  g.add(paperFlail);
 
   const loftY = 2.94;
   g.add(sack(0.46, 0.56, 0.36, SACK, -2.55, loftY + 0.28, -2.35, 0.1));
