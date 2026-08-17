@@ -8,7 +8,7 @@ This is a PAPER / SIMULATED harbour game in `/workspace/game`. The Polymarket pa
 
 Operator came back to **playtest**. Bar is **`http://localhost:8787/`**, inland spawn, walkable harbour.
 
-Gauntlet live. `/g/south102` PASS SOUTH — ferry, real landfall, 60 s idle, no freeze. Next `/g/loop103` (full loop in one session).
+Gauntlet at a resting point. `/g/loop103` PASS LOOP — full session (walk, lease, House, Enter/Exit, taxi, ferry to South) with zero freezes. Next piece: operator playtest feedback, or a perf pass to return quay clutter / foam / trees off the main thread.
 
 Last playtest fix: D043 — trickle carries only cars + moving ferry (quay clutter / foam froze the 60 s idle). D042 ferry-hint observer loop killed. D040/41 no burst timer. D039 south landfall. D038 cheap lots. D037 taxi + pier. D036 no auto trees.
 
