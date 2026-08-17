@@ -18,7 +18,8 @@ import * as THREE from "three";
  * kraft PAPER ladle leaning by the workbench, a tiny
  * kraft PAPER spade leaning by the workbench, a tiny
  * kraft PAPER trowel leaning by the workbench, a tiny
- * kraft PAPER shears leaning by the workbench, and
+ * kraft PAPER shears leaning by the workbench, a tiny
+ * kraft PAPER yoke leaning by the workbench, and
  * dim warm light — not the
  * house living room, warehouse crates, shop, or factory.
  * No WASD. Tap-to-walk stays in interior.js.
@@ -883,6 +884,36 @@ function farmShears() {
   return g;
 }
 
+/**
+ * Tiny kraft PAPER yoke: wood bar, kraft pads.
+ * Hexes already in this file (WOOD, KRAFT). PAPER boxes only — no grey.
+ * Leans by the farm workbench; offset from shears, trowel, spade, ladle,
+ * scythe, sickle, hoe, rake, broom, seed, lid, mug, egg, pail, lantern,
+ * scoop, and the hanging farm-tools. Not the hanging farm-tool shovel.
+ * Not the tiny kraft PAPER shears or trowel.
+ */
+function farmYoke() {
+  const g = new THREE.Group();
+  g.name = "farm-yoke";
+  g.userData.kind = "farm-yoke";
+  g.userData.part = "yoke";
+  g.userData.mode = "PAPER";
+  const y0 = 0.16;
+  const bar = paperBox(0.12, 0.02, 0.02, WOOD, "farm-yoke");
+  bar.userData.part = "yoke";
+  bar.position.y = y0 + 0.08;
+  g.add(bar);
+  const padL = paperBox(0.04, 0.035, 0.03, KRAFT, "farm-yoke");
+  padL.userData.part = "yoke";
+  padL.position.set(-0.035, y0 + 0.05, 0);
+  g.add(padL);
+  const padR = paperBox(0.04, 0.035, 0.03, KRAFT, "farm-yoke");
+  padR.userData.part = "yoke";
+  padR.position.set(0.035, y0 + 0.05, 0);
+  g.add(padR);
+  return g;
+}
+
 function workbench(x, z) {
   const g = new THREE.Group();
   g.name = "farm-bench";
@@ -1074,6 +1105,14 @@ function makeFarmDress() {
   paperShears.position.set(-2.60, 0, 0.18);
   paperShears.rotation.z = 0.24;
   g.add(paperShears);
+  const paperYoke = farmYoke();
+  // Floor beside the 1.55 × 0.58 bench — leans by the mid-left
+  // edge, not the shears (mid-right front at -2.60, 0, 0.18), trowel,
+  // spade, ladle, scythe, sickle, hoe, rake, broom, or the top
+  // (seed, mug, egg, pail, lantern, scoop). Not hanging farm-tools.
+  paperYoke.position.set(-3.90, 0, 0.0);
+  paperYoke.rotation.z = -0.26;
+  g.add(paperYoke);
 
   const loftY = 2.94;
   g.add(sack(0.46, 0.56, 0.36, SACK, -2.55, loftY + 0.28, -2.35, 0.1));
