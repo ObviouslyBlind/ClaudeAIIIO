@@ -64,6 +64,9 @@ describe("South first loop", () => {
     expect(order.paid).toBe(CART_PAPER_PRICE + HOTDOG_PACK_PRICE);
     expect(visitor.cash).toBe(before - order.paid);
     expect(order.delivery.status).toBe("en_route");
+    expect(order.delivery.drop).toBeTruthy();
+    expect(order.delivery.drop?.roadName).toBeTruthy();
+    expect(order.delivery.drop!.x !== plot.x || order.delivery.drop!.z !== plot.z).toBe(true);
     expect(markArrived(visitor, order.delivery.id).ok).toBe(true);
     const taken = takeAll(visitor, order.delivery.id);
     expect(taken.ok).toBe(true);

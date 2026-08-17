@@ -79,7 +79,7 @@ describe("parcel map (PAPER)", () => {
     const pm = mount(plots, added);
     const fills = pm.buildIsland("north");
     expect(fills.length).toBe(1);
-    expect(fills[0].userData.kind).toBe("ground");
+    expect(fills[0].userData.kind).toBe("parcel-fill");
     expect(fills[0].userData.part).toBe("parcel-fill");
     expect(fills[0].userData.mode).toBe("PAPER");
     expect(added.length).toBe(2);

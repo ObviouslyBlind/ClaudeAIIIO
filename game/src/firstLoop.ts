@@ -6,6 +6,7 @@
 
 import { getPlot, type IslandId, type LandBoard, type Parcel } from "./land.ts";
 import { plotTrafficBand, type TrafficBand } from "./footTraffic.ts";
+import { roadsideDrop, type DropPoint } from "./roadside.ts";
 import type { Visitor } from "./sim.ts";
 
 export const FIRST_LOOP_NOTE =
@@ -62,6 +63,7 @@ export type Delivery = {
   plotId: string;
   items: InvItem[];
   status: "en_route" | "arrived";
+  drop: DropPoint | null;
   mode: "PAPER";
   provenance: "SIMULATED";
 };
@@ -169,6 +171,7 @@ export function orderMarket(
     plotId: plot.id,
     items,
     status: "en_route",
+    drop: roadsideDrop(land.roads, "south", plot.x, plot.z),
     mode: "PAPER",
     provenance: "SIMULATED",
   };

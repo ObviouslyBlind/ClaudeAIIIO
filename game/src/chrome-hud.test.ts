@@ -8,6 +8,8 @@ describe("harbour chrome HUD", () => {
     expect(html).toContain('class="game-name"');
     expect(html).toContain("Two Harbors");
     expect(html).toContain('data-overlay="foot"');
+    expect(html).toContain('id="viewers"');
+    expect(html).toContain('id="viewer-hint"');
     expect(html).toContain('data-panel="inventory"');
     expect(html).toContain('data-panel="market"');
     expect(html).toContain('data-panel="employees"');

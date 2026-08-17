@@ -186,7 +186,10 @@ export function mountParcelMap({ worldAdd, specOf, heightAt, getPlots }) {
         polygonOffsetFactor: -1,
       }),
     );
-    fillMesh.userData.kind = "ground";
+    fillMesh.name = `parcel-fill:${id}`;
+    fillMesh.userData.kind = "parcel-fill";
+    fillMesh.userData.label = `${id} parcels`;
+    fillMesh.userData.island = id;
     fillMesh.userData.part = "parcel-fill";
     fillMesh.userData.mode = "PAPER";
     fillMesh.receiveShadow = true;
@@ -198,7 +201,10 @@ export function mountParcelMap({ worldAdd, specOf, heightAt, getPlots }) {
       lineGeo,
       new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.65 }),
     );
+    lineMesh.name = `parcel-lines:${id}`;
     lineMesh.userData.kind = "parcel-lines";
+    lineMesh.userData.label = `${id} parcel lines`;
+    lineMesh.userData.island = id;
     lineMesh.userData.mode = "PAPER";
 
     worldAdd(fillMesh);

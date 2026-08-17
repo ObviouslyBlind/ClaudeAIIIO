@@ -29,6 +29,8 @@ export function makeHotdogCart() {
   g.name = "hotdog-cart";
   g.userData.mode = "PAPER";
   g.userData.kind = "hotdog-cart";
+  g.userData.label = "hotdog cart";
+  g.userData.layer = "world";
 
   const body = box(1.35, 0.72, 0.78, RED);
   body.position.y = 0.86;
@@ -79,6 +81,8 @@ export function makeCrate() {
   const g = new THREE.Group();
   g.name = "delivery-crate";
   g.userData.kind = "crate";
+  g.userData.label = "delivery crate";
+  g.userData.layer = "logistics";
   g.userData.mode = "PAPER";
   const wood = box(0.9, 0.55, 0.7, WOOD);
   wood.position.y = 0.28;
@@ -86,7 +90,13 @@ export function makeCrate() {
   const lid = box(0.92, 0.06, 0.72, 0x8a6238);
   lid.position.y = 0.58;
   lid.userData.part = "lid";
-  g.add(wood, lid);
+  const pick = new THREE.Mesh(
+    new THREE.CylinderGeometry(1.7, 1.7, 1.5, 8),
+    new THREE.MeshBasicMaterial({ visible: false }),
+  );
+  pick.position.y = 0.7;
+  pick.userData.part = "pick";
+  g.add(wood, lid, pick);
   return g;
 }
 

@@ -40,11 +40,21 @@ export function mountChrome(opts) {
   let skuCart = true;
   let skuDogs = true;
 
+  const HINTS = {
+    world: "World: tap walks. Land does not steal the click.",
+    foot: "Foot traffic: green / yellow / red on each named road.",
+    logistics: "Logistics: tap the roadside crate. Van drops on the kerb.",
+    minerals: "Minerals: not on the South first loop yet.",
+  };
+
   function setOverlay(id) {
     overlay = id;
     root.querySelectorAll("[data-overlay]").forEach((b) => {
       b.classList.toggle("is-on", b.getAttribute("data-overlay") === id);
     });
+    const hint = document.getElementById("viewer-hint");
+    if (hint) hint.textContent = (HINTS[id] || HINTS.world) + " PAPER · SIMULATED";
+    if (opts.setStatus) opts.setStatus((HINTS[id] || HINTS.world) + " PAPER.");
     if (opts.onOverlay) opts.onOverlay(id);
   }
 
@@ -107,7 +117,7 @@ export function mountChrome(opts) {
     body.innerHTML = `
       <p class="float-kicker">PAPER · SIMULATED · South island</p>
       <h2>Market</h2>
-      <p>Order a crate. A van drives paved roads to the plot you pick.</p>
+      <p>Order a crate. A van drives paved roads, drops it on the kerb, and drives away.</p>
       ${play.catalog
         .map(
           (s) => `
@@ -264,11 +274,7 @@ export function mountChrome(opts) {
   });
   root.querySelectorAll("[data-overlay]").forEach((btn) => {
     btn.addEventListener("click", () => {
-      const id = btn.getAttribute("data-overlay");
-      if (id === "minerals" && opts.setStatus) {
-        opts.setStatus("Minerals: not on the South first loop yet. PAPER.");
-      }
-      setOverlay(id);
+      setOverlay(btn.getAttribute("data-overlay"));
     });
   });
 
@@ -309,12 +315,13 @@ export function mountChrome(opts) {
       landCard.hidden = false;
       const band = extras && extras.band ? extras.band : "";
       const crate = extras && extras.crate;
+      const roadside = extras && extras.roadside;
       landCard.innerHTML = `
         <p class="float-kicker">PAPER · SIMULATED</p>
-        <h2>${plot.owner === "visitor" ? "Your plot" : "South land"}</h2>
-        <p class="price">${plot.owner ? (plot.owner === "visitor" ? "YOURS" : "taken") : money(plot.price)}</p>
+        <h2>${roadside ? "Roadside crate" : plot.owner === "visitor" ? "Your plot" : "South land"}</h2>
+        ${roadside ? "" : `<p class="price">${plot.owner ? (plot.owner === "visitor" ? "YOURS" : "taken") : money(plot.price)}</p>`}
         ${band ? `<p><span class="band-dot ${band}"></span>Foot traffic ${band}</p>` : ""}
-        ${!plot.owner ? `<button type="button" class="take-all" id="land-lease">Lease</button>` : ""}
+        ${!roadside && !plot.owner ? `<button type="button" class="take-all" id="land-lease">Lease</button>` : ""}
         ${crate ? `<button type="button" class="take-all" id="land-take">Take all</button>` : ""}
       `;
       const leaseBtn = landCard.querySelector("#land-lease");
