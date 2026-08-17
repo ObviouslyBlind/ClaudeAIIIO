@@ -157,8 +157,6 @@ const ports = [];
 let ferryMesh = null;
 let tickFerry = null;
 let meshForUse = null;
-let stalls = null;
-let pedestrians = null;
 const econHud = mountEconHud({
   el: document.getElementById("econ"),
 });
@@ -190,7 +188,12 @@ function heightAt(spec, x, z) {
   const across = Math.abs(x - spec.port.x);
   // Apron only. A 90 m seaward pad put the timber pier on sand.
   if (across < 22 && along > -16 && along < 14) return 1.12;
-  if (across < 8 && along >= 14 && along < 50) return -8;
+  // Harbour cove: pier slot widens seaward into the open sea (see land.ts).
+  if (along >= 14) {
+    const reach = along - 14;
+    const mouth = 8 + reach * 0.55;
+    if (across < mouth) return -2 - 6 * Math.min(1, reach / 90);
+  }
   if (r > edge) return -8;
   const t = r / edge;
   const portD = Math.hypot(x - spec.port.x, z - spec.port.z);
@@ -386,8 +389,11 @@ function parcelTint(p, isSel) {
 }
 
 function makeTerrain(spec) {
-  const segsX = 96;
-  const segsZ = 64;
+  // Dense enough to carry the cove and the port apron. 96x64 cells were 90 m
+  // wide: the carved pier slot dragged whole cells underwater and the harbour
+  // rendered as an inland lake.
+  const segsX = 224;
+  const segsZ = 144;
   const geo = new THREE.PlaneGeometry(spec.rx * 2.15, spec.rz * 2.15, segsX, segsZ);
   geo.rotateX(-Math.PI / 2);
   const pos = geo.attributes.position;
@@ -504,6 +510,8 @@ function makePalms(spec) {
     const z = spec.port.z + (spec.id === "north" ? -1 : 1) * (40 + i * 28);
     const y = heightAt(spec, x, z);
     if (y < 0.4) continue;
+    // Verge trees only. A palm through a leased house reads as a glitch.
+    if (map && map.plots.some((p) => pointInRing(x, z, p.ring))) continue;
     palmAt(x, z, y, side * 0.1);
   }
 }
@@ -830,10 +838,6 @@ function onPointer(ev) {
     const p = findParcelAt(groundHit.point.x, groundHit.point.z);
     if (p) selectLand(p, true);
     else goTo(groundHit.point.x, groundHit.point.z);
-    return;
-  }
-  if (stalls && stalls.handleRay(raycaster)) {
-    refreshHud();
   }
 }
 
@@ -956,8 +960,6 @@ function tick(dt) {
   }
   if (taxi) taxi.tick(dt);
   if (traffic) traffic.tick(dt);
-  if (stalls) stalls.tick(dt);
-  if (pedestrians) pedestrians.tick(dt);
   if (econHud) econHud.tick(dt);
   if (walking) {
     const dx = walkTarget.x - player.position.x;
