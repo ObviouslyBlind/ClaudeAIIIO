@@ -290,6 +290,22 @@ function channelBuoy() {
   return g;
 }
 
+/** Terracotta/kraft life ring on the camera-facing hull, offset from the rust buoy. */
+function basinRing() {
+  const g = new THREE.Group();
+  g.userData.dress = "ring";
+  g.userData.mode = "PAPER";
+  const r = 2.8;
+  for (let i = 0; i < 8; i++) {
+    const a = (i / 8) * Math.PI * 2;
+    const seg = part(1.5, 1.2, 1.5, i % 2 ? 0xc4b496 : 0x6e2e22);
+    seg.position.set(Math.cos(a) * r, 0, Math.sin(a) * r);
+    if (i === 0) seg.userData.part = "body";
+    g.add(seg);
+  }
+  return g;
+}
+
 /** Crate with a canvas tarp lashed over it. */
 function canvasCrate() {
   const g = new THREE.Group();
@@ -491,6 +507,11 @@ export function makeQuay(spec, helpers) {
     const buoy = channelBuoy();
     buoy.position.set(x, 5.4, z + toward * 116);
     root.add(buoy);
+
+    /** /g/buoy70 PASS BUOY: rust cube on the cream hull. Ring sits to +x, same z. */
+    const ring = basinRing();
+    ring.position.set(x + 8.4, 4.8, z + toward * 116);
+    root.add(ring);
 
     // Extra kraft stack on the north timber, west of the walk, short of the brow.
     const stackN = crateStack();

@@ -114,7 +114,15 @@ Pixel: **kraft gangplank / brow** at `http://localhost:8787/g/brow68`. Dinghy-ta
 
 Pixel: **rust channel buoy** at `http://localhost:8787/g/buoy70`. On the camera-facing cream hull (fend54 slot), 8 m rust cube + kraft band. No RMB. Address bar must be `/g/buoy70`. Do not restart play while the critic is on the page.
 
-## Next pixel (after buoy70 PASS, immediately, no wait)
+`/g/buoy70` **PASS BUOY**: cyan sky, loaded harbour, rust-brown mass on the left of the cream ferry, distinct from the beige pier.
+
+## Held (pixel-ratified, buoy)
+
+Rust channel buoy on the north cream hull (`/g/buoy70` PASS).
+
+Pixel: **kraft/rust life ring** at `http://localhost:8787/g/ring71`. Same camera-facing hull as buoy70, offset +x. No RMB. Address bar must be `/g/ring71`. Do not restart play while the critic is on the page.
+
+## Next pixel (after ring71 PASS, immediately, no wait)
 
 ## Frozen
 
