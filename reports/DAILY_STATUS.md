@@ -2,7 +2,7 @@
 
 ## 2026-08-17 (latest)
 
-**Current status:** `/g/play95` PASS PLAY (taxi + pier). Next `/g/house96` House → Enter → Exit. PAPER / SIMULATED. Politics frozen.
+**Current status:** `/g/house96` FAIL HOUSE. D038 spawn cheap street lots. Next `/g/house97`. PAPER / SIMULATED. Politics frozen.
 
 ## 2026-08-16
 

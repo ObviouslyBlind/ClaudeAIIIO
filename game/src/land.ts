@@ -88,6 +88,11 @@ export const ISLANDS: Record<IslandId, IslandSpec> = {
 
 /** Half-width of the paved carriageway plus a grass verge, metres. */
 export const ROAD_CLEAR = 11;
+/** First-frame lots. Keep in sync with public/harbour/main.js */
+export const SPAWN_PARCEL_M = 420;
+export const STARTER_CASH = 1_000;
+/** Metres. Tap this close to a starter street centroid to select it. */
+export const STARTER_SNAP_M = 40;
 
 function inlandSign(spec: IslandSpec): number {
   return spec.id === "north" ? -1 : 1;
@@ -412,6 +417,43 @@ export function findParcelAt(board: LandBoard, x: number, z: number): Parcel | u
   const hits = board.plots.filter((p) => pointInRing(x, z, p.ring));
   if (!hits.length) return undefined;
   return hits.reduce((a, b) => (a.area <= b.area ? a : b));
+}
+
+/** Cheap vacant north street lots (or already yours) inside the spawn window. */
+export function isStarterPlot(
+  plot: Parcel,
+  spec: IslandSpec = ISLANDS.north,
+  cash = STARTER_CASH,
+): boolean {
+  if (plot.island !== spec.id) return false;
+  if (Math.hypot(plot.x - spec.port.x, plot.z - spec.port.z) >= SPAWN_PARCEL_M) return false;
+  if (plot.owner === "visitor") return true;
+  if (plot.owner) return false;
+  if (plot.band !== "street") return false;
+  return plot.price + DEVELOP_COST <= cash;
+}
+
+/** Prefer a starter street lot under the tap, else the nearest within STARTER_SNAP_M. */
+export function pickStarterPlotAt(
+  plots: Parcel[],
+  x: number,
+  z: number,
+  spec: IslandSpec = ISLANDS.north,
+  cash = STARTER_CASH,
+): Parcel | undefined {
+  const starters = plots.filter((p) => isStarterPlot(p, spec, cash));
+  const inside = starters.filter((p) => pointInRing(x, z, p.ring));
+  if (inside.length) return inside.reduce((a, b) => (a.area <= b.area ? a : b));
+  let best: Parcel | undefined;
+  let bestD = STARTER_SNAP_M;
+  for (const p of starters) {
+    const d = Math.hypot(x - p.x, z - p.z);
+    if (d < bestD) {
+      best = p;
+      bestD = d;
+    }
+  }
+  return best;
 }
 
 export function leasePlot(

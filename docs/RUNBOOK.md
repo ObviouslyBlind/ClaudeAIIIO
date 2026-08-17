@@ -17,7 +17,7 @@ Open **`http://localhost:8787/`** to playtest. Spawn looks inland along the tarm
 - Port **8787**. Restart: `game/scripts/restart-play.sh` (tmux `two-harbors-play`).
 - Left click/tap = walk or use. RMB-hold = orbit. No WASD. No wallet.
 - Critics: unique `/g/` path. Do not ask computerUse to RMB-orbit. Cube rounds are paused while playtest is the bar.
-- Taxi button hails a yellow cab on the paved road. Timber pier sits over water (D037). `/g/play95` held taxi+pier. `/g/lease94` held lease. Trees still wait; do not expect a forest on first load.
+- Taxi button hails a yellow cab on the paved road. Timber pier sits over water (D037). First-frame lots are cheap street parcels (D038). Trees still wait.
 - Status: `game/reports/GAUNTLET_STATUS.md`.
 - New chat: paste `game/reports/HANDOVER.md` (this thread is bloated).
 

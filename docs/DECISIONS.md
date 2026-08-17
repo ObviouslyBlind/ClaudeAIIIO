@@ -183,6 +183,11 @@ Record of architecture and strategy decisions with reasoning.
 **Decision:** `ensureTaxi()` runs at the end of boot so the Taxi button and yellow cab work without waiting 45–120 s. Port apron is only ~14 m seaward; the timber pier is 7×32 m with pilings over water, not an 86 m slab on the 90 m land pad.
 **Reason:** Operator: taxi dead, pier sitting on sand. D036 skipped taxi.js to avoid compile freeze. PAPER / SIMULATED.
 
+## D038 — Spawn only cheap street lots (2026-08-17)
+
+**Decision:** First-frame parcels are vacant north street lots $1000 can lease and develop. Giant fields stay unmeshed. A tap near a starter lot snaps to it. Plot lines are clickable before dressing.
+**Reason:** `/g/house96` FAIL HOUSE: first inland tap selected a 6,522 m² field at $1,121 with $970 cash, so Lease stayed disabled. PAPER / SIMULATED.
+
 ## D015 — Supplemental merge before save (2026-03-18)
 
 **Decision:** Move `relevant_markets_*.json` save to AFTER supplemental /markets merge.

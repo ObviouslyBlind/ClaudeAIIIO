@@ -229,6 +229,12 @@ function pointInRing(x, z, ring) {
   return inside;
 }
 
+function canLeasePlot(p) {
+  const cash = map.visitor && Number.isFinite(map.visitor.cash) ? map.visitor.cash : 0;
+  const need = map.developCost ?? 40;
+  return p && !p.owner && p.price + need <= cash;
+}
+
 function findParcelAt(x, z) {
   const hits = [];
   for (const p of map.plots) {
@@ -237,8 +243,22 @@ function findParcelAt(x, z) {
     if (Math.hypot(x - p.x, z - p.z) > reach) continue;
     if (pointInRing(x, z, p.ring)) hits.push(p);
   }
-  if (!hits.length) return undefined;
-  return hits.reduce((a, b) => (a.area <= b.area ? a : b));
+  if (hits.length) {
+    const smallest = hits.reduce((a, b) => (a.area <= b.area ? a : b));
+    if (smallest.owner === "visitor" || canLeasePlot(smallest)) return smallest;
+  }
+  let best = null;
+  let bestD = STARTER_SNAP_M;
+  for (const p of map.plots) {
+    if (!plotMeshes.has(p.id)) continue;
+    if (!(p.owner === "visitor" || canLeasePlot(p))) continue;
+    const d = pointInRing(x, z, p.ring) ? 0 : Math.hypot(x - p.x, z - p.z);
+    if (d < bestD) {
+      best = p;
+      bestD = d;
+    }
+  }
+  return best || undefined;
 }
 
 function setStatus(t) {
@@ -577,12 +597,25 @@ function addParcel(p) {
   if (p.use) useFor(p);
 }
 
-/** Metres from the north port. First-frame lots only — the rest paints later. */
+/** Metres from the north port. Keep in sync with game/src/land.ts SPAWN_PARCEL_M */
 export const SPAWN_PARCEL_M = 420;
+/** Keep in sync with game/src/land.ts STARTER_SNAP_M */
+const STARTER_SNAP_M = 40;
+const STARTER_CASH = 1000;
 
 function nearNorthSpawn(p) {
   const spec = specOf("north");
-  return p.island === "north" && Math.hypot(p.x - spec.port.x, p.z - spec.port.z) < SPAWN_PARCEL_M;
+  const cash = Math.max(
+    STARTER_CASH,
+    map.visitor && Number.isFinite(map.visitor.cash) ? map.visitor.cash : STARTER_CASH,
+  );
+  const need = map.developCost ?? 40;
+  if (p.island !== "north") return false;
+  if (Math.hypot(p.x - spec.port.x, p.z - spec.port.z) >= SPAWN_PARCEL_M) return false;
+  if (p.owner === "visitor") return true;
+  if (p.owner) return false;
+  if (p.band !== "street") return false;
+  return p.price + need <= cash;
 }
 
 async function makeParcels(filter) {
@@ -686,8 +719,7 @@ function leaveInterior() {
 }
 
 function clickTargets() {
-  if (!dressingStarted) return ground.filter(Boolean);
-  const objs = ground.slice();
+  const objs = ground.filter(Boolean);
   for (const rec of plotMeshes.values()) {
     objs.push(rec.line);
     if (rec.fill) objs.push(rec.fill);

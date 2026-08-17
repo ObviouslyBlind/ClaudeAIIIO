@@ -9,6 +9,9 @@ import {
   ISLANDS,
   leasePlot,
   DEVELOP_COST,
+  isStarterPlot,
+  pickStarterPlotAt,
+  STARTER_CASH,
   pavedPolyline,
   pointInRing,
   roadNodes,
@@ -114,6 +117,31 @@ describe("harbour land board", () => {
     const pick = unique.sort((a, b) => a.price - b.price)[0]!;
     expect(leasePlot(board, visitor, pick.id).ok).toBe(true);
     expect(developPlot(board, visitor, pick.id, "house").ok).toBe(true);
+  });
+
+  it("keeps $1000 PAPER starter street lots at north spawn, not 6500 m² fields", () => {
+    const board = createLandBoard();
+    const spec = ISLANDS.north;
+    const starters = board.plots.filter((p) => isStarterPlot(p, spec));
+    expect(starters.length).toBeGreaterThanOrEqual(2);
+    expect(starters.every((p) => p.band === "street")).toBe(true);
+    expect(starters.every((p) => p.price + DEVELOP_COST <= STARTER_CASH)).toBe(true);
+    expect(starters.every((p) => p.area < 2000)).toBe(true);
+    expect(starters.some((p) => p.price <= 500)).toBe(true);
+
+    const street = starters.sort((a, b) => a.price - b.price)[0]!;
+    const snapped = pickStarterPlotAt(board.plots, street.x + 12, street.z + 12, spec);
+    expect(snapped).toBeTruthy();
+    expect(isStarterPlot(snapped!, spec)).toBe(true);
+
+    const nearField = board.plots
+      .filter((p) => p.island === "north" && p.band === "field")
+      .sort(
+        (a, b) =>
+          Math.hypot(a.x - spec.port.x, a.z - spec.port.z) -
+          Math.hypot(b.x - spec.port.x, b.z - spec.port.z),
+      )[0]!;
+    expect(isStarterPlot(nearField, spec)).toBe(false);
   });
 
   it("lets you lease a piece of ground underfoot and then develop it", () => {
