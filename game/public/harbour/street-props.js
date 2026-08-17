@@ -429,7 +429,13 @@ function villagePump(_side) {
   spigot.userData.mode = "PAPER";
   spigot.position.set(0, 1.02, 0.22);
 
-  g.add(shoe, post, head, handle, spout, basin, rim, water, dipper, crank, bolt, washer, peg, hook, spigot);
+  /** Tiny kraft PAPER tap on the pump spout. WOOD already in this file — PAPER box, not grey iron. Offset from spigot, bung, bolt, washer, peg, hook, dipper, crank. */
+  const tap = part(0.04, 0.06, 0.04, WOOD, false);
+  tap.userData.part = "tap";
+  tap.userData.mode = "PAPER";
+  tap.position.set(0.06, 0.94, 0.18);
+
+  g.add(shoe, post, head, handle, spout, basin, rim, water, dipper, crank, bolt, washer, peg, hook, spigot, tap);
   return g;
 }
 
