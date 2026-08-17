@@ -8,7 +8,7 @@ This is a PAPER / SIMULATED harbour game in `/workspace/game`. The Polymarket pa
 
 Operator came back to **playtest**. Bar is **`http://localhost:8787/`**, inland spawn, walkable harbour.
 
-Gauntlet live. `/g/house97` PASS HOUSE. Next `/g/ferry98` ($15 kraft ticket).
+Gauntlet live. `/g/ferry98` PASS FERRY. Next `/g/south99` (real south island after D039).
 
 Last playtest fix: D039 — ferry landfall builds south island; pier taps open the ferry; restored lots mesh. D038 cheap street lots. D037 taxi + short pier. D036 no auto trees.
 

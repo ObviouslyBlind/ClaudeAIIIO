@@ -2,7 +2,7 @@
 
 ## 2026-08-17 (latest)
 
-**Current status:** `/g/house97` PASS HOUSE. Next `/g/ferry98` $15 ticket. PAPER / SIMULATED. Politics frozen.
+**Current status:** `/g/ferry98` PASS FERRY. D039 bug scout (south void, restore, pier taps). Next `/g/south99`. PAPER / SIMULATED. Politics frozen.
 
 ## 2026-08-16
 
