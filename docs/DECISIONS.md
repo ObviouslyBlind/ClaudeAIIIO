@@ -153,6 +153,11 @@ Record of architecture and strategy decisions with reasoning.
 **Decision:** Stamp harbour HTML/JS with one `ASSET_NONCE` for the life of `npm run play`. Do not call `Date.now()` on every response.
 **Reason:** Playtest: `/` painted the cyan first frame (North port) then the tab stopped responding. `first-frame.js` dynamically imports `main.js`, and `main.js` statically imports `first-frame.js`. A fresh `?v=` per file turned that cycle into an infinite module fetch. PAPER / SIMULATED.
 
+## D032 — Defer heavy harbour meshes until after first walk (2026-08-17)
+
+**Decision:** `main.js` must not statically import `interior.js` / `trees.js` / `stalls.js` / `taxi.js` / `quay.js` / `buildings.js`. Spawn, north terrain, roads, and north port paint first. The rest loads after a paint yield. `canEnter` / `wrapHarbourWorld` live in `harbour-world.js`.
+**Reason:** Playtest on the tunnel: HUD and tick showed, canvas stayed teal with specks, Edge “page not responding.” Compiling factory/shop interiors plus trees before the first walk blocked the main thread. PAPER / SIMULATED.
+
 ## D015 — Supplemental merge before save (2026-03-18)
 
 **Decision:** Move `relevant_markets_*.json` save to AFTER supplemental /markets merge.

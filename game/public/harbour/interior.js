@@ -3,6 +3,9 @@ import { dressFactory, isFactoryPlot, undressFactory } from "./factory.js";
 import { dressWarehouse, isWarehousePlot, undressWarehouse } from "./warehouse.js";
 import { dressShop, isShopPlot, undressShop } from "./shop.js";
 import { dressHouseShop, isHouseShopPlot, undressHouseShop } from "./house-shop.js";
+import { canEnter, objectWithKind, wrapHarbourWorld } from "./harbour-world.js";
+
+export { canEnter, objectWithKind, wrapHarbourWorld };
 
 /** Player eye-height on the downstairs floor, metres. */
 export const DOWNSTAIRS_Y = 1.15;
@@ -10,15 +13,6 @@ export const DOWNSTAIRS_Y = 1.15;
 export const UPSTAIRS_Y = 3.85;
 /** Interior room half-extents, metres. */
 export const ROOM = { hw: 3.6, hd: 3.1 };
-
-/**
- * Owned + developed only. NPC land, vacant lots, and unset use are SKIP.
- * @param {{ owner?: string | null, use?: string | null } | null | undefined} plot
- */
-export function canEnter(plot) {
-  if (!plot) return false;
-  return plot.owner === "visitor" && Boolean(plot.use);
-}
 
 const WOOD = 0x5a3a22;
 const WOOD_FLOOR = 0x8a5530;
@@ -792,36 +786,6 @@ export function makeInteriorScene() {
 
   group.visible = false;
   return group;
-}
-
-/**
- * Reparent harbour meshes into a group so enter/exit can hide them
- * without deleting the world. Lights and `keep` stay on the scene.
- */
-export function wrapHarbourWorld(scene, { keep = [] } = {}) {
-  const harbour = new THREE.Group();
-  harbour.name = "harbour";
-  harbour.userData.kind = "harbour";
-  const keepSet = new Set(keep);
-  const moving = [];
-  for (const child of scene.children) {
-    if (keepSet.has(child)) continue;
-    if (child.isLight) continue;
-    if (child.userData?.kind === "interior") continue;
-    moving.push(child);
-  }
-  for (const child of moving) harbour.add(child);
-  scene.add(harbour);
-  return harbour;
-}
-
-export function objectWithKind(obj, kind) {
-  let o = obj;
-  while (o) {
-    if (o.userData?.kind === kind) return o;
-    o = o.parent;
-  }
-  return null;
 }
 
 function clampRoom(x, z) {
