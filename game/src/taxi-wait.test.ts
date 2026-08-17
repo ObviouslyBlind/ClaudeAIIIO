@@ -582,6 +582,50 @@ describe("taxi roof lamp", () => {
     expect(tails.length).toBeGreaterThanOrEqual(1);
   });
 
+  it("puts one tiny kraft PAPER foglamp on the taxi; grille, bumper, and headlamp remain", () => {
+    const mesh = makeTaxiMesh();
+    const foglamps: THREE.Mesh[] = [];
+    const grilles: THREE.Mesh[] = [];
+    const bumpers: THREE.Mesh[] = [];
+    const headlamps: THREE.Mesh[] = [];
+    const wipers: THREE.Mesh[] = [];
+    const visors: THREE.Mesh[] = [];
+    const hubcaps: THREE.Mesh[] = [];
+    const sidelights: THREE.Mesh[] = [];
+    const reflectors: THREE.Mesh[] = [];
+    const tails: THREE.Mesh[] = [];
+    const kraftFoglamp = new Set([0xc4a574, 0xf4ead8]);
+    mesh.traverse((obj) => {
+      const m = obj as THREE.Mesh & { userData: { part?: string; mode?: string } };
+      if (m.userData?.part === "foglamp") foglamps.push(m);
+      if (m.userData?.part === "grille") grilles.push(m);
+      if (m.userData?.part === "bumper") bumpers.push(m);
+      if (m.userData?.part === "headlamp") headlamps.push(m);
+      if (m.userData?.part === "wiper") wipers.push(m);
+      if (m.userData?.part === "visor") visors.push(m);
+      if (m.userData?.part === "hubcap") hubcaps.push(m);
+      if (m.userData?.part === "sidelight") sidelights.push(m);
+      if (m.userData?.part === "reflector") reflectors.push(m);
+      if (m.userData?.part === "tail") tails.push(m);
+    });
+    expect(foglamps.length).toBeGreaterThanOrEqual(1);
+    expect(foglamps.every((f) => f.geometry.type === "BoxGeometry")).toBe(true);
+    expect(foglamps.every((f) => f.userData.mode === "PAPER")).toBe(true);
+    expect(
+      foglamps.every((f) => kraftFoglamp.has((f.material as THREE.MeshLambertMaterial).color.getHex())),
+    ).toBe(true);
+    expect(foglamps.every((f) => f.position.z > 2.0)).toBe(true);
+    expect(grilles.length).toBeGreaterThanOrEqual(1);
+    expect(bumpers.length).toBe(2);
+    expect(headlamps.length).toBeGreaterThanOrEqual(1);
+    expect(wipers.length).toBeGreaterThanOrEqual(2);
+    expect(visors.length).toBeGreaterThanOrEqual(1);
+    expect(hubcaps.length).toBeGreaterThanOrEqual(1);
+    expect(sidelights.length).toBeGreaterThanOrEqual(1);
+    expect(reflectors.length).toBeGreaterThanOrEqual(1);
+    expect(tails.length).toBeGreaterThanOrEqual(1);
+  });
+
   it("puts one tiny kraft PAPER tail lamp on the taxi; reflector, sidelight, and headlamp remain", () => {
     const mesh = makeTaxiMesh();
     const tails: THREE.Mesh[] = [];
