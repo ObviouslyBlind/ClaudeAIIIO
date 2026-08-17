@@ -138,7 +138,11 @@ Pixel: **rust funnel** at `http://localhost:8787/g/funnel74`. Tall rust chimney 
 
 Pixel: **rust funnel** at `http://localhost:8787/g/funnel75`. 40 m rust stick into the cyan sky above the held buoy. No RMB. Address bar must be `/g/funnel75`. Do not restart play while the critic is on the page.
 
-## Next pixel (after funnel75 PASS, immediately, no wait)
+`/g/funnel75` **FAIL FUNNEL**: cream hull and low rust cabin in frame; 40 m stick still unread. **Funnel round stopped.** Code stays; not pixel-held.
+
+Pixel: **rust cargo** at `http://localhost:8787/g/cargo76`. Buoy-class rust cube on the north timber pier, east of the walk. No RMB. Address bar must be `/g/cargo76`. Do not restart play while the critic is on the page.
+
+## Next pixel (after cargo76 PASS, immediately, no wait)
 
 ## Frozen
 

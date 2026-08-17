@@ -336,6 +336,27 @@ function basinFunnel() {
   return g;
 }
 
+/** Buoy-class rust cargo on the north timber. Funnel round stopped: verticals unread. */
+function basinCargo() {
+  const g = new THREE.Group();
+  g.userData.dress = "cargo";
+  g.userData.mode = "PAPER";
+
+  const body = part(8.2, 8.4, 8.2, 0x6e2e22);
+  body.userData.part = "body";
+  g.add(body);
+
+  const band = part(8.6, 1.6, 8.6, 0xc4b496, false);
+  band.position.y = 1.2;
+  g.add(band);
+
+  const cap = part(6.8, 0.8, 6.8, 0x8a6238, false);
+  cap.position.y = 4.4;
+  g.add(cap);
+
+  return g;
+}
+
 /** Crate with a canvas tarp lashed over it. */
 function canvasCrate() {
   const g = new THREE.Group();
@@ -551,6 +572,12 @@ export function makeQuay(spec, helpers) {
     const funnel = basinFunnel();
     funnel.position.set(x, 32.0, z + toward * 116);
     root.add(funnel);
+
+    /** /g/funnel75 FAIL FUNNEL: 40 m stick still unread from spawn. Round stopped.
+     *  Buoy-class rust cube on the timber, east of the walk, in the pier frame. */
+    const cargo = basinCargo();
+    cargo.position.set(x + 6.4, deckY + 4.2, pierZ + toward * 26);
+    root.add(cargo);
 
     // Extra kraft stack on the north timber, west of the walk, short of the brow.
     const stackN = crateStack();
