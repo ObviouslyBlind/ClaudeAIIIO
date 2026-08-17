@@ -1287,6 +1287,77 @@ function plantNorthPortNeedle(root) {
   root.add(needle);
 }
 
+function markAcorn(mesh) {
+  mesh.userData.part = "acorn";
+  mesh.userData.dress = "acorn";
+  mesh.userData.mode = "PAPER";
+  mesh.userData.provenance = "PAPER";
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+}
+
+/**
+ * One tiny kraft PAPER acorn (one box) on a north-port palm trunk —
+ * not instead of the needle, lichen, moss, knot, bark, twig, vine,
+ * husk, frond, leaf, coconut, bird, nest, or egg. Hexes already in
+ * this file: trunk kraft. Reuses the nest twig box so geometry count
+ * stays put. Unique mesh — one box — so the phone mesh budget stays
+ * tiny. Trunks, leaves, coconuts, bird, nest, egg, leaf, frond, husk,
+ * vine, twig, bark, knot, moss, lichen, and needle stay put.
+ */
+function plantNorthPortAcorn(root) {
+  const placed = root.userData.placed || [];
+  const sites = placed.filter((p) => p.island === "north" && p.dress === "north-port-palm");
+  if (!sites.length) return;
+
+  let nest = null;
+  root.traverse((obj) => {
+    if (!nest && obj.userData.kind === "nest") nest = obj;
+  });
+  if (!nest) return;
+
+  let geo = null;
+  nest.traverse((obj) => {
+    if (geo) return;
+    if (obj.isMesh && obj.geometry && obj.userData.part === "nest") geo = obj.geometry;
+  });
+  if (!geo) return;
+
+  const nestPos = new THREE.Vector3();
+  nest.getWorldPosition(nestPos);
+  let p = sites[0];
+  let best = Infinity;
+  for (const s of sites) {
+    const d = Math.hypot(s.x - nestPos.x, s.z - nestPos.z);
+    if (d < best) {
+      best = d;
+      p = s;
+    }
+  }
+
+  const mat = new THREE.MeshLambertMaterial({ color: TRUNK });
+  const acorn = new THREE.Group();
+  acorn.name = "acorn";
+  acorn.userData.kind = "acorn";
+  acorn.userData.part = "acorn";
+  acorn.userData.dress = "acorn";
+  acorn.userData.mode = "PAPER";
+  acorn.userData.provenance = "PAPER";
+  // Sit on the palm trunk, offset from needle, lichen, moss, knot, and bark.
+  const yaw = 3.25;
+  const rad = 0.22;
+  acorn.position.set(p.x + Math.cos(yaw) * rad, p.y + 2.56, p.z + Math.sin(yaw) * rad);
+  acorn.rotation.set(0.22, yaw, -0.3);
+
+  const box = new THREE.Mesh(geo, mat);
+  box.name = "acorn-box";
+  markAcorn(box);
+  box.scale.set(0.22, 0.48, 0.26);
+
+  acorn.add(box);
+  root.add(acorn);
+}
+
 /**
  * Low-poly PAPER trees on hills, inland slopes, and behind street lots.
  * Palms stay on the quay (makePalms). helpers: { scene, specOf, heightAt }.
@@ -1319,6 +1390,7 @@ export function makeTrees(map, helpers) {
   plantNorthPortMoss(root);
   plantNorthPortLichen(root);
   plantNorthPortNeedle(root);
+  plantNorthPortAcorn(root);
   scene.add(root);
   return root;
 }
