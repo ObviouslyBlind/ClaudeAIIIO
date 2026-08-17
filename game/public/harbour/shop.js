@@ -9,7 +9,7 @@ import * as THREE from "three";
  * kraft coin, a tiny kraft blotter, a tiny kraft pencil, a tiny kraft
  * ink pad, a tiny kraft ribbon, a tiny kraft twine coil, a tiny kraft wax
  * seal, a tiny kraft paper weight, a tiny kraft sponge, a tiny kraft
- * brush, a short wall shelf
+ * brush, a tiny kraft mop, a short wall shelf
  * with two kraft boxes,
  * plus two shelf bays
  * — not the house living room and not the warehouse. No WASD.
@@ -540,6 +540,28 @@ function kraftBrush(x, y, z) {
 }
 
 /**
+ * Tiny kraft PAPER mop on the counter: wood handle + cream head.
+ * Paper boxes only. Beside the brush — not on the sponge, weight, seal,
+ * twine, ribbon, inkpad, pencil, blotter, coin, or receipt. Existing hexes only.
+ */
+function kraftMop(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "shop-mop";
+  g.userData.kind = "shop-mop";
+  g.userData.mode = "PAPER";
+  g.userData.part = "mop";
+  g.position.set(x, y, z);
+  const handle = paperBox(0.05, 0.01, 0.01, WOOD, "shop-mop");
+  handle.userData.part = "mop";
+  g.add(handle);
+  const head = paperBox(0.02, 0.016, 0.022, CREAM, "shop-mop");
+  head.userData.part = "mop";
+  head.position.x = 0.033;
+  g.add(head);
+  return g;
+}
+
+/**
  * Small standing kraft PAPER shopping bag on the counter: cream body + two
  * thin strap handles. Paper boxes only. Beside the parcel / till, not on them.
  */
@@ -649,6 +671,8 @@ function makeCounter(x, z) {
   g.add(kraftSponge(1.48, topY + 0.054, -0.42));
   // Tiny kraft brush beside the sponge — wood handle + cream head.
   g.add(kraftBrush(1.62, topY + 0.054, -0.28));
+  // Tiny kraft mop beside the brush — wood handle + cream head.
+  g.add(kraftMop(1.72, topY + 0.054, -0.14));
   // Two small kraft / terracotta jars beside the till. Original TIN + CORAL.
   const kraftJar = paperBox(0.12, 0.16, 0.12, TIN, "shop-goods");
   kraftJar.position.set(0.48, topY + 0.13, -0.04);
