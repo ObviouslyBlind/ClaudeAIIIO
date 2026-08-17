@@ -139,6 +139,8 @@ let placingUse = null;
 let catalogPicker = null;
 let staffHud = null;
 let parcelMap = null;
+let propsMod = null;
+const propsBuilt = new Set();
 
 const player = new THREE.Mesh(
   new THREE.CapsuleGeometry(0.55, 1.15, 4, 8),
@@ -680,6 +682,8 @@ async function ensureIsland(id) {
   await makeParcels((p) => starterLotOn(p, id));
   await idle(48);
   if (parcelMap) ground.push(...parcelMap.buildIsland(id));
+  await idle(48);
+  buildProps(id);
 }
 
 function spawnAt(id) {
@@ -965,7 +969,7 @@ function tick(dt) {
     const dx = walkTarget.x - player.position.x;
     const dz = walkTarget.z - player.position.z;
     const dist = Math.hypot(dx, dz);
-    const step = 18 * dt;
+    const step = 22 * dt;
     if (dist <= step) {
       player.position.copy(walkTarget);
       walking = false;
@@ -1148,6 +1152,24 @@ async function loadTrickleDressing() {
     if (!parcelMapped(p)) continue;
     useFor(p);
   }
+
+  // Small props: instanced bushes/rocks/barrels/benches, four draw calls.
+  await quietStep();
+  propsMod = await import("./props.js");
+  for (const id of builtIslands) buildProps(id);
+}
+
+function buildProps(id) {
+  if (!propsMod || !map || propsBuilt.has(id)) return;
+  propsBuilt.add(id);
+  propsMod.mountProps({
+    worldAdd,
+    spec: specOf(id),
+    heightAt,
+    plots: map.plots,
+    roads: map.roads,
+    stops: map.stops || [],
+  });
 }
 
 async function boot() {

@@ -1,5 +1,4 @@
 import * as THREE from "three";
-import { projectOnPolyline } from "./taxi.js";
 
 const CAR_COUNT = 6;
 const SPEED = 9;
@@ -178,43 +177,68 @@ function makeCar(color) {
  */
 export const COLORS = [0xc45c3a, 0x4a6e8a, 0x6a8f44, 0xe8d7b8, 0x2a7a72, 0x6e2e22];
 
+/** Metres. Opposing cars keep their own side of the carriageway. */
+export const LANE_OFFSET_M = 1.7;
+
 /**
- * PAPER NPC cars that loop the paved spline. They never leave `kind === "paved"`.
- * Start packed near the port so spawn actually sees them.
+ * PAPER NPC cars that drive the paved network. Each car owns a road, drives
+ * it at its own speed, keeps a lane, and turns around at the road end.
+ * No player-following: earlier code teleported cars to cluster ahead of the
+ * player every frame, which read as jittering toy cars stalking you.
  */
-export function createTraffic({ scene, getMap, specOf, heightAt, getPlayer, getIslandId }) {
+export function createTraffic({ scene, getMap, specOf, heightAt }) {
   const cars = [];
 
-  function paved(islandId) {
+  function pavedRoads(islandId) {
     const map = getMap();
-    if (!map) return null;
-    return map.roads.find((r) => r.kind === "paved" && r.island === islandId) || null;
+    if (!map) return [];
+    return map.roads.filter(
+      (r) => r.kind === "paved" && r.island === islandId && r.points && r.points.length >= 2,
+    );
+  }
+
+  function roadOf(car) {
+    const roads = pavedRoads(car.islandId);
+    return roads[Math.min(car.roadIdx, roads.length - 1)] || null;
   }
 
   function place(car) {
-    const road = paved(car.islandId);
+    const road = roadOf(car);
     if (!road) return;
     const p = pointAlongPolyline(road.points, car.along);
     const spec = specOf(car.islandId);
-    const y = heightAt(spec, p.x, p.z);
-    car.mesh.position.set(p.x, y + Y_LIFT, p.z);
-    car.mesh.rotation.y = p.yaw;
+    // Lane: right-hand offset relative to travel direction.
+    const rx = Math.cos(p.yaw) * LANE_OFFSET_M * car.dir;
+    const rz = -Math.sin(p.yaw) * LANE_OFFSET_M * car.dir;
+    const x = p.x + rx;
+    const z = p.z + rz;
+    const y = heightAt(spec, x, z);
+    car.mesh.position.set(x, y + Y_LIFT, z);
+    car.mesh.rotation.y = car.dir > 0 ? p.yaw : p.yaw + Math.PI;
   }
 
   function spawnIsland(islandId) {
-    const road = paved(islandId);
-    if (!road || road.points.length < 2) return;
-    const span = Math.min(SPAWN_SPAN_M, polylineLength(road.points) * 0.25);
+    const roads = pavedRoads(islandId);
+    if (!roads.length) return;
+    const trunk = roads[0];
+    const span = Math.min(SPAWN_SPAN_M, polylineLength(trunk.points) * 0.25);
     for (let i = 0; i < CAR_COUNT; i++) {
+      // Two cars take side streets; the rest work the trunk near the port.
+      const roadIdx = i >= CAR_COUNT - 2 && roads.length > 1 ? 1 + (i % (roads.length - 1)) : 0;
+      const road = roads[roadIdx];
+      const total = polylineLength(road.points);
       const mesh = makeCar(COLORS[i % COLORS.length]);
-      const along = 40 + (i / Math.max(1, CAR_COUNT - 1)) * span;
-      const dir = i % 2 === 0 ? 1 : -1;
+      const along =
+        roadIdx === 0
+          ? 40 + (i / Math.max(1, CAR_COUNT - 1)) * span
+          : Math.min(total * 0.4, 30 + i * 12);
       const car = {
         mesh,
         islandId,
+        roadIdx,
         along,
-        dir,
-        speed: SPEED * (0.85 + (i % 3) * 0.1),
+        dir: i % 2 === 0 ? 1 : -1,
+        speed: SPEED * (0.8 + (i % 4) * 0.12),
         slot: i,
         phase: 0,
       };
@@ -228,17 +252,18 @@ export function createTraffic({ scene, getMap, specOf, heightAt, getPlayer, getI
   spawnIsland("south");
 
   function tick(dt) {
-    const player = getPlayer ? getPlayer() : null;
-    const here = getIslandId ? getIslandId() : null;
     for (const car of cars) {
-      const road = paved(car.islandId);
+      const road = roadOf(car);
       if (!road) continue;
-      if (player && here === car.islandId) {
-        const hit = projectOnPolyline(road.points, player.position.x, player.position.z);
-        car.phase += car.speed * dt;
-        car.along = hit.along + 28 + car.slot * 18 + (car.phase % 12);
-      } else {
-        car.along += car.speed * car.dir * dt;
+      const total = polylineLength(road.points);
+      car.along += car.speed * car.dir * dt;
+      // Turn around near the ends instead of wrap-teleporting to the start.
+      if (car.along >= total - 4) {
+        car.along = total - 4;
+        car.dir = -1;
+      } else if (car.along <= 4) {
+        car.along = 4;
+        car.dir = 1;
       }
       place(car);
     }
