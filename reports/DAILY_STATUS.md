@@ -2,7 +2,7 @@
 
 ## 2026-08-17 (latest)
 
-**Current status:** D043 — trickle carries only cars + moving ferry; quay clutter/foam off until off-main-thread. D042 killed the observer loop. Next `/g/south102`. PAPER / SIMULATED. Politics frozen.
+**Current status:** `/g/south102` PASS SOUTH — freeze gone (D042 observer loop + D043 slim trickle). Capstone `/g/loop103` full-loop critic. PAPER / SIMULATED. Politics frozen.
 
 ## 2026-08-16
 
