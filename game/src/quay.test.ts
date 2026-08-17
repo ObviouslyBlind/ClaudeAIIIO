@@ -637,11 +637,12 @@ describe("quay harbour dressing", () => {
       if (mat?.color) hexes.push(mat.color.getHex());
     });
     expect(hexes).toContain(0x2a7a72);
-    expect(hexes).toContain(0xc4b496);
+    expect(hexes.every((c) => c === 0x2a7a72)).toBe(true);
     const bg = (body as THREE.Mesh).geometry as THREE.BoxGeometry;
-    expect(bg.parameters.height).toBeGreaterThanOrEqual(4);
-    expect(teal!.position.x).toBeGreaterThan(2);
-    expect(teal!.position.y).toBeGreaterThan(2);
+    expect(bg.parameters.height).toBeGreaterThanOrEqual(8);
+    expect(teal!.position.x).toBeGreaterThan(3);
+    expect(teal!.position.x).toBeLessThan(5.15);
+    expect(teal!.position.y).toBeGreaterThan(8);
     expect(teal!.position.z).toBeGreaterThan(-6882);
     expect(teal!.position.z).toBeLessThan(-6868);
   });
