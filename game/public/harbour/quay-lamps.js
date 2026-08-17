@@ -17,18 +17,18 @@ const GLOW = 0xe8a45a;
 
 /**
  * Local pier spots. `side` is east of the port; `along` is toward the water
- * from pier centre (`pierZ = port.z + toward * 38`). Stay on the 11 m timber
- * deck (`|along| < 43`).
+ * from pier centre (`pierZ = port.z + toward * 28`). Stay on the 7 m timber
+ * deck (`|along| < 16`).
  *
  * Playtest scale (D036): a person is ~2 m. Lamp posts are street-lamp
  * tall (~3.2 m), not the 32 m critic towers that wrecked inland spawn.
  */
 export const QUAY_LAMP_SPOTS = Object.freeze([
-  Object.freeze({ side: -3.2, along: -32 }),
-  Object.freeze({ side: 3.2, along: -18 }),
-  Object.freeze({ side: -3.2, along: 36 }),
-  Object.freeze({ side: 3.2, along: 40 }),
-  Object.freeze({ side: 0, along: 42 }),
+  Object.freeze({ side: -2.8, along: -12 }),
+  Object.freeze({ side: 2.8, along: -4 }),
+  Object.freeze({ side: -2.8, along: 4 }),
+  Object.freeze({ side: 2.8, along: 10 }),
+  Object.freeze({ side: 0, along: 14 }),
 ]);
 
 const glassMat = new THREE.MeshLambertMaterial({
@@ -118,7 +118,7 @@ export function makeQuayLamps(spec, helpers) {
   const toward = spec.id === "north" ? 1 : -1;
   const { x, z } = spec.port;
   const y = helpers && helpers.heightAt ? helpers.heightAt(spec, x, z) : 1.12;
-  const pierZ = z + toward * 38;
+  const pierZ = z + toward * 28;
   const deckY = y + 0.5;
 
   const g = new THREE.Group();

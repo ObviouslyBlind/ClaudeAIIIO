@@ -21,9 +21,9 @@ const INK = "#3d2a1c";
 const PAPER_FACE = "#efe4c8";
 const PAPER_EDGE = "#8a6238";
 
-/** On the port pad (across < 16, along < 90) so heightAt is 1.12, not water. */
-const LOCAL_X = 12;
-const ALONG = 80;
+/** On the port apron (across < 22, along < 14) so heightAt is land, not water. */
+const LOCAL_X = 10;
+const ALONG = 6;
 
 const POST_W = 0.16;
 const POST_H = 3.2;

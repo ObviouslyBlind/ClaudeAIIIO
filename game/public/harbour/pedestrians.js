@@ -42,13 +42,14 @@ export const LAND_MIN_M = 0.4;
 /** Slow stroll, metres per second. */
 export const WALK_SPEED_M_S = 0.85;
 
-/** Seaward of the north port, short of the ferry. `/g/peds42` FAIL PEDS:
- * along -18/-6 sat on the visitor; kraft aprons facing the camera read as crates. */
-export const SPAWN_QUAY_ALONG = Object.freeze([26, 40, 54, 68]);
+/** On the north port apron (land). D037 dredged the old 90 m pad, so along
+ * 26–68 is now basin water. Stay seaward of the visitor (along -8) and
+ * short of the basin (along 14). */
+export const SPAWN_QUAY_ALONG = Object.freeze([0, 4, 8, 12]);
 /** `/g/peds43` FAIL PEDS: 1.8 m shirts were specks beside the crate path. */
 export const SPAWN_QUAY_SCALE = 4.8;
-const QUAY_ALONG_MIN = 16;
-const QUAY_ALONG_MAX = 88;
+const QUAY_ALONG_MIN = -10;
+const QUAY_ALONG_MAX = 13;
 const VERGE_ALONG_MIN = 10;
 const VERGE_ALONG_MAX = 180;
 /** Shirt colours that read on kraft timber from the seaward spawn look. Skip cream seed 0. */

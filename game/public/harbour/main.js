@@ -184,7 +184,9 @@ function heightAt(spec, x, z) {
   const toward = spec.id === "north" ? 1 : -1;
   const along = (z - spec.port.z) * toward;
   const across = Math.abs(x - spec.port.x);
-  if (across < 16 && along > -24 && along < 90) return 1.12;
+  // Apron only. A 90 m seaward pad put the timber pier on sand.
+  if (across < 22 && along > -16 && along < 14) return 1.12;
+  if (across < 8 && along >= 14 && along < 50) return -8;
   if (r > edge) return -8;
   const t = r / edge;
   const portD = Math.hypot(x - spec.port.x, z - spec.port.z);
@@ -407,17 +409,19 @@ function makePort(spec) {
   const toward = spec.id === "north" ? 1 : -1;
   const { x, z } = spec.port;
   const y = heightAt(spec, x, z);
-  const pierZ = z + toward * 38;
-  const pier = box(11, 0.45, 86, 0x8a6238, x, y + 0.28, pierZ);
+  const pierLen = 32;
+  const pierZ = z + toward * 28;
+  const pier = box(7, 0.4, pierLen, 0x8a6238, x, y + 0.35, pierZ);
   pier.userData.kind = "port";
-  for (let i = -5; i <= 5; i++) {
-    const piling = box(0.45, 3.4, 0.45, 0x5a3a22, x - 4.6, y - 0.9, pierZ + i * 7.4, false);
+  for (let i = 0; i < 6; i++) {
+    const pz = pierZ + toward * (-14 + i * 5.6);
+    const piling = box(0.35, 2.8, 0.35, 0x5a3a22, x - 3.15, y - 0.85, pz, false);
     piling.userData.kind = "port";
-    const pilingB = box(0.45, 3.4, 0.45, 0x5a3a22, x + 4.6, y - 0.9, pierZ + i * 7.4, false);
+    const pilingB = box(0.35, 2.8, 0.35, 0x5a3a22, x + 3.15, y - 0.85, pz, false);
     pilingB.userData.kind = "port";
   }
   for (let i = -2; i <= 2; i++) {
-    box(0.4, 1.05, 0.4, 0x3d2a1c, x + i * 1.8, y + 0.9, z + toward * 78, false);
+    box(0.35, 0.85, 0.35, 0x3d2a1c, x + i * 1.2, y + 0.95, z + toward * 42, false);
   }
   const wx = x + 18;
   const wz = z - toward * 12;
@@ -980,6 +984,25 @@ async function ensureCatalog() {
   }
 }
 
+async function ensureTaxi() {
+  if (taxi) return taxi;
+  const taxiMod = await import("./taxi.js");
+  taxi = taxiMod.createTaxi({
+    scene: worldScene(),
+    player,
+    getMap: () => map,
+    specOf,
+    heightAt,
+    getIslandId: () => islandId,
+    setWalking: (v) => {
+      walking = v;
+    },
+    setStatus,
+    button: btnTaxi,
+  });
+  return taxi;
+}
+
 async function ensureInterior() {
   if (interior) return interior;
   if (!harbourGroup) {
@@ -1096,6 +1119,8 @@ async function boot() {
   harbourGroup = wrapHarbourWorld(scene, { keep: [player, sun.target] });
   await makeParcels(nearNorthSpawn);
   setStatus("Tap a piece of land. Lease it, then develop it.");
+  await idle(80);
+  await ensureTaxi();
   scheduleDressing(DRESSING_FALLBACK_MS);
 }
 

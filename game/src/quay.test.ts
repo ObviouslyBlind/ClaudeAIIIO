@@ -84,13 +84,13 @@ describe("quay harbour dressing", () => {
     for (const spot of QUAY_DECK_SPOTS) {
       expect(Math.abs(spot.x)).toBeGreaterThanOrEqual(2.2);
       expect(Math.abs(spot.x)).toBeLessThan(5.5);
-      expect(Math.abs(spot.along)).toBeLessThan(36);
+      expect(Math.abs(spot.along)).toBeLessThan(16);
     }
 
     for (const id of ["north", "south"] as const) {
       const spec = ISLANDS[id];
       const toward = id === "north" ? 1 : -1;
-      const pierZ = spec.port.z + toward * 38;
+      const pierZ = spec.port.z + toward * 28;
       const added: THREE.Object3D[] = [];
       const scene = { add(obj: THREE.Object3D) { added.push(obj); } };
       const root = makeQuay(spec, { scene, heightAt });
@@ -112,15 +112,15 @@ describe("quay harbour dressing", () => {
     expect(FENDER_SPOTS.length).toBeGreaterThanOrEqual(4);
     for (const spot of FENDER_SPOTS) {
       expect(Math.abs(spot.x)).toBeLessThan(5.5);
-      expect(spot.along).toBeGreaterThan(42);
-      expect(spot.along).toBeLessThan(44);
+      expect(spot.along).toBeGreaterThan(15);
+      expect(spot.along).toBeLessThan(17);
     }
 
     const knownGrey = new Set([0x2a2d32, 0x3a3d44]);
     for (const id of ["north", "south"] as const) {
       const spec = ISLANDS[id];
       const toward = id === "north" ? 1 : -1;
-      const pierZ = spec.port.z + toward * 38;
+      const pierZ = spec.port.z + toward * 28;
       const added: THREE.Object3D[] = [];
       const scene = { add(obj: THREE.Object3D) { added.push(obj); } };
       const root = makeQuay(spec, { scene, heightAt });
@@ -175,8 +175,8 @@ describe("quay harbour dressing", () => {
       }
 
       const dinghySpots = [
-        { x: spec.port.x + 3.2, y: 1.55, z: spec.port.z + toward * 102 },
-        { x: spec.port.x - 3.8, y: 1.48, z: spec.port.z + toward * 97 },
+        { x: spec.port.x + 5.2, y: 1.55, z: spec.port.z + toward * 40 },
+        { x: spec.port.x - 5.4, y: 1.48, z: spec.port.z + toward * 36 },
       ];
       for (const spot of dinghySpots) {
         const boat = root.children.find((c) => {

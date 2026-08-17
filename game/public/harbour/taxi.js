@@ -612,8 +612,10 @@ export function createTaxi({
     const hit = closestPaved(player.position.x, player.position.z, island);
     if (!hit) return false;
     road = hit.road;
-    const start = road.points[0];
-    place(start.x, start.z, Math.atan2(road.points[1].x - start.x, road.points[1].z - start.z));
+    const { proj } = hit;
+    const a = road.points[proj.i];
+    const b = road.points[Math.min(proj.i + 1, road.points.length - 1)];
+    place(proj.x, proj.z, Math.atan2(b.x - a.x, b.z - a.z));
     mesh.visible = true;
     return true;
   }

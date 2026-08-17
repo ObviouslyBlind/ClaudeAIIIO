@@ -85,15 +85,15 @@ describe("quay paper lamps", () => {
     expect(QUAY_LAMP_SPOTS.length).toBeLessThanOrEqual(8);
     const alongs = QUAY_LAMP_SPOTS.map((s) => s.along);
     expect(alongs.filter((a) => a < 0).length).toBeGreaterThan(0);
-    expect(alongs.filter((a) => a > 35).length).toBeGreaterThan(0);
+    expect(alongs.filter((a) => a > 8).length).toBeGreaterThan(0);
     for (const along of alongs) {
-      expect(Math.abs(along)).toBeLessThan(43);
+      expect(Math.abs(along)).toBeLessThan(16);
     }
 
     for (const id of ["north", "south"] as const) {
       const spec = ISLANDS[id];
       const toward = id === "north" ? 1 : -1;
-      const pierZ = spec.port.z + toward * 38;
+      const pierZ = spec.port.z + toward * 28;
       const y = heightAt(spec, spec.port.x, spec.port.z);
       const group = makeQuayLamps(spec, { heightAt });
       expect(group).not.toBeNull();
@@ -104,8 +104,8 @@ describe("quay paper lamps", () => {
 
       for (const lamp of lamps) {
         expect(Math.abs(lamp.position.x - spec.port.x)).toBeLessThan(5.5);
-        expect(Math.abs(lamp.position.z - pierZ)).toBeLessThan(43);
-        expect(Math.abs(lamp.position.z - pierZ)).toBeGreaterThan(6);
+        expect(Math.abs(lamp.position.z - pierZ)).toBeLessThan(16);
+        expect(Math.abs(lamp.position.z - pierZ)).toBeGreaterThan(3);
         expect(lamp.position.y).toBeCloseTo(y + 0.5, 5);
         const basesOnLamp = collectBase(lamp);
         expect(basesOnLamp.length).toBe(1);

@@ -26,6 +26,7 @@ describe("harbour land board", () => {
     expect(s.port.z - n.port.z).toBeGreaterThan(12000);
     expect(s.cz - n.cz).toBeGreaterThan(16000);
     expect(heightAt(n, n.port.x, n.port.z)).toBeGreaterThan(0.5);
+    expect(heightAt(n, n.port.x, n.port.z + 28)).toBeLessThan(0.25);
     expect(heightAt(s, s.port.x, s.port.z)).toBeGreaterThan(0.5);
     expect(heightAt(n, 0, 0)).toBeLessThan(0);
   });

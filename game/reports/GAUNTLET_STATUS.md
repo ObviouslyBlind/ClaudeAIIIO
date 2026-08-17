@@ -16,7 +16,7 @@ Loop is **live** on playtest bugs (operator: “so many bugs, use the gauntlet�
 
 `/g/scale93` **PASS SCALE**: person-scale shed vs visitor, no 32 m towers, inland click walked, no hang for 8s.
 
-Current piece: **`/g/lease94` LEASE** — walk onto a vacant north lot, click Lease, cash drops and the plot reads yours. No RMB. No House/Enter. Do not close the sheet.
+Current piece: **`/g/play95` PLAY** — yellow taxi at north spawn, Taxi button works, timber pier over water with pilings (not an 86 m sand slab). No RMB.
 
 One **pixel critic** at a time. Unique `/g/…` path. No RMB. Do not restart play while a critic is on the page.
 
