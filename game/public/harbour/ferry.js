@@ -450,6 +450,15 @@ export function makeFerry() {
   plug.userData.mode = "PAPER";
   plug.position.set(-18.0, 1.86, 0);
   g.add(plug);
+  // Tiny kraft PAPER stopper on the aft cream deck. Existing DECK hex,
+  // one box, not grey. Clear of plug/coaming/wedge/grommet/hatch/scupper/
+  // hawser/bucket/oar/cleat/rail/fender/bollard/lantern/handle/smoke/horn.
+  const stopper = part(0.08, 0.05, 0.08, DECK, false);
+  stopper.name = "stopper";
+  stopper.userData.part = "stopper";
+  stopper.userData.mode = "PAPER";
+  stopper.position.set(-18.4, 1.86, 1.6);
+  g.add(stopper);
 
   const cabin = part(16.5, 3.35, 7.6, CABIN);
   cabin.position.set(-2.4, 3.52, 0);
