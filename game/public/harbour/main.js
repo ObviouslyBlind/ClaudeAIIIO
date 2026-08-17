@@ -150,6 +150,8 @@ scene.add(player);
 const plotMeshes = new Map();
 const useMeshes = new Map();
 const ground = [];
+/** Pier / shed / dock boxes so tapping the port can open the ferry. */
+const ports = [];
 let ferryMesh = null;
 let tickFerry = null;
 let meshForUse = null;
@@ -433,6 +435,7 @@ function makePort(spec) {
   const pierZ = z + toward * 28;
   const pier = box(7, 0.4, pierLen, 0x8a6238, x, y + 0.35, pierZ);
   pier.userData.kind = "port";
+  ports.push(pier);
   for (let i = 0; i < 6; i++) {
     const pz = pierZ + toward * (-14 + i * 5.6);
     const piling = box(0.35, 2.8, 0.35, 0x5a3a22, x - 3.15, y - 0.85, pz, false);
@@ -447,6 +450,7 @@ function makePort(spec) {
   const wz = z - toward * 12;
   const shed = box(8, 3.4, 6, 0xd9cbb3, wx, y + 1.85, wz);
   shed.userData.kind = "port";
+  ports.push(shed);
   const roofA = box(8.6, 0.14, 3.4, 0x6e2e22, wx, y + 3.75, wz - 1.2, false);
   roofA.rotation.x = 0.4;
   const roofB = box(8.6, 0.14, 3.4, 0x6e2e22, wx, y + 3.75, wz + 1.2, false);
@@ -454,6 +458,7 @@ function makePort(spec) {
   box(8.8, 0.12, 0.22, 0x6e2e22, wx, y + 4.45, wz, false);
   const dock = box(4.2, 0.5, 3.2, 0x9a8a72, wx + toward * 0.2, y + 0.45, wz + toward * 4.2, false);
   dock.userData.kind = "port";
+  ports.push(dock);
   box(2.4, 2.4, 0.12, 0x3d2a1c, wx, y + 1.45, wz + toward * 3.1, false);
   box(0.9, 0.7, 0.08, 0x8ec4d4, wx - 2.8, y + 2.55, wz + toward * 3.08, false);
   box(0.9, 0.7, 0.08, 0x8ec4d4, wx + 2.8, y + 2.55, wz + toward * 3.08, false);
@@ -603,19 +608,23 @@ export const SPAWN_PARCEL_M = 420;
 const STARTER_SNAP_M = 40;
 const STARTER_CASH = 1000;
 
-function nearNorthSpawn(p) {
-  const spec = specOf("north");
+function starterLotOn(p, islandId) {
+  const spec = specOf(islandId);
   const cash = Math.max(
     STARTER_CASH,
     map.visitor && Number.isFinite(map.visitor.cash) ? map.visitor.cash : STARTER_CASH,
   );
   const need = map.developCost ?? 40;
-  if (p.island !== "north") return false;
+  if (p.island !== islandId) return false;
   if (Math.hypot(p.x - spec.port.x, p.z - spec.port.z) >= SPAWN_PARCEL_M) return false;
   if (p.owner === "visitor") return true;
   if (p.owner) return false;
   if (p.band !== "street") return false;
   return p.price + need <= cash;
+}
+
+function nearNorthSpawn(p) {
+  return starterLotOn(p, "north");
 }
 
 async function makeParcels(filter) {
@@ -639,7 +648,22 @@ function snapCamera() {
   playCam.snap();
 }
 
+/** Islands whose terrain / port / starter lots are meshed. Boot marks north. */
+const builtIslands = new Set();
+
+/** Ferry landfall was a void: south never got terrain, a port, or lots. */
+function ensureIsland(id) {
+  if (builtIslands.has(id) || !map) return;
+  builtIslands.add(id);
+  const spec = specOf(id);
+  makeTerrain(spec);
+  makePort(spec);
+  makePalms(spec);
+  void makeParcels((p) => starterLotOn(p, id));
+}
+
 function spawnAt(id) {
+  ensureIsland(id);
   islandId = id;
   const spec = specOf(id);
   const x = spec.port.x;
@@ -720,6 +744,7 @@ function leaveInterior() {
 
 function clickTargets() {
   const objs = ground.filter(Boolean);
+  for (const p of ports) objs.push(p);
   for (const rec of plotMeshes.values()) {
     objs.push(rec.line);
     if (rec.fill) objs.push(rec.fill);
@@ -803,6 +828,12 @@ function onPointer(ev) {
 function applySnapshot(snapshot) {
   if (!snapshot || !snapshot.plots) return;
   map = snapshot;
+  // Restore can hand back leases/buildings on lots that were never meshed.
+  for (const p of map.plots) {
+    if (p.owner !== "visitor" && !p.use) continue;
+    if (!plotMeshes.has(p.id)) addParcel(p);
+    else if (p.use) useFor(p);
+  }
   refreshHud();
 }
 
@@ -1139,6 +1170,8 @@ async function boot() {
     return;
   }
   makeWater(scene);
+  // North builds in stages below for a fast first frame; keep ensureIsland out.
+  builtIslands.add("north");
   spawnAt("north");
   startLoop();
   setStatus("North port · PAPER");
