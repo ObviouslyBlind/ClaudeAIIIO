@@ -18,6 +18,7 @@ Open **`http://localhost:8787/`** to playtest. Spawn looks inland along the tarm
 - Left click/tap = walk or use. RMB-hold = orbit. No WASD. No wallet.
 - Critics: unique `/g/` path. Do not ask computerUse to RMB-orbit. Cube rounds are paused while playtest is the bar.
 - Status: `game/reports/GAUNTLET_STATUS.md`.
+- New chat: paste `game/reports/HANDOVER.md` (this thread is bloated).
 
 ## Live dashboard (public URL)
 

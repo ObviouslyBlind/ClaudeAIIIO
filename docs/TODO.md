@@ -2,7 +2,7 @@
 
 ## Two Harbors (current gauntlet — base harbour)
 
-Politics frozen. See `game/reports/GAUNTLET_STATUS.md`.
+Politics frozen. See `game/reports/GAUNTLET_STATUS.md`. New chat: `game/reports/HANDOVER.md`.
 
 - [x] Lease → House → Enter → Exit (pixel `/?g=int22`)
 - [x] PAPER econ HUD strip (code)
