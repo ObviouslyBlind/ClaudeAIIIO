@@ -22,7 +22,9 @@ Loop is **live** on playtest bugs (operator: “so many bugs, use the gauntlet�
 
 `/g/house96` **FAIL HOUSE**: inland tap selected a 6,522 m² field at $1,121 with $970 cash; Lease stayed disabled. D038: spawn only cheap street lots.
 
-Current piece: **`/g/house97` HOUSE** — inland street lot → Lease → Develop House → Enter → Exit. No RMB.
+`/g/house97` **PASS HOUSE**: street land $242, Lease $1,000 → $758, House, Enter interior, Exit. No hang.
+
+Current piece: **`/g/ferry98` FERRY** — Ferry button at north port, kraft ticket $15, confirm to South. No RMB.
 
 One **pixel critic** at a time. Unique `/g/…` path. No RMB. Do not restart play while a critic is on the page.
 

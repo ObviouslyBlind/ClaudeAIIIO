@@ -48,7 +48,8 @@ Politics frozen. See `game/reports/GAUNTLET_STATUS.md`. New chat: `game/reports/
 - [x] `/g/lease94` PASS LEASE — inland street lot, cash $1,000 → $745, no hang.
 - [x] `/g/play95` PASS PLAY — yellow taxi at spawn, Taxi button, pier over water.
 - [x] `/g/house96` FAIL HOUSE — first tap was a $1,121 field (D038 cheap street lots).
-- [ ] `/g/house97` HOUSE — lease inland street lot, Develop House, Enter, Exit.
+- [x] `/g/house97` PASS HOUSE — street $242, House, Enter, Exit.
+- [ ] `/g/ferry98` FERRY — $15 kraft ticket north → south.
 - [x] Playtest: taxi missing + 86 m pier on sand — taxi at boot, pier over water (D037).
 - [x] Pixel green basin crate (`/g/green86`–`87` FAIL GREEN — round stopped, not pixel-held)
 
