@@ -8,7 +8,7 @@ import * as THREE from "three";
  * receipt slip, a small kraft receipt, a small kraft ink stamp, a tiny
  * kraft coin, a tiny kraft blotter, a tiny kraft pencil, a tiny kraft
  * ink pad, a tiny kraft ribbon, a tiny kraft twine coil, a tiny kraft wax
- * seal, a short wall shelf with two kraft boxes,
+ * seal, a tiny kraft paper weight, a short wall shelf with two kraft boxes,
  * plus two shelf bays
  * — not the house living room and not the warehouse. No WASD.
  * Tap-to-walk stays in interior.js.
@@ -472,6 +472,28 @@ function kraftSeal(x, y, z) {
 }
 
 /**
+ * Tiny kraft PAPER weight on the counter: wood base + cream stone.
+ * Paper boxes only. Beside the seal — not on the twine, ribbon, inkpad,
+ * pencil, blotter, coin, or receipt. Existing hexes only.
+ */
+function kraftPaperWeight(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "shop-paperweight";
+  g.userData.kind = "shop-weight";
+  g.userData.mode = "PAPER";
+  g.userData.part = "weight";
+  g.position.set(x, y, z);
+  const base = paperBox(0.05, 0.01, 0.05, WOOD, "shop-weight");
+  base.userData.part = "weight";
+  g.add(base);
+  const stone = paperBox(0.04, 0.016, 0.04, CREAM, "shop-weight");
+  stone.userData.part = "weight";
+  stone.position.y = 0.012;
+  g.add(stone);
+  return g;
+}
+
+/**
  * Small standing kraft PAPER shopping bag on the counter: cream body + two
  * thin strap handles. Paper boxes only. Beside the parcel / till, not on them.
  */
@@ -575,6 +597,8 @@ function makeCounter(x, z) {
   g.add(kraftTwine(-0.58, topY + 0.054, -0.28));
   // Tiny kraft wax seal beside the till — wood wafer + coral blob.
   g.add(kraftSeal(1.10, topY + 0.054, -0.28));
+  // Tiny kraft paper weight beside the seal — wood base + cream stone.
+  g.add(kraftPaperWeight(1.30, topY + 0.054, -0.34));
   // Two small kraft / terracotta jars beside the till. Original TIN + CORAL.
   const kraftJar = paperBox(0.12, 0.16, 0.12, TIN, "shop-goods");
   kraftJar.position.set(0.48, topY + 0.13, -0.04);
