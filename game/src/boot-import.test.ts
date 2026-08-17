@@ -28,7 +28,7 @@ describe("harbour boot import graph", () => {
     // Ferry landfall: south terrain/port/lots build on first spawnAt there.
     expect(src).toContain("async function ensureIsland");
     expect(src).toMatch(/function spawnAt\(id\) \{\s*void ensureIsland\(id\);/);
-    expect(src).toMatch(/builtIslands\.add\("north"\)/);
+    expect(src).toMatch(/builtIslands\.add\("south"\)/);
     // Tapping the pier/shed/dock must reach the ferry (portHit).
     expect(src).toContain("for (const p of ports) objs.push(p);");
     expect(src).toContain("ports.push(pier);");

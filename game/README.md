@@ -2,7 +2,7 @@
 
 Persistent browser economy + politics game. Spec: [PLAN.md](PLAN.md). Backend: [BACKEND.md](BACKEND.md). Land: [LAND.md](LAND.md). Roadmap: [ROADMAP.md](ROADMAP.md). Skills: [SKILLS.md](SKILLS.md). Gauntlet: [GAUNTLET.md](GAUNTLET.md).
 
-The whole island is a priced parcel map now: every lot drawn with boundary ink and a PAPER price tag (`YOURS` on your leases). Wheel zooms out to map height. Each island starts with an NPC town.
+The whole island is a priced parcel map now: every lot drawn with boundary ink and a PAPER price tag (`YOURS` on your leases). You spawn on **South**. First loop: lease land → order a hotdog cart → van delivers a crate → inventory → place → stock → hire or run.
 
 ## Now
 
@@ -18,9 +18,9 @@ npm run play        # http://localhost:8787  (3D harbour)
 
 From a **Cursor cloud agent**: plug icon (top-right of the agent panel) → make sure **8787** is forwarded → open `http://localhost:8787/`. If you are on cursor.com/agents in a browser only, 8787 is not on your laptop — use the agent Ports / Simple Browser.
 
-Open `/` for the harbour. Tap a **piece of land** (not a given lot card), Lease, then Develop. **Ferry** near a port quotes the North ↔ South crossing (PAPER $15) before travel. **Taxi** rides the paved road only (PAPER). `/market/` is the paper goods HUD; cash is shared. Labelled PAPER / SIMULATED.
+Open `/` for the harbour. Toggle **Foot traffic**, lease a green South plot, then **Market** to order a hotdog cart delivered to that plot. Tap the crate **Take all**, **Inventory → Place in world**, short right-click the cart to stock. Hire from **Staff** or run it yourself. **Taxi** still paved-only. **Ferry** still North ↔ South. Labelled PAPER / SIMULATED.
 
-Visitor starts with $1,000. Tap ground to walk. The world still ticks if nobody clicks.
+Visitor starts with $1,000. Tap ground to walk (green line). The world still ticks if nobody clicks.
 
 ## Headless sim
 

@@ -17,6 +17,7 @@ import { matchVisitorOrders } from "./orders.ts";
 import { tickStaff, type StaffSlot } from "./staff.ts";
 import { tickUpkeep, type UpkeepLand } from "./upkeep.ts";
 import { createVisitorCart, type CartLine } from "./visitorCart.ts";
+import { createPlayState, tickHotdogSales, type PlayState } from "./firstLoop.ts";
 
 export {
   BOOK_ISLANDS,
@@ -220,7 +221,10 @@ export function tick(world: World, visitor?: Visitor, land?: UpkeepLand): void {
   refreshIndex(world);
   world.tick += 1;
   if (visitor) tickStaff(world, visitor);
-  if (visitor && land) tickUpkeep(world, visitor, land);
+  if (visitor && land) {
+    tickUpkeep(world, visitor, land);
+    tickHotdogSales(visitor, land);
+  }
 }
 
 export function fastForward(world: World, n: number, visitor?: Visitor, land?: UpkeepLand): void {
@@ -234,12 +238,21 @@ export type Visitor = {
   goods: Record<GoodId, number>;
   staffSlots: StaffSlot[];
   cart: CartLine[];
+  /** South first-loop inventory / stands / crates. */
+  play: PlayState;
 };
 
 export function createVisitor(cash = 1_000): Visitor {
   const stock = {} as Record<GoodId, number>;
   for (const id of GOOD_IDS) stock[id] = 0;
-  return { cash, stock, goods: stock, staffSlots: [], cart: createVisitorCart() };
+  return {
+    cash,
+    stock,
+    goods: stock,
+    staffSlots: [],
+    cart: createVisitorCart(),
+    play: createPlayState(),
+  };
 }
 
 export function buyFromStall(

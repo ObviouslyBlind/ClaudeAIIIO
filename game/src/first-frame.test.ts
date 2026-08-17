@@ -9,8 +9,8 @@ describe("first harbour frame", () => {
   });
 
   it("looks inland along the tarmac, not at the seaward berth", () => {
-    expect(CAM.z).toBe(-6918);
-    expect(LOOK.z).toBeLessThan(CAM.z);
-    expect(LOOK.z).toBeLessThan(-7000);
+    expect(CAM.z).toBe(6918);
+    expect(LOOK.z).toBeGreaterThan(CAM.z);
+    expect(LOOK.z).toBeGreaterThan(7000);
   });
 });

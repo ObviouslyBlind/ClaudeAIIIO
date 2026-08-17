@@ -20,6 +20,17 @@ import { walkSeededPresence } from "./presenceWalk.ts";
 import { dumpCart } from "./visitorCart.ts";
 import { startPersistLoop } from "./persistLoop.ts";
 import { restoreLive } from "./persistRestore.ts";
+import {
+  attendStand,
+  hireStand,
+  markArrived,
+  orderMarket,
+  placeStand,
+  playSnapshot,
+  stockStand,
+  takeAll,
+} from "./firstLoop.ts";
+import { footTrafficSnapshot } from "./footTraffic.ts";
 
 const root = join(fileURLToPath(new URL(".", import.meta.url)), "..");
 const publicDir = join(root, "public");
@@ -139,6 +150,67 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "GET" && url.pathname === "/api/map") {
     json(res, 200, staffMapSnapshot(land, visitor));
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname === "/api/play") {
+    json(res, 200, {
+      ...playSnapshot(visitor, land),
+      traffic: footTrafficSnapshot(land),
+    });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/market/order") {
+    const body = await readJsonBody(req);
+    if (!body) {
+      json(res, 400, { ok: false, reason: "bad_json", mode: "PAPER" });
+      return;
+    }
+    const result = orderMarket(visitor, land, body);
+    json(res, result.ok ? 200 : 400, { ...result, play: playSnapshot(visitor, land) });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/delivery/arrive") {
+    const body = await readJsonBody(req);
+    const result = markArrived(visitor, String(body?.deliveryId ?? ""));
+    json(res, result.ok ? 200 : 400, { ...result, play: playSnapshot(visitor, land) });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/delivery/take") {
+    const body = await readJsonBody(req);
+    const result = takeAll(visitor, String(body?.deliveryId ?? ""));
+    json(res, result.ok ? 200 : 400, { ...result, play: playSnapshot(visitor, land) });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/inventory/place") {
+    const body = await readJsonBody(req);
+    const result = placeStand(visitor, land, String(body?.plotId ?? ""));
+    json(res, result.ok ? 200 : 400, { ...result, play: playSnapshot(visitor, land) });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/stand/stock") {
+    const body = await readJsonBody(req);
+    const result = stockStand(visitor, String(body?.standId ?? ""), Number(body?.qty ?? 0));
+    json(res, result.ok ? 200 : 400, { ...result, play: playSnapshot(visitor, land) });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/stand/hire") {
+    const body = await readJsonBody(req);
+    const result = hireStand(visitor, String(body?.standId ?? ""));
+    json(res, result.ok ? 200 : 400, { ...result, play: playSnapshot(visitor, land) });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/stand/attend") {
+    const body = await readJsonBody(req);
+    const result = attendStand(visitor, body?.standId ? String(body.standId) : null);
+    json(res, result.ok ? 200 : 400, { ...result, play: playSnapshot(visitor, land) });
     return;
   }
 
