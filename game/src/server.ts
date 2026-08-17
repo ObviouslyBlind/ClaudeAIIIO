@@ -11,7 +11,7 @@ import { createVisitor, createWorld, hud, tick } from "./sim.ts";
 import { cancelOrder } from "./cancelOrder.ts";
 import { listOpenOrders, placeAsk, placeBid } from "./orders.ts";
 import { postStaff, staffMapSnapshot } from "./staff-http.ts";
-import { bustHarbourAssets, bustModuleImports } from "./cache-bust.ts";
+import { ASSET_NONCE, bustHarbourAssets, bustModuleImports } from "./cache-bust.ts";
 import { resolvePublicPath } from "./public-path.ts";
 import { confirmFerry, listFerryRoutes } from "./ferry-routes.ts";
 import { calendarHud } from "./calendar.ts";
@@ -311,10 +311,10 @@ const server = createServer(async (req, res) => {
       headers["expires"] = "0";
     }
     if (ext === ".html") {
-      data = bustHarbourAssets(data.toString("utf8"));
+      data = bustHarbourAssets(data.toString("utf8"), ASSET_NONCE);
     }
     if (ext === ".js" && pathname.startsWith("/harbour/")) {
-      data = bustModuleImports(data.toString("utf8"));
+      data = bustModuleImports(data.toString("utf8"), ASSET_NONCE);
     }
     res.writeHead(200, headers);
     res.end(data);
