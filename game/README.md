@@ -10,6 +10,6 @@ npm run play
 npm run play:laptop   # https link for a laptop / phone
 ```
 
-South spawn. Left-click walks. Click a **$ tag** to buy. Lots overlay: click the lot dirt. Foot traffic / logistics overlays. Van drops on the kerb. Restart wipes.
+South spawn. Click a **$ bar** — a small ask: do you want to buy? Yes / No. Foot traffic / logistics overlays. Van drops on the kerb. Restart wipes.
 
 [PLAN](PLAN.md) · [FOUNDATION](FOUNDATION.md) · [FIRST_LOOP](reports/FIRST_LOOP.md)

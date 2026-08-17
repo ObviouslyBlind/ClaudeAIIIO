@@ -32,6 +32,7 @@
 #chrome a,
 .float-panel,
 #land-card,
+#buy-ask,
 #stand-menu {
   pointer-events: auto;
   text-shadow: none;
@@ -247,6 +248,67 @@ nav.dock.travel-dock {
   min-height: 32px;
   padding: 4px 8px;
 }
+
+#lot-tags {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+}
+.lot-tag {
+  position: absolute;
+  transform: translate(-50%, -110%);
+  pointer-events: auto;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 8px;
+  background: rgba(24, 30, 20, 0.92);
+  color: #f4f2ea;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+.lot-tag.is-buy {
+  background: rgba(24, 30, 20, 0.94);
+  color: #f4f2ea;
+}
+.lot-tag.is-buy:hover { box-shadow: 0 0 0 2px #5dcc6a; }
+.lot-tag.is-taken {
+  background: rgba(40, 36, 32, 0.9);
+  color: #c5c0b2;
+  cursor: default;
+}
+.lot-tag.is-yours {
+  background: rgba(38, 128, 66, 0.92);
+  color: #f4f2ea;
+  cursor: default;
+}
+
+#buy-ask {
+  position: absolute;
+  left: 50%;
+  bottom: calc(88px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  width: min(320px, calc(100vw - 24px));
+  padding: 14px 16px 16px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  z-index: 12;
+  pointer-events: auto;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
+}
+#buy-ask[hidden] { display: none !important; }
+#buy-ask h2 { margin: 0 0 6px; font-size: 16px; }
+#buy-ask .buy-ask-name { margin: 0 0 4px; font-size: 14px; color: var(--muted); }
+#buy-ask .price { margin: 0; color: var(--green); font-weight: 800; font-size: 18px; }
+#buy-ask .land-row { display: flex; gap: 8px; margin-top: 12px; }
+#buy-ask .land-row .take-all { margin-top: 0; }
+#buy-ask-no { background: #2c3c40; color: #e8e4d8; }
 
 #land-card, #stand-menu, #foot-legend {
   position: absolute;

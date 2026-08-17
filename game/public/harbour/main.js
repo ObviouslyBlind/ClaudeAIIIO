@@ -25,6 +25,7 @@ import { mountPresenceHud } from "./presence-hud.js";
 import { mountStaffHud } from "./staff-hud.js";
 import { mountCalendarHud } from "./calendar-hud.js";
 import { mountParcelMap, pointerToNdc } from "./parcel-map.js";
+import { mountLotTags } from "./lot-tags.js";
 
 function ensureDockButton(id, label) {
   let btn = document.getElementById(id);
@@ -143,6 +144,7 @@ let placingUse = null;
 let catalogPicker = null;
 let staffHud = null;
 let parcelMap = null;
+let lotTags = null;
 let propsMod = null;
 let chromeHud = null;
 let walkPath = null;
@@ -309,7 +311,7 @@ function aimPointer(ev) {
 }
 
 const HUD_BLOCK =
-  "nav, a, button, #taxi-map, #ferry-ticket, #catalog-picker, .float-panel, #land-card, #stand-menu";
+  "nav, a, button, #taxi-map, #ferry-ticket, #catalog-picker, .float-panel, #land-card, #buy-ask, #lot-tags, #stand-menu";
 
 function parcelLabel(p) {
   const kind = p.band === "field" ? "field" : p.band === "shore" ? "shore land" : "street land";
@@ -1030,17 +1032,35 @@ function showLandCard(p) {
     crate,
     onTake: crate ? () => takeCrate(crate.id) : null,
   });
-  if (!p.owner) setStatus((p.name || "This lot") + " · click Buy, or the $ title. PAPER · SIMULATED.");
+  if (!p.owner) setStatus((p.name || "This lot") + " · do you want to buy it? PAPER · SIMULATED.");
   else if (p.owner === "visitor") setStatus("Yours. PAPER.");
   else setStatus("This land is taken. PAPER.");
   return true;
 }
 
-function buyPlot(p) {
+function askToBuy(p) {
   if (!p || !map) return;
+  const prev = selected ? map.plots.find((row) => row.id === selected) : null;
+  selected = p.id;
+  landPinned = true;
+  lastInspectKey = p.id + ":ask";
+  if (prev && prev.id !== p.id) paintParcel(prev);
+  paintParcel(p);
+  if (parcelMap) parcelMap.setSelected(p.id);
+  if (p.owner) {
+    showLandCard(p);
+    return;
+  }
+  if (chromeHud && chromeHud.paintBuyAsk) {
+    chromeHud.paintBuyAsk(p, { band: bandForPlot(p) });
+    setStatus("Do you want to buy " + (p.name || "this lot") + "? PAPER.");
+    return;
+  }
   showLandCard(p);
-  if (p.owner) return;
-  void lease();
+}
+
+function buyPlot(p) {
+  askToBuy(p);
 }
 
 function closeLandCard() {
@@ -1172,10 +1192,14 @@ function onPointer(ev) {
     setStatus("Tap land you leased that has no building yet.");
     return;
   }
-  if (viewer === "lots" && tapPt) {
+  if ((viewer === "world" || viewer === "lots") && tapPt) {
     const p = findParcelAt(tapPt.x, tapPt.z);
-    if (p) {
-      buyPlot(p);
+    if (p && !p.owner) {
+      askToBuy(p);
+      return;
+    }
+    if (p && viewer === "lots") {
+      showLandCard(p);
       return;
     }
   }
@@ -1256,7 +1280,9 @@ async function lease() {
     const note = leaseFailText(body.reason);
     setStatus(note);
     const fail = map && selected ? map.plots.find((x) => x.id === selected) : null;
-    if (fail && chromeHud && chromeHud.paintLand) {
+    if (fail && !fail.owner && chromeHud && chromeHud.paintBuyAsk) {
+      chromeHud.paintBuyAsk(fail, { band: bandForPlot(fail), note });
+    } else if (fail && chromeHud && chromeHud.paintLand) {
       chromeHud.paintLand(fail, { band: bandForPlot(fail), note });
     }
     return;
@@ -1267,6 +1293,7 @@ async function lease() {
   landPinned = true;
   lastInspectKey = "";
   const p = map.plots.find((x) => x.id === selected);
+  if (chromeHud && chromeHud.hideBuyAsk) chromeHud.hideBuyAsk();
   if (p && chromeHud && chromeHud.paintLand) {
     chromeHud.paintLand(p, { band: bandForPlot(p), note: "Yours for $" + money(body.paid) + " PAPER." });
   }
@@ -1383,6 +1410,7 @@ function tick(dt) {
   }
   if (ferryMesh && tickFerry) tickFerry(ferryMesh, dt);
   if (parcelMap) parcelMap.tick(player.position, dt, viewerMode());
+  if (lotTags) lotTags.tick(player.position, dt, viewerMode());
   inspectNearbyLand();
   btnFerry.disabled = !nearPort();
   refreshHud();
@@ -1626,6 +1654,15 @@ async function boot() {
     heightAt,
     getPlots: () => (map ? map.plots : []),
   });
+  lotTags = mountLotTags({
+    canvas,
+    camera,
+    heightAt,
+    specOf,
+    getPlots: () => (map ? map.plots : []),
+    onBuy: askToBuy,
+    onInspect: showLandCard,
+  });
   ground.push(...parcelMap.buildIsland("south"));
   overlays = createOverlays({
     scene: harbourGroup || scene,
@@ -1672,7 +1709,7 @@ async function boot() {
     },
     onPlaceMode() {},
   });
-  setStatus("World viewer. Left-click walks. Click a $ tag to buy. PAPER.");
+  setStatus("Lots viewer. Click a $ bar — you will be asked if you want to buy. PAPER.");
   onResize();
   await idle(80);
   await ensureTaxi();
@@ -1703,7 +1740,15 @@ canvas.addEventListener("pointerup", (ev) => {
     return;
   }
 });
-btnLease.addEventListener("click", lease);
+btnLease.addEventListener("click", () => {
+  const ask = document.getElementById("buy-ask");
+  if (ask && !ask.hidden) {
+    void lease();
+    return;
+  }
+  const p = selected && map ? map.plots.find((x) => x.id === selected) : null;
+  if (p) askToBuy(p);
+});
 btnDevelop.addEventListener("click", openCatalog);
 if (btnEnter) {
   btnEnter.addEventListener("click", () => {

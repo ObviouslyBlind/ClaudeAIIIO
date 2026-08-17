@@ -4,6 +4,7 @@
  */
 
 import { plotDisplayName } from "./parcel-map.js";
+import { buyAskModel } from "./buy-ask.js";
 import { playPaperBuy } from "./paper-sfx.js";
 
 export const POLL_MS = 1000;
@@ -34,6 +35,7 @@ export function mountChrome(opts) {
   const incomeEl = document.getElementById("income");
   const onlineEl = document.getElementById("online");
   const landCard = document.getElementById("land-card");
+  const buyAsk = document.getElementById("buy-ask");
   const standMenu = document.getElementById("stand-menu");
 
   let play = null;
@@ -44,8 +46,8 @@ export function mountChrome(opts) {
   let marketSku = null;
 
   const HINTS = {
-    world: "World: left-click walks. Click a $ title to buy a lot.",
-    lots: "Lots: outlines on. Click the $ title or the lot dirt to buy it.",
+    world: "World: left-click walks. Click a $ bar to be asked if you want to buy.",
+    lots: "Lots: click a $ bar or the lot. A small ask appears before you buy.",
     foot: "Foot traffic: green / yellow / red on each named road.",
     logistics: "Logistics: tap the crate. The van waits until you take it.",
     minerals: "Minerals: ore catalog is in. Overlay paint comes next.",
@@ -359,7 +361,39 @@ export function mountChrome(opts) {
 
   poll();
   const timer = setInterval(poll, POLL_MS);
-  setOverlay("world");
+  function paintBuyAsk(plot, extras) {
+    if (!buyAsk) return;
+    const model = buyAskModel(plot);
+    if (!model) {
+      buyAsk.hidden = true;
+      return;
+    }
+    buyAsk.hidden = false;
+    if (landCard) landCard.hidden = true;
+    const note = extras && extras.note ? `<p class="lease-note">${extras.note}</p>` : "";
+    buyAsk.innerHTML = `
+      <p class="float-kicker">PAPER · SIMULATED</p>
+      <h2>${model.question}</h2>
+      <p class="buy-ask-name">${model.name}</p>
+      <p class="price">${model.priceLabel}</p>
+      ${note}
+      <div class="land-row">
+        <button type="button" class="take-all" id="buy-ask-yes">${model.yes}</button>
+        <button type="button" class="take-all" id="buy-ask-no">${model.no}</button>
+      </div>
+    `;
+    const yes = buyAsk.querySelector("#buy-ask-yes");
+    const no = buyAsk.querySelector("#buy-ask-no");
+    if (yes && opts.lease) yes.addEventListener("click", () => opts.lease());
+    if (no) {
+      no.addEventListener("click", () => {
+        buyAsk.hidden = true;
+        if (opts.onCloseLand) opts.onCloseLand();
+      });
+    }
+  }
+
+  setOverlay("lots");
 
   return {
     stop() {
@@ -375,8 +409,13 @@ export function mountChrome(opts) {
     setOverlay,
     open,
     closePanels,
+    hideBuyAsk() {
+      if (buyAsk) buyAsk.hidden = true;
+    },
+    paintBuyAsk,
     paintLand(plot, extras) {
       if (!landCard) return;
+      if (buyAsk) buyAsk.hidden = true;
       if (!plot) {
         landCard.hidden = true;
         return;
@@ -408,7 +447,7 @@ export function mountChrome(opts) {
         ${roadside ? `<button type="button" class="take-all" id="land-close">Close</button>` : ""}
       `;
       const leaseBtn = landCard.querySelector("#land-lease");
-      if (leaseBtn && opts.lease) leaseBtn.addEventListener("click", () => opts.lease());
+      if (leaseBtn) leaseBtn.addEventListener("click", () => paintBuyAsk(plot, extras || {}));
       const closeBtn = landCard.querySelector("#land-close");
       if (closeBtn) {
         closeBtn.addEventListener("click", () => {

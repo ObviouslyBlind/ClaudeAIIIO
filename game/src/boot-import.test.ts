@@ -62,9 +62,11 @@ describe("harbour boot import graph", () => {
     expect(steps).toBeGreaterThanOrEqual(4);
     expect(src).toContain("function showLandCard");
     expect(src).toContain("function buyPlot");
+    expect(src).toContain("function askToBuy");
+    expect(src).toContain("mountLotTags");
     expect(src).toContain("parcel-label");
     expect(src).toContain("pickLabel");
-    expect(src).toContain("Click a $ tag to buy");
+    expect(src).toContain("you will be asked if you want to buy");
     expect(src).toContain("clickTargets()");
     expect(src).not.toContain("function inspectLandAt");
     expect(src).not.toContain("intersectObjects(root.children, true)");

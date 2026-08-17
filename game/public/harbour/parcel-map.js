@@ -320,63 +320,10 @@ export function mountParcelMap({ worldAdd, specOf, heightAt, getPlots }) {
     return sprites[i];
   }
 
-  /** Assign pooled labels to the nearest labelled plots. Throttled. */
-  function tick(playerPos, dt = 0.016, overlay = "world") {
-    const lots = overlay === "lots";
-    labelClock -= dt;
-    if (labelClock > 0) return;
-    labelClock = lots ? 0.2 : 0.5;
-    const radius = lots ? LABEL_RADIUS_LOTS_M : LABEL_RADIUS_M;
-    const gap = lots ? LABEL_MIN_GAP_LOTS_M : LABEL_MIN_GAP_M;
-    const pool = lots ? LABEL_POOL_LOTS : LABEL_POOL;
-    const near = [];
-    for (const p of getPlots()) {
-      const rec = ranges.get(p.id);
-      if (!rec) continue;
-      const text = labelTextFor(p);
-      if (!text) continue;
-      const d = Math.hypot(playerPos.x - p.x, playerPos.z - p.z);
-      if (d > radius) continue;
-      near.push({ p, d, text });
-    }
-    near.sort((a, b) => a.d - b.d);
-    // Greedy spacing: nearest tags win, later tags need clear air.
-    const shown = [];
-    for (const cand of near) {
-      if (shown.length >= pool) break;
-      let clear = true;
-      for (const kept of shown) {
-        if (Math.hypot(cand.p.x - kept.p.x, cand.p.z - kept.p.z) < gap) {
-          clear = false;
-          break;
-        }
-      }
-      if (clear) shown.push(cand);
-    }
-    for (let i = 0; i < LABEL_POOL_LOTS; i++) {
-      const slot = shown[i];
-      if (!slot) {
-        if (sprites[i]) sprites[i].sprite.visible = false;
-        continue;
-      }
-      const rec = spriteAt(i);
-      if (rec.text !== slot.text) {
-        drawLabel(rec.canvas, slot.text, slot.text === "YOURS");
-        rec.texture.needsUpdate = true;
-        rec.text = slot.text;
-      }
-      const spec = specOf(slot.p.island);
-      const s = Math.max(14, Math.min(32, 8 + Math.sqrt(slot.p.area) * 0.32));
-      rec.sprite.position.set(
-        slot.p.x,
-        heightAt(spec, slot.p.x, slot.p.z) + 3 + s * 0.12,
-        slot.p.z,
-      );
-      rec.sprite.scale.set(s, s * 0.42, 1);
-      rec.sprite.userData.plot = slot.p;
-      rec.sprite.userData.plotId = slot.p.id;
-      rec.sprite.userData.label = slot.text;
-      rec.sprite.visible = true;
+  /** 3D billboards stay off. HTML #lot-tags are the clickable $ bars. */
+  function tick() {
+    for (const rec of sprites) {
+      if (rec && rec.sprite) rec.sprite.visible = false;
     }
   }
 
