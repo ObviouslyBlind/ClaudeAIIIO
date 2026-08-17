@@ -25,7 +25,8 @@ import * as THREE from "three";
  * kraft PAPER harrow leaning by the workbench, a tiny
  * kraft PAPER mattock leaning by the workbench, a tiny
  * kraft PAPER hod leaning by the workbench, a tiny
- * kraft PAPER cask leaning by the workbench, and
+ * kraft PAPER cask leaning by the workbench, a tiny
+ * kraft PAPER winnow leaning by the workbench, and
  * dim warm light — not the
  * house living room, warehouse crates, shop, or factory.
  * No WASD. Tap-to-walk stays in interior.js.
@@ -1106,6 +1107,38 @@ function farmCask() {
   return g;
 }
 
+/**
+ * Tiny kraft PAPER winnow: kraft tray, wood rim, wood grip.
+ * Hexes already in this file (WOOD, KRAFT). PAPER boxes only — no grey.
+ * Leans by the farm workbench; offset from cask, hod, mattock, harrow,
+ * fork, flail, yoke, shears, trowel, spade, ladle, scythe, sickle, hoe,
+ * rake, broom, seed, lid, mug, egg, pail, lantern, scoop, and the
+ * hanging farm-tools. Not the hanging farm-tool shovel. Not the trough
+ * pitchfork (farm-fork). Not the tiny kraft PAPER cask, hod, mattock,
+ * harrow, or fork.
+ */
+function farmWinnow() {
+  const g = new THREE.Group();
+  g.name = "farm-winnow";
+  g.userData.kind = "farm-winnow";
+  g.userData.part = "winnow";
+  g.userData.mode = "PAPER";
+  const y0 = 0.16;
+  const tray = paperBox(0.09, 0.018, 0.065, KRAFT, "farm-winnow");
+  tray.userData.part = "winnow";
+  tray.position.y = y0 + 0.02;
+  g.add(tray);
+  const rim = paperBox(0.098, 0.014, 0.072, WOOD, "farm-winnow");
+  rim.userData.part = "winnow";
+  rim.position.y = y0 + 0.032;
+  g.add(rim);
+  const grip = paperBox(0.018, 0.05, 0.016, WOOD, "farm-winnow");
+  grip.userData.part = "winnow";
+  grip.position.set(0, y0 + 0.055, -0.028);
+  g.add(grip);
+  return g;
+}
+
 function workbench(x, z) {
   const g = new THREE.Group();
   g.name = "farm-bench";
@@ -1364,6 +1397,17 @@ function makeFarmDress() {
   paperCask.position.set(-3.00, 0, -0.72);
   paperCask.rotation.z = -0.24;
   g.add(paperCask);
+  const paperWinnow = farmWinnow();
+  // Floor beside the 1.55 × 0.58 bench — leans by the mid-back-left
+  // edge, behind the rake (back-left at -3.72, 0, -0.48), not the
+  // cask (mid-back-right at -3.00, 0, -0.72), hod (mid-front at
+  // -3.36, 0, 0.58), mattock, harrow, fork, flail, yoke, shears,
+  // trowel, spade, ladle, scythe, sickle, hoe, broom, or the top
+  // (seed, mug, egg, pail, lantern, scoop). Not hanging farm-tools.
+  // Not the trough pitchfork.
+  paperWinnow.position.set(-3.52, 0, -0.70);
+  paperWinnow.rotation.z = 0.22;
+  g.add(paperWinnow);
 
   const loftY = 2.94;
   g.add(sack(0.46, 0.56, 0.36, SACK, -2.55, loftY + 0.28, -2.35, 0.1));
@@ -1463,6 +1507,7 @@ function dimSceneLights(scene, farm) {
  * a tiny kraft fork leaning by the workbench,
  * a tiny kraft harrow leaning by the workbench,
  * a tiny kraft cask leaning by the workbench,
+ * a tiny kraft winnow leaning by the workbench,
  * warms and dims lights.
  * @param {THREE.Object3D} scene
  */
