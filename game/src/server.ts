@@ -245,7 +245,10 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "POST" && url.pathname === "/api/inventory/place") {
     const body = await readJsonBody(req);
-    const result = placeStand(visitor, land, String(body?.plotId ?? ""));
+    const result = placeStand(visitor, land, String(body?.plotId ?? ""), {
+      x: Number(body?.x),
+      z: Number(body?.z),
+    });
     json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
     return;
   }

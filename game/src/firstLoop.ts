@@ -4,9 +4,10 @@
  * PAPER / SIMULATED. Not a wallet.
  */
 
-import { getPlot, ISLANDS, type IslandId, type LandBoard, type Parcel } from "./land.ts";
+import { findParcelAt, getPlot, ISLANDS, type IslandId, type LandBoard, type Parcel } from "./land.ts";
 import { plotTrafficBand, type TrafficBand } from "./footTraffic.ts";
 import { roadsideDrop, type DropPoint } from "./roadside.ts";
+import { skuFitsPlot, type ZoneId } from "./zones.ts";
 import type { Visitor } from "./sim.ts";
 
 export const FIRST_LOOP_NOTE =
@@ -32,30 +33,49 @@ export type InvItem = {
   provenance: "SIMULATED";
 };
 
+export type MarketAisle = "street_carts" | "stock";
+
 export type CatalogSku = {
   id: InvKind;
+  aisle: MarketAisle;
+  aisleLabel: string;
   label: string;
   paperPrice: number;
   qty: number;
   note: string;
+  zone: ZoneId;
 };
+
+export const MARKET_AISLES: { id: MarketAisle; label: string; note: string }[] = [
+  { id: "street_carts", label: "Street carts", note: "Commercial kerb stalls. Pick one, then where it drops." },
+  { id: "stock", label: "Stock", note: "Food for a cart you already own. Same delivery pick." },
+];
 
 export const MARKET_CATALOG: CatalogSku[] = [
   {
     id: "hotdog_cart",
+    aisle: "street_carts",
+    aisleLabel: "Street carts",
     label: "Hotdog cart",
     paperPrice: CART_PAPER_PRICE,
     qty: 1,
     note: "Starting street cart. PAPER. Delivered in a crate.",
+    zone: "commercial",
   },
   {
     id: "hotdogs",
+    aisle: "stock",
+    aisleLabel: "Stock",
     label: `Hotdogs (×${HOTDOG_PACK_QTY})`,
     paperPrice: HOTDOG_PACK_PRICE,
     qty: HOTDOG_PACK_QTY,
     note: "Stock for the cart. Sells at $0.10 PAPER each.",
+    zone: "commercial",
   },
 ];
+
+/** Metres from your lot toward the paved road where a cart may sit. */
+export const PLACE_CORRIDOR_M = 22;
 
 export type Delivery = {
   id: string;
@@ -72,6 +92,8 @@ export type Stand = {
   id: string;
   plotId: string;
   island: IslandId;
+  x: number;
+  z: number;
   hotdogs: number;
   hired: boolean;
   attending: boolean;
@@ -159,6 +181,8 @@ export function orderMarket(
   for (const id of wanted) {
     if (id !== "hotdog_cart" && id !== "hotdogs") return fail("unknown_sku");
     const row = sku(id)!;
+    const fit = skuFitsPlot(row.zone, plot.zone);
+    if (!fit.ok) return fail(fit.reason);
     paid = roundMoney(paid + row.paperPrice);
     items.push({ kind: row.id, qty: row.qty, mode: "PAPER", provenance: "SIMULATED" });
   }
@@ -197,20 +221,58 @@ export function takeAll(visitor: Visitor, deliveryId: string): LoopOk<{ inventor
   return ok({ inventory: play.inventory.map((row) => ({ ...row })) });
 }
 
+/** Your South lot, or the lot whose road verge you tapped. */
+export function plotForPlace(
+  land: LandBoard,
+  plotId?: string,
+  x?: number,
+  z?: number,
+): Parcel | null {
+  if (plotId) {
+    const named = southVisitorPlot(land, plotId);
+    if (named) return named;
+  }
+  if (Number.isFinite(x) && Number.isFinite(z)) {
+    const at = findParcelAt(land, x as number, z as number);
+    if (at && at.island === "south" && at.owner === "visitor") return at;
+    let best: Parcel | null = null;
+    let bestD = Infinity;
+    for (const p of land.plots) {
+      if (p.island !== "south" || p.owner !== "visitor") continue;
+      const drop = roadsideDrop(land.roads, "south", p.x, p.z);
+      const dPlot = Math.hypot((x as number) - p.x, (z as number) - p.z);
+      const dDrop = drop ? Math.hypot((x as number) - drop.x, (z as number) - drop.z) : Infinity;
+      const dCurb = drop ? Math.hypot((x as number) - drop.curbX, (z as number) - drop.curbZ) : Infinity;
+      const d = Math.min(dPlot, dDrop, dCurb);
+      if (d < bestD) {
+        bestD = d;
+        best = p;
+      }
+    }
+    if (best && bestD <= PLACE_CORRIDOR_M) return best;
+  }
+  return null;
+}
+
 export function placeStand(
   visitor: Visitor,
   land: LandBoard,
   plotId: string,
+  pose?: { x?: number; z?: number },
 ): LoopOk<{ stand: Stand }> | LoopFail {
   const play = ensurePlay(visitor);
-  const plot = southVisitorPlot(land, plotId);
+  const plot = plotForPlace(land, plotId, pose?.x, pose?.z);
   if (!plot) return fail("not_yours");
   if (play.stands.some((s) => s.plotId === plot.id)) return fail("already_placed");
   if (!takeInv(play, "hotdog_cart", 1)) return fail("no_cart");
+  const x = Number.isFinite(pose?.x) ? (pose!.x as number) : plot.x;
+  const z = Number.isFinite(pose?.z) ? (pose!.z as number) : plot.z;
   const stand: Stand = {
     id: `stand-${play.nextId++}`,
     plotId: plot.id,
     island: "south",
+    x,
+    z,
     hotdogs: 0,
     hired: false,
     attending: false,
@@ -298,12 +360,16 @@ export function playSnapshot(visitor: Visitor, land: LandBoard) {
     cash: visitor.cash,
     incomePerMinute: incomePerMinute(play),
     playersOnline: 1,
+    aisles: MARKET_AISLES,
     catalog: MARKET_CATALOG,
     inventory: play.inventory.map((row) => ({ ...row })),
     deliveries: play.deliveries.map((d) => ({ ...d, items: d.items.map((i) => ({ ...i })) })),
     stands: play.stands.map((s) => ({ ...s })),
     leases: land.plots.filter((p) => p.owner === "visitor" && p.island === "south").map((p) => ({
       id: p.id,
+      name: p.name,
+      street: p.street,
+      zone: p.zone,
       x: p.x,
       z: p.z,
       price: p.price,
@@ -318,6 +384,8 @@ export function playSnapshot(visitor: Visitor, land: LandBoard) {
       .slice(0, 8)
       .map((p) => ({
         id: p.id,
+        name: p.name,
+        zone: p.zone,
         price: p.price,
         band: plotTrafficBand(land, p),
       })),

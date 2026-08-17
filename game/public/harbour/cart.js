@@ -100,6 +100,33 @@ export function makeCrate() {
   return g;
 }
 
+/** Hired vendor. Stands by the cart. ~1.7 m like the player. */
+export function makeVendor() {
+  const g = new THREE.Group();
+  g.name = "vendor";
+  g.userData.kind = "vendor";
+  g.userData.label = "hired vendor";
+  g.userData.layer = "world";
+  g.userData.mode = "PAPER";
+  const body = new THREE.Mesh(
+    new THREE.CapsuleGeometry(0.28, 0.85, 4, 8),
+    new THREE.MeshLambertMaterial({ color: 0xc4a574 }),
+  );
+  body.position.y = 0.85;
+  body.userData.part = "body";
+  const head = new THREE.Mesh(
+    new THREE.SphereGeometry(0.22, 8, 6),
+    new THREE.MeshLambertMaterial({ color: 0xf2d2a8 }),
+  );
+  head.position.y = 1.62;
+  head.userData.part = "head";
+  const hat = box(0.42, 0.1, 0.42, 0xb42318);
+  hat.position.y = 1.84;
+  hat.userData.part = "hat";
+  g.add(body, head, hat);
+  return g;
+}
+
 /** Kept so old imports do not boot-fail. Does not parent a wagon on the player. */
 export function dressCart(player) {
   return player;

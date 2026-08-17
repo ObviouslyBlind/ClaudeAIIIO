@@ -2,10 +2,12 @@ import { describe, expect, it } from "vitest";
 import { createLandBoard, leasePlot } from "./land.ts";
 import { createVisitor } from "./sim.ts";
 import { footTrafficSnapshot, plotTrafficBand, roadTrafficBand } from "./footTraffic.ts";
+import { roadsideDrop } from "./roadside.ts";
 import {
   CART_PAPER_PRICE,
   HOTDOG_PACK_PRICE,
   HOTDOG_SALE_PRICE,
+  PLACE_CORRIDOR_M,
   attendStand,
   hireStand,
   incomePerMinute,
@@ -107,6 +109,38 @@ describe("South first loop", () => {
     expect(snap.mode).toBe("PAPER");
     expect(snap.leaseOptions.length).toBeGreaterThan(0);
     expect(snap.leases).toHaveLength(1);
+    expect(snap.aisles.some((a) => a.id === "street_carts")).toBe(true);
+    expect(placed.stand.x).toBeDefined();
+  });
+
+  it("lets you place the cart on the verge out toward the main road", () => {
+    const { land, visitor, plot } = leaseCheapSouth();
+    const order = orderMarket(visitor, land, { plotId: plot.id, skus: ["hotdog_cart"] });
+    expect(order.ok).toBe(true);
+    if (!order.ok) return;
+    takeAll(visitor, order.delivery.id);
+    const drop = roadsideDrop(land.roads, "south", plot.x, plot.z);
+    expect(drop).toBeTruthy();
+    const placed = placeStand(visitor, land, "", { x: drop!.x, z: drop!.z });
+    expect(placed.ok).toBe(true);
+    if (!placed.ok) return;
+    expect(placed.stand.plotId).toBe(plot.id);
+    expect(Math.hypot(placed.stand.x - plot.x, placed.stand.z - plot.z)).toBeLessThan(PLACE_CORRIDOR_M + 1);
+  });
+
+  it("refuses a commercial cart on a residential lot", () => {
+    const land = createLandBoard();
+    const visitor = createVisitor(20_000);
+    const home = land.plots
+      .filter((p) => p.island === "south" && p.zone === "residential" && !p.owner)
+      .sort((a, b) => a.price - b.price)[0];
+    expect(home).toBeTruthy();
+    const leased = leasePlot(land, visitor, home!.id);
+    expect(leased.ok).toBe(true);
+    const order = orderMarket(visitor, land, { plotId: home!.id, skus: ["hotdog_cart"] });
+    expect(order.ok).toBe(false);
+    if (order.ok) return;
+    expect(order.reason).toBe("zone_mismatch");
   });
 
   it("does not sell when idle, does sell when the player attends", () => {

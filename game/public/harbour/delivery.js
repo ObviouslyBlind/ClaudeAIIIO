@@ -88,24 +88,30 @@ export function createDeliveries({ scene, getMap, specOf, heightAt, onDrop }) {
         delivery,
         drop,
         phase: "in",
+        leaveAfterDrop: false,
       });
     },
     tick(dt) {
       for (const [id, job] of vans) {
+        if (job.phase === "wait") continue;
         const done = tickOne(job, dt);
         if (!done) continue;
         if (job.phase === "in") {
           if (onDrop) onDrop(job.delivery, job.drop);
-          job.phase = "out";
-          job.path = vanAwayPath(
-            job.drop || {
-              curbX: job.mesh.position.x,
-              curbZ: job.mesh.position.z,
-              awayX: job.mesh.position.x,
-              awayZ: job.mesh.position.z,
-            },
-          );
-          job.i = 0;
+          if (job.leaveAfterDrop) {
+            job.phase = "out";
+            job.path = vanAwayPath(
+              job.drop || {
+                curbX: job.mesh.position.x,
+                curbZ: job.mesh.position.z,
+                awayX: job.mesh.position.x,
+                awayZ: job.mesh.position.z,
+              },
+            );
+            job.i = 0;
+          } else {
+            job.phase = "wait";
+          }
           continue;
         }
         scene.remove(job.mesh);
@@ -114,6 +120,25 @@ export function createDeliveries({ scene, getMap, specOf, heightAt, onDrop }) {
     },
     clickables() {
       return [...vans.values()].map((job) => job.mesh);
+    },
+    /** Leave only after the crate is taken. */
+    release(id) {
+      const job = vans.get(id);
+      if (!job) return;
+      if (job.phase === "wait") {
+        job.phase = "out";
+        job.path = vanAwayPath(
+          job.drop || {
+            curbX: job.mesh.position.x,
+            curbZ: job.mesh.position.z,
+            awayX: job.mesh.position.x,
+            awayZ: job.mesh.position.z,
+          },
+        );
+        job.i = 0;
+        return;
+      }
+      job.leaveAfterDrop = true;
     },
   };
 }

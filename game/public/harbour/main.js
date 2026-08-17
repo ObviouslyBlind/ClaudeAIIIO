@@ -15,7 +15,8 @@ import { makeWater } from "./water.js";
 import { makeSky } from "./sky.js";
 import { CAM, LOOK } from "./first-frame.js";
 import { dressPlayer } from "./player.js";
-import { makeHotdogCart, makeCrate } from "./cart.js";
+import { makeHotdogCart, makeCrate, makeVendor } from "./cart.js";
+import { playPaperBuy } from "./paper-sfx.js";
 import { createWalkPath } from "./walk-path.js";
 import { mountChrome } from "./chrome.js";
 import { createOverlays } from "./overlays.js";
@@ -343,15 +344,11 @@ function standOn(plotId) {
   return (play.stands || []).find((s) => s.plotId === plotId) || null;
 }
 
-async function placeCartOn(plot) {
-  if (!plot || plot.owner !== "visitor") {
-    setStatus("Lease that South plot first.");
-    return;
-  }
+async function placeCartOn(plot, x, z) {
   const res = await fetch("/api/inventory/place", {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ plotId: plot.id }),
+    body: JSON.stringify({ plotId: plot && plot.id, x, z }),
   });
   const data = await res.json();
   if (!res.ok) {
@@ -361,23 +358,36 @@ async function placeCartOn(plot) {
   if (chromeHud) chromeHud.clearPlacing();
   syncStandMesh(data.stand);
   if (chromeHud) chromeHud.refresh();
-  setStatus("Cart placed. Right-click it to stock hotdogs. PAPER.");
+  setStatus("Cart placed. Stock hotdogs, then hire. PAPER.");
+}
+
+function attachVendor(cart) {
+  if (!cart || cart.getObjectByName("vendor")) return;
+  const vendor = makeVendor();
+  vendor.position.set(1.05, 0, 0.15);
+  cart.add(vendor);
 }
 
 function syncStandMesh(stand) {
-  if (!stand || standMeshes.has(stand.id)) return;
-  const plot = map.plots.find((p) => p.id === stand.plotId);
-  if (!plot) return;
-  const mesh = makeHotdogCart();
-  mesh.position.set(plot.x, heightAt(specOf(plot.island), plot.x, plot.z), plot.z);
-  mesh.userData.standId = stand.id;
-  mesh.userData.plotId = plot.id;
-  mesh.userData.kind = "hotdog-cart";
-  mesh.userData.label = "hotdog cart";
-  mesh.userData.layer = "world";
-  mesh.name = `hotdog-cart:${stand.id}`;
-  worldAdd(mesh);
-  standMeshes.set(stand.id, mesh);
+  if (!stand) return;
+  let mesh = standMeshes.get(stand.id);
+  const plot = map && map.plots.find((p) => p.id === stand.plotId);
+  const island = (plot && plot.island) || stand.island || "south";
+  const x = Number.isFinite(stand.x) ? stand.x : plot ? plot.x : 0;
+  const z = Number.isFinite(stand.z) ? stand.z : plot ? plot.z : 0;
+  if (!mesh) {
+    mesh = makeHotdogCart();
+    mesh.userData.standId = stand.id;
+    mesh.userData.plotId = stand.plotId;
+    mesh.userData.kind = "hotdog-cart";
+    mesh.userData.label = "hotdog cart";
+    mesh.userData.layer = "world";
+    mesh.name = `hotdog-cart:${stand.id}`;
+    worldAdd(mesh);
+    standMeshes.set(stand.id, mesh);
+  }
+  mesh.position.set(x, heightAt(specOf(island), x, z), z);
+  if (stand.hired) attachVendor(mesh);
 }
 
 function syncCrateMesh(delivery) {
@@ -420,6 +430,7 @@ async function takeCrate(deliveryId) {
     return;
   }
   dropCrate(deliveryId);
+  if (deliveries && typeof deliveries.release === "function") deliveries.release(deliveryId);
   if (chromeHud) chromeHud.refresh();
   setStatus("In your inventory. Place the cart, then stock it. PAPER.");
 }
@@ -457,7 +468,10 @@ function openStandMenu(standId) {
       });
       chromeHud.refresh();
       chromeHud.hideStandMenu();
-      setStatus("Hired. The cart sells on its own. PAPER.");
+      const playNow = chromeHud.getPlay && chromeHud.getPlay();
+      const hired = playNow && (playNow.stands || []).find((s) => s.id === standId);
+      if (hired) syncStandMesh({ ...hired, hired: true });
+      setStatus("Hired. A vendor stands by the cart. PAPER.");
     },
     async () => {
       await fetch("/api/stand/attend", {
@@ -1092,15 +1106,13 @@ function onPointer(ev) {
   const tapPt = tap && tap.point;
   if (chromeHud && chromeHud.isPlacing && chromeHud.isPlacing()) {
     const tapped = plotToDevelop(plotHit?.object.userData.plotId, tapPt?.x, tapPt?.z);
-    if (tapped) {
-      void placeCartOn(tapped);
-      return;
-    }
-    setStatus("Tap land you leased to place the hotdog cart.");
+    void placeCartOn(tapped, tapPt?.x, tapPt?.z);
     return;
   }
   const tagPick =
-    viewer === "world" && parcelMap && typeof parcelMap.pickLabel === "function"
+    (viewer === "world" || viewer === "lots") &&
+    parcelMap &&
+    typeof parcelMap.pickLabel === "function"
       ? parcelMap.pickLabel(camera, ev.clientX, ev.clientY, window.innerWidth, window.innerHeight)
       : null;
   if (tagPick && tagPick.plotId && map) {
@@ -1110,7 +1122,7 @@ function onPointer(ev) {
       return;
     }
   }
-  if (labelHit && viewer === "world") {
+  if (labelHit && (viewer === "world" || viewer === "lots")) {
     const spr = objectWithKind(labelHit.object, "parcel-label");
     const id = spr && (spr.userData.plotId || (spr.userData.plot && spr.userData.plot.id));
     const p = id && map && map.plots.find((x) => x.id === id);
@@ -1133,6 +1145,13 @@ function onPointer(ev) {
     }
     setStatus("Tap land you leased that has no building yet.");
     return;
+  }
+  if (viewer === "lots" && tapPt) {
+    const p = findParcelAt(tapPt.x, tapPt.z);
+    if (p) {
+      showLandCard(p);
+      return;
+    }
   }
   if (crateHit && (viewer === "logistics" || viewer === "world")) {
     const crate = objectWithKind(crateHit.object, "crate");
@@ -1220,6 +1239,7 @@ async function lease() {
   if (p && chromeHud && chromeHud.paintLand) {
     chromeHud.paintLand(p, { band: bandForPlot(p) });
   }
+  playPaperBuy();
   setStatus("This land is yours for $" + money(body.paid) + " (PAPER). Order from Market.");
 }
 
@@ -1454,7 +1474,7 @@ async function ensureDeliveries() {
         syncCrateMesh({ ...delivery, status: "arrived", drop: drop || delivery.drop });
         if (chromeHud) chromeHud.refresh();
         if (overlays) overlays.refresh(chromeHud && chromeHud.getPlay(), map);
-        setStatus("Crate on the roadside. Logistics viewer to take it. PAPER.");
+        setStatus("Van waiting. Take the crate — it will not leave first. PAPER.");
       });
     },
   });

@@ -13,19 +13,25 @@ Windows: `play.cmd` or `play-laptop.cmd`. From `game/`: `npm run play` / `npm ru
 
 ## UI
 - Top left: **Two Harbors** (green), players online, balance + $/min
-- Top right: **viewers** — World / Foot traffic / Logistics / Minerals
+- Top right: **viewers** — World / **Lots** / Foot traffic / Logistics / Minerals
+- **Lots:** boundary outlines. Click the **$ title** above a lot to lease it. Buy other sections the same way.
 - Foot traffic paints **green / yellow / red ribbons on each named road**
-- World: **left-click walks**. **Click a $ price tag** to open the lot card (name, cost, Lease / Close). The bottom **Lease** button also works once that lot is selected — you do not have to stand on the dirt. RMB-hold still orbits.
-- Logistics: tap the **roadside crate**. Van drops on the kerb and drives away.
-- Left rail: Inventory / Market / Employees — floating panels, not extra pages
-- Tap-to-walk draws a green line. RMB-hold still orbits. Short RMB on a cart opens stock/hire.
+- World: **left-click walks**. RMB-hold still orbits.
+- Logistics: tap the **roadside crate**. The van **waits** until you take it.
+- Left rail: Inventory / Market / Employees
+- Market is a marketplace: section → item → deliver-to → Buy (chirp)
 
 ## Loop
-1. Foot traffic overlay (green / yellow / red on paved).
-2. Open **Market**. If you have no land yet, tap **Lease $…** on a South street lot, then **Order crate**.
-3. Van drives paved roads (same graph as taxi), drops the crate on the **side of the road**, drives away.
-4. Switch **Logistics** (or tap the crate). Take all → inventory.
-5. Place in world.
-6. Stock the cart. Hire or run it. $0.10 PAPER per hotdog sold.
+1. **Lots** overlay. Click a **$ title**. Lease.
+2. Open **Market** → Street carts → Hotdog cart → pick your lot → **Buy**. Hear the chirp.
+3. Van drives paved roads, stops on the kerb, **stays** until you take the crate.
+4. Inventory → Place in world. Tap your lot or the verge out to the main road.
+5. Right-click the cart: stock hotdogs, hire. A vendor stands by the cart.
+
+## Zoning (baked in)
+- Street lots = **commercial** (on)
+- Fields / shore = **residential** (on)
+- High commercial / high residential = **government-locked** (off)
+- A hotdog cart only delivers to a commercial lot you own.
 
 Handheld wagon on the player is gone. The cart is the starting stall.

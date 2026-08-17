@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import * as THREE from "three";
-import { HOTDOG_CART_MESH_COUNT, dressCart, makeCrate, makeHotdogCart } from "../public/harbour/cart.js";
+import { HOTDOG_CART_MESH_COUNT, dressCart, makeCrate, makeHotdogCart, makeVendor } from "../public/harbour/cart.js";
 import { dressPlayer } from "../public/harbour/player.js";
 
 function meshCount(root: THREE.Object3D) {
@@ -43,5 +43,19 @@ describe("hotdog cart (starting stall, not a handheld wagon)", () => {
     const crate = makeCrate();
     expect(crate.userData.kind).toBe("crate");
     expect(meshCount(crate)).toBeGreaterThan(1);
+  });
+
+  it("builds a hired vendor under door height", () => {
+    const vendor = makeVendor();
+    expect(vendor.userData.kind).toBe("vendor");
+    let maxY = 0;
+    vendor.traverse((obj) => {
+      if (!(obj as THREE.Mesh).isMesh) return;
+      obj.updateMatrixWorld(true);
+      const box = new THREE.Box3().setFromObject(obj);
+      if (box.max.y > maxY) maxY = box.max.y;
+    });
+    expect(maxY).toBeGreaterThan(1.5);
+    expect(maxY).toBeLessThan(2.2);
   });
 });
