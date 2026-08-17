@@ -110,9 +110,11 @@ Pixel: **kraft gangplank / brow** at `http://localhost:8787/g/brow68`. Dinghy-ta
 
 `/g/brow68` **FAIL BROW**: pier, cream ferry, NPCs, teal water in frame; lip slab still unread. Brow round stopped; not pixel-held.
 
-Pixel: **rust channel buoy** at `http://localhost:8787/g/buoy69`. Same north basin slot as ding65, tall rust drum + kraft band above the sage hulls. No RMB. Address bar must be `/g/buoy69`. Do not restart play while the critic is on the page.
+`/g/buoy69` **FAIL BUOY**: pier, cream ferry, NPCs, empty teal water — rust drum sat inside the sage dinghies at toward*102.
 
-## Next pixel (after buoy69 PASS, immediately, no wait)
+Pixel: **rust channel buoy** at `http://localhost:8787/g/buoy70`. On the camera-facing cream hull (fend54 slot), 8 m rust cube + kraft band. No RMB. Address bar must be `/g/buoy70`. Do not restart play while the critic is on the page.
+
+## Next pixel (after buoy70 PASS, immediately, no wait)
 
 ## Frozen
 

@@ -275,15 +275,15 @@ function channelBuoy() {
   g.userData.dress = "buoy";
   g.userData.mode = "PAPER";
 
-  const body = part(5.2, 8.4, 5.2, 0x6e2e22);
+  const body = part(8.2, 8.4, 8.2, 0x6e2e22);
   body.userData.part = "body";
   g.add(body);
 
-  const band = part(5.6, 1.4, 5.6, 0xc4b496, false);
-  band.position.y = 1.6;
+  const band = part(8.6, 1.6, 8.6, 0xc4b496, false);
+  band.position.y = 1.2;
   g.add(band);
 
-  const cap = part(4.4, 0.7, 4.4, 0x8a6238, false);
+  const cap = part(6.8, 0.8, 6.8, 0x8a6238, false);
   cap.position.y = 4.4;
   g.add(cap);
 
@@ -486,9 +486,10 @@ export function makeQuay(spec, helpers) {
     brow.position.set(x, 1.7, z + toward * 86);
     root.add(brow);
 
-    /** Same basin slot as ding65. Rust drum stands above the sage hulls. */
+    /** /g/buoy69 FAIL BUOY: sat inside the sage dinghies at toward*102.
+     *  Park on the camera-facing cream hull — same slot as fend54. */
     const buoy = channelBuoy();
-    buoy.position.set(x, 5.2, z + toward * 102);
+    buoy.position.set(x, 5.4, z + toward * 116);
     root.add(buoy);
 
     // Extra kraft stack on the north timber, west of the walk, short of the brow.
