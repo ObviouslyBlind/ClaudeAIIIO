@@ -329,7 +329,8 @@ function lotsAlongRoad(spec: IslandSpec): { lots: Parcel[]; dirt: Road[] } {
         pushParcel(lots, spec, street, "street", lots.length);
       }
       const fieldSetback = 18 + streetDepth + 10;
-      const field = quad(a, b, p, fieldSetback, 32 + h * 18, (h - 0.4) * 0.1);
+      const fieldDepth = 32 + h * 18;
+      const field = quad(a, b, p, fieldSetback, fieldDepth, (h - 0.4) * 0.1);
       const fieldBefore = lots.length;
       pushParcel(lots, spec, field, "field", lots.length);
       if (lots.length > fieldBefore) {
@@ -343,6 +344,16 @@ function lotsAlongRoad(spec: IslandSpec): { lots: Parcel[]; dirt: Road[] } {
           kind: "dirt",
           points: [inner, { x: fieldPlot.x, z: fieldPlot.z }],
         });
+      }
+      // Rows 2-3: carpet the corridor in parcels so the map reads as land you
+      // can claim everywhere, not one strip. pushParcel culls water/hill/road.
+      let rowSetback = fieldSetback + fieldDepth + 8;
+      for (let row = 2; row <= 3; row++) {
+        const hr = hash(i * 23 + side * 7 + row * 31 + (spec.id === "north" ? 2 : 5));
+        const depth = 34 + hr * 22;
+        const ringR = quad(a, b, p, rowSetback, depth, (hr - 0.5) * 0.12);
+        pushParcel(lots, spec, ringR, "field", lots.length);
+        rowSetback += depth + 8;
       }
     }
   }
@@ -385,6 +396,47 @@ function seedNpcLots(plots: Parcel[]): void {
   }
 }
 
+/** Street uses cycle so an NPC town reads as a town, not a row of clones. */
+const NPC_TOWN_USES: Exclude<LandUse, null>[] = ["house", "shop", "house_shop", "house", "warehouse"];
+/** Per island. The world starts inhabited (evergreen), the player interferes. */
+const NPC_TOWN_LOTS = 10;
+/** Leave everything a $1000 starter could want: cheap street lots near spawn stay vacant. */
+const NPC_TOWN_MIN_PORT_M = 260;
+
+function seedNpcTown(plots: Parcel[]): void {
+  for (const spec of Object.values(ISLANDS)) {
+    const candidates = plots
+      .filter(
+        (p) =>
+          p.island === spec.id &&
+          p.class === "by_right" &&
+          !p.owner &&
+          p.band === "street" &&
+          Math.hypot(p.x - spec.port.x, p.z - spec.port.z) > NPC_TOWN_MIN_PORT_M,
+      )
+      .sort(
+        (a, b) =>
+          Math.hypot(a.x - spec.port.x, a.z - spec.port.z) -
+          Math.hypot(b.x - spec.port.x, b.z - spec.port.z),
+      );
+    candidates.slice(0, NPC_TOWN_LOTS).forEach((p, i) => {
+      p.owner = "npc";
+      p.use = NPC_TOWN_USES[i % NPC_TOWN_USES.length];
+    });
+    const farms = plots
+      .filter(
+        (p) =>
+          p.island === spec.id && p.class === "by_right" && !p.owner && p.band === "field",
+      )
+      .sort((a, b) => b.area - a.area)
+      .slice(0, 4);
+    for (const p of farms) {
+      p.owner = "npc";
+      p.use = "farm";
+    }
+  }
+}
+
 export function createLandBoard(): LandBoard {
   const plots: Parcel[] = [];
   const dirt: Road[] = [];
@@ -394,6 +446,7 @@ export function createLandBoard(): LandBoard {
     dirt.push(...built.dirt);
   }
   seedNpcLots(plots);
+  seedNpcTown(plots);
   const roads = Object.values(ISLANDS).flatMap((spec) => [
     { island: spec.id, kind: "paved" as const, nodes: roadNodes(spec), points: pavedPolyline(spec) },
     ...dirt.filter((d) => d.island === spec.id),

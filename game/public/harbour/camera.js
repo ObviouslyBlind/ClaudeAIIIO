@@ -11,6 +11,15 @@ export const PITCH_MAX = 1.35;
 export const LOOK_Y = 1.1;
 export const RMB = 2;
 export const LMB = 0;
+/** Wheel zoom, metres from the player. High enough to read the parcel map. */
+export const ZOOM_MIN_M = 9;
+export const ZOOM_MAX_M = 420;
+
+/** Exponential wheel zoom, clamped. Positive deltaY zooms out. */
+export function zoomRadius(radius, deltaY) {
+  const next = radius * Math.exp((deltaY || 0) * 0.0011);
+  return Math.max(ZOOM_MIN_M, Math.min(ZOOM_MAX_M, next));
+}
 
 /**
  * Offset from the player → yaw (around Y), pitch (from XZ), radius.
@@ -171,12 +180,18 @@ export function createPlayCamera({ camera, canvas, getPlayer, getIslandId }) {
     ev.preventDefault();
   }
 
+  function onWheel(ev) {
+    ev.preventDefault();
+    state = { ...state, radius: zoomRadius(state.radius, ev.deltaY), orbited: true };
+  }
+
   canvas.addEventListener("pointerdown", onDown);
   window.addEventListener("pointermove", onMove);
   // End the hold on window, never steal canvas pointerup from walk-or-use.
   window.addEventListener("pointerup", onUp);
   window.addEventListener("pointercancel", onUp);
   canvas.addEventListener("contextmenu", onMenu);
+  canvas.addEventListener("wheel", onWheel, { passive: false });
 
   function snap() {
     state = createOrbitState(spawnCameraOffset(getIslandId()));
