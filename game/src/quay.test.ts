@@ -617,4 +617,32 @@ describe("quay harbour dressing", () => {
     expect(plate!.position.y).toBeGreaterThan(4);
     expect(Math.abs(plate!.position.z - buoy!.position.z)).toBeLessThan(1);
   });
+
+  it("parks a spawn-readable teal crate on the north timber pier", () => {
+    const spec = ISLANDS.north;
+    const added: THREE.Object3D[] = [];
+    const scene = { add(obj: THREE.Object3D) { added.push(obj); } };
+    const root = makeQuay(spec, { scene, heightAt });
+    const teal = root.children.find((c) => c.userData?.dress === "teal");
+    expect(teal).toBeTruthy();
+    let body: THREE.Mesh | null = null;
+    teal!.traverse((obj) => {
+      if (obj.userData?.part === "body") body = obj as THREE.Mesh;
+    });
+    expect(body).not.toBeNull();
+    const hexes: number[] = [];
+    teal!.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      const mat = mesh.material as THREE.MeshLambertMaterial | undefined;
+      if (mat?.color) hexes.push(mat.color.getHex());
+    });
+    expect(hexes).toContain(0x2a7a72);
+    expect(hexes).toContain(0xc4b496);
+    const bg = (body as THREE.Mesh).geometry as THREE.BoxGeometry;
+    expect(bg.parameters.height).toBeGreaterThanOrEqual(4);
+    expect(teal!.position.x).toBeGreaterThan(2);
+    expect(teal!.position.y).toBeGreaterThan(2);
+    expect(teal!.position.z).toBeGreaterThan(-6882);
+    expect(teal!.position.z).toBeLessThan(-6868);
+  });
 });

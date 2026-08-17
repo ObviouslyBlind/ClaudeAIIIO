@@ -162,7 +162,11 @@ Pixel: **rust hull waterline** at `http://localhost:8787/g/plate80`. Wide rust b
 
 Pixel: **rust hull stripe** at `http://localhost:8787/g/plate81`. Wide rust band across the camera-facing cream hull at the held buoy's height. No RMB. Address bar must be `/g/plate81`. Do not restart play while the critic is on the page.
 
-## Next pixel (after plate81 PASS, immediately, no wait)
+`/g/plate81` **FAIL PLATE**: cream hull with one small rust buoy blob; 22 m stripe at buoy height still unread. **Plate round stopped.** Code stays; not pixel-held.
+
+Pixel: **teal pier crate** at `http://localhost:8787/g/teal82`. Ped-shirt teal cube on the north timber, east of the walk. No RMB. Address bar must be `/g/teal82`. Do not restart play while the critic is on the page.
+
+## Next pixel (after teal82 PASS, immediately, no wait)
 
 ## Frozen
 
