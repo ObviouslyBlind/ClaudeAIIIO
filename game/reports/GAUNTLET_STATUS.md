@@ -6,9 +6,9 @@ Loop is **live** on playtest bugs (operator: “so many bugs, use the gauntlet�
 
 `/g/play88` **PASS INTERACTIVE**: inland harbour, beige sand, black road, Cash $1,000, PAPER · SIMULATED. Left click did not hang.
 
-Current piece: **`/g/walk89` WALK** — one left click on inland ground must walk (status Walking or the visitor moves). No RMB.
+`/g/walk89` **FAIL WALK**: left click on inland ground → “Page Unresponsive.” Recursive `intersectObjects` on the full harbour (trees/props). D034: clickTargets only.
 
-Queue after that: lease a cheap north lot, Develop House, Enter/Exit.
+Current piece: **`/g/walk90` WALK** — one left click on inland ground must walk without hanging. No RMB.
 
 One **pixel critic** at a time. Unique `/g/…` path. No RMB. Do not restart play while a critic is on the page.
 

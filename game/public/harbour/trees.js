@@ -440,6 +440,8 @@ function plantInstanced(root, placed) {
   if (leaves.instanceColor) leaves.instanceColor.needsUpdate = true;
   trunks.computeBoundingSphere();
   leaves.computeBoundingSphere();
+  trunks.raycast = () => {};
+  leaves.raycast = () => {};
   root.add(trunks, leaves);
 }
 
