@@ -32,7 +32,7 @@ Politics frozen. See `game/reports/GAUNTLET_STATUS.md`.
 - [x] Pixel rust channel buoy (`/g/buoy70` PASS BUOY — rust mass on the cream hull; `/g/buoy69` FAIL)
 - [x] Pixel kraft/rust life ring (`/g/ring71`–`/g/ring73` FAIL RING — round stopped, not pixel-held)
 - [x] Pixel rust funnel (`/g/funnel74`–`/g/funnel75` FAIL FUNNEL — round stopped, not pixel-held)
-- [ ] Pixel rust cargo (`http://localhost:8787/g/cargo77`; `/g/cargo76` FAIL CARGO — sat on the spawn camera). Shells deferred: seaward spawn, no RMB)
+- [ ] Pixel rust cargo (`http://localhost:8787/g/cargo78`; `/g/cargo76`–`77` FAIL CARGO). Shells deferred: seaward spawn, no RMB)
 
 ## Polymarket paper bot
 
