@@ -121,9 +121,12 @@ export function mountFerryHud(opts = {}) {
     return isFerryHintActive(btnEl, overlay());
   }
 
+  /** Write only on change. An unconditional write re-fired MutationObservers
+   *  and a body-wide observer looped the tab into "Page Unresponsive". */
   function paint() {
     if (!el) return;
-    el.textContent = formatFerryHint(lastData, active());
+    const next = formatFerryHint(lastData, active());
+    if (el.textContent !== next) el.textContent = next;
   }
 
   async function refresh() {
@@ -157,9 +160,8 @@ export function mountFerryHud(opts = {}) {
       if (ticket && typeof ticket.nodeType === "number") {
         observer.observe(ticket, { attributes: true, attributeFilter: ["hidden"] });
       }
-      if (typeof document !== "undefined" && document.body) {
-        observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["hidden"] });
-      }
+      // Never observe document.body: paint() writes #ferry-hint inside body,
+      // so a body-wide childList observer fed itself forever (/g/south100).
     }
   }
 

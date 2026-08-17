@@ -91,7 +91,8 @@ export function mountUnpaidHud(opts = {}) {
 
   function paint() {
     if (!el) return;
-    el.textContent = formatUnpaidLine(inspectedPlot(opts, lastMap, plotEl));
+    const next = formatUnpaidLine(inspectedPlot(opts, lastMap, plotEl));
+    if (el.textContent !== next) el.textContent = next;
   }
 
   async function refresh() {

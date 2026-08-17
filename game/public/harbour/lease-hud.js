@@ -114,7 +114,8 @@ export function mountLeaseHud(opts = {}) {
 
   function paint() {
     if (!el) return;
-    el.textContent = formatLeaseHint(lastData, inspectOf(statusEl, plotEl));
+    const next = formatLeaseHint(lastData, inspectOf(statusEl, plotEl));
+    if (el.textContent !== next) el.textContent = next;
   }
 
   async function refresh() {

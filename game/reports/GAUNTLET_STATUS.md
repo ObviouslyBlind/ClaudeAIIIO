@@ -28,7 +28,9 @@ Loop is **live** on playtest bugs (operator: “so many bugs, use the gauntlet�
 
 `/g/south99` **FAIL SOUTH**: “Page Unresponsive” at the Ferry click — the 45 s dressing timer compiled quay/ferry/traffic mid-session. D040: no delayed dressing on live play; ensureIsland spread across idle slices.
 
-Current piece: **`/g/south100` SOUTH** — confirm ferry, land on a real south island: terrain, port pier, walkable, lots. No RMB.
+`/g/south100` **FAIL SOUTH**: “Page Unresponsive” at the Ferry click on a build with **no dressing** — real cause was the ferry-hint MutationObserver on `document.body` feeding its own repaint (D042). D041 also trickles dressing back click-safe.
+
+Current piece: **`/g/south101` SOUTH** — ferry ticket, real south landfall, 60 s idle, still responsive. No RMB.
 
 One **pixel critic** at a time. Unique `/g/…` path. No RMB. Do not restart play while a critic is on the page.
 

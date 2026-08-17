@@ -115,7 +115,8 @@ export function mountDevelopHud(opts = {}) {
 
   function paint() {
     if (!el) return;
-    el.textContent = formatDevelopHint(lastData, inspectOf(statusEl, plotEl));
+    const next = formatDevelopHint(lastData, inspectOf(statusEl, plotEl));
+    if (el.textContent !== next) el.textContent = next;
   }
 
   async function refresh() {
