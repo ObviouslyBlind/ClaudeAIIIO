@@ -676,15 +676,15 @@ describe("quay harbour dressing", () => {
     expect(clay!.position.z).toBeLessThan(-6836);
   });
 
-  it("parks a spawn-readable green crate on the camera-facing hull beside the buoy", () => {
+  it("parks a spawn-readable green crate above the north dinghies", () => {
     const spec = ISLANDS.north;
     const added: THREE.Object3D[] = [];
     const scene = { add(obj: THREE.Object3D) { added.push(obj); } };
     const root = makeQuay(spec, { scene, heightAt });
     const green = root.children.find((c) => c.userData?.dress === "green");
-    const buoy = root.children.find((c) => c.userData?.dress === "buoy");
+    const boats = root.children.filter((c) => c.userData?.kind === "dinghy");
     expect(green).toBeTruthy();
-    expect(buoy).toBeTruthy();
+    expect(boats.length).toBe(2);
     let body: THREE.Mesh | null = null;
     green!.traverse((obj) => {
       if (obj.userData?.part === "body") body = obj as THREE.Mesh;
@@ -700,9 +700,10 @@ describe("quay harbour dressing", () => {
     expect(hexes.every((c) => c === 0x6a8f44)).toBe(true);
     const bg = (body as THREE.Mesh).geometry as THREE.BoxGeometry;
     expect(bg.parameters.height).toBeGreaterThanOrEqual(8);
-    expect(green!.position.x).toBeGreaterThan(4);
-    expect(green!.position.x).toBeLessThan(6);
-    expect(green!.position.y).toBeGreaterThan(4);
-    expect(Math.abs(green!.position.z - buoy!.position.z)).toBeLessThan(1);
+    expect(bg.parameters.depth).toBeGreaterThanOrEqual(16);
+    expect(Math.abs(green!.position.x)).toBeLessThan(2);
+    expect(green!.position.y).toBeGreaterThan(8);
+    expect(green!.position.z).toBeGreaterThan(-6854);
+    expect(green!.position.z).toBeLessThan(-6842);
   });
 });

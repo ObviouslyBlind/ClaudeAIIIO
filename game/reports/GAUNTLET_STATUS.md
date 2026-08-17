@@ -178,7 +178,11 @@ Pixel: **terracotta basin crate** at `http://localhost:8787/g/clay85`. Ped-shirt
 
 Pixel: **green hull crate** at `http://localhost:8787/g/green86`. Ped-shirt green cube on the camera-facing cream hull, right of the held rust buoy. No RMB. Address bar must be `/g/green86`. Do not restart play while the critic is on the page.
 
-## Next pixel (after green86 PASS, immediately, no wait)
+`/g/green86` **FAIL GREEN**: no green cube on the hull; x+5.2 sat in the wheelhouse. Block is now dinghy-deep, stacked above the held sage hulls in the center channel.
+
+Pixel: **green basin crate** at `http://localhost:8787/g/green87`. Ped-shirt green block above the sage dinghies, center water. No RMB. Address bar must be `/g/green87`. Do not restart play while the critic is on the page.
+
+## Next pixel (after green87 PASS, immediately, no wait)
 
 ## Frozen
 

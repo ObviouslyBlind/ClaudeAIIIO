@@ -36,7 +36,7 @@ Politics frozen. See `game/reports/GAUNTLET_STATUS.md`.
 - [x] Pixel rust hull plate (`/g/plate79`–`81` FAIL PLATE — round stopped, not pixel-held)
 - [x] Pixel teal pier crate (`/g/teal82`–`83` FAIL TEAL — round stopped, not pixel-held)
 - [x] Pixel terracotta basin crate (`/g/clay84`–`85` FAIL CLAY — round stopped, not pixel-held)
-- [ ] Pixel green hull crate (`http://localhost:8787/g/green86`). Shells deferred: seaward spawn, no RMB)
+- [ ] Pixel green basin crate (`http://localhost:8787/g/green87`; `/g/green86` FAIL GREEN). Shells deferred: seaward spawn, no RMB)
 
 ## Polymarket paper bot
 
