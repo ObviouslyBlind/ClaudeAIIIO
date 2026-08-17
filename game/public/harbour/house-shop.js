@@ -623,6 +623,30 @@ function makeCounterPan(x, y, z) {
   return g;
 }
 
+/**
+ * Tiny kraft PAPER kettle on the counter — tin body, wood handle, cream lid.
+ * PAPER boxes only. Offset from the pan, tin, pot, jug, saucer, knife, spoon,
+ * napkin, cup, coaster, blotter, and stamp. Not the larger counter kettle.
+ */
+function makeTinyKettle(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "house-shop-tiny-kettle";
+  g.userData.kind = "house-shop-tiny-kettle";
+  g.userData.mode = "PAPER";
+  g.userData.part = "kettle";
+  g.position.set(x, y, z);
+  const body = paperBox(0.07, 0.055, 0.06, TIN, "house-shop-tiny-kettle");
+  body.position.set(0, 0.028, 0);
+  const spout = paperBox(0.035, 0.018, 0.022, TIN, "house-shop-tiny-kettle");
+  spout.position.set(0.045, 0.038, 0);
+  const handle = paperBox(0.018, 0.04, 0.018, WOOD, "house-shop-tiny-kettle");
+  handle.position.set(-0.05, 0.048, 0);
+  const lid = paperBox(0.05, 0.014, 0.05, CREAM, "house-shop-tiny-kettle");
+  lid.position.set(0, 0.062, 0);
+  g.add(body, spout, handle, lid);
+  return g;
+}
+
 function tableLamp(x, y, z) {
   const g = new THREE.Group();
   g.name = "house-shop-lamp";
@@ -685,6 +709,8 @@ function makeHouseShopDress() {
   g.add(makeCounterPan(0.90, 1.12, 0.52));
   // Tiny kraft PAPER tin on the counter, offset from pan, pot, jug, kettle, jar, pad, bell, and cup.
   g.add(makeCounterTin(-1.10, 1.12, 0.55));
+  // Tiny kraft PAPER kettle on the counter, offset from pan, tin, pot, jug, and table dress.
+  g.add(makeTinyKettle(0.22, 1.12, 0.70));
   g.add(paperMark(-2.15, 1.62, 3.38));
 
   const rug = paperBox(1.55, 0.04, 1.25, RUG, "house-shop-rug");
