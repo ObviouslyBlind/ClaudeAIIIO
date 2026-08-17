@@ -193,6 +193,11 @@ Record of architecture and strategy decisions with reasoning.
 **Decision:** Remove the 45 s / 120 s dressing timer entirely. Live `/` never imports quay.js / ferry.js / shore.js / traffic.js; sheet HUDs load at the end of boot. `ensureIsland` spreads landfall builds across idle slices.
 **Reason:** `/g/south99` FAIL SOUTH and the operator's "crashes within ~5 minutes": dressing compiled heavy modules mid-session on the main thread and Chrome showed "Page Unresponsive". A working game beats quay clutter; the meshes return after a perf pass. PAPER / SIMULATED.
 
+## D043 — Trickle carries only cars and the moving ferry (2026-08-17)
+
+**Decision:** `loadTrickleDressing` loads traffic and the moving ferry only. Quay clutter and shore foam stay off live play until they can build off the main thread.
+**Reason:** `/g/south101` FAIL SOUTH: the ferry/landfall worked, but the tab froze during the 60 s idle exactly when the quay-clutter and foam steps built their meshes. PAPER / SIMULATED.
+
 ## D042 — Ferry-hint observer loop killed (2026-08-17)
 
 **Decision:** `ferry-hud.js` never observes `document.body`; all sheet-HUD paints write only when the text changes.

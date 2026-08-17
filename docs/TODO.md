@@ -53,7 +53,8 @@ Politics frozen. See `game/reports/GAUNTLET_STATUS.md`. New chat: `game/reports/
 - [x] `/g/south99` FAIL SOUTH — dressing timer froze the tab (D040 no delayed dressing).
 - [x] `/g/south100` FAIL SOUTH — ferry-hint body-observer loop was the real freeze (D042).
 - [x] Operator: bring decoration back without the freeze — trickle dressing (D041).
-- [ ] `/g/south101` SOUTH — ferry, real landfall, 60 s idle, responsive.
+- [x] `/g/south101` FAIL SOUTH — quay/foam trickle froze the idle (D043 cars+ferry only).
+- [ ] `/g/south102` SOUTH — ferry, real landfall, 60 s idle, responsive.
 - [x] Bug scout: south island void after ferry, invisible restored buildings, dead pier taps (D039).
 - [x] Playtest: taxi missing + 86 m pier on sand — taxi at boot, pier over water (D037).
 - [x] Pixel green basin crate (`/g/green86`–`87` FAIL GREEN — round stopped, not pixel-held)

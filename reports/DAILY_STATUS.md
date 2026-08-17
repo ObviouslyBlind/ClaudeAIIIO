@@ -2,7 +2,7 @@
 
 ## 2026-08-17 (latest)
 
-**Current status:** D042 — the real freeze was a ferry-hint MutationObserver loop, now killed. D041 trickle dressing live. Next `/g/south101`. PAPER / SIMULATED. Politics frozen.
+**Current status:** D043 — trickle carries only cars + moving ferry; quay clutter/foam off until off-main-thread. D042 killed the observer loop. Next `/g/south102`. PAPER / SIMULATED. Politics frozen.
 
 ## 2026-08-16
 

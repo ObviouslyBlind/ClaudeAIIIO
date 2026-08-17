@@ -44,8 +44,10 @@ describe("harbour boot import graph", () => {
     expect(src).toContain("while (Date.now() - lastTap < TRICKLE_CLICK_QUIET_MS)");
     expect(src).toContain('import("./traffic.js")');
     expect(src).toContain('import("./ferry.js")');
-    expect(src).toContain('import("./quay.js")');
-    expect(src).toContain('import("./shore.js")');
+    // /g/south101 froze during a 60 s idle while quay clutter and foam
+    // built. They stay off live play until they load off the main thread.
+    expect(src).not.toContain('import("./quay.js")');
+    expect(src).not.toContain('import("./shore.js")');
     expect(src).not.toContain('import("./trees.js")');
     expect(src).not.toContain('import("./stalls.js")');
     expect(src).not.toContain('import("./pedestrians.js")');
@@ -57,7 +59,7 @@ describe("harbour boot import graph", () => {
       src.indexOf("async function boot"),
     );
     const steps = trickle.split("await quietStep();").length - 1;
-    expect(steps).toBeGreaterThanOrEqual(8);
+    expect(steps).toBeGreaterThanOrEqual(4);
     expect(src).toContain("clickTargets()");
     expect(src).not.toContain("intersectObjects(root.children, true)");
   });
