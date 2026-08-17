@@ -2,7 +2,7 @@
 
 ## 2026-08-17 (latest)
 
-**Current status:** `/g/persist110` PASS PERSIST. Taxi fare hint only while the map is open (D047). Critic `/g/taxi111`. PAPER / SIMULATED. Politics frozen.
+**Current status:** `/g/taxi111` PASS TAXI. HUD / Market / Persist held this loop (D044–D047). Next: perf pass for quay/trees/peds. PAPER / SIMULATED. Politics frozen.
 
 ## 2026-08-16
 

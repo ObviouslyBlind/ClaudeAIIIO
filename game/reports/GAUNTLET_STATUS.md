@@ -48,7 +48,9 @@ Loop is **live** on playtest bugs (operator: 鈥渟o many bugs, use the gauntlet鈥
 
 `/g/persist110` **PASS PERSIST**: Restore enabled on a dump; after 2 s persist-line still `PAPER 路 SIMULATED 路 restored 路 tick 路 $1,000`. Unique `/g/persist110`.
 
-Next: quiet the spawn taxi hint (always-on `$5 路 dirt forbidden`), then nearby meshes / perf pass.
+`/g/taxi111` **PASS TAXI**: spawn sheet has no `Taxi 路 $5 路 dirt forbidden`; Taxi still hails ("waiting on paved"). Unique `/g/taxi111`.
+
+Queue: nearby meshes / quay clutter / trees off the main thread (perf pass). User is the brake.
 
 One **pixel critic** at a time. Unique `/g/鈥 path. No RMB. Do not restart play while a critic is on the page.
 

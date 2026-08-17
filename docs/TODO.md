@@ -59,7 +59,7 @@ Politics frozen. See `game/reports/GAUNTLET_STATUS.md`. New chat: `game/reports/
 - [x] HUD clone lines — empty goods/persist no longer paint the same PAPER badge (D044). `/g/hud104` FAIL HUD: House $40 afford on boot copy (D045). `/g/hud107` PASS HUD.
 - [x] Market from harbour dock — Buy 1 fills, cash shared, PAPER labeled (`/g/mkt108` PASS MARKET).
 - [x] Persist Restore from a live dump. `/g/persist109` FAIL PERSIST: restored label lasted <1 s (D046). `/g/persist110` PASS PERSIST.
-- [ ] Quiet spawn taxi hint — `$5 · dirt forbidden` paints whenever Taxi exists (`/g/taxi111`).
+- [x] Quiet spawn taxi hint — `$5 · dirt forbidden` paints whenever Taxi exists (`/g/taxi111` PASS TAXI).
 - [ ] Perf pass: return quay clutter / foam / trees without main-thread builds.
 - [x] Bug scout: south island void after ferry, invisible restored buildings, dead pier taps (D039).
 - [x] Playtest: taxi missing + 86 m pier on sand — taxi at boot, pier over water (D037).

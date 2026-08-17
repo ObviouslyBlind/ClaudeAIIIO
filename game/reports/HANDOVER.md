@@ -8,7 +8,7 @@ This is a PAPER / SIMULATED harbour game in `/workspace/game`. The Polymarket pa
 
 Operator came back to **playtest**. Bar is **`http://localhost:8787/`**, inland spawn, walkable harbour.
 
-Gauntlet live. `/g/persist110` PASS PERSIST. Next: quiet spawn taxi hint (`/g/taxi111`).
+Gauntlet at a resting point after HUD / market / persist / taxi-hint. `/g/taxi111` PASS TAXI. Next: perf pass to return quay clutter / foam / trees / peds off the main thread.
 
 Last playtest fix: D047 taxi fare only while the map is open. D046 persist line keeps restored. D045 develop hint ignores boot copy. D044 empty goods blank / persist `no dump`.
 
