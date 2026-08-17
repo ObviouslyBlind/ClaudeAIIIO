@@ -4,9 +4,11 @@ New chat: paste **`game/reports/HANDOVER.md`**, not this file.
 
 Loop is **live** on playtest bugs (operator: “so many bugs, use the gauntlet”). Not seaward cubes. Not another funnel.
 
-Current piece: **`/g/play88` INTERACTIVE** — inland `/` spawn must stay clickable after land paints. D033 already shipped (boot returns before trees). Critic inspects the live page only.
+`/g/play88` **PASS INTERACTIVE**: inland harbour, beige sand, black road, Cash $1,000, PAPER · SIMULATED. Left click did not hang.
 
-Queue after that (one bar each): click-walk, lease a cheap north lot, Develop House, Enter/Exit.
+Current piece: **`/g/walk89` WALK** — one left click on inland ground must walk (status Walking or the visitor moves). No RMB.
+
+Queue after that: lease a cheap north lot, Develop House, Enter/Exit.
 
 One **pixel critic** at a time. Unique `/g/…` path. No RMB. Do not restart play while a critic is on the page.
 
