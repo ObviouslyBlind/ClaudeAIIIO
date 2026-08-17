@@ -1145,6 +1145,77 @@ function plantNorthPortMoss(root) {
   root.add(moss);
 }
 
+function markLichen(mesh) {
+  mesh.userData.part = "lichen";
+  mesh.userData.dress = "lichen";
+  mesh.userData.mode = "PAPER";
+  mesh.userData.provenance = "PAPER";
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+}
+
+/**
+ * One tiny kraft PAPER lichen patch (one box) on a north-port palm trunk —
+ * not instead of the moss, knot, bark, twig, vine, husk, frond, leaf,
+ * coconut, bird, nest, or egg. Hexes already in this file: trunk kraft.
+ * Reuses the nest twig box so geometry count stays put. Unique mesh —
+ * one box — so the phone mesh budget stays tiny. Trunks, leaves,
+ * coconuts, bird, nest, egg, leaf, frond, husk, vine, twig, bark, knot,
+ * and moss stay put.
+ */
+function plantNorthPortLichen(root) {
+  const placed = root.userData.placed || [];
+  const sites = placed.filter((p) => p.island === "north" && p.dress === "north-port-palm");
+  if (!sites.length) return;
+
+  let nest = null;
+  root.traverse((obj) => {
+    if (!nest && obj.userData.kind === "nest") nest = obj;
+  });
+  if (!nest) return;
+
+  let geo = null;
+  nest.traverse((obj) => {
+    if (geo) return;
+    if (obj.isMesh && obj.geometry && obj.userData.part === "nest") geo = obj.geometry;
+  });
+  if (!geo) return;
+
+  const nestPos = new THREE.Vector3();
+  nest.getWorldPosition(nestPos);
+  let p = sites[0];
+  let best = Infinity;
+  for (const s of sites) {
+    const d = Math.hypot(s.x - nestPos.x, s.z - nestPos.z);
+    if (d < best) {
+      best = d;
+      p = s;
+    }
+  }
+
+  const mat = new THREE.MeshLambertMaterial({ color: TRUNK });
+  const lichen = new THREE.Group();
+  lichen.name = "lichen";
+  lichen.userData.kind = "lichen";
+  lichen.userData.part = "lichen";
+  lichen.userData.dress = "lichen";
+  lichen.userData.mode = "PAPER";
+  lichen.userData.provenance = "PAPER";
+  // Sit on the palm trunk, offset from the moss, knot, and bark flake.
+  const yaw = 5.65;
+  const rad = 0.22;
+  lichen.position.set(p.x + Math.cos(yaw) * rad, p.y + 1.88, p.z + Math.sin(yaw) * rad);
+  lichen.rotation.set(0.18, yaw, -0.4);
+
+  const box = new THREE.Mesh(geo, mat);
+  box.name = "lichen-box";
+  markLichen(box);
+  box.scale.set(0.3, 0.5, 0.34);
+
+  lichen.add(box);
+  root.add(lichen);
+}
+
 /**
  * Low-poly PAPER trees on hills, inland slopes, and behind street lots.
  * Palms stay on the quay (makePalms). helpers: { scene, specOf, heightAt }.
@@ -1175,6 +1246,7 @@ export function makeTrees(map, helpers) {
   plantNorthPortBark(root);
   plantNorthPortKnot(root);
   plantNorthPortMoss(root);
+  plantNorthPortLichen(root);
   scene.add(root);
   return root;
 }
