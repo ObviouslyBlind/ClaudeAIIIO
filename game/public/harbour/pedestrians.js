@@ -326,6 +326,22 @@ function addKraftPaperPipe(figure) {
 }
 
 /**
+ * Tiny kraft PAPER cigar in the right hand. Original canvas hex already
+ * in this file — no new grey. PAPER box only. Hat, apron, satchel,
+ * gloves, tin, pin, basket, loaf, parcel, flask, bundle, can, match,
+ * pipe, boots stay. Offset from the pipe, match, can, bundle, flask,
+ * parcel, loaf, tin, pin, basket, gloves, kerchief, satchel, apron,
+ * and hat.
+ */
+function addKraftPaperCigar(figure) {
+  const cigar = paperBox(0.04, 0.08, 0.04, CANVAS);
+  cigar.position.set(0.45, 1.10, 0.32);
+  cigar.userData.mode = "PAPER";
+  cigar.userData.part = "cigar";
+  figure.add(cigar);
+}
+
+/**
  * Short kraft work-boot shafts above each shoe so dock hands read as
  * boots, not socks on boxes. Original shoe hex already in this file —
  * no new grey. PAPER boxes only. Existing shoes stay.
@@ -512,6 +528,7 @@ export function makePedestrians(map, helpers) {
       addKraftPaperCan(person.mesh);
       addKraftPaperMatch(person.mesh);
       addKraftPaperPipe(person.mesh);
+      addKraftPaperCigar(person.mesh);
       lightQuayShirt(person.mesh);
     }
     const at = samplePerson(spec, heightAt, person, along);
