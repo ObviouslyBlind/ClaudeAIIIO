@@ -421,23 +421,21 @@ function makePort(spec) {
   }
   const wx = x + 18;
   const wz = z - toward * 12;
-  const shed = box(20, 5.8, 12, 0xd9cbb3, wx, y + 3.15, wz);
+  const shed = box(8, 3.4, 6, 0xd9cbb3, wx, y + 1.85, wz);
   shed.userData.kind = "port";
-  const roofA = box(21.2, 0.18, 7.6, 0x6e2e22, wx, y + 6.85, wz - 2.4, false);
+  const roofA = box(8.6, 0.14, 3.4, 0x6e2e22, wx, y + 3.75, wz - 1.2, false);
   roofA.rotation.x = 0.4;
-  const roofB = box(21.2, 0.18, 7.6, 0x6e2e22, wx, y + 6.85, wz + 2.4, false);
+  const roofB = box(8.6, 0.14, 3.4, 0x6e2e22, wx, y + 3.75, wz + 1.2, false);
   roofB.rotation.x = -0.4;
-  box(21.4, 0.14, 0.3, 0x6e2e22, wx, y + 8.15, wz, false);
-  const dock = box(8.5, 0.7, 6, 0x9a8a72, wx + toward * 0.2, y + 0.55, wz + toward * 8.2, false);
+  box(8.8, 0.12, 0.22, 0x6e2e22, wx, y + 4.45, wz, false);
+  const dock = box(4.2, 0.5, 3.2, 0x9a8a72, wx + toward * 0.2, y + 0.45, wz + toward * 4.2, false);
   dock.userData.kind = "port";
-  box(4.2, 3.8, 0.18, 0x3d2a1c, wx, y + 2.2, wz + toward * 6.1, false);
-  box(1.5, 1.15, 0.1, 0x8ec4d4, wx - 6.2, y + 4.4, wz + toward * 6.05, false);
-  box(1.5, 1.15, 0.1, 0x8ec4d4, wx + 6.2, y + 4.4, wz + toward * 6.05, false);
+  box(2.4, 2.4, 0.12, 0x3d2a1c, wx, y + 1.45, wz + toward * 3.1, false);
+  box(0.9, 0.7, 0.08, 0x8ec4d4, wx - 2.8, y + 2.55, wz + toward * 3.08, false);
+  box(0.9, 0.7, 0.08, 0x8ec4d4, wx + 2.8, y + 2.55, wz + toward * 3.08, false);
   for (let i = 0; i < 5; i++) {
-    box(1.5, 1.35, 1.5, 0x7a5230, x - 9 + i * 2.0, y + 0.95, z - toward * 4, false);
+    box(0.7, 0.65, 0.7, 0x7a5230, x - 4.2 + i * 1.1, y + 0.55, z - toward * 4, false);
   }
-  box(0.85, 34, 0.85, 0xf3efe4, x - 14, y + 17, z + toward * 4, false);
-  box(1.4, 0.35, 1.4, 0xc45c3a, x - 14, y + 34.3, z + toward * 4, false);
 }
 
 function palmAt(x, z, y, lean = 0.12) {
@@ -463,14 +461,6 @@ function palmAt(x, z, y, lean = 0.12) {
 }
 
 function makePalms(spec) {
-  for (let i = 0; i < 22; i++) {
-    const a = (i / 22) * Math.PI * 2 + (spec.id === "north" ? 0.2 : 1.1);
-    const x = spec.cx + Math.cos(a) * spec.rx * 0.86;
-    const z = spec.cz + Math.sin(a) * spec.rz * 0.86;
-    const y = heightAt(spec, x, z);
-    if (y < 0.35) continue;
-    palmAt(x, z, y, (i % 2 ? 1 : -1) * 0.08);
-  }
   for (let i = 0; i < 8; i++) {
     const t = 0.12 + i * 0.08;
     const side = i % 2 ? 1 : -1;
@@ -940,7 +930,12 @@ const SHEET_HUD = [
 ];
 
 function loadSheetHuds() {
-  return Promise.all(SHEET_HUD.map((p) => import(p)));
+  return (async () => {
+    for (const p of SHEET_HUD) {
+      await idle(80);
+      await import(p);
+    }
+  })();
 }
 
 /** Yield so Edge can paint and take clicks. rAF + 0ms still froze the tab. */
@@ -979,7 +974,9 @@ async function ensureCatalog() {
     });
   }
   if (map) {
-    for (const p of map.plots) useFor(p);
+    for (const p of map.plots) {
+      if (plotMeshes.has(p.id)) useFor(p);
+    }
   }
 }
 
@@ -1000,13 +997,14 @@ async function ensureInterior() {
   return interior;
 }
 
-/** Trees/quay/stalls compile on the main thread. Do not start until the first walk is painted. */
-export const DRESSING_AFTER_CLICK_MS = 5000;
-/** If they never click, still dress the harbour — after a long quiet window. */
-export const DRESSING_FALLBACK_MS = 60000;
+/** Quay/ferry compile on the main thread. Wait until walk has been idle. */
+export const DRESSING_AFTER_WALK_MS = 45000;
+/** If they never click, still add the north quay — after a long quiet window. */
+export const DRESSING_FALLBACK_MS = 120000;
 
 let dressingStarted = false;
 let firstPointerDone = false;
+let dressingTimer = 0;
 
 function startDressing() {
   if (dressingStarted) return;
@@ -1015,16 +1013,31 @@ function startDressing() {
   void loadDressing();
 }
 
+function scheduleDressing(ms) {
+  if (dressingStarted) return;
+  clearTimeout(dressingTimer);
+  dressingTimer = setTimeout(() => {
+    if (walking) {
+      scheduleDressing(DRESSING_AFTER_WALK_MS);
+      return;
+    }
+    startDressing();
+  }, ms);
+}
+
 function afterFirstPointer() {
-  if (firstPointerDone) return;
+  if (firstPointerDone) {
+    scheduleDressing(DRESSING_AFTER_WALK_MS);
+    return;
+  }
   firstPointerDone = true;
-  setTimeout(startDressing, DRESSING_AFTER_CLICK_MS);
+  scheduleDressing(DRESSING_AFTER_WALK_MS);
 }
 
 async function loadDressing() {
   const target = worldScene();
   const step = async (fn) => {
-    await idle(120);
+    await idle(160);
     await fn();
   };
 
@@ -1038,49 +1051,15 @@ async function loadDressing() {
   await step(async () => {
     const quayMod = await import("./quay.js");
     quayMod.makeQuay(specOf("north"), { scene: target, heightAt });
-    loadDressing.quayMod = quayMod;
-  });
-
-  await step(async () => {
-    const pedMod = await import("./pedestrians.js");
-    pedestrians = pedMod.makePedestrians(map, {
-      scene: target,
-      specOf,
-      heightAt,
-      getPlayer: () => player,
-    });
   });
 
   await step(async () => {
     const shoreMod = await import("./shore.js");
     shoreMod.makeShoreFoam(specOf("north"), heightAt, target);
-    loadDressing.shoreMod = shoreMod;
   });
 
   await step(async () => {
     makePalms(specOf("north"));
-  });
-
-  await step(async () => {
-    const propsMod = await import("./street-props.js");
-    propsMod.makeStreetProps(map, { scene: target, specOf, heightAt });
-  });
-
-  await step(async () => {
-    const treeMod = await import("./trees.js");
-    treeMod.makeTrees(map, { scene: target, specOf, heightAt });
-  });
-
-  await step(async () => {
-    makeTerrain(specOf("south"));
-    makePort(specOf("south"));
-    makePalms(specOf("south"));
-    if (loadDressing.quayMod) {
-      loadDressing.quayMod.makeQuay(specOf("south"), { scene: target, heightAt });
-    }
-    if (loadDressing.shoreMod) {
-      loadDressing.shoreMod.makeShoreFoam(specOf("south"), heightAt, target);
-    }
   });
 
   await step(async () => {
@@ -1092,36 +1071,6 @@ async function loadDressing() {
       heightAt,
       getPlayer: () => player,
       getIslandId: () => islandId,
-    });
-  });
-
-  await step(async () => {
-    const stallMod = await import("./stalls.js");
-    stalls = stallMod.createStalls({
-      scene: target,
-      getMap: () => map,
-      specOf,
-      heightAt,
-      setStatus,
-      applySnapshot,
-      getPlayer: () => player,
-    });
-  });
-
-  await step(async () => {
-    const taxiMod = await import("./taxi.js");
-    taxi = taxiMod.createTaxi({
-      scene: target,
-      player,
-      getMap: () => map,
-      specOf,
-      heightAt,
-      getIslandId: () => islandId,
-      setWalking: (v) => {
-        walking = v;
-      },
-      setStatus,
-      button: btnTaxi,
     });
   });
 }
@@ -1143,10 +1092,11 @@ async function boot() {
   await idle(48);
   makeRoads(map, { scene, specOf, heightAt });
   makePort(specOf("north"));
+  makePalms(specOf("north"));
   harbourGroup = wrapHarbourWorld(scene, { keep: [player, sun.target] });
   await makeParcels(nearNorthSpawn);
   setStatus("Tap a piece of land. Lease it, then develop it.");
-  setTimeout(startDressing, DRESSING_FALLBACK_MS);
+  scheduleDressing(DRESSING_FALLBACK_MS);
 }
 
 canvas.addEventListener("pointerup", onPointer);

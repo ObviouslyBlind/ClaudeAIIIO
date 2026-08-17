@@ -7,12 +7,8 @@ import * as THREE from "three";
  *
  * Hook from quay.js `makeQuay` only. Do not import from main.js.
  *
- * Spawn camera sits inland (more negative Z) and cannot orbit.
- * /g/sign59 FAIL SIGN: seaward-facing 4 m board.
- * /g/sign60 FAIL SIGN: 11 m inland board in deck clutter.
- * /g/sign61 FAIL SIGN: 24 m cream wall at x=18 sat off the port pad
- * (across >= 16 → heightAt water) and read as ferry hull. Keep across < 16,
- * along < 90, tall WOOD_DARK posts into cyan, modest kraft board high up.
+ * Playtest scale (D036): two posts ~3.2 m, board ~2.4 × 0.9 m.
+ * The 48 m critic posts read as towers next to a 2 m visitor.
  */
 
 export const SIGN_LINE = "North port · PAPER";
@@ -29,15 +25,15 @@ const PAPER_EDGE = "#8a6238";
 const LOCAL_X = 12;
 const ALONG = 80;
 
-const POST_W = 4.6;
-const POST_H = 48;
-const POST_SPAN = 6;
-const BOARD_W = 10;
-const BOARD_H = 6;
-const BOARD_D = 2;
-const BOARD_Y = 32;
-const FACE_W = 9.4;
-const FACE_H = 5.4;
+const POST_W = 0.16;
+const POST_H = 3.2;
+const POST_SPAN = 1.15;
+const BOARD_W = 2.4;
+const BOARD_H = 0.9;
+const BOARD_D = 0.12;
+const BOARD_Y = 2.2;
+const FACE_W = 2.2;
+const FACE_H = 0.75;
 
 function part(w, h, d, color, shadow = true) {
   const m = new THREE.Mesh(
@@ -133,35 +129,35 @@ export function makePortSign(spec, helpers) {
   postR.userData.part = "post";
   g.add(postL, postR);
 
-  const capY = POST_H + 0.4;
-  const capL = part(5.4, 0.6, 5.4, WOOD, false);
+  const capY = POST_H + 0.06;
+  const capL = part(0.26, 0.08, 0.26, WOOD, false);
   capL.position.set(-POST_SPAN, capY, 0);
   capL.userData.part = "cap";
   capL.userData.kind = "port-sign-cap";
-  const capR = part(5.4, 0.6, 5.4, WOOD, false);
+  const capR = part(0.26, 0.08, 0.26, WOOD, false);
   capR.position.set(POST_SPAN, capY, 0);
   capR.userData.part = "cap";
   capR.userData.kind = "port-sign-cap";
-  const finL = part(1.1, 1.2, 1.1, WOOD, false);
-  finL.position.set(-POST_SPAN, capY + 0.9, 0);
-  const finR = part(1.1, 1.2, 1.1, WOOD, false);
-  finR.position.set(POST_SPAN, capY + 0.9, 0);
+  const finL = part(0.08, 0.12, 0.08, WOOD, false);
+  finL.position.set(-POST_SPAN, capY + 0.1, 0);
+  const finR = part(0.08, 0.12, 0.08, WOOD, false);
+  finR.position.set(POST_SPAN, capY + 0.1, 0);
   g.add(capL, capR, finL, finR);
 
-  const braceL = part(1.4, 10, 1.4, WOOD);
-  braceL.position.set(-POST_SPAN + 3.4, 14, 0);
+  const braceL = part(0.1, 0.85, 0.1, WOOD);
+  braceL.position.set(-POST_SPAN + 0.35, 1.55, 0);
   braceL.rotation.z = -0.55;
   braceL.userData.part = "brace";
   braceL.userData.kind = "port-sign-brace";
-  const braceR = part(1.4, 10, 1.4, WOOD);
-  braceR.position.set(POST_SPAN - 3.4, 14, 0);
+  const braceR = part(0.1, 0.85, 0.1, WOOD);
+  braceR.position.set(POST_SPAN - 0.35, 1.55, 0);
   braceR.rotation.z = 0.55;
   braceR.userData.part = "brace";
   braceR.userData.kind = "port-sign-brace";
   g.add(braceL, braceR);
 
-  const beam = part(BOARD_W + 0.6, 0.45, 0.5, WOOD, false);
-  beam.position.set(0, BOARD_Y + BOARD_H / 2 + 0.28, 0);
+  const beam = part(BOARD_W + 0.12, 0.1, 0.12, WOOD, false);
+  beam.position.set(0, BOARD_Y + BOARD_H / 2 + 0.08, 0);
   g.add(beam);
 
   const board = part(BOARD_W, BOARD_H, BOARD_D, WOOD_LIGHT);
@@ -177,13 +173,13 @@ export function makePortSign(spec, helpers) {
 
   /** Tiny kraft nail on the board face. WOOD_DARK already in this file — PAPER box, not grey iron. */
   const nail = part(0.05, 0.05, 0.04, WOOD_DARK, false);
-  nail.position.set(-4.2, BOARD_Y + 2.4, -(BOARD_D / 2 + 0.06));
+  nail.position.set(-0.9, BOARD_Y + 0.32, -(BOARD_D / 2 + 0.06));
   nail.userData.part = "nail";
   g.add(nail);
 
   /** Tiny kraft screw, second fastener, offset from the nail. WOOD already in this file — PAPER box, not grey iron. */
   const screw = part(0.05, 0.05, 0.04, WOOD, false);
-  screw.position.set(4.2, BOARD_Y + 2.4, -(BOARD_D / 2 + 0.06));
+  screw.position.set(0.9, BOARD_Y + 0.32, -(BOARD_D / 2 + 0.06));
   screw.userData.part = "screw";
   g.add(screw);
 

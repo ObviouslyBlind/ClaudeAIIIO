@@ -124,12 +124,9 @@ export function makeShoreFoam(spec, heightAtFn, scene) {
   const group = new THREE.Group();
   group.name = "shore-foam-" + spec.id;
 
-  const ringGeo = new THREE.BoxGeometry(2.0, 0.06, 9.0);
-  /**
-   * Large basin bars. `/g/shore38`–`shore39` FAIL FOAM: side dashes sat
-   * beside the timber and read as the beige pier from spawn.
-   */
-  const portGeo = new THREE.BoxGeometry(7.4, 1.35, 9.2);
+  const ringGeo = new THREE.BoxGeometry(1.2, 0.05, 2.4);
+  /** Thin kraft dashes. 7×9 m critic bars read as shoreline tiles inland. */
+  const portGeo = new THREE.BoxGeometry(1.6, 0.1, 2.4);
   const mat = new THREE.MeshLambertMaterial({
     color: 0xefe6c9,
     emissive: 0xefe6c9,
