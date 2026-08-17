@@ -12,40 +12,41 @@ come to the player later, the player does not blink across the map).
 
 - Whole-island parcel map: every lot filled, boundary-inked, price-tagged. `YOURS` on leases.
 - Wheel zoom to map height (RMB orbit unchanged, tap-to-walk unchanged).
-- Fields carpet rows 2–3 off the road spine.
+- Harbour cove opens to the sea (no inland “lake”); terrain 224×144. `heightAt` lives in
+  both `src/land.ts` and `public/harbour/main.js` — keep them in sync.
+- Dead gauntlet dressing purged (~19k lines). Notes: `reports/FABLE5_NOTES.md`.
+- **Road network:** 4 named side streets per island (Market / Mill / Chapel / Weir St).
+  Lots front their street. Fields sit on dirt lanes past street ends. Taxi is point-based
+  (named stops). Traffic owns a road, uses a lane offset, turns around at ends.
+  `/api/map` includes `stops`.
 - NPC town seeded per island (houses, shops, house-shops, warehouse, farms): the world
-  starts inhabited, tagged buildings appear via the trickle loader.
+  starts inhabited, tagged buildings appear via the trickle loader (~8s).
 - Printed-map terrain greens so the plat reads on top.
+- Instanced props (bushes / rocks / barrels / benches) off-road and off-parcel.
 
 ## Next, in order
 
-### 1. Road network, not one spine
-- Cross streets branching off the spine near each port (town grid), dirt tracks to fields.
-- Parcels re-tiled to face their street. Taxi still paved-only; extend the taxi graph to
-  the new paved streets. Traffic loops the grid.
-- Keep `ROAD_CLEAR` culling so nothing builds on the carriageway.
-
-### 2. Map expansion
+### 1. Map expansion
 - Fill both islands corridor-first: more spine steps, then side-street tiling.
 - Chunked loading stays mandatory (phone floor, no full-island mesh).
 
-### 3. Evergreen server
+### 2. Evergreen server
 - The shard is already headless-ticking; make it durable: Postgres persistence
   (BACKEND.md step C), boot-restore, event log for leases/develops/statutes.
 - One live world. The sim never waits for a player.
 
-### 4. Preplaced buildings with purchasable interiors (before player-built)
+### 3. Preplaced buildings with purchasable interiors (before player-built)
 - NPC town buildings get room-level interiors: each room is a purchasable unit with a
   PAPER price tag (the Capital Rift room-with-$ pattern, our implementation).
 - Buy a room → it is yours (storage, lodging, or shopfront slot). Whole-building buyout
   possible when every room is owned.
 - Player-designed buildings come only after this works.
 
-### 5. Working buildings
+### 4. Working buildings
 - A shop sells from its owner's stock. A farm produces on the tick. A warehouse stores.
   Staff slots (already in sim) attach to real sites. No decorative-only meshes.
 
-### 6. Asset sizing + real models
+### 5. Asset sizing + real models
 - Rule: door height ≈ 2.1 m against the 1.7 m player capsule. Every mesh placed gets
   checked against the player at spawn distance.
 - Replace box shells with CC0 glTF kits (license-safe, commercial OK, no attribution needed):

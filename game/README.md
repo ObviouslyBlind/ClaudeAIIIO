@@ -16,6 +16,8 @@ npm run tick        # 1 simulated hour
 npm run play        # http://localhost:8787  (3D harbour)
 ```
 
+From a **Cursor cloud agent**: plug icon (top-right of the agent panel) → make sure **8787** is forwarded → open `http://localhost:8787/`. If you are on cursor.com/agents in a browser only, 8787 is not on your laptop — use the agent Ports / Simple Browser.
+
 Open `/` for the harbour. Tap a **piece of land** (not a given lot card), Lease, then Develop. **Ferry** near a port quotes the North ↔ South crossing (PAPER $15) before travel. **Taxi** rides the paved road only (PAPER). `/market/` is the paper goods HUD; cash is shared. Labelled PAPER / SIMULATED.
 
 Visitor starts with $1,000. Tap ground to walk. The world still ticks if nobody clicks.
