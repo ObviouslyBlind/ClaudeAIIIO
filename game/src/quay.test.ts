@@ -588,7 +588,7 @@ describe("quay harbour dressing", () => {
     expect(cargo!.position.z).toBeLessThan(-6864);
   });
 
-  it("parks a spawn-readable rust plate port of the held buoy on the cream hull", () => {
+  it("paints a spawn-readable rust waterline on the camera-facing cream hull", () => {
     const spec = ISLANDS.north;
     const added: THREE.Object3D[] = [];
     const scene = { add(obj: THREE.Object3D) { added.push(obj); } };
@@ -611,9 +611,11 @@ describe("quay harbour dressing", () => {
     expect(hexes).toContain(0x6e2e22);
     expect(hexes).toContain(0xc4b496);
     const bg = (body as THREE.Mesh).geometry as THREE.BoxGeometry;
-    expect(bg.parameters.height).toBeGreaterThanOrEqual(6);
-    expect(plate!.position.x).toBeLessThan(-6);
-    expect(plate!.position.y).toBeGreaterThan(4);
-    expect(Math.abs(plate!.position.z - buoy!.position.z)).toBeLessThan(1);
+    expect(bg.parameters.width).toBeGreaterThanOrEqual(14);
+    expect(bg.parameters.height).toBeGreaterThanOrEqual(3);
+    expect(Math.abs(plate!.position.x)).toBeLessThan(2);
+    expect(plate!.position.y).toBeGreaterThan(1);
+    expect(plate!.position.y).toBeLessThan(4);
+    expect(Math.abs(plate!.position.z - buoy!.position.z)).toBeLessThan(4);
   });
 });

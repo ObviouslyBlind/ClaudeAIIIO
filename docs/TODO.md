@@ -33,7 +33,7 @@ Politics frozen. See `game/reports/GAUNTLET_STATUS.md`.
 - [x] Pixel kraft/rust life ring (`/g/ring71`–`/g/ring73` FAIL RING — round stopped, not pixel-held)
 - [x] Pixel rust funnel (`/g/funnel74`–`/g/funnel75` FAIL FUNNEL — round stopped, not pixel-held)
 - [x] Pixel rust cargo (`/g/cargo76`–`78` FAIL CARGO — round stopped, not pixel-held)
-- [ ] Pixel rust hull plate (`http://localhost:8787/g/plate79`). Shells deferred: seaward spawn, no RMB)
+- [ ] Pixel rust hull waterline (`http://localhost:8787/g/plate80`; `/g/plate79` FAIL PLATE). Shells deferred: seaward spawn, no RMB)
 
 ## Polymarket paper bot
 

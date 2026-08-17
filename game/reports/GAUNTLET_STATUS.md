@@ -154,7 +154,11 @@ Pixel: **rust cargo** at `http://localhost:8787/g/cargo78`. Pier-wide rust slab 
 
 Pixel: **rust hull plate** at `http://localhost:8787/g/plate79`. Buoy-class rust cube on the camera-facing cream hull, port (left) of the held buoy. No RMB. Address bar must be `/g/plate79`. Do not restart play while the critic is on the page.
 
-## Next pixel (after plate79 PASS, immediately, no wait)
+`/g/plate79` **FAIL PLATE**: one rust buoy on the hull; port cube at x-8.8 sat behind the cream hull from the east spawn camera. Waterline rust band now on the camera-facing north face, below the buoy.
+
+Pixel: **rust hull waterline** at `http://localhost:8787/g/plate80`. Wide rust band on the camera-facing cream hull, below the held buoy. No RMB. Address bar must be `/g/plate80`. Do not restart play while the critic is on the page.
+
+## Next pixel (after plate80 PASS, immediately, no wait)
 
 ## Frozen
 
