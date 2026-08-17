@@ -18,6 +18,7 @@ import { createFerryTicket } from "./ferry-ticket.js";
 import { createCatalogPicker, meshForUse } from "./buildings.js";
 import { makeWater } from "./water.js";
 import { makeSky } from "./sky.js";
+import { CAM, LOOK } from "./first-frame.js";
 import { makeStreetProps } from "./street-props.js";
 import { makeTrees } from "./trees.js";
 import { dressPlayer } from "./player.js";
@@ -122,8 +123,8 @@ scene.add(sun);
 
 if (statusEl) statusEl.textContent = "North port · PAPER";
 if (renderer) {
-  camera.position.set(18, 22, -6888);
-  camera.lookAt(0, 1.2, -6835);
+  camera.position.set(CAM.x, CAM.y, CAM.z);
+  camera.lookAt(LOOK.x, LOOK.y, LOOK.z);
   renderer.render(scene, camera);
 }
 

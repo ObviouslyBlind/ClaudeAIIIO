@@ -1,10 +1,11 @@
 /**
- * Paint sky cyan and look at the north ferry berth before the rest of the
- * harbour graph loads. HUD <script type="module"> tags plus main.js static
- * imports otherwise block any WebGL frame past a 25s critic timeout
+ * Paint sky cyan and look inland along the north tarmac before the rest of
+ * the harbour graph loads. HUD <script type="module"> tags plus main.js
+ * static imports otherwise block any WebGL frame past a 25s critic timeout
  * (`/?g=ferry31`–`ferry33` FAIL: body teal #0e4a55, status still Loading).
  *
- * BERTH_Z must stay in sync with ferry.js HOME_Z.
+ * CAM / LOOK match spawnCameraOffset("north") + spawnLookAtOffset("north")
+ * at the north port pad. BERTH_Z stays in sync with ferry.js HOME_Z.
  */
 import * as THREE from "three";
 
@@ -13,7 +14,9 @@ export const BERTH_Z = -6835;
 export const FOG_NEAR_M = 6000;
 export const FOG_FAR_M = 42000;
 export const CAMERA_FAR_M = 52000;
-export const CAM = { x: 18, y: 22, z: -6888 };
+/** Quay camera, looking inland. Not the seaward critic slot at z=-6888. */
+export const CAM = { x: 20, y: 26, z: -6918 };
+export const LOOK = { x: 0, y: 7, z: -7078 };
 
 export function paintFirstFrame(canvas) {
   if (!canvas) throw new Error("no canvas");
@@ -36,7 +39,7 @@ export function paintFirstFrame(canvas) {
     CAMERA_FAR_M,
   );
   camera.position.set(CAM.x, CAM.y, CAM.z);
-  camera.lookAt(0, 1.2, BERTH_Z);
+  camera.lookAt(LOOK.x, LOOK.y, LOOK.z);
   renderer.render(scene, camera);
   return { renderer, scene, camera };
 }

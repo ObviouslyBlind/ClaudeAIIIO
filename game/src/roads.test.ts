@@ -161,7 +161,7 @@ describe("paved street from spawn", () => {
     }
   });
 
-  it("places the spawn camera high, looking at the harbour channel and the ferry berth", () => {
+  it("places the spawn camera on the quay looking inland along the tarmac", () => {
     const n = spawnCameraOffset("north");
     const s = spawnCameraOffset("south");
     const nl = spawnLookAtOffset("north");
@@ -171,8 +171,10 @@ describe("paved street from spawn", () => {
     expect(n.y).toBeLessThan(40);
     expect(s.y).toBe(n.y);
     expect(Math.abs(n.x)).toBeLessThan(40);
-    expect(nl.z).toBeGreaterThan(40);
-    expect(sl.z).toBeLessThan(-40);
+    expect(n.z).toBeGreaterThan(0);
+    expect(s.z).toBeLessThan(0);
+    expect(nl.z).toBeLessThan(-40);
+    expect(sl.z).toBeGreaterThan(40);
 
     const farM = ISLANDS.south.port.z - ISLANDS.north.port.z;
     const fogged = (farM - FOG_NEAR_M) / (FOG_FAR_M - FOG_NEAR_M);
@@ -188,7 +190,7 @@ describe("paved street from spawn", () => {
       const px = spec.port.x;
       const pz = spec.port.z + (id === "north" ? -8 : 8);
       const py = heightAt(spec, px, pz) + 1.15;
-      const seaward = id === "north" ? 1 : -1;
+      const inland = id === "north" ? -1 : 1;
       const cam = new THREE.PerspectiveCamera(55, 16 / 9, 0.4, CAMERA_FAR_M);
       cam.position.set(px + o.x, py + o.y, pz + o.z);
       cam.lookAt(px + l.x, py + l.y, pz + l.z);
@@ -197,12 +199,10 @@ describe("paved street from spawn", () => {
       const ndc = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z).project(cam);
       const inFrame = (v: THREE.Vector3) => Math.abs(v.x) < 0.95 && Math.abs(v.y) < 0.95 && v.z < 1;
 
-      // Camera sits inland of the visitor and looks seaward, so the player,
-      // quay, and north berth are in front of the lens (`/g/ferry36` cannot RMB).
       const player = ndc(px, py, pz);
-      const quay = ndc(spec.port.x, py, spec.port.z + seaward * 38);
+      const spine = ndc(px, py + 2, pz + inland * 80);
       expect(inFrame(player)).toBe(true);
-      expect(inFrame(quay)).toBe(true);
+      expect(inFrame(spine)).toBe(true);
     }
 
     const north = ISLANDS.north;
@@ -216,8 +216,6 @@ describe("paved street from spawn", () => {
     cam.lookAt(px + l.x, py + l.y, pz + l.z);
     cam.updateMatrixWorld();
     const berth = new THREE.Vector3(0, 1.2, -6835).project(cam);
-    expect(Math.abs(berth.x)).toBeLessThan(0.95);
-    expect(Math.abs(berth.y)).toBeLessThan(0.95);
-    expect(berth.z).toBeLessThan(1);
+    expect(berth.z).toBeGreaterThanOrEqual(1);
   });
 });

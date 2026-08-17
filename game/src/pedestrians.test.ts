@@ -1312,12 +1312,12 @@ describe("harbour PAPER pedestrians", () => {
     }
   });
 
-  it("plants quay walkers in the seaward spawn look, not on the visitor", () => {
+  it("plants quay walkers on the north pier, not on the visitor", () => {
     const spec = ISLANDS.north;
     const playerZ = spec.port.z - 8;
     const lookZ = playerZ + spawnLookAtOffset("north").z;
     expect(HOME_Z).toBe(-6835);
-    expect(lookZ).toBeCloseTo(HOME_Z - 33, 0);
+    expect(lookZ).toBeLessThan(playerZ - 40);
     expect(SPAWN_QUAY_SCALE).toBeGreaterThan(4);
     expect(SPAWN_QUAY_ALONG.every((along) => along >= 24 && along <= 80)).toBe(true);
 
