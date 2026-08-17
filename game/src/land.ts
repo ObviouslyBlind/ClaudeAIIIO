@@ -555,7 +555,13 @@ export function heightAt(spec: IslandSpec, x: number, z: number): number {
   const along = (z - spec.port.z) * toward;
   const across = Math.abs(x - spec.port.x);
   if (across < 22 && along > -16 && along < 14) return 1.12;
-  if (across < 8 && along >= 14 && along < 50) return -8;
+  // Harbour cove: the pier slot widens seaward and meets the open sea, so the
+  // port reads as a coastal harbour, not a carved pond behind a beach spit.
+  if (along >= 14) {
+    const reach = along - 14;
+    const mouth = 8 + reach * 0.55;
+    if (across < mouth) return -2 - 6 * Math.min(1, reach / 90);
+  }
   if (r > edge) return -8;
   const t = r / edge;
   const portD = Math.hypot(x - spec.port.x, z - spec.port.z);

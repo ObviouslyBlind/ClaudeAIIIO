@@ -21,9 +21,12 @@ export const FILL_SELECTED = 0xf0d060;
 export const LINE_INK = 0x2f4a26;
 
 /** Metres. Labels only near the player; the far map stays clean geometry. */
-export const LABEL_RADIUS_M = 520;
+export const LABEL_RADIUS_M = 420;
 /** Pooled sprites. Bounded so a dense town cannot mint unbounded canvases. */
-export const LABEL_POOL = 96;
+export const LABEL_POOL = 72;
+/** Metres between shown tags. Street cuts sit ~45 m apart; without a floor
+ *  their tags stack into an unreadable shingle pile. */
+export const LABEL_MIN_GAP_M = 26;
 /** Metres above ground. */
 const FILL_LIFT = 0.35;
 const LINE_LIFT = 0.5;
@@ -259,7 +262,19 @@ export function mountParcelMap({ worldAdd, specOf, heightAt, getPlots }) {
       near.push({ p, d, text });
     }
     near.sort((a, b) => a.d - b.d);
-    const shown = near.slice(0, LABEL_POOL);
+    // Greedy spacing: nearest tags win, later tags need clear air.
+    const shown = [];
+    for (const cand of near) {
+      if (shown.length >= LABEL_POOL) break;
+      let clear = true;
+      for (const kept of shown) {
+        if (Math.hypot(cand.p.x - kept.p.x, cand.p.z - kept.p.z) < LABEL_MIN_GAP_M) {
+          clear = false;
+          break;
+        }
+      }
+      if (clear) shown.push(cand);
+    }
     for (let i = 0; i < LABEL_POOL; i++) {
       const slot = shown[i];
       if (!slot) {
