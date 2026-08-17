@@ -2509,3 +2509,124 @@ describe("farm PAPER kraft cask", () => {
     expect(boxes).toBeLessThanOrEqual(3);
   });
 });
+
+describe("farm PAPER kraft winnow", () => {
+  it("leans one tiny kraft PAPER winnow by the workbench; cask hod mattock harrow fork flail remain", () => {
+    const scene = new THREE.Scene();
+    dressFarm(scene);
+
+    const dress = scene.getObjectByName("farm-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+
+    const winnows: THREE.Object3D[] = [];
+    dress!.traverse((obj) => {
+      if (obj.userData?.part === "winnow" && obj.name === "farm-winnow") winnows.push(obj);
+    });
+    expect(winnows.length).toBe(1);
+    const paperWinnow = winnows[0];
+    expect(paperWinnow.userData.part).toBe("winnow");
+    expect(paperWinnow.userData.mode).toBe("PAPER");
+    expect(Math.abs(paperWinnow.rotation.z) > 0.15 || Math.abs(paperWinnow.rotation.x) > 0.15).toBe(true);
+
+    const paperCask = dress!.getObjectByName("farm-cask")!;
+    const paperHod = dress!.getObjectByName("farm-hod")!;
+    const paperMattock = dress!.getObjectByName("farm-mattock")!;
+    const paperHarrow = dress!.getObjectByName("farm-harrow")!;
+    const paperFork = dress!.getObjectByName("farm-paper-fork")!;
+    const paperFlail = dress!.getObjectByName("farm-flail")!;
+    const paperYoke = dress!.getObjectByName("farm-yoke")!;
+    const paperShears = dress!.getObjectByName("farm-shears")!;
+    const paperTrowel = dress!.getObjectByName("farm-trowel")!;
+    const paperSpade = dress!.getObjectByName("farm-spade")!;
+    const paperLadle = dress!.getObjectByName("farm-ladle")!;
+    const paperScythe = dress!.getObjectByName("farm-scythe")!;
+    const paperSickle = dress!.getObjectByName("farm-sickle")!;
+    const paperHoe = dress!.getObjectByName("farm-hoe")!;
+    const paperRake = dress!.getObjectByName("farm-rake")!;
+    const broom = dress!.getObjectByName("farm-broom")!;
+    const seed = dress!.getObjectByName("farm-seed")!;
+    const lid = dress!.getObjectByName("farm-lid")!;
+    const mug = dress!.getObjectByName("farm-mug")!;
+    const egg = dress!.getObjectByName("farm-egg")!;
+    const tablePail = dress!.getObjectByName("farm-table-pail")!;
+    const lantern = dress!.getObjectByName("farm-lantern")!;
+    expect(paperCask).toBeTruthy();
+    expect(paperHod).toBeTruthy();
+    expect(paperMattock).toBeTruthy();
+    expect(paperHarrow).toBeTruthy();
+    expect(paperFork).toBeTruthy();
+    expect(paperFlail).toBeTruthy();
+    expect(paperYoke).toBeTruthy();
+    expect(paperShears).toBeTruthy();
+    expect(paperTrowel).toBeTruthy();
+    expect(paperSpade).toBeTruthy();
+    expect(paperLadle).toBeTruthy();
+    expect(paperScythe).toBeTruthy();
+    expect(paperSickle).toBeTruthy();
+    expect(paperHoe).toBeTruthy();
+    expect(paperRake).toBeTruthy();
+    expect(broom).toBeTruthy();
+    expect(seed).toBeTruthy();
+    expect(lid).toBeTruthy();
+    expect(mug).toBeTruthy();
+    expect(egg).toBeTruthy();
+    expect(tablePail).toBeTruthy();
+    expect(lantern).toBeTruthy();
+    expect(paperCask.userData.part).toBe("cask");
+    expect(paperHod.userData.part).toBe("hod");
+    expect(paperMattock.userData.part).toBe("mattock");
+    expect(paperHarrow.userData.part).toBe("harrow");
+    expect(paperFork.userData.part).toBe("fork");
+    expect(paperFlail.userData.part).toBe("flail");
+
+    expect(paperWinnow.position.y).toBeLessThan(0.5);
+    const toBench = Math.hypot(paperWinnow.position.x - -3.28, paperWinnow.position.z - -0.15);
+    expect(toBench).toBeGreaterThan(0.2);
+    expect(toBench).toBeLessThan(0.8);
+
+    expect(Math.hypot(paperWinnow.position.x - paperCask.position.x, paperWinnow.position.z - paperCask.position.z)).toBeGreaterThan(0.2);
+    expect(Math.hypot(paperWinnow.position.x - paperHod.position.x, paperWinnow.position.z - paperHod.position.z)).toBeGreaterThan(0.2);
+    expect(Math.hypot(paperWinnow.position.x - paperMattock.position.x, paperWinnow.position.z - paperMattock.position.z)).toBeGreaterThan(0.2);
+    expect(Math.hypot(paperWinnow.position.x - paperHarrow.position.x, paperWinnow.position.z - paperHarrow.position.z)).toBeGreaterThan(0.2);
+    expect(Math.hypot(paperWinnow.position.x - paperFork.position.x, paperWinnow.position.z - paperFork.position.z)).toBeGreaterThan(0.2);
+    expect(Math.hypot(paperWinnow.position.x - paperFlail.position.x, paperWinnow.position.z - paperFlail.position.z)).toBeGreaterThan(0.2);
+    expect(Math.hypot(paperWinnow.position.x - paperYoke.position.x, paperWinnow.position.z - paperYoke.position.z)).toBeGreaterThan(0.2);
+    expect(Math.hypot(paperWinnow.position.x - paperShears.position.x, paperWinnow.position.z - paperShears.position.z)).toBeGreaterThan(0.2);
+    expect(Math.hypot(paperWinnow.position.x - paperTrowel.position.x, paperWinnow.position.z - paperTrowel.position.z)).toBeGreaterThan(0.2);
+    expect(Math.hypot(paperWinnow.position.x - paperSpade.position.x, paperWinnow.position.z - paperSpade.position.z)).toBeGreaterThan(0.2);
+    expect(Math.hypot(paperWinnow.position.x - paperLadle.position.x, paperWinnow.position.z - paperLadle.position.z)).toBeGreaterThan(0.2);
+    expect(Math.hypot(paperWinnow.position.x - paperScythe.position.x, paperWinnow.position.z - paperScythe.position.z)).toBeGreaterThan(0.2);
+    expect(Math.hypot(paperWinnow.position.x - paperSickle.position.x, paperWinnow.position.z - paperSickle.position.z)).toBeGreaterThan(0.2);
+    expect(Math.hypot(paperWinnow.position.x - paperHoe.position.x, paperWinnow.position.z - paperHoe.position.z)).toBeGreaterThan(0.2);
+    expect(Math.hypot(paperWinnow.position.x - paperRake.position.x, paperWinnow.position.z - paperRake.position.z)).toBeGreaterThan(0.2);
+    expect(Math.hypot(paperWinnow.position.x - broom.position.x, paperWinnow.position.z - broom.position.z)).toBeGreaterThan(0.2);
+    expect(Math.hypot(paperWinnow.position.x - seed.position.x, paperWinnow.position.z - seed.position.z)).toBeGreaterThan(0.2);
+    expect(Math.hypot(paperWinnow.position.x - mug.position.x, paperWinnow.position.z - mug.position.z)).toBeGreaterThan(0.2);
+    expect(Math.hypot(paperWinnow.position.x - egg.position.x, paperWinnow.position.z - egg.position.z)).toBeGreaterThan(0.2);
+    expect(Math.hypot(paperWinnow.position.x - tablePail.position.x, paperWinnow.position.z - tablePail.position.z)).toBeGreaterThan(0.2);
+    expect(Math.hypot(paperWinnow.position.x - lantern.position.x, paperWinnow.position.z - lantern.position.z)).toBeGreaterThan(0.2);
+    expect(Math.hypot(paperWinnow.position.x - lid.position.x, paperWinnow.position.z - lid.position.z)).toBeGreaterThan(4);
+
+    const colors = hexes(paperWinnow);
+    expect(colors.some((c) => c === KRAFT)).toBe(true);
+    expect(colors.every((c) => [KRAFT, WOOD, WOOD_DARK, HANDLE].includes(c))).toBe(true);
+
+    let boxes = 0;
+    paperWinnow.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        boxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.part).toBe("winnow");
+        expect(mesh.userData.mode).toBe("PAPER");
+        const geo = mesh.geometry as THREE.BoxGeometry;
+        expect(geo.parameters.width).toBeLessThan(0.16);
+        expect(geo.parameters.height).toBeLessThan(0.4);
+        expect(geo.parameters.depth).toBeLessThan(0.16);
+      }
+    });
+    expect(boxes).toBeGreaterThanOrEqual(1);
+    expect(boxes).toBeLessThanOrEqual(3);
+  });
+});
