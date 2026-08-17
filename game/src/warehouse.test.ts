@@ -2310,3 +2310,155 @@ describe("warehouse PAPER kraft bale", () => {
     expect(boxes).toBeGreaterThanOrEqual(1);
   });
 });
+
+describe("warehouse PAPER kraft cord", () => {
+  it("sits one tiny kraft PAPER cord on the clipboard; bale, spool, wax stay", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressWarehouse(scene);
+
+    const dress = interior.getObjectByName("warehouse-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+
+    const cords: THREE.Object3D[] = [];
+    const bales: THREE.Object3D[] = [];
+    const spools: THREE.Object3D[] = [];
+    const waxes: THREE.Object3D[] = [];
+    const staples: THREE.Object3D[] = [];
+    const labels: THREE.Object3D[] = [];
+    const dockets: THREE.Object3D[] = [];
+    const tags: THREE.Object3D[] = [];
+    const ribbons: THREE.Object3D[] = [];
+    const tacks: THREE.Object3D[] = [];
+    const erasers: THREE.Object3D[] = [];
+    const pencils: THREE.Object3D[] = [];
+    const clips: THREE.Object3D[] = [];
+    const stamps: THREE.Object3D[] = [];
+    const cards: THREE.Object3D[] = [];
+    const twines: THREE.Object3D[] = [];
+    const chalks: THREE.Object3D[] = [];
+    const clipboards: THREE.Object3D[] = [];
+    dress!.traverse((obj) => {
+      if (obj.userData?.kind === "warehouse-cord" && obj.name === "warehouse-cord") {
+        cords.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-bale" && obj.name === "warehouse-bale") {
+        bales.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-spool" && obj.name === "warehouse-spool") {
+        spools.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-wax" && obj.name === "warehouse-wax") {
+        waxes.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-staple" && obj.name === "warehouse-staple") {
+        staples.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-label" && obj.name === "warehouse-label") {
+        labels.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-docket" && obj.name === "warehouse-docket") {
+        dockets.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-tag" && obj.name === "warehouse-tag") {
+        tags.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-ribbon" && obj.name === "warehouse-ribbon") {
+        ribbons.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-tack" && obj.name === "warehouse-tack") {
+        tacks.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-eraser" && obj.name === "warehouse-eraser") {
+        erasers.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-pencil" && obj.name === "warehouse-pencil") {
+        pencils.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-clip" && obj.name === "warehouse-clip") {
+        clips.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-stamp" && obj.name === "warehouse-stamp") {
+        stamps.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-card" && obj.name === "warehouse-card") {
+        cards.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-twine" && obj.name === "warehouse-twine") {
+        twines.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-chalk" && obj.name === "warehouse-chalk") {
+        chalks.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-clipboard" && obj.name === "warehouse-clipboard") {
+        clipboards.push(obj);
+      }
+    });
+    expect(cords.length).toBe(1);
+    expect(bales.length).toBe(1);
+    expect(spools.length).toBe(1);
+    expect(waxes.length).toBe(1);
+    expect(staples.length).toBe(1);
+    expect(labels.length).toBe(1);
+    expect(dockets.length).toBe(1);
+    expect(tags.length).toBe(1);
+    expect(ribbons.length).toBe(1);
+    expect(tacks.length).toBe(1);
+    expect(erasers.length).toBe(1);
+    expect(pencils.length).toBe(1);
+    expect(clips.length).toBe(1);
+    expect(stamps.length).toBe(1);
+    expect(cards.length).toBe(1);
+    expect(twines.length).toBe(1);
+    expect(chalks.length).toBe(1);
+
+    const cord = cords[0];
+    expect(cord.userData.kind).toBe("warehouse-cord");
+    expect(cord.userData.mode).toBe("PAPER");
+    expect(cord.userData.part).toBe("cord");
+    expect(cord.position.y).toBeGreaterThan(1.2);
+    expect(cord.position.y).toBeLessThan(2.4);
+    const onBack = Math.abs(cord.position.z) > 3.0;
+    const onSide = Math.abs(cord.position.x) > 3.5;
+    expect(onBack || onSide).toBe(true);
+    expect(horizDist(cord, clipboards[0])).toBeLessThan(0.5);
+    expect(horizDist(cord, cards[0])).toBeGreaterThan(1.5);
+    expect(horizDist(cord, twines[0])).toBeGreaterThan(1.5);
+    expect(bales[0].userData.part).toBe("bale");
+    expect(spools[0].userData.part).toBe("spool");
+    expect(waxes[0].userData.part).toBe("wax");
+    expect(staples[0].userData.part).toBe("staple");
+    expect(labels[0].userData.part).toBe("label");
+    expect(dockets[0].userData.part).toBe("docket");
+    expect(tags[0].userData.part).toBe("tag");
+    expect(ribbons[0].userData.part).toBe("ribbon");
+    expect(tacks[0].userData.part).toBe("tack");
+    expect(erasers[0].userData.part).toBe("eraser");
+    expect(pencils[0].userData.part).toBe("pencil");
+    expect(clips[0].userData.part).toBe("clip");
+    expect(stamps[0].userData.part).toBe("stamp");
+    expect(cards[0].userData.part).toBe("card");
+    expect(twines[0].userData.part).toBe("twine");
+    expect(chalks[0].userData.part).toBe("chalk");
+
+    const colors = hexes(cord);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.every((c) => c === 0x5a3a22 || c === 0x8a6238 || c === 0x9a6a40)).toBe(true);
+    expect(colors.some((c) => c === 0x5a3a22 || c === 0x8a6238 || c === 0x9a6a40)).toBe(true);
+    expect(colors.every((c) => !isGrey(c))).toBe(true);
+
+    let boxes = 0;
+    cord.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        boxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.kind).toBe("warehouse-cord");
+        expect(mesh.userData.mode).toBe("PAPER");
+      }
+    });
+    expect(boxes).toBeGreaterThanOrEqual(1);
+  });
+});

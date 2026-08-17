@@ -566,6 +566,32 @@ function kraftBale(x, y, z, yaw = 0) {
 }
 
 /**
+ * Tiny kraft paper cord on the clipboard — wood length + strap knot +
+ * light-wood tip. PAPER boxes only. Not a bale, not a spool, not twine.
+ */
+function kraftCord(x, y, z, yaw = 0) {
+  const g = new THREE.Group();
+  g.name = "warehouse-cord";
+  g.userData.kind = "warehouse-cord";
+  g.userData.mode = "PAPER";
+  g.userData.part = "cord";
+  g.position.set(x, y, z);
+  g.rotation.y = yaw;
+  // Rest on the clipboard sheet, mid-center-lower, offset from the bale, spool,
+  // wax, staple, label, docket, tag, ribbon, tack, eraser, stamp, clip, pencil,
+  // and chalk.
+  g.rotation.z = 0.22;
+  const length = paperBox(0.05, 0.008, 0.01, WOOD, "warehouse-cord");
+  length.position.set(0.0, -0.09, 0.05);
+  const knot = paperBox(0.012, 0.012, 0.012, STRAP, "warehouse-cord");
+  knot.position.set(0.0, -0.09, 0.056);
+  const tip = paperBox(0.01, 0.006, 0.008, WOOD_LIGHT, "warehouse-cord");
+  tip.position.set(0.026, -0.09, 0.05);
+  g.add(length, knot, tip);
+  return g;
+}
+
+/**
  * Kraft broom leaning on the wall — wood stick + bristle block.
  * PAPER boxes only. Not a crate, not a hook.
  */
@@ -812,6 +838,11 @@ function makeWarehouseDress() {
   // the spool and wax. Clear of spool, wax, staple, label, docket, tag,
   // ribbon, tack, eraser, stamp, clip, pencil, chalk, card, and twine.
   g.add(kraftBale(1.02, 1.58, -3.38));
+  // Tiny kraft paper cord on that clipboard sheet, mid-center-lower, offset
+  // from the bale and spool. Clear of bale, spool, wax, staple, label,
+  // docket, tag, ribbon, tack, eraser, stamp, clip, pencil, chalk, card,
+  // and twine.
+  g.add(kraftCord(1.02, 1.58, -3.38));
   // Tiny kraft twine ball on the back-right crate stack. Clear of pencil,
   // chalk, clipboard, pallet, dolly, and floor crates.
   g.add(kraftTwine(3.22, 1.56, -2.38, 0.18));
