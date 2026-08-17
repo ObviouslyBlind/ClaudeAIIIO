@@ -314,22 +314,23 @@ function basinRing() {
   return g;
 }
 
-/** Tall rust funnel above the held buoy. Ring round stopped: +X left the frame. */
+/** Tall rust funnel above the held buoy. Ring round stopped: +X left the frame.
+ *  /g/funnel74 FAIL FUNNEL: 12 m stick at y=14 sat inside the buoy blob. */
 function basinFunnel() {
   const g = new THREE.Group();
   g.userData.dress = "funnel";
   g.userData.mode = "PAPER";
 
-  const body = part(4.4, 12.0, 4.4, 0x6e2e22);
+  const body = part(3.6, 40.0, 3.6, 0x6e2e22);
   body.userData.part = "body";
   g.add(body);
 
-  const band = part(4.8, 1.6, 4.8, 0xc4b496, false);
-  band.position.y = 2.2;
+  const band = part(4.2, 3.0, 4.2, 0xc4b496, false);
+  band.position.y = 8;
   g.add(band);
 
-  const cap = part(3.4, 0.8, 3.4, 0x8a6238, false);
-  cap.position.y = 6.2;
+  const cap = part(2.8, 1.2, 2.8, 0x8a6238, false);
+  cap.position.y = 20.4;
   g.add(cap);
 
   return g;
@@ -545,8 +546,10 @@ export function makeQuay(spec, helpers) {
 
     /** /g/ring73 FAIL RING: bow cube at x+15.4 sat under the spawn camera.
      *  Ring round stopped. Funnel uses the held buoy's x=0 slot, stacked up. */
+    /** /g/funnel74 FAIL FUNNEL: 12 m at y=14 sat inside the buoy blob.
+     *  Lift a 40 m rust stick into the cyan sky above that slot. */
     const funnel = basinFunnel();
-    funnel.position.set(x, 14.2, z + toward * 116);
+    funnel.position.set(x, 32.0, z + toward * 116);
     root.add(funnel);
 
     // Extra kraft stack on the north timber, west of the walk, short of the brow.

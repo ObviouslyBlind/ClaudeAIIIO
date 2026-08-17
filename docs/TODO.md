@@ -31,7 +31,8 @@ Politics frozen. See `game/reports/GAUNTLET_STATUS.md`.
 - [x] Pixel kraft gangplank / brow (`/g/brow66`–`/g/brow68` FAIL BROW — round stopped, not pixel-held)
 - [x] Pixel rust channel buoy (`/g/buoy70` PASS BUOY — rust mass on the cream hull; `/g/buoy69` FAIL)
 - [x] Pixel kraft/rust life ring (`/g/ring71`–`/g/ring73` FAIL RING — round stopped, not pixel-held)
-- [ ] Pixel rust funnel (`http://localhost:8787/g/funnel74`). Shells deferred: seaward spawn, no RMB)
+- [x] Pixel rust funnel (`/g/funnel74` FAIL FUNNEL — sat inside the buoy blob)
+- [ ] Pixel rust funnel (`http://localhost:8787/g/funnel75`). Shells deferred: seaward spawn, no RMB)
 
 ## Polymarket paper bot
 

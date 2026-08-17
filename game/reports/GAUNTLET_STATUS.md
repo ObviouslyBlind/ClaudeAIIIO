@@ -134,7 +134,11 @@ Pixel: **kraft/rust life ring** at `http://localhost:8787/g/ring73`. Solid 8 m r
 
 Pixel: **rust funnel** at `http://localhost:8787/g/funnel74`. Tall rust chimney stacked on the held buoy slot (x=0), above the left-side rust mass. No RMB. Address bar must be `/g/funnel74`. Do not restart play while the critic is on the page.
 
-## Next pixel (after funnel74 PASS, immediately, no wait)
+`/g/funnel74` **FAIL FUNNEL**: left-side rust buoy in frame; 12 m stick at y=14 sat inside that low brown mass, not a chimney in the sky.
+
+Pixel: **rust funnel** at `http://localhost:8787/g/funnel75`. 40 m rust stick into the cyan sky above the held buoy. No RMB. Address bar must be `/g/funnel75`. Do not restart play while the critic is on the page.
+
+## Next pixel (after funnel75 PASS, immediately, no wait)
 
 ## Frozen
 
