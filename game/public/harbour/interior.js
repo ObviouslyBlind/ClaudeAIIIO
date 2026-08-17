@@ -403,6 +403,21 @@ function makeDecanter(x, y, z) {
   return g;
 }
 
+/** Tiny kraft PAPER salt on the table — wood foot, plaster body, linen cap. Boxes only. */
+function makeSalt(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "salt";
+  g.userData.kind = "interior-salt";
+  g.userData.mode = "PAPER";
+  g.userData.part = "salt";
+  g.position.set(x, y, z);
+  const paper = { mode: "PAPER", part: "salt" };
+  g.add(box(0.02, 0.006, 0.02, WOOD, 0, 0.003, 0, "interior-salt", paper));
+  g.add(box(0.024, 0.032, 0.024, PLASTER, 0, 0.022, 0, "interior-salt", paper));
+  g.add(box(0.014, 0.008, 0.014, LINEN, 0, 0.042, 0, "interior-salt", paper));
+  return g;
+}
+
 /** Tiny kraft PAPER saucer on the table — wood rim, plaster well, linen center. Boxes only. */
 function makeSaucer(x, y, z) {
   const g = new THREE.Group();
@@ -604,7 +619,7 @@ function makeBed(cx, floorY, cz) {
 
 /**
  * PAPER Caribbean house: plaster walls, wood floors, window openings,
- * downstairs table/chairs/stool/lamp/clock/picture/vase/mug/saucer/bowl/pitcher/tray/crock/tureen/platter/cruet/goblet/decanter/book/napkin/spoon/fork/knife/plate/cup, upstairs bed. Low-poly boxes only.
+ * downstairs table/chairs/stool/lamp/clock/picture/vase/mug/saucer/bowl/pitcher/tray/crock/tureen/platter/cruet/goblet/decanter/salt/book/napkin/spoon/fork/knife/plate/cup, upstairs bed. Low-poly boxes only.
  */
 export function makeInteriorScene() {
   const group = new THREE.Group();
@@ -676,6 +691,8 @@ export function makeInteriorScene() {
   down.add(makeGoblet(0.5, 0.955, -0.75));
   // Kraft PAPER decanter on the table top — offset from goblet, cruet, platter, tureen, crock, tray, pitcher, bowl, saucer, mug, napkin, spoon, fork, knife, plate, cup.
   down.add(makeDecanter(-0.32, 0.955, -0.16));
+  // Kraft PAPER salt on the table top — offset from decanter, goblet, cruet, platter, tureen, crock, tray, pitcher, bowl, saucer, mug, napkin, spoon, fork, knife, plate, cup.
+  down.add(makeSalt(-0.54, 0.955, -0.82));
   // Kraft PAPER book on the table top — offset from the mug and vase.
   down.add(makeBook(-0.05, 0.955, 0.08));
   // Kraft PAPER napkin on the table top — offset from the mug, vase, and book.
