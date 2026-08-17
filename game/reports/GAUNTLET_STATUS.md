@@ -26,7 +26,9 @@ Loop is **live** on playtest bugs (operator: “so many bugs, use the gauntlet�
 
 `/g/ferry98` **PASS FERRY**: kraft $15 ticket, confirm crossed to South, no hang. (Pre-D039 build; south was still a void then.)
 
-Current piece: **`/g/south99` SOUTH** — confirm ferry, land on a real south island: green terrain, port pier, walkable, lots. No RMB.
+`/g/south99` **FAIL SOUTH**: “Page Unresponsive” at the Ferry click — the 45 s dressing timer compiled quay/ferry/traffic mid-session. D040: no delayed dressing on live play; ensureIsland spread across idle slices.
+
+Current piece: **`/g/south100` SOUTH** — confirm ferry, land on a real south island: terrain, port pier, walkable, lots. No RMB.
 
 One **pixel critic** at a time. Unique `/g/…` path. No RMB. Do not restart play while a critic is on the page.
 

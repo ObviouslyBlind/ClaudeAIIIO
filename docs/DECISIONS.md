@@ -188,6 +188,11 @@ Record of architecture and strategy decisions with reasoning.
 **Decision:** First-frame parcels are vacant north street lots $1000 can lease and develop. Giant fields stay unmeshed. A tap near a starter lot snaps to it. Plot lines are clickable before dressing.
 **Reason:** `/g/house96` FAIL HOUSE: first inland tap selected a 6,522 m² field at $1,121 with $970 cash, so Lease stayed disabled. PAPER / SIMULATED.
 
+## D040 — No delayed dressing on live play (2026-08-17)
+
+**Decision:** Remove the 45 s / 120 s dressing timer entirely. Live `/` never imports quay.js / ferry.js / shore.js / traffic.js; sheet HUDs load at the end of boot. `ensureIsland` spreads landfall builds across idle slices.
+**Reason:** `/g/south99` FAIL SOUTH and the operator's "crashes within ~5 minutes": dressing compiled heavy modules mid-session on the main thread and Chrome showed "Page Unresponsive". A working game beats quay clutter; the meshes return after a perf pass. PAPER / SIMULATED.
+
 ## D039 — Ferry landfall builds south; port is tappable (2026-08-17)
 
 **Decision:** `spawnAt` calls `ensureIsland(id)`: first arrival on an island builds its terrain, port, palms, and starter lots (boot pre-marks north). `applySnapshot` meshes restored visitor/used lots that were never drawn. Pier/shed/dock are in `clickTargets` so tapping the port opens the ferry.

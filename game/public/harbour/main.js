@@ -651,19 +651,22 @@ function snapCamera() {
 /** Islands whose terrain / port / starter lots are meshed. Boot marks north. */
 const builtIslands = new Set();
 
-/** Ferry landfall was a void: south never got terrain, a port, or lots. */
-function ensureIsland(id) {
+/** Ferry landfall was a void: south never got terrain, a port, or lots.
+ *  Spread across idle slices so landfall cannot hold the main thread. */
+async function ensureIsland(id) {
   if (builtIslands.has(id) || !map) return;
   builtIslands.add(id);
   const spec = specOf(id);
   makeTerrain(spec);
+  await idle(48);
   makePort(spec);
   makePalms(spec);
-  void makeParcels((p) => starterLotOn(p, id));
+  await idle(48);
+  await makeParcels((p) => starterLotOn(p, id));
 }
 
 function spawnAt(id) {
-  ensureIsland(id);
+  void ensureIsland(id);
   islandId = id;
   const spec = specOf(id);
   const x = spec.port.x;
@@ -757,7 +760,6 @@ function onPointer(ev) {
   if (ev.button != null && ev.button !== 0) return;
   if (Date.now() - lastTap < 180) return;
   lastTap = Date.now();
-  afterFirstPointer();
   if (taxi && typeof taxi.mapOpen === "function" && taxi.mapOpen()) return;
   if (ev.target.closest && ev.target.closest("nav, a, button, #taxi-map, #ferry-ticket, #catalog-picker")) return;
   pointer.x = (ev.clientX / window.innerWidth) * 2 - 1;
@@ -1083,83 +1085,13 @@ async function ensureInterior() {
   return interior;
 }
 
-/** Quay/ferry compile on the main thread. Wait until walk has been idle. */
-export const DRESSING_AFTER_WALK_MS = 45000;
-/** If they never click, still add the north quay — after a long quiet window. */
-export const DRESSING_FALLBACK_MS = 120000;
-
-let dressingStarted = false;
-let firstPointerDone = false;
-let dressingTimer = 0;
-
-function startDressing() {
-  if (dressingStarted) return;
-  dressingStarted = true;
-  void loadSheetHuds();
-  void loadDressing();
-}
-
-function scheduleDressing(ms) {
-  if (dressingStarted) return;
-  clearTimeout(dressingTimer);
-  dressingTimer = setTimeout(() => {
-    if (walking) {
-      scheduleDressing(DRESSING_AFTER_WALK_MS);
-      return;
-    }
-    startDressing();
-  }, ms);
-}
-
-function afterFirstPointer() {
-  if (firstPointerDone) {
-    scheduleDressing(DRESSING_AFTER_WALK_MS);
-    return;
-  }
-  firstPointerDone = true;
-  scheduleDressing(DRESSING_AFTER_WALK_MS);
-}
-
-async function loadDressing() {
-  const target = worldScene();
-  const step = async (fn) => {
-    await idle(160);
-    await fn();
-  };
-
-  await step(async () => {
-    const ferryMod = await import("./ferry.js");
-    tickFerry = ferryMod.tickFerry;
-    ferryMesh = ferryMod.makeFerry();
-    target.add(ferryMesh);
-  });
-
-  await step(async () => {
-    const quayMod = await import("./quay.js");
-    quayMod.makeQuay(specOf("north"), { scene: target, heightAt });
-  });
-
-  await step(async () => {
-    const shoreMod = await import("./shore.js");
-    shoreMod.makeShoreFoam(specOf("north"), heightAt, target);
-  });
-
-  await step(async () => {
-    makePalms(specOf("north"));
-  });
-
-  await step(async () => {
-    const trafficMod = await import("./traffic.js");
-    traffic = trafficMod.createTraffic({
-      scene: target,
-      getMap: () => map,
-      specOf,
-      heightAt,
-      getPlayer: () => player,
-      getIslandId: () => islandId,
-    });
-  });
-}
+/**
+ * No delayed dressing on live play (D040). The 45 s / 120 s timer compiled
+ * quay/ferry/traffic mid-session and Chrome showed "Page Unresponsive"
+ * (`/g/south99`, operator "crashes within 5 minutes"). Quay clutter, the
+ * moving ferry, foam, and cars stay off `/` until a perf pass moves their
+ * compile off the main thread.
+ */
 
 async function boot() {
   const res = await fetch("/api/map");
@@ -1186,7 +1118,7 @@ async function boot() {
   setStatus("Tap a piece of land. Lease it, then develop it.");
   await idle(80);
   await ensureTaxi();
-  scheduleDressing(DRESSING_FALLBACK_MS);
+  void loadSheetHuds();
 }
 
 canvas.addEventListener("pointerup", onPointer);

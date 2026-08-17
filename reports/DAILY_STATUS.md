@@ -2,7 +2,7 @@
 
 ## 2026-08-17 (latest)
 
-**Current status:** `/g/ferry98` PASS FERRY. D039 bug scout (south void, restore, pier taps). Next `/g/south99`. PAPER / SIMULATED. Politics frozen.
+**Current status:** D040 — no delayed dressing (mid-session freeze killed). D039 south landfall + pier taps. Next `/g/south100`. PAPER / SIMULATED. Politics frozen.
 
 ## 2026-08-16
 
