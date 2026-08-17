@@ -653,6 +653,27 @@ export function makeStallMesh(plot) {
     g.add(peach);
   }
 
+  // One tiny kraft PAPER mango on the counter so the stall reads as a
+  // working stand, not only produce. Kraft body + wood stem. Local
+  // offset only — stall world pose stays put. PAPER boxes. Existing
+  // hexes. Offset from peach, grape, pear, banana, orange, lime, lemon, plate, napkin, knife, cup.
+  if (!g.children.some((c) => c.userData.part === "mango")) {
+    const mango = new THREE.Group();
+    mango.name = "mango";
+    mango.userData.part = "mango";
+    mango.userData.mode = "PAPER";
+    mango.userData.paper = true;
+    mango.position.set(0.5, 0.9, 1.22);
+    const body = paperBox(0.06, 0.055, 0.06, KRAFT, false);
+    body.position.y = 0.028;
+    body.userData.part = "mango";
+    const stem = paperBox(0.015, 0.02, 0.015, WOOD, false);
+    stem.position.y = 0.065;
+    stem.userData.part = "mango";
+    mango.add(body, stem);
+    g.add(mango);
+  }
+
   const back = paperBox(3.9, 1.6, 0.12, PLASTER);
   back.position.set(0, 1.05, -1.28);
   back.userData.part = "back";
