@@ -38,7 +38,13 @@ Loop is **live** on playtest bugs (operator: “so many bugs, use the gauntlet�
 
 `/g/loop103` **PASS LOOP**: one session — walk, lease $209, House $40, Enter/Exit, taxi waiting on paved, $15 ferry to a real South, $508 left, zero freezes.
 
-D044: empty goods stay blank; persist says `no dump`. `/g/hud104` **FAIL HUD**: spawn still painted `cash $1,000 vs House $40` because boot status "then develop it" matched the develop hint (D045). Re-critic `/g/hud107`. Then Market Buy 1 (`/g/mkt108`).
+`/g/hud104` **FAIL HUD**: spawn still painted `cash $1,000 vs House $40` because boot status "then develop it" matched the develop hint (D045).
+
+`/g/hud107` **PASS HUD**: goods blank, cart `PAPER`, persist dump line, plot still "Tap land to inspect it", no House $40 at spawn. Unique `/g/hud107`.
+
+`/g/mkt108` **PASS MARKET**: dock Market → Buy 1 corn, cash $1,000.00 → $999.73, held 0 → 1, PAPER · SIMULATED · not the 3D harbour. Unique `/g/mkt108`.
+
+`/g/persist109` **FAIL PERSIST**: Restore posted (status `Not Postgres. Does not restart play.`) but persist-line snapped back to `tick · $` because the 1 s dump poll cleared `restored` (D046). Re-critic `/g/persist110`.
 
 One **pixel critic** at a time. Unique `/g/…` path. No RMB. Do not restart play while a critic is on the page.
 

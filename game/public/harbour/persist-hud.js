@@ -31,7 +31,16 @@ export function formatPersistLine(blob, phase) {
   if (phase === "busy") return `${mode} · ${provenance} · restoring…`;
   if (phase === "no_blob") return `${mode} · ${provenance} · no dump`;
   if (phase === "error") return `${mode} · ${provenance} · restore failed`;
-  if (phase === "restored") return `${mode} · ${provenance} · restored`;
+  if (phase === "restored") {
+    const bits = [`${mode} · ${provenance} · restored`];
+    if (blob && typeof blob === "object") {
+      const tick = num(blob.tick);
+      const cash = blob.visitor ? num(blob.visitor.cash) : null;
+      if (tick != null) bits.push("tick " + tick);
+      if (cash != null) bits.push("$" + money(cash));
+    }
+    return bits.join(" · ");
+  }
   if (!blob || typeof blob !== "object") return `${mode} · ${provenance} · no dump`;
   const tick = num(blob.tick);
   const cash = blob.visitor ? num(blob.visitor.cash) : null;
@@ -146,7 +155,7 @@ export function mountPersistHud(opts = {}) {
       }
       if (!res.ok) return;
       lastBlob = await res.json();
-      if (phase !== "busy") phase = "";
+      if (phase !== "busy" && phase !== "restored") phase = "";
       paint();
     } catch {
       /* keep the last painted PAPER line */

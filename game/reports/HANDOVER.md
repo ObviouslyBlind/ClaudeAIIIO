@@ -8,7 +8,9 @@ This is a PAPER / SIMULATED harbour game in `/workspace/game`. The Polymarket pa
 
 Operator came back to **playtest**. Bar is **`http://localhost:8787/`**, inland spawn, walkable harbour.
 
-Gauntlet live on HUD clones. `/g/hud104` FAIL HUD — boot copy "then develop it" painted House $40 afford (D045). Re-critic `/g/hud107`. Then Market Buy 1.
+Gauntlet live. `/g/persist109` FAIL PERSIST — restored label lasted <1 s (D046). Re-critic `/g/persist110`.
+
+Last playtest fix: D046 persist line keeps restored. D045 develop hint ignores boot copy. D044 empty goods blank / persist `no dump`.
 
 Last playtest fix: D045 develop hint ignores boot copy. D044 empty goods blank / persist `no dump`. D043 trickle cars+ferry only. D042 ferry-hint observer loop killed.
 

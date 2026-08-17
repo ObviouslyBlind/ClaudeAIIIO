@@ -59,7 +59,9 @@ describe("harbour PAPER persist restore HUD", () => {
   it("is one short PAPER · SIMULATED line, never a wallet", () => {
     expect(formatPersistLine(null)).toBe(IDLE_LINE);
     expect(formatPersistLine(DUMP)).toBe("PAPER · SIMULATED · tick 12 · $777");
-    expect(formatPersistLine(DUMP, "restored")).toBe("PAPER · SIMULATED · restored");
+    expect(formatPersistLine(DUMP, "restored")).toBe(
+      "PAPER · SIMULATED · restored · tick 12 · $777",
+    );
     expect(formatPersistLine(null, "no_blob")).toBe("PAPER · SIMULATED · no dump");
     expect(formatPersistLine(DUMP).includes("\n")).toBe(false);
     expect(formatPersistLine(DUMP).length).toBeLessThan(80);
@@ -143,7 +145,9 @@ describe("harbour PAPER persist restore HUD", () => {
     expect(restoreBtn.disabled).toBe(false);
 
     restoreBtn.click();
-    await vi.waitFor(() => expect(node.textContent).toBe("PAPER · SIMULATED · restored"));
+    await vi.waitFor(() =>
+      expect(node.textContent).toBe("PAPER · SIMULATED · restored · tick 12 · $777"),
+    );
 
     const post = calls.find((c) => c.url === "/api/persist/restore");
     expect(post?.init?.method).toBe("POST");
@@ -151,6 +155,33 @@ describe("harbour PAPER persist restore HUD", () => {
     expect(status.textContent).toMatch(/PAPER/);
     expect(status.textContent).toMatch(/Does not restart play/);
     expect(status.textContent.toLowerCase()).not.toContain("wallet");
+  });
+
+  it("keeps restored on the sheet after the next dump poll (`/g/persist109`)", async () => {
+    vi.useFakeTimers();
+    const node = line();
+    const restoreBtn = btn();
+    const hud = mountPersistHud({
+      el: node,
+      btnEl: restoreBtn,
+      cashEl: { textContent: "Cash $0" },
+      statusEl: { textContent: "" },
+      fetch: async (url: string, init?: RequestInit) => {
+        if (String(url) === "/api/persist/restore") {
+          return { ok: true, status: 200, json: async () => RESTORE_OK };
+        }
+        return { ok: true, status: 200, json: async () => DUMP };
+      },
+    });
+    mounted.push(hud);
+    await Promise.resolve();
+    await Promise.resolve();
+    restoreBtn.click();
+    await vi.waitFor(() =>
+      expect(node.textContent).toBe("PAPER · SIMULATED · restored · tick 12 · $777"),
+    );
+    await vi.advanceTimersByTimeAsync(POLL_MS);
+    expect(node.textContent).toBe("PAPER · SIMULATED · restored · tick 12 · $777");
   });
 
   it("does not POST restore when GET /api/persist is empty", async () => {
