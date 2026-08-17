@@ -122,7 +122,11 @@ Rust channel buoy on the north cream hull (`/g/buoy70` PASS).
 
 Pixel: **kraft/rust life ring** at `http://localhost:8787/g/ring71`. Same camera-facing hull as buoy70, offset +x. No RMB. Address bar must be `/g/ring71`. Do not restart play while the critic is on the page.
 
-## Next pixel (after ring71 PASS, immediately, no wait)
+`/g/ring71` **FAIL RING**: pier, cream ferry, NPCs, cyan water in frame; 1.2 m segs at r=2.8 read as hull furniture, not a distinct rust/kraft ring.
+
+Pixel: **kraft/rust life ring** at `http://localhost:8787/g/ring72`. Same camera-facing hull as buoy70, buoy-tall rust/kraft cluster to the RIGHT of the rust buoy. No RMB. Address bar must be `/g/ring72`. Do not restart play while the critic is on the page.
+
+## Next pixel (after ring72 PASS, immediately, no wait)
 
 ## Frozen
 

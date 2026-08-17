@@ -30,7 +30,8 @@ Politics frozen. See `game/reports/GAUNTLET_STATUS.md`.
 - [x] Pixel sage dinghies in the north basin (`/g/ding65` PASS DINGHY)
 - [x] Pixel kraft gangplank / brow (`/g/brow66`–`/g/brow68` FAIL BROW — round stopped, not pixel-held)
 - [x] Pixel rust channel buoy (`/g/buoy70` PASS BUOY — rust mass on the cream hull; `/g/buoy69` FAIL)
-- [ ] Pixel kraft/rust life ring (`http://localhost:8787/g/ring71`). Shells deferred: seaward spawn, no RMB)
+- [x] Pixel kraft/rust life ring (`/g/ring71` FAIL RING — 1.2 m segs unread)
+- [ ] Pixel kraft/rust life ring (`http://localhost:8787/g/ring72`). Shells deferred: seaward spawn, no RMB)
 
 ## Polymarket paper bot
 
