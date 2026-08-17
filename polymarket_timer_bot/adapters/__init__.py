@@ -1,1 +1,0 @@
-# Polymarket API adapters
