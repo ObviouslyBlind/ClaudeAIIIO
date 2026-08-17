@@ -448,6 +448,31 @@ function kraftStaple(x, y, z, yaw = 0) {
 }
 
 /**
+ * Tiny kraft paper wax stick on the clipboard — wood stick + strap band +
+ * light-wood tip. PAPER boxes only. Not a staple, not a label, not chalk.
+ */
+function kraftWax(x, y, z, yaw = 0) {
+  const g = new THREE.Group();
+  g.name = "warehouse-wax";
+  g.userData.kind = "warehouse-wax";
+  g.userData.mode = "PAPER";
+  g.userData.part = "wax";
+  g.position.set(x, y, z);
+  g.rotation.y = yaw;
+  // Rest on the clipboard sheet, mid-right, offset from the staple, label,
+  // docket, tag, ribbon, tack, eraser, stamp, and clip.
+  g.rotation.z = -0.2;
+  const stick = paperBox(0.052, 0.012, 0.012, WOOD, "warehouse-wax");
+  stick.position.set(0.12, 0.02, 0.05);
+  const band = paperBox(0.014, 0.014, 0.014, STRAP, "warehouse-wax");
+  band.position.set(0.12, 0.02, 0.05);
+  const tip = paperBox(0.01, 0.008, 0.008, WOOD_LIGHT, "warehouse-wax");
+  tip.position.set(0.146, 0.02, 0.05);
+  g.add(stick, band, tip);
+  return g;
+}
+
+/**
  * Tiny kraft inventory card on a crate — cream sheet + strap stripe.
  * PAPER boxes only. Not a pencil, not twine, not chalk, not a broom.
  */
@@ -724,6 +749,10 @@ function makeWarehouseDress() {
   // from the label and docket. Clear of label, docket, tag, ribbon, tack,
   // eraser, stamp, clip, pencil, chalk, card, and twine.
   g.add(kraftStaple(1.02, 1.58, -3.38));
+  // Tiny kraft paper wax stick on that clipboard sheet, mid-right, offset
+  // from the staple and label. Clear of staple, label, docket, tag, ribbon,
+  // tack, eraser, stamp, clip, pencil, chalk, card, and twine.
+  g.add(kraftWax(1.02, 1.58, -3.38));
   // Tiny kraft twine ball on the back-right crate stack. Clear of pencil,
   // chalk, clipboard, pallet, dolly, and floor crates.
   g.add(kraftTwine(3.22, 1.56, -2.38, 0.18));
