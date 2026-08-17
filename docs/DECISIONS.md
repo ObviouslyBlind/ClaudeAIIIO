@@ -173,6 +173,11 @@ Record of architecture and strategy decisions with reasoning.
 **Decision:** Do not start quay/trees/stalls/taxi/`loadSheetHuds` on a 400ms boot timer. `startDressing()` runs 5s after the first left click (so the walk paints), or after 60s if they never click. First click raycasts ground only. `findParcelAt` only tests lots that already have meshes.
 **Reason:** `/g/walk90` FAIL WALK: D034 cheap raycast still froze the tab. Critics click ~6s after load, which landed on `trees.js` compile. PAPER / SIMULATED.
 
+## D036 — Human-metre playtest meshes; no auto trees (2026-08-17)
+
+**Decision:** Live spawn uses person scale (~2 m visitor). Quay lamps ~3.2 m, north sign posts ~3.2 m, dinghies ~4.2 m, port shed ~8×3.4×6 m, foam dashes ~1.6 m, rust buoy ~0.9 m. Strip the 34 m cream mast and the 32 m / 48 m critic towers. `loadDressing` does not import `trees.js` / south / stalls / street-props / peds. Dressing waits until walk has been idle 45 s (120 s fallback). Develop only meshes lots that already have plot lines.
+**Reason:** Operator playtest: scale was unreadable (tiny visitor vs towers), and the tab crashed within minutes. `/g/lease92` FAIL LEASE: first click then “Page Unresponsive” while trees compiled. PAPER / SIMULATED.
+
 ## D015 — Supplemental merge before save (2026-03-18)
 
 **Decision:** Move `relevant_markets_*.json` save to AFTER supplemental /markets merge.

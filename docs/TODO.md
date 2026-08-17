@@ -43,6 +43,7 @@ Politics frozen. See `game/reports/GAUNTLET_STATUS.md`. New chat: `game/reports/
 - [x] `/g/walk89` FAIL WALK — click raycast ground/lots only (D034).
 - [x] `/g/walk90` FAIL WALK — dressing still started at 400ms and froze the first click (D035).
 - [x] `/g/walk91` PASS WALK — first inland click walks without hanging.
+- [x] `/g/lease92` FAIL LEASE — freeze + giant critic meshes (D036).
 - [x] Pixel green basin crate (`/g/green86`–`87` FAIL GREEN — round stopped, not pixel-held)
 
 ## Polymarket paper bot

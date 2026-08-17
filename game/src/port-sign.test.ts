@@ -154,13 +154,15 @@ describe("north port sign", () => {
     expect(posts.length).toBe(2);
 
     const boardGeom = (board as THREE.Mesh).geometry as THREE.BoxGeometry;
-    expect(boardGeom.parameters.width).toBeGreaterThanOrEqual(8);
-    expect(boardGeom.parameters.width).toBeLessThan(16);
-    expect(boardGeom.parameters.height).toBeGreaterThanOrEqual(5);
+    expect(boardGeom.parameters.width).toBeGreaterThanOrEqual(2);
+    expect(boardGeom.parameters.width).toBeLessThan(4);
+    expect(boardGeom.parameters.height).toBeGreaterThanOrEqual(0.7);
+    expect(boardGeom.parameters.height).toBeLessThan(1.4);
 
     const postGeom = posts[0].geometry as THREE.BoxGeometry;
-    expect(postGeom.parameters.height).toBeGreaterThanOrEqual(40);
-    expect(postGeom.parameters.width).toBeGreaterThanOrEqual(4);
+    expect(postGeom.parameters.height).toBeGreaterThanOrEqual(2.8);
+    expect(postGeom.parameters.height).toBeLessThan(4);
+    expect(postGeom.parameters.width).toBeLessThan(0.3);
 
     expect(face!.position.z).toBeLessThan(0);
     expect(Math.abs(face!.rotation.y)).toBeGreaterThan(3);

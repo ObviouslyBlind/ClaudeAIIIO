@@ -2,7 +2,7 @@
 
 ## 2026-08-17 (latest)
 
-**Current status:** `/g/walk91` PASS WALK. Next `/g/lease92` (lease a vacant north lot). D035 still applies. PAPER / SIMULATED. Politics frozen.
+**Current status:** Operator playtest: scale broken, tab dies in minutes. D036 shrinks towers and stops auto `trees.js`. Next `/g/scale93`. PAPER / SIMULATED. Politics frozen.
 
 ## 2026-08-16
 

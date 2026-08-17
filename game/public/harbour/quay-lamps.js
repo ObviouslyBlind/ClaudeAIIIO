@@ -20,11 +20,8 @@ const GLOW = 0xe8a45a;
  * from pier centre (`pierZ = port.z + toward * 38`). Stay on the 11 m timber
  * deck (`|along| < 43`).
  *
- * `/g/lamps55` FAIL: 0.4 m glass, inland along.
- * `/g/lamps56` FAIL: 2.6 m cream glass still a speck at ~130 m.
- * `/g/lamps57` FAIL: 8 m cream cubes read as flat white pier planks.
- * Tall dark posts (above the 24 m spawn camera) + amber lanterns on top
- * so they silhouette against cyan sky, not the kraft deck.
+ * Playtest scale (D036): a person is ~2 m. Lamp posts are street-lamp
+ * tall (~3.2 m), not the 32 m critic towers that wrecked inland spawn.
  */
 export const QUAY_LAMP_SPOTS = Object.freeze([
   Object.freeze({ side: -3.2, along: -32 }),
@@ -51,12 +48,7 @@ function part(w, h, d, color, shadow = true) {
   return m;
 }
 
-/**
- * Tall dark post + amber lantern on top. No iron arm.
- * `/g/lamps57`: 8 m cream cubes looked like pier planks from the downward
- * spawn look. Posts reach past camera height (24 m) so they read as
- * verticals against cyan sky; lanterns stay amber GLOW, not kraft cream.
- */
+/** Street-lamp tall. Visitor is ~2 m; a 32 m post reads as a tower. */
 function paperLamp() {
   const g = new THREE.Group();
   g.name = "quay-lamp";
@@ -64,36 +56,36 @@ function paperLamp() {
   g.userData.dress = "quay-lamp";
   g.userData.mode = "PAPER";
 
-  const base = part(2.8, 0.4, 2.8, WOOD);
-  base.position.y = 0.2;
+  const base = part(0.32, 0.12, 0.32, WOOD);
+  base.position.y = 0.06;
   base.userData.part = "base";
 
-  const post = part(2.4, 32, 2.4, WOOD_DARK);
-  post.position.y = 16.2;
+  const post = part(0.14, 3.2, 0.14, WOOD_DARK);
+  post.position.y = 1.66;
   post.userData.part = "post";
 
-  const collar = part(3.2, 0.45, 3.2, WOOD, false);
-  collar.position.y = 32.4;
+  const collar = part(0.22, 0.08, 0.22, WOOD, false);
+  collar.position.y = 3.22;
   collar.userData.part = "collar";
 
-  const drip = part(2.6, 0.24, 2.6, KRAFT, false);
-  drip.position.y = 32.72;
+  const drip = part(0.28, 0.06, 0.28, KRAFT, false);
+  drip.position.y = 3.28;
   drip.userData.part = "drip";
 
-  const glass = new THREE.Mesh(new THREE.BoxGeometry(4.6, 4.6, 4.6), glassMat);
-  glass.position.y = 35.2;
+  const glass = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.38, 0.38), glassMat);
+  glass.position.y = 3.52;
   glass.castShadow = false;
   glass.receiveShadow = true;
   glass.userData.mode = "PAPER";
   glass.userData.part = "glass";
   glass.userData.kind = "quay-lamp-glass";
 
-  const cap = part(5.4, 0.5, 5.4, WOOD, false);
-  cap.position.y = 37.7;
+  const cap = part(0.42, 0.08, 0.42, WOOD, false);
+  cap.position.y = 3.74;
   cap.userData.part = "cap";
 
-  const brace = part(0.4, 3.2, 0.4, WOOD);
-  brace.position.set(1.35, 28.4, 0);
+  const brace = part(0.06, 0.42, 0.06, WOOD);
+  brace.position.set(0.12, 2.95, 0);
   brace.rotation.z = 0.55;
   brace.userData.part = "brace";
 
@@ -101,15 +93,15 @@ function paperLamp() {
   ring.name = "ring";
   ring.userData.part = "ring";
   ring.userData.mode = "PAPER";
-  ring.position.set(0, 32.5, 1.4);
-  const top = part(0.8, 0.18, 0.18, KRAFT, false);
-  top.position.set(0, 0.4, 0);
-  const bot = part(0.8, 0.18, 0.18, KRAFT, false);
-  bot.position.set(0, -0.4, 0);
-  const left = part(0.18, 0.8, 0.18, KRAFT, false);
-  left.position.set(-0.34, 0, 0);
-  const right = part(0.18, 0.8, 0.18, KRAFT, false);
-  right.position.set(0.34, 0, 0);
+  ring.position.set(0, 3.24, 0.16);
+  const top = part(0.16, 0.04, 0.04, KRAFT, false);
+  top.position.set(0, 0.08, 0);
+  const bot = part(0.16, 0.04, 0.04, KRAFT, false);
+  bot.position.set(0, -0.08, 0);
+  const left = part(0.04, 0.16, 0.04, KRAFT, false);
+  left.position.set(-0.07, 0, 0);
+  const right = part(0.04, 0.16, 0.04, KRAFT, false);
+  right.position.set(0.07, 0, 0);
   ring.add(top, bot, left, right);
 
   g.add(base, post, collar, drip, glass, cap, brace, ring);
