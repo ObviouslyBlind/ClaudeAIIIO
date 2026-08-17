@@ -24,6 +24,11 @@ describe("harbour boot import graph", () => {
     expect(src).not.toContain("await loadDressing(");
     expect(src).toContain("void loadDressing()");
     expect(src).toContain("SPAWN_PARCEL_M = 420");
+    expect(src).toContain("DRESSING_AFTER_CLICK_MS = 5000");
+    expect(src).toContain("DRESSING_FALLBACK_MS = 60000");
+    expect(src).toContain("setTimeout(startDressing, DRESSING_AFTER_CLICK_MS)");
+    expect(src).toContain("setTimeout(startDressing, DRESSING_FALLBACK_MS)");
+    expect(src).not.toMatch(/void loadDressing\(\);\s*\}, 400\)/);
     expect(src).toContain("clickTargets()");
     expect(src).not.toContain("intersectObjects(root.children, true)");
     const dressing = src.slice(src.indexOf("async function loadDressing"), src.indexOf("async function boot"));

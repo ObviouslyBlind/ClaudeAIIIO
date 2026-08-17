@@ -1,6 +1,10 @@
 # Daily Status
 
-## 2026-08-16 (latest)
+## 2026-08-17 (latest)
+
+**Current status:** Playtest bar is walk-without-freeze. `/g/walk90` FAIL WALK. D035 delays trees/quay until 5s after the first click. Next `/g/walk91`. PAPER / SIMULATED. Politics frozen.
+
+## 2026-08-16
 
 **Current status:** Two Harbors gauntlet redirected to the **base harbour game**. Politics frozen. Ten agent slots on spawn/cart/lease/market/presence/persist — not House/Senate.
 

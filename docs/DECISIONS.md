@@ -168,6 +168,11 @@ Record of architecture and strategy decisions with reasoning.
 **Decision:** `onPointer` intersects `clickTargets()` (terrain, plot lines, buildings), not `harbourGroup` recursively. Tree InstancedMeshes have a no-op `raycast`. Do not dump every island plot into the scene during dressing.
 **Reason:** `/g/walk89` FAIL WALK: left click on inland ground opened “Page Unresponsive.” Full-scene recursive raycast against trees/props/peds blocked the main thread. PAPER / SIMULATED.
 
+## D035 — Dress the harbour after the first click, not at 400ms (2026-08-17)
+
+**Decision:** Do not start quay/trees/stalls/taxi/`loadSheetHuds` on a 400ms boot timer. `startDressing()` runs 5s after the first left click (so the walk paints), or after 60s if they never click. First click raycasts ground only. `findParcelAt` only tests lots that already have meshes.
+**Reason:** `/g/walk90` FAIL WALK: D034 cheap raycast still froze the tab. Critics click ~6s after load, which landed on `trees.js` compile. PAPER / SIMULATED.
+
 ## D015 — Supplemental merge before save (2026-03-18)
 
 **Decision:** Move `relevant_markets_*.json` save to AFTER supplemental /markets merge.
