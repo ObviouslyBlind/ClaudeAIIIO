@@ -31,7 +31,7 @@ Open **`http://localhost:8787/`**. Close leftover `/g/` tabs.
 ## Git / PR
 
 - Repo: `github.com/ObviouslyBlind/ClaudeAIIIO`
-- Preferred base: `main`. Do **not** merge unless the operator asks.
+- Preferred base: `main`. Draft PR: https://github.com/ObviouslyBlind/ClaudeAIIIO/pull/33. Do **not** merge unless the operator asks.
 
 ## Guardrails
 
