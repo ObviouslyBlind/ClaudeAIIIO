@@ -27,11 +27,12 @@ import * as THREE from "three";
  * + a tiny kraft produce parsnip (WOOD_LIGHT box) left of the squash
  * + a tiny kraft produce yam (WOOD_LIGHT box) between the parsnip and the squash
  * + a tiny kraft produce plum (WOOD_LIGHT box) ahead of the yam
- * + a tiny kraft produce fig (WOOD_LIGHT box) left of the plum.
+ * + a tiny kraft produce fig (WOOD_LIGHT box) left of the plum
+ * + a tiny kraft produce apricot (WOOD_LIGHT box) behind the fig.
  * Wheels: kraft cream hub discs (paper boxes) on the outer face of each wheel.
  * Grip: a short kraft hitch pin (paper box) through the handle.
  */
-export const CART_MESH_COUNT = 41;
+export const CART_MESH_COUNT = 42;
 /** Metres from player.position down to the soles. Same as player.js SOLE_Y. */
 const SOLE_Y = -1.15;
 
@@ -299,7 +300,15 @@ function makeHandcart() {
   fig.userData.mode = "PAPER";
   fig.userData.part = "fig";
 
-  g.add(bed, sideL, sideR, tail, head, wheelL, wheelR, hubL, hubR, handleL, handleR, grip, pin, crate, strap, crate2, roll, coil, coilTop, lanternPost, lanternGlass, jugBody, jugNeck, jugHandle, appleBox, apple, carrot, carrotTop, potato, onion, garlic, cabbage, leek, turnip, beet, radish, squash, parsnip, yam, plum, fig);
+  // Tiny kraft produce apricot on the bed — one WOOD_LIGHT paper box.
+  // Behind the fig, inside the rails, clear of fig, plum, yam, parsnip, squash, radish, beet, turnip, leek, cabbage, garlic, onion, potato, carrot, apple.
+  // Sits on the bed top (y = 0.53). Paper box only.
+  const apricot = paperBox(0.05, 0.045, 0.05, WOOD_LIGHT, false);
+  apricot.position.set(-0.12, 0.553, -0.96);
+  apricot.userData.mode = "PAPER";
+  apricot.userData.part = "apricot";
+
+  g.add(bed, sideL, sideR, tail, head, wheelL, wheelR, hubL, hubR, handleL, handleR, grip, pin, crate, strap, crate2, roll, coil, coilTop, lanternPost, lanternGlass, jugBody, jugNeck, jugHandle, appleBox, apple, carrot, carrotTop, potato, onion, garlic, cabbage, leek, turnip, beet, radish, squash, parsnip, yam, plum, fig, apricot);
   return g;
 }
 
