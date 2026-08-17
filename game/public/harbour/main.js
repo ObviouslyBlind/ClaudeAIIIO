@@ -20,6 +20,7 @@ import { mountEconHud } from "./hud-econ.js";
 import { mountPresenceHud } from "./presence-hud.js";
 import { mountStaffHud } from "./staff-hud.js";
 import { mountCalendarHud } from "./calendar-hud.js";
+import { mountParcelMap } from "./parcel-map.js";
 
 function ensureDockButton(id, label) {
   let btn = document.getElementById(id);
@@ -137,6 +138,7 @@ let interior = null;
 let placingUse = null;
 let catalogPicker = null;
 let staffHud = null;
+let parcelMap = null;
 
 const player = new THREE.Mesh(
   new THREE.CapsuleGeometry(0.55, 1.15, 4, 8),
@@ -237,22 +239,26 @@ function canLeasePlot(p) {
   return p && !p.owner && p.price + need <= cash;
 }
 
+function parcelMapped(p) {
+  return plotMeshes.has(p.id) || (parcelMap && parcelMap.has(p.id));
+}
+
 function findParcelAt(x, z) {
   const hits = [];
   for (const p of map.plots) {
-    if (!plotMeshes.has(p.id)) continue;
+    if (!parcelMapped(p)) continue;
     const reach = Math.max(80, Math.sqrt(p.area || 0) * 2);
     if (Math.hypot(x - p.x, z - p.z) > reach) continue;
     if (pointInRing(x, z, p.ring)) hits.push(p);
   }
   if (hits.length) {
-    const smallest = hits.reduce((a, b) => (a.area <= b.area ? a : b));
-    if (smallest.owner === "visitor" || canLeasePlot(smallest)) return smallest;
+    // Any parcel is inspectable — the HUD says taken / need cash on its own.
+    return hits.reduce((a, b) => (a.area <= b.area ? a : b));
   }
   let best = null;
   let bestD = STARTER_SNAP_M;
   for (const p of map.plots) {
-    if (!plotMeshes.has(p.id)) continue;
+    if (!parcelMapped(p)) continue;
     if (!(p.owner === "visitor" || canLeasePlot(p))) continue;
     const d = pointInRing(x, z, p.ring) ? 0 : Math.hypot(x - p.x, z - p.z);
     if (d < bestD) {
@@ -386,9 +392,10 @@ function makeTerrain(spec) {
   geo.rotateX(-Math.PI / 2);
   const pos = geo.attributes.position;
   const colors = [];
-  const grass = spec.id === "north" ? new THREE.Color(0x4a7a3c) : new THREE.Color(0x3d8f4a);
+  // Printed-map greens: light, low-contrast, so the parcel plat reads on top.
+  const grass = spec.id === "north" ? new THREE.Color(0x7fb257) : new THREE.Color(0x87bb60);
   const sand = new THREE.Color(0xe8d5a3);
-  const rock = new THREE.Color(0x6b5a4a);
+  const rock = new THREE.Color(0x7d926a);
   for (let i = 0; i < pos.count; i++) {
     const x = pos.getX(i) + spec.cx;
     const z = pos.getZ(i) + spec.cz;
@@ -663,6 +670,8 @@ async function ensureIsland(id) {
   makePalms(spec);
   await idle(48);
   await makeParcels((p) => starterLotOn(p, id));
+  await idle(48);
+  if (parcelMap) ground.push(...parcelMap.buildIsland(id));
 }
 
 function spawnAt(id) {
@@ -707,6 +716,7 @@ function selectLand(p, walk) {
   selected = p.id;
   if (prev) paintParcel(prev);
   paintParcel(p);
+  if (parcelMap) parcelMap.setSelected(p.id);
   refreshHud();
   if (walk && !nearParcel(p)) {
     goTo(p.x, p.z);
@@ -836,6 +846,7 @@ function applySnapshot(snapshot) {
     if (!plotMeshes.has(p.id)) addParcel(p);
     else if (p.use) useFor(p);
   }
+  if (parcelMap) parcelMap.sync();
   refreshHud();
 }
 
@@ -964,6 +975,7 @@ function tick(dt) {
     }
   }
   if (ferryMesh && tickFerry) tickFerry(ferryMesh, dt);
+  if (parcelMap) parcelMap.tick(player.position, dt);
   btnFerry.disabled = !nearPort();
   refreshHud();
   playCam.tick(dt);
@@ -1124,6 +1136,16 @@ async function loadTrickleDressing() {
   tickFerry = ferryMod.tickFerry;
   ferryMesh = ferryMod.makeFerry();
   target.add(ferryMesh);
+
+  // NPC town: the world starts built (evergreen), so developed lots grow
+  // real meshes without waiting for the player to open the catalogue.
+  await quietStep();
+  await ensureCatalog();
+  for (const p of map.plots) {
+    if (!p.use || useMeshes.has(p.id)) continue;
+    if (!parcelMapped(p)) continue;
+    useFor(p);
+  }
 }
 
 async function boot() {
@@ -1148,6 +1170,14 @@ async function boot() {
   makePalms(specOf("north"));
   harbourGroup = wrapHarbourWorld(scene, { keep: [player, sun.target] });
   await makeParcels(nearNorthSpawn);
+  await idle(48);
+  parcelMap = mountParcelMap({
+    worldAdd,
+    specOf,
+    heightAt,
+    getPlots: () => (map ? map.plots : []),
+  });
+  ground.push(...parcelMap.buildIsland("north"));
   setStatus("Tap a piece of land. Lease it, then develop it.");
   await idle(80);
   await ensureTaxi();

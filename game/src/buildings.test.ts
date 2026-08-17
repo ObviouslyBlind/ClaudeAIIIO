@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   BUILDING_CATALOG,
   DEVELOP_COST,
+  isLandUse,
   paperCostFor,
   parseLandUse,
 } from "./buildings.ts";
@@ -113,11 +114,16 @@ describe("paper building catalogue", () => {
     expect(developPlot(board, visitor, vacant.id, "shop").ok).toBe(false);
   });
 
-  it("keeps NPC farm and stall uses as placeable meshes", () => {
+  it("seeds an NPC town whose every use is a placeable mesh", () => {
     const board = createLandBoard();
     const npc = board.plots.filter((p) => p.owner === "npc" && p.use);
     expect(npc.length).toBeGreaterThan(0);
-    expect(npc.every((p) => p.use === "farm" || p.use === "stall")).toBe(true);
+    expect(npc.every((p) => isLandUse(p.use))).toBe(true);
+    // The evergreen world starts as a town, not two lonely farms.
+    const towny = new Set(npc.map((p) => p.use));
+    expect(towny.has("house")).toBe(true);
+    expect(towny.has("shop")).toBe(true);
+    expect(towny.has("farm")).toBe(true);
     for (const p of npc) {
       const mesh = meshForUse(p.use, { area: p.area });
       expect(mesh.children.length).toBeGreaterThan(3);
