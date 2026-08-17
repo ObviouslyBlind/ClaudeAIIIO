@@ -1500,6 +1500,78 @@ function plantNorthPortBud(root) {
   root.add(bud);
 }
 
+function markBloom(mesh) {
+  mesh.userData.part = "bloom";
+  mesh.userData.dress = "bloom";
+  mesh.userData.mode = "PAPER";
+  mesh.userData.provenance = "PAPER";
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+}
+
+/**
+ * One tiny kraft PAPER bloom (one box) on a north-port palm trunk —
+ * not instead of the bud, sap, acorn, needle, lichen, moss, knot, bark,
+ * twig, vine, husk, frond, leaf, coconut, bird, nest, or egg. Hexes
+ * already in this file: trunk kraft. Reuses the nest twig box so
+ * geometry count stays put. Unique mesh — one box — so the phone mesh
+ * budget stays tiny. Trunks, leaves, coconuts, bird, nest, egg, leaf,
+ * frond, husk, vine, twig, bark, knot, moss, lichen, needle, acorn,
+ * sap, and bud stay put.
+ */
+function plantNorthPortBloom(root) {
+  const placed = root.userData.placed || [];
+  const sites = placed.filter((p) => p.island === "north" && p.dress === "north-port-palm");
+  if (!sites.length) return;
+
+  let nest = null;
+  root.traverse((obj) => {
+    if (!nest && obj.userData.kind === "nest") nest = obj;
+  });
+  if (!nest) return;
+
+  let geo = null;
+  nest.traverse((obj) => {
+    if (geo) return;
+    if (obj.isMesh && obj.geometry && obj.userData.part === "nest") geo = obj.geometry;
+  });
+  if (!geo) return;
+
+  const nestPos = new THREE.Vector3();
+  nest.getWorldPosition(nestPos);
+  let p = sites[0];
+  let best = Infinity;
+  for (const s of sites) {
+    const d = Math.hypot(s.x - nestPos.x, s.z - nestPos.z);
+    if (d < best) {
+      best = d;
+      p = s;
+    }
+  }
+
+  const mat = new THREE.MeshLambertMaterial({ color: TRUNK });
+  const bloom = new THREE.Group();
+  bloom.name = "bloom";
+  bloom.userData.kind = "bloom";
+  bloom.userData.part = "bloom";
+  bloom.userData.dress = "bloom";
+  bloom.userData.mode = "PAPER";
+  bloom.userData.provenance = "PAPER";
+  // Sit on the palm trunk, offset from bud, sap, acorn, needle, lichen, moss, knot, bark.
+  const yaw = 2.75;
+  const rad = 0.22;
+  bloom.position.set(p.x + Math.cos(yaw) * rad, p.y + 3.58, p.z + Math.sin(yaw) * rad);
+  bloom.rotation.set(0.2, yaw, -0.28);
+
+  const box = new THREE.Mesh(geo, mat);
+  box.name = "bloom-box";
+  markBloom(box);
+  box.scale.set(0.22, 0.38, 0.24);
+
+  bloom.add(box);
+  root.add(bloom);
+}
+
 /**
  * Low-poly PAPER trees on hills, inland slopes, and behind street lots.
  * Palms stay on the quay (makePalms). helpers: { scene, specOf, heightAt }.
@@ -1535,6 +1607,7 @@ export function makeTrees(map, helpers) {
   plantNorthPortAcorn(root);
   plantNorthPortSap(root);
   plantNorthPortBud(root);
+  plantNorthPortBloom(root);
   scene.add(root);
   return root;
 }
