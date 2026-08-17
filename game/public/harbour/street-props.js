@@ -435,7 +435,13 @@ function villagePump(_side) {
   tap.userData.mode = "PAPER";
   tap.position.set(0.06, 0.94, 0.18);
 
-  g.add(shoe, post, head, handle, spout, basin, rim, water, dipper, crank, bolt, washer, peg, hook, spigot, tap);
+  /** Tiny kraft PAPER fid (rope spike) on the pump. Kraft 0xc4b496 — PAPER box, not grey iron. Offset from tap, spigot, hook, peg, washer, bolt, bung, crank, dipper. */
+  const fid = part(0.03, 0.08, 0.03, 0xc4b496, false);
+  fid.userData.part = "fid";
+  fid.userData.mode = "PAPER";
+  fid.position.set(0.1, 0.7, -0.08);
+
+  g.add(shoe, post, head, handle, spout, basin, rim, water, dipper, crank, bolt, washer, peg, hook, spigot, tap, fid);
   return g;
 }
 
