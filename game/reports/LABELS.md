@@ -11,7 +11,7 @@ PAPER / SIMULATED. Grep these `kind` / `layer` / `.name` strings. Source of trut
 | Logistics | `logistics` | van + roadside crate pads | crate / van / walk |
 | Minerals | `minerals` | empty on South v1 | walk only |
 
-Lease a plot by **walking onto it** (land card), not by tapping the cadastral fill.
+Lease a plot by **clicking its $ price tag** (name, cost, Lease / Close). Left-click empty ground still walks.
 
 ## Mesh kinds
 

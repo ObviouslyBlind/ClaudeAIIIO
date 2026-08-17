@@ -37,7 +37,7 @@ npm run play:laptop
 
 The old cloud-agent plug-icon forward still works in Cursor Desktop. The scripts are the supported way to run it on your machine.
 
-Open `/` for the harbour. Toggle **Foot traffic**, lease a green South plot, then **Market** to order a hotdog cart delivered to that plot. Tap the crate **Take all**, **Inventory → Place in world**, short right-click the cart to stock. Hire from **Staff** or run it yourself. **Taxi** still paved-only. **Ferry** still North ↔ South. Labelled PAPER / SIMULATED.
+Open `/` for the harbour. Toggle **Foot traffic**, click a **$ tag** to lease a green South plot, then **Market** to order a hotdog cart delivered to that plot. Tap the crate **Take all**, **Inventory → Place in world**, short right-click the cart to stock. Hire from **Staff** or run it yourself. **Taxi** still paved-only. **Ferry** still North ↔ South. Labelled PAPER / SIMULATED.
 
 Visitor starts with $1,000. Tap ground to walk (green line). The world still ticks if nobody clicks.
 

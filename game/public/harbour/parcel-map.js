@@ -47,6 +47,20 @@ export function labelTextFor(plot) {
   return "$" + Number(plot.price).toLocaleString("en-US", { maximumFractionDigits: 0 });
 }
 
+/** Card title: "14 Harbour Rd". Uses the plot's stamped name, or a fallback. */
+export function plotDisplayName(plot) {
+  if (!plot) return "Land";
+  if (plot.name) return plot.name;
+  const street =
+    plot.street ||
+    (plot.band === "shore" ? "Shore Rd" : plot.band === "field" ? "Field Lane" : "Harbour Rd");
+  let h = 0;
+  const id = String(plot.id || "");
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) | 0;
+  const n = 2 + (((h >>> 0) % 49) * 2);
+  return `${n} ${street}`;
+}
+
 function hash01(s) {
   let h = 0;
   for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
@@ -245,6 +259,8 @@ export function mountParcelMap({ worldAdd, specOf, heightAt, getPlots }) {
     );
     sprite.userData.kind = "parcel-label";
     sprite.userData.mode = "PAPER";
+    sprite.userData.plot = null;
+    sprite.userData.plotId = null;
     sprite.visible = false;
     sprite.renderOrder = 5;
     worldAdd(sprite);
@@ -294,16 +310,28 @@ export function mountParcelMap({ worldAdd, specOf, heightAt, getPlots }) {
         rec.text = slot.text;
       }
       const spec = specOf(slot.p.island);
-      const s = Math.max(9, Math.min(26, 6 + Math.sqrt(slot.p.area) * 0.28));
+      const s = Math.max(14, Math.min(32, 8 + Math.sqrt(slot.p.area) * 0.32));
       rec.sprite.position.set(
         slot.p.x,
         heightAt(spec, slot.p.x, slot.p.z) + 3 + s * 0.12,
         slot.p.z,
       );
-      rec.sprite.scale.set(s, s * 0.35, 1);
+      rec.sprite.scale.set(s, s * 0.42, 1);
+      rec.sprite.userData.plot = slot.p;
+      rec.sprite.userData.plotId = slot.p.id;
+      rec.sprite.userData.label = slot.text;
       rec.sprite.visible = true;
     }
   }
 
-  return { buildIsland, has, setSelected, sync, tick };
+  /** Visible price tags. Left-click these to open Lease / Close — not the dirt. */
+  function clickables() {
+    const out = [];
+    for (const rec of sprites) {
+      if (rec && rec.sprite && rec.sprite.visible) out.push(rec.sprite);
+    }
+    return out;
+  }
+
+  return { buildIsland, has, setSelected, sync, tick, clickables };
 }

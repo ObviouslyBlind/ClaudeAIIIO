@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 const html = readFileSync(new URL("../public/harbour/index.html", import.meta.url), "utf8");
+const chrome = readFileSync(new URL("../public/harbour/chrome.js", import.meta.url), "utf8");
 
 describe("harbour chrome HUD", () => {
   it("ships the corner chrome, not a handheld-cart sheet as the main UI", () => {
@@ -15,10 +16,18 @@ describe("harbour chrome HUD", () => {
     expect(html).toContain('data-panel="market"');
     expect(html).toContain('data-panel="employees"');
     expect(html).toContain('id="chrome"');
-    expect(html).toContain("Right-click a lot to lease");
+    expect(html).toContain("Click a $ tag to lease");
     expect(html).toContain('id="cart">PAPER<');
     expect(html).not.toContain('data-panel="tutorials"');
     expect(html).not.toContain("Tutorials");
     expect(html).not.toContain("script-coach");
+  });
+
+  it("lease card shows the property name, the PAPER price, Lease, and Close", () => {
+    expect(chrome).toContain("plotDisplayName");
+    expect(chrome).toContain('id="land-lease"');
+    expect(chrome).toContain('id="land-close"');
+    expect(chrome).toContain("onCloseLand");
+    expect(chrome).toContain("PAPER");
   });
 });

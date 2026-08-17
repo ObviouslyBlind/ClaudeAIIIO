@@ -24,7 +24,7 @@ Open **`http://localhost:8787/`**. Close leftover `/g/` tabs.
 
 - Port **8787**. tmux session `two-harbors-play`. Binds `0.0.0.0:8787`.
 - Cursor Desktop: plug icon → Auto-Forward Ports → open **8787**. Web-only agents do not put that port on your laptop.
-- Left click / tap = walk or use. RMB-hold = orbit. Wheel = zoom. No WASD. No wallet.
+- Left click / tap = walk or use. Click a **$ tag** for name / cost / Lease or Close. RMB-hold = orbit. Wheel = zoom. No WASD. No wallet.
 - Taxi: stand on paved, hail, tap a named stop (Port / Mill St / …). Dirt forbidden.
 - Ferry: near a port, ticket PAPER $15, North ↔ South.
 

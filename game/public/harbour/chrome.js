@@ -3,6 +3,8 @@
  * PAPER / SIMULATED. Polls /api/play.
  */
 
+import { plotDisplayName } from "./parcel-map.js";
+
 export const POLL_MS = 1000;
 
 function money(n) {
@@ -41,7 +43,7 @@ export function mountChrome(opts) {
   let skuDogs = true;
 
   const HINTS = {
-    world: "World: left-click walks. Right-click a lot to lease.",
+    world: "World: left-click walks. Click a $ tag to lease.",
     foot: "Foot traffic: green / yellow / red on each named road.",
     logistics: "Logistics: tap the roadside crate. Van drops on the kerb.",
     minerals: "Minerals: not on the South first loop yet.",
@@ -372,16 +374,39 @@ export function mountChrome(opts) {
       const band = extras && extras.band ? extras.band : "";
       const crate = extras && extras.crate;
       const roadside = extras && extras.roadside;
+      const title = roadside ? "Roadside crate" : plotDisplayName(plot);
+      const price = roadside
+        ? ""
+        : `<p class="price">${
+            plot.owner
+              ? plot.owner === "visitor"
+                ? "YOURS"
+                : "taken"
+              : money(plot.price) + " PAPER"
+          }</p>`;
+      const leaseBtnHtml = !roadside && !plot.owner ? `<button type="button" class="take-all" id="land-lease">Lease</button>` : "";
       landCard.innerHTML = `
         <p class="float-kicker">PAPER · SIMULATED</p>
-        <h2>${roadside ? "Roadside crate" : plot.owner === "visitor" ? "Your plot" : "South land"}</h2>
-        ${roadside ? "" : `<p class="price">${plot.owner ? (plot.owner === "visitor" ? "YOURS" : "taken") : money(plot.price)}</p>`}
+        <h2>${title}</h2>
+        ${price}
         ${band ? `<p><span class="band-dot ${band}"></span>Foot traffic ${band}</p>` : ""}
-        ${!roadside && !plot.owner ? `<button type="button" class="take-all" id="land-lease">Lease</button>` : ""}
+        ${
+          roadside
+            ? ""
+            : `<div class="land-row">${leaseBtnHtml}<button type="button" class="take-all" id="land-close">Close</button></div>`
+        }
         ${crate ? `<button type="button" class="take-all" id="land-take">Take all</button>` : ""}
+        ${roadside ? `<button type="button" class="take-all" id="land-close">Close</button>` : ""}
       `;
       const leaseBtn = landCard.querySelector("#land-lease");
       if (leaseBtn && opts.lease) leaseBtn.addEventListener("click", () => opts.lease());
+      const closeBtn = landCard.querySelector("#land-close");
+      if (closeBtn) {
+        closeBtn.addEventListener("click", () => {
+          landCard.hidden = true;
+          if (opts.onCloseLand) opts.onCloseLand();
+        });
+      }
       const takeBtn = landCard.querySelector("#land-take");
       if (takeBtn && extras.onTake) takeBtn.addEventListener("click", extras.onTake);
     },

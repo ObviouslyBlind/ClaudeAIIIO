@@ -41,6 +41,10 @@ export type Parcel = {
   price: number;
   owner: string | null;
   use: LandUse;
+  /** Street the lot fronts. */
+  street: string;
+  /** House number + street, e.g. "14 Harbour Rd". */
+  name: string;
 };
 
 export type Road = {
@@ -360,12 +364,26 @@ function quad(
   ];
 }
 
+/** Even house numbers 2–98, stable from the plot id. */
+export function houseNumberFor(id: string): number {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) | 0;
+  return 2 + (((h >>> 0) % 49) * 2);
+}
+
+export function streetLabelForBand(band: PlotBand): string {
+  if (band === "shore") return "Shore Rd";
+  if (band === "field") return "Field Lane";
+  return "Harbour Rd";
+}
+
 function pushParcel(
   out: Parcel[],
   spec: IslandSpec,
   ring: Ring,
   band: PlotBand,
   n: number,
+  streetName?: string,
 ): void {
   const c = ringCentroid(ring);
   if (heightAt(spec, c.x, c.z) < 0.4) return;
@@ -374,8 +392,10 @@ function pushParcel(
   const area = ringArea(ring);
   if (area < 180 || area > 9000) return;
   const portDist = Math.hypot(c.x - spec.port.x, c.z - spec.port.z);
+  const id = `${spec.id}-${band}-${n}`;
+  const street = streetName || streetLabelForBand(band);
   out.push({
-    id: `${spec.id}-${band}-${n}`,
+    id,
     island: spec.id,
     ring,
     x: c.x,
@@ -386,6 +406,8 @@ function pushParcel(
     price: priceOf(spec, area, band, portDist),
     owner: null,
     use: null,
+    street,
+    name: `${houseNumberFor(id)} ${street}`,
   });
 }
 
@@ -398,7 +420,7 @@ function lotsAlongPolyline(
   lots: Parcel[],
   spec: IslandSpec,
   pts: { x: number; z: number }[],
-  opts: { fromM: number; toM: number; cutM: number; seed: number },
+  opts: { fromM: number; toM: number; cutM: number; seed: number; street: string },
 ): void {
   let acc = 0;
   for (let i = 0; i < pts.length - 1; i++) {
@@ -426,8 +448,8 @@ function lotsAlongPolyline(
         const p = { x: perp.x / plen, z: perp.z / plen };
         const hk = hash(opts.seed + i * 17 + k * 13 + side * 9);
         const depth = 18 + hk * 14;
-        const street = quad(sa, sb, p, 13, depth, (hk - 0.5) * 0.08);
-        pushParcel(lots, spec, street, "street", lots.length);
+        const lot = quad(sa, sb, p, 13, depth, (hk - 0.5) * 0.08);
+        pushParcel(lots, spec, lot, "street", lots.length, opts.street);
       }
     }
     acc += segLen;
@@ -470,6 +492,7 @@ function lotsAlongRoad(spec: IslandSpec): { lots: Parcel[]; dirt: Road[] } {
     toM: 900,
     cutM: 44,
     seed: spec.id === "north" ? 1 : 3,
+    street: "Harbour Rd",
   });
 
   // Every side street carries its own single row of lots.
@@ -480,6 +503,7 @@ function lotsAlongRoad(spec: IslandSpec): { lots: Parcel[]; dirt: Road[] } {
       toM: s.len - 12,
       cutM: 40,
       seed: 100 + i * 7 + (spec.id === "north" ? 0 : 50),
+      street: s.name,
     });
     // Farmland continues past the street end on a dirt lane.
     const a = pts[pts.length - 2];

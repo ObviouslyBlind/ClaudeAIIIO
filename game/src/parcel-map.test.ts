@@ -8,6 +8,7 @@ import {
   LABEL_RADIUS_M,
   fillColorFor,
   labelTextFor,
+  plotDisplayName,
   mountParcelMap,
 } from "../public/harbour/parcel-map.js";
 
@@ -107,5 +108,19 @@ describe("parcel map (PAPER)", () => {
   it("keeps the label pool bounded", () => {
     expect(LABEL_POOL).toBeLessThanOrEqual(128);
     expect(LABEL_RADIUS_M).toBeLessThanOrEqual(600);
+  });
+
+  it("names a lot for the lease card", () => {
+    expect(plotDisplayName({ name: "14 Harbour Rd" })).toBe("14 Harbour Rd");
+    expect(plotDisplayName({ id: "south-street-0", band: "street" })).toMatch(/^\d+ Harbour Rd$/);
+  });
+
+  it("exposes a clickables list for price tags", () => {
+    const plots = [plot("north-street-0", null)];
+    const added: any[] = [];
+    const pm = mount(plots, added);
+    pm.buildIsland("north");
+    expect(typeof pm.clickables).toBe("function");
+    expect(pm.clickables()).toEqual([]);
   });
 });

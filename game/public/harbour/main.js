@@ -964,6 +964,9 @@ function clickTargets() {
     objs.push(...deliveries.clickables());
   }
   if (overlays && overlays.group) objs.push(overlays.group);
+  if (parcelMap && typeof parcelMap.clickables === "function") {
+    objs.push(...parcelMap.clickables());
+  }
   return objs.filter(Boolean);
 }
 
@@ -979,14 +982,8 @@ function walkPoint(hits) {
   return hit || hits[0] || null;
 }
 
-function inspectLandAt(x, z) {
-  if (!map || !chromeHud || !chromeHud.paintLand) return false;
-  const p = findParcelAt(x, z);
-  if (!p) {
-    landPinned = false;
-    setStatus("Right-click a street lot to lease it. PAPER.");
-    return false;
-  }
+function showLandCard(p) {
+  if (!p || !map || !chromeHud || !chromeHud.paintLand) return false;
   landPinned = true;
   const prev = selected ? map.plots.find((row) => row.id === selected) : null;
   selected = p.id;
@@ -1000,10 +997,22 @@ function inspectLandAt(x, z) {
     crate,
     onTake: crate ? () => takeCrate(crate.id) : null,
   });
-  if (!p.owner) setStatus("Lease this lot. PAPER · SIMULATED.");
+  if (!p.owner) setStatus((p.name || "This lot") + " · lease or close. PAPER · SIMULATED.");
   else if (p.owner === "visitor") setStatus("Yours. PAPER.");
   else setStatus("This land is taken. PAPER.");
   return true;
+}
+
+function closeLandCard() {
+  landPinned = false;
+  lastInspectKey = "";
+  if (chromeHud && chromeHud.paintLand) chromeHud.paintLand(null);
+  if (selected && map) {
+    const prev = map.plots.find((x) => x.id === selected);
+    selected = null;
+    if (prev) paintParcel(prev);
+    if (parcelMap) parcelMap.setSelected(null);
+  }
 }
 
 function inspectNearbyLand() {
@@ -1070,6 +1079,7 @@ function onPointer(ev) {
   }
   const viewer = viewerMode();
   const hits = raycaster.intersectObjects(clickTargets(), true);
+  const labelHit = hits.find((h) => objectWithKind(h.object, "parcel-label"));
   const standHit = hits.find((h) => objectWithStand(h.object));
   const crateHit = hits.find((h) => objectWithKind(h.object, "crate"));
   const vanHit = hits.find((h) => objectWithKind(h.object, "van"));
@@ -1088,6 +1098,13 @@ function onPointer(ev) {
       return;
     }
     setStatus("Tap land you leased to place the hotdog cart.");
+    return;
+  }
+  if (labelHit && viewer === "world") {
+    const spr = objectWithKind(labelHit.object, "parcel-label");
+    const id = spr && (spr.userData.plotId || (spr.userData.plot && spr.userData.plot.id));
+    const p = id && map && map.plots.find((x) => x.id === id);
+    if (p) showLandCard(p);
     return;
   }
   if (
@@ -1187,8 +1204,12 @@ async function lease() {
   applySnapshot(body.snapshot);
   paintParcel(map.plots.find((x) => x.id === selected));
   if (chromeHud) chromeHud.refresh();
-  landPinned = false;
+  landPinned = true;
   lastInspectKey = "";
+  const p = map.plots.find((x) => x.id === selected);
+  if (p && chromeHud && chromeHud.paintLand) {
+    chromeHud.paintLand(p, { band: bandForPlot(p) });
+  }
   setStatus("This land is yours for $" + money(body.paid) + " (PAPER). Order from Market.");
 }
 
@@ -1554,6 +1575,7 @@ async function boot() {
   chromeHud = mountChrome({
     setStatus,
     lease,
+    onCloseLand: closeLandCard,
     onLeased(snapshot) {
       landPinned = false;
       lastInspectKey = "";
@@ -1589,7 +1611,7 @@ async function boot() {
     },
     onPlaceMode() {},
   });
-  setStatus("World viewer. Left-click walks. Right-click a lot to lease. PAPER.");
+  setStatus("World viewer. Left-click walks. Click a $ tag to lease. PAPER.");
   await idle(80);
   await ensureTaxi();
   await ensureDeliveries();
@@ -1619,13 +1641,6 @@ canvas.addEventListener("pointerup", (ev) => {
     if (obj) openStandMenu(obj.userData.standId);
     return;
   }
-  const tap = walkPoint(hits);
-  const pt = (tap && tap.point) || (hits[0] && hits[0].point);
-  if (!pt) {
-    setStatus("Right-click a street lot to lease it. PAPER.");
-    return;
-  }
-  inspectLandAt(pt.x, pt.z);
 });
 btnLease.addEventListener("click", lease);
 btnDevelop.addEventListener("click", openCatalog);
