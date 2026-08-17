@@ -62,6 +62,7 @@ describe("harbour boot import graph", () => {
     expect(steps).toBeGreaterThanOrEqual(4);
     expect(src).toContain("function showLandCard");
     expect(src).toContain("parcel-label");
+    expect(src).toContain("pickLabel");
     expect(src).toContain("Click a $ tag to lease");
     expect(src).toContain("clickTargets()");
     expect(src).not.toContain("function inspectLandAt");

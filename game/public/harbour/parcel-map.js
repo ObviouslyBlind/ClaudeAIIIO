@@ -47,6 +47,25 @@ export function labelTextFor(plot) {
   return "$" + Number(plot.price).toLocaleString("en-US", { maximumFractionDigits: 0 });
 }
 
+/** Screen-space box for a billboard tag. Used so a left-click on $146 hits even
+ *  when THREE.Sprite.raycast misses the non-square scale. */
+export function labelScreenBox(ndcX, ndcY, dist, scaleX, scaleY, viewW, viewH, fovDeg) {
+  const sx = (ndcX * 0.5 + 0.5) * viewW;
+  const sy = (-ndcY * 0.5 + 0.5) * viewH;
+  const vFov = ((fovDeg || 50) * Math.PI) / 180;
+  const m = viewH / (2 * Math.tan(vFov / 2) * Math.max(0.5, dist));
+  return {
+    sx,
+    sy,
+    hw: Math.max(36, (scaleX * m) / 2),
+    hh: Math.max(20, (scaleY * m) / 2),
+  };
+}
+
+export function pointInLabelBox(cx, cy, box) {
+  return Math.abs(cx - box.sx) <= box.hw && Math.abs(cy - box.sy) <= box.hh;
+}
+
 /** Card title: "14 Harbour Rd". Uses the plot's stamped name, or a fallback. */
 export function plotDisplayName(plot) {
   if (!plot) return "Land";
@@ -333,5 +352,25 @@ export function mountParcelMap({ worldAdd, specOf, heightAt, getPlots }) {
     return out;
   }
 
-  return { buildIsland, has, setSelected, sync, tick, clickables };
+  /** Hit-test a click against visible $ tags in screen space. */
+  function pickLabel(camera, clientX, clientY, viewW, viewH) {
+    if (!camera || !viewW || !viewH) return null;
+    const ndc = new THREE.Vector3();
+    let best = null;
+    const fov = camera.fov || 50;
+    for (const rec of sprites) {
+      if (!rec || !rec.sprite.visible) continue;
+      const spr = rec.sprite;
+      ndc.copy(spr.position).project(camera);
+      if (!Number.isFinite(ndc.x) || ndc.z > 1 || ndc.z < -1) continue;
+      const dist = camera.position.distanceTo(spr.position);
+      const box = labelScreenBox(ndc.x, ndc.y, dist, spr.scale.x, spr.scale.y, viewW, viewH, fov);
+      if (!pointInLabelBox(clientX, clientY, box)) continue;
+      const d = Math.hypot(clientX - box.sx, clientY - box.sy);
+      if (!best || d < best.d) best = { d, plotId: spr.userData.plotId, sprite: spr };
+    }
+    return best;
+  }
+
+  return { buildIsland, has, setSelected, sync, tick, clickables, pickLabel };
 }

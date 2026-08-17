@@ -527,7 +527,6 @@ function refreshHud() {
     return;
   }
   const p = pSel;
-  const near = nearParcel(p);
   if (p.owner === "visitor") {
     plotLineEl.textContent = parcelLabel(p) + (p.use ? " · " + p.use : " · yours");
     btnLease.disabled = true;
@@ -538,7 +537,7 @@ function refreshHud() {
     plotLineEl.textContent = parcelLabel(p) + " · $" + money(p.price);
     const headroom = map.visitor.cash - p.price;
     const need = map.developCost ?? 40;
-    btnLease.disabled = !near || map.visitor.cash < p.price || headroom < need;
+    btnLease.disabled = map.visitor.cash < p.price || headroom < need;
     if (map.visitor.cash < p.price) {
       plotLineEl.textContent = parcelLabel(p) + " · $" + money(p.price) + " · need cash";
     } else if (headroom < need) {
@@ -1099,6 +1098,17 @@ function onPointer(ev) {
     }
     setStatus("Tap land you leased to place the hotdog cart.");
     return;
+  }
+  const tagPick =
+    viewer === "world" && parcelMap && typeof parcelMap.pickLabel === "function"
+      ? parcelMap.pickLabel(camera, ev.clientX, ev.clientY, window.innerWidth, window.innerHeight)
+      : null;
+  if (tagPick && tagPick.plotId && map) {
+    const tagged = map.plots.find((x) => x.id === tagPick.plotId);
+    if (tagged) {
+      showLandCard(tagged);
+      return;
+    }
   }
   if (labelHit && viewer === "world") {
     const spr = objectWithKind(labelHit.object, "parcel-label");

@@ -8,6 +8,8 @@ import {
   LABEL_RADIUS_M,
   fillColorFor,
   labelTextFor,
+  labelScreenBox,
+  pointInLabelBox,
   plotDisplayName,
   mountParcelMap,
 } from "../public/harbour/parcel-map.js";
@@ -121,6 +123,16 @@ describe("parcel map (PAPER)", () => {
     const pm = mount(plots, added);
     pm.buildIsland("north");
     expect(typeof pm.clickables).toBe("function");
+    expect(typeof pm.pickLabel).toBe("function");
     expect(pm.clickables()).toEqual([]);
+    expect(pm.pickLabel(null, 0, 0, 800, 600)).toBeNull();
+  });
+
+  it("hits a $ tag in screen space, not only via mesh raycast", () => {
+    const box = labelScreenBox(0, 0, 20, 20, 8, 800, 600, 50);
+    expect(pointInLabelBox(400, 300, box)).toBe(true);
+    expect(pointInLabelBox(400 + box.hw + 8, 300, box)).toBe(false);
+    expect(box.hw).toBeGreaterThanOrEqual(36);
+    expect(box.hh).toBeGreaterThanOrEqual(20);
   });
 });
