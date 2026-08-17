@@ -28,11 +28,12 @@ import * as THREE from "three";
  * + a tiny kraft produce yam (WOOD_LIGHT box) between the parsnip and the squash
  * + a tiny kraft produce plum (WOOD_LIGHT box) ahead of the yam
  * + a tiny kraft produce fig (WOOD_LIGHT box) left of the plum
- * + a tiny kraft produce apricot (WOOD_LIGHT box) behind the fig.
+ * + a tiny kraft produce apricot (WOOD_LIGHT box) behind the fig
+ * + a tiny kraft produce date (WOOD_LIGHT box) right of the apricot.
  * Wheels: kraft cream hub discs (paper boxes) on the outer face of each wheel.
  * Grip: a short kraft hitch pin (paper box) through the handle.
  */
-export const CART_MESH_COUNT = 42;
+export const CART_MESH_COUNT = 43;
 /** Metres from player.position down to the soles. Same as player.js SOLE_Y. */
 const SOLE_Y = -1.15;
 
@@ -308,7 +309,15 @@ function makeHandcart() {
   apricot.userData.mode = "PAPER";
   apricot.userData.part = "apricot";
 
-  g.add(bed, sideL, sideR, tail, head, wheelL, wheelR, hubL, hubR, handleL, handleR, grip, pin, crate, strap, crate2, roll, coil, coilTop, lanternPost, lanternGlass, jugBody, jugNeck, jugHandle, appleBox, apple, carrot, carrotTop, potato, onion, garlic, cabbage, leek, turnip, beet, radish, squash, parsnip, yam, plum, fig, apricot);
+  // Tiny kraft produce date on the bed — one WOOD_LIGHT paper box.
+  // Right of the apricot, inside the rails, clear of apricot, fig, plum, yam, parsnip, squash, radish, beet, turnip, leek, cabbage, garlic, onion, potato, carrot, apple.
+  // Sits on the bed top (y = 0.53). Paper box only.
+  const date = paperBox(0.05, 0.045, 0.05, WOOD_LIGHT, false);
+  date.position.set(0.16, 0.553, -0.90);
+  date.userData.mode = "PAPER";
+  date.userData.part = "date";
+
+  g.add(bed, sideL, sideR, tail, head, wheelL, wheelR, hubL, hubR, handleL, handleR, grip, pin, crate, strap, crate2, roll, coil, coilTop, lanternPost, lanternGlass, jugBody, jugNeck, jugHandle, appleBox, apple, carrot, carrotTop, potato, onion, garlic, cabbage, leek, turnip, beet, radish, squash, parsnip, yam, plum, fig, apricot, date);
   return g;
 }
 
