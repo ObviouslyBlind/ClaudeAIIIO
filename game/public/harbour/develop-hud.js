@@ -40,11 +40,13 @@ function cheapestLabel(data) {
   return CHEAPEST_LABEL;
 }
 
-/** Leased vacant inspect: plot-line ends with " · yours", or status says develop it. */
+/** Leased vacant inspect: plot-line ends with " · yours", or status is the post-lease line.
+ *  Boot copy "Lease it, then develop it." must not count — `/g/hud104` painted House $40 at spawn. */
 export function isLeasedVacantInspect(status, plot) {
   const s = String(status || "");
   const p = String(plot || "").trim();
-  if (/\bDevelop it\b/i.test(s)) return true;
+  if (/then develop it/i.test(s)) return / · yours$/i.test(p);
+  if (/This land is yours/i.test(s)) return true;
   if (/land you leased/i.test(s)) return true;
   if (!p || /taken|Inside|^Tap land/i.test(p)) return false;
   return / · yours$/i.test(p);

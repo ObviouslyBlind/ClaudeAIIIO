@@ -8,9 +8,9 @@ This is a PAPER / SIMULATED harbour game in `/workspace/game`. The Polymarket pa
 
 Operator came back to **playtest**. Bar is **`http://localhost:8787/`**, inland spawn, walkable harbour.
 
-Gauntlet at a resting point after `/g/loop103` PASS LOOP. Next piece: **HUD clone lines** (D044) then Market Buy 1. Operator screenshot stacked identical `PAPER · SIMULATED` goods + persist lines.
+Gauntlet live on HUD clones. `/g/hud104` FAIL HUD — boot copy "then develop it" painted House $40 afford (D045). Re-critic `/g/hud107`. Then Market Buy 1.
 
-Last playtest fix: D044 empty goods blank / persist `no dump`. D043 trickle cars+ferry only. D042 ferry-hint observer loop killed. D040/41 no burst timer. D039 south landfall. D038 cheap lots. D037 taxi + pier. D036 no auto trees.
+Last playtest fix: D045 develop hint ignores boot copy. D044 empty goods blank / persist `no dump`. D043 trickle cars+ferry only. D042 ferry-hint observer loop killed.
 
 ## Play
 
