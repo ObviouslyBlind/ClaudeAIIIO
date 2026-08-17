@@ -16,6 +16,8 @@ Loop is **live** on playtest bugs (operator: “so many bugs, use the gauntlet�
 
 `/g/scale93` **PASS SCALE**: person-scale shed vs visitor, no 32 m towers, inland click walked, no hang for 8s.
 
+`/g/lease94` **PASS LEASE**: inland street plot, Lease enabled, cash $1,000 → $745 ($255), “yours”, no hang.
+
 Current piece: **`/g/play95` PLAY** — yellow taxi at north spawn, Taxi button works, timber pier over water with pilings (not an 86 m sand slab). No RMB.
 
 One **pixel critic** at a time. Unique `/g/…` path. No RMB. Do not restart play while a critic is on the page.

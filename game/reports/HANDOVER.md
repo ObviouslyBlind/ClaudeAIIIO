@@ -8,7 +8,7 @@ This is a PAPER / SIMULATED harbour game in `/workspace/game`. The Polymarket pa
 
 Operator came back to **playtest**. Bar is **`http://localhost:8787/`**, inland spawn, walkable harbour.
 
-Gauntlet live. `/g/scale93` PASS SCALE. Operator: taxi dead, pier on sand. D037: taxi at boot, pier over water. Next `/g/play95`.
+Gauntlet live. `/g/lease94` PASS LEASE. D037: taxi at boot, pier over water. Next `/g/play95`.
 
 Last playtest fix: D037 — taxi at boot; 7×32 m pier over water. D036 still applies (no auto trees).
 
