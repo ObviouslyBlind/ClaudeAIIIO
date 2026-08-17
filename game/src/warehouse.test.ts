@@ -1640,3 +1640,125 @@ describe("warehouse PAPER kraft docket", () => {
     expect(boxes).toBeGreaterThanOrEqual(1);
   });
 });
+
+describe("warehouse PAPER kraft label", () => {
+  it("sits one tiny kraft PAPER label on the clipboard; docket, tag, ribbon stay", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressWarehouse(scene);
+
+    const dress = interior.getObjectByName("warehouse-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+
+    const labels: THREE.Object3D[] = [];
+    const dockets: THREE.Object3D[] = [];
+    const tags: THREE.Object3D[] = [];
+    const ribbons: THREE.Object3D[] = [];
+    const tacks: THREE.Object3D[] = [];
+    const erasers: THREE.Object3D[] = [];
+    const pencils: THREE.Object3D[] = [];
+    const clips: THREE.Object3D[] = [];
+    const stamps: THREE.Object3D[] = [];
+    const cards: THREE.Object3D[] = [];
+    const twines: THREE.Object3D[] = [];
+    const chalks: THREE.Object3D[] = [];
+    const clipboards: THREE.Object3D[] = [];
+    dress!.traverse((obj) => {
+      if (obj.userData?.kind === "warehouse-label" && obj.name === "warehouse-label") {
+        labels.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-docket" && obj.name === "warehouse-docket") {
+        dockets.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-tag" && obj.name === "warehouse-tag") {
+        tags.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-ribbon" && obj.name === "warehouse-ribbon") {
+        ribbons.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-tack" && obj.name === "warehouse-tack") {
+        tacks.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-eraser" && obj.name === "warehouse-eraser") {
+        erasers.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-pencil" && obj.name === "warehouse-pencil") {
+        pencils.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-clip" && obj.name === "warehouse-clip") {
+        clips.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-stamp" && obj.name === "warehouse-stamp") {
+        stamps.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-card" && obj.name === "warehouse-card") {
+        cards.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-twine" && obj.name === "warehouse-twine") {
+        twines.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-chalk" && obj.name === "warehouse-chalk") {
+        chalks.push(obj);
+      }
+      if (obj.userData?.kind === "warehouse-clipboard" && obj.name === "warehouse-clipboard") {
+        clipboards.push(obj);
+      }
+    });
+    expect(labels.length).toBe(1);
+    expect(dockets.length).toBe(1);
+    expect(tags.length).toBe(1);
+    expect(ribbons.length).toBe(1);
+    expect(tacks.length).toBe(1);
+    expect(erasers.length).toBe(1);
+    expect(pencils.length).toBe(1);
+    expect(clips.length).toBe(1);
+    expect(stamps.length).toBe(1);
+    expect(cards.length).toBe(1);
+    expect(twines.length).toBe(1);
+    expect(chalks.length).toBe(1);
+
+    const label = labels[0];
+    expect(label.userData.kind).toBe("warehouse-label");
+    expect(label.userData.mode).toBe("PAPER");
+    expect(label.userData.part).toBe("label");
+    expect(label.position.y).toBeGreaterThan(1.2);
+    expect(label.position.y).toBeLessThan(2.4);
+    const onBack = Math.abs(label.position.z) > 3.0;
+    const onSide = Math.abs(label.position.x) > 3.5;
+    expect(onBack || onSide).toBe(true);
+    expect(horizDist(label, clipboards[0])).toBeLessThan(0.5);
+    expect(horizDist(label, cards[0])).toBeGreaterThan(1.5);
+    expect(horizDist(label, twines[0])).toBeGreaterThan(1.5);
+    expect(dockets[0].userData.part).toBe("docket");
+    expect(tags[0].userData.part).toBe("tag");
+    expect(ribbons[0].userData.part).toBe("ribbon");
+    expect(tacks[0].userData.part).toBe("tack");
+    expect(erasers[0].userData.part).toBe("eraser");
+    expect(pencils[0].userData.part).toBe("pencil");
+    expect(clips[0].userData.part).toBe("clip");
+    expect(stamps[0].userData.part).toBe("stamp");
+    expect(cards[0].userData.part).toBe("card");
+    expect(twines[0].userData.part).toBe("twine");
+    expect(chalks[0].userData.part).toBe("chalk");
+
+    const colors = hexes(label);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.every((c) => c === 0x5a3a22 || c === 0x8a6238 || c === 0x9a6a40)).toBe(true);
+    expect(colors.some((c) => c === 0x5a3a22 || c === 0x8a6238 || c === 0x9a6a40)).toBe(true);
+    expect(colors.every((c) => !isGrey(c))).toBe(true);
+
+    let boxes = 0;
+    label.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        boxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.kind).toBe("warehouse-label");
+        expect(mesh.userData.mode).toBe("PAPER");
+      }
+    });
+    expect(boxes).toBeGreaterThanOrEqual(1);
+  });
+});
