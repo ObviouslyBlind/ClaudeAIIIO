@@ -142,7 +142,11 @@ Pixel: **rust funnel** at `http://localhost:8787/g/funnel75`. 40 m rust stick in
 
 Pixel: **rust cargo** at `http://localhost:8787/g/cargo76`. Buoy-class rust cube on the north timber pier, east of the walk. No RMB. Address bar must be `/g/cargo76`. Do not restart play while the critic is on the page.
 
-## Next pixel (after cargo76 PASS, immediately, no wait)
+`/g/cargo76` **FAIL CARGO**: beige timber pier, cream ferry, NPCs, teal water in frame; no rust cube. Placement `pierZ+26` (`z≈-6886`) sat on the spawn camera (`z=-6888`) and clipped. Cube now sits on the seaward lip (`pierZ+38`, `z≈-6874`), east of the walk.
+
+Pixel: **rust cargo** at `http://localhost:8787/g/cargo77`. Buoy-class rust cube on the north timber pier lip, east of the walk, between beige deck and cream ferry. No RMB. Address bar must be `/g/cargo77`. Do not restart play while the critic is on the page.
+
+## Next pixel (after cargo77 PASS, immediately, no wait)
 
 ## Frozen
 
