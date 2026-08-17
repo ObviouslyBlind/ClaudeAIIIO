@@ -2,9 +2,8 @@
 
 Operator asked Grok to record this. PAPER / SIMULATED. No wallet. Do not restart the pixel-critic swarm.
 
-Branch: `cursor/capital-map-v2-183a`
-Latest game commit at note time: `928dcf6d feat(game): road network with side streets, point-based taxi, honest traffic, props`
-Draft PR: https://github.com/ObviouslyBlind/ClaudeAIIIO/pull/31
+Branch: `cursor/shard-kernel-3710` (Fable 5 + kernel K.1)
+Draft PR: https://github.com/ObviouslyBlind/ClaudeAIIIO/pull/33
 
 Play: **`http://localhost:8787/`** (port **8787**, tmux `two-harbors-play`, `cd /workspace/game && npm run play`).
 
@@ -79,7 +78,7 @@ Updated: `buildings.test.ts`, `roads.test.ts`, `taxi-wait.test.ts`, `playtest-sc
 
 ## Guardrails for the next agent
 
-- Work on **`cursor/capital-map-v2-183a`**, not Polymarket main
+- Work on **`cursor/shard-kernel-3710`**. Do not merge first-loop / dressing side branches.
 - Do not fetch `play.capitalrift.com` game files, OSM Earth, or CR branding
 - Keep `createWorld` in `game/src/server.ts`
 - `gh` is read-only; use ManagePullRequest for PR writes

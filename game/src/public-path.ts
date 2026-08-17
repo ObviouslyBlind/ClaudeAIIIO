@@ -8,6 +8,5 @@ export function resolvePublicPath(pathname: string): string {
   }
   if (pathname === "/play" || pathname === "/play/") return "/harbour/index.html";
   if (pathname === "/market" || pathname === "/market/") return "/market/index.html";
-  if (pathname === "/hansard" || pathname === "/hansard/") return "/hansard/index.html";
   return pathname;
 }
