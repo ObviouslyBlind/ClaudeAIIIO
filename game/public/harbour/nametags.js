@@ -43,6 +43,8 @@ export const NAMETAG_WASHER = true;
 export const NAMETAG_EYELET = true;
 /** Tiny kraft PAPER snap on the card. 3D box, existing walker hex. */
 export const NAMETAG_SNAP = true;
+/** Tiny kraft PAPER prong on the card. 3D box, existing walker hex. */
+export const NAMETAG_PRONG = true;
 
 const SKIN = 0xf2d2a8;
 const PANTS = 0x6e4a32;
@@ -314,6 +316,26 @@ export function makeNametagSnap() {
   return snap;
 }
 
+/**
+ * Tiny kraft PAPER prong on the card face. PANTS brown box —
+ * not grey metal. Offset from the snap (-0.50, 1.30, 0.05), eyelet,
+ * washer, loop, clasp, bead, rivet, stud, tab, pin, string, and clip.
+ * Sprite-local so it stays a prong on the kraft card.
+ */
+export function makeNametagProng() {
+  const prong = paperBox(0.03, 0.042, 0.018, PANTS);
+  prong.name = "paper-nametag-prong";
+  prong.userData.part = "prong";
+  prong.userData.mode = "PAPER";
+  prong.castShadow = false;
+  prong.receiveShadow = false;
+  prong.frustumCulled = false;
+  prong.renderOrder = 4;
+  prong.material.depthTest = false;
+  prong.position.set(0.50, 0.48, 0.05);
+  return prong;
+}
+
 /** Tracked letters so PAPER reads as a stamp even without canvas letterSpacing. */
 function fillSpaced(ctx, text, x, y, tracking) {
   const chars = String(text).split("");
@@ -466,6 +488,7 @@ export function makePaperNametag(name) {
   if (NAMETAG_WASHER) sprite.add(makeNametagWasher());
   if (NAMETAG_EYELET) sprite.add(makeNametagEyelet());
   if (NAMETAG_SNAP) sprite.add(makeNametagSnap());
+  if (NAMETAG_PRONG) sprite.add(makeNametagProng());
   return sprite;
 }
 

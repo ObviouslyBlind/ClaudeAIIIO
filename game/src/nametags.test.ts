@@ -10,6 +10,7 @@ import {
   NAMETAG_LOOP,
   NAMETAG_NEAR_M,
   NAMETAG_PIN,
+  NAMETAG_PRONG,
   NAMETAG_RIVET,
   NAMETAG_SNAP,
   NAMETAG_STRING,
@@ -22,6 +23,7 @@ import {
   makeNametagEyelet,
   makeNametagLoop,
   makeNametagPin,
+  makeNametagProng,
   makeNametagRivet,
   makeNametagSnap,
   makeNametagString,
@@ -70,7 +72,7 @@ function mockCtx() {
 }
 
 describe("outdoor PAPER nametags", () => {
-  it("keeps a kraft folded corner, punch-hole, clip, string, pin, tab, stud, rivet, bead, clasp, loop, washer, eyelet, snap, and still stamps PAPER", () => {
+  it("keeps a kraft folded corner, punch-hole, clip, string, pin, tab, stud, rivet, bead, clasp, loop, washer, eyelet, snap, prong, and still stamps PAPER", () => {
     expect(NAMETAG_FOLD).toBe(true);
     expect(NAMETAG_HOLE).toBe(true);
     expect(NAMETAG_CLIP).toBe(true);
@@ -85,6 +87,7 @@ describe("outdoor PAPER nametags", () => {
     expect(NAMETAG_WASHER).toBe(true);
     expect(NAMETAG_EYELET).toBe(true);
     expect(NAMETAG_SNAP).toBe(true);
+    expect(NAMETAG_PRONG).toBe(true);
     expect(NAMETAG_NEAR_M).toBeGreaterThanOrEqual(200);
     const ctx = mockCtx();
     paintPaperNametagCard(ctx, 512, 128, "Ferry clerk");
@@ -295,6 +298,28 @@ describe("outdoor PAPER nametags", () => {
     expect(snap.position.distanceTo(loop.position)).toBeGreaterThan(0.25);
     expect(snap.position.distanceTo(washer.position)).toBeGreaterThan(0.25);
     expect(snap.position.distanceTo(eyelet.position)).toBeGreaterThan(0.25);
+
+    const prong = makeNametagProng();
+    expect(prong.userData.part).toBe("prong");
+    expect(prong.userData.mode).toBe("PAPER");
+    expect(prong.geometry.type).toBe("BoxGeometry");
+    expect((prong.material as THREE.MeshLambertMaterial).color.getHex()).toBe(0x6e4a32);
+    const pr = (prong.geometry as THREE.BoxGeometry).parameters;
+    expect(pr.width).toBeLessThan(0.12);
+    expect(pr.height).toBeLessThan(0.12);
+    expect(pr.depth).toBeLessThan(0.12);
+    expect(prong.position.distanceTo(clip.position)).toBeGreaterThan(0.25);
+    expect(prong.position.distanceTo(cord.position)).toBeGreaterThan(0.25);
+    expect(prong.position.distanceTo(pin.position)).toBeGreaterThan(0.25);
+    expect(prong.position.distanceTo(tab.position)).toBeGreaterThan(0.25);
+    expect(prong.position.distanceTo(stud.position)).toBeGreaterThan(0.25);
+    expect(prong.position.distanceTo(rivet.position)).toBeGreaterThan(0.25);
+    expect(prong.position.distanceTo(bead.position)).toBeGreaterThan(0.25);
+    expect(prong.position.distanceTo(clasp.position)).toBeGreaterThan(0.25);
+    expect(prong.position.distanceTo(loop.position)).toBeGreaterThan(0.25);
+    expect(prong.position.distanceTo(washer.position)).toBeGreaterThan(0.25);
+    expect(prong.position.distanceTo(eyelet.position)).toBeGreaterThan(0.25);
+    expect(prong.position.distanceTo(snap.position)).toBeGreaterThan(0.25);
 
     expect(makePaperNametag("Ferry clerk")).toBeNull();
   });
