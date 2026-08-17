@@ -21,7 +21,8 @@ import * as THREE from "three";
  * kraft PAPER shears leaning by the workbench, a tiny
  * kraft PAPER yoke leaning by the workbench, a tiny
  * kraft PAPER flail leaning by the workbench, a tiny
- * kraft PAPER fork leaning by the workbench, and
+ * kraft PAPER fork leaning by the workbench, a tiny
+ * kraft PAPER harrow leaning by the workbench, and
  * dim warm light — not the
  * house living room, warehouse crates, shop, or factory.
  * No WASD. Tap-to-walk stays in interior.js.
@@ -977,6 +978,37 @@ function farmPaperFork() {
   return g;
 }
 
+/**
+ * Tiny kraft PAPER harrow: wood beam, kraft teeth.
+ * Hexes already in this file (WOOD, KRAFT). PAPER boxes only — no grey.
+ * Leans by the farm workbench; offset from fork, flail, yoke, shears,
+ * trowel, spade, ladle, scythe, sickle, hoe, rake, broom, seed, lid,
+ * mug, egg, pail, lantern, scoop, and the hanging farm-tools. Not the
+ * hanging farm-tool shovel. Not the trough pitchfork (farm-fork). Not
+ * the tiny kraft PAPER fork or flail.
+ */
+function farmHarrow() {
+  const g = new THREE.Group();
+  g.name = "farm-harrow";
+  g.userData.kind = "farm-harrow";
+  g.userData.part = "harrow";
+  g.userData.mode = "PAPER";
+  const y0 = 0.16;
+  const beam = paperBox(0.10, 0.016, 0.016, WOOD, "farm-harrow");
+  beam.userData.part = "harrow";
+  beam.position.y = y0 + 0.08;
+  g.add(beam);
+  const cross = paperBox(0.016, 0.016, 0.055, WOOD, "farm-harrow");
+  cross.userData.part = "harrow";
+  cross.position.y = y0 + 0.05;
+  g.add(cross);
+  const teeth = paperBox(0.08, 0.035, 0.05, KRAFT, "farm-harrow");
+  teeth.userData.part = "harrow";
+  teeth.position.y = y0 + 0.028;
+  g.add(teeth);
+  return g;
+}
+
 function workbench(x, z) {
   const g = new THREE.Group();
   g.name = "farm-bench";
@@ -1193,6 +1225,16 @@ function makeFarmDress() {
   paperFork.position.set(-3.96, 0, 0.22);
   paperFork.rotation.z = -0.24;
   g.add(paperFork);
+  const paperHarrow = farmHarrow();
+  // Floor beside the 1.55 × 0.58 bench — leans by the mid-front
+  // edge, not the fork (far-left front at -3.96, 0, 0.22), flail
+  // (far-left back at -3.95, 0, -0.32), yoke (mid-left at -3.90, 0,
+  // 0.0), shears, trowel, spade, ladle, scythe, sickle, hoe, rake,
+  // broom, or the top (seed, mug, egg, pail, lantern, scoop). Not
+  // hanging farm-tools. Not the trough pitchfork.
+  paperHarrow.position.set(-3.05, 0, 0.48);
+  paperHarrow.rotation.z = 0.25;
+  g.add(paperHarrow);
 
   const loftY = 2.94;
   g.add(sack(0.46, 0.56, 0.36, SACK, -2.55, loftY + 0.28, -2.35, 0.1));
@@ -1290,6 +1332,7 @@ function dimSceneLights(scene, farm) {
  * a tiny kraft ladle leaning by the workbench,
  * a tiny kraft spade leaning by the workbench,
  * a tiny kraft fork leaning by the workbench,
+ * a tiny kraft harrow leaning by the workbench,
  * warms and dims lights.
  * @param {THREE.Object3D} scene
  */
