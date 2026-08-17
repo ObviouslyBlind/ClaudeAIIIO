@@ -1043,6 +1043,129 @@ describe("house-shop PAPER tiny kettle", () => {
   });
 });
 
+describe("house-shop PAPER tiny colander", () => {
+  it("sits a tiny kraft PAPER colander on the house-shop counter", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressHouseShop(scene);
+
+    const dress = interior.getObjectByName("house-shop-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+
+    const colanders: THREE.Object3D[] = [];
+    dress!.traverse((obj) => {
+      if (obj.userData?.part === "colander") {
+        colanders.push(obj);
+      }
+    });
+    expect(colanders.length).toBe(1);
+
+    const colander = colanders[0];
+    expect(colander.userData.kind).toBe("house-shop-colander");
+    expect(colander.userData.part).toBe("colander");
+    expect(colander.userData.mode).toBe("PAPER");
+    // Counter top is ~1.12; colander sits on it, not hanging with the bell.
+    expect(colander.position.y).toBeGreaterThan(1.0);
+    expect(colander.position.y).toBeLessThan(1.25);
+    expect(Math.abs(colander.position.x)).toBeLessThan(1.2);
+    expect(colander.position.z).toBeGreaterThan(0.1);
+    expect(colander.position.z).toBeLessThan(0.9);
+
+    const kettles: THREE.Object3D[] = [];
+    dress!.traverse((obj) => {
+      if (obj.userData?.part === "kettle") kettles.push(obj);
+    });
+    const kettle = kettles[0];
+    const pan = dress!.getObjectByName("house-shop-pan");
+    const tin = dress!.getObjectByName("house-shop-tin");
+    const pot = dress!.getObjectByName("house-shop-pot");
+    const jug = dress!.getObjectByName("house-shop-jug");
+    const cup = dress!.getObjectByName("house-shop-cup");
+    expect(kettle).toBeTruthy();
+    expect(pan).toBeTruthy();
+    expect(tin).toBeTruthy();
+    expect(pot).toBeTruthy();
+    expect(jug).toBeTruthy();
+    expect(cup).toBeTruthy();
+    const kettleOffset = Math.hypot(
+      colander.position.x - kettle!.position.x,
+      colander.position.z - kettle!.position.z,
+    );
+    const panOffset = Math.hypot(
+      colander.position.x - pan!.position.x,
+      colander.position.z - pan!.position.z,
+    );
+    const tinOffset = Math.hypot(
+      colander.position.x - tin!.position.x,
+      colander.position.z - tin!.position.z,
+    );
+    const potOffset = Math.hypot(
+      colander.position.x - pot!.position.x,
+      colander.position.z - pot!.position.z,
+    );
+    const jugOffset = Math.hypot(
+      colander.position.x - jug!.position.x,
+      colander.position.z - jug!.position.z,
+    );
+    const cupOffset = Math.hypot(
+      colander.position.x - cup!.position.x,
+      colander.position.z - cup!.position.z,
+    );
+    expect(kettleOffset).toBeGreaterThan(0.25);
+    expect(panOffset).toBeGreaterThan(0.25);
+    expect(tinOffset).toBeGreaterThan(0.25);
+    expect(potOffset).toBeGreaterThan(0.25);
+    expect(jugOffset).toBeGreaterThan(0.25);
+    expect(cupOffset).toBeGreaterThan(0.25);
+
+    const colanderPos = new THREE.Vector3();
+    colander.getWorldPosition(colanderPos);
+    const xzOffset = (other: THREE.Object3D) => {
+      const otherPos = new THREE.Vector3();
+      other.getWorldPosition(otherPos);
+      return Math.hypot(colanderPos.x - otherPos.x, colanderPos.z - otherPos.z);
+    };
+    const neighbors: THREE.Object3D[] = [];
+    dress!.traverse((obj) => {
+      if (
+        obj.userData?.part === "saucer" ||
+        obj.userData?.part === "knife" ||
+        obj.userData?.part === "spoon" ||
+        obj.userData?.part === "napkin" ||
+        obj.userData?.part === "cup" ||
+        obj.userData?.part === "coaster" ||
+        obj.userData?.part === "blotter" ||
+        obj.userData?.part === "stamp"
+      ) {
+        neighbors.push(obj);
+      }
+    });
+    expect(neighbors.length).toBe(8);
+    for (const other of neighbors) {
+      expect(xzOffset(other)).toBeGreaterThan(0.2);
+    }
+
+    const colors = hexes(colander);
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.every((c) => c === WOOD || c === TIN || c === CREAM)).toBe(true);
+    expect(colors.some((c) => c === WOOD)).toBe(true);
+    expect(colors.some((c) => c === TIN)).toBe(true);
+    expect(colors.some((c) => c === CREAM)).toBe(true);
+    expect(colors.every((c) => !isGrey(c))).toBe(true);
+
+    colander.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.kind).toBe("house-shop-colander");
+        expect(mesh.userData.mode).toBe("PAPER");
+      }
+    });
+  });
+});
+
 describe("house-shop PAPER cup saucer", () => {
   it("sits a small kraft PAPER saucer under the house-shop cup", () => {
     const scene = new THREE.Scene();
