@@ -32,7 +32,9 @@ Loop is **live** on playtest bugs (operator: “so many bugs, use the gauntlet�
 
 `/g/south101` **FAIL SOUTH**: ferry + landfall worked; froze during the 60 s idle while the quay-clutter / foam trickle steps built. D043: trickle carries only cars + moving ferry.
 
-Current piece: **`/g/south102` SOUTH** — ferry ticket, real south landfall, 60 s idle, still responsive. No RMB.
+`/g/south102` **PASS SOUTH**: instant $15 ticket, real south terrain + pier + road with traffic, walk, 60 s idle, still responsive.
+
+Current piece: **`/g/loop103` LOOP** — one session: walk, lease, House, Enter/Exit, Taxi, ferry to South, no freeze. No RMB.
 
 One **pixel critic** at a time. Unique `/g/…` path. No RMB. Do not restart play while a critic is on the page.
 
