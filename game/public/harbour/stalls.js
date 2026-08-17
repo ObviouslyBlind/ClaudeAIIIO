@@ -85,7 +85,7 @@ function labelGood(g) {
   return String(g).replace(/_/g, " ");
 }
 
-/** Visible PAPER market stand: deck, posts, price board, striped awning, counter, crates, hanging scale, produce basket, oil lantern, melon, kraft cone, hanging fish, ground crate, kraft price slate, kraft stool, kraft cup, kraft knife, kraft napkin, kraft plate, kraft lemon, kraft lime, kraft orange, kraft banana, kraft pear, kraft grape. */
+/** Visible PAPER market stand: deck, posts, price board, striped awning, counter, crates, hanging scale, produce basket, oil lantern, melon, kraft cone, hanging fish, ground crate, kraft price slate, kraft stool, kraft cup, kraft knife, kraft napkin, kraft plate, kraft lemon, kraft lime, kraft orange, kraft banana, kraft pear, kraft grape, kraft peach. */
 export function makeStallMesh(plot) {
   const g = new THREE.Group();
   g.name = "npc-stall";
@@ -630,6 +630,27 @@ export function makeStallMesh(plot) {
     stem.userData.part = "grape";
     grape.add(body, stem);
     g.add(grape);
+  }
+
+  // One tiny kraft PAPER peach on the counter so the stall reads as a
+  // working stand, not only produce. Kraft body + wood stem. Local
+  // offset only — stall world pose stays put. PAPER boxes. Existing
+  // hexes. Offset from grape, pear, banana, orange, lime, lemon, plate, napkin, knife, cup.
+  if (!g.children.some((c) => c.userData.part === "peach")) {
+    const peach = new THREE.Group();
+    peach.name = "peach";
+    peach.userData.part = "peach";
+    peach.userData.mode = "PAPER";
+    peach.userData.paper = true;
+    peach.position.set(-0.22, 0.9, 1.22);
+    const body = paperBox(0.06, 0.055, 0.06, KRAFT, false);
+    body.position.y = 0.028;
+    body.userData.part = "peach";
+    const stem = paperBox(0.015, 0.02, 0.015, WOOD, false);
+    stem.position.y = 0.065;
+    stem.userData.part = "peach";
+    peach.add(body, stem);
+    g.add(peach);
   }
 
   const back = paperBox(3.9, 1.6, 0.12, PLASTER);
