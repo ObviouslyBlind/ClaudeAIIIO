@@ -2,7 +2,7 @@
 
 ## 2026-08-17 (latest)
 
-**Current status:** `/g/lease94` PASS LEASE. D037 taxi at boot + pier over water. Next `/g/play95`. PAPER / SIMULATED. Politics frozen.
+**Current status:** `/g/play95` PASS PLAY (taxi + pier). Next `/g/house96` House → Enter → Exit. PAPER / SIMULATED. Politics frozen.
 
 ## 2026-08-16
 
