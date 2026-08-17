@@ -230,6 +230,7 @@ function pointInRing(x, z, ring) {
 function findParcelAt(x, z) {
   const hits = [];
   for (const p of map.plots) {
+    if (!plotMeshes.has(p.id)) continue;
     const reach = Math.max(80, Math.sqrt(p.area || 0) * 2);
     if (Math.hypot(x - p.x, z - p.z) > reach) continue;
     if (pointInRing(x, z, p.ring)) hits.push(p);
@@ -691,6 +692,7 @@ function leaveInterior() {
 }
 
 function clickTargets() {
+  if (!dressingStarted) return ground.filter(Boolean);
   const objs = ground.slice();
   for (const rec of plotMeshes.values()) {
     objs.push(rec.line);
@@ -704,6 +706,7 @@ function onPointer(ev) {
   if (ev.button != null && ev.button !== 0) return;
   if (Date.now() - lastTap < 180) return;
   lastTap = Date.now();
+  afterFirstPointer();
   if (taxi && typeof taxi.mapOpen === "function" && taxi.mapOpen()) return;
   if (ev.target.closest && ev.target.closest("nav, a, button, #taxi-map, #ferry-ticket, #catalog-picker")) return;
   pointer.x = (ev.clientX / window.innerWidth) * 2 - 1;
@@ -997,10 +1000,31 @@ async function ensureInterior() {
   return interior;
 }
 
+/** Trees/quay/stalls compile on the main thread. Do not start until the first walk is painted. */
+export const DRESSING_AFTER_CLICK_MS = 5000;
+/** If they never click, still dress the harbour — after a long quiet window. */
+export const DRESSING_FALLBACK_MS = 60000;
+
+let dressingStarted = false;
+let firstPointerDone = false;
+
+function startDressing() {
+  if (dressingStarted) return;
+  dressingStarted = true;
+  void loadSheetHuds();
+  void loadDressing();
+}
+
+function afterFirstPointer() {
+  if (firstPointerDone) return;
+  firstPointerDone = true;
+  setTimeout(startDressing, DRESSING_AFTER_CLICK_MS);
+}
+
 async function loadDressing() {
   const target = worldScene();
   const step = async (fn) => {
-    await idle(80);
+    await idle(120);
     await fn();
   };
 
@@ -1122,10 +1146,7 @@ async function boot() {
   harbourGroup = wrapHarbourWorld(scene, { keep: [player, sun.target] });
   await makeParcels(nearNorthSpawn);
   setStatus("Tap a piece of land. Lease it, then develop it.");
-  setTimeout(() => {
-    void loadSheetHuds();
-    void loadDressing();
-  }, 400);
+  setTimeout(startDressing, DRESSING_FALLBACK_MS);
 }
 
 canvas.addEventListener("pointerup", onPointer);

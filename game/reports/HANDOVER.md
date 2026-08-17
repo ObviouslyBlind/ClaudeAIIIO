@@ -8,9 +8,9 @@ This is a PAPER / SIMULATED harbour game in `/workspace/game`. The Polymarket pa
 
 Operator came back to **playtest**. Bar is **`http://localhost:8787/`**, inland spawn, walkable harbour.
 
-Gauntlet live. `/g/play88` PASS. `/g/walk89` FAIL WALK (click hung). D034 clickTargets. Next `/g/walk90`.
+Gauntlet live. `/g/play88` PASS. `/g/walk89` FAIL WALK. `/g/walk90` FAIL WALK (dressing compile during click). D035: trees wait until 5s after first click. Next `/g/walk91`.
 
-Last playtest fix: D033 — boot returns after north land; trees/interiors wait. Hard-refresh the tunnel. D032/D031 still apply.
+Last playtest fix: D035 — do not start quay/trees/stalls at 400ms. D034/D033/D032/D031 still apply.
 
 ## Play
 

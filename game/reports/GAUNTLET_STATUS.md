@@ -8,7 +8,9 @@ Loop is **live** on playtest bugs (operator: “so many bugs, use the gauntlet�
 
 `/g/walk89` **FAIL WALK**: left click on inland ground → “Page Unresponsive.” Recursive `intersectObjects` on the full harbour (trees/props). D034: clickTargets only.
 
-Current piece: **`/g/walk90` WALK** — one left click on inland ground must walk without hanging. No RMB.
+`/g/walk90` **FAIL WALK**: cheap raycast was not enough. Click still opened “Page Unresponsive” because dressing (`trees.js`) started 400ms after boot and compiled during the first tap. D035: dress 5s after first click, or 60s fallback.
+
+Current piece: **`/g/walk91` WALK** — one left click on inland ground must walk without hanging. No RMB. Click within ~8s of load so dressing has not started.
 
 One **pixel critic** at a time. Unique `/g/…` path. No RMB. Do not restart play while a critic is on the page.
 
