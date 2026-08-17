@@ -489,6 +489,32 @@ describe("taxi roof lamp", () => {
     expect(fares.length).toBeGreaterThanOrEqual(1);
   });
 
+  it("puts one tiny kraft PAPER sidelight on the taxi; headlamp, visor, and fare remain", () => {
+    const mesh = makeTaxiMesh();
+    const sidelights: THREE.Mesh[] = [];
+    const headlamps: THREE.Mesh[] = [];
+    const visors: THREE.Mesh[] = [];
+    const fares: THREE.Mesh[] = [];
+    const kraftSidelight = new Set([0xc4a574, 0xf4ead8]);
+    mesh.traverse((obj) => {
+      const m = obj as THREE.Mesh & { userData: { part?: string; mode?: string } };
+      if (m.userData?.part === "sidelight") sidelights.push(m);
+      if (m.userData?.part === "headlamp") headlamps.push(m);
+      if (m.userData?.part === "visor") visors.push(m);
+      if (m.userData?.part === "fare") fares.push(m);
+    });
+    expect(sidelights.length).toBeGreaterThanOrEqual(1);
+    expect(sidelights.every((s) => s.geometry.type === "BoxGeometry")).toBe(true);
+    expect(sidelights.every((s) => s.userData.mode === "PAPER")).toBe(true);
+    expect(
+      sidelights.every((s) => kraftSidelight.has((s.material as THREE.MeshLambertMaterial).color.getHex())),
+    ).toBe(true);
+    expect(sidelights.every((s) => Math.abs(s.position.x) > 1.0)).toBe(true);
+    expect(headlamps.length).toBeGreaterThanOrEqual(1);
+    expect(visors.length).toBeGreaterThanOrEqual(1);
+    expect(fares.length).toBeGreaterThanOrEqual(1);
+  });
+
   it("puts one tiny kraft PAPER hubcap on a taxi wheel; visor, flag, fare, plate, and mirror remain", () => {
     const mesh = makeTaxiMesh();
     const hubcaps: THREE.Mesh[] = [];
