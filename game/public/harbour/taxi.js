@@ -326,6 +326,18 @@ function addTaxiSidelight(g, kraftMat) {
 }
 
 /**
+ * One tiny kraft PAPER reflector on the rear fender — small box, not chrome,
+ * not a second sidelight. Same 0xc4a574 as the visor. PAPER box only.
+ * Offset from sidelight (1.26, 0.92, 2.28), headlamp, visor, hubcap, flag,
+ * fare, mudflap, wiper, spare, plate, mirror, aerial, handle, bumper, check.
+ */
+function addTaxiReflector(g, kraftMat) {
+  const reflector = tagPart(taxiBox(0.08, 0.1, 0.12, kraftMat, false), "reflector");
+  reflector.position.set(-1.26, 0.92, -2.28);
+  g.add(reflector);
+}
+
+/**
  * Tiny kraft cream PAPER mudflaps behind the rear wheels — small hanging boxes.
  * Same 0xf4ead8 as the hubs. PAPER boxes only. Door plates, aerial cap, wipers stay.
  */
@@ -363,7 +375,8 @@ function addTaxiSpare(g, tyreMat, hubMat) {
  * one tiny kraft PAPER fare card on the dash, one tiny kraft PAPER roof flag,
  * one tiny kraft PAPER sun visor at the windscreen, one tiny kraft PAPER hubcap
  * on a front wheel, one tiny kraft PAPER headlamp on the cab front,
- * one tiny kraft PAPER sidelight on the front fender.
+ * one tiny kraft PAPER sidelight on the front fender,
+ * one tiny kraft PAPER reflector on the rear fender.
  * Compact warm PAPER taxi-sign box — original cream lamp, not a sedan lid, not a debug mast, not a cop lightbar.
  */
 export function makeTaxiMesh() {
@@ -456,6 +469,7 @@ export function makeTaxiMesh() {
   addTaxiVisor(g, kraft);
   addTaxiHeadlamp(g, kraft);
   addTaxiSidelight(g, kraft);
+  addTaxiReflector(g, kraft);
 
   g.userData.kind = "taxi";
   g.userData.mode = "PAPER";
