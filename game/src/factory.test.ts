@@ -2471,3 +2471,138 @@ describe("factory PAPER kraft spoke", () => {
     expect(spokeBoxes).toBeGreaterThanOrEqual(2);
   });
 });
+
+function factoryPaperBits(root: THREE.Object3D) {
+  const out: THREE.Object3D[] = [];
+  root.traverse((obj) => {
+    if (obj.userData?.part === "bit") {
+      out.push(obj);
+    }
+  });
+  return out;
+}
+
+describe("factory PAPER kraft bit", () => {
+  it("puts one tiny kraft PAPER bit on a factory bench; spoke, drawknife, and auger remain", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressFactory(scene);
+
+    const dress = interior.getObjectByName("factory-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+
+    const bits = factoryPaperBits(dress!);
+    expect(bits.length).toBe(1);
+    const bit = bits[0];
+    expect(bit.userData.part).toBe("bit");
+    expect(bit.userData.mode).toBe("PAPER");
+    expect(bit.userData.kind).toBe("factory-paper-bit");
+    expect(bit.userData.part).not.toBe("spoke");
+    expect(bit.userData.part).not.toBe("drawknife");
+    expect(bit.userData.part).not.toBe("auger");
+    expect(bit.userData.part).not.toBe("adze");
+    expect(bit.userData.part).not.toBe("clamp");
+    expect(bit.userData.part).not.toBe("vice");
+    expect(bit.userData.part).not.toBe("plane");
+    expect(bit.userData.part).not.toBe("gouge");
+    expect(bit.userData.part).not.toBe("mallet");
+    expect(bit.userData.part).not.toBe("chisel");
+    expect(bit.userData.part).not.toBe("file");
+    expect(bit.userData.part).not.toBe("rasp");
+    expect(bit.userData.part).not.toBe("awl");
+    expect(bit.userData.part).not.toBe("shaving");
+    expect(bit.userData.part).not.toBe("peg");
+    expect(bit.userData.part).not.toBe("cork");
+    expect(bit.userData.part).not.toBe("funnel");
+    expect(bit.userData.part).not.toBe("oilcan");
+    expect(bit.userData.part).not.toBe("rag");
+    expect(bit.userData.part).not.toBe("rivet");
+    expect(bit.userData.part).not.toBe("wrench");
+
+    expect(factoryPaperSpokes(dress!).length).toBe(1);
+    expect(factoryPaperDrawknives(dress!).length).toBe(1);
+    expect(factoryPaperAugers(dress!).length).toBe(1);
+
+    const spoke = factoryPaperSpokes(dress!)[0];
+    const drawknife = factoryPaperDrawknives(dress!)[0];
+    const auger = factoryPaperAugers(dress!)[0];
+    const adze = factoryPaperAdzes(dress!)[0];
+    const clamp = factoryPaperClamps(dress!)[0];
+    const vice = factoryPaperVices(dress!)[0];
+    const plane = factoryPaperPlanes(dress!)[0];
+    const gouge = factoryPaperGouges(dress!)[0];
+    const mallet = factoryPaperMallets(dress!)[0];
+    const chisel = factoryPaperChisels(dress!)[0];
+    const file = factoryPaperFiles(dress!)[0];
+    const rasp = factoryPaperRasps(dress!)[0];
+    const awl = factoryPaperAwls(dress!)[0];
+    const shaving = factoryPaperShavings(dress!)[0];
+    const peg = factoryPaperPegs(dress!)[0];
+    const cork = factoryPaperCorks(dress!)[0];
+    const funnel = factoryPaperFunnels(dress!)[0];
+    const can = factoryPaperOilcans(dress!)[0];
+    const rag = factoryRags(dress!)[0];
+    const rivet = factoryRivets(dress!)[0];
+    const wrench = factoryTools(dress!)[0];
+    const toSpoke = Math.hypot(bit.position.x - spoke.position.x, bit.position.z - spoke.position.z);
+    const toDrawknife = Math.hypot(bit.position.x - drawknife.position.x, bit.position.z - drawknife.position.z);
+    const toAuger = Math.hypot(bit.position.x - auger.position.x, bit.position.z - auger.position.z);
+    const toAdze = Math.hypot(bit.position.x - adze.position.x, bit.position.z - adze.position.z);
+    const toClamp = Math.hypot(bit.position.x - clamp.position.x, bit.position.z - clamp.position.z);
+    const toVice = Math.hypot(bit.position.x - vice.position.x, bit.position.z - vice.position.z);
+    const toPlane = Math.hypot(bit.position.x - plane.position.x, bit.position.z - plane.position.z);
+    const toGouge = Math.hypot(bit.position.x - gouge.position.x, bit.position.z - gouge.position.z);
+    const toMallet = Math.hypot(bit.position.x - mallet.position.x, bit.position.z - mallet.position.z);
+    const toChisel = Math.hypot(bit.position.x - chisel.position.x, bit.position.z - chisel.position.z);
+    const toFile = Math.hypot(bit.position.x - file.position.x, bit.position.z - file.position.z);
+    const toRasp = Math.hypot(bit.position.x - rasp.position.x, bit.position.z - rasp.position.z);
+    const toAwl = Math.hypot(bit.position.x - awl.position.x, bit.position.z - awl.position.z);
+    const toShaving = Math.hypot(bit.position.x - shaving.position.x, bit.position.z - shaving.position.z);
+    const toPeg = Math.hypot(bit.position.x - peg.position.x, bit.position.z - peg.position.z);
+    const toCork = Math.hypot(bit.position.x - cork.position.x, bit.position.z - cork.position.z);
+    const toFunnel = Math.hypot(bit.position.x - funnel.position.x, bit.position.z - funnel.position.z);
+    const toCan = Math.hypot(bit.position.x - can.position.x, bit.position.z - can.position.z);
+    const toRag = Math.hypot(bit.position.x - rag.position.x, bit.position.z - rag.position.z);
+    const toRivet = Math.hypot(bit.position.x - rivet.position.x, bit.position.z - rivet.position.z);
+    const toWrench = Math.hypot(bit.position.x - wrench.position.x, bit.position.z - wrench.position.z);
+    expect(toSpoke).toBeGreaterThan(0.25);
+    expect(toDrawknife).toBeGreaterThan(0.25);
+    expect(toAuger).toBeGreaterThan(0.25);
+    expect(toAdze).toBeGreaterThan(0.25);
+    expect(toClamp).toBeGreaterThan(0.25);
+    expect(toVice).toBeGreaterThan(0.25);
+    expect(toPlane).toBeGreaterThan(0.25);
+    expect(toGouge).toBeGreaterThan(0.25);
+    expect(toMallet).toBeGreaterThan(0.25);
+    expect(toChisel).toBeGreaterThan(0.25);
+    expect(toFile).toBeGreaterThan(0.25);
+    expect(toRasp).toBeGreaterThan(0.25);
+    expect(toAwl).toBeGreaterThan(0.25);
+    expect(toShaving).toBeGreaterThan(0.25);
+    expect(toPeg).toBeGreaterThan(0.25);
+    expect(toCork).toBeGreaterThan(0.25);
+    expect(toFunnel).toBeGreaterThan(0.25);
+    expect(toCan).toBeGreaterThan(0.25);
+    expect(toRag).toBeGreaterThan(0.25);
+    expect(toRivet).toBeGreaterThan(0.25);
+    expect(toWrench).toBeGreaterThan(0.25);
+
+    const bitColors = hexes(bit);
+    expect(bitColors.length).toBeGreaterThan(0);
+    expect(bitColors.some((c) => c === KRAFT)).toBe(true);
+    expect(bitColors.every((c) => [KRAFT, 0x9a6a40, 0x6a4a32].includes(c))).toBe(true);
+
+    let bitBoxes = 0;
+    bit.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        bitBoxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.mode).toBe("PAPER");
+      }
+    });
+    expect(bitBoxes).toBeGreaterThanOrEqual(2);
+  });
+});
