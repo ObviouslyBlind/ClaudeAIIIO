@@ -15,7 +15,7 @@ Windows: `play.cmd` or `play-laptop.cmd`. From `game/`: `npm run play` / `npm ru
 - Top left: **Two Harbors** (green), players online, balance + $/min
 - Top right: **viewers** — World / Foot traffic / Logistics / Minerals
 - Foot traffic paints **green / yellow / red ribbons on each named road**
-- World tap **walks**. Land does not steal the click. Walk onto a plot to lease.
+- World: **left-click walks**. **Right-click a lot** to open Lease. RMB-hold still orbits.
 - Logistics: tap the **roadside crate**. Van drops on the kerb and drives away.
 - Left rail: Inventory / Market / Employees — floating panels, not extra pages
 - Tap-to-walk draws a green line. RMB-hold still orbits. Short RMB on a cart opens stock/hire.

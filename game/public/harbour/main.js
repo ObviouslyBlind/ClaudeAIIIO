@@ -148,6 +148,7 @@ let walkPath = null;
 let overlays = null;
 let deliveries = null;
 let lastInspectKey = "";
+let landPinned = false;
 const standMeshes = new Map();
 const crateMeshes = new Map();
 const propsBuilt = new Set();
@@ -978,7 +979,35 @@ function walkPoint(hits) {
   return hit || hits[0] || null;
 }
 
+function inspectLandAt(x, z) {
+  if (!map || !chromeHud || !chromeHud.paintLand) return false;
+  const p = findParcelAt(x, z);
+  if (!p) {
+    landPinned = false;
+    setStatus("Right-click a street lot to lease it. PAPER.");
+    return false;
+  }
+  landPinned = true;
+  const prev = selected ? map.plots.find((row) => row.id === selected) : null;
+  selected = p.id;
+  if (prev) paintParcel(prev);
+  paintParcel(p);
+  if (parcelMap) parcelMap.setSelected(p.id);
+  const crate = crateOn(p.id);
+  lastInspectKey = p.id + ":" + (crate ? crate.id : "") + ":" + bandForPlot(p);
+  chromeHud.paintLand(p, {
+    band: bandForPlot(p),
+    crate,
+    onTake: crate ? () => takeCrate(crate.id) : null,
+  });
+  if (!p.owner) setStatus("Lease this lot. PAPER · SIMULATED.");
+  else if (p.owner === "visitor") setStatus("Yours. PAPER.");
+  else setStatus("This land is taken. PAPER.");
+  return true;
+}
+
 function inspectNearbyLand() {
+  if (landPinned) return;
   if (!map || !chromeHud || !chromeHud.paintLand) return;
   const p = findParcelAt(player.position.x, player.position.z);
   let crate = p ? crateOn(p.id) : null;
@@ -1119,26 +1148,7 @@ function onPointer(ev) {
     ferry();
     return;
   }
-  if (tapPt) {
-    if (viewer === "world") {
-      const p = findParcelAt(tapPt.x, tapPt.z);
-      if (p && chromeHud && chromeHud.paintLand) {
-        const prev = selected ? map.plots.find((x) => x.id === selected) : null;
-        selected = p.id;
-        if (prev) paintParcel(prev);
-        paintParcel(p);
-        if (parcelMap) parcelMap.setSelected(p.id);
-        lastInspectKey = p.id + ":" + (crateOn(p.id) ? crateOn(p.id).id : "") + ":" + bandForPlot(p);
-        const crate = crateOn(p.id);
-        chromeHud.paintLand(p, {
-          band: bandForPlot(p),
-          crate,
-          onTake: crate ? () => takeCrate(crate.id) : null,
-        });
-      }
-    }
-    goTo(tapPt.x, tapPt.z);
-  }
+  if (tapPt) goTo(tapPt.x, tapPt.z);
 }
 
 function applySnapshot(snapshot) {
@@ -1177,6 +1187,8 @@ async function lease() {
   applySnapshot(body.snapshot);
   paintParcel(map.plots.find((x) => x.id === selected));
   if (chromeHud) chromeHud.refresh();
+  landPinned = false;
+  lastInspectKey = "";
   setStatus("This land is yours for $" + money(body.paid) + " (PAPER). Order from Market.");
 }
 
@@ -1543,6 +1555,8 @@ async function boot() {
     setStatus,
     lease,
     onLeased(snapshot) {
+      landPinned = false;
+      lastInspectKey = "";
       applySnapshot(snapshot);
       const ids = snapshot.visitor && snapshot.visitor.leases;
       if (ids && ids.length) {
@@ -1575,7 +1589,7 @@ async function boot() {
     },
     onPlaceMode() {},
   });
-  setStatus("World viewer. Tap walks. Switch Foot traffic / Logistics top-right. PAPER.");
+  setStatus("World viewer. Left-click walks. Right-click a lot to lease. PAPER.");
   await idle(80);
   await ensureTaxi();
   await ensureDeliveries();
@@ -1594,14 +1608,24 @@ canvas.addEventListener("pointerup", (ev) => {
   const dist = Math.hypot(ev.clientX - rmbDown.x, ev.clientY - rmbDown.y);
   rmbDown = null;
   if (dt > 280 || dist > 10) return;
+  if (ev.target.closest && ev.target.closest("nav, a, button, #taxi-map, #ferry-ticket, #catalog-picker, #chrome, .float-panel, #land-card, #stand-menu")) return;
   pointer.x = (ev.clientX / window.innerWidth) * 2 - 1;
   pointer.y = -(ev.clientY / window.innerHeight) * 2 + 1;
   raycaster.setFromCamera(pointer, camera);
   const hits = raycaster.intersectObjects(clickTargets(), true);
   const standHit = hits.find((h) => objectWithStand(h.object));
-  if (!standHit) return;
-  const obj = objectWithStand(standHit.object);
-  if (obj) openStandMenu(obj.userData.standId);
+  if (standHit) {
+    const obj = objectWithStand(standHit.object);
+    if (obj) openStandMenu(obj.userData.standId);
+    return;
+  }
+  const tap = walkPoint(hits);
+  const pt = (tap && tap.point) || (hits[0] && hits[0].point);
+  if (!pt) {
+    setStatus("Right-click a street lot to lease it. PAPER.");
+    return;
+  }
+  inspectLandAt(pt.x, pt.z);
 });
 btnLease.addEventListener("click", lease);
 btnDevelop.addEventListener("click", openCatalog);

@@ -60,6 +60,8 @@ describe("harbour boot import graph", () => {
     );
     const steps = trickle.split("await quietStep();").length - 1;
     expect(steps).toBeGreaterThanOrEqual(4);
+    expect(src).toContain("function inspectLandAt");
+    expect(src).toContain("Right-click a street lot to lease it");
     expect(src).toContain("clickTargets()");
     expect(src).not.toContain("intersectObjects(root.children, true)");
   });

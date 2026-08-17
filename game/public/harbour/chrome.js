@@ -41,7 +41,7 @@ export function mountChrome(opts) {
   let skuDogs = true;
 
   const HINTS = {
-    world: "World: tap walks. Land does not steal the click.",
+    world: "World: left-click walks. Right-click a lot to lease.",
     foot: "Foot traffic: green / yellow / red on each named road.",
     logistics: "Logistics: tap the roadside crate. Van drops on the kerb.",
     minerals: "Minerals: not on the South first loop yet.",
