@@ -1,6 +1,6 @@
 # Two Harbors
 
-Fable 5 harbour with the South first-loop HUD (PR #32). PAPER / SIMULATED. No wallet.
+Two Harbors harbour MMO shard. PAPER / SIMULATED. No wallet. One visitor on this process until accounts land.
 
 ```bash
 cd game

@@ -18,6 +18,7 @@ describe("harbour chrome HUD", () => {
     expect(html).toContain('data-panel="employees"');
     expect(html).toContain('id="chrome"');
     expect(html).toContain("click a $ title to lease");
+    expect(html).not.toContain("first loop");
     expect(html).toContain('id="cart">PAPER<');
     expect(html).not.toContain('data-panel="tutorials"');
     expect(html).not.toContain("Tutorials");
@@ -38,5 +39,6 @@ describe("harbour chrome HUD", () => {
     expect(chrome).toContain("playPaperBuy");
     expect(chrome).toContain("data-aisle");
     expect(chrome).toContain("marketplace");
+    expect(chrome).not.toContain("first loop");
   });
 });
