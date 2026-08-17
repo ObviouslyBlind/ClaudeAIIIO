@@ -204,4 +204,54 @@ describe("south port sign", () => {
       expect(pin.position.distanceTo(b.position)).toBeGreaterThan(0.05);
     }
   });
+
+  it("puts a tiny kraft PAPER rivet on the south sign board, pin washer screw and nail remain", () => {
+    const sign = makeSouthSign(ISLANDS.south, { heightAt });
+    expect(sign).not.toBeNull();
+    expect(sign!.userData.mode).toBe("PAPER");
+
+    const nails = collectPart(sign!, "nail");
+    expect(nails.length).toBeGreaterThanOrEqual(1);
+    const screws = collectPart(sign!, "screw");
+    expect(screws.length).toBeGreaterThanOrEqual(1);
+    const washers = collectPart(sign!, "washer");
+    expect(washers.length).toBeGreaterThanOrEqual(1);
+    const pins = collectPart(sign!, "pin");
+    expect(pins.length).toBeGreaterThanOrEqual(1);
+    const braces = collectPart(sign!, "brace");
+    expect(braces.length).toBeGreaterThanOrEqual(1);
+    const caps = collectPart(sign!, "cap");
+    expect(caps.length).toBeGreaterThanOrEqual(1);
+
+    const rivets = collectPart(sign!, "rivet");
+    expect(rivets.length).toBeGreaterThanOrEqual(1);
+    for (const r of rivets) {
+      expect(r.userData.part).toBe("rivet");
+      expect(r.userData.mode).toBe("PAPER");
+      const mesh = r as THREE.Mesh;
+      expect(mesh.geometry).toBeInstanceOf(THREE.BoxGeometry);
+      const mat = mesh.material as THREE.MeshLambertMaterial;
+      expect(mat.color.getHex()).toBe(WOOD);
+      const { width, height, depth } = (mesh.geometry as THREE.BoxGeometry).parameters;
+      expect(width).toBeLessThan(0.12);
+      expect(height).toBeLessThan(0.12);
+      expect(depth).toBeLessThan(0.12);
+    }
+
+    const rivet = rivets[0] as THREE.Mesh;
+    const pin = pins[0] as THREE.Mesh;
+    const washer = washers[0] as THREE.Mesh;
+    const screw = screws[0] as THREE.Mesh;
+    const nail = nails[0] as THREE.Mesh;
+    expect(rivet.position.distanceTo(pin.position)).toBeGreaterThan(0.05);
+    expect(rivet.position.distanceTo(washer.position)).toBeGreaterThan(0.05);
+    expect(rivet.position.distanceTo(screw.position)).toBeGreaterThan(0.05);
+    expect(rivet.position.distanceTo(nail.position)).toBeGreaterThan(0.05);
+    for (const c of caps) {
+      expect(rivet.position.distanceTo(c.position)).toBeGreaterThan(0.05);
+    }
+    for (const b of braces) {
+      expect(rivet.position.distanceTo(b.position)).toBeGreaterThan(0.05);
+    }
+  });
 });

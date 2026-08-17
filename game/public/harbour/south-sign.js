@@ -162,6 +162,12 @@ export function makeSouthSign(spec, helpers) {
   pin.userData.part = "pin";
   g.add(pin);
 
+  /** Tiny kraft rivet on the board, offset from pin, washer, screw, nail, braces and caps. WOOD already in this file — PAPER box, not grey iron. */
+  const rivet = part(0.05, 0.05, 0.04, WOOD, false);
+  rivet.position.set(0, 2.12, 0.1);
+  rivet.userData.part = "rivet";
+  g.add(rivet);
+
   g.position.set(wx, gy, wz);
   g.rotation.y = Math.PI + 0.42;
   return g;
