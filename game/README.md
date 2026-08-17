@@ -6,17 +6,36 @@ The whole island is a priced parcel map now: every lot drawn with boundary ink a
 
 ## Now
 
-Headless sim plus a **basic 3D harbour**: two Caribbean-scale islands, a port on each, paper plot leases. No wallet. No live trading.
+Headless sim plus a **basic 3D harbour**. PAPER / SIMULATED. No wallet.
+
+**On your laptop (Mac / Linux / Git Bash):**
 
 ```bash
-cd game
-npm install
-npm test
-npm run tick        # 1 simulated hour
-npm run play        # http://localhost:8787  (3D harbour)
+git clone https://github.com/ObviouslyBlind/ClaudeAIIIO.git
+cd ClaudeAIIIO
+git checkout cursor/first-loop-ui-183a
+chmod +x play.sh game/scripts/play.sh
+./play.sh
 ```
 
-From a **Cursor cloud agent**: plug icon (top-right of the agent panel) → make sure **8787** is forwarded → open `http://localhost:8787/`. If you are on cursor.com/agents in a browser only, 8787 is not on your laptop — use the agent Ports / Simple Browser.
+That installs if needed and serves **http://localhost:8787/**.
+
+Need a URL you can paste into any browser (phone, another PC, or when localhost is not this machine):
+
+```bash
+./play.sh --public
+```
+
+or from `game/`:
+
+```bash
+npm install
+npm run play:laptop
+```
+
+**On Windows:** double-click `play.cmd` (this PC) or `play-laptop.cmd` (public URL).
+
+The old cloud-agent plug-icon forward still works in Cursor Desktop. The scripts are the supported way to run it on your machine.
 
 Open `/` for the harbour. Toggle **Foot traffic**, lease a green South plot, then **Market** to order a hotdog cart delivered to that plot. Tap the crate **Take all**, **Inventory → Place in world**, short right-click the cart to stock. Hire from **Staff** or run it yourself. **Taxi** still paved-only. **Ferry** still North ↔ South. Labelled PAPER / SIMULATED.
 

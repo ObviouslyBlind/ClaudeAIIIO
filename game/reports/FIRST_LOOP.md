@@ -2,6 +2,15 @@
 
 PAPER / SIMULATED. Spawn: South port. No wallet.
 
+## Play on your laptop
+
+```bash
+./play.sh              # http://localhost:8787
+./play.sh --public     # plus a pasteable laptop URL
+```
+
+Windows: `play.cmd` or `play-laptop.cmd`. From `game/`: `npm run play` / `npm run play:laptop`.
+
 ## UI
 - Top left: **Two Harbors** (green), players online, balance + $/min
 - Top right: Tutorials / Leaderboard / Account, then World / Foot traffic / Logistics / Minerals
