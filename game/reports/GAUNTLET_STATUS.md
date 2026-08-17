@@ -1,5 +1,7 @@
 # Gauntlet status
 
+New chat: paste **`game/reports/HANDOVER.md`**, not this file.
+
 Loop is **paused for playtest**. User asked to play `/`. Do not launch another seaward cube critic until they say so.
 
 One **pixel critic** at a time (one pair of eyes). The **live harbour** already runs the rest together on `/`: water, shore foam, both quays, roads, street props, trees, cart, traffic, taxi, ferry, stalls, pedestrians, nametags, interiors, econ/nearby/cart/staff HUD, lease/develop/hire/fire/enter/exit/ferry/taxi, market + hansard.
