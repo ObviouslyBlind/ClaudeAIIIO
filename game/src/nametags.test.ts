@@ -6,6 +6,7 @@ import {
   NAMETAG_CLIP,
   NAMETAG_FOLD,
   NAMETAG_HOLE,
+  NAMETAG_LOOP,
   NAMETAG_NEAR_M,
   NAMETAG_PIN,
   NAMETAG_RIVET,
@@ -15,6 +16,7 @@ import {
   makeNametagBead,
   makeNametagClasp,
   makeNametagClip,
+  makeNametagLoop,
   makeNametagPin,
   makeNametagRivet,
   makeNametagString,
@@ -62,7 +64,7 @@ function mockCtx() {
 }
 
 describe("outdoor PAPER nametags", () => {
-  it("keeps a kraft folded corner, punch-hole, clip, string, pin, tab, stud, rivet, bead, clasp, and still stamps PAPER", () => {
+  it("keeps a kraft folded corner, punch-hole, clip, string, pin, tab, stud, rivet, bead, clasp, loop, and still stamps PAPER", () => {
     expect(NAMETAG_FOLD).toBe(true);
     expect(NAMETAG_HOLE).toBe(true);
     expect(NAMETAG_CLIP).toBe(true);
@@ -73,6 +75,7 @@ describe("outdoor PAPER nametags", () => {
     expect(NAMETAG_RIVET).toBe(true);
     expect(NAMETAG_BEAD).toBe(true);
     expect(NAMETAG_CLASP).toBe(true);
+    expect(NAMETAG_LOOP).toBe(true);
     expect(NAMETAG_NEAR_M).toBeGreaterThanOrEqual(200);
     const ctx = mockCtx();
     paintPaperNametagCard(ctx, 512, 128, "Ferry clerk");
@@ -205,6 +208,24 @@ describe("outdoor PAPER nametags", () => {
     expect(clasp.position.distanceTo(stud.position)).toBeGreaterThan(0.25);
     expect(clasp.position.distanceTo(rivet.position)).toBeGreaterThan(0.25);
     expect(clasp.position.distanceTo(bead.position)).toBeGreaterThan(0.25);
+
+    const loop = makeNametagLoop();
+    expect(loop.userData.part).toBe("loop");
+    expect(loop.userData.mode).toBe("PAPER");
+    expect(loop.geometry.type).toBe("BoxGeometry");
+    expect((loop.material as THREE.MeshLambertMaterial).color.getHex()).toBe(0x3d2a1c);
+    const lp = (loop.geometry as THREE.BoxGeometry).parameters;
+    expect(lp.width).toBeLessThan(0.12);
+    expect(lp.height).toBeLessThan(0.12);
+    expect(lp.depth).toBeLessThan(0.12);
+    expect(loop.position.distanceTo(clip.position)).toBeGreaterThan(0.25);
+    expect(loop.position.distanceTo(cord.position)).toBeGreaterThan(0.25);
+    expect(loop.position.distanceTo(pin.position)).toBeGreaterThan(0.25);
+    expect(loop.position.distanceTo(tab.position)).toBeGreaterThan(0.25);
+    expect(loop.position.distanceTo(stud.position)).toBeGreaterThan(0.25);
+    expect(loop.position.distanceTo(rivet.position)).toBeGreaterThan(0.25);
+    expect(loop.position.distanceTo(bead.position)).toBeGreaterThan(0.25);
+    expect(loop.position.distanceTo(clasp.position)).toBeGreaterThan(0.25);
 
     expect(makePaperNametag("Ferry clerk")).toBeNull();
   });

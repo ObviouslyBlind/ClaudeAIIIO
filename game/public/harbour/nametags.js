@@ -35,6 +35,8 @@ export const NAMETAG_RIVET = true;
 export const NAMETAG_BEAD = true;
 /** Tiny kraft PAPER clasp on the card. 3D box, existing walker hex. */
 export const NAMETAG_CLASP = true;
+/** Tiny kraft PAPER loop on the card. 3D box, existing walker hex. */
+export const NAMETAG_LOOP = true;
 
 const SKIN = 0xf2d2a8;
 const PANTS = 0x6e4a32;
@@ -226,6 +228,26 @@ export function makeNametagClasp() {
   return clasp;
 }
 
+/**
+ * Tiny kraft PAPER loop on the card face. HAIR brown box —
+ * not grey metal. Offset from the clasp (0.0, 0.88, 0.05), clip,
+ * string, pin, tab, stud, rivet, and bead. Sprite-local so it stays a
+ * loop on the kraft card.
+ */
+export function makeNametagLoop() {
+  const loop = paperBox(0.035, 0.04, 0.022, HAIR);
+  loop.name = "paper-nametag-loop";
+  loop.userData.part = "loop";
+  loop.userData.mode = "PAPER";
+  loop.castShadow = false;
+  loop.receiveShadow = false;
+  loop.frustumCulled = false;
+  loop.renderOrder = 4;
+  loop.material.depthTest = false;
+  loop.position.set(0.18, 1.10, 0.05);
+  return loop;
+}
+
 /** Tracked letters so PAPER reads as a stamp even without canvas letterSpacing. */
 function fillSpaced(ctx, text, x, y, tracking) {
   const chars = String(text).split("");
@@ -374,6 +396,7 @@ export function makePaperNametag(name) {
   if (NAMETAG_RIVET) sprite.add(makeNametagRivet());
   if (NAMETAG_BEAD) sprite.add(makeNametagBead());
   if (NAMETAG_CLASP) sprite.add(makeNametagClasp());
+  if (NAMETAG_LOOP) sprite.add(makeNametagLoop());
   return sprite;
 }
 
