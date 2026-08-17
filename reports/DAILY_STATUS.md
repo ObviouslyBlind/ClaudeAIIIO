@@ -2,7 +2,7 @@
 
 ## 2026-08-17 (latest)
 
-**Current status:** `/g/hud104` FAIL HUD — House $40 afford fired on boot copy (D045). Re-critic `/g/hud107`. PAPER / SIMULATED. Politics frozen.
+**Current status:** `/g/mkt108` PASS MARKET. `/g/persist109` FAIL PERSIST — restored label cleared by dump poll (D046). Re-critic `/g/persist110`. PAPER / SIMULATED. Politics frozen.
 
 ## 2026-08-16
 
