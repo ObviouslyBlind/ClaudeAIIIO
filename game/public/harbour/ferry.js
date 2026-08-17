@@ -475,6 +475,15 @@ export function makeFerry() {
   bitt.userData.mode = "PAPER";
   bitt.position.set(-18.4, 1.86, 3.5);
   g.add(bitt);
+  // Tiny kraft PAPER tiller on the aft cream deck. Kraft hex, one box, not
+  // grey. Clear of grommet/hatch/scupper/wedge/coaming/plug/stopper/chock/
+  // bitt/handle/bollard/lifering.
+  const tiller = part(0.08, 0.05, 0.08, 0xc4b496, false);
+  tiller.name = "tiller";
+  tiller.userData.part = "tiller";
+  tiller.userData.mode = "PAPER";
+  tiller.position.set(-18.4, 1.86, -3.5);
+  g.add(tiller);
 
   const cabin = part(16.5, 3.35, 7.6, CABIN);
   cabin.position.set(-2.4, 3.52, 0);
