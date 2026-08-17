@@ -76,9 +76,9 @@ describe("harbour PAPER tax strip", () => {
 });
 
 describe("harbour PAPER goods strip", () => {
-  it("paints PAPER · SIMULATED when the bag is empty", () => {
-    expect(formatGoodsLine(SNAPSHOT)).toBe("PAPER · SIMULATED");
-    expect(formatGoodsLine(null)).toBe("PAPER · SIMULATED");
+  it("stays blank when the bag is empty so it does not clone persist / the badge", () => {
+    expect(formatGoodsLine(SNAPSHOT)).toBe("");
+    expect(formatGoodsLine(null)).toBe("");
     expect(
       formatGoodsLine({
         mode: "PAPER",
@@ -97,7 +97,9 @@ describe("first-frame flow / tax / goods placeholders", () => {
     );
     expect(html).toMatch(/id="flow">PAPER · SIMULATED · Faucet 0 · sink 0</);
     expect(html).toMatch(/id="tax">PAPER · SIMULATED · Sales tax 0%</);
-    expect(html).toMatch(/id="goods">PAPER · SIMULATED</);
+    expect(html).toMatch(/id="goods"><\/p>/);
+    expect(html).toMatch(/id="persist-line">PAPER · SIMULATED · no dump</);
+    expect(html).not.toMatch(/id="goods">PAPER · SIMULATED</);
     expect(html).not.toMatch(/id="flow">Faucet —/);
     expect(html).toContain('fetch("/api/statutes")');
     expect(html).toContain('fetch("/api/snapshot")');

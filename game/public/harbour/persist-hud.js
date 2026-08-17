@@ -6,7 +6,7 @@
  */
 
 export const POLL_MS = 1000;
-export const IDLE_LINE = "PAPER · SIMULATED";
+export const IDLE_LINE = "PAPER · SIMULATED · no dump";
 export const RESTORE_LABEL = "Restore";
 
 function money(n) {
@@ -24,7 +24,7 @@ function lookup(id) {
     : null;
 }
 
-/** Last PAPER dump as a short sheet line. Empty dump stays PAPER · SIMULATED. */
+/** Last PAPER dump as a short sheet line. Empty dump stays "no dump", not a clone of the badge. */
 export function formatPersistLine(blob, phase) {
   const mode = (blob && blob.mode) || "PAPER";
   const provenance = (blob && blob.provenance) || "SIMULATED";
@@ -32,7 +32,7 @@ export function formatPersistLine(blob, phase) {
   if (phase === "no_blob") return `${mode} · ${provenance} · no dump`;
   if (phase === "error") return `${mode} · ${provenance} · restore failed`;
   if (phase === "restored") return `${mode} · ${provenance} · restored`;
-  if (!blob || typeof blob !== "object") return `${mode} · ${provenance}`;
+  if (!blob || typeof blob !== "object") return `${mode} · ${provenance} · no dump`;
   const tick = num(blob.tick);
   const cash = blob.visitor ? num(blob.visitor.cash) : null;
   const bits = [`${mode} · ${provenance}`];

@@ -1,6 +1,7 @@
 /**
  * Harbour PAPER held-goods strip: visitor.stock / goods on #goods.
  * Non-zero only, e.g. "corn 2 · beans 1 · PAPER".
+ * Empty bag stays blank so it does not clone persist / the badge.
  * Polls GET /api/snapshot ~1/s. PAPER / SIMULATED. Never a wallet.
  */
 
@@ -55,7 +56,7 @@ export function formatGoodsLine(data) {
   const mode = (data && data.mode) || "PAPER";
   const provenance = (data && data.provenance) || "SIMULATED";
   const bits = heldBits(data);
-  if (!bits.length) return `${mode} · ${provenance}`;
+  if (!bits.length) return "";
   return `${bits.join(" · ")} · ${mode} · ${provenance}`;
 }
 
@@ -93,8 +94,7 @@ export function mountGoodsHud(opts = {}) {
   }
 
   if (el) {
-    const already = String(el.textContent || "");
-    if (!already.includes("PAPER")) el.textContent = formatGoodsLine(null);
+    el.textContent = formatGoodsLine(null);
     if (el.setAttribute) el.setAttribute("title", "PAPER · SIMULATED");
     refresh();
     timer = setInterval(refresh, POLL_MS);
