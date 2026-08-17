@@ -283,6 +283,21 @@ function makeBowl(x, y, z) {
   return g;
 }
 
+/** Tiny kraft PAPER pitcher on the table — wood foot, plaster body, linen rim. Boxes only. */
+function makePitcher(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "pitcher";
+  g.userData.kind = "interior-pitcher";
+  g.userData.mode = "PAPER";
+  g.userData.part = "pitcher";
+  g.position.set(x, y, z);
+  const paper = { mode: "PAPER", part: "pitcher" };
+  g.add(box(0.055, 0.008, 0.055, WOOD, 0, 0.004, 0, "interior-pitcher", paper));
+  g.add(box(0.068, 0.05, 0.068, PLASTER, 0, 0.033, 0, "interior-pitcher", paper));
+  g.add(box(0.042, 0.01, 0.042, LINEN, 0, 0.062, 0, "interior-pitcher", paper));
+  return g;
+}
+
 /** Tiny kraft PAPER saucer on the table — wood rim, plaster well, linen center. Boxes only. */
 function makeSaucer(x, y, z) {
   const g = new THREE.Group();
@@ -484,7 +499,7 @@ function makeBed(cx, floorY, cz) {
 
 /**
  * PAPER Caribbean house: plaster walls, wood floors, window openings,
- * downstairs table/chairs/stool/lamp/clock/picture/vase/mug/saucer/bowl/book/napkin/spoon/fork/knife/plate/cup, upstairs bed. Low-poly boxes only.
+ * downstairs table/chairs/stool/lamp/clock/picture/vase/mug/saucer/bowl/pitcher/book/napkin/spoon/fork/knife/plate/cup, upstairs bed. Low-poly boxes only.
  */
 export function makeInteriorScene() {
   const group = new THREE.Group();
@@ -540,6 +555,8 @@ export function makeInteriorScene() {
   down.add(makeSaucer(-0.8, 0.955, -0.7));
   // Kraft PAPER bowl on the table top — offset from saucer, mug, cup, plate, knife, fork, spoon, napkin, vase, book.
   down.add(makeBowl(0.1, 0.955, -0.4));
+  // Kraft PAPER pitcher on the table top — offset from bowl, saucer, mug, cup, plate, knife, fork, spoon, napkin, vase, book.
+  down.add(makePitcher(-0.72, 0.955, 0.18));
   // Kraft PAPER book on the table top — offset from the mug and vase.
   down.add(makeBook(-0.05, 0.955, 0.08));
   // Kraft PAPER napkin on the table top — offset from the mug, vase, and book.
