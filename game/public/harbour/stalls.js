@@ -85,7 +85,7 @@ function labelGood(g) {
   return String(g).replace(/_/g, " ");
 }
 
-/** Visible PAPER market stand: deck, posts, price board, striped awning, counter, crates, hanging scale, produce basket, oil lantern, melon, kraft cone, hanging fish, ground crate, kraft price slate, kraft stool, kraft cup, kraft knife, kraft napkin, kraft plate, kraft lemon, kraft lime, kraft orange, kraft banana, kraft pear, kraft grape, kraft peach, kraft mango, kraft kiwi, kraft cherry, kraft nectarine, kraft quince, kraft papaya, kraft guava. */
+/** Visible PAPER market stand: deck, posts, price board, striped awning, counter, crates, hanging scale, produce basket, oil lantern, melon, kraft cone, hanging fish, ground crate, kraft price slate, kraft stool, kraft cup, kraft knife, kraft napkin, kraft plate, kraft lemon, kraft lime, kraft orange, kraft banana, kraft pear, kraft grape, kraft peach, kraft mango, kraft kiwi, kraft cherry, kraft nectarine, kraft quince, kraft papaya, kraft guava, kraft currant. */
 export function makeStallMesh(plot) {
   const g = new THREE.Group();
   g.name = "npc-stall";
@@ -804,6 +804,29 @@ export function makeStallMesh(plot) {
     stem.userData.part = "guava";
     guava.add(body, stem);
     g.add(guava);
+  }
+
+  // One tiny kraft PAPER currant on the counter so the stall reads as a
+  // working stand, not only produce. Kraft body + wood stem. Local
+  // offset only — stall world pose stays put. PAPER boxes. Existing
+  // hexes. Offset from guava, papaya, quince, nectarine, cherry, kiwi,
+  // mango, peach, grape, pear, banana, orange, lime, lemon, plate,
+  // napkin, knife, cup.
+  if (!g.children.some((c) => c.userData.part === "currant")) {
+    const currant = new THREE.Group();
+    currant.name = "currant";
+    currant.userData.part = "currant";
+    currant.userData.mode = "PAPER";
+    currant.userData.paper = true;
+    currant.position.set(1.48, 0.9, 1.22);
+    const body = paperBox(0.06, 0.055, 0.06, KRAFT, false);
+    body.position.y = 0.028;
+    body.userData.part = "currant";
+    const stem = paperBox(0.015, 0.02, 0.015, WOOD, false);
+    stem.position.y = 0.065;
+    stem.userData.part = "currant";
+    currant.add(body, stem);
+    g.add(currant);
   }
 
   const back = paperBox(3.9, 1.6, 0.12, PLASTER);
