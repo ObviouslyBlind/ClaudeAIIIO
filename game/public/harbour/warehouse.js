@@ -323,6 +323,31 @@ function kraftTack(x, y, z, yaw = 0) {
 }
 
 /**
+ * Tiny kraft paper ribbon on the clipboard — wood strip + strap knot +
+ * light-wood tail. PAPER boxes only. Not a tack, not twine, not chalk.
+ */
+function kraftRibbon(x, y, z, yaw = 0) {
+  const g = new THREE.Group();
+  g.name = "warehouse-ribbon";
+  g.userData.kind = "warehouse-ribbon";
+  g.userData.mode = "PAPER";
+  g.userData.part = "ribbon";
+  g.position.set(x, y, z);
+  g.rotation.y = yaw;
+  // Rest on the clipboard sheet, upper-center, clear of tack, eraser, pencil,
+  // clip, stamp, and chalk.
+  g.rotation.z = 0.18;
+  const strip = paperBox(0.072, 0.008, 0.016, WOOD, "warehouse-ribbon");
+  strip.position.set(0.0, 0.16, 0.05);
+  const knot = paperBox(0.02, 0.012, 0.02, STRAP, "warehouse-ribbon");
+  knot.position.set(0.0, 0.16, 0.056);
+  const tail = paperBox(0.018, 0.006, 0.012, WOOD_LIGHT, "warehouse-ribbon");
+  tail.position.set(0.028, 0.154, 0.05);
+  g.add(strip, knot, tail);
+  return g;
+}
+
+/**
  * Tiny kraft inventory card on a crate — cream sheet + strap stripe.
  * PAPER boxes only. Not a pencil, not twine, not chalk, not a broom.
  */
@@ -581,6 +606,9 @@ function makeWarehouseDress() {
   // Tiny kraft paper tack on that clipboard sheet. Clear of eraser, pencil,
   // clip, stamp, card, twine, and chalk.
   g.add(kraftTack(1.02, 1.58, -3.38));
+  // Tiny kraft paper ribbon on that clipboard sheet. Clear of tack, eraser,
+  // pencil, clip, stamp, card, twine, and chalk.
+  g.add(kraftRibbon(1.02, 1.58, -3.38));
   // Tiny kraft twine ball on the back-right crate stack. Clear of pencil,
   // chalk, clipboard, pallet, dolly, and floor crates.
   g.add(kraftTwine(3.22, 1.56, -2.38, 0.18));
