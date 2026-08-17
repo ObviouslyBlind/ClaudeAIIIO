@@ -126,7 +126,11 @@ Pixel: **kraft/rust life ring** at `http://localhost:8787/g/ring71`. Same camera
 
 Pixel: **kraft/rust life ring** at `http://localhost:8787/g/ring72`. Same camera-facing hull as buoy70, buoy-tall rust/kraft cluster to the RIGHT of the rust buoy. No RMB. Address bar must be `/g/ring72`. Do not restart play while the critic is on the page.
 
-## Next pixel (after ring72 PASS, immediately, no wait)
+`/g/ring72` **FAIL RING**: cream hull and cabin in frame; 8 segs at x+10.2 sat on the wheelhouse and read as bridge furniture.
+
+Pixel: **kraft/rust life ring** at `http://localhost:8787/g/ring73`. Solid 8 m rust cube + kraft band on the bow, right of the held buoy, clear of the wheelhouse. No RMB. Address bar must be `/g/ring73`. Do not restart play while the critic is on the page.
+
+## Next pixel (after ring73 PASS, immediately, no wait)
 
 ## Frozen
 
