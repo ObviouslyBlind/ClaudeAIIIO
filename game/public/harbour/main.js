@@ -15,7 +15,10 @@ import { makeWater } from "./water.js";
 import { makeSky } from "./sky.js";
 import { CAM, LOOK } from "./first-frame.js";
 import { dressPlayer } from "./player.js";
-import { dressCart } from "./cart.js";
+import { makeHotdogCart, makeCrate } from "./cart.js";
+import { createWalkPath } from "./walk-path.js";
+import { mountChrome } from "./chrome.js";
+import { createOverlays } from "./overlays.js";
 import { mountEconHud } from "./hud-econ.js";
 import { mountPresenceHud } from "./presence-hud.js";
 import { mountStaffHud } from "./staff-hud.js";
@@ -113,7 +116,7 @@ sun.shadow.camera.near = 10;
 sun.shadow.camera.far = 700;
 scene.add(sun);
 
-if (statusEl) statusEl.textContent = "North port · PAPER";
+if (statusEl) statusEl.textContent = "South port · PAPER";
 if (renderer) {
   camera.position.set(CAM.x, CAM.y, CAM.z);
   camera.lookAt(LOOK.x, LOOK.y, LOOK.z);
@@ -127,7 +130,7 @@ const walkTarget = new THREE.Vector3();
 const tmp = new THREE.Vector3();
 
 let map = null;
-let islandId = "north";
+let islandId = "south";
 let selected = null;
 let walking = false;
 let lastTap = 0;
@@ -140,7 +143,16 @@ let catalogPicker = null;
 let staffHud = null;
 let parcelMap = null;
 let propsMod = null;
+let chromeHud = null;
+let walkPath = null;
+let overlays = null;
+let deliveries = null;
+let lastInspectKey = "";
+let landPinned = false;
+const standMeshes = new Map();
+const crateMeshes = new Map();
 const propsBuilt = new Set();
+let rmbDown = null;
 
 const player = new THREE.Mesh(
   new THREE.CapsuleGeometry(0.55, 1.15, 4, 8),
@@ -148,8 +160,8 @@ const player = new THREE.Mesh(
 );
 player.castShadow = true;
 dressPlayer(player);
-dressCart(player);
 scene.add(player);
+walkPath = createWalkPath(scene);
 
 const plotMeshes = new Map();
 const useMeshes = new Map();
@@ -261,7 +273,7 @@ function findParcelAt(x, z) {
     return hits.reduce((a, b) => (a.area <= b.area ? a : b));
   }
   let best = null;
-  let bestD = STARTER_SNAP_M;
+  let bestD = 70;
   for (const p of map.plots) {
     if (!parcelMapped(p)) continue;
     if (!(p.owner === "visitor" || canLeasePlot(p))) continue;
@@ -302,9 +314,163 @@ function canOpenCatalog() {
   return vacant && map.visitor.cash >= cheapestDevelop();
 }
 
-function vacantMine(p) {
-  return Boolean(p && p.owner === "visitor" && !p.use);
+function bandForPlot(p) {
+  const play = chromeHud && chromeHud.getPlay && chromeHud.getPlay();
+  const hit = play && play.leases && play.leases.find((l) => l.id === p.id);
+  if (hit) return hit.band;
+  const roads = play && play.traffic && play.traffic.roads;
+  if (!roads || !p) return "";
+  let best = null;
+  for (const road of roads) {
+    if (road.island !== p.island) continue;
+    for (const pt of road.points || []) {
+      const d = Math.hypot(pt.x - p.x, pt.z - p.z);
+      if (!best || d < best.d) best = { d, band: road.band };
+    }
+  }
+  return best && best.d < 80 ? best.band : "red";
 }
+
+function crateOn(plotId) {
+  const play = chromeHud && chromeHud.getPlay && chromeHud.getPlay();
+  if (!play) return null;
+  return (play.deliveries || []).find((d) => d.plotId === plotId) || null;
+}
+
+function standOn(plotId) {
+  const play = chromeHud && chromeHud.getPlay && chromeHud.getPlay();
+  if (!play) return null;
+  return (play.stands || []).find((s) => s.plotId === plotId) || null;
+}
+
+async function placeCartOn(plot) {
+  if (!plot || plot.owner !== "visitor") {
+    setStatus("Lease that South plot first.");
+    return;
+  }
+  const res = await fetch("/api/inventory/place", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ plotId: plot.id }),
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    setStatus("Could not place: " + (data.reason || "fail") + " · PAPER");
+    return;
+  }
+  if (chromeHud) chromeHud.clearPlacing();
+  syncStandMesh(data.stand);
+  if (chromeHud) chromeHud.refresh();
+  setStatus("Cart placed. Right-click it to stock hotdogs. PAPER.");
+}
+
+function syncStandMesh(stand) {
+  if (!stand || standMeshes.has(stand.id)) return;
+  const plot = map.plots.find((p) => p.id === stand.plotId);
+  if (!plot) return;
+  const mesh = makeHotdogCart();
+  mesh.position.set(plot.x, heightAt(specOf(plot.island), plot.x, plot.z), plot.z);
+  mesh.userData.standId = stand.id;
+  mesh.userData.plotId = plot.id;
+  mesh.userData.kind = "hotdog-cart";
+  mesh.userData.label = "hotdog cart";
+  mesh.userData.layer = "world";
+  mesh.name = `hotdog-cart:${stand.id}`;
+  worldAdd(mesh);
+  standMeshes.set(stand.id, mesh);
+}
+
+function syncCrateMesh(delivery) {
+  if (!delivery || crateMeshes.has(delivery.id)) return;
+  const plot = map.plots.find((p) => p.id === delivery.plotId);
+  if (!plot) return;
+  const mesh = makeCrate();
+  const x = delivery.drop && Number.isFinite(delivery.drop.x) ? delivery.drop.x : plot.x + 1.4;
+  const z = delivery.drop && Number.isFinite(delivery.drop.z) ? delivery.drop.z : plot.z + 1.1;
+  mesh.position.set(x, heightAt(specOf(plot.island), x, z), z);
+  mesh.name = `crate:${delivery.id}`;
+  mesh.userData.deliveryId = delivery.id;
+  mesh.userData.plotId = plot.id;
+  mesh.userData.kind = "crate";
+  mesh.userData.label = "delivery crate";
+  mesh.userData.layer = "logistics";
+  mesh.userData.roadName = delivery.drop && delivery.drop.roadName;
+  worldAdd(mesh);
+  crateMeshes.set(delivery.id, mesh);
+}
+
+function dropCrate(deliveryId) {
+  const mesh = crateMeshes.get(deliveryId);
+  if (mesh) {
+    mesh.parent && mesh.parent.remove(mesh);
+    crateMeshes.delete(deliveryId);
+  }
+  lastInspectKey = "";
+}
+
+async function takeCrate(deliveryId) {
+  const res = await fetch("/api/delivery/take", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ deliveryId }),
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    setStatus("Take all failed: " + (data.reason || "fail"));
+    return;
+  }
+  dropCrate(deliveryId);
+  if (chromeHud) chromeHud.refresh();
+  setStatus("In your inventory. Place the cart, then stock it. PAPER.");
+}
+
+function objectWithStand(obj) {
+  let o = obj;
+  while (o) {
+    if (o.userData && (o.userData.kind === "hotdog-cart" || o.userData.standId)) return o;
+    o = o.parent;
+  }
+  return null;
+}
+
+function openStandMenu(standId) {
+  const play = chromeHud && chromeHud.getPlay && chromeHud.getPlay();
+  const stand = play && (play.stands || []).find((s) => s.id === standId);
+  if (!stand || !chromeHud) return;
+  chromeHud.paintStandMenu(
+    stand,
+    async () => {
+      await fetch("/api/stand/stock", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ standId }),
+      });
+      chromeHud.refresh();
+      chromeHud.hideStandMenu();
+      setStatus("Hotdogs in the cart. PAPER · SIMULATED.");
+    },
+    async () => {
+      await fetch("/api/stand/hire", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ standId }),
+      });
+      chromeHud.refresh();
+      chromeHud.hideStandMenu();
+      setStatus("Hired. The cart sells on its own. PAPER.");
+    },
+    async () => {
+      await fetch("/api/stand/attend", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ standId }),
+      });
+      chromeHud.refresh();
+      setStatus("You're running the cart. Stay nearby. PAPER.");
+    },
+  );
+}
+
 
 /** Selected leased lot, or the parcel under the tap. Placement must not require a second hunt. */
 function plotToDevelop(hitPlotId, x, z) {
@@ -361,18 +527,17 @@ function refreshHud() {
     return;
   }
   const p = pSel;
-  const near = nearParcel(p);
   if (p.owner === "visitor") {
-    plotLineEl.textContent = parcelLabel(p) + (p.use ? " · " + p.use : " · yours") + (p.deposit ? " · " + p.deposit : "");
+    plotLineEl.textContent = parcelLabel(p) + (p.use ? " · " + p.use : " · yours");
     btnLease.disabled = true;
   } else if (p.owner) {
-    plotLineEl.textContent = parcelLabel(p) + " · taken" + (p.deposit ? " · " + p.deposit : "");
+    plotLineEl.textContent = parcelLabel(p) + " · taken";
     btnLease.disabled = true;
   } else {
-    plotLineEl.textContent = parcelLabel(p) + " · $" + money(p.price) + (p.deposit ? " · " + p.deposit : "");
+    plotLineEl.textContent = parcelLabel(p) + " · $" + money(p.price);
     const headroom = map.visitor.cash - p.price;
     const need = map.developCost ?? 40;
-    btnLease.disabled = !near || map.visitor.cash < p.price || headroom < need;
+    btnLease.disabled = map.visitor.cash < p.price || headroom < need;
     if (map.visitor.cash < p.price) {
       plotLineEl.textContent = parcelLabel(p) + " · $" + money(p.price) + " · need cash";
     } else if (headroom < need) {
@@ -640,8 +805,8 @@ function starterLotOn(p, islandId) {
   return p.price + need <= cash;
 }
 
-function nearNorthSpawn(p) {
-  return starterLotOn(p, "north");
+function nearSouthSpawn(p) {
+  return starterLotOn(p, "south");
 }
 
 async function makeParcels(filter) {
@@ -665,7 +830,7 @@ function snapCamera() {
   playCam.snap();
 }
 
-/** Islands whose terrain / port / starter lots are meshed. Boot marks north. */
+/** Islands whose terrain / port / starter lots are meshed. Boot marks south. */
 const builtIslands = new Set();
 
 /** Ferry landfall was a void: south never got terrain, a port, or lots.
@@ -694,6 +859,7 @@ function spawnAt(id) {
   const z = spec.port.z + (id === "north" ? -8 : 8);
   player.position.set(x, heightAt(spec, x, z) + 1.15, z);
   walking = false;
+  if (walkPath) walkPath.hide();
   selected = null;
   if (taxi) taxi.hopOut();
   snapCamera();
@@ -720,6 +886,14 @@ function goTo(x, z) {
   walkTarget.set(x, h + 1.15, z);
   walking = true;
   islandId = nearestIsland(x, z);
+  if (walkPath) {
+    walkPath.show(
+      player.position,
+      walkTarget,
+      player.position.y - 1.15,
+      h,
+    );
+  }
   setStatus("Walking.");
 }
 
@@ -737,6 +911,14 @@ function selectLand(p, walk) {
     setStatus("Yours. Tap the building or Enter (PAPER).");
   } else {
     setStatus(p.owner ? "This land is taken." : "This land. Lease it to develop.");
+  }
+  if (chromeHud && chromeHud.paintLand) {
+    const crate = crateOn(p.id);
+    chromeHud.paintLand(p, {
+      band: bandForPlot(p),
+      crate,
+      onTake: crate ? () => takeCrate(crate.id) : null,
+    });
   }
 }
 
@@ -775,7 +957,109 @@ function clickTargets() {
     if (rec.fill) objs.push(rec.fill);
   }
   for (const mesh of useMeshes.values()) objs.push(mesh);
+  for (const mesh of standMeshes.values()) objs.push(mesh);
+  for (const mesh of crateMeshes.values()) objs.push(mesh);
+  if (deliveries && typeof deliveries.clickables === "function") {
+    objs.push(...deliveries.clickables());
+  }
+  if (overlays && overlays.group) objs.push(overlays.group);
+  if (parcelMap && typeof parcelMap.clickables === "function") {
+    objs.push(...parcelMap.clickables());
+  }
   return objs.filter(Boolean);
+}
+
+function viewerMode() {
+  return overlays && overlays.mode ? overlays.mode : "world";
+}
+
+function walkPoint(hits) {
+  const hit = hits.find((h) => {
+    const k = h.object.userData && h.object.userData.kind;
+    return k === "ground" || k === "parcel-fill" || k === "road" || k === "plot" || k === "plot-line";
+  });
+  return hit || hits[0] || null;
+}
+
+function showLandCard(p) {
+  if (!p || !map || !chromeHud || !chromeHud.paintLand) return false;
+  landPinned = true;
+  const prev = selected ? map.plots.find((row) => row.id === selected) : null;
+  selected = p.id;
+  if (prev) paintParcel(prev);
+  paintParcel(p);
+  if (parcelMap) parcelMap.setSelected(p.id);
+  const crate = crateOn(p.id);
+  lastInspectKey = p.id + ":" + (crate ? crate.id : "") + ":" + bandForPlot(p);
+  chromeHud.paintLand(p, {
+    band: bandForPlot(p),
+    crate,
+    onTake: crate ? () => takeCrate(crate.id) : null,
+  });
+  if (!p.owner) setStatus((p.name || "This lot") + " · lease or close. PAPER · SIMULATED.");
+  else if (p.owner === "visitor") setStatus("Yours. PAPER.");
+  else setStatus("This land is taken. PAPER.");
+  return true;
+}
+
+function closeLandCard() {
+  landPinned = false;
+  lastInspectKey = "";
+  if (chromeHud && chromeHud.paintLand) chromeHud.paintLand(null);
+  if (selected && map) {
+    const prev = map.plots.find((x) => x.id === selected);
+    selected = null;
+    if (prev) paintParcel(prev);
+    if (parcelMap) parcelMap.setSelected(null);
+  }
+}
+
+function inspectNearbyLand() {
+  if (landPinned) return;
+  if (!map || !chromeHud || !chromeHud.paintLand) return;
+  const p = findParcelAt(player.position.x, player.position.z);
+  let crate = p ? crateOn(p.id) : null;
+  if (!crate) {
+    for (const [id, mesh] of crateMeshes) {
+      if (Math.hypot(mesh.position.x - player.position.x, mesh.position.z - player.position.z) < 10) {
+        crate = { id };
+        break;
+      }
+    }
+  }
+  const band = p ? bandForPlot(p) : "";
+  const key = (p ? p.id : "") + ":" + (crate ? crate.id : "") + ":" + band;
+  if (key === lastInspectKey) return;
+  lastInspectKey = key;
+  if (!p) {
+    if (selected) {
+      const prev = map.plots.find((x) => x.id === selected);
+      selected = null;
+      if (prev) paintParcel(prev);
+      if (parcelMap) parcelMap.setSelected(null);
+    }
+    if (crate) {
+      chromeHud.paintLand(
+        { id: "roadside", owner: "visitor", price: 0 },
+        { crate, roadside: true, onTake: () => takeCrate(crate.id) },
+      );
+    } else {
+      chromeHud.paintLand(null);
+    }
+    return;
+  }
+  if (selected !== p.id) {
+    const prev = selected ? map.plots.find((x) => x.id === selected) : null;
+    selected = p.id;
+    if (prev) paintParcel(prev);
+    paintParcel(p);
+    if (parcelMap) parcelMap.setSelected(p.id);
+  }
+  chromeHud.paintLand(p, {
+    band: bandForPlot(p),
+    crate,
+    onTake: crate ? () => takeCrate(crate.id) : null,
+  });
 }
 
 function onPointer(ev) {
@@ -783,7 +1067,7 @@ function onPointer(ev) {
   if (Date.now() - lastTap < 180) return;
   lastTap = Date.now();
   if (taxi && typeof taxi.mapOpen === "function" && taxi.mapOpen()) return;
-  if (ev.target.closest && ev.target.closest("nav, a, button, #taxi-map, #ferry-ticket, #catalog-picker")) return;
+  if (ev.target.closest && ev.target.closest("nav, a, button, #taxi-map, #ferry-ticket, #catalog-picker, #chrome, .float-panel, #land-card, #stand-menu")) return;
   pointer.x = (ev.clientX / window.innerWidth) * 2 - 1;
   pointer.y = -(ev.clientY / window.innerHeight) * 2 + 1;
   raycaster.setFromCamera(pointer, camera);
@@ -792,14 +1076,47 @@ function onPointer(ev) {
     refreshHud();
     return;
   }
-  const hits = raycaster.intersectObjects(clickTargets(), false);
+  const viewer = viewerMode();
+  const hits = raycaster.intersectObjects(clickTargets(), true);
+  const labelHit = hits.find((h) => objectWithKind(h.object, "parcel-label"));
+  const standHit = hits.find((h) => objectWithStand(h.object));
+  const crateHit = hits.find((h) => objectWithKind(h.object, "crate"));
+  const vanHit = hits.find((h) => objectWithKind(h.object, "van"));
+  const padHit = hits.find((h) => objectWithKind(h.object, "logistics-pad"));
   const buildingHit = hits.find((h) => objectWithKind(h.object, "building"));
   const plotHit = hits.find(
     (h) => h.object.userData.kind === "plot" || h.object.userData.kind === "plot-line",
   );
   const portHit = hits.find((h) => h.object.userData.kind === "port");
-  const groundHit = hits.find((h) => h.object.userData.kind === "ground");
-  const tapPt = plotHit?.point || groundHit?.point || portHit?.point || buildingHit?.point || hits[0]?.point;
+  const tap = walkPoint(hits);
+  const tapPt = tap && tap.point;
+  if (chromeHud && chromeHud.isPlacing && chromeHud.isPlacing()) {
+    const tapped = plotToDevelop(plotHit?.object.userData.plotId, tapPt?.x, tapPt?.z);
+    if (tapped) {
+      void placeCartOn(tapped);
+      return;
+    }
+    setStatus("Tap land you leased to place the hotdog cart.");
+    return;
+  }
+  const tagPick =
+    viewer === "world" && parcelMap && typeof parcelMap.pickLabel === "function"
+      ? parcelMap.pickLabel(camera, ev.clientX, ev.clientY, window.innerWidth, window.innerHeight)
+      : null;
+  if (tagPick && tagPick.plotId && map) {
+    const tagged = map.plots.find((x) => x.id === tagPick.plotId);
+    if (tagged) {
+      showLandCard(tagged);
+      return;
+    }
+  }
+  if (labelHit && viewer === "world") {
+    const spr = objectWithKind(labelHit.object, "parcel-label");
+    const id = spr && (spr.userData.plotId || (spr.userData.plot && spr.userData.plot.id));
+    const p = id && map && map.plots.find((x) => x.id === id);
+    if (p) showLandCard(p);
+    return;
+  }
   if (
     !placingUse &&
     tapPt &&
@@ -817,7 +1134,32 @@ function onPointer(ev) {
     setStatus("Tap land you leased that has no building yet.");
     return;
   }
-  if (buildingHit) {
+  if (crateHit && (viewer === "logistics" || viewer === "world")) {
+    const crate = objectWithKind(crateHit.object, "crate");
+    const id = crate && crate.userData.deliveryId;
+    if (id) {
+      void takeCrate(id);
+      return;
+    }
+  }
+  if (padHit && viewer === "logistics") {
+    const pad = objectWithKind(padHit.object, "logistics-pad");
+    const id = pad && pad.userData.deliveryId;
+    if (id) {
+      void takeCrate(id);
+      return;
+    }
+  }
+  if (vanHit && viewer === "logistics") {
+    setStatus("Van on the paved road. Crate drops on the kerb. PAPER.");
+    return;
+  }
+  if (standHit && viewer === "world") {
+    const standObj = objectWithStand(standHit.object);
+    if (standObj) openStandMenu(standObj.userData.standId);
+    return;
+  }
+  if (buildingHit && viewer === "world") {
     const b = objectWithKind(buildingHit.object, "building");
     const p =
       (b && b.userData.plotId && map.plots.find((x) => x.id === b.userData.plotId)) ||
@@ -826,23 +1168,14 @@ function onPointer(ev) {
       enterPlot(p);
       return;
     }
-    if (p) selectLand(p, true);
+    if (p) goTo(p.x, p.z);
     return;
   }
-  if (plotHit) {
-    const p = map.plots.find((x) => x.id === plotHit.object.userData.plotId);
-    if (p) selectLand(p, true);
-    return;
-  }
-  if (portHit && nearPort()) {
+  if (portHit && nearPort() && viewer === "world") {
     ferry();
     return;
   }
-  if (groundHit) {
-    const p = findParcelAt(groundHit.point.x, groundHit.point.z);
-    if (p) selectLand(p, true);
-    else goTo(groundHit.point.x, groundHit.point.z);
-  }
+  if (tapPt) goTo(tapPt.x, tapPt.z);
 }
 
 function applySnapshot(snapshot) {
@@ -856,57 +1189,6 @@ function applySnapshot(snapshot) {
   }
   if (parcelMap) parcelMap.sync();
   refreshHud();
-}
-
-function mergeInterestPlots(incoming) {
-  if (!map || !Array.isArray(incoming)) return;
-  const byId = new Map(map.plots.map((p) => [p.id, p]));
-  for (const p of incoming) {
-    if (!p || !p.id) continue;
-    const prev = byId.get(p.id);
-    if (prev) {
-      prev.owner = p.owner;
-      prev.use = p.use;
-      prev.deposit = p.deposit;
-      prev.price = p.price;
-    } else {
-      map.plots.push(p);
-      byId.set(p.id, p);
-    }
-    if (p.use) useFor(p);
-  }
-  if (parcelMap) parcelMap.sync();
-}
-
-async function pollInterest() {
-  if (!map) return;
-  try {
-    const res = await fetch(
-      "/api/interest?island=" +
-        encodeURIComponent(islandId) +
-        "&x=" +
-        player.position.x +
-        "&z=" +
-        player.position.z +
-        "&radius=192",
-    );
-    if (!res.ok) return;
-    const data = await res.json();
-    mergeInterestPlots(data.plots);
-  } catch {
-    /* keep last map facts */
-  }
-}
-
-if (typeof document !== "undefined" && document.addEventListener) {
-  document.addEventListener("harbour-restored", () => {
-    fetch("/api/map")
-      .then((r) => (r && r.ok ? r.json() : null))
-      .then((snap) => {
-        if (snap) applySnapshot(snap);
-      })
-      .catch(() => {});
-  });
 }
 
 staffHud = mountStaffHud({
@@ -931,7 +1213,14 @@ async function lease() {
   }
   applySnapshot(body.snapshot);
   paintParcel(map.plots.find((x) => x.id === selected));
-  setStatus("This land is yours for $" + money(body.paid) + " (PAPER). Develop it.");
+  if (chromeHud) chromeHud.refresh();
+  landPinned = true;
+  lastInspectKey = "";
+  const p = map.plots.find((x) => x.id === selected);
+  if (p && chromeHud && chromeHud.paintLand) {
+    chromeHud.paintLand(p, { band: bandForPlot(p) });
+  }
+  setStatus("This land is yours for $" + money(body.paid) + " (PAPER). Order from Market.");
 }
 
 async function developAt(plotId, use) {
@@ -1015,6 +1304,7 @@ function tick(dt) {
   }
   if (taxi) taxi.tick(dt);
   if (traffic) traffic.tick(dt);
+  if (deliveries) deliveries.tick(dt);
   if (econHud) econHud.tick(dt);
   if (walking) {
     const dx = walkTarget.x - player.position.x;
@@ -1024,15 +1314,25 @@ function tick(dt) {
     if (dist <= step) {
       player.position.copy(walkTarget);
       walking = false;
-      setStatus("Tap a piece of land to inspect it.");
+      if (walkPath) walkPath.hide();
+      setStatus("Walking.");
     } else {
       player.position.x += (dx / dist) * step;
       player.position.z += (dz / dist) * step;
       player.position.y = landHeight(player.position.x, player.position.z) + 1.15;
+      if (walkPath) {
+        walkPath.show(
+          player.position,
+          walkTarget,
+          player.position.y - 1.15,
+          walkTarget.y - 1.15,
+        );
+      }
     }
   }
   if (ferryMesh && tickFerry) tickFerry(ferryMesh, dt);
   if (parcelMap) parcelMap.tick(player.position, dt);
+  inspectNearbyLand();
   btnFerry.disabled = !nearPort();
   refreshHud();
   playCam.tick(dt);
@@ -1065,8 +1365,6 @@ const SHEET_HUD = [
   "./flow-hud.js",
   "./stall-hud.js",
   "./persist-hud.js",
-  "./menu-stack.js",
-  "./minerals-hud.js",
 ];
 
 function loadSheetHuds() {
@@ -1137,6 +1435,30 @@ async function ensureTaxi() {
     button: btnTaxi,
   });
   return taxi;
+}
+
+async function ensureDeliveries() {
+  if (deliveries) return deliveries;
+  const mod = await import("./delivery.js");
+  deliveries = mod.createDeliveries({
+    scene: worldScene(),
+    getMap: () => map,
+    specOf,
+    heightAt,
+    onDrop(delivery, drop) {
+      fetch("/api/delivery/arrive", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ deliveryId: delivery.id }),
+      }).then(() => {
+        syncCrateMesh({ ...delivery, status: "arrived", drop: drop || delivery.drop });
+        if (chromeHud) chromeHud.refresh();
+        if (overlays) overlays.refresh(chromeHud && chromeHud.getPlay(), map);
+        setStatus("Crate on the roadside. Logistics viewer to take it. PAPER.");
+      });
+    },
+  });
+  return deliveries;
 }
 
 async function ensureInterior() {
@@ -1234,22 +1556,18 @@ async function boot() {
     return;
   }
   makeWater(scene);
-  // North builds in stages below for a fast first frame; keep ensureIsland out.
-  builtIslands.add("north");
-  spawnAt("north");
+  builtIslands.add("south");
+  spawnAt("south");
   startLoop();
-  setStatus("North port · PAPER");
-  setInterval(() => {
-    void pollInterest();
-  }, 2500);
+  setStatus("South port · PAPER");
   await idle(48);
-  makeTerrain(specOf("north"));
+  makeTerrain(specOf("south"));
   await idle(48);
   makeRoads(map, { scene, specOf, heightAt });
-  makePort(specOf("north"));
-  makePalms(specOf("north"));
+  makePort(specOf("south"));
+  makePalms(specOf("south"));
   harbourGroup = wrapHarbourWorld(scene, { keep: [player, sun.target] });
-  await makeParcels(nearNorthSpawn);
+  await makeParcels(nearSouthSpawn);
   await idle(48);
   parcelMap = mountParcelMap({
     worldAdd,
@@ -1257,15 +1575,83 @@ async function boot() {
     heightAt,
     getPlots: () => (map ? map.plots : []),
   });
-  ground.push(...parcelMap.buildIsland("north"));
-  setStatus("Tap a piece of land. Lease it, then develop it.");
+  ground.push(...parcelMap.buildIsland("south"));
+  overlays = createOverlays({
+    scene: harbourGroup || scene,
+    heightAt,
+    specOf,
+    getMap: () => map,
+  });
+  chromeHud = mountChrome({
+    setStatus,
+    lease,
+    onCloseLand: closeLandCard,
+    onLeased(snapshot) {
+      landPinned = false;
+      lastInspectKey = "";
+      applySnapshot(snapshot);
+      const ids = snapshot.visitor && snapshot.visitor.leases;
+      if (ids && ids.length) {
+        selected = ids[ids.length - 1];
+        const p = map.plots.find((x) => x.id === selected);
+        if (p) paintParcel(p);
+        if (parcelMap) parcelMap.setSelected(selected);
+      }
+      if (chromeHud) chromeHud.refresh();
+    },
+    onOverlay(id) {
+      if (overlays) overlays.setMode(id, chromeHud.getPlay(), map);
+    },
+    onPlay(play) {
+      if (overlays) overlays.refresh(play, map);
+      for (const d of play.deliveries || []) {
+        if (d.status === "en_route" && deliveries) {
+          const plot = map.plots.find((p) => p.id === d.plotId);
+          if (plot) deliveries.start(d, plot);
+        }
+        if (d.status === "arrived") syncCrateMesh(d);
+      }
+      for (const s of play.stands || []) syncStandMesh(s);
+    },
+    onOrder(delivery) {
+      void ensureDeliveries().then(() => {
+        const plot = map.plots.find((p) => p.id === delivery.plotId);
+        if (plot) deliveries.start(delivery, plot);
+      });
+    },
+    onPlaceMode() {},
+  });
+  setStatus("World viewer. Left-click walks. Click a $ tag to lease. PAPER.");
   await idle(80);
   await ensureTaxi();
+  await ensureDeliveries();
   void loadSheetHuds();
   void loadTrickleDressing();
 }
 
 canvas.addEventListener("pointerup", onPointer);
+canvas.addEventListener("contextmenu", (ev) => ev.preventDefault());
+canvas.addEventListener("pointerdown", (ev) => {
+  if (ev.button === 2) rmbDown = { t: Date.now(), x: ev.clientX, y: ev.clientY };
+});
+canvas.addEventListener("pointerup", (ev) => {
+  if (ev.button !== 2 || !rmbDown) return;
+  const dt = Date.now() - rmbDown.t;
+  const dist = Math.hypot(ev.clientX - rmbDown.x, ev.clientY - rmbDown.y);
+  rmbDown = null;
+  if (dt > 280 || dist > 10) return;
+  if (ev.target.closest && ev.target.closest("nav, a, button, #taxi-map, #ferry-ticket, #catalog-picker, #chrome, .float-panel, #land-card, #stand-menu")) return;
+  pointer.x = (ev.clientX / window.innerWidth) * 2 - 1;
+  pointer.y = -(ev.clientY / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(pointer, camera);
+  const hits = raycaster.intersectObjects(clickTargets(), true);
+  const standHit = hits.find((h) => objectWithStand(h.object));
+  if (standHit) {
+    const obj = objectWithStand(standHit.object);
+    if (obj) openStandMenu(obj.userData.standId);
+    return;
+  }
+});
 btnLease.addEventListener("click", lease);
 btnDevelop.addEventListener("click", openCatalog);
 if (btnEnter) {

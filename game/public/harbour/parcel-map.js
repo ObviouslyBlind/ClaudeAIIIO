@@ -47,6 +47,39 @@ export function labelTextFor(plot) {
   return "$" + Number(plot.price).toLocaleString("en-US", { maximumFractionDigits: 0 });
 }
 
+/** Screen-space box for a billboard tag. Used so a left-click on $146 hits even
+ *  when THREE.Sprite.raycast misses the non-square scale. */
+export function labelScreenBox(ndcX, ndcY, dist, scaleX, scaleY, viewW, viewH, fovDeg) {
+  const sx = (ndcX * 0.5 + 0.5) * viewW;
+  const sy = (-ndcY * 0.5 + 0.5) * viewH;
+  const vFov = ((fovDeg || 50) * Math.PI) / 180;
+  const m = viewH / (2 * Math.tan(vFov / 2) * Math.max(0.5, dist));
+  return {
+    sx,
+    sy,
+    hw: Math.max(36, (scaleX * m) / 2),
+    hh: Math.max(20, (scaleY * m) / 2),
+  };
+}
+
+export function pointInLabelBox(cx, cy, box) {
+  return Math.abs(cx - box.sx) <= box.hw && Math.abs(cy - box.sy) <= box.hh;
+}
+
+/** Card title: "14 Harbour Rd". Uses the plot's stamped name, or a fallback. */
+export function plotDisplayName(plot) {
+  if (!plot) return "Land";
+  if (plot.name) return plot.name;
+  const street =
+    plot.street ||
+    (plot.band === "shore" ? "Shore Rd" : plot.band === "field" ? "Field Lane" : "Harbour Rd");
+  let h = 0;
+  const id = String(plot.id || "");
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) | 0;
+  const n = 2 + (((h >>> 0) % 49) * 2);
+  return `${n} ${street}`;
+}
+
 function hash01(s) {
   let h = 0;
   for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
@@ -186,7 +219,10 @@ export function mountParcelMap({ worldAdd, specOf, heightAt, getPlots }) {
         polygonOffsetFactor: -1,
       }),
     );
-    fillMesh.userData.kind = "ground";
+    fillMesh.name = `parcel-fill:${id}`;
+    fillMesh.userData.kind = "parcel-fill";
+    fillMesh.userData.label = `${id} parcels`;
+    fillMesh.userData.island = id;
     fillMesh.userData.part = "parcel-fill";
     fillMesh.userData.mode = "PAPER";
     fillMesh.receiveShadow = true;
@@ -198,7 +234,10 @@ export function mountParcelMap({ worldAdd, specOf, heightAt, getPlots }) {
       lineGeo,
       new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.65 }),
     );
+    lineMesh.name = `parcel-lines:${id}`;
     lineMesh.userData.kind = "parcel-lines";
+    lineMesh.userData.label = `${id} parcel lines`;
+    lineMesh.userData.island = id;
     lineMesh.userData.mode = "PAPER";
 
     worldAdd(fillMesh);
@@ -239,6 +278,8 @@ export function mountParcelMap({ worldAdd, specOf, heightAt, getPlots }) {
     );
     sprite.userData.kind = "parcel-label";
     sprite.userData.mode = "PAPER";
+    sprite.userData.plot = null;
+    sprite.userData.plotId = null;
     sprite.visible = false;
     sprite.renderOrder = 5;
     worldAdd(sprite);
@@ -288,16 +329,48 @@ export function mountParcelMap({ worldAdd, specOf, heightAt, getPlots }) {
         rec.text = slot.text;
       }
       const spec = specOf(slot.p.island);
-      const s = Math.max(9, Math.min(26, 6 + Math.sqrt(slot.p.area) * 0.28));
+      const s = Math.max(14, Math.min(32, 8 + Math.sqrt(slot.p.area) * 0.32));
       rec.sprite.position.set(
         slot.p.x,
         heightAt(spec, slot.p.x, slot.p.z) + 3 + s * 0.12,
         slot.p.z,
       );
-      rec.sprite.scale.set(s, s * 0.35, 1);
+      rec.sprite.scale.set(s, s * 0.42, 1);
+      rec.sprite.userData.plot = slot.p;
+      rec.sprite.userData.plotId = slot.p.id;
+      rec.sprite.userData.label = slot.text;
       rec.sprite.visible = true;
     }
   }
 
-  return { buildIsland, has, setSelected, sync, tick };
+  /** Visible price tags. Left-click these to open Lease / Close — not the dirt. */
+  function clickables() {
+    const out = [];
+    for (const rec of sprites) {
+      if (rec && rec.sprite && rec.sprite.visible) out.push(rec.sprite);
+    }
+    return out;
+  }
+
+  /** Hit-test a click against visible $ tags in screen space. */
+  function pickLabel(camera, clientX, clientY, viewW, viewH) {
+    if (!camera || !viewW || !viewH) return null;
+    const ndc = new THREE.Vector3();
+    let best = null;
+    const fov = camera.fov || 50;
+    for (const rec of sprites) {
+      if (!rec || !rec.sprite.visible) continue;
+      const spr = rec.sprite;
+      ndc.copy(spr.position).project(camera);
+      if (!Number.isFinite(ndc.x) || ndc.z > 1 || ndc.z < -1) continue;
+      const dist = camera.position.distanceTo(spr.position);
+      const box = labelScreenBox(ndc.x, ndc.y, dist, spr.scale.x, spr.scale.y, viewW, viewH, fov);
+      if (!pointInLabelBox(clientX, clientY, box)) continue;
+      const d = Math.hypot(clientX - box.sx, clientY - box.sy);
+      if (!best || d < best.d) best = { d, plotId: spr.userData.plotId, sprite: spr };
+    }
+    return best;
+  }
+
+  return { buildIsland, has, setSelected, sync, tick, clickables, pickLabel };
 }

@@ -4,8 +4,8 @@
  * static imports otherwise block any WebGL frame past a 25s critic timeout
  * (`/?g=ferry31`–`ferry33` FAIL: body teal #0e4a55, status still Loading).
  *
- * CAM / LOOK match spawnCameraOffset("north") + spawnLookAtOffset("north")
- * at the north port pad. BERTH_Z stays in sync with ferry.js HOME_Z.
+ * CAM / LOOK match spawnCameraOffset("south") + spawnLookAtOffset("south")
+ * at the south port pad. BERTH_Z stays in sync with ferry.js HOME_Z.
  */
 import * as THREE from "three";
 
@@ -14,9 +14,9 @@ export const BERTH_Z = -6835;
 export const FOG_NEAR_M = 6000;
 export const FOG_FAR_M = 42000;
 export const CAMERA_FAR_M = 52000;
-/** Quay camera, looking inland. Not the seaward critic slot at z=-6888. */
-export const CAM = { x: 20, y: 26, z: -6918 };
-export const LOOK = { x: 0, y: 7, z: -7078 };
+/** South quay camera, looking inland along the tarmac. */
+export const CAM = { x: 20, y: 26, z: 6918 };
+export const LOOK = { x: 0, y: 7, z: 7078 };
 
 export function paintFirstFrame(canvas) {
   if (!canvas) throw new Error("no canvas");
@@ -48,7 +48,7 @@ function bootFirstFrame() {
   const canvas = document.getElementById("c");
   if (!canvas) return;
   const statusEl = document.getElementById("status");
-  if (statusEl) statusEl.textContent = "North port · PAPER";
+  if (statusEl) statusEl.textContent = "South port · PAPER";
   try {
     globalThis.__harbourFirst = paintFirstFrame(canvas);
   } catch (err) {

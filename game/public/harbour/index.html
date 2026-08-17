@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Two Harbors — harbour</title>
     <link rel="stylesheet" href="/harbour/style.css" />
+    <link rel="stylesheet" href="/harbour/chrome.css" />
     <style>
       #c {
         position: absolute;
@@ -17,12 +18,12 @@
     </style>
   </head>
   <body>
-    <header class="bar">
+    <header class="bar legacy-hud">
       <p class="badge" id="boot-badge">BASE · 3D HARBOUR · PAPER · SIMULATED</p>
-      <h1 id="place">North port</h1>
-      <p id="status">North port · PAPER</p>
+      <h1 id="place">South port</h1>
+      <p id="status">South port · PAPER</p>
     </header>
-    <aside class="sheet" id="sheet">
+    <aside class="sheet legacy-hud" id="sheet">
       <p id="cash">Cash $0</p>
       <p id="calendar">PAPER · SIMULATED · Day 0 · tick 0</p>
       <p id="econ">Index — · money — · output —</p>
@@ -43,11 +44,52 @@
       <p id="persist-line">PAPER · SIMULATED · restart wipes</p>
     </aside>
     <canvas id="c" width="1280" height="720" style="background:#7ec8d4"></canvas>
+
+    <div id="chrome">
+      <div class="chrome-tl">
+        <h1 class="game-name">Two Harbors</h1>
+        <p class="meta" id="online">1 online · PAPER · SIMULATED</p>
+        <p><span id="balance">$1,000.00</span> <span id="income" class="is-zero">+$0.00/min</span></p>
+      </div>
+      <div class="chrome-tr">
+        <div class="chrome-row">
+          <button type="button" class="chip" data-panel="leaderboard">Leaderboard</button>
+          <button type="button" class="chip" data-panel="account">Account</button>
+        </div>
+        <div class="chrome-row" id="viewers">
+          <button type="button" class="chip" data-overlay="world" title="Walk. Land does not steal taps.">World</button>
+          <button type="button" class="chip" data-overlay="foot" title="Green / yellow / red on each road.">Foot traffic</button>
+          <button type="button" class="chip" data-overlay="logistics" title="Vans and roadside crates.">Logistics</button>
+          <button type="button" class="chip" data-overlay="minerals" title="Not on the South first loop yet.">Minerals</button>
+        </div>
+        <p class="viewer-hint" id="viewer-hint">World: left-click walks. Click a $ tag to lease. PAPER · SIMULATED</p>
+      </div>
+      <div class="chrome-left">
+        <button type="button" class="rail-btn" data-panel="inventory">Inv</button>
+        <button type="button" class="rail-btn" data-panel="market">Mkt</button>
+        <button type="button" class="rail-btn" data-panel="employees">Staff</button>
+      </div>
+      <div id="panel-inventory" class="float-panel pos-inv" hidden><div id="inv-body"></div></div>
+      <div id="panel-market" class="float-panel pos-market" hidden><div id="market-body"></div></div>
+      <div id="panel-employees" class="float-panel pos-staff" hidden><div id="staff-body"></div></div>
+      <div id="panel-leaderboard" class="float-panel pos-tr" hidden><div id="board-body"></div></div>
+      <div id="panel-account" class="float-panel pos-tr" hidden><div id="acct-body"></div></div>
+      <div id="land-card" hidden></div>
+      <div id="stand-menu" hidden></div>
+      <div id="foot-legend" hidden></div>
+    </div>
+
     <div id="taxi-map" class="taxi-map" hidden>
       <p class="taxi-map-badge">PAPER · SIMULATED</p>
       <p class="taxi-map-hint">Tap a rough point. Ride stays on paved. Dirt forbidden.</p>
       <canvas id="taxi-map-canvas" width="320" height="220"></canvas>
       <button type="button" id="taxi-map-close">Close</button>
+    </div>
+    <div id="catalog-picker" hidden>
+      <p class="catalog-badge">PAPER · SIMULATED</p>
+      <p class="catalog-hint">Pick a building, then tap your leased land.</p>
+      <div class="catalog-grid"></div>
+      <button type="button" id="catalog-cancel">Cancel</button>
     </div>
     <div id="menu-stack" hidden>
       <p class="menu-badge">PAPER · SIMULATED</p>
@@ -59,23 +101,16 @@
         <button type="button" id="menu-close">Close</button>
       </div>
     </div>
-    <div id="catalog-picker" hidden>
-      <p class="catalog-badge">PAPER · SIMULATED</p>
-      <p class="catalog-hint">Pick a building, then tap your leased land.</p>
-      <div class="catalog-grid"></div>
-      <button type="button" id="catalog-cancel">Cancel</button>
-    </div>
-    <nav class="dock">
+    <nav class="dock travel-dock">
       <button type="button" id="btn-lease" disabled>Lease</button>
-      <button type="button" id="btn-develop" disabled>Develop</button>
-      <button type="button" id="btn-hire" disabled title="PAPER · SIMULATED">Hire</button>
-      <button type="button" id="btn-fire" disabled title="PAPER · SIMULATED">Fire</button>
+      <button type="button" id="btn-develop" hidden>Develop</button>
+      <button type="button" id="btn-hire" hidden title="PAPER · SIMULATED">Hire</button>
+      <button type="button" id="btn-fire" hidden title="PAPER · SIMULATED">Fire</button>
       <button type="button" id="btn-enter" hidden>Enter</button>
       <button type="button" id="btn-exit" hidden>Exit</button>
       <button type="button" id="btn-ferry" disabled>Ferry</button>
       <button type="button" id="btn-taxi" title="PAPER · SIMULATED">Taxi</button>
-      <button type="button" id="btn-minerals" title="PAPER · SIMULATED">Minerals</button>
-      <a class="ghost" href="/market/">Market</a>
+      <button type="button" id="btn-minerals" hidden title="PAPER · SIMULATED">Minerals</button>
     </nav>
     <script>
       (function () {
@@ -83,7 +118,7 @@
         var cash = document.getElementById("cash");
         var badge = document.getElementById("boot-badge");
         var boot = location.pathname + location.search;
-        if (status) status.textContent = "North port · PAPER · " + boot;
+        if (status) status.textContent = "South port · PAPER · " + boot;
         if (badge) badge.textContent = "BASE · 3D HARBOUR · PAPER · SIMULATED · " + boot;
         function stillBooting() {
           if (!status) return false;
@@ -97,8 +132,8 @@
           "error",
           function (e) {
             var msg = (e && e.message) || "";
-            if (!msg && e && e.filename) msg = "load " + e.filename;
-            if (!msg && e && e.target && e.target.src) msg = "load " + e.target.src;
+            if (!msg && e.filename) msg = "load " + e.filename;
+            if (!msg && e.target && e.target.src) msg = "load " + e.target.src;
             if (msg) fail(msg);
           },
           true,
@@ -107,7 +142,6 @@
           var r = e.reason;
           fail(r && r.message ? r.message : String(r));
         });
-        // Classic fetch: cash must update even if the three.js module never runs.
         fetch("/api/map")
           .then(function (r) {
             if (!r.ok) throw new Error("map " + r.status);
@@ -126,8 +160,6 @@
           .catch(function (e) {
             fail("map " + (e && e.message ? e.message : e));
           });
-        // Calendar + cart must read PAPER before main.js. `/g/hud48` FAIL HUD:
-        // first HTML still used em-dash placeholders on those two sheet lines.
         fetch("/api/snapshot")
           .then(function (r) {
             return r && r.ok ? r.json() : null;
@@ -204,8 +236,6 @@
             taxEl.textContent = "PAPER · SIMULATED · Sales tax " + pct + "%";
           })
           .catch(function () {});
-        // Nearby must read PAPER walkers before main.js. `/g/hud47` showed
-        // "0 nearby" because the three.js mesh still sat at 0,0 pre-spawnAt.
         fetch("/api/presence")
           .then(function (r) {
             return r && r.ok ? r.json() : null;

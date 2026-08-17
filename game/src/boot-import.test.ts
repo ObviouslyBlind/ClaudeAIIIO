@@ -28,7 +28,7 @@ describe("harbour boot import graph", () => {
     // Ferry landfall: south terrain/port/lots build on first spawnAt there.
     expect(src).toContain("async function ensureIsland");
     expect(src).toMatch(/function spawnAt\(id\) \{\s*void ensureIsland\(id\);/);
-    expect(src).toMatch(/builtIslands\.add\("north"\)/);
+    expect(src).toMatch(/builtIslands\.add\("south"\)/);
     // Tapping the pier/shed/dock must reach the ferry (portHit).
     expect(src).toContain("for (const p of ports) objs.push(p);");
     expect(src).toContain("ports.push(pier);");
@@ -60,7 +60,12 @@ describe("harbour boot import graph", () => {
     );
     const steps = trickle.split("await quietStep();").length - 1;
     expect(steps).toBeGreaterThanOrEqual(4);
+    expect(src).toContain("function showLandCard");
+    expect(src).toContain("parcel-label");
+    expect(src).toContain("pickLabel");
+    expect(src).toContain("Click a $ tag to lease");
     expect(src).toContain("clickTargets()");
+    expect(src).not.toContain("function inspectLandAt");
     expect(src).not.toContain("intersectObjects(root.children, true)");
   });
 });
