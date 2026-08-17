@@ -11,7 +11,7 @@ import { skuFitsPlot, type ZoneId } from "./zones.ts";
 import type { Visitor } from "./sim.ts";
 
 export const FIRST_LOOP_NOTE =
-  "PAPER first loop on South. SIMULATED. Not live. Not a wallet.";
+  "PAPER shard on South. SIMULATED. One visitor on this process. Not a wallet.";
 
 export const HOTDOG_SALE_PRICE = 0.1;
 export const CART_PAPER_PRICE = 85;

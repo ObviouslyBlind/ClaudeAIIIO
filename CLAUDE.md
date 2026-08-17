@@ -1,6 +1,7 @@
 # Two Harbors — Fable 5
 
-This repo is the harbour game. One shard. The sim owns cash, plots, staff, and prices. The browser is a camera.
+This repo is a harbour MMO shard, not a loop game and not a trading bot.
+One shard. The sim owns cash, plots, staff, and prices. The browser is a camera.
 
 ## What to build
 - Headless 1Hz sim in `game/src/`

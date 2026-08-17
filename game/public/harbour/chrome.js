@@ -48,7 +48,7 @@ export function mountChrome(opts) {
     lots: "Lots: outlines on. Click the $ title above a lot to lease it.",
     foot: "Foot traffic: green / yellow / red on each named road.",
     logistics: "Logistics: tap the crate. The van waits until you take it.",
-    minerals: "Minerals: not on the South first loop yet.",
+    minerals: "Minerals: ore catalog is in. Overlay paint comes next.",
   };
 
   function setOverlay(id) {

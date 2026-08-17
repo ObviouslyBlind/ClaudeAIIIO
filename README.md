@@ -1,8 +1,8 @@
 # Two Harbors
 
-Fable 5 harbour + South first-loop play (PR #32). PAPER / SIMULATED. No wallet.
+Two Harbors is a PAPER / SIMULATED harbour MMO shard. No wallet.
 
-One shard. The sim owns cash, plots, staff, and prices. The browser is a camera.
+One shard. The sim owns cash, plots, staff, and prices. The browser is a camera. Live sockets and Postgres are not in yet.
 
 ```bash
 cd game

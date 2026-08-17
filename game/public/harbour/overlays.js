@@ -8,7 +8,7 @@ import * as THREE from "three";
  *   lots       — boundary outlines. Click a $ tag to lease another lot.
  *   foot       — green / yellow / red ribbons on each named paved road.
  *   logistics  — vans and roadside crates. Tap the crate.
- *   minerals   — empty on the South first loop.
+ *   minerals   — ore catalog exists; overlay paint is next.
  */
 
 export const VIEWERS = {
@@ -35,7 +35,7 @@ export const VIEWERS = {
   minerals: {
     id: "minerals",
     label: "Minerals",
-    hint: "Minerals: not on the South first loop yet. PAPER.",
+    hint: "Minerals: ore catalog is in. Overlay paint comes next. PAPER.",
   },
 };
 

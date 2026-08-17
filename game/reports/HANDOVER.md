@@ -1,6 +1,6 @@
 # Two Harbors handover
 
-South first-loop on the Fable 5 harbour. PAPER / SIMULATED.
+Two Harbors harbour MMO shard. PAPER / SIMULATED. One visitor on this process.
 
 Lots overlay: click the **$ title** to lease. Market is section → item → deliver-to. Van waits for the crate. Place on the lot or the verge. Hire puts a vendor by the cart. Commercial / residential on; high density locked.
 
