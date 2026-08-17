@@ -1086,12 +1086,55 @@ async function ensureInterior() {
 }
 
 /**
- * No delayed dressing on live play (D040). The 45 s / 120 s timer compiled
- * quay/ferry/traffic mid-session and Chrome showed "Page Unresponsive"
- * (`/g/south99`, operator "crashes within 5 minutes"). Quay clutter, the
- * moving ferry, foam, and cars stay off `/` until a perf pass moves their
- * compile off the main thread.
+ * Trickle dressing (D041). The old 45 s / 120 s timer compiled
+ * quay/ferry/traffic in one burst mid-session and Chrome showed
+ * "Page Unresponsive" (`/g/south99`, operator "crashes within 5 min").
+ * Now each module compiles as its own step with long gaps, and the
+ * trickle waits whenever the player has clicked recently, so decoration
+ * never competes with input. Trees / stalls / peds stay off (D036).
  */
+const TRICKLE_START_MS = 8000;
+const TRICKLE_STEP_MS = 2500;
+const TRICKLE_CLICK_QUIET_MS = 1500;
+
+async function quietStep() {
+  await idle(TRICKLE_STEP_MS);
+  while (Date.now() - lastTap < TRICKLE_CLICK_QUIET_MS) await idle(500);
+}
+
+async function loadTrickleDressing() {
+  await idle(TRICKLE_START_MS);
+  const target = worldScene();
+
+  await quietStep();
+  const trafficMod = await import("./traffic.js");
+  await quietStep();
+  traffic = trafficMod.createTraffic({
+    scene: target,
+    getMap: () => map,
+    specOf,
+    heightAt,
+    getPlayer: () => player,
+    getIslandId: () => islandId,
+  });
+
+  await quietStep();
+  const ferryMod = await import("./ferry.js");
+  await quietStep();
+  tickFerry = ferryMod.tickFerry;
+  ferryMesh = ferryMod.makeFerry();
+  target.add(ferryMesh);
+
+  await quietStep();
+  const quayMod = await import("./quay.js");
+  await quietStep();
+  quayMod.makeQuay(specOf("north"), { scene: target, heightAt });
+
+  await quietStep();
+  const shoreMod = await import("./shore.js");
+  await quietStep();
+  shoreMod.makeShoreFoam(specOf("north"), heightAt, target);
+}
 
 async function boot() {
   const res = await fetch("/api/map");
@@ -1119,6 +1162,7 @@ async function boot() {
   await idle(80);
   await ensureTaxi();
   void loadSheetHuds();
+  void loadTrickleDressing();
 }
 
 canvas.addEventListener("pointerup", onPointer);
