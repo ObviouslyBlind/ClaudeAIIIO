@@ -60,6 +60,7 @@ function paperBox(w, h, d, color) {
  *   ticket  y 0.84–0.88   (0.38, 0.86, 0.16)    0.07×0.04×0.01   kraft, satchel
  *   coin    y 0.72–0.76   (0.30, 0.74, 0.16)    0.04×0.04×0.01   kraft, satchel
  *   key     y 0.64–0.68   (0.46, 0.66, 0.16)    0.05×0.03×0.01   kraft, satchel
+ *   whistle y 0.78–0.82   (0.36, 0.80, 0.16)    0.05×0.03×0.01   kraft, satchel
  *   strap   y 0.92–1.40   (0.05, 1.14, 0.16)    0.04×0.82×0.02   cross-body
  *
  * Hat crown ≈ 1.98 m. Eyes ≈ 1.62 m local → world y ≈ player.y + 0.47.
@@ -179,6 +180,11 @@ export function dressPlayer(player) {
   key.position.set(0.46, 0.66, 0.16);
   key.userData.mode = "PAPER";
   key.userData.part = "key";
+  // Tiny kraft PAPER whistle on the satchel face. Offset from key, coin, ticket.
+  const whistle = paperBox(0.05, 0.03, 0.01, KRAFT);
+  whistle.position.set(0.36, 0.8, 0.16);
+  whistle.userData.mode = "PAPER";
+  whistle.userData.part = "whistle";
   const strap = paperBox(0.04, 0.82, 0.02, STRAP);
   strap.position.set(0.05, 1.14, 0.16);
   strap.rotation.z = -Math.atan2(0.7, 0.44);
@@ -224,6 +230,7 @@ export function dressPlayer(player) {
     ticket,
     coin,
     key,
+    whistle,
     strap,
   );
   player.add(figure);
