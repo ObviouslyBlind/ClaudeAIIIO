@@ -2,6 +2,25 @@
 
 How to run, test, and inspect the system.
 
+## Two Harbors harbour (PAPER / SIMULATED)
+
+Politics is frozen. Play the base harbour, not House/Senate.
+
+```bash
+cd game
+npm test
+npm run play
+```
+
+Open **`http://localhost:8787/`** to playtest. Spawn looks inland along the tarmac (paved ribbon, dirt, cars, taxi, trees + cart). Close other Two Harbors tabs if the first frame looks like the old seaward critic harbour.
+
+- Port **8787**. Restart: `game/scripts/restart-play.sh` (tmux `two-harbors-play`).
+- Left click/tap = walk or use. RMB-hold = orbit. No WASD. No wallet.
+- Critics: unique `/g/` path. Do not ask computerUse to RMB-orbit. Cube rounds are paused while playtest is the bar.
+- Taxi button hails a yellow cab on the paved road. Timber pier sits over water (D037). First-frame lots are cheap street parcels (D038). Ferry landfall builds the south island; tapping the pier opens the ferry (D039). Cars and the moving ferry trickle in over the first minute and pause while you click (D043). Empty goods stay blank; persist says `no dump` until there is a blob (D044). House $40 afford only after a real lease, not the boot tutorial line (D045). Restore keeps `restored` on the persist strip (D046). Taxi $5 fare hint only while the taxi map is open (D047). Quay clutter, foam, and trees stay off live play (D036/D043).
+- Status: `game/reports/GAUNTLET_STATUS.md`.
+- New chat: paste `game/reports/HANDOVER.md` (this thread is bloated).
+
 ## Live dashboard (public URL)
 
 **https://obviouslyblind.github.io/ClaudeAIIIO/**

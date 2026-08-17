@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Two Harbors — harbour</title>
+    <link rel="stylesheet" href="/harbour/style.css" />
+    <style>
+      #c {
+        position: absolute;
+        inset: 0;
+        display: block;
+        width: 100%;
+        height: 100%;
+        background: #7ec8d4;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="bar">
+      <p class="badge" id="boot-badge">BASE · 3D HARBOUR · PAPER · SIMULATED</p>
+      <h1 id="place">North port</h1>
+      <p id="status">North port · PAPER</p>
+    </header>
+    <aside class="sheet" id="sheet">
+      <p id="cash">Cash $0</p>
+      <p id="calendar">PAPER · SIMULATED · Day 0 · tick 0</p>
+      <p id="econ">Index — · money — · output —</p>
+      <p id="flow">PAPER · SIMULATED · Faucet 0 · sink 0</p>
+      <p id="spread">PAPER · SIMULATED · Ferry spread · N 0.00 · S 0.00</p>
+      <p id="tax">PAPER · SIMULATED · Sales tax 0%</p>
+      <p id="nearby">PAPER · SIMULATED · 250 m PAPER cell · — nearby</p>
+      <p id="cart">PAPER</p>
+      <p id="goods"></p>
+      <p id="staff-line">PAPER · SIMULATED · Staff —</p>
+      <p id="plot-line">Tap land to inspect it</p>
+      <p id="lease-hint"></p>
+      <p id="develop-hint"></p>
+      <p id="ferry-hint"></p>
+      <p id="taxi-hint"></p>
+      <p id="stall-hint"></p>
+      <p id="persist-line">PAPER · SIMULATED · no dump</p>
+    </aside>
+    <canvas id="c" width="1280" height="720" style="background:#7ec8d4"></canvas>
+    <div id="taxi-map" class="taxi-map" hidden>
+      <p class="taxi-map-badge">PAPER · SIMULATED</p>
+      <p class="taxi-map-hint">Tap a rough point. Ride stays on paved. Dirt forbidden.</p>
+      <canvas id="taxi-map-canvas" width="320" height="220"></canvas>
+      <button type="button" id="taxi-map-close">Close</button>
+    </div>
+    <div id="catalog-picker" hidden>
+      <p class="catalog-badge">PAPER · SIMULATED</p>
+      <p class="catalog-hint">Pick a building, then tap your leased land.</p>
+      <div class="catalog-grid"></div>
+      <button type="button" id="catalog-cancel">Cancel</button>
+    </div>
+    <nav class="dock">
+      <button type="button" id="btn-lease" disabled>Lease</button>
+      <button type="button" id="btn-develop" disabled>Develop</button>
+      <button type="button" id="btn-hire" disabled title="PAPER · SIMULATED">Hire</button>
+      <button type="button" id="btn-fire" disabled title="PAPER · SIMULATED">Fire</button>
+      <button type="button" id="btn-enter" hidden>Enter</button>
+      <button type="button" id="btn-exit" hidden>Exit</button>
+      <button type="button" id="btn-ferry" disabled>Ferry</button>
+      <button type="button" id="btn-taxi" title="PAPER · SIMULATED">Taxi</button>
+      <a class="ghost" href="/market/">Market</a>
+      <a class="ghost" href="/hansard/">Hansard</a>
+    </nav>
+    <script>
+      (function () {
+        var status = document.getElementById("status");
+        var cash = document.getElementById("cash");
+        var badge = document.getElementById("boot-badge");
+        var boot = location.pathname + location.search;
+        if (status) status.textContent = "North port · PAPER · " + boot;
+        if (badge) badge.textContent = "BASE · 3D HARBOUR · PAPER · SIMULATED · " + boot;
+        function stillBooting() {
+          if (!status) return false;
+          var t = status.textContent || "";
+          return t.indexOf("Loading") === 0 || t.indexOf("BOOT FAIL") === 0 || t.indexOf("Cash loaded") === 0;
+        }
+        function fail(msg) {
+          if (status && stillBooting()) status.textContent = "BOOT FAIL: " + msg;
+        }
+        window.addEventListener(
+          "error",
+          function (e) {
+            var msg = (e && e.message) || "";
+            if (!msg && e && e.filename) msg = "load " + e.filename;
+            if (!msg && e && e.target && e.target.src) msg = "load " + e.target.src;
+            if (msg) fail(msg);
+          },
+          true,
+        );
+        window.addEventListener("unhandledrejection", function (e) {
+          var r = e.reason;
+          fail(r && r.message ? r.message : String(r));
+        });
+        // Classic fetch: cash must update even if the three.js module never runs.
+        fetch("/api/map")
+          .then(function (r) {
+            if (!r.ok) throw new Error("map " + r.status);
+            return r.json();
+          })
+          .then(function (d) {
+            if (cash && d && d.visitor) {
+              cash.textContent =
+                "Cash $" +
+                Number(d.visitor.cash).toLocaleString("en-US", { maximumFractionDigits: 0 });
+            }
+            if (status && (status.textContent || "").indexOf("Loading") === 0) {
+              status.textContent = "Cash loaded · starting 3D · PAPER";
+            }
+          })
+          .catch(function (e) {
+            fail("map " + (e && e.message ? e.message : e));
+          });
+        // Calendar + cart must read PAPER before main.js. `/g/hud48` FAIL HUD:
+        // first HTML still used em-dash placeholders on those two sheet lines.
+        fetch("/api/snapshot")
+          .then(function (r) {
+            return r && r.ok ? r.json() : null;
+          })
+          .then(function (d) {
+            var calEl = document.getElementById("calendar");
+            var cartEl = document.getElementById("cart");
+            var day = 0;
+            var tick = 0;
+            if (d && d.calendar) {
+              if (d.calendar.day != null) day = Number(d.calendar.day) || 0;
+              if (d.calendar.tick != null) tick = Number(d.calendar.tick) || 0;
+            } else if (d && d.hud && d.hud.tick != null) {
+              tick = Number(d.hud.tick) || 0;
+              day = Math.floor(Math.max(0, tick) / 3600);
+            }
+            if (calEl) {
+              calEl.textContent = "PAPER · SIMULATED · Day " + day + " · tick " + tick;
+            }
+            if (cartEl) cartEl.textContent = "PAPER";
+            var flowEl = document.getElementById("flow");
+            var goodsEl = document.getElementById("goods");
+            var faucet = 0;
+            var sink = 0;
+            if (d && d.hud) {
+              if (d.hud.faucet != null && isFinite(Number(d.hud.faucet))) faucet = Number(d.hud.faucet);
+              if (d.hud.sink != null && isFinite(Number(d.hud.sink))) sink = Number(d.hud.sink);
+            }
+            if (flowEl) {
+              flowEl.textContent =
+                "PAPER · SIMULATED · Faucet " +
+                faucet.toLocaleString("en-US", { maximumFractionDigits: 2 }) +
+                " · sink " +
+                sink.toLocaleString("en-US", { maximumFractionDigits: 2 });
+            }
+            if (goodsEl) {
+              var bag = d && d.visitor && (d.visitor.stock || d.visitor.goods);
+              var bits = [];
+              if (bag) {
+                for (var k in bag) {
+                  if (!Object.prototype.hasOwnProperty.call(bag, k)) continue;
+                  var qty = Number(bag[k]);
+                  if (isFinite(qty) && qty > 0) bits.push(k + " " + qty);
+                }
+              }
+              goodsEl.textContent = bits.length
+                ? bits.join(" · ") + " · PAPER · SIMULATED"
+                : "";
+            }
+          })
+          .catch(function () {});
+        fetch("/api/statutes")
+          .then(function (r) {
+            return r && r.ok ? r.json() : null;
+          })
+          .then(function (d) {
+            var taxEl = document.getElementById("tax");
+            if (!taxEl) return;
+            var rate = 0;
+            var rows = d && d.statutes;
+            if (Array.isArray(rows)) {
+              for (var i = 0; i < rows.length; i++) {
+                var row = rows[i];
+                if (row && (row.id === "sales_tax" || row.id === "sales-tax")) {
+                  if (row.enabled === false) rate = 0;
+                  else if (row.sliders && row.sliders.rate != null) rate = Number(row.sliders.rate) || 0;
+                  else rate = Number(row.rate) || 0;
+                  break;
+                }
+              }
+            }
+            var pct = Math.round(rate * 10000) / 100;
+            if (!isFinite(pct) || pct <= 0) pct = 0;
+            taxEl.textContent = "PAPER · SIMULATED · Sales tax " + pct + "%";
+          })
+          .catch(function () {});
+        // Nearby must read PAPER walkers before main.js. `/g/hud47` showed
+        // "0 nearby" because the three.js mesh still sat at 0,0 pre-spawnAt.
+        fetch("/api/presence")
+          .then(function (r) {
+            return r && r.ok ? r.json() : null;
+          })
+          .then(function (d) {
+            var el = document.getElementById("nearby");
+            if (!el || !d) return;
+            var n = d.actors && d.actors.length ? d.actors.length : 0;
+            var cell = d.cellSize != null ? Number(d.cellSize) : 250;
+            if (!isFinite(cell) || cell <= 0) cell = 250;
+            el.textContent =
+              "PAPER · SIMULATED · " + Math.round(cell) + " m PAPER cell · " + n + " nearby";
+          })
+          .catch(function () {});
+      })();
+    </script>
+    <script type="importmap">
+      { "imports": { "three": "/vendor/three.module.js" } }
+    </script>
+    <script type="module" src="/harbour/first-frame.js"></script>
+  </body>
+</html>

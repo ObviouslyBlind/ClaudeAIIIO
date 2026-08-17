@@ -1,5 +1,72 @@
 # TODO
 
+## Two Harbors (current gauntlet — base harbour)
+
+Politics frozen. See `game/reports/GAUNTLET_STATUS.md`. New chat: `game/reports/HANDOVER.md`.
+
+- [x] Lease → House → Enter → Exit (pixel `/?g=int22`)
+- [x] PAPER econ HUD strip (code)
+- [x] NPC stall buy + quay pedestrians (code)
+- [x] Nearby presence, cart persist, warehouse interior, nametags (code)
+- [x] Pixel: trees + cart (`/?g=tree25` PASS)
+- [x] Pixel: dirt ribbons (`/?g=dirt24` PASS)
+- [x] Visitor PAPER bid/ask vs NPC books
+- [x] Staff slots on developed plots
+- [x] Pixel remaining meshes (cars `/?g=cars26` PASS, taxi cab `/?g=taxi27` PASS)
+- [x] Shop + farm interiors, hire/fire HTTP, land upkeep, North/South buy+sell, cart HUD (code)
+- [x] Pixel remaining meshes (ferry `/g/ferry37` PASS — cream hull in the water, seaward spawn, no orbit)
+- [x] Pixel remaining meshes (shore foam `/g/shore40` PASS — kraft/cream bars in the north basin)
+- [x] Pixel remaining meshes (quay clutter `/g/quay41` PASS — crates on the kraft north pier)
+- [x] Pixel remaining meshes (pedestrians `/g/peds44` PASS — crate-scale teal/slate/green/terracotta shirts on the north pier)
+- [x] Pixel remaining meshes (nametags `/g/tags46` PASS — kraft cards above crate-scale pier walkers)
+- [x] Pixel HUD sheet (`/g/hud47` PASS — econ / nearby / staff PAPER · SIMULATED; nearby count was 0)
+- [x] Pixel HUD sheet (`/g/hud49` PASS — calendar Day 0 · tick live, cart PAPER, persist PAPER · SIMULATED)
+- [x] Pixel HUD sheet (`/g/near50` PASS — `250 m PAPER cell · 4 nearby`)
+- [x] Pixel HUD sheet (`/g/flow51` PASS — flow Faucet 0 · sink 0, tax 0%, goods PAPER · SIMULATED)
+- [x] Pixel HUD sheet (`/g/hud52` PASS — staff PAPER · SIMULATED · Staff —, ferry spread N/S numbers)
+- [x] Pixel ferry fender (`/g/fend54` PASS FENDER — dark tyre + kraft band on the north cream hull)
+- [x] Pixel quay lamps (`/g/lamps55`–`/g/lamps58` FAIL LAMPS — round stopped, not pixel-held)
+- [x] Pixel north port sign (`/g/sign59`–`/g/sign62` FAIL SIGN — round stopped, not pixel-held)
+- [x] Pixel sage dinghies in the north basin (`/g/ding65` PASS DINGHY)
+- [x] Pixel kraft gangplank / brow (`/g/brow66`–`/g/brow68` FAIL BROW — round stopped, not pixel-held)
+- [x] Pixel rust channel buoy (`/g/buoy70` PASS BUOY — rust mass on the cream hull; `/g/buoy69` FAIL)
+- [x] Pixel kraft/rust life ring (`/g/ring71`–`/g/ring73` FAIL RING — round stopped, not pixel-held)
+- [x] Pixel rust funnel (`/g/funnel74`–`/g/funnel75` FAIL FUNNEL — round stopped, not pixel-held)
+- [x] Pixel rust cargo (`/g/cargo76`–`78` FAIL CARGO — round stopped, not pixel-held)
+- [x] Pixel rust hull plate (`/g/plate79`–`81` FAIL PLATE — round stopped, not pixel-held)
+- [x] Pixel teal pier crate (`/g/teal82`–`83` FAIL TEAL — round stopped, not pixel-held)
+- [x] Pixel terracotta basin crate (`/g/clay84`–`85` FAIL CLAY — round stopped, not pixel-held)
+- [x] Restore inland playtest spawn on `/` (D030). Unread giant basin extras off the live quay.
+- [x] Playtest: `/` tab unresponsive after first frame — one asset nonce per play process (D031).
+- [x] Playtest: Edge “page not responding” on teal canvas — defer interiors/trees until after north walk (D032).
+- [x] Playtest: beige land then freeze — do not await dressing; nearby lots only (D033).
+- [x] `/g/walk89` FAIL WALK — click raycast ground/lots only (D034).
+- [x] `/g/walk90` FAIL WALK — dressing still started at 400ms and froze the first click (D035).
+- [x] `/g/walk91` PASS WALK — first inland click walks without hanging.
+- [x] `/g/lease92` FAIL LEASE — freeze + giant critic meshes (D036).
+- [x] `/g/scale93` PASS SCALE — person-scale shed/lamps, walk click, no hang.
+- [x] `/g/lease94` PASS LEASE — inland street lot, cash $1,000 → $745, no hang.
+- [x] `/g/play95` PASS PLAY — yellow taxi at spawn, Taxi button, pier over water.
+- [x] `/g/house96` FAIL HOUSE — first tap was a $1,121 field (D038 cheap street lots).
+- [x] `/g/house97` PASS HOUSE — street $242, House, Enter, Exit.
+- [x] `/g/ferry98` PASS FERRY — $15 kraft ticket, crossed to South.
+- [x] `/g/south99` FAIL SOUTH — dressing timer froze the tab (D040 no delayed dressing).
+- [x] `/g/south100` FAIL SOUTH — ferry-hint body-observer loop was the real freeze (D042).
+- [x] Operator: bring decoration back without the freeze — trickle dressing (D041).
+- [x] `/g/south101` FAIL SOUTH — quay/foam trickle froze the idle (D043 cars+ferry only).
+- [x] `/g/south102` PASS SOUTH — ferry, real landfall, 60 s idle, no freeze.
+- [x] `/g/loop103` PASS LOOP — full session held end to end, zero freezes.
+- [x] HUD clone lines — empty goods/persist no longer paint the same PAPER badge (D044). `/g/hud104` FAIL HUD: House $40 afford on boot copy (D045). `/g/hud107` PASS HUD.
+- [x] Market from harbour dock — Buy 1 fills, cash shared, PAPER labeled (`/g/mkt108` PASS MARKET).
+- [x] Persist Restore from a live dump. `/g/persist109` FAIL PERSIST: restored label lasted <1 s (D046). `/g/persist110` PASS PERSIST.
+- [x] Quiet spawn taxi hint — `$5 · dirt forbidden` paints whenever Taxi exists (`/g/taxi111` PASS TAXI).
+- [ ] Perf pass: return quay clutter / foam / trees without main-thread builds.
+- [x] Bug scout: south island void after ferry, invisible restored buildings, dead pier taps (D039).
+- [x] Playtest: taxi missing + 86 m pier on sand — taxi at boot, pier over water (D037).
+- [x] Pixel green basin crate (`/g/green86`–`87` FAIL GREEN — round stopped, not pixel-held)
+
+## Polymarket paper bot
+
 ## Completed
 
 - [x] Phase 1 — Clean planning

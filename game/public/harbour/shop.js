@@ -1,0 +1,1014 @@
+import * as THREE from "three";
+
+/**
+ * PAPER shop interior dress. Kraft-paper counter (cream top, wood body), a
+ * small wooden till with a kraft drawer slightly pulled out, a kraft counter
+ * scale beside the till, a small kraft scale weight beside the scale, a
+ * kraft wrapped parcel, a standing kraft shopping bag, a small kraft
+ * receipt slip, a small kraft receipt, a small kraft ink stamp, a tiny
+ * kraft coin, a tiny kraft blotter, a tiny kraft pencil, a tiny kraft
+ * ink pad, a tiny kraft ribbon, a tiny kraft twine coil, a tiny kraft wax
+ * seal, a tiny kraft paper weight, a tiny kraft sponge, a tiny kraft
+ * brush, a tiny kraft mop, a tiny kraft dustpan, a tiny kraft soap, a tiny
+ * kraft ledger, a tiny kraft inkwell, a tiny kraft ruler, a tiny kraft
+ * envelope, a tiny kraft wafer, a short wall shelf with two kraft boxes,
+ * plus two shelf bays
+ * — not the house living room and not the warehouse. No WASD.
+ * Tap-to-walk stays in interior.js.
+ *
+ * Call dressShop(scene) when plot.kind or plot.use is "shop" or "house_shop".
+ * Idempotent: a second call only shows the existing dress.
+ */
+
+const WOOD = 0x8a6238;
+const WOOD_DARK = 0x6a4428;
+const WOOD_TOP = 0x9a6a40;
+const STRAP = 0x5a3a22;
+const CREAM = 0xe8d7b8;
+const CREAM_SIDE = 0xdfc9a8;
+const FLOOR_SHOP = 0x9a6440;
+const CORAL = 0xc45c3a;
+const TEAL = 0x2a7a72;
+const TIN = 0xc4a574;
+const LINEN = 0xf4ead8;
+const GREEN = 0x5f8a32;
+const PAPER_CARD = 0xf3efe4;
+const LAMP_WOOD = 0x5a3a22;
+const LAMP_SHADE = 0xf0c878;
+const LAMP_BULB = 0xfff1d0;
+const HOUSE_KINDS = new Set(["interior-table", "interior-chair", "interior-bed", "interior-lamp"]);
+const SHOP_LIGHT = 1.22;
+const SHOP_BG = 0x2c241c;
+const SCENE_LIGHT_SCALE = 0.92;
+
+export function isShopPlot(plot) {
+  if (!plot) return false;
+  const k = plot.kind;
+  const u = plot.use;
+  return k === "shop" || k === "house_shop" || u === "shop" || u === "house_shop";
+}
+
+function paperBox(w, h, d, color, kind = "shop-prop") {
+  const m = new THREE.Mesh(
+    new THREE.BoxGeometry(w, h, d),
+    new THREE.MeshLambertMaterial({ color }),
+  );
+  m.castShadow = true;
+  m.receiveShadow = true;
+  m.userData.kind = kind;
+  m.userData.mode = "PAPER";
+  return m;
+}
+
+function goodsCrate(w, h, d, color, x, y, z) {
+  const g = new THREE.Group();
+  g.userData.kind = "shop-crate";
+  g.userData.mode = "PAPER";
+  const body = paperBox(w, h, d, color, "shop-crate");
+  g.add(body);
+  const rim = paperBox(w + 0.03, 0.04, d + 0.03, STRAP, "shop-crate");
+  rim.position.y = h / 2 - 0.02;
+  g.add(rim);
+  g.position.set(x, y, z);
+  return g;
+}
+
+function goodsOn(parent, colors, y, zSpread = 0.16) {
+  const n = colors.length;
+  const span = Math.min(0.72, 0.18 * n);
+  for (let i = 0; i < n; i++) {
+    const t = n === 1 ? 0 : i / (n - 1) - 0.5;
+    const tin = paperBox(0.14, 0.16 + (i % 2) * 0.06, 0.14, colors[i], "shop-goods");
+    tin.position.set(t * span * 2, y + 0.1, (i % 2 ? 1 : -1) * zSpread * 0.25);
+    parent.add(tin);
+  }
+}
+
+function crateWithGoods(x, z, yaw, crateColor, goods) {
+  const g = new THREE.Group();
+  g.name = "shop-crate";
+  g.userData.kind = "shop-crate";
+  g.userData.mode = "PAPER";
+  g.position.set(x, 0, z);
+  g.rotation.y = yaw;
+  const h = 0.42;
+  g.add(goodsCrate(0.62, h, 0.52, crateColor, 0, 0.16 + h / 2, 0));
+  goodsOn(g, goods, 0.16 + h, 0.12);
+  return g;
+}
+
+function shelfBay(x, z, yaw, width = 1.35) {
+  const g = new THREE.Group();
+  g.name = "shop-shelf";
+  g.userData.kind = "shop-shelf";
+  g.userData.mode = "PAPER";
+  g.position.set(x, 0, z);
+  g.rotation.y = yaw;
+  const back = paperBox(width, 1.85, 0.08, WOOD_DARK, "shop-shelf");
+  back.position.set(0, 0.16 + 0.92, -0.22);
+  g.add(back);
+  const posts = [-width / 2 + 0.05, width / 2 - 0.05];
+  for (const px of posts) {
+    const post = paperBox(0.07, 1.85, 0.28, WOOD, "shop-shelf");
+    post.position.set(px, 0.16 + 0.92, -0.08);
+    g.add(post);
+  }
+  const goodsRows = [
+    [CORAL, TIN, GREEN, LINEN],
+    [TEAL, CORAL, TIN, GREEN, LINEN],
+    [GREEN, LINEN, CORAL, TEAL],
+  ];
+  for (let i = 0; i < 3; i++) {
+    const y = 0.52 + i * 0.48;
+    const plank = paperBox(width - 0.08, 0.05, 0.36, WOOD_TOP, "shop-shelf");
+    plank.position.set(0, y, -0.04);
+    g.add(plank);
+    const row = goodsRows[i];
+    const span = width - 0.28;
+    for (let k = 0; k < row.length; k++) {
+      const t = row.length === 1 ? 0 : k / (row.length - 1) - 0.5;
+      const gh = 0.18 + (k % 3) * 0.08;
+      const gw = 0.13 + (k % 2) * 0.04;
+      const item = paperBox(gw, gh, 0.13, row[k], "shop-goods");
+      item.position.set(t * span, y + gh / 2 + 0.03, 0.02);
+      g.add(item);
+    }
+  }
+  return g;
+}
+
+/**
+ * Small kraft PAPER till drawer: thin cream tray slightly pulled toward +z
+ * (camera), wood lip + strap pull. Paper boxes only. Child of the till.
+ */
+function kraftDrawer() {
+  const g = new THREE.Group();
+  g.name = "shop-drawer";
+  g.userData.kind = "shop-drawer";
+  g.userData.mode = "PAPER";
+  const w = 0.34;
+  const h = 0.05;
+  const d = 0.2;
+  const tray = paperBox(w, h, d, CREAM, "shop-drawer");
+  g.add(tray);
+  const lip = paperBox(w + 0.02, 0.03, 0.03, WOOD, "shop-drawer");
+  lip.position.z = d / 2 + 0.005;
+  g.add(lip);
+  const pull = paperBox(0.07, 0.025, 0.03, STRAP, "shop-drawer");
+  pull.position.z = d / 2 + 0.02;
+  g.add(pull);
+  return g;
+}
+
+/** Small wooden till on the counter: wood body, kraft lid, kraft drawer. Paper boxes only. */
+function cashBox(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "shop-till";
+  g.userData.kind = "shop-till";
+  g.userData.mode = "PAPER";
+  g.position.set(x, y, z);
+  const h = 0.16;
+  const body = paperBox(0.42, h, 0.3, WOOD, "shop-till");
+  g.add(body);
+  const band = paperBox(0.45, 0.04, 0.33, WOOD_DARK, "shop-till");
+  band.position.y = -0.02;
+  g.add(band);
+  const lid = paperBox(0.44, 0.05, 0.32, LINEN, "shop-till");
+  lid.position.y = h / 2 + 0.02;
+  g.add(lid);
+  // Kraft till drawer — thin box slightly pulled toward the camera.
+  const drawer = kraftDrawer();
+  drawer.position.set(0, -0.02, 0.12);
+  g.add(drawer);
+  return g;
+}
+
+/**
+ * Small kraft PAPER counter scale: wood base, cream pan, strap needle.
+ * Paper boxes only. Sits on the counter beside the till — not on the
+ * pulled drawer, not a parcel / bag / wall shelf.
+ */
+function kraftScale(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "shop-scale";
+  g.userData.kind = "shop-scale";
+  g.userData.mode = "PAPER";
+  g.position.set(x, y, z);
+  const baseH = 0.06;
+  const base = paperBox(0.16, baseH, 0.14, WOOD, "shop-scale");
+  g.add(base);
+  const pan = paperBox(0.18, 0.02, 0.16, CREAM, "shop-scale");
+  pan.position.y = baseH / 2 + 0.01;
+  g.add(pan);
+  const needle = paperBox(0.015, 0.08, 0.015, STRAP, "shop-scale");
+  needle.position.set(0.05, baseH / 2 + 0.05, 0);
+  needle.rotation.z = -0.35;
+  g.add(needle);
+  return g;
+}
+
+/**
+ * Small kraft PAPER scale weight: wood block, strap band, cream knob.
+ * Paper boxes only. Sits on the counter beside the scale — not on the
+ * pan, not a till / drawer / parcel / bag / wall shelf.
+ */
+function kraftWeight(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "shop-weight";
+  g.userData.kind = "shop-weight";
+  g.userData.mode = "PAPER";
+  g.position.set(x, y, z);
+  const bodyH = 0.07;
+  const body = paperBox(0.08, bodyH, 0.08, WOOD, "shop-weight");
+  g.add(body);
+  const band = paperBox(0.09, 0.02, 0.09, STRAP, "shop-weight");
+  g.add(band);
+  const knob = paperBox(0.03, 0.03, 0.03, CREAM, "shop-weight");
+  knob.position.y = bodyH / 2 + 0.015;
+  g.add(knob);
+  return g;
+}
+
+/**
+ * Small kraft wrapped parcel on the counter: cream box + strap + wood
+ * label. Paper boxes only. Not a till, not a goods crate.
+ */
+function wrappedParcel(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "shop-parcel";
+  g.userData.kind = "shop-parcel";
+  g.userData.mode = "PAPER";
+  g.position.set(x, y, z);
+  const w = 0.2;
+  const h = 0.12;
+  const d = 0.16;
+  const body = paperBox(w, h, d, CREAM, "shop-parcel");
+  g.add(body);
+  const band = paperBox(w + 0.02, 0.035, d + 0.02, STRAP, "shop-parcel");
+  g.add(band);
+  const label = paperBox(0.07, 0.02, 0.05, WOOD, "shop-parcel");
+  label.position.y = h / 2 + 0.01;
+  g.add(label);
+  return g;
+}
+
+/**
+ * Small kraft PAPER receipt slip on the counter: cream sheet + strap stub.
+ * Paper boxes only. Beside the till — not on the drawer, scale, weight,
+ * parcel, or bag.
+ */
+function kraftSlip(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "shop-slip";
+  g.userData.kind = "shop-slip";
+  g.userData.mode = "PAPER";
+  g.position.set(x, y, z);
+  const sheet = paperBox(0.14, 0.01, 0.18, CREAM, "shop-slip");
+  g.add(sheet);
+  const edge = paperBox(0.15, 0.014, 0.03, STRAP, "shop-slip");
+  edge.position.z = -0.08;
+  g.add(edge);
+  return g;
+}
+
+/**
+ * Tiny kraft PAPER receipt on the counter: linen sheet, paper-card face,
+ * wood stub. Paper boxes only. Beside the till — not on the drawer, scale,
+ * weight, slip, stamp, parcel, or bag. Not a wallet.
+ */
+function kraftReceipt(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "shop-receipt";
+  g.userData.kind = "shop-receipt";
+  g.userData.mode = "PAPER";
+  g.userData.part = "receipt";
+  g.position.set(x, y, z);
+  const sheet = paperBox(0.08, 0.008, 0.12, LINEN, "shop-receipt");
+  sheet.userData.part = "receipt";
+  g.add(sheet);
+  const face = paperBox(0.06, 0.005, 0.08, PAPER_CARD, "shop-receipt");
+  face.userData.part = "receipt";
+  face.position.y = 0.007;
+  g.add(face);
+  const stub = paperBox(0.085, 0.01, 0.018, WOOD, "shop-receipt");
+  stub.userData.part = "receipt";
+  stub.position.z = -0.05;
+  g.add(stub);
+  return g;
+}
+
+/**
+ * Tiny kraft PAPER coin on the counter: cream disc + wood rim. Paper
+ * boxes only. Beside the till — not on the drawer, scale, stamp, receipt,
+ * slip, parcel, or bag. Not a wallet. Existing hexes only.
+ */
+function kraftCoin(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "shop-coin";
+  g.userData.kind = "shop-coin";
+  g.userData.mode = "PAPER";
+  g.userData.part = "coin";
+  g.position.set(x, y, z);
+  const disc = paperBox(0.04, 0.008, 0.04, CREAM, "shop-coin");
+  disc.userData.part = "coin";
+  g.add(disc);
+  const rim = paperBox(0.046, 0.004, 0.046, WOOD, "shop-coin");
+  rim.userData.part = "coin";
+  rim.position.y = 0.006;
+  g.add(rim);
+  return g;
+}
+
+/**
+ * Tiny kraft PAPER blotter on the counter: flat cream pad + wood board.
+ * Paper boxes only. Beside the till — not on the coin, receipt, stamp,
+ * slip, parcel, bag, or scale. Existing hexes only.
+ */
+function kraftBlotter(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "shop-blotter";
+  g.userData.kind = "shop-blotter";
+  g.userData.mode = "PAPER";
+  g.userData.part = "blotter";
+  g.position.set(x, y, z);
+  const board = paperBox(0.12, 0.006, 0.09, WOOD, "shop-blotter");
+  board.userData.part = "blotter";
+  g.add(board);
+  const pad = paperBox(0.11, 0.006, 0.08, CREAM, "shop-blotter");
+  pad.userData.part = "blotter";
+  pad.position.y = 0.005;
+  g.add(pad);
+  return g;
+}
+
+/**
+ * Tiny kraft PAPER pencil on the counter: wood shaft + strap tip.
+ * Paper boxes only. Beside the till — not on the blotter, coin, receipt,
+ * or stamp. Existing hexes only.
+ */
+function kraftPencil(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "shop-pencil";
+  g.userData.kind = "shop-pencil";
+  g.userData.mode = "PAPER";
+  g.userData.part = "pencil";
+  g.position.set(x, y, z);
+  const shaft = paperBox(0.11, 0.012, 0.012, WOOD, "shop-pencil");
+  shaft.userData.part = "pencil";
+  g.add(shaft);
+  const tip = paperBox(0.018, 0.008, 0.008, STRAP, "shop-pencil");
+  tip.userData.part = "pencil";
+  tip.position.x = 0.062;
+  g.add(tip);
+  return g;
+}
+
+/**
+ * Small kraft PAPER ink stamp on the counter: wood handle, strap neck,
+ * coral pad. Paper boxes only. Beside the till — not on the drawer,
+ * scale, weight, slip, parcel, or bag.
+ */
+function kraftStamp(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "shop-stamp";
+  g.userData.kind = "shop-stamp";
+  g.userData.mode = "PAPER";
+  g.position.set(x, y, z);
+  const handleH = 0.08;
+  const handle = paperBox(0.035, handleH, 0.035, WOOD, "shop-stamp");
+  handle.position.y = 0.01;
+  g.add(handle);
+  const neck = paperBox(0.05, 0.02, 0.05, STRAP, "shop-stamp");
+  neck.position.y = -handleH / 2 + 0.01;
+  g.add(neck);
+  const pad = paperBox(0.075, 0.02, 0.075, CORAL, "shop-stamp");
+  pad.position.y = -handleH / 2 - 0.01;
+  g.add(pad);
+  return g;
+}
+
+/**
+ * Tiny kraft PAPER ink pad on the counter: wood tin + strap pad.
+ * Paper boxes only. Beside the till — not on the stamp, blotter, coin,
+ * receipt, or pencil. Existing hexes only.
+ */
+function kraftInkpad(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "shop-inkpad";
+  g.userData.kind = "shop-inkpad";
+  g.userData.mode = "PAPER";
+  g.userData.part = "inkpad";
+  g.position.set(x, y, z);
+  const tin = paperBox(0.07, 0.012, 0.055, WOOD, "shop-inkpad");
+  tin.userData.part = "inkpad";
+  g.add(tin);
+  const pad = paperBox(0.055, 0.008, 0.042, STRAP, "shop-inkpad");
+  pad.userData.part = "inkpad";
+  pad.position.y = 0.008;
+  g.add(pad);
+  return g;
+}
+
+/**
+ * Tiny kraft PAPER ribbon on the counter: cream strip + strap knot.
+ * Paper boxes only. Beside the till — not on the inkpad, pencil, blotter,
+ * coin, or receipt. Existing hexes only.
+ */
+function kraftRibbon(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "shop-ribbon";
+  g.userData.kind = "shop-ribbon";
+  g.userData.mode = "PAPER";
+  g.userData.part = "ribbon";
+  g.position.set(x, y, z);
+  const strip = paperBox(0.10, 0.006, 0.018, CREAM, "shop-ribbon");
+  strip.userData.part = "ribbon";
+  g.add(strip);
+  const knot = paperBox(0.022, 0.01, 0.022, STRAP, "shop-ribbon");
+  knot.userData.part = "ribbon";
+  knot.position.y = 0.006;
+  g.add(knot);
+  return g;
+}
+
+/**
+ * Tiny kraft PAPER twine coil on the counter: wood winding + strap wrap.
+ * Paper boxes only. Beside the till — not on the ribbon, inkpad, pencil,
+ * blotter, coin, or receipt. Existing hexes only.
+ */
+function kraftTwine(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "shop-twine";
+  g.userData.kind = "shop-twine";
+  g.userData.mode = "PAPER";
+  g.userData.part = "twine";
+  g.position.set(x, y, z);
+  const coil = paperBox(0.055, 0.05, 0.055, WOOD, "shop-twine");
+  coil.userData.part = "twine";
+  g.add(coil);
+  const wrap = paperBox(0.062, 0.016, 0.062, STRAP, "shop-twine");
+  wrap.userData.part = "twine";
+  g.add(wrap);
+  return g;
+}
+
+/**
+ * Tiny kraft PAPER wax seal on the counter: wood wafer + coral blob.
+ * Paper boxes only. Beside the till — not on the twine, ribbon, inkpad,
+ * pencil, blotter, coin, or receipt. Existing hexes only.
+ */
+function kraftSeal(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "shop-seal";
+  g.userData.kind = "shop-seal";
+  g.userData.mode = "PAPER";
+  g.userData.part = "seal";
+  g.position.set(x, y, z);
+  const wafer = paperBox(0.04, 0.006, 0.04, WOOD, "shop-seal");
+  wafer.userData.part = "seal";
+  g.add(wafer);
+  const blob = paperBox(0.032, 0.01, 0.032, CORAL, "shop-seal");
+  blob.userData.part = "seal";
+  blob.position.y = 0.007;
+  g.add(blob);
+  return g;
+}
+
+/**
+ * Tiny kraft PAPER weight on the counter: wood base + cream stone.
+ * Paper boxes only. Beside the seal — not on the twine, ribbon, inkpad,
+ * pencil, blotter, coin, or receipt. Existing hexes only.
+ */
+function kraftPaperWeight(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "shop-paperweight";
+  g.userData.kind = "shop-weight";
+  g.userData.mode = "PAPER";
+  g.userData.part = "weight";
+  g.position.set(x, y, z);
+  const base = paperBox(0.05, 0.01, 0.05, WOOD, "shop-weight");
+  base.userData.part = "weight";
+  g.add(base);
+  const stone = paperBox(0.04, 0.016, 0.04, CREAM, "shop-weight");
+  stone.userData.part = "weight";
+  stone.position.y = 0.012;
+  g.add(stone);
+  return g;
+}
+
+/**
+ * Tiny kraft PAPER sponge on the counter: wood tray + cream pad.
+ * Paper boxes only. Beside the weight — not on the seal, twine, ribbon,
+ * inkpad, pencil, blotter, coin, or receipt. Existing hexes only.
+ */
+function kraftSponge(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "shop-sponge";
+  g.userData.kind = "shop-sponge";
+  g.userData.mode = "PAPER";
+  g.userData.part = "sponge";
+  g.position.set(x, y, z);
+  const tray = paperBox(0.05, 0.008, 0.04, WOOD, "shop-sponge");
+  tray.userData.part = "sponge";
+  g.add(tray);
+  const pad = paperBox(0.044, 0.016, 0.034, CREAM, "shop-sponge");
+  pad.userData.part = "sponge";
+  pad.position.y = 0.011;
+  g.add(pad);
+  return g;
+}
+
+/**
+ * Tiny kraft PAPER brush on the counter: wood handle + cream head.
+ * Paper boxes only. Beside the sponge — not on the weight, seal, twine,
+ * ribbon, inkpad, pencil, blotter, coin, or receipt. Existing hexes only.
+ */
+function kraftBrush(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "shop-brush";
+  g.userData.kind = "shop-brush";
+  g.userData.mode = "PAPER";
+  g.userData.part = "brush";
+  g.position.set(x, y, z);
+  const handle = paperBox(0.055, 0.012, 0.012, WOOD, "shop-brush");
+  handle.userData.part = "brush";
+  g.add(handle);
+  const head = paperBox(0.022, 0.018, 0.02, CREAM, "shop-brush");
+  head.userData.part = "brush";
+  head.position.x = 0.036;
+  g.add(head);
+  return g;
+}
+
+/**
+ * Tiny kraft PAPER mop on the counter: wood handle + cream head.
+ * Paper boxes only. Beside the brush — not on the sponge, weight, seal,
+ * twine, ribbon, inkpad, pencil, blotter, coin, or receipt. Existing hexes only.
+ */
+function kraftMop(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "shop-mop";
+  g.userData.kind = "shop-mop";
+  g.userData.mode = "PAPER";
+  g.userData.part = "mop";
+  g.position.set(x, y, z);
+  const handle = paperBox(0.05, 0.01, 0.01, WOOD, "shop-mop");
+  handle.userData.part = "mop";
+  g.add(handle);
+  const head = paperBox(0.02, 0.016, 0.022, CREAM, "shop-mop");
+  head.userData.part = "mop";
+  head.position.x = 0.033;
+  g.add(head);
+  return g;
+}
+
+/**
+ * Tiny kraft PAPER dustpan on the counter: wood handle + cream pan.
+ * Paper boxes only. Beside the mop — not on the brush, sponge, weight,
+ * seal, twine, ribbon, inkpad, pencil, blotter, coin, or receipt. Existing hexes only.
+ */
+function kraftDustpan(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "shop-dustpan";
+  g.userData.kind = "shop-dustpan";
+  g.userData.mode = "PAPER";
+  g.userData.part = "dustpan";
+  g.position.set(x, y, z);
+  const handle = paperBox(0.045, 0.01, 0.01, WOOD, "shop-dustpan");
+  handle.userData.part = "dustpan";
+  g.add(handle);
+  const pan = paperBox(0.028, 0.012, 0.034, CREAM, "shop-dustpan");
+  pan.userData.part = "dustpan";
+  pan.position.x = 0.034;
+  g.add(pan);
+  return g;
+}
+
+/**
+ * Tiny kraft PAPER soap on the counter: wood wrap + cream bar.
+ * Paper boxes only. Beside the dustpan — not on the mop, brush, sponge,
+ * weight, seal, twine, ribbon, or inkpad. Existing hexes only.
+ */
+function kraftSoap(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "shop-soap";
+  g.userData.kind = "shop-soap";
+  g.userData.mode = "PAPER";
+  g.userData.part = "soap";
+  g.position.set(x, y, z);
+  const wrap = paperBox(0.04, 0.012, 0.026, WOOD, "shop-soap");
+  wrap.userData.part = "soap";
+  g.add(wrap);
+  const bar = paperBox(0.034, 0.016, 0.022, CREAM, "shop-soap");
+  bar.userData.part = "soap";
+  bar.position.y = 0.004;
+  g.add(bar);
+  return g;
+}
+
+/**
+ * Tiny kraft PAPER ledger on the counter: wood cover + cream pages.
+ * Paper boxes only. Beside the soap — not on the dustpan, mop, brush,
+ * or sponge. Existing hexes only.
+ */
+function kraftLedger(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "shop-ledger";
+  g.userData.kind = "shop-ledger";
+  g.userData.mode = "PAPER";
+  g.userData.part = "ledger";
+  g.position.set(x, y, z);
+  const cover = paperBox(0.048, 0.012, 0.036, WOOD, "shop-ledger");
+  cover.userData.part = "ledger";
+  g.add(cover);
+  const pages = paperBox(0.042, 0.016, 0.030, CREAM, "shop-ledger");
+  pages.userData.part = "ledger";
+  pages.position.y = 0.004;
+  g.add(pages);
+  return g;
+}
+
+/**
+ * Tiny kraft PAPER inkwell on the counter: wood well + cream rim.
+ * Paper boxes only. Beside the ledger — not on the soap, dustpan, mop,
+ * brush, sponge, weight, seal, twine, ribbon, inkpad, pencil, blotter,
+ * coin, or receipt. Existing hexes only.
+ */
+function kraftInkwell(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "shop-inkwell";
+  g.userData.kind = "shop-inkwell";
+  g.userData.mode = "PAPER";
+  g.userData.part = "inkwell";
+  g.position.set(x, y, z);
+  const well = paperBox(0.036, 0.018, 0.036, WOOD, "shop-inkwell");
+  well.userData.part = "inkwell";
+  g.add(well);
+  const rim = paperBox(0.028, 0.010, 0.028, CREAM, "shop-inkwell");
+  rim.userData.part = "inkwell";
+  rim.position.y = 0.012;
+  g.add(rim);
+  return g;
+}
+
+/**
+ * Tiny kraft PAPER ruler on the counter: wood stick + cream marks.
+ * Paper boxes only. Beside the inkwell — not on the ledger, soap, dustpan,
+ * mop, brush, sponge, weight, seal, twine, ribbon, inkpad, pencil, blotter,
+ * coin, or receipt. Existing hexes only.
+ */
+function kraftRuler(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "shop-ruler";
+  g.userData.kind = "shop-ruler";
+  g.userData.mode = "PAPER";
+  g.userData.part = "ruler";
+  g.position.set(x, y, z);
+  const stick = paperBox(0.090, 0.008, 0.018, WOOD, "shop-ruler");
+  stick.userData.part = "ruler";
+  g.add(stick);
+  const marks = paperBox(0.078, 0.006, 0.012, CREAM, "shop-ruler");
+  marks.userData.part = "ruler";
+  marks.position.y = 0.006;
+  g.add(marks);
+  return g;
+}
+
+/**
+ * Tiny kraft PAPER envelope on the counter: cream body + wood flap.
+ * Paper boxes only. Beside the ruler — not on the inkwell, ledger, soap,
+ * dustpan, mop, brush, sponge, weight, seal, twine, ribbon, inkpad, pencil,
+ * blotter, coin, or receipt. Existing hexes only.
+ */
+function kraftEnvelope(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "shop-envelope";
+  g.userData.kind = "shop-envelope";
+  g.userData.mode = "PAPER";
+  g.userData.part = "envelope";
+  g.position.set(x, y, z);
+  const body = paperBox(0.070, 0.008, 0.048, CREAM, "shop-envelope");
+  body.userData.part = "envelope";
+  g.add(body);
+  const flap = paperBox(0.070, 0.006, 0.018, WOOD, "shop-envelope");
+  flap.userData.part = "envelope";
+  flap.position.set(0, 0.006, -0.016);
+  g.add(flap);
+  return g;
+}
+
+/**
+ * Tiny kraft PAPER wafer on the counter: cream disc + wood rim.
+ * Paper boxes only. Beside the envelope — not on the ruler, inkwell, ledger,
+ * soap, dustpan, mop, brush, sponge, weight, seal, twine, ribbon, inkpad,
+ * pencil, blotter, coin, or receipt. Existing hexes only.
+ */
+function kraftWafer(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "shop-wafer";
+  g.userData.kind = "shop-wafer";
+  g.userData.mode = "PAPER";
+  g.userData.part = "wafer";
+  g.position.set(x, y, z);
+  const disc = paperBox(0.048, 0.006, 0.048, CREAM, "shop-wafer");
+  disc.userData.part = "wafer";
+  g.add(disc);
+  const rim = paperBox(0.054, 0.004, 0.054, WOOD, "shop-wafer");
+  rim.userData.part = "wafer";
+  rim.position.y = 0.004;
+  g.add(rim);
+  return g;
+}
+
+/**
+ * Small standing kraft PAPER shopping bag on the counter: cream body + two
+ * thin strap handles. Paper boxes only. Beside the parcel / till, not on them.
+ */
+function kraftBag(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "shop-bag";
+  g.userData.kind = "shop-bag";
+  g.userData.mode = "PAPER";
+  g.userData.provenance = "SIMULATED";
+  g.position.set(x, y, z);
+  const w = 0.14;
+  const h = 0.2;
+  const d = 0.1;
+  const body = paperBox(w, h, d, CREAM, "shop-bag");
+  g.add(body);
+  const handleH = 0.09;
+  const handleL = paperBox(0.02, handleH, 0.02, STRAP, "shop-bag");
+  handleL.position.set(-0.035, h / 2 + handleH / 2, 0);
+  g.add(handleL);
+  const handleR = paperBox(0.02, handleH, 0.02, STRAP, "shop-bag");
+  handleR.position.set(0.035, h / 2 + handleH / 2, 0);
+  g.add(handleR);
+  return g;
+}
+
+/**
+ * Short wall shelf above the counter: one plank, two kraft boxes.
+ * Original WOOD / WOOD_DARK / WOOD_TOP / TIN. Not a till, not jars.
+ */
+function shortWallShelf(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "shop-wall-shelf";
+  g.userData.kind = "shop-shelf";
+  g.userData.mode = "PAPER";
+  g.position.set(x, y, z);
+  const width = 0.86;
+  const back = paperBox(width, 0.26, 0.05, WOOD_DARK, "shop-shelf");
+  back.position.set(0, 0.08, -0.12);
+  g.add(back);
+  const plank = paperBox(width, 0.05, 0.26, WOOD_TOP, "shop-shelf");
+  g.add(plank);
+  for (const px of [-width / 2 + 0.07, width / 2 - 0.07]) {
+    const bracket = paperBox(0.05, 0.1, 0.2, WOOD, "shop-shelf");
+    bracket.position.set(px, -0.07, 0);
+    g.add(bracket);
+  }
+  g.add(goodsCrate(0.22, 0.16, 0.18, TIN, -0.18, 0.105, 0.02));
+  g.add(goodsCrate(0.2, 0.2, 0.16, WOOD, 0.17, 0.125, 0));
+  return g;
+}
+
+function makeCounter(x, z) {
+  const g = new THREE.Group();
+  g.name = "shop-counter";
+  g.userData.kind = "shop-counter";
+  g.userData.mode = "PAPER";
+  const y0 = 0.16;
+  const topY = y0 + 0.94;
+  const top = paperBox(2.95, 0.1, 0.92, LINEN, "shop-counter");
+  top.position.set(0, topY, 0);
+  g.add(top);
+  const body = paperBox(2.82, 0.86, 0.8, WOOD, "shop-counter");
+  body.position.set(0, y0 + 0.43, 0);
+  g.add(body);
+  const face = paperBox(2.82, 0.64, 0.05, CREAM, "shop-counter");
+  face.position.set(0, y0 + 0.5, 0.42);
+  g.add(face);
+  const kick = paperBox(2.82, 0.12, 0.08, WOOD_DARK, "shop-counter");
+  kick.position.set(0, y0 + 0.06, 0.42);
+  g.add(kick);
+  const stripe = paperBox(2.82, 0.1, 0.08, CORAL, "shop-counter");
+  stripe.position.set(0, topY + 0.02, 0.44);
+  g.add(stripe);
+  // Wooden cash box on the linen top — kraft lid, wood body. Not a wallet.
+  g.add(cashBox(0.88, topY + 0.13, -0.08));
+  // Kraft counter scale beside the till — wood base, cream pan, strap needle.
+  g.add(kraftScale(0.68, topY + 0.08, 0.22));
+  // Kraft scale weight beside the scale — wood block, strap band, cream knob.
+  g.add(kraftWeight(0.50, topY + 0.08, 0.30));
+  // Kraft wrapped parcel beside the till — cream box + strap. Not a wallet.
+  g.add(wrappedParcel(1.22, topY + 0.11, 0.08));
+  // Standing kraft shopping bag beside the parcel / till — cream body + straps.
+  g.add(kraftBag(1.38, topY + 0.15, -0.18));
+  // Kraft receipt slip beside the till — cream sheet + strap stub. Not a parcel.
+  g.add(kraftSlip(1.10, topY + 0.056, 0.32));
+  // Tiny kraft receipt beside the till — linen sheet + paper-card face + wood stub.
+  g.add(kraftReceipt(-0.82, topY + 0.054, 0.30));
+  // Kraft ink stamp beside the till — wood handle + strap/coral pad.
+  g.add(kraftStamp(0.14, topY + 0.11, 0.34));
+  // Tiny kraft coin beside the till — cream disc + wood rim. Not a wallet.
+  g.add(kraftCoin(0.88, topY + 0.054, 0.28));
+  // Tiny kraft blotter beside the till — flat cream pad + wood board.
+  g.add(kraftBlotter(-1.18, topY + 0.054, 0.26));
+  // Tiny kraft pencil beside the till — wood shaft + strap tip.
+  g.add(kraftPencil(-1.32, topY + 0.056, -0.18));
+  // Tiny kraft ink pad beside the till — wood tin + strap pad.
+  g.add(kraftInkpad(-0.42, topY + 0.054, 0.32));
+  // Tiny kraft ribbon beside the till — cream strip + strap knot.
+  g.add(kraftRibbon(-0.95, topY + 0.054, -0.26));
+  // Tiny kraft twine coil beside the till — wood winding + strap wrap.
+  g.add(kraftTwine(-0.58, topY + 0.054, -0.28));
+  // Tiny kraft wax seal beside the till — wood wafer + coral blob.
+  g.add(kraftSeal(1.10, topY + 0.054, -0.28));
+  // Tiny kraft paper weight beside the seal — wood base + cream stone.
+  g.add(kraftPaperWeight(1.30, topY + 0.054, -0.34));
+  // Tiny kraft sponge beside the weight — wood tray + cream pad.
+  g.add(kraftSponge(1.48, topY + 0.054, -0.42));
+  // Tiny kraft brush beside the sponge — wood handle + cream head.
+  g.add(kraftBrush(1.62, topY + 0.054, -0.28));
+  // Tiny kraft mop beside the brush — wood handle + cream head.
+  g.add(kraftMop(1.72, topY + 0.054, -0.14));
+  // Tiny kraft dustpan beside the mop — wood handle + cream pan.
+  g.add(kraftDustpan(1.80, topY + 0.054, 0.02));
+  // Tiny kraft soap beside the dustpan — wood wrap + cream bar.
+  g.add(kraftSoap(1.88, topY + 0.054, 0.18));
+  // Tiny kraft ledger beside the soap — wood cover + cream pages.
+  g.add(kraftLedger(1.96, topY + 0.054, 0.34));
+  // Tiny kraft inkwell beside the ledger — wood well + cream rim.
+  g.add(kraftInkwell(2.04, topY + 0.054, 0.50));
+  // Tiny kraft ruler beside the inkwell — wood stick + cream marks.
+  g.add(kraftRuler(2.12, topY + 0.054, 0.66));
+  // Tiny kraft envelope beside the ruler — cream body + wood flap.
+  g.add(kraftEnvelope(2.20, topY + 0.054, 0.82));
+  // Tiny kraft wafer beside the envelope — cream disc + wood rim.
+  g.add(kraftWafer(2.28, topY + 0.054, 0.98));
+  // Two small kraft / terracotta jars beside the till. Original TIN + CORAL.
+  const kraftJar = paperBox(0.12, 0.16, 0.12, TIN, "shop-goods");
+  kraftJar.position.set(0.48, topY + 0.13, -0.04);
+  g.add(kraftJar);
+  const terraJar = paperBox(0.11, 0.2, 0.11, CORAL, "shop-goods");
+  terraJar.position.set(0.6, topY + 0.15, 0.02);
+  g.add(terraJar);
+  const jar = paperBox(0.18, 0.24, 0.18, TEAL, "shop-goods");
+  jar.position.set(-0.95, topY + 0.17, 0.12);
+  g.add(jar);
+  const tin = paperBox(0.2, 0.16, 0.2, CORAL, "shop-goods");
+  tin.position.set(-0.58, topY + 0.13, 0.14);
+  g.add(tin);
+  const stack = paperBox(0.26, 0.09, 0.2, PAPER_CARD, "shop-goods");
+  stack.position.set(-0.18, topY + 0.09, 0.16);
+  g.add(stack);
+  const green = paperBox(0.16, 0.2, 0.16, GREEN, "shop-goods");
+  green.position.set(0.28, topY + 0.15, 0.12);
+  g.add(green);
+  // Short wall shelf above the counter — two kraft boxes, not only till + jars.
+  g.add(shortWallShelf(-0.38, topY + 0.48, -0.28));
+  g.position.set(x, 0, z);
+  return g;
+}
+
+function hangingLamp(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "shop-lamp";
+  g.userData.kind = "shop-lamp";
+  g.userData.mode = "PAPER";
+  const stem = paperBox(0.04, 0.38, 0.04, LAMP_WOOD, "shop-lamp");
+  stem.position.set(x, y + 0.22, z);
+  const shade = paperBox(0.55, 0.16, 0.55, LAMP_SHADE, "shop-lamp");
+  shade.position.set(x, y, z);
+  const bulb = paperBox(0.1, 0.07, 0.1, LAMP_BULB, "shop-lamp");
+  bulb.position.set(x, y - 0.12, z);
+  g.add(stem, shade, bulb);
+  return g;
+}
+
+function paperMark(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "shop-paper";
+  g.userData.kind = "interior-paper";
+  g.userData.mode = "PAPER";
+  g.add(paperBox(0.85, 0.32, 0.04, CORAL, "interior-paper"));
+  const card = paperBox(0.72, 0.22, 0.03, PAPER_CARD, "interior-paper");
+  card.position.z = 0.03;
+  g.add(card);
+  g.position.set(x, y, z);
+  return g;
+}
+
+function makeShopDress() {
+  const g = new THREE.Group();
+  g.name = "shop-dress";
+  g.userData.kind = "shop-dress";
+  g.userData.mode = "PAPER";
+  g.userData.provenance = "SIMULATED";
+
+  // Spawn is (0, 1.15, 1.6); camera looks from +z. Counter sits in that view.
+  g.add(makeCounter(-0.15, 0.48));
+  g.add(shelfBay(-3.28, 0.15, Math.PI / 2, 1.45));
+  g.add(shelfBay(-0.35, -2.52, 0, 1.55));
+  g.add(crateWithGoods(2.35, 0.55, -0.18, WOOD, [CORAL, GREEN, TIN]));
+
+  g.add(hangingLamp(-0.15, 2.18, 0.48));
+  g.add(paperMark(-2.15, 1.62, 3.38));
+
+  return g;
+}
+
+function findInterior(root) {
+  if (!root) return null;
+  if (root.userData?.kind === "interior") return root;
+  let found = null;
+  root.traverse((o) => {
+    if (!found && o.userData?.kind === "interior") found = o;
+  });
+  return found;
+}
+
+function setHouseFurnitureVisible(interior, visible) {
+  interior.traverse((o) => {
+    if (HOUSE_KINDS.has(o.userData?.kind)) o.visible = visible;
+    if (o.userData?.kind === "interior-prop") o.visible = visible;
+  });
+}
+
+function remember(obj, key, value) {
+  if (obj.userData[key] == null) obj.userData[key] = value;
+}
+
+function tintInterior(interior, shop) {
+  interior.traverse((o) => {
+    if (o.isLight) {
+      remember(o, "_shopIntensity", o.intensity);
+      remember(o, "_shopColor", o.color ? o.color.getHex() : null);
+      o.intensity = shop ? SHOP_LIGHT : o.userData._shopIntensity;
+      if (o.color) {
+        o.color.setHex(shop ? 0xffe8c4 : o.userData._shopColor);
+      }
+    }
+    if (!o.material || !o.material.color) return;
+    if (o.userData?.kind === "interior-wall") {
+      remember(o, "_shopColor", o.material.color.getHex());
+      const cream = o.geometry?.parameters?.width < 0.3 ? CREAM_SIDE : CREAM;
+      o.material.color.setHex(shop ? cream : o.userData._shopColor);
+    }
+    if (o.userData?.kind === "interior-floor") {
+      remember(o, "_shopColor", o.material.color.getHex());
+      o.material.color.setHex(shop ? FLOOR_SHOP : o.userData._shopColor);
+    }
+  });
+}
+
+function tintSceneLights(scene, shop) {
+  if (!scene || !scene.children) return;
+  for (const child of scene.children) {
+    if (!child.isLight) continue;
+    remember(child, "_shopIntensity", child.intensity);
+    child.intensity = shop
+      ? child.userData._shopIntensity * SCENE_LIGHT_SCALE
+      : child.userData._shopIntensity;
+  }
+  if (scene.background && scene.background.isColor) {
+    remember(scene, "_shopBg", scene.background.getHex());
+    scene.background.setHex(shop ? SHOP_BG : scene.userData._shopBg);
+  }
+}
+
+/**
+ * Dress an interior (or a scene that contains one) as a PAPER shop.
+ * Hides living-room furniture, adds counter, shelves, and goods crates.
+ * @param {THREE.Object3D} scene
+ */
+export function dressShop(scene) {
+  if (!scene) return null;
+  const interior = findInterior(scene) || scene;
+  interior.userData.mode = "PAPER";
+  interior.userData.interiorUse = "shop";
+  interior.userData.provenance = "SIMULATED";
+  setHouseFurnitureVisible(interior, false);
+  tintInterior(interior, true);
+  tintSceneLights(scene, true);
+  let dress = interior.getObjectByName("shop-dress");
+  if (!dress) {
+    dress = makeShopDress();
+    interior.add(dress);
+  }
+  dress.visible = true;
+  return interior;
+}
+
+/** Restore the house living room after a shop visit. */
+export function undressShop(scene) {
+  if (!scene) return null;
+  const interior = findInterior(scene) || scene;
+  const dress = interior.getObjectByName("shop-dress");
+  if (dress) dress.visible = false;
+  setHouseFurnitureVisible(interior, true);
+  tintInterior(interior, false);
+  tintSceneLights(scene, false);
+  interior.userData.interiorUse = "house";
+  return interior;
+}

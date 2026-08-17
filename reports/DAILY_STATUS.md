@@ -1,6 +1,26 @@
 # Daily Status
 
-## 2026-03-18 (latest)
+## 2026-08-17 (latest)
+
+**Current status:** `/g/taxi111` PASS TAXI. HUD / Market / Persist held this loop (D044–D047). Next: perf pass for quay/trees/peds. PAPER / SIMULATED. Politics frozen.
+
+## 2026-08-16
+
+**Current status:** Two Harbors gauntlet redirected to the **base harbour game**. Politics frozen. Ten agent slots on spawn/cart/lease/market/presence/persist — not House/Senate.
+
+### Harbour (PAPER / SIMULATED)
+
+- Pixel-held: inland spawn, paved ribbon, dirt ribbons, traffic, taxi overlay, ferry $15, RMB orbit, lease → House → Enter → Exit, trees + cart (`/?g=tree25`), cream ferry hull (`/g/ferry37` PASS), kraft shore foam (`/g/shore40` PASS), quay clutter (`/g/quay41` PASS), pedestrians (`/g/peds44` PASS), nametags (`/g/tags46` PASS), HUD econ/nearby/staff (`/g/hud47` PASS), calendar/cart/persist (`/g/hud49` PASS), nearby count (`/g/near50` PASS — 4 nearby), flow/tax/goods (`/g/flow51` PASS), staff + ferry spread (`/g/hud52` PASS), ferry fender (`/g/fend54` PASS FENDER), sage dinghies (`/g/ding65` PASS DINGHY), rust channel buoy (`/g/buoy70` PASS BUOY)
+- New chat: paste `game/reports/HANDOVER.md`. This gauntlet thread is bloated.
+- Code-held: econ HUD, stalls, pedestrians, nametags, interiors, presence, persist, north port sign, calendar / fare / tax / held-goods / faucet lines
+- Play: **`http://localhost:8787/`** (port 8787). Close stale `/g/` tabs. Left click/tap = walk or use. RMB-hold = orbit.
+- Do not clone Capital Rift UI / Earth / OSM / wallet
+
+### Polymarket bot
+
+Unchanged. Still paper-only. Not the active gauntlet.
+
+## 2026-03-18
 
 **Current status:** Pipeline end-to-end operational with multi-strategy comparative testing support.
 
