@@ -158,7 +158,11 @@ Pixel: **rust hull plate** at `http://localhost:8787/g/plate79`. Buoy-class rust
 
 Pixel: **rust hull waterline** at `http://localhost:8787/g/plate80`. Wide rust band on the camera-facing cream hull, below the held buoy. No RMB. Address bar must be `/g/plate80`. Do not restart play while the critic is on the page.
 
-## Next pixel (after plate80 PASS, immediately, no wait)
+`/g/plate80` **FAIL PLATE**: cream hull with one rust buoy; y=2.4 band hid behind the sage dinghies. Stripe lifted to buoy height (`y=5.4`) so it sits above the dinghies.
+
+Pixel: **rust hull stripe** at `http://localhost:8787/g/plate81`. Wide rust band across the camera-facing cream hull at the held buoy's height. No RMB. Address bar must be `/g/plate81`. Do not restart play while the critic is on the page.
+
+## Next pixel (after plate81 PASS, immediately, no wait)
 
 ## Frozen
 

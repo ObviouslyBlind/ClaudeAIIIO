@@ -290,19 +290,20 @@ function channelBuoy() {
   return g;
 }
 
-/** Camera-facing rust waterline on the cream hull. Cargo round stopped.
- *  /g/plate79 FAIL PLATE: cube at x-8.8 sat on the far (port) side, occluded. */
+/** Camera-facing rust stripe at buoy height. Cargo round stopped.
+ *  /g/plate79 FAIL PLATE: cube at x-8.8 sat on the far (port) side, occluded.
+ *  /g/plate80 FAIL PLATE: y=2.4 waterline hid behind the sage dinghies. */
 function hullPlate() {
   const g = new THREE.Group();
   g.userData.dress = "plate";
   g.userData.mode = "PAPER";
 
-  const body = part(18, 3.6, 3.2, 0x6e2e22);
+  const body = part(22, 5.2, 4.2, 0x6e2e22);
   body.userData.part = "body";
   g.add(body);
 
-  const band = part(18.4, 0.8, 3.6, 0xc4b496, false);
-  band.position.y = 0.4;
+  const band = part(22.4, 1.0, 4.6, 0xc4b496, false);
+  band.position.y = 0.6;
   g.add(band);
 
   return g;
@@ -580,12 +581,10 @@ export function makeQuay(spec, helpers) {
     buoy.position.set(x, 5.4, z + toward * 116);
     root.add(buoy);
 
-    /** /g/cargo76–78 FAIL CARGO: pier rust unread from spawn. Round stopped.
-     *  Second buoy-class cube port of the held buoy, still on the cream hull. */
     /** /g/plate79 FAIL PLATE: x-8.8 sat behind the hull from the east camera.
-     *  Wide rust waterline on the camera-facing north face, below the buoy. */
+     *  /g/plate80 FAIL PLATE: y=2.4 hid behind dinghies. Lift to buoy height. */
     const plate = hullPlate();
-    plate.position.set(x, 2.4, z + toward * 114);
+    plate.position.set(x, 5.4, z + toward * 116);
     root.add(plate);
 
     /** /g/ring72 FAIL RING: x+10.2 overlapped the wheelhouse (local x 6–11).
