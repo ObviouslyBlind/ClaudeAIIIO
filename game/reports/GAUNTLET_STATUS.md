@@ -24,7 +24,9 @@ Loop is **live** on playtest bugs (operator: “so many bugs, use the gauntlet�
 
 `/g/house97` **PASS HOUSE**: street land $242, Lease $1,000 → $758, House, Enter interior, Exit. No hang.
 
-Current piece: **`/g/ferry98` FERRY** — Ferry button at north port, kraft ticket $15, confirm to South. No RMB.
+`/g/ferry98` **PASS FERRY**: kraft $15 ticket, confirm crossed to South, no hang. (Pre-D039 build; south was still a void then.)
+
+Current piece: **`/g/south99` SOUTH** — confirm ferry, land on a real south island: green terrain, port pier, walkable, lots. No RMB.
 
 One **pixel critic** at a time. Unique `/g/…` path. No RMB. Do not restart play while a critic is on the page.
 
