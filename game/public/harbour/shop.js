@@ -11,7 +11,7 @@ import * as THREE from "three";
  * seal, a tiny kraft paper weight, a tiny kraft sponge, a tiny kraft
  * brush, a tiny kraft mop, a tiny kraft dustpan, a tiny kraft soap, a tiny
  * kraft ledger, a tiny kraft inkwell, a tiny kraft ruler, a tiny kraft
- * envelope, a short wall shelf with two kraft boxes,
+ * envelope, a tiny kraft wafer, a short wall shelf with two kraft boxes,
  * plus two shelf bays
  * — not the house living room and not the warehouse. No WASD.
  * Tap-to-walk stays in interior.js.
@@ -698,6 +698,29 @@ function kraftEnvelope(x, y, z) {
 }
 
 /**
+ * Tiny kraft PAPER wafer on the counter: cream disc + wood rim.
+ * Paper boxes only. Beside the envelope — not on the ruler, inkwell, ledger,
+ * soap, dustpan, mop, brush, sponge, weight, seal, twine, ribbon, inkpad,
+ * pencil, blotter, coin, or receipt. Existing hexes only.
+ */
+function kraftWafer(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "shop-wafer";
+  g.userData.kind = "shop-wafer";
+  g.userData.mode = "PAPER";
+  g.userData.part = "wafer";
+  g.position.set(x, y, z);
+  const disc = paperBox(0.048, 0.006, 0.048, CREAM, "shop-wafer");
+  disc.userData.part = "wafer";
+  g.add(disc);
+  const rim = paperBox(0.054, 0.004, 0.054, WOOD, "shop-wafer");
+  rim.userData.part = "wafer";
+  rim.position.y = 0.004;
+  g.add(rim);
+  return g;
+}
+
+/**
  * Small standing kraft PAPER shopping bag on the counter: cream body + two
  * thin strap handles. Paper boxes only. Beside the parcel / till, not on them.
  */
@@ -821,6 +844,8 @@ function makeCounter(x, z) {
   g.add(kraftRuler(2.12, topY + 0.054, 0.66));
   // Tiny kraft envelope beside the ruler — cream body + wood flap.
   g.add(kraftEnvelope(2.20, topY + 0.054, 0.82));
+  // Tiny kraft wafer beside the envelope — cream disc + wood rim.
+  g.add(kraftWafer(2.28, topY + 0.054, 0.98));
   // Two small kraft / terracotta jars beside the till. Original TIN + CORAL.
   const kraftJar = paperBox(0.12, 0.16, 0.12, TIN, "shop-goods");
   kraftJar.position.set(0.48, topY + 0.13, -0.04);
