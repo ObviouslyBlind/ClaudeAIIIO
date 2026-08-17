@@ -16,7 +16,8 @@ import * as THREE from "three";
  * kraft PAPER sickle leaning by the workbench, a tiny
  * kraft PAPER scythe leaning by the workbench, a tiny
  * kraft PAPER ladle leaning by the workbench, a tiny
- * kraft PAPER spade leaning by the workbench, and
+ * kraft PAPER spade leaning by the workbench, a tiny
+ * kraft PAPER trowel leaning by the workbench, and
  * dim warm light — not the
  * house living room, warehouse crates, shop, or factory.
  * No WASD. Tap-to-walk stays in interior.js.
@@ -825,6 +826,32 @@ function farmSpade() {
   return g;
 }
 
+/**
+ * Tiny kraft PAPER trowel: wood shaft, kraft blade.
+ * Hexes already in this file (WOOD, KRAFT). PAPER boxes only — no grey.
+ * Leans by the farm workbench; offset from spade, ladle, scythe, sickle,
+ * hoe, rake, broom, seed, lid, mug, egg, pail, lantern, scoop, and the
+ * hanging farm-tools. Not the hanging farm-tool shovel. Not the tiny
+ * kraft PAPER spade or ladle.
+ */
+function farmTrowel() {
+  const g = new THREE.Group();
+  g.name = "farm-trowel";
+  g.userData.kind = "farm-trowel";
+  g.userData.part = "trowel";
+  g.userData.mode = "PAPER";
+  const y0 = 0.16;
+  const shaft = paperBox(0.02, 0.2, 0.02, WOOD, "farm-trowel");
+  shaft.userData.part = "trowel";
+  shaft.position.y = y0 + 0.1;
+  g.add(shaft);
+  const blade = paperBox(0.06, 0.035, 0.045, KRAFT, "farm-trowel");
+  blade.userData.part = "trowel";
+  blade.position.y = y0 + 0.024;
+  g.add(blade);
+  return g;
+}
+
 function workbench(x, z) {
   const g = new THREE.Group();
   g.name = "farm-bench";
@@ -1000,6 +1027,14 @@ function makeFarmDress() {
   paperSpade.position.set(-2.70, 0, -0.18);
   paperSpade.rotation.z = 0.26;
   g.add(paperSpade);
+  const paperTrowel = farmTrowel();
+  // Floor beside the 1.55 × 0.58 bench — leans by the far-right back
+  // edge, not the spade (mid-right at -2.70, 0, -0.18), ladle
+  // (back-center), scythe, sickle, hoe, rake, broom, or the top
+  // (seed, mug, egg, pail, lantern, scoop). Not hanging farm-tools.
+  paperTrowel.position.set(-2.55, 0, -0.42);
+  paperTrowel.rotation.z = -0.28;
+  g.add(paperTrowel);
 
   const loftY = 2.94;
   g.add(sack(0.46, 0.56, 0.36, SACK, -2.55, loftY + 0.28, -2.35, 0.1));
