@@ -499,4 +499,31 @@ describe("quay harbour dressing", () => {
     expect(buoy!.position.z).toBeGreaterThan(-6840);
     expect(buoy!.position.z).toBeLessThan(-6828);
   });
+
+  it("hangs a spawn-readable kraft/rust life ring on the camera-facing hull, offset from the buoy", () => {
+    const spec = ISLANDS.north;
+    const added: THREE.Object3D[] = [];
+    const scene = { add(obj: THREE.Object3D) { added.push(obj); } };
+    const root = makeQuay(spec, { scene, heightAt });
+    const ring = root.children.find((c) => c.userData?.dress === "ring");
+    const buoy = root.children.find((c) => c.userData?.dress === "buoy");
+    expect(ring).toBeTruthy();
+    expect(buoy).toBeTruthy();
+    let body: THREE.Mesh | null = null;
+    ring!.traverse((obj) => {
+      if (obj.userData?.part === "body") body = obj as THREE.Mesh;
+    });
+    expect(body).not.toBeNull();
+    const hexes: number[] = [];
+    ring!.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      const mat = mesh.material as THREE.MeshLambertMaterial | undefined;
+      if (mat?.color) hexes.push(mat.color.getHex());
+    });
+    expect(hexes).toContain(0x6e2e22);
+    expect(hexes).toContain(0xc4b496);
+    expect(ring!.position.x).toBeGreaterThan(6);
+    expect(ring!.position.y).toBeGreaterThan(3);
+    expect(Math.abs(ring!.position.z - buoy!.position.z)).toBeLessThan(1);
+  });
 });
