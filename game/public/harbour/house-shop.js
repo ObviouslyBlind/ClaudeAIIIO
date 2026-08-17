@@ -555,6 +555,30 @@ function makeCounterJug(x, y, z) {
   return g;
 }
 
+/**
+ * Tiny kraft PAPER pot on the counter — tin body, wood handles, cream rim.
+ * PAPER boxes only. Offset from the jug, kettle, jar, pad, bell, cup, saucer,
+ * stamp, blotter, coaster, napkin, spoon, and knife. Not a till.
+ */
+function makeCounterPot(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "house-shop-pot";
+  g.userData.kind = "house-shop-pot";
+  g.userData.mode = "PAPER";
+  g.userData.part = "pot";
+  g.position.set(x, y, z);
+  const body = paperBox(0.09, 0.08, 0.09, TIN, "house-shop-pot");
+  body.position.set(0, 0.04, 0);
+  const rim = paperBox(0.1, 0.02, 0.1, CREAM, "house-shop-pot");
+  rim.position.set(0, 0.09, 0);
+  const handleL = paperBox(0.025, 0.03, 0.025, WOOD, "house-shop-pot");
+  handleL.position.set(-0.06, 0.065, 0);
+  const handleR = paperBox(0.025, 0.03, 0.025, WOOD, "house-shop-pot");
+  handleR.position.set(0.06, 0.065, 0);
+  g.add(body, rim, handleL, handleR);
+  return g;
+}
+
 function tableLamp(x, y, z) {
   const g = new THREE.Group();
   g.name = "house-shop-lamp";
@@ -611,6 +635,8 @@ function makeHouseShopDress() {
   g.add(makeCounterCup(0.48, 1.12, 0.22));
   // Tiny kraft PAPER jug on the counter, offset from kettle, jar, pad, bell, and cup.
   g.add(makeCounterJug(1.08, 1.12, 0.28));
+  // Tiny kraft PAPER pot on the counter, offset from jug, kettle, jar, pad, bell, and cup.
+  g.add(makeCounterPot(-0.96, 1.12, 0.26));
   g.add(paperMark(-2.15, 1.62, 3.38));
 
   const rug = paperBox(1.55, 0.04, 1.25, RUG, "house-shop-rug");
