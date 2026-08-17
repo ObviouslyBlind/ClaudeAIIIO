@@ -69,6 +69,7 @@ Node 22  TypeScript
         │
 Postgres (from step C)     players, plots, orders, offices
 In-memory (step A–B)       current: game/src/sim.ts
+Kernel (K.1)               game/src/kernel/ — players, plot index, events, minerals, menus
 ```
 
 - **Not** Unity WebGL.
@@ -118,6 +119,7 @@ Impeccable stays for HUD chrome later.
 ## Build order vs this file
 
 Step A (now): in-memory tick, no sockets.  
+Step A2: shard kernel — unique plots, persist buildings, minerals, interest.  
 Step B: statutes write sim fields.  
 Step C: Postgres + accounts + HTTP intents.  
 Step D: second book + ferry.  

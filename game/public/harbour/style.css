@@ -248,3 +248,71 @@ h1 { margin: 2px 0; font-size: 20px; }
   color: #1a140c;
   font-weight: 700;
 }
+
+#menu-stack {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: calc(64px + env(safe-area-inset-bottom));
+  z-index: 5;
+  background: var(--panel);
+  border-radius: var(--radius);
+  padding: 10px;
+  pointer-events: auto;
+  max-height: 52vh;
+  overflow: auto;
+}
+#menu-stack[hidden] { display: none !important; }
+#menu-stack .menu-badge {
+  margin: 0;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--btn);
+}
+#menu-crumbs {
+  margin: 4px 0 0;
+  font-size: 11px;
+  color: var(--muted);
+}
+#menu-title {
+  margin: 4px 0 8px;
+  font-size: 18px;
+}
+#menu-body {
+  font-size: 13px;
+}
+#menu-body .menu-note {
+  margin: 0 0 8px;
+  color: var(--muted);
+}
+#menu-body .mineral-row {
+  margin: 0 0 10px;
+  padding: 8px;
+  background: rgba(8, 28, 32, 0.45);
+  border-radius: 6px;
+}
+#menu-body .mineral-row h3 {
+  margin: 0 0 4px;
+  font-size: 15px;
+}
+#menu-body .mineral-row p {
+  margin: 0 0 4px;
+  color: var(--muted);
+}
+.menu-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+.menu-actions button {
+  flex: 1;
+  min-height: 44px;
+  border: 0;
+  border-radius: var(--radius);
+  font-weight: 700;
+  color: #1a140c;
+}
+#menu-back { background: var(--btn); }
+#menu-close { background: #d9cbb3; }
+#btn-minerals { background: #7fa95a; }

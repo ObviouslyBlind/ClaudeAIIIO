@@ -527,6 +527,7 @@ Later: more islands, extra catalog rows, courts, press, live stock book, native 
 | Step | Outcome | How you know it worked |
 |---|---|---|
 | **A. Headless sim** | 1Hz tick, 12 goods, NPC demand, statute table loaded | Empty hour: prices drift, faucets/sinks balance in a band |
+| **A2. Shard kernel** | Unique plots, persist buildings, player table cap 500, minerals catalog, stacked HUD menus, interest queries | House survives restore. No overlapping rings. `/api/minerals` lists ore. 500 player records, bounded interest. See [FOUNDATION.md](FOUNDATION.md). |
 | **B. Starter pack** | ~60 statutes on, sliders write sim fields | Flipping sales tax in the DB changes the next tick’s collections |
 | **C. Player small sites** | Accounts, by-right vendor/farm/artisan mine, persist | Two clients trade; offline orders still fill |
 | **D. Second island + ferry** | Two books, ticket, travel time | Arb exists; raising the ferry statute widens spread |

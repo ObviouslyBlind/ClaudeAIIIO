@@ -1,5 +1,11 @@
 export { GOOD_IDS, GOODS, type GoodId } from "./goods.ts";
 export {
+  KERNEL_VERSION,
+  PLAYER_CAP,
+  mineralsSnapshot,
+  uniquePlotIds,
+} from "./kernel/index.ts";
+export {
   createWorld,
   createVisitor,
   buyFromStall,

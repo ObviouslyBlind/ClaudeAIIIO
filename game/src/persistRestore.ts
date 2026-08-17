@@ -3,6 +3,7 @@
 import type { LandBoard } from "./land.ts";
 import { restoreShard } from "./persist.ts";
 import type { Visitor, World } from "./sim.ts";
+import type { EventLog } from "./kernel/index.ts";
 
 export const RESTORE_NOTE =
   "PAPER restore of last in-memory shard blob. SIMULATED. Not Postgres. Does not restart play.";
@@ -13,6 +14,7 @@ export type LiveSetters = {
   setWorld: (world: World) => void;
   setLand: (land: LandBoard) => void;
   setVisitor: (visitor: Visitor) => void;
+  setEvents?: (events: EventLog) => void;
 };
 
 export type RestoreLiveOk = {
@@ -50,6 +52,7 @@ export function restoreLive(getLastBlob: GetLastBlob, setters: LiveSetters): Res
   setters.setWorld(restored.world);
   setters.setLand(restored.land);
   setters.setVisitor(restored.visitor);
+  if (setters.setEvents) setters.setEvents(restored.events);
 
   return { ok: true, mode: "PAPER", provenance: "SIMULATED", note: RESTORE_NOTE };
 }
