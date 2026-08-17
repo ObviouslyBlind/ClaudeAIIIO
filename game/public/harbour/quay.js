@@ -290,6 +290,27 @@ function channelBuoy() {
   return g;
 }
 
+/** Second buoy-class rust plate, port of the held buoy. Cargo round stopped. */
+function hullPlate() {
+  const g = new THREE.Group();
+  g.userData.dress = "plate";
+  g.userData.mode = "PAPER";
+
+  const body = part(8.2, 8.4, 8.2, 0x6e2e22);
+  body.userData.part = "body";
+  g.add(body);
+
+  const band = part(8.6, 1.6, 8.6, 0xc4b496, false);
+  band.position.y = 1.2;
+  g.add(band);
+
+  const cap = part(6.8, 0.8, 6.8, 0x8a6238, false);
+  cap.position.y = 4.4;
+  g.add(cap);
+
+  return g;
+}
+
 /** Terracotta/kraft life ring on the camera-facing hull, offset from the rust buoy.
  *  /g/ring71 FAIL RING: 1.2 m segs at r=2.8 read as hull furniture from spawn.
  *  /g/ring72 FAIL RING: 8 segs at x+10.2 sat on the wheelhouse and read as cabin.
@@ -561,6 +582,12 @@ export function makeQuay(spec, helpers) {
     const buoy = channelBuoy();
     buoy.position.set(x, 5.4, z + toward * 116);
     root.add(buoy);
+
+    /** /g/cargo76–78 FAIL CARGO: pier rust unread from spawn. Round stopped.
+     *  Second buoy-class cube port of the held buoy, still on the cream hull. */
+    const plate = hullPlate();
+    plate.position.set(x - 8.8, 5.4, z + toward * 116);
+    root.add(plate);
 
     /** /g/ring72 FAIL RING: x+10.2 overlapped the wheelhouse (local x 6–11).
      *  Park on the bow, right of the held buoy, clear of the cabin. */

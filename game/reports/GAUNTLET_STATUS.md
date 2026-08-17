@@ -150,7 +150,11 @@ Pixel: **rust cargo** at `http://localhost:8787/g/cargo77`. Buoy-class rust cube
 
 Pixel: **rust cargo** at `http://localhost:8787/g/cargo78`. Pier-wide rust slab on the north timber, seaward lip, centre of the walk. No RMB. Address bar must be `/g/cargo78`. Do not restart play while the critic is on the page.
 
-## Next pixel (after cargo78 PASS, immediately, no wait)
+`/g/cargo78` **FAIL CARGO**: cyan sky, beige pier, cream ferry, NPCs; pier still uniformly beige, no rust slab. **Cargo round stopped.** Code stays; not pixel-held. Overhead pier rust reads as decking.
+
+Pixel: **rust hull plate** at `http://localhost:8787/g/plate79`. Buoy-class rust cube on the camera-facing cream hull, port (left) of the held buoy. No RMB. Address bar must be `/g/plate79`. Do not restart play while the critic is on the page.
+
+## Next pixel (after plate79 PASS, immediately, no wait)
 
 ## Frozen
 
