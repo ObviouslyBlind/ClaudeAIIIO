@@ -167,7 +167,7 @@ describe("hill and verge trees", () => {
 
     const { meshes, geos } = countMeshes(root);
     expect(meshes).toBeLessThan(MAX_UNIQUE_MESHES);
-    expect(meshes).toBeLessThanOrEqual(27);
+    expect(meshes).toBeLessThanOrEqual(28);
     expect(geos).toBeLessThanOrEqual(6);
     expect(placed.length).toBeGreaterThan(meshes);
 
@@ -2034,6 +2034,164 @@ describe("hill and verge trees", () => {
     expect(others.length).toBeGreaterThan(0);
     for (const p of others) {
       expect(Math.hypot(bloomPos.x - p.x, bloomPos.y - p.y, bloomPos.z - p.z)).toBeGreaterThan(0.01);
+    }
+  });
+
+  it("sits one tiny kraft PAPER catkin on the north-port palm trunk, bloom and bud remain", () => {
+    const map = createLandBoard();
+    const scene = { add(_obj: THREE.Object3D) {} };
+    const root = makeTrees(map, {
+      scene,
+      specOf: (id: "north" | "south") => ISLANDS[id],
+      heightAt,
+    });
+
+    const placed = (root.userData.placed || []) as {
+      island: "north" | "south";
+      x: number;
+      z: number;
+      y: number;
+      role: string;
+      dress?: string;
+    }[];
+    const northPalms = placed.filter((p) => p.island === "north" && p.dress === "north-port-palm");
+    expect(northPalms.length).toBeGreaterThan(0);
+    expect(northPalms.length).toBeLessThanOrEqual(NORTH_PORT_PALM_OFFSETS.length);
+
+    const catkinBoxes: THREE.Mesh[] = [];
+    const bloomBoxes: THREE.Mesh[] = [];
+    const budBoxes: THREE.Mesh[] = [];
+    const sapBoxes: THREE.Mesh[] = [];
+    const acornBoxes: THREE.Mesh[] = [];
+    const needleBoxes: THREE.Mesh[] = [];
+    const lichenBoxes: THREE.Mesh[] = [];
+    const mossBoxes: THREE.Mesh[] = [];
+    const knotBoxes: THREE.Mesh[] = [];
+    const barkBoxes: THREE.Mesh[] = [];
+    const twigBoxes: THREE.Mesh[] = [];
+    const vineBoxes: THREE.Mesh[] = [];
+    const huskBoxes: THREE.Mesh[] = [];
+    const frondBoxes: THREE.Mesh[] = [];
+    const leafBoxes: THREE.Mesh[] = [];
+    root.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (!mesh.isMesh) return;
+      if (mesh.userData.part === "catkin") catkinBoxes.push(mesh);
+      if (mesh.userData.part === "bloom") bloomBoxes.push(mesh);
+      if (mesh.userData.part === "bud") budBoxes.push(mesh);
+      if (mesh.userData.part === "sap") sapBoxes.push(mesh);
+      if (mesh.userData.part === "acorn") acornBoxes.push(mesh);
+      if (mesh.userData.part === "needle") needleBoxes.push(mesh);
+      if (mesh.userData.part === "lichen") lichenBoxes.push(mesh);
+      if (mesh.userData.part === "moss") mossBoxes.push(mesh);
+      if (mesh.userData.part === "knot") knotBoxes.push(mesh);
+      if (mesh.userData.part === "bark") barkBoxes.push(mesh);
+      if (mesh.userData.part === "twig") twigBoxes.push(mesh);
+      if (mesh.userData.part === "vine") vineBoxes.push(mesh);
+      if (mesh.userData.part === "husk") huskBoxes.push(mesh);
+      if (mesh.userData.part === "frond") frondBoxes.push(mesh);
+      if (mesh.userData.part === "leaf") leafBoxes.push(mesh);
+    });
+    expect(catkinBoxes.length).toBe(1);
+    expect(bloomBoxes.length).toBe(1);
+    expect(budBoxes.length).toBe(1);
+    expect(sapBoxes.length).toBe(1);
+    expect(acornBoxes.length).toBe(1);
+    expect(needleBoxes.length).toBe(1);
+    expect(lichenBoxes.length).toBe(1);
+    expect(mossBoxes.length).toBe(1);
+    expect(knotBoxes.length).toBe(1);
+    expect(barkBoxes.length).toBe(1);
+    expect(twigBoxes.length).toBe(1);
+    expect(vineBoxes.length).toBe(1);
+    expect(huskBoxes.length).toBe(1);
+    expect(frondBoxes.length).toBe(1);
+    expect(leafBoxes.length).toBe(1);
+
+    const nuts: THREE.Mesh[] = [];
+    root.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (!mesh.isMesh) return;
+      if (mesh.userData.part === "coconut") nuts.push(mesh);
+    });
+    expect(nuts.length).toBeGreaterThanOrEqual(4);
+
+    const birds: THREE.Object3D[] = [];
+    const nests: THREE.Object3D[] = [];
+    const eggs: THREE.Object3D[] = [];
+    root.traverse((obj) => {
+      if (obj.userData.kind === "bird") birds.push(obj);
+      if (obj.userData.kind === "nest") nests.push(obj);
+      if (obj.userData.kind === "egg") eggs.push(obj);
+    });
+    expect(birds.length).toBe(1);
+    expect(nests.length).toBe(1);
+    expect(eggs.length).toBe(1);
+
+    const kraft = new Set([0x8a6238, 0x9a6a40, 0x3f7a38, 0x2f6b32]);
+    const catkin = catkinBoxes[0];
+    expect(catkin.userData.part).toBe("catkin");
+    expect(catkin.userData.dress).toBe("catkin");
+    expect(catkin.userData.mode).toBe("PAPER");
+    expect(catkin.userData.provenance).toBe("PAPER");
+    expect(catkin.geometry.type).toBe("BoxGeometry");
+    const mat = catkin.material as THREE.MeshLambertMaterial;
+    expect(mat.type).toBe("MeshLambertMaterial");
+    expect(kraft.has(mat.color.getHex())).toBe(true);
+    expect(isGrey(mat.color.getHex())).toBe(false);
+
+    catkin.geometry.computeBoundingBox();
+    const size = new THREE.Vector3();
+    catkin.geometry.boundingBox!.getSize(size);
+    size.multiply(catkin.scale);
+    expect(size.x).toBeLessThan(0.2);
+    expect(size.y).toBeLessThan(0.08);
+    expect(size.z).toBeLessThan(0.15);
+
+    const catkinPos = new THREE.Vector3();
+    catkin.getWorldPosition(catkinPos);
+    const port = ISLANDS.north.port;
+    expect(distToPaved(ISLANDS.north, catkinPos.x, catkinPos.z)).toBeGreaterThanOrEqual(PAVED_CLEAR_M);
+    expect(onPublicQuay(ISLANDS.north, catkinPos.x, catkinPos.z)).toBe(false);
+    expect(heightAt(ISLANDS.north, catkinPos.x, catkinPos.z)).toBeGreaterThanOrEqual(WATER_MIN_M);
+    expect(Math.hypot(catkinPos.x - port.x, catkinPos.z - port.z)).toBeLessThan(400);
+    const atTrunk = northPalms.some((p) => Math.hypot(p.x - catkinPos.x, p.z - catkinPos.z) < 0.5);
+    expect(atTrunk).toBe(true);
+    const nestPos = new THREE.Vector3();
+    nests[0].getWorldPosition(nestPos);
+    expect(catkinPos.y).toBeGreaterThan(nestPos.y + 0.3);
+
+    const others: THREE.Vector3[] = [];
+    root.traverse((obj) => {
+      const part = obj.userData.part;
+      if (
+        part === "bloom" ||
+        part === "bud" ||
+        part === "sap" ||
+        part === "acorn" ||
+        part === "needle" ||
+        part === "lichen" ||
+        part === "moss" ||
+        part === "knot" ||
+        part === "bark" ||
+        part === "twig" ||
+        part === "vine" ||
+        part === "husk" ||
+        part === "frond" ||
+        part === "leaf" ||
+        part === "coconut" ||
+        part === "bird" ||
+        part === "nest" ||
+        part === "egg"
+      ) {
+        const p = new THREE.Vector3();
+        obj.getWorldPosition(p);
+        others.push(p);
+      }
+    });
+    expect(others.length).toBeGreaterThan(0);
+    for (const p of others) {
+      expect(Math.hypot(catkinPos.x - p.x, catkinPos.y - p.y, catkinPos.z - p.z)).toBeGreaterThan(0.01);
     }
   });
 });
