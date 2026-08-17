@@ -1,6 +1,8 @@
 # Two Harbors
 
-Persistent browser economy + politics game. Spec: [PLAN.md](PLAN.md). Backend: [BACKEND.md](BACKEND.md). Land: [LAND.md](LAND.md). Skills: [SKILLS.md](SKILLS.md). Gauntlet: [GAUNTLET.md](GAUNTLET.md).
+Persistent browser economy + politics game. Spec: [PLAN.md](PLAN.md). Backend: [BACKEND.md](BACKEND.md). Land: [LAND.md](LAND.md). Roadmap: [ROADMAP.md](ROADMAP.md). Skills: [SKILLS.md](SKILLS.md). Gauntlet: [GAUNTLET.md](GAUNTLET.md).
+
+The whole island is a priced parcel map now: every lot drawn with boundary ink and a PAPER price tag (`YOURS` on your leases). Wheel zooms out to map height. Each island starts with an NPC town.
 
 ## Now
 
