@@ -379,6 +379,24 @@ function basinCargo() {
   return g;
 }
 
+/** Ped-teal crate on the north timber. Plate round stopped: hull rust unread.
+ *  Peds in 0x2a7a72 passed on this deck; rust-on-beige did not. */
+function pierTeal() {
+  const g = new THREE.Group();
+  g.userData.dress = "teal";
+  g.userData.mode = "PAPER";
+
+  const body = part(5.4, 4.8, 5.4, 0x2a7a72);
+  body.userData.part = "body";
+  g.add(body);
+
+  const band = part(5.8, 0.8, 5.8, 0xc4b496, false);
+  band.position.y = 0.6;
+  g.add(band);
+
+  return g;
+}
+
 /** Crate with a canvas tarp lashed over it. */
 function canvasCrate() {
   const g = new THREE.Group();
@@ -606,6 +624,12 @@ export function makeQuay(spec, helpers) {
     const cargo = basinCargo();
     cargo.position.set(x, deckY + 3.2, pierZ + toward * 40);
     root.add(cargo);
+
+    /** /g/plate81 FAIL PLATE: 22 m stripe still unread. Round stopped.
+     *  Ped-teal crate on the timber — same hex as held pier shirts. */
+    const teal = pierTeal();
+    teal.position.set(x + 3.5, deckY + 2.4, pierZ + toward * 36);
+    root.add(teal);
 
     // Extra kraft stack on the north timber, west of the walk, short of the brow.
     const stackN = crateStack();
