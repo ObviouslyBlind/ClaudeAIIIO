@@ -415,3 +415,58 @@ describe("player PAPER compass", () => {
     expect(box.parameters.depth).toBeLessThan(0.06);
   });
 });
+
+describe("player PAPER flint", () => {
+  it("tucks one tiny kraft PAPER flint on the satchel; compass and whistle remain", () => {
+    const player = makePlayer();
+    expect(player.position.x).toBe(12);
+    expect(player.position.y).toBe(3.4);
+    expect(player.position.z).toBe(-6950);
+    expect(player.userData.mode).toBe("PAPER");
+
+    const figure = player.getObjectByName("paper-figure")!;
+    const p = parts(figure);
+    expect(p.filter((k) => k === "flint").length).toBe(1);
+    expect(p.filter((k) => k === "compass").length).toBe(1);
+    expect(p.filter((k) => k === "whistle").length).toBe(1);
+    expect(p.filter((k) => k === "key").length).toBe(1);
+    expect(p.filter((k) => k === "coin").length).toBe(1);
+    expect(p.filter((k) => k === "ticket").length).toBe(1);
+    expect(p).toContain("satchel");
+
+    const flint = figure.children.find((c) => c.userData.part === "flint") as THREE.Mesh;
+    const compass = figure.children.find((c) => c.userData.part === "compass") as THREE.Mesh;
+    const whistle = figure.children.find((c) => c.userData.part === "whistle") as THREE.Mesh;
+    const key = figure.children.find((c) => c.userData.part === "key") as THREE.Mesh;
+    const coin = figure.children.find((c) => c.userData.part === "coin") as THREE.Mesh;
+    const ticket = figure.children.find((c) => c.userData.part === "ticket") as THREE.Mesh;
+    const satchel = figure.children.find((c) => c.userData.part === "satchel") as THREE.Mesh;
+    expect(flint).toBeTruthy();
+    expect(compass).toBeTruthy();
+    expect(whistle).toBeTruthy();
+    expect(key).toBeTruthy();
+    expect(coin).toBeTruthy();
+    expect(ticket).toBeTruthy();
+    expect(satchel).toBeTruthy();
+    expect(flint.userData.mode).toBe("PAPER");
+    expect(flint.geometry.type).toBe("BoxGeometry");
+    const flintHex = (flint.material as THREE.MeshLambertMaterial).color.getHex();
+    expect(flintHex).toBe(KRAFT);
+    expect(isGrey(flintHex)).toBe(false);
+    expect(flint.position.x).not.toBeCloseTo(compass.position.x, 1);
+    expect(flint.position.y).not.toBeCloseTo(compass.position.y, 1);
+    expect(flint.position.x).not.toBeCloseTo(whistle.position.x, 1);
+    expect(flint.position.y).not.toBeCloseTo(whistle.position.y, 1);
+    expect(flint.position.y).not.toBeCloseTo(key.position.y, 1);
+    expect(flint.position.y).not.toBeCloseTo(coin.position.y, 1);
+    expect(flint.position.y).not.toBeCloseTo(ticket.position.y, 1);
+    expect(flint.position.x).toBeGreaterThan(satchel.position.x - 0.12);
+    expect(flint.position.x).toBeLessThan(satchel.position.x + 0.12);
+    expect(flint.position.y).toBeGreaterThan(0.6);
+    expect(flint.position.y).toBeLessThan(1.05);
+    const box = flint.geometry as THREE.BoxGeometry;
+    expect(box.parameters.width).toBeLessThan(0.12);
+    expect(box.parameters.height).toBeLessThan(0.08);
+    expect(box.parameters.depth).toBeLessThan(0.06);
+  });
+});

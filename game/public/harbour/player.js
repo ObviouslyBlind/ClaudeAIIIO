@@ -62,6 +62,7 @@ function paperBox(w, h, d, color) {
  *   key     y 0.64–0.68   (0.46, 0.66, 0.16)    0.05×0.03×0.01   kraft, satchel
  *   whistle y 0.78–0.82   (0.36, 0.80, 0.16)    0.05×0.03×0.01   kraft, satchel
  *   compass y 0.60–0.62   (0.28, 0.61, 0.16)    0.05×0.03×0.01   kraft, satchel
+ *   flint   y 0.93–0.96   (0.44, 0.94, 0.16)    0.05×0.03×0.01   kraft, satchel
  *   strap   y 0.92–1.40   (0.05, 1.14, 0.16)    0.04×0.82×0.02   cross-body
  *
  * Hat crown ≈ 1.98 m. Eyes ≈ 1.62 m local → world y ≈ player.y + 0.47.
@@ -191,6 +192,11 @@ export function dressPlayer(player) {
   compass.position.set(0.28, 0.61, 0.16);
   compass.userData.mode = "PAPER";
   compass.userData.part = "compass";
+  // Tiny kraft PAPER flint on the satchel face. Offset from compass, whistle, key, coin, ticket.
+  const flint = paperBox(0.05, 0.03, 0.01, KRAFT);
+  flint.position.set(0.44, 0.94, 0.16);
+  flint.userData.mode = "PAPER";
+  flint.userData.part = "flint";
   const strap = paperBox(0.04, 0.82, 0.02, STRAP);
   strap.position.set(0.05, 1.14, 0.16);
   strap.rotation.z = -Math.atan2(0.7, 0.44);
@@ -238,6 +244,7 @@ export function dressPlayer(player) {
     key,
     whistle,
     compass,
+    flint,
     strap,
   );
   player.add(figure);
