@@ -2,7 +2,7 @@
 
 ## 2026-08-17 (latest)
 
-**Current status:** `/g/south102` PASS SOUTH — freeze gone (D042 observer loop + D043 slim trickle). Capstone `/g/loop103` full-loop critic. PAPER / SIMULATED. Politics frozen.
+**Current status:** `/g/loop103` PASS LOOP — full session (walk, lease, House, Enter/Exit, taxi, ferry to South) with zero freezes. Base game is playable end to end. PAPER / SIMULATED. Politics frozen.
 
 ## 2026-08-16
 

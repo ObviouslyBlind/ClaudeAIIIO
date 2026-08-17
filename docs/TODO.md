@@ -55,7 +55,8 @@ Politics frozen. See `game/reports/GAUNTLET_STATUS.md`. New chat: `game/reports/
 - [x] Operator: bring decoration back without the freeze — trickle dressing (D041).
 - [x] `/g/south101` FAIL SOUTH — quay/foam trickle froze the idle (D043 cars+ferry only).
 - [x] `/g/south102` PASS SOUTH — ferry, real landfall, 60 s idle, no freeze.
-- [ ] `/g/loop103` LOOP — full session: lease, House, Enter/Exit, Taxi, ferry.
+- [x] `/g/loop103` PASS LOOP — full session held end to end, zero freezes.
+- [ ] Perf pass: return quay clutter / foam / trees without main-thread builds.
 - [x] Bug scout: south island void after ferry, invisible restored buildings, dead pier taps (D039).
 - [x] Playtest: taxi missing + 86 m pier on sand — taxi at boot, pier over water (D037).
 - [x] Pixel green basin crate (`/g/green86`–`87` FAIL GREEN — round stopped, not pixel-held)
