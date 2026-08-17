@@ -25,6 +25,8 @@ describe("harbour boot import graph", () => {
     expect(src).not.toContain("await loadDressing(");
     expect(src).toContain("void loadDressing()");
     expect(src).toContain("SPAWN_PARCEL_M = 420");
+    expect(src).toContain('p.band !== "street"');
+    expect(src).toContain("STARTER_SNAP_M = 40");
     expect(src).toContain("DRESSING_AFTER_WALK_MS = 45000");
     expect(src).toContain("DRESSING_FALLBACK_MS = 120000");
     expect(src).toContain("scheduleDressing(DRESSING_AFTER_WALK_MS)");

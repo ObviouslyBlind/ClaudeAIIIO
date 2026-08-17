@@ -20,7 +20,9 @@ Loop is **live** on playtest bugs (operator: “so many bugs, use the gauntlet�
 
 `/g/play95` **PASS PLAY**: yellow cab on the north paved road, Taxi button hails (“waiting on paved”), short timber pier over water, no hang.
 
-Current piece: **`/g/house96` HOUSE** — inland lot → Lease if needed → Develop House → Enter → Exit. No RMB.
+`/g/house96` **FAIL HOUSE**: inland tap selected a 6,522 m² field at $1,121 with $970 cash; Lease stayed disabled. D038: spawn only cheap street lots.
+
+Current piece: **`/g/house97` HOUSE** — inland street lot → Lease → Develop House → Enter → Exit. No RMB.
 
 One **pixel critic** at a time. Unique `/g/…` path. No RMB. Do not restart play while a critic is on the page.
 
