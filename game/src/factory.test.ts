@@ -1343,3 +1343,97 @@ describe("factory PAPER kraft file", () => {
     expect(fileBoxes).toBeGreaterThanOrEqual(2);
   });
 });
+
+function factoryPaperChisels(root: THREE.Object3D) {
+  const out: THREE.Object3D[] = [];
+  root.traverse((obj) => {
+    if (obj.userData?.part === "chisel") {
+      out.push(obj);
+    }
+  });
+  return out;
+}
+
+describe("factory PAPER kraft chisel", () => {
+  it("puts one tiny kraft PAPER chisel on a factory bench; file, rasp, and awl remain", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressFactory(scene);
+
+    const dress = interior.getObjectByName("factory-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+
+    const chisels = factoryPaperChisels(dress!);
+    expect(chisels.length).toBe(1);
+    const chisel = chisels[0];
+    expect(chisel.userData.part).toBe("chisel");
+    expect(chisel.userData.mode).toBe("PAPER");
+    expect(chisel.userData.part).not.toBe("file");
+    expect(chisel.userData.part).not.toBe("rasp");
+    expect(chisel.userData.part).not.toBe("awl");
+    expect(chisel.userData.part).not.toBe("shaving");
+    expect(chisel.userData.part).not.toBe("peg");
+    expect(chisel.userData.part).not.toBe("cork");
+    expect(chisel.userData.part).not.toBe("funnel");
+    expect(chisel.userData.part).not.toBe("oilcan");
+    expect(chisel.userData.part).not.toBe("rag");
+    expect(chisel.userData.part).not.toBe("rivet");
+    expect(chisel.userData.part).not.toBe("wrench");
+
+    expect(factoryPaperFiles(dress!).length).toBe(1);
+    expect(factoryPaperRasps(dress!).length).toBe(1);
+    expect(factoryPaperAwls(dress!).length).toBe(1);
+
+    const file = factoryPaperFiles(dress!)[0];
+    const rasp = factoryPaperRasps(dress!)[0];
+    const awl = factoryPaperAwls(dress!)[0];
+    const shaving = factoryPaperShavings(dress!)[0];
+    const peg = factoryPaperPegs(dress!)[0];
+    const cork = factoryPaperCorks(dress!)[0];
+    const funnel = factoryPaperFunnels(dress!)[0];
+    const can = factoryPaperOilcans(dress!)[0];
+    const rag = factoryRags(dress!)[0];
+    const rivet = factoryRivets(dress!)[0];
+    const wrench = factoryTools(dress!)[0];
+    const toFile = Math.hypot(chisel.position.x - file.position.x, chisel.position.z - file.position.z);
+    const toRasp = Math.hypot(chisel.position.x - rasp.position.x, chisel.position.z - rasp.position.z);
+    const toAwl = Math.hypot(chisel.position.x - awl.position.x, chisel.position.z - awl.position.z);
+    const toShaving = Math.hypot(chisel.position.x - shaving.position.x, chisel.position.z - shaving.position.z);
+    const toPeg = Math.hypot(chisel.position.x - peg.position.x, chisel.position.z - peg.position.z);
+    const toCork = Math.hypot(chisel.position.x - cork.position.x, chisel.position.z - cork.position.z);
+    const toFunnel = Math.hypot(chisel.position.x - funnel.position.x, chisel.position.z - funnel.position.z);
+    const toCan = Math.hypot(chisel.position.x - can.position.x, chisel.position.z - can.position.z);
+    const toRag = Math.hypot(chisel.position.x - rag.position.x, chisel.position.z - rag.position.z);
+    const toRivet = Math.hypot(chisel.position.x - rivet.position.x, chisel.position.z - rivet.position.z);
+    const toWrench = Math.hypot(chisel.position.x - wrench.position.x, chisel.position.z - wrench.position.z);
+    expect(toFile).toBeGreaterThan(0.5);
+    expect(toRasp).toBeGreaterThan(0.5);
+    expect(toAwl).toBeGreaterThan(0.5);
+    expect(toShaving).toBeGreaterThan(0.5);
+    expect(toPeg).toBeGreaterThan(0.5);
+    expect(toCork).toBeGreaterThan(0.5);
+    expect(toFunnel).toBeGreaterThan(0.5);
+    expect(toCan).toBeGreaterThan(0.5);
+    expect(toRag).toBeGreaterThan(0.5);
+    expect(toRivet).toBeGreaterThan(0.5);
+    expect(toWrench).toBeGreaterThan(0.5);
+
+    const chiselColors = hexes(chisel);
+    expect(chiselColors.length).toBeGreaterThan(0);
+    expect(chiselColors.some((c) => c === KRAFT)).toBe(true);
+    expect(chiselColors.every((c) => [KRAFT, 0x9a6a40, 0x6a4a32].includes(c))).toBe(true);
+
+    let chiselBoxes = 0;
+    chisel.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        chiselBoxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.mode).toBe("PAPER");
+      }
+    });
+    expect(chiselBoxes).toBeGreaterThanOrEqual(2);
+  });
+});
