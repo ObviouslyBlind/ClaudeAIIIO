@@ -8,11 +8,14 @@ Kernel contract: **[FOUNDATION.md](../FOUNDATION.md)**. Fable 5 notes: **[FABLE5
 
 ## You are here
 
-Shard kernel K.1. Operator playtest bar is still **`http://localhost:8787/`**. Houses must survive Restore. Minerals dock lists ore. Politics frozen.
-
-Do **not** restart `/g/` critics.
+Shard kernel K.1. **Play restart wipes.** No Restore button on the sheet. Minerals dock lists ore. Politics frozen.
 
 ## Play
+
+The harbour is a Node process on this VM, port **8787**.
+
+- **Cursor Desktop:** plug icon → forward **8787** → Open. That is how you play.
+- **Web-only cursor.com/agents:** you cannot hit this VM as localhost. Do not try `localhost:8787` in Safari/Chrome on your laptop.
 
 ```bash
 cd /workspace/game
@@ -20,13 +23,7 @@ npm test
 npm run play          # or game/scripts/restart-play.sh
 ```
 
-Open **`http://localhost:8787/`**. Close leftover `/g/` tabs.
-
-- Port **8787**. tmux session `two-harbors-play`. Binds `0.0.0.0:8787`.
-- Cursor Desktop: plug icon → Auto-Forward Ports → open **8787**. Web-only agents do not put that port on your laptop.
-- Left click / tap = walk or use. RMB-hold = orbit. Wheel = zoom. No WASD. No wallet.
-- Taxi: stand on paved, hail, tap a named stop (Port / Mill St / …). Dirt forbidden.
-- Ferry: near a port, ticket PAPER $15, North ↔ South.
+Left click / tap = walk or use. RMB-hold = orbit. Wheel = zoom. No WASD. No wallet. Taxi on paved. Ferry $15 North ↔ South.
 
 ## Git / PR
 
