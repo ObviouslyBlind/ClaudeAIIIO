@@ -938,4 +938,92 @@ describe("ferry berth", () => {
     new THREE.Box3().setFromObject(fender).getSize(fenderSize);
     expect(Math.max(fenderSize.x, fenderSize.y, fenderSize.z)).toBeGreaterThan(2.4);
   });
+
+  it("sits one tiny kraft PAPER chock on the cream deck; other PAPER parts remain", () => {
+    expect(HOME_Z).toBe(-6835);
+    const mesh = makeFerry();
+    expect(mesh.position.z).toBe(-6835);
+    const tagged: THREE.Object3D[] = [];
+    mesh.traverse((obj) => {
+      if (obj.userData?.part) tagged.push(obj);
+    });
+    const chocks = tagged.filter((o) => o.userData.part === "chock");
+    expect(chocks.length).toBeGreaterThanOrEqual(1);
+    for (const name of [
+      "stopper",
+      "plug",
+      "coaming",
+      "wedge",
+      "grommet",
+      "hatch",
+      "scupper",
+      "hawser",
+      "bucket",
+      "oar",
+      "cleat",
+      "rail",
+      "fender",
+      "bollard",
+      "lantern",
+      "handle",
+      "smoke",
+      "horn",
+    ]) {
+      expect(tagged.some((o) => o.userData.part === name)).toBe(true);
+    }
+
+    const chock = chocks[0];
+    expect(chock.userData.part).toBe("chock");
+    expect(chock.userData.mode).toBe("PAPER");
+    expect(chock.position.y).toBeGreaterThan(1.5);
+    expect(chock.position.y).toBeLessThan(2.3);
+    expect(Math.abs(chock.position.z)).toBeLessThan(5);
+    const chockSize = new THREE.Vector3();
+    new THREE.Box3().setFromObject(chock).getSize(chockSize);
+    expect(chockSize.x).toBeLessThan(0.8);
+    expect(chockSize.y).toBeLessThan(0.5);
+    expect(chockSize.z).toBeLessThan(0.8);
+    chock.traverse((child) => {
+      const m = child as THREE.Mesh;
+      if (!m.isMesh) return;
+      expect(m.geometry.type).toBe("BoxGeometry");
+      const hex = (m.material as THREE.MeshLambertMaterial).color.getHex();
+      expect(hex).toBe(0xc4b496);
+    });
+
+    for (const name of [
+      "stopper",
+      "plug",
+      "coaming",
+      "wedge",
+      "grommet",
+      "hatch",
+      "scupper",
+      "hawser",
+      "bucket",
+      "oar",
+      "cleat",
+      "rail",
+      "fender",
+      "bollard",
+      "lantern",
+      "handle",
+      "smoke",
+      "horn",
+    ]) {
+      for (const other of tagged) {
+        if (other === chock) continue;
+        if (other.userData.part !== name) continue;
+        const dx = chock.position.x - other.position.x;
+        const dz = chock.position.z - other.position.z;
+        expect(Math.hypot(dx, dz)).toBeGreaterThan(1.5);
+      }
+    }
+
+    const fender = tagged.find((o) => o.userData.part === "fender")!;
+    expect(fender.position.z).toBeLessThan(-5.5);
+    const fenderSize = new THREE.Vector3();
+    new THREE.Box3().setFromObject(fender).getSize(fenderSize);
+    expect(Math.max(fenderSize.x, fenderSize.y, fenderSize.z)).toBeGreaterThan(2.4);
+  });
 });

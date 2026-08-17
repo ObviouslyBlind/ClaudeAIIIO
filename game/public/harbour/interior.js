@@ -343,6 +343,21 @@ function makeTureen(x, y, z) {
   return g;
 }
 
+/** Tiny kraft PAPER platter on the table — wood rim, plaster well, linen center. Boxes only. */
+function makePlatter(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "platter";
+  g.userData.kind = "interior-platter";
+  g.userData.mode = "PAPER";
+  g.userData.part = "platter";
+  g.position.set(x, y, z);
+  const paper = { mode: "PAPER", part: "platter" };
+  g.add(box(0.13, 0.007, 0.08, WOOD, 0, 0.004, 0, "interior-platter", paper));
+  g.add(box(0.105, 0.009, 0.062, PLASTER, 0, 0.011, 0, "interior-platter", paper));
+  g.add(box(0.07, 0.006, 0.04, LINEN, 0, 0.016, 0, "interior-platter", paper));
+  return g;
+}
+
 /** Tiny kraft PAPER saucer on the table — wood rim, plaster well, linen center. Boxes only. */
 function makeSaucer(x, y, z) {
   const g = new THREE.Group();
@@ -544,7 +559,7 @@ function makeBed(cx, floorY, cz) {
 
 /**
  * PAPER Caribbean house: plaster walls, wood floors, window openings,
- * downstairs table/chairs/stool/lamp/clock/picture/vase/mug/saucer/bowl/pitcher/tray/crock/book/napkin/spoon/fork/knife/plate/cup, upstairs bed. Low-poly boxes only.
+ * downstairs table/chairs/stool/lamp/clock/picture/vase/mug/saucer/bowl/pitcher/tray/crock/tureen/platter/book/napkin/spoon/fork/knife/plate/cup, upstairs bed. Low-poly boxes only.
  */
 export function makeInteriorScene() {
   const group = new THREE.Group();
@@ -608,6 +623,8 @@ export function makeInteriorScene() {
   down.add(makeCrock(-0.88, 0.955, -0.28));
   // Kraft PAPER tureen on the table top — offset from crock, tray, pitcher, vase, mug, saucer, bowl, book, napkin, spoon, fork, knife, plate, cup.
   down.add(makeTureen(0.55, 0.955, 0.08));
+  // Kraft PAPER platter on the table top — offset from tureen, crock, tray, pitcher, bowl, saucer, mug, napkin, spoon, fork, knife, plate, cup.
+  down.add(makePlatter(0.66, 0.955, -0.2));
   // Kraft PAPER book on the table top — offset from the mug and vase.
   down.add(makeBook(-0.05, 0.955, 0.08));
   // Kraft PAPER napkin on the table top — offset from the mug, vase, and book.
