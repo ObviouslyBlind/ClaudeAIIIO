@@ -1210,4 +1210,100 @@ describe("ferry berth", () => {
     new THREE.Box3().setFromObject(fender).getSize(fenderSize);
     expect(Math.max(fenderSize.x, fenderSize.y, fenderSize.z)).toBeGreaterThan(2.4);
   });
+
+  it("sits one tiny kraft PAPER thimble on the cream deck; other PAPER parts remain", () => {
+    expect(HOME_Z).toBe(-6835);
+    const mesh = makeFerry();
+    expect(mesh.position.z).toBe(-6835);
+    const tagged: THREE.Object3D[] = [];
+    mesh.traverse((obj) => {
+      if (obj.userData?.part) tagged.push(obj);
+    });
+    const thimbles = tagged.filter((o) => o.userData.part === "thimble");
+    expect(thimbles.length).toBeGreaterThanOrEqual(1);
+    for (const name of [
+      "tiller",
+      "bitt",
+      "chock",
+      "stopper",
+      "plug",
+      "coaming",
+      "wedge",
+      "grommet",
+      "hatch",
+      "scupper",
+      "hawser",
+      "bucket",
+      "oar",
+      "cleat",
+      "rail",
+      "fender",
+      "bollard",
+      "lantern",
+      "handle",
+      "smoke",
+      "horn",
+      "lifering",
+    ]) {
+      expect(tagged.some((o) => o.userData.part === name)).toBe(true);
+    }
+
+    const thimble = thimbles[0];
+    expect(thimble.userData.part).toBe("thimble");
+    expect(thimble.userData.mode).toBe("PAPER");
+    expect(thimble.position.y).toBeGreaterThan(1.5);
+    expect(thimble.position.y).toBeLessThan(2.3);
+    expect(Math.abs(thimble.position.z)).toBeLessThan(5);
+    const thimbleSize = new THREE.Vector3();
+    new THREE.Box3().setFromObject(thimble).getSize(thimbleSize);
+    expect(thimbleSize.x).toBeLessThan(0.8);
+    expect(thimbleSize.y).toBeLessThan(0.5);
+    expect(thimbleSize.z).toBeLessThan(0.8);
+    thimble.traverse((child) => {
+      const m = child as THREE.Mesh;
+      if (!m.isMesh) return;
+      expect(m.geometry.type).toBe("BoxGeometry");
+      const hex = (m.material as THREE.MeshLambertMaterial).color.getHex();
+      expect(hex).toBe(0xc4b496);
+    });
+
+    for (const name of [
+      "tiller",
+      "bitt",
+      "chock",
+      "stopper",
+      "plug",
+      "coaming",
+      "wedge",
+      "scupper",
+      "hatch",
+      "grommet",
+      "handle",
+      "bollard",
+      "lifering",
+      "hawser",
+      "bucket",
+      "oar",
+      "cleat",
+      "rail",
+      "fender",
+      "lantern",
+      "smoke",
+      "horn",
+    ]) {
+      for (const other of tagged) {
+        if (other === thimble) continue;
+        if (other.userData.part !== name) continue;
+        const dx = thimble.position.x - other.position.x;
+        const dz = thimble.position.z - other.position.z;
+        expect(Math.hypot(dx, dz)).toBeGreaterThan(1.5);
+      }
+    }
+
+    const fender = tagged.find((o) => o.userData.part === "fender")!;
+    expect(fender.position.z).toBeLessThan(-5.5);
+    const fenderSize = new THREE.Vector3();
+    new THREE.Box3().setFromObject(fender).getSize(fenderSize);
+    expect(Math.max(fenderSize.x, fenderSize.y, fenderSize.z)).toBeGreaterThan(2.4);
+  });
 });
