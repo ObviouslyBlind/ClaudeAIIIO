@@ -402,6 +402,22 @@ function addKraftPaperPouch(figure) {
 }
 
 /**
+ * Tiny kraft PAPER cane in the left hand. Original canvas hex already
+ * in this file — no new grey. PAPER box only. Hat, apron, satchel,
+ * gloves, tin, pin, basket, loaf, parcel, flask, bundle, can, match,
+ * pipe, cigar, gourd, torch, sack, pouch, boots stay. Offset from the
+ * pouch, sack, torch, gourd, cigar, pipe, match, can, bundle, flask,
+ * and parcel.
+ */
+function addKraftPaperCane(figure) {
+  const cane = paperBox(0.04, 0.08, 0.04, CANVAS);
+  cane.position.set(-0.45, 1.10, -0.55);
+  cane.userData.mode = "PAPER";
+  cane.userData.part = "cane";
+  figure.add(cane);
+}
+
+/**
  * Short kraft work-boot shafts above each shoe so dock hands read as
  * boots, not socks on boxes. Original shoe hex already in this file —
  * no new grey. PAPER boxes only. Existing shoes stay.
@@ -593,6 +609,7 @@ export function makePedestrians(map, helpers) {
       addKraftPaperTorch(person.mesh);
       addKraftPaperSack(person.mesh);
       addKraftPaperPouch(person.mesh);
+      addKraftPaperCane(person.mesh);
       lightQuayShirt(person.mesh);
     }
     const at = samplePerson(spec, heightAt, person, along);
