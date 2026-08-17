@@ -29,6 +29,8 @@ export const NAMETAG_PIN = true;
 export const NAMETAG_TAB = true;
 /** Tiny kraft PAPER stud on the card. 3D box, existing walker hex. */
 export const NAMETAG_STUD = true;
+/** Tiny kraft PAPER rivet on the card. 3D box, existing walker hex. */
+export const NAMETAG_RIVET = true;
 
 const SKIN = 0xf2d2a8;
 const PANTS = 0x6e4a32;
@@ -158,6 +160,26 @@ export function makeNametagStud() {
   stud.material.depthTest = false;
   stud.position.set(0.0, 0.32, 0.05);
   return stud;
+}
+
+/**
+ * Tiny kraft PAPER rivet on the card face. PANTS brown box —
+ * not grey metal. Offset from the clip (top-left), string, pin (lower-right),
+ * tab (lower-left), stud, fold (top-right), and punch-hole (top-centre).
+ * Sprite-local so it stays a rivet on the kraft card.
+ */
+export function makeNametagRivet() {
+  const rivet = paperBox(0.04, 0.04, 0.025, PANTS);
+  rivet.name = "paper-nametag-rivet";
+  rivet.userData.part = "rivet";
+  rivet.userData.mode = "PAPER";
+  rivet.castShadow = false;
+  rivet.receiveShadow = false;
+  rivet.frustumCulled = false;
+  rivet.renderOrder = 4;
+  rivet.material.depthTest = false;
+  rivet.position.set(-0.24, 0.62, 0.05);
+  return rivet;
 }
 
 /** Tracked letters so PAPER reads as a stamp even without canvas letterSpacing. */
@@ -305,6 +327,7 @@ export function makePaperNametag(name) {
   if (NAMETAG_PIN) sprite.add(makeNametagPin());
   if (NAMETAG_TAB) sprite.add(makeNametagTab());
   if (NAMETAG_STUD) sprite.add(makeNametagStud());
+  if (NAMETAG_RIVET) sprite.add(makeNametagRivet());
   return sprite;
 }
 

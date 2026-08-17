@@ -6,11 +6,13 @@ import {
   NAMETAG_HOLE,
   NAMETAG_NEAR_M,
   NAMETAG_PIN,
+  NAMETAG_RIVET,
   NAMETAG_STRING,
   NAMETAG_STUD,
   NAMETAG_TAB,
   makeNametagClip,
   makeNametagPin,
+  makeNametagRivet,
   makeNametagString,
   makeNametagStud,
   makeNametagTab,
@@ -56,7 +58,7 @@ function mockCtx() {
 }
 
 describe("outdoor PAPER nametags", () => {
-  it("keeps a kraft folded corner, punch-hole, clip, string, pin, tab, stud, and still stamps PAPER", () => {
+  it("keeps a kraft folded corner, punch-hole, clip, string, pin, tab, stud, rivet, and still stamps PAPER", () => {
     expect(NAMETAG_FOLD).toBe(true);
     expect(NAMETAG_HOLE).toBe(true);
     expect(NAMETAG_CLIP).toBe(true);
@@ -64,6 +66,7 @@ describe("outdoor PAPER nametags", () => {
     expect(NAMETAG_PIN).toBe(true);
     expect(NAMETAG_TAB).toBe(true);
     expect(NAMETAG_STUD).toBe(true);
+    expect(NAMETAG_RIVET).toBe(true);
     expect(NAMETAG_NEAR_M).toBeGreaterThanOrEqual(200);
     const ctx = mockCtx();
     paintPaperNametagCard(ctx, 512, 128, "Ferry clerk");
@@ -148,6 +151,21 @@ describe("outdoor PAPER nametags", () => {
     expect(stud.position.distanceTo(cord.position)).toBeGreaterThan(0.25);
     expect(stud.position.distanceTo(pin.position)).toBeGreaterThan(0.25);
     expect(stud.position.distanceTo(tab.position)).toBeGreaterThan(0.25);
+
+    const rivet = makeNametagRivet();
+    expect(rivet.userData.part).toBe("rivet");
+    expect(rivet.userData.mode).toBe("PAPER");
+    expect(rivet.geometry.type).toBe("BoxGeometry");
+    expect((rivet.material as THREE.MeshLambertMaterial).color.getHex()).toBe(0x6e4a32);
+    const rv = (rivet.geometry as THREE.BoxGeometry).parameters;
+    expect(rv.width).toBeLessThan(0.12);
+    expect(rv.height).toBeLessThan(0.12);
+    expect(rv.depth).toBeLessThan(0.12);
+    expect(rivet.position.distanceTo(clip.position)).toBeGreaterThan(0.25);
+    expect(rivet.position.distanceTo(cord.position)).toBeGreaterThan(0.25);
+    expect(rivet.position.distanceTo(pin.position)).toBeGreaterThan(0.25);
+    expect(rivet.position.distanceTo(tab.position)).toBeGreaterThan(0.25);
+    expect(rivet.position.distanceTo(stud.position)).toBeGreaterThan(0.25);
 
     expect(makePaperNametag("Ferry clerk")).toBeNull();
   });
