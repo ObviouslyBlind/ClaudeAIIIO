@@ -24,7 +24,7 @@ come to the player later, the player does not blink across the map).
 - Printed-map terrain greens so the plat reads on top.
 - Instanced props (bushes / rocks / barrels / benches) off-road and off-parcel.
 - **South first loop HUD:** no handheld wagon. Green tap-to-walk line. Floating chrome
-  (tutorials / leaderboard / account, world / foot traffic / logistics / minerals,
+  (leaderboard / account, world / foot traffic / logistics / minerals,
   inventory / market / employees). Market van delivers a hotdog cart crate to a
   leased South plot. Place, stock, hire or run, earn $0.10 PAPER per dog.
 

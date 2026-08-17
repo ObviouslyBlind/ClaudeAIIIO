@@ -5,15 +5,6 @@
 
 export const POLL_MS = 1000;
 
-const TUTORIALS = [
-  "Toggle Foot traffic. Green streets sell faster. Lease a South plot there.",
-  "Open Market. Order a hotdog cart (and hotdogs) delivered to your plot.",
-  "A van drives the paved roads and drops a crate. Walk over and Take all.",
-  "Inventory → Place in world. Foot traffic lights stay on while you place.",
-  "Right-click the cart (short click, not a drag) to load hotdogs.",
-  "Employees → Hire, or stand by the cart to run it yourself. $0.10 PAPER per dog.",
-];
-
 function money(n) {
   const v = Number(n);
   if (!Number.isFinite(v)) return "$0";
@@ -235,16 +226,6 @@ export function mountChrome(opts) {
     });
   }
 
-  function paintTutorials() {
-    const body = document.getElementById("tut-body");
-    if (!body) return;
-    body.innerHTML = `
-      <p class="float-kicker">PAPER · SIMULATED</p>
-      <h2>Tutorials</h2>
-      <ol>${TUTORIALS.map((t) => `<li>${t}</li>`).join("")}</ol>
-    `;
-  }
-
   function paintBoard() {
     const body = document.getElementById("board-body");
     if (!body || !play) return;
@@ -274,7 +255,6 @@ export function mountChrome(opts) {
     paintMarket();
     paintInv();
     paintStaff();
-    paintTutorials();
     paintBoard();
     paintAccount();
   }

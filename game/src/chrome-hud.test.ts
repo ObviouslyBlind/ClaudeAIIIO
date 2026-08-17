@@ -14,5 +14,8 @@ describe("harbour chrome HUD", () => {
     expect(html).toContain('id="chrome"');
     expect(html).toContain("South port");
     expect(html).toContain('id="cart">PAPER<');
+    expect(html).not.toContain('data-panel="tutorials"');
+    expect(html).not.toContain("Tutorials");
+    expect(html).not.toContain("script-coach");
   });
 });

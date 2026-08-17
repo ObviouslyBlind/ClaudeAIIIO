@@ -13,7 +13,7 @@ Windows: `play.cmd` or `play-laptop.cmd`. From `game/`: `npm run play` / `npm ru
 
 ## UI
 - Top left: **Two Harbors** (green), players online, balance + $/min
-- Top right: Tutorials / Leaderboard / Account, then World / Foot traffic / Logistics / Minerals
+- Top right: Leaderboard / Account, then World / Foot traffic / Logistics / Minerals
 - Left rail: Inventory / Market / Employees — floating panels, not extra pages
 - Tap-to-walk draws a green line. RMB-hold still orbits. Short RMB on a cart opens stock/hire.
 
