@@ -164,13 +164,11 @@ Pixel: **rust hull stripe** at `http://localhost:8787/g/plate81`. Wide rust band
 
 `/g/plate81` **FAIL PLATE**: cream hull with one small rust buoy blob; 22 m stripe at buoy height still unread. **Plate round stopped.** Code stays; not pixel-held.
 
-Pixel: **teal pier crate** at `http://localhost:8787/g/teal82`. Ped-shirt teal cube on the north timber, east of the walk. No RMB. Address bar must be `/g/teal82`. Do not restart play while the critic is on the page.
+`/g/teal82` **FAIL TEAL**: pier uniformly beige; 5.4 m teal cube sat inside the unread 12×16 cargo slab. Crate is now buoy-class (8.2 m), no kraft cap, stacked on top of that slab, east of the walk on the 11 m deck.
 
-Critic **in flight** on `/g/teal82` (play restarted after plate81; JS serves `pierTeal()`). Do not restart play until that critic finishes.
+Pixel: **teal pier crate** at `http://localhost:8787/g/teal83`. Ped-shirt teal cube sitting on the north timber (above the unread cargo), east of the walk. No RMB. Address bar must be `/g/teal83`. Do not restart play while the critic is on the page.
 
-Stash-pop conflict markers on harbour extras were resolved by keeping HEAD (`842a570f`). House stoop already existed — no duplicate.
-
-## Next pixel (after teal82 PASS, immediately, no wait)
+## Next pixel (after teal83 PASS, immediately, no wait)
 
 ## Frozen
 

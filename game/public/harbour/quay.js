@@ -380,19 +380,19 @@ function basinCargo() {
 }
 
 /** Ped-teal crate on the north timber. Plate round stopped: hull rust unread.
- *  Peds in 0x2a7a72 passed on this deck; rust-on-beige did not. */
+ *  Peds in 0x2a7a72 passed on this deck; rust-on-beige did not.
+ *  /g/teal82 FAIL TEAL: 5.4 m cube at (x+3.5, deckY+2.4, along 36) sat
+ *  inside the unread 12×16 cargo slab (along 32–48, x ±6) so the
+ *  downward spawn camera only saw beige deck. Buoy-class, no kraft cap
+ *  (cargo77: kraft top read as planks), stacked on top of that slab. */
 function pierTeal() {
   const g = new THREE.Group();
   g.userData.dress = "teal";
   g.userData.mode = "PAPER";
 
-  const body = part(5.4, 4.8, 5.4, 0x2a7a72);
+  const body = part(8.2, 8.2, 8.2, 0x2a7a72);
   body.userData.part = "body";
   g.add(body);
-
-  const band = part(5.8, 0.8, 5.8, 0xc4b496, false);
-  band.position.y = 0.6;
-  g.add(band);
 
   return g;
 }
@@ -625,10 +625,10 @@ export function makeQuay(spec, helpers) {
     cargo.position.set(x, deckY + 3.2, pierZ + toward * 40);
     root.add(cargo);
 
-    /** /g/plate81 FAIL PLATE: 22 m stripe still unread. Round stopped.
-     *  Ped-teal crate on the timber — same hex as held pier shirts. */
+    /** /g/teal82 FAIL TEAL: buried inside cargo. Sit on top of that slab,
+     *  east of the walk, still on the 11 m deck (bollards at ±5.15). */
     const teal = pierTeal();
-    teal.position.set(x + 3.5, deckY + 2.4, pierZ + toward * 36);
+    teal.position.set(x + 4.2, deckY + 10.4, pierZ + toward * 36);
     root.add(teal);
 
     // Extra kraft stack on the north timber, west of the walk, short of the brow.
