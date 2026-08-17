@@ -10,7 +10,7 @@ Operator came back to **playtest**. Bar is **`http://localhost:8787/`**, inland 
 
 Gauntlet live. `/g/south99` FAIL SOUTH (dressing freeze). D040: no delayed dressing. Next `/g/south100`.
 
-Last playtest fix: D040 — no delayed dressing on live play (the 45 s timer froze the tab mid-session). D039 ferry landfall builds south. D038 cheap street lots. D037 taxi + short pier. D036 no auto trees.
+Last playtest fix: D041 — trickle dressing (cars/ferry/quay/foam return one step at a time, pausing for clicks). D040 killed the burst timer that froze tabs. D039 ferry landfall builds south. D038 cheap street lots. D037 taxi + short pier. D036 no auto trees.
 
 ## Play
 
