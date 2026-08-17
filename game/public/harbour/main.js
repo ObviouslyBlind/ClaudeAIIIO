@@ -1,9 +1,5 @@
 import * as THREE from "three";
-import { createTaxi } from "./taxi.js";
-import { makeFerry, tickFerry } from "./ferry.js";
-import { paintShoreColor, makeShoreFoam } from "./shore.js";
-import { makeQuay } from "./quay.js";
-import { createTraffic } from "./traffic.js";
+import { paintShoreColor } from "./shore.js";
 import {
   CAMERA_FAR_M,
   FOG_FAR_M,
@@ -12,23 +8,18 @@ import {
   spawnCameraOffset,
   spawnLookAtOffset,
 } from "./roads.js";
-import { canEnter, createInterior, objectWithKind, wrapHarbourWorld } from "./interior.js";
+import { canEnter, objectWithKind, wrapHarbourWorld } from "./harbour-world.js";
 import { createPlayCamera } from "./camera.js";
 import { createFerryTicket } from "./ferry-ticket.js";
-import { createCatalogPicker, meshForUse } from "./buildings.js";
 import { makeWater } from "./water.js";
 import { makeSky } from "./sky.js";
 import { CAM, LOOK } from "./first-frame.js";
-import { makeStreetProps } from "./street-props.js";
-import { makeTrees } from "./trees.js";
 import { dressPlayer } from "./player.js";
 import { dressCart } from "./cart.js";
 import { mountEconHud } from "./hud-econ.js";
 import { mountPresenceHud } from "./presence-hud.js";
 import { mountStaffHud } from "./staff-hud.js";
 import { mountCalendarHud } from "./calendar-hud.js";
-import { createStalls } from "./stalls.js";
-import { makePedestrians } from "./pedestrians.js";
 
 function ensureDockButton(id, label) {
   let btn = document.getElementById(id);
@@ -160,6 +151,8 @@ const plotMeshes = new Map();
 const useMeshes = new Map();
 const ground = [];
 let ferryMesh = null;
+let tickFerry = null;
+let meshForUse = null;
 let stalls = null;
 let pedestrians = null;
 const econHud = mountEconHud({
@@ -383,7 +376,7 @@ function makeTerrain(spec) {
   mesh.position.set(spec.cx, 0, spec.cz);
   mesh.receiveShadow = true;
   mesh.userData.kind = "ground";
-  scene.add(mesh);
+  worldAdd(mesh);
   ground.push(mesh);
 }
 
@@ -395,7 +388,7 @@ function box(w, h, d, color, x, y, z, shadow = true) {
   m.position.set(x, y, z);
   m.castShadow = shadow;
   m.receiveShadow = true;
-  scene.add(m);
+  worldAdd(m);
   return m;
 }
 
@@ -460,7 +453,7 @@ function palmAt(x, z, y, lean = 0.12) {
     frond.rotation.x = Math.sin((i / 5) * Math.PI * 2) * 0.85;
     g.add(frond);
   }
-  scene.add(g);
+  worldAdd(g);
 }
 
 function makePalms(spec) {
@@ -550,7 +543,7 @@ function paintParcel(p) {
 }
 
 function useFor(p) {
-  if (!p || !p.use || useMeshes.has(p.id)) return;
+  if (!p || !p.use || useMeshes.has(p.id) || !meshForUse) return;
   const spec = specOf(p.island);
   const y = heightAt(spec, p.x, p.z);
   const yaw = spec.id === "north" ? 0.15 : 3.3;
@@ -563,26 +556,32 @@ function useFor(p) {
   useMeshes.set(p.id, built);
 }
 
-function makeParcels() {
-  for (const p of map.plots) {
-    const spec = specOf(p.island);
-    const y = heightAt(spec, p.x, p.z) + 0.1;
-    const ring = insetRing(p.ring, 0.08);
-    const pts = ring.map(([x, z]) => new THREE.Vector3(x, y, z));
-    pts.push(pts[0].clone());
-    const line = new THREE.Line(
-      new THREE.BufferGeometry().setFromPoints(pts),
-      new THREE.LineBasicMaterial({
-        color: parcelTint(p, false),
-        transparent: true,
-        opacity: p.owner ? 0.45 : 0.28,
-      }),
-    );
-    line.userData.kind = "plot-line";
-    line.userData.plotId = p.id;
-    scene.add(line);
-    plotMeshes.set(p.id, { line, fill: null });
-    if (p.use) useFor(p);
+function addParcel(p) {
+  const spec = specOf(p.island);
+  const y = heightAt(spec, p.x, p.z) + 0.1;
+  const ring = insetRing(p.ring, 0.08);
+  const pts = ring.map(([x, z]) => new THREE.Vector3(x, y, z));
+  pts.push(pts[0].clone());
+  const line = new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints(pts),
+    new THREE.LineBasicMaterial({
+      color: parcelTint(p, false),
+      transparent: true,
+      opacity: p.owner ? 0.45 : 0.28,
+    }),
+  );
+  line.userData.kind = "plot-line";
+  line.userData.plotId = p.id;
+  worldAdd(line);
+  plotMeshes.set(p.id, { line, fill: null });
+  if (p.use) useFor(p);
+}
+
+async function makeParcels() {
+  const plots = map.plots;
+  for (let i = 0; i < plots.length; i++) {
+    addParcel(plots[i]);
+    if (i % 48 === 47) await afterPaint();
   }
 }
 
@@ -648,15 +647,18 @@ function selectLand(p, walk) {
 }
 
 function enterPlot(p) {
-  if (!p || !interior || !canEnter(p)) return false;
+  if (!p || !canEnter(p)) return false;
   walking = false;
   if (taxi && taxi.hopOut) taxi.hopOut();
-  const ok = interior.enter(p);
-  if (ok) {
-    selected = p.id;
-    refreshHud();
-  }
-  return ok;
+  void ensureInterior().then((ctl) => {
+    if (!ctl) return;
+    const ok = ctl.enter(p);
+    if (ok) {
+      selected = p.id;
+      refreshHud();
+    }
+  });
+  return true;
 }
 
 function leaveInterior() {
@@ -796,8 +798,9 @@ async function developAt(plotId, use) {
   return true;
 }
 
-function openCatalog() {
+async function openCatalog() {
   if (!map) return;
+  await ensureCatalog();
   if (!catalogPicker) return;
   if (placingUse) {
     const p = plotToDevelop(selected, player.position.x, player.position.z);
@@ -872,7 +875,7 @@ function tick(dt) {
       player.position.y = landHeight(player.position.x, player.position.z) + 1.15;
     }
   }
-  if (ferryMesh) tickFerry(ferryMesh, dt);
+  if (ferryMesh && tickFerry) tickFerry(ferryMesh, dt);
   btnFerry.disabled = !nearPort();
   refreshHud();
   playCam.tick(dt);
@@ -920,46 +923,120 @@ function afterPaint() {
   });
 }
 
-async function boot() {
-  const res = await fetch("/api/map");
-  map = await res.json();
-  refreshHud();
-  if (!renderer) {
-    setStatus("Map loaded. 3D harbour failed (WebGL).");
-    return;
+function worldScene() {
+  return harbourGroup || scene;
+}
+
+async function ensureCatalog() {
+  if (catalogPicker && meshForUse) return;
+  const mod = await import("./buildings.js");
+  meshForUse = mod.meshForUse;
+  if (!catalogPicker) {
+    catalogPicker = mod.createCatalogPicker({
+      onPick(id) {
+        placingUse = id;
+        const p = plotToDevelop(selected, player.position.x, player.position.z);
+        if (p) {
+          developAt(p.id, id);
+          return;
+        }
+        setStatus("Tap your leased land to place a " + catalogLabel(id) + " (PAPER).");
+      },
+      onCancel() {
+        placingUse = null;
+        setStatus("Tap a piece of land. Lease it, then develop it.");
+      },
+    });
   }
-  makeWater(scene);
-  ferryMesh = makeFerry();
-  scene.add(ferryMesh);
-  makeShoreFoam(specOf("north"), heightAt, scene);
-  makeShoreFoam(specOf("south"), heightAt, scene);
-  spawnAt("north");
-  pedestrians = makePedestrians(map, { scene, specOf, heightAt, getPlayer: () => player });
-  startLoop();
-  setStatus("North port · PAPER");
-  void loadSheetHuds();
+  if (map) {
+    for (const p of map.plots) useFor(p);
+  }
+}
+
+async function ensureInterior() {
+  if (interior) return interior;
+  if (!harbourGroup) {
+    harbourGroup = wrapHarbourWorld(scene, { keep: [player, sun.target] });
+  }
+  const mod = await import("./interior.js");
+  interior = mod.createInterior({
+    scene,
+    player,
+    setStatus,
+    heightAt,
+    specOf,
+  });
+  interior.setHarbour(harbourGroup);
+  return interior;
+}
+
+async function loadDressing() {
+  const target = worldScene();
+  const ferryMod = await import("./ferry.js");
+  tickFerry = ferryMod.tickFerry;
+  ferryMesh = ferryMod.makeFerry();
+  target.add(ferryMesh);
   await afterPaint();
-  makeTerrain(specOf("north"));
+
+  const shoreMod = await import("./shore.js");
+  shoreMod.makeShoreFoam(specOf("north"), heightAt, target);
   await afterPaint();
+
+  const quayMod = await import("./quay.js");
+  quayMod.makeQuay(specOf("north"), { scene: target, heightAt });
+  await afterPaint();
+
+  const pedMod = await import("./pedestrians.js");
+  pedestrians = pedMod.makePedestrians(map, {
+    scene: target,
+    specOf,
+    heightAt,
+    getPlayer: () => player,
+  });
+  await afterPaint();
+
+  const treeMod = await import("./trees.js");
+  treeMod.makeTrees(map, { scene: target, specOf, heightAt });
+  await afterPaint();
+
+  const propsMod = await import("./street-props.js");
+  propsMod.makeStreetProps(map, { scene: target, specOf, heightAt });
+  await afterPaint();
+
   makeTerrain(specOf("south"));
-  makeRoads(map, { scene, specOf, heightAt });
-  await afterPaint();
-  makeStreetProps(map, { scene, specOf, heightAt });
-  makeTrees(map, { scene, specOf, heightAt });
-  await afterPaint();
-  makePort(specOf("north"));
-  makeQuay(specOf("north"), { scene, heightAt });
   makePort(specOf("south"));
-  makeQuay(specOf("south"), { scene, heightAt });
-  if (!pedestrians) {
-    pedestrians = makePedestrians(map, { scene, specOf, heightAt, getPlayer: () => player });
-  }
+  quayMod.makeQuay(specOf("south"), { scene: target, heightAt });
+  shoreMod.makeShoreFoam(specOf("south"), heightAt, target);
   makePalms(specOf("north"));
   makePalms(specOf("south"));
-  makeParcels();
   await afterPaint();
-  taxi = createTaxi({
-    scene,
+
+  const trafficMod = await import("./traffic.js");
+  traffic = trafficMod.createTraffic({
+    scene: target,
+    getMap: () => map,
+    specOf,
+    heightAt,
+    getPlayer: () => player,
+    getIslandId: () => islandId,
+  });
+  await afterPaint();
+
+  const stallMod = await import("./stalls.js");
+  stalls = stallMod.createStalls({
+    scene: target,
+    getMap: () => map,
+    specOf,
+    heightAt,
+    setStatus,
+    applySnapshot,
+    getPlayer: () => player,
+  });
+  await afterPaint();
+
+  const taxiMod = await import("./taxi.js");
+  taxi = taxiMod.createTaxi({
+    scene: target,
     player,
     getMap: () => map,
     specOf,
@@ -971,50 +1048,36 @@ async function boot() {
     setStatus,
     button: btnTaxi,
   });
-  traffic = createTraffic({
-    scene,
-    getMap: () => map,
-    specOf,
-    heightAt,
-    getPlayer: () => player,
-    getIslandId: () => islandId,
-  });
-  stalls = createStalls({
-    scene,
-    getMap: () => map,
-    specOf,
-    heightAt,
-    setStatus,
-    applySnapshot,
-    getPlayer: () => player,
-  });
-  harbourGroup = wrapHarbourWorld(scene, { keep: [player, sun.target] });
-  interior = createInterior({
-    scene,
-    player,
-    setStatus,
-    heightAt,
-    specOf,
-  });
-  interior.setHarbour(harbourGroup);
-  setStatus("Tap a piece of land. Lease it, then develop it.");
+  await afterPaint();
+  void ensureCatalog();
+  void ensureInterior();
 }
 
-catalogPicker = createCatalogPicker({
-  onPick(id) {
-    placingUse = id;
-    const p = plotToDevelop(selected, player.position.x, player.position.z);
-    if (p) {
-      developAt(p.id, id);
-      return;
-    }
-    setStatus("Tap your leased land to place a " + catalogLabel(id) + " (PAPER).");
-  },
-  onCancel() {
-    placingUse = null;
-    setStatus("Tap a piece of land. Lease it, then develop it.");
-  },
-});
+async function boot() {
+  const res = await fetch("/api/map");
+  map = await res.json();
+  refreshHud();
+  if (!renderer) {
+    setStatus("Map loaded. 3D harbour failed (WebGL).");
+    return;
+  }
+  makeWater(scene);
+  spawnAt("north");
+  startLoop();
+  setStatus("North port · PAPER");
+  void loadSheetHuds();
+  await afterPaint();
+  makeTerrain(specOf("north"));
+  await afterPaint();
+  makeRoads(map, { scene, specOf, heightAt });
+  makePort(specOf("north"));
+  harbourGroup = wrapHarbourWorld(scene, { keep: [player, sun.target] });
+  await makeParcels();
+  setStatus("Tap a piece of land. Lease it, then develop it.");
+  await afterPaint();
+  await loadDressing();
+}
+
 canvas.addEventListener("pointerup", onPointer);
 btnLease.addEventListener("click", lease);
 btnDevelop.addEventListener("click", openCatalog);

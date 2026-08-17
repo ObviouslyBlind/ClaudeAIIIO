@@ -10,7 +10,7 @@ Operator came back to **playtest**. Bar is **`http://localhost:8787/`**, inland 
 
 Cube-critic rounds are **paused**. Do not launch another seaward `/g/…` critic until the operator asks.
 
-Last playtest fix: one `ASSET_NONCE` per play process (D031). `/` froze after the cyan North-port first frame because first-frame ↔ main stamped a new `?v=` on every JS response. `/g/green87` **FAIL GREEN** — round stopped (`c775cba7`). Inland look remains D030.
+Last playtest fix: D032 — `/` paints north land before interiors/trees so Edge stops “not responding.” D031 one asset nonce. Inland look remains D030. `/g/green87` **FAIL GREEN** — round stopped.
 
 ## Play
 
