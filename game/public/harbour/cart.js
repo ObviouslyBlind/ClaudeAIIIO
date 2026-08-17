@@ -25,11 +25,12 @@ import * as THREE from "three";
  * + a tiny kraft produce radish (WOOD_LIGHT box) right of the turnip
  * + a tiny kraft produce squash (WOOD box) ahead of the radish
  * + a tiny kraft produce parsnip (WOOD_LIGHT box) left of the squash
- * + a tiny kraft produce yam (WOOD_LIGHT box) between the parsnip and the squash.
+ * + a tiny kraft produce yam (WOOD_LIGHT box) between the parsnip and the squash
+ * + a tiny kraft produce plum (WOOD_LIGHT box) ahead of the yam.
  * Wheels: kraft cream hub discs (paper boxes) on the outer face of each wheel.
  * Grip: a short kraft hitch pin (paper box) through the handle.
  */
-export const CART_MESH_COUNT = 39;
+export const CART_MESH_COUNT = 40;
 /** Metres from player.position down to the soles. Same as player.js SOLE_Y. */
 const SOLE_Y = -1.15;
 
@@ -281,7 +282,15 @@ function makeHandcart() {
   yam.userData.mode = "PAPER";
   yam.userData.part = "yam";
 
-  g.add(bed, sideL, sideR, tail, head, wheelL, wheelR, hubL, hubR, handleL, handleR, grip, pin, crate, strap, crate2, roll, coil, coilTop, lanternPost, lanternGlass, jugBody, jugNeck, jugHandle, appleBox, apple, carrot, carrotTop, potato, onion, garlic, cabbage, leek, turnip, beet, radish, squash, parsnip, yam);
+  // Tiny kraft produce plum on the bed — one WOOD_LIGHT paper box.
+  // Ahead of the yam, inside the rails, clear of yam, parsnip, squash, radish, beet, turnip, leek, cabbage, garlic, onion, potato, carrot, apple.
+  // Sits on the bed top (y = 0.53). Paper box only.
+  const plum = paperBox(0.05, 0.045, 0.05, WOOD_LIGHT, false);
+  plum.position.set(0.14, 0.553, -0.64);
+  plum.userData.mode = "PAPER";
+  plum.userData.part = "plum";
+
+  g.add(bed, sideL, sideR, tail, head, wheelL, wheelR, hubL, hubR, handleL, handleR, grip, pin, crate, strap, crate2, roll, coil, coilTop, lanternPost, lanternGlass, jugBody, jugNeck, jugHandle, appleBox, apple, carrot, carrotTop, potato, onion, garlic, cabbage, leek, turnip, beet, radish, squash, parsnip, yam, plum);
   return g;
 }
 
