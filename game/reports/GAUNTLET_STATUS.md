@@ -10,7 +10,9 @@ Loop is **live** on playtest bugs (operator: “so many bugs, use the gauntlet�
 
 `/g/walk90` **FAIL WALK**: cheap raycast was not enough. Click still opened “Page Unresponsive” because dressing (`trees.js`) started 400ms after boot and compiled during the first tap. D035: dress 5s after first click, or 60s fallback.
 
-Current piece: **`/g/walk91` WALK** — one left click on inland ground must walk without hanging. No RMB. Click within ~8s of load so dressing has not started.
+`/g/walk91` **PASS WALK**: inland beige harbour, Cash $1,000, PAPER · SIMULATED. Left click walked; no hang. Trees compiled after the walk.
+
+Current piece: **`/g/lease92` LEASE** — walk onto a vacant north lot, click Lease, cash drops and the plot reads yours. No RMB. No House/Enter this round.
 
 One **pixel critic** at a time. Unique `/g/…` path. No RMB. Do not restart play while a critic is on the page.
 
