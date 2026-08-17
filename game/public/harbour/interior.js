@@ -328,6 +328,21 @@ function makeCrock(x, y, z) {
   return g;
 }
 
+/** Tiny kraft PAPER tureen on the table — wood foot, plaster body, linen rim. Boxes only. */
+function makeTureen(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "tureen";
+  g.userData.kind = "interior-tureen";
+  g.userData.mode = "PAPER";
+  g.userData.part = "tureen";
+  g.position.set(x, y, z);
+  const paper = { mode: "PAPER", part: "tureen" };
+  g.add(box(0.07, 0.008, 0.055, WOOD, 0, 0.004, 0, "interior-tureen", paper));
+  g.add(box(0.088, 0.038, 0.07, PLASTER, 0, 0.027, 0, "interior-tureen", paper));
+  g.add(box(0.058, 0.01, 0.045, LINEN, 0, 0.051, 0, "interior-tureen", paper));
+  return g;
+}
+
 /** Tiny kraft PAPER saucer on the table — wood rim, plaster well, linen center. Boxes only. */
 function makeSaucer(x, y, z) {
   const g = new THREE.Group();
@@ -591,6 +606,8 @@ export function makeInteriorScene() {
   down.add(makeTray(-0.18, 0.955, -0.42));
   // Kraft PAPER crock on the table top — offset from tray, pitcher, vase, mug, saucer, bowl, book, napkin, spoon, fork, knife, plate, cup.
   down.add(makeCrock(-0.88, 0.955, -0.28));
+  // Kraft PAPER tureen on the table top — offset from crock, tray, pitcher, vase, mug, saucer, bowl, book, napkin, spoon, fork, knife, plate, cup.
+  down.add(makeTureen(0.55, 0.955, 0.08));
   // Kraft PAPER book on the table top — offset from the mug and vase.
   down.add(makeBook(-0.05, 0.955, 0.08));
   // Kraft PAPER napkin on the table top — offset from the mug, vase, and book.
