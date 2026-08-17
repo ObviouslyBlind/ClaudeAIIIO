@@ -4,11 +4,11 @@ Paste this file into a **new chat**. Do not continue the bloated gauntlet thread
 
 This is a PAPER / SIMULATED harbour game in `/workspace/game`. The Polymarket paper bot in the rest of the repo is not the active work. Do not delete it.
 
-Fable 5’s ship list: **[FABLE5_NOTES.md](FABLE5_NOTES.md)**. Roadmap: **[../ROADMAP.md](../ROADMAP.md)**.
+Kernel contract: **[FOUNDATION.md](../FOUNDATION.md)**. Fable 5 notes: **[FABLE5_NOTES.md](FABLE5_NOTES.md)**. Roadmap: **[../ROADMAP.md](../ROADMAP.md)**.
 
 ## You are here
 
-Operator playtest. Bar is **`http://localhost:8787/`**, inland spawn, walkable harbour with a priced parcel map, named side streets, point taxi, honest traffic.
+Shard kernel K.1. Operator playtest bar is still **`http://localhost:8787/`**. Houses must survive Restore. Minerals dock lists ore. Politics frozen.
 
 Do **not** restart `/g/` critics.
 
@@ -31,10 +31,7 @@ Open **`http://localhost:8787/`**. Close leftover `/g/` tabs.
 ## Git / PR
 
 - Repo: `github.com/ObviouslyBlind/ClaudeAIIIO`
-- Branch: `cursor/capital-map-v2-183a`
-- Draft PR: https://github.com/ObviouslyBlind/ClaudeAIIIO/pull/31
-- Preferred base: `main`. Do **not** merge unless the operator asks (this PR is the whole game).
-- `gh` is read-only. Use ManagePullRequest for PR writes.
+- Preferred base: `main`. Do **not** merge unless the operator asks.
 
 ## Guardrails
 

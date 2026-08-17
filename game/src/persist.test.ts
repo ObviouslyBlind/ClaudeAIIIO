@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createLandBoard, getPlot, leasePlot } from "./land.ts";
+import { createLandBoard, getPlot, leasePlot, developPlot } from "./land.ts";
 import { restoreShard, serializeShard } from "./persist.ts";
 import { createVisitor, createWorld, fastForward } from "./sim.ts";
 import { setStatuteSlider } from "./statutes.ts";
@@ -30,6 +30,8 @@ describe("PAPER shard persist step C", () => {
     expect(json.visitor.cash).toBe(cash);
     expect(json.visitor.leases).toEqual([vacant.id]);
     expect(json.visitor.cart).toEqual([]);
+    expect(json.visitor.develops).toEqual([]);
+    expect(json.kernel).toBe("K.1");
     expect(json.statutes.sales_tax.rate).toBeCloseTo(0.05);
 
     const restored = restoreShard(json);
@@ -79,5 +81,25 @@ describe("PAPER shard persist step C", () => {
     expect(restored.ok).toBe(true);
     if (!restored.ok) return;
     expect(restored.visitor.cart).toEqual([{ goodId: "potato", qty: 8 }]);
+  });
+
+  it("keeps a developed house on restore, not only the lease", () => {
+    const world = createWorld(3);
+    const land = createLandBoard();
+    const visitor = createVisitor(1_000);
+    const vacant = cheapVacant(land, visitor.cash);
+    expect(leasePlot(land, visitor, vacant.id).ok).toBe(true);
+    expect(developPlot(land, visitor, vacant.id, "house").ok).toBe(true);
+    expect(vacant.use).toBe("house");
+
+    const blob = serializeShard({ world, land, visitor });
+    expect(blob.kernel).toBe("K.1");
+    expect(blob.visitor.develops).toEqual([{ plotId: vacant.id, use: "house" }]);
+
+    const restored = restoreShard(blob);
+    expect(restored.ok).toBe(true);
+    if (!restored.ok) return;
+    expect(getPlot(restored.land, vacant.id)?.owner).toBe("visitor");
+    expect(getPlot(restored.land, vacant.id)?.use).toBe("house");
   });
 });

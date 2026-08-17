@@ -20,6 +20,17 @@ import { walkSeededPresence } from "./presenceWalk.ts";
 import { dumpCart } from "./visitorCart.ts";
 import { startPersistLoop } from "./persistLoop.ts";
 import { restoreLive } from "./persistRestore.ts";
+import {
+  KERNEL_VERSION,
+  PLAYER_CAP,
+  PLOT_CELL_M,
+  VISITOR_ID,
+  appendEvent,
+  createEventLog,
+  indexPlots,
+  interestSnapshot,
+  mineralsSnapshot,
+} from "./kernel/index.ts";
 
 const root = join(fileURLToPath(new URL(".", import.meta.url)), "..");
 const publicDir = join(root, "public");
@@ -28,11 +39,12 @@ const port = Number(process.env.PORT ?? 8787);
 let world = createWorld(7);
 let visitor = createVisitor(1_000);
 let land = createLandBoard();
+let events = createEventLog();
 const presence = createPresence();
 setInterval(() => tick(world, visitor, land), 1000);
 setInterval(() => walkSeededPresence(presence), 1000);
 const persist = startPersistLoop({
-  getShard: () => ({ world, land, visitor }),
+  getShard: () => ({ world, land, visitor, events }),
   intervalMs: 10_000,
 });
 
@@ -41,6 +53,7 @@ function snapshot() {
     mode: "PAPER",
     provenance: "SIMULATED",
     note: "Live sim HUD. Visitor cash is paper. Shared with harbour leases.",
+    kernel: { version: KERNEL_VERSION, playerCap: PLAYER_CAP, plotCellM: PLOT_CELL_M },
     hud: hud(world, visitor),
     calendar: calendarHud(world.tick),
     lastPrices: world.lastPrice,
@@ -56,6 +69,7 @@ function snapshot() {
     staffSlots: visitor.staffSlots,
     visitorOrders: listOpenOrders(visitor),
     goods: GOOD_IDS,
+    minerals: mineralsSnapshot(land.plots, visitor.stock),
   };
 }
 
@@ -102,6 +116,47 @@ const server = createServer(async (req, res) => {
     return;
   }
 
+  if (req.method === "GET" && url.pathname === "/api/kernel") {
+    json(res, 200, {
+      mode: "PAPER",
+      provenance: "SIMULATED",
+      note: "Shard kernel K.1. Player cap is a table size, not live sockets.",
+      kernel: KERNEL_VERSION,
+      playerCap: PLAYER_CAP,
+      plotCellM: PLOT_CELL_M,
+    });
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname === "/api/minerals") {
+    json(res, 200, mineralsSnapshot(land.plots, visitor.stock));
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname === "/api/interest") {
+    const island = url.searchParams.get("island") === "south" ? "south" : "north";
+    const x = Number(url.searchParams.get("x"));
+    const z = Number(url.searchParams.get("z"));
+    const radius = Number(url.searchParams.get("radius"));
+    const byId = new Map(land.plots.map((p) => [p.id, p]));
+    json(
+      res,
+      200,
+      interestSnapshot({
+        plotIndex: indexPlots(land.plots),
+        plotsById: byId,
+        presence,
+        query: {
+          island,
+          x: Number.isFinite(x) ? x : 0,
+          z: Number.isFinite(z) ? z : 0,
+          radius: Number.isFinite(radius) && radius > 0 ? radius : PLOT_CELL_M * 2,
+        },
+      }),
+    );
+    return;
+  }
+
   if (req.method === "GET" && url.pathname === "/api/persist") {
     if (!persist.lastBlob) {
       res.writeHead(204);
@@ -122,6 +177,9 @@ const server = createServer(async (req, res) => {
       },
       setVisitor: (next) => {
         visitor = next;
+      },
+      setEvents: (next) => {
+        events = next;
       },
     });
     json(res, result.ok ? 200 : 400, result);
@@ -149,6 +207,14 @@ const server = createServer(async (req, res) => {
       return;
     }
     const result = leasePlot(land, visitor, String(body.plotId ?? ""));
+    if (result.ok) {
+      appendEvent(events, {
+        tick: world.tick,
+        kind: "lease",
+        playerId: VISITOR_ID,
+        plotId: result.plot.id,
+      });
+    }
     json(res, result.ok ? 200 : 400, { ...result, snapshot: staffMapSnapshot(land, visitor) });
     return;
   }
@@ -165,6 +231,15 @@ const server = createServer(async (req, res) => {
       return;
     }
     const result = developPlot(land, visitor, String(body.plotId ?? ""), use);
+    if (result.ok) {
+      appendEvent(events, {
+        tick: world.tick,
+        kind: "develop",
+        playerId: VISITOR_ID,
+        plotId: result.plot.id,
+        detail: use,
+      });
+    }
     json(res, result.ok ? 200 : 400, { ...result, snapshot: staffMapSnapshot(land, visitor) });
     return;
   }
@@ -176,6 +251,14 @@ const server = createServer(async (req, res) => {
       return;
     }
     const result = postStaff(land, visitor, body);
+    if (result.ok && result.slot) {
+      appendEvent(events, {
+        tick: world.tick,
+        kind: body.action === "fire" ? "fire" : "hire",
+        playerId: VISITOR_ID,
+        plotId: result.slot.plotId,
+      });
+    }
     json(res, result.ok ? 200 : 400, result);
     return;
   }

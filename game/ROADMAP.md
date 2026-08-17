@@ -10,6 +10,7 @@ come to the player later, the player does not blink across the map).
 
 ## Done (this branch)
 
+- **Shard kernel K.1** — player table (cap 500), unique non-overlapping plots, persist of buildings not just leases, minerals catalog (`ore`), stacked HUD menus, `/api/interest` for nearby plot facts. Spec: `FOUNDATION.md`.
 - Whole-island parcel map: every lot filled, boundary-inked, price-tagged. `YOURS` on leases.
 - Wheel zoom to map height (RMB orbit unchanged, tap-to-walk unchanged).
 - Harbour cove opens to the sea (no inland “lake”); terrain 224×144. `heightAt` lives in
@@ -25,6 +26,10 @@ come to the player later, the player does not blink across the map).
 - Instanced props (bushes / rocks / barrels / benches) off-road and off-parcel.
 
 ## Next, in order
+
+### 0. Kernel before features
+- K.1 is in. Do not add leasing-politics until houses, hires, and plot facts round-trip.
+- Postgres (step C) still required for a restart-proof shard.
 
 ### 1. Map expansion
 - Fill both islands corridor-first: more spine steps, then side-street tiling.

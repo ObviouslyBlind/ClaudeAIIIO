@@ -178,6 +178,9 @@ export function mountPersistHud(opts = {}) {
             (body.note && String(body.note)) ||
             "PAPER restore of last in-memory shard blob. SIMULATED.";
         }
+        if (typeof document !== "undefined" && document.dispatchEvent) {
+          document.dispatchEvent(new CustomEvent("harbour-restored", { detail: lastBlob }));
+        }
       } else {
         phase = body && body.reason === "no_blob" ? "no_blob" : "error";
         if (statusEl) {

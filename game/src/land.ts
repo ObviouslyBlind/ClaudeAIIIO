@@ -5,6 +5,8 @@ import {
   paperCostFor,
   type LandUseId,
 } from "./buildings.ts";
+import { bboxOverlap, ringBBox, ringsOverlap } from "./kernel/plots.ts";
+import { seedDeposits, type MineralId } from "./kernel/minerals.ts";
 import type { Visitor } from "./sim.ts";
 
 export { BUILDING_CATALOG, DEVELOP_COST };
@@ -41,6 +43,8 @@ export type Parcel = {
   price: number;
   owner: string | null;
   use: LandUse;
+  /** In-world mineral, or null. Street lots stay empty. */
+  deposit: MineralId | null;
 };
 
 export type Road = {
@@ -360,6 +364,16 @@ function quad(
   ];
 }
 
+function overlapsExisting(out: Parcel[], spec: IslandSpec, ring: Ring): boolean {
+  const box = ringBBox(ring);
+  for (const p of out) {
+    if (p.island !== spec.id) continue;
+    if (!bboxOverlap(box, ringBBox(p.ring))) continue;
+    if (ringsOverlap(ring, p.ring)) return true;
+  }
+  return false;
+}
+
 function pushParcel(
   out: Parcel[],
   spec: IslandSpec,
@@ -371,6 +385,7 @@ function pushParcel(
   if (heightAt(spec, c.x, c.z) < 0.4) return;
   if (publicQuay(spec, c.x, c.z)) return;
   if (ringHitsPaved(spec, ring)) return;
+  if (overlapsExisting(out, spec, ring)) return;
   const area = ringArea(ring);
   if (area < 180 || area > 9000) return;
   const portDist = Math.hypot(c.x - spec.port.x, c.z - spec.port.z);
@@ -386,6 +401,7 @@ function pushParcel(
     price: priceOf(spec, area, band, portDist),
     owner: null,
     use: null,
+    deposit: null,
   });
 }
 
@@ -613,6 +629,7 @@ export function createLandBoard(): LandBoard {
   }
   seedNpcLots(plots);
   seedNpcTown(plots);
+  seedDeposits(plots);
   // Spine first per island: taxi and traffic treat roads[0] as the trunk.
   const roads = Object.values(ISLANDS).flatMap((spec) => [
     {
@@ -758,6 +775,7 @@ export function landSnapshot(board: LandBoard, visitor: Visitor) {
     mode: "PAPER" as const,
     provenance: "SIMULATED",
     note: "Authored island parcels in metres. Not Earth. Not OSM. Leases are paper.",
+    kernel: "K.1",
     islands: ISLANDS,
     developCost: DEVELOP_COST,
     catalog: BUILDING_CATALOG,

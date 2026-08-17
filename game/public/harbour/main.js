@@ -363,13 +363,13 @@ function refreshHud() {
   const p = pSel;
   const near = nearParcel(p);
   if (p.owner === "visitor") {
-    plotLineEl.textContent = parcelLabel(p) + (p.use ? " · " + p.use : " · yours");
+    plotLineEl.textContent = parcelLabel(p) + (p.use ? " · " + p.use : " · yours") + (p.deposit ? " · " + p.deposit : "");
     btnLease.disabled = true;
   } else if (p.owner) {
-    plotLineEl.textContent = parcelLabel(p) + " · taken";
+    plotLineEl.textContent = parcelLabel(p) + " · taken" + (p.deposit ? " · " + p.deposit : "");
     btnLease.disabled = true;
   } else {
-    plotLineEl.textContent = parcelLabel(p) + " · $" + money(p.price);
+    plotLineEl.textContent = parcelLabel(p) + " · $" + money(p.price) + (p.deposit ? " · " + p.deposit : "");
     const headroom = map.visitor.cash - p.price;
     const need = map.developCost ?? 40;
     btnLease.disabled = !near || map.visitor.cash < p.price || headroom < need;
@@ -858,6 +858,57 @@ function applySnapshot(snapshot) {
   refreshHud();
 }
 
+function mergeInterestPlots(incoming) {
+  if (!map || !Array.isArray(incoming)) return;
+  const byId = new Map(map.plots.map((p) => [p.id, p]));
+  for (const p of incoming) {
+    if (!p || !p.id) continue;
+    const prev = byId.get(p.id);
+    if (prev) {
+      prev.owner = p.owner;
+      prev.use = p.use;
+      prev.deposit = p.deposit;
+      prev.price = p.price;
+    } else {
+      map.plots.push(p);
+      byId.set(p.id, p);
+    }
+    if (p.use) useFor(p);
+  }
+  if (parcelMap) parcelMap.sync();
+}
+
+async function pollInterest() {
+  if (!map) return;
+  try {
+    const res = await fetch(
+      "/api/interest?island=" +
+        encodeURIComponent(islandId) +
+        "&x=" +
+        player.position.x +
+        "&z=" +
+        player.position.z +
+        "&radius=192",
+    );
+    if (!res.ok) return;
+    const data = await res.json();
+    mergeInterestPlots(data.plots);
+  } catch {
+    /* keep last map facts */
+  }
+}
+
+if (typeof document !== "undefined" && document.addEventListener) {
+  document.addEventListener("harbour-restored", () => {
+    fetch("/api/map")
+      .then((r) => (r && r.ok ? r.json() : null))
+      .then((snap) => {
+        if (snap) applySnapshot(snap);
+      })
+      .catch(() => {});
+  });
+}
+
 staffHud = mountStaffHud({
   getSelected: () => selected,
   getMap: () => map,
@@ -1014,6 +1065,8 @@ const SHEET_HUD = [
   "./flow-hud.js",
   "./stall-hud.js",
   "./persist-hud.js",
+  "./menu-stack.js",
+  "./minerals-hud.js",
 ];
 
 function loadSheetHuds() {
@@ -1186,6 +1239,9 @@ async function boot() {
   spawnAt("north");
   startLoop();
   setStatus("North port · PAPER");
+  setInterval(() => {
+    void pollInterest();
+  }, 2500);
   await idle(48);
   makeTerrain(specOf("north"));
   await idle(48);

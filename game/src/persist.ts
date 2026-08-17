@@ -1,6 +1,7 @@
 /** In-memory PAPER shard snapshot. Not Postgres. PLAN C save blob. */
 
 import { DEVELOP_COST, createLandBoard, getPlot, leasePlot, type LandBoard } from "./land.ts";
+import { isLandUse, type LandUseId } from "./buildings.ts";
 import {
   applyVisitorOrders,
   dumpStaffSlots,
@@ -13,21 +14,33 @@ import { setStatuteSlider, statuteById } from "./statutes.ts";
 import type { StaffSlot } from "./staff.ts";
 import type { VisitorOrder } from "./orders.ts";
 import { dumpCart, restoreCart, type CartLine } from "./visitorCart.ts";
+import {
+  KERNEL_VERSION,
+  dumpEvents,
+  restoreEvents,
+  type EventLog,
+  type ShardEvent,
+} from "./kernel/index.ts";
+
+export type DevelopedPlot = { plotId: string; use: LandUseId };
 
 export type ShardInput = {
   world: World;
   land: LandBoard;
   visitor: Visitor;
+  events?: EventLog;
 };
 
 export type ShardBlob = {
   mode: "PAPER";
   provenance: "SIMULATED";
   note: string;
+  kernel: typeof KERNEL_VERSION;
   tick: number;
   visitor: {
     cash: number;
     leases: string[];
+    develops: DevelopedPlot[];
     cart: CartLine[];
     staffSlots: StaffSlot[];
     visitorOrders: VisitorOrder[];
@@ -35,13 +48,14 @@ export type ShardBlob = {
   statutes: {
     sales_tax: { rate: number };
   };
+  events: ShardEvent[];
 };
 
-export type RestoreOk = { ok: true; world: World; land: LandBoard; visitor: Visitor };
+export type RestoreOk = { ok: true; world: World; land: LandBoard; visitor: Visitor; events: EventLog };
 export type RestoreFail = { ok: false; reason: string };
 export type RestoreResult = RestoreOk | RestoreFail;
 
-const NOTE = "PAPER in-memory shard snapshot. SIMULATED. Not Postgres.";
+const NOTE = "PAPER in-memory shard snapshot. SIMULATED. Not Postgres. Buildings and leases are facts.";
 
 function jsonSafe<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T;
@@ -55,6 +69,25 @@ function salesTaxSlider(world: World): number {
 
 function visitorLeaseIds(land: LandBoard): string[] {
   return land.plots.filter((p) => p.owner === "visitor").map((p) => p.id);
+}
+
+function visitorDevelops(land: LandBoard): DevelopedPlot[] {
+  return land.plots
+    .filter((p) => p.owner === "visitor" && p.use && isLandUse(p.use))
+    .map((p) => ({ plotId: p.id, use: p.use as LandUseId }));
+}
+
+function readDevelops(raw: unknown): DevelopedPlot[] {
+  if (!Array.isArray(raw)) return [];
+  const out: DevelopedPlot[] = [];
+  for (const row of raw) {
+    if (!row || typeof row !== "object") continue;
+    const r = row as Record<string, unknown>;
+    const plotId = String(r.plotId ?? "").trim();
+    if (!plotId || !isLandUse(r.use)) continue;
+    out.push({ plotId, use: r.use });
+  }
+  return out;
 }
 
 function isFiniteNumber(n: unknown): n is number {
@@ -84,28 +117,33 @@ function readBlob(raw: unknown): ShardBlob | null {
     mode: "PAPER",
     provenance: "SIMULATED",
     note: typeof b.note === "string" ? b.note : NOTE,
+    kernel: KERNEL_VERSION,
     tick: b.tick,
     visitor: {
       cash: v.cash,
       leases: [...(v.leases as string[])],
+      develops: readDevelops(v.develops),
       cart: restoreCart(v.cart),
       staffSlots: restoreStaffSlots(v.staffSlots),
       visitorOrders: restoreVisitorOrders(v.visitorOrders),
     },
     statutes: { sales_tax: { rate } },
+    events: dumpEvents(restoreEvents(b.events)),
   };
 }
 
-/** Dump a JSON-safe PAPER shard. Cash, leases, cart, staffSlots, open visitorOrders. */
+/** Dump a JSON-safe PAPER shard. Cash, leases, buildings, cart, staff, orders, events. */
 export function serializeShard(input: ShardInput): ShardBlob {
   return jsonSafe({
     mode: "PAPER" as const,
     provenance: "SIMULATED" as const,
     note: NOTE,
+    kernel: KERNEL_VERSION,
     tick: input.world.tick,
     visitor: {
       cash: input.visitor.cash,
       leases: visitorLeaseIds(input.land),
+      develops: visitorDevelops(input.land),
       cart: dumpCart(input.visitor.cart),
       staffSlots: dumpStaffSlots(input.visitor.staffSlots),
       visitorOrders: dumpVisitorOrders(input.visitor),
@@ -113,12 +151,13 @@ export function serializeShard(input: ShardInput): ShardBlob {
     statutes: {
       sales_tax: { rate: salesTaxSlider(input.world) },
     },
+    events: dumpEvents(input.events ?? restoreEvents([])),
   });
 }
 
 /**
  * Rebuild world, land, and visitor from a blob.
- * Re-applies leasePlot, then restores the saved cash so the lease is not charged twice.
+ * Re-applies leasePlot, seats saved buildings without charging again, then restores cash.
  */
 export function restoreShard(raw: unknown): RestoreResult {
   if (raw == null) return { ok: false, reason: "no_blob" };
@@ -140,10 +179,15 @@ export function restoreShard(raw: unknown): RestoreResult {
     const leased = leasePlot(land, visitor, id);
     if (!leased.ok) return { ok: false, reason: leased.reason };
   }
+  for (const row of blob.visitor.develops) {
+    const plot = getPlot(land, row.plotId);
+    if (!plot || plot.owner !== "visitor") continue;
+    plot.use = row.use;
+  }
   visitor.cash = blob.visitor.cash;
   visitor.cart = blob.visitor.cart;
   visitor.staffSlots = blob.visitor.staffSlots;
   applyVisitorOrders(world, visitor, blob.visitor.visitorOrders);
 
-  return { ok: true, world, land, visitor };
+  return { ok: true, world, land, visitor, events: restoreEvents(blob.events) };
 }
