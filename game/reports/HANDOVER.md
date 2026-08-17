@@ -8,7 +8,7 @@ This is a PAPER / SIMULATED harbour game in `/workspace/game`. The Polymarket pa
 
 Operator came back to **playtest**. Bar is **`http://localhost:8787/`**, inland spawn, walkable harbour.
 
-Gauntlet live. `/g/house96` FAIL HOUSE (giant field unaffordable). D038: spawn cheap street lots. Next `/g/house97`.
+Gauntlet live. `/g/house97` PASS HOUSE. Next `/g/ferry98` ($15 kraft ticket).
 
 Last playtest fix: D038 — spawn cheap street lots (after `/g/house96` FAIL HOUSE). D037 taxi + short pier. D036 no auto trees.
 
