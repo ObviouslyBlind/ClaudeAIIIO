@@ -808,6 +808,28 @@ function paperSpoke(x, z, yaw = 0) {
 }
 
 /**
+ * Tiny kraft PAPER bit: KRAFT shank, KRAFT_LIGHT tip. Boxes only.
+ * Sits on the wood bench — not the spoke, drawknife, auger, adze, clamp, vice, plane, gouge, mallet, chisel, file, rasp, awl, cork, funnel, oilcan, peg, shaving, rag, or rivet.
+ */
+function paperBit(x, z, yaw = 0) {
+  const g = new THREE.Group();
+  g.name = "factory-paper-bit";
+  g.userData.kind = "factory-paper-bit";
+  g.userData.mode = "PAPER";
+  g.userData.part = "bit";
+  // Wood-bench top: y0 0.16 + 0.78, top half 0.04.
+  const sitY = 0.16 + 0.78 + 0.04;
+  g.position.set(x, sitY, z);
+  g.rotation.y = yaw;
+  const shank = paperBox(0.036, 0.012, 0.012, KRAFT, "factory-paper-bit");
+  shank.position.set(-0.008, 0.008, 0);
+  const tip = paperBox(0.028, 0.008, 0.008, KRAFT_LIGHT, "factory-paper-bit");
+  tip.position.set(0.022, 0.008, 0);
+  g.add(shank, tip);
+  return g;
+}
+
+/**
  * Small kraft/iron PAPER oil can: short box body, thinner spout.
  * Sits on the first workbench top — not a mill, not the hanging wrench.
  */
@@ -973,6 +995,8 @@ function makeFactoryDress() {
   g.add(paperDrawknife(2.84, -1.62, 0.06));
   // Wood-bench east-south, south of chisel. Off drawknife, auger, adze, clamp, vice, plane, gouge, mallet, chisel, file, rasp, awl, cork, funnel, oilcan, peg, shaving, rag, rivet.
   g.add(paperSpoke(3.42, -1.82, 0.05));
+  // Wood-bench south-west, south of file. Off spoke, drawknife, auger, adze, clamp, vice, plane, gouge, mallet, chisel, file, rasp, awl, cork, funnel, oilcan, peg, shaving, rag, rivet.
+  g.add(paperBit(2.96, -2.12, 0.05));
   // Left wall, opposite the wood bench. Off the centre aisle (x≈0).
   g.add(scrapBin(-3.22, -2.62, 0.08));
   // Right wall, door side. Off the centre aisle (x≈0). Flat on the floor.
