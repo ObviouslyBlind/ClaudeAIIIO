@@ -178,6 +178,11 @@ Record of architecture and strategy decisions with reasoning.
 **Decision:** Live spawn uses person scale (~2 m visitor). Quay lamps ~3.2 m, north sign posts ~3.2 m, dinghies ~4.2 m, port shed ~8×3.4×6 m, foam dashes ~1.6 m, rust buoy ~0.9 m. Strip the 34 m cream mast and the 32 m / 48 m critic towers. `loadDressing` does not import `trees.js` / south / stalls / street-props / peds. Dressing waits until walk has been idle 45 s (120 s fallback). Develop only meshes lots that already have plot lines.
 **Reason:** Operator playtest: scale was unreadable (tiny visitor vs towers), and the tab crashed within minutes. `/g/lease92` FAIL LEASE: first click then “Page Unresponsive” while trees compiled. PAPER / SIMULATED.
 
+## D045 — Develop hint ignores boot copy (2026-08-17)
+
+**Decision:** `isLeasedVacantInspect` does not treat "Lease it, then develop it." as a leased plot. House $40 afford only paints after a real lease (`This land is yours` or plot ` · yours`).
+**Reason:** `/g/hud104` FAIL HUD: spawn sheet showed `cash $1,000 vs House $40` while plot-line still said "Tap land to inspect it", because `\bDevelop it\b` matched the tutorial status. PAPER / SIMULATED.
+
 ## D044 — Empty goods / persist do not clone the PAPER badge (2026-08-17)
 
 **Decision:** Empty held-goods stay blank. Empty persist is `PAPER · SIMULATED · no dump`. Empty cart stays `PAPER`. Empty sheet `<p>` tags collapse.

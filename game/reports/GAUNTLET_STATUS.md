@@ -36,7 +36,9 @@ Loop is **live** on playtest bugs (operator: “so many bugs, use the gauntlet�
 
 `/g/loop103` **PASS LOOP**: one session — walk, lease $209, House $40, Enter/Exit, taxi waiting on paved, $15 ferry to a real South, $508 left, zero freezes.
 
-D044: empty goods stay blank; persist says `no dump`. Critic `/g/hud104` next. Then Market Buy 1 (`/g/mkt105`).
+`/g/loop103` **PASS LOOP**: one session — walk, lease $209, House $40, Enter/Exit, taxi waiting on paved, $15 ferry to a real South, $508 left, zero freezes.
+
+D044: empty goods stay blank; persist says `no dump`. `/g/hud104` **FAIL HUD**: spawn still painted `cash $1,000 vs House $40` because boot status "then develop it" matched the develop hint (D045). Re-critic `/g/hud107`. Then Market Buy 1 (`/g/mkt108`).
 
 One **pixel critic** at a time. Unique `/g/…` path. No RMB. Do not restart play while a critic is on the page.
 

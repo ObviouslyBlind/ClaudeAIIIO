@@ -2,7 +2,7 @@
 
 ## 2026-08-17 (latest)
 
-**Current status:** Gauntlet resumed on playtest HUD clones. D044: empty goods stay blank; persist says `no dump`. Next critic `/g/hud104`. PAPER / SIMULATED. Politics frozen.
+**Current status:** `/g/hud104` FAIL HUD — House $40 afford fired on boot copy (D045). Re-critic `/g/hud107`. PAPER / SIMULATED. Politics frozen.
 
 ## 2026-08-16
 
