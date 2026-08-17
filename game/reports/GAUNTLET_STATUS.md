@@ -2,9 +2,13 @@
 
 New chat: paste **`game/reports/HANDOVER.md`**, not this file.
 
-Loop is **paused for playtest**. User asked to play `/`. Do not launch another seaward cube critic until they say so.
+Loop is **live** on playtest bugs (operator: “so many bugs, use the gauntlet”). Not seaward cubes. Not another funnel.
 
-One **pixel critic** at a time (one pair of eyes). The **live harbour** already runs the rest together on `/`: water, shore foam, both quays, roads, street props, trees, cart, traffic, taxi, ferry, stalls, pedestrians, nametags, interiors, econ/nearby/cart/staff HUD, lease/develop/hire/fire/enter/exit/ferry/taxi, market + hansard.
+Current piece: **`/g/play88` INTERACTIVE** — inland `/` spawn must stay clickable after land paints. D033 already shipped (boot returns before trees). Critic inspects the live page only.
+
+Queue after that (one bar each): click-walk, lease a cheap north lot, Develop House, Enter/Exit.
+
+One **pixel critic** at a time. Unique `/g/…` path. No RMB. Do not restart play while a critic is on the page.
 
 Not a Capital Rift clone. No new politics.
 

@@ -8,7 +8,7 @@ This is a PAPER / SIMULATED harbour game in `/workspace/game`. The Polymarket pa
 
 Operator came back to **playtest**. Bar is **`http://localhost:8787/`**, inland spawn, walkable harbour.
 
-Cube-critic rounds are **paused**. Do not launch another seaward `/g/…` critic until the operator asks.
+Operator asked to **resume the gauntlet** on playtest bugs. First bar: `/g/play88` INTERACTIVE (page stays clickable after north land paints). Not seaward cubes.
 
 Last playtest fix: D033 — boot returns after north land; trees/interiors wait. Hard-refresh the tunnel. D032/D031 still apply.
 
