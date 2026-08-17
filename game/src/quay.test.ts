@@ -528,4 +528,33 @@ describe("quay harbour dressing", () => {
     expect(ring!.position.y).toBeGreaterThan(4);
     expect(Math.abs(ring!.position.z - buoy!.position.z)).toBeLessThan(1);
   });
+
+  it("stands a spawn-readable rust funnel above the held buoy on the camera-facing hull", () => {
+    const spec = ISLANDS.north;
+    const added: THREE.Object3D[] = [];
+    const scene = { add(obj: THREE.Object3D) { added.push(obj); } };
+    const root = makeQuay(spec, { scene, heightAt });
+    const funnel = root.children.find((c) => c.userData?.dress === "funnel");
+    const buoy = root.children.find((c) => c.userData?.dress === "buoy");
+    expect(funnel).toBeTruthy();
+    expect(buoy).toBeTruthy();
+    let body: THREE.Mesh | null = null;
+    funnel!.traverse((obj) => {
+      if (obj.userData?.part === "body") body = obj as THREE.Mesh;
+    });
+    expect(body).not.toBeNull();
+    const hexes: number[] = [];
+    funnel!.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      const mat = mesh.material as THREE.MeshLambertMaterial | undefined;
+      if (mat?.color) hexes.push(mat.color.getHex());
+    });
+    expect(hexes).toContain(0x6e2e22);
+    expect(hexes).toContain(0xc4b496);
+    const bg = (body as THREE.Mesh).geometry as THREE.BoxGeometry;
+    expect(bg.parameters.height).toBeGreaterThanOrEqual(10);
+    expect(Math.abs(funnel!.position.x)).toBeLessThan(2);
+    expect(funnel!.position.y).toBeGreaterThan(10);
+    expect(Math.abs(funnel!.position.z - buoy!.position.z)).toBeLessThan(1);
+  });
 });
