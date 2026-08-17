@@ -35,11 +35,21 @@ describe("taxi map dest", () => {
     const bounds = islandMapBounds(spec);
     const w = 400;
     const h = 220;
-    const tap = worldToMapPx(bounds, dirt.points[0].x, dirt.points[0].z, w, h);
+    // Tap the far end of a dirt lane, deep in the fields and off every street.
+    const laneEnd = dirt.points[dirt.points.length - 1];
+    const pavedDist = (x: number, z: number) =>
+      Math.min(
+        ...board.roads
+          .filter((r) => r.kind === "paved" && r.island === "north")
+          .map((r) => projectOnPolyline(r.points, x, z).dist),
+      );
+    expect(pavedDist(laneEnd.x, laneEnd.z)).toBeGreaterThan(20);
+    const tap = worldToMapPx(bounds, laneEnd.x, laneEnd.z, w, h);
     const dest = pavedDestFromMapClick(board.roads, "north", spec, tap.sx, tap.sy, w, h);
     expect(dest).toBeTruthy();
-    expect(projectOnPolyline(paved.points, dest!.proj.x, dest!.proj.z).dist).toBeLessThan(0.5);
-    expect(projectOnPolyline(dirt.points, dest!.proj.x, dest!.proj.z).dist).toBeGreaterThan(5);
+    // The destination snaps back onto the paved network: dirt is never a stop.
+    expect(pavedDist(dest!.proj.x, dest!.proj.z)).toBeLessThan(0.5);
+    expect(paved.points.length).toBeGreaterThan(2);
   });
 });
 

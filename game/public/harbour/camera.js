@@ -6,14 +6,14 @@ export const YAW_PER_PX = 0.005;
 export const PITCH_PER_PX = 0.0035;
 /** Keep the camera above the player; never flip over. */
 export const PITCH_MIN = 0.12;
-export const PITCH_MAX = 1.35;
+export const PITCH_MAX = 1.45;
 /** Look at the capsule, slightly above its centre, after the user has orbited. */
 export const LOOK_Y = 1.1;
 export const RMB = 2;
 export const LMB = 0;
-/** Wheel zoom, metres from the player. High enough to read the parcel map. */
+/** Wheel zoom, metres from the player. High enough to read the whole town. */
 export const ZOOM_MIN_M = 9;
-export const ZOOM_MAX_M = 420;
+export const ZOOM_MAX_M = 650;
 
 /** Exponential wheel zoom, clamped. Positive deltaY zooms out. */
 export function zoomRadius(radius, deltaY) {

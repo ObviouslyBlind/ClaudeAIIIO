@@ -49,6 +49,10 @@ export type Road = {
   points: { x: number; z: number }[];
   /** Spline control points. Paved only. Traffic and taxi follow `points`. */
   nodes?: { x: number; z: number }[];
+  /** Branch roads only: where this road meets its parent (the junction). */
+  joins?: { x: number; z: number };
+  /** Street name, shown on the taxi map. */
+  name?: string;
 };
 
 export type LandBoard = {
@@ -145,6 +149,70 @@ export function pavedPolyline(spec: IslandSpec): { x: number; z: number }[] {
   return sampleSpline(roadNodes(spec), 8);
 }
 
+/**
+ * Side streets: short paved branches off the harbour road, so lots front a
+ * street of their own instead of stacking four zoning rows on one spine.
+ * `t` is the fraction along the spine; `side` flips the branch direction.
+ */
+export const SIDE_STREET_SPECS: { t: number; side: 1 | -1; len: number; name: string }[] = [
+  { t: 0.1, side: -1, len: 150, name: "Market St" },
+  { t: 0.18, side: 1, len: 170, name: "Mill St" },
+  { t: 0.3, side: -1, len: 160, name: "Chapel St" },
+  { t: 0.46, side: 1, len: 150, name: "Weir St" },
+];
+
+/** A branch road's polyline. First point sits ON the spine (the junction). */
+export function sideStreetPolyline(
+  spec: IslandSpec,
+  branch: { t: number; side: 1 | -1; len: number },
+): { x: number; z: number }[] {
+  const a = roadPoint(spec, Math.max(0, branch.t - 0.01));
+  const b = roadPoint(spec, Math.min(1, branch.t + 0.01));
+  const len = Math.hypot(b.x - a.x, b.z - a.z) || 1;
+  const perp = { x: (-(b.z - a.z) / len) * branch.side, z: ((b.x - a.x) / len) * branch.side };
+  const j = roadPoint(spec, branch.t);
+  const pts: { x: number; z: number }[] = [];
+  const n = 6;
+  const wiggle = hash(branch.t * 97 + branch.side * 3) - 0.5;
+  for (let i = 0; i <= n; i++) {
+    const d = (branch.len * i) / n;
+    pts.push({
+      x: j.x + perp.x * d + ((b.x - a.x) / len) * wiggle * d * 0.14,
+      z: j.z + perp.z * d + ((b.z - a.z) / len) * wiggle * d * 0.14,
+    });
+  }
+  return pts;
+}
+
+export function sideStreets(spec: IslandSpec): Road[] {
+  return SIDE_STREET_SPECS.map((s) => ({
+    island: spec.id,
+    kind: "paved" as const,
+    points: sideStreetPolyline(spec, s),
+    joins: { x: sideStreetPolyline(spec, s)[0].x, z: sideStreetPolyline(spec, s)[0].z },
+    name: s.name,
+  }));
+}
+
+/** Named taxi stops, derived from the network so an expanding map keeps working. */
+export type TaxiStop = { id: string; name: string; x: number; z: number };
+
+export function taxiStops(spec: IslandSpec): TaxiStop[] {
+  const stops: TaxiStop[] = [];
+  const port = roadPoint(spec, 0.015);
+  stops.push({ id: `${spec.id}-port`, name: `${spec.name} Port`, x: port.x, z: port.z });
+  SIDE_STREET_SPECS.forEach((s, i) => {
+    const pts = sideStreetPolyline(spec, s);
+    const j = pts[0];
+    const end = pts[pts.length - 1];
+    stops.push({ id: `${spec.id}-jct-${i}`, name: s.name, x: j.x, z: j.z });
+    stops.push({ id: `${spec.id}-end-${i}`, name: `${s.name} End`, x: end.x, z: end.z });
+  });
+  const inland = roadPoint(spec, 0.985);
+  stops.push({ id: `${spec.id}-inland`, name: "Road End", x: inland.x, z: inland.z });
+  return stops;
+}
+
 export function roadPoint(spec: IslandSpec, t: number): { x: number; z: number } {
   const pts = pavedPolyline(spec);
   const clamped = Math.max(0, Math.min(1, t));
@@ -179,6 +247,25 @@ export function distToPaved(spec: IslandSpec, x: number, z: number): number {
   return best;
 }
 
+function distToPolyline(pts: { x: number; z: number }[], x: number, z: number): number {
+  let best = Infinity;
+  for (let i = 0; i < pts.length - 1; i++) {
+    best = Math.min(best, distToSegment({ x, z }, pts[i], pts[i + 1]));
+  }
+  return best;
+}
+
+/** Spine plus side streets. Parcels must clear every carriageway. */
+function allPavedPolylines(spec: IslandSpec): { x: number; z: number }[][] {
+  return [pavedPolyline(spec), ...SIDE_STREET_SPECS.map((s) => sideStreetPolyline(spec, s))];
+}
+
+function distToAnyPaved(spec: IslandSpec, x: number, z: number): number {
+  let best = Infinity;
+  for (const pts of allPavedPolylines(spec)) best = Math.min(best, distToPolyline(pts, x, z));
+  return best;
+}
+
 function ringHitsPaved(spec: IslandSpec, ring: Ring): boolean {
   for (let i = 0; i < ring.length; i++) {
     const a = ring[i];
@@ -189,11 +276,13 @@ function ringHitsPaved(spec: IslandSpec, ring: Ring): boolean {
       const t = s / n;
       const x = a[0] + (b[0] - a[0]) * t;
       const z = a[1] + (b[1] - a[1]) * t;
-      if (distToPaved(spec, x, z) < ROAD_CLEAR) return true;
+      if (distToAnyPaved(spec, x, z) < ROAD_CLEAR) return true;
     }
   }
-  for (const p of pavedPolyline(spec)) {
-    if (pointInRing(p.x, p.z, ring)) return true;
+  for (const pts of allPavedPolylines(spec)) {
+    for (const p of pts) {
+      if (pointInRing(p.x, p.z, ring)) return true;
+    }
   }
   return false;
 }
@@ -300,16 +389,116 @@ function pushParcel(
   });
 }
 
-/** House-scale street frontage. One road step was a 140 m slab at harbour prices. */
-const STREET_CUTS = 4;
 /** NPC farms sit inland so the quay walk is vacant. */
 const NPC_INLAND_M = 700;
+
+/** One row of house lots flanking a polyline street. Real zoning: lots front
+ *  the street they sit on, instead of four stacked rows on one spine. */
+function lotsAlongPolyline(
+  lots: Parcel[],
+  spec: IslandSpec,
+  pts: { x: number; z: number }[],
+  opts: { fromM: number; toM: number; cutM: number; seed: number },
+): void {
+  let acc = 0;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const a = pts[i];
+    const b = pts[i + 1];
+    const segLen = Math.hypot(b.x - a.x, b.z - a.z) || 1;
+    const cuts = Math.max(1, Math.round(segLen / opts.cutM));
+    for (let k = 0; k < cuts; k++) {
+      const d0 = acc + (segLen * k) / cuts;
+      if (d0 < opts.fromM || d0 > opts.toM) continue;
+      const sa = {
+        x: a.x + ((b.x - a.x) * k) / cuts,
+        z: a.z + ((b.z - a.z) * k) / cuts,
+      };
+      const sb = {
+        x: a.x + ((b.x - a.x) * (k + 1)) / cuts,
+        z: a.z + ((b.z - a.z) * (k + 1)) / cuts,
+      };
+      for (const side of [-1, 1] as const) {
+        const perp = {
+          x: (-(sb.z - sa.z) / segLen) * cuts * side,
+          z: (((sb.x - sa.x) / segLen) * cuts * side),
+        };
+        const plen = Math.hypot(perp.x, perp.z) || 1;
+        const p = { x: perp.x / plen, z: perp.z / plen };
+        const hk = hash(opts.seed + i * 17 + k * 13 + side * 9);
+        const depth = 18 + hk * 14;
+        const street = quad(sa, sb, p, 13, depth, (hk - 0.5) * 0.08);
+        pushParcel(lots, spec, street, "street", lots.length);
+      }
+    }
+    acc += segLen;
+  }
+}
+
+/** Dirt lane running on from a street end, with working fields flanking it. */
+function fieldsOnDirtLane(
+  lots: Parcel[],
+  dirt: Road[],
+  spec: IslandSpec,
+  from: { x: number; z: number },
+  dir: { x: number; z: number },
+  seed: number,
+): void {
+  const laneLen = 190;
+  const end = { x: from.x + dir.x * laneLen, z: from.z + dir.z * laneLen };
+  if (heightAt(spec, end.x, end.z) < 0.4) return;
+  dirt.push({ island: spec.id, kind: "dirt", points: [from, end] });
+  for (const side of [-1, 1] as const) {
+    const p = { x: -dir.z * side, z: dir.x * side };
+    for (let seg = 0; seg < 2; seg++) {
+      const h = hash(seed + side * 11 + seg * 29);
+      const a = { x: from.x + dir.x * (18 + seg * 88), z: from.z + dir.z * (18 + seg * 88) };
+      const b = { x: from.x + dir.x * (94 + seg * 88), z: from.z + dir.z * (94 + seg * 88) };
+      const field = quad(a, b, p, 6, 46 + h * 26, (h - 0.5) * 0.1);
+      pushParcel(lots, spec, field, "field", lots.length);
+    }
+  }
+}
 
 function lotsAlongRoad(spec: IslandSpec): { lots: Parcel[]; dirt: Road[] } {
   const lots: Parcel[] = [];
   const dirt: Road[] = [];
+  const spine = pavedPolyline(spec);
+
+  // Town: one row of house lots on the spine's first stretch (starter walk).
+  lotsAlongPolyline(lots, spec, spine, {
+    fromM: 30,
+    toM: 900,
+    cutM: 44,
+    seed: spec.id === "north" ? 1 : 3,
+  });
+
+  // Every side street carries its own single row of lots.
+  SIDE_STREET_SPECS.forEach((s, i) => {
+    const pts = sideStreetPolyline(spec, s);
+    lotsAlongPolyline(lots, spec, pts, {
+      fromM: 26,
+      toM: s.len - 12,
+      cutM: 40,
+      seed: 100 + i * 7 + (spec.id === "north" ? 0 : 50),
+    });
+    // Farmland continues past the street end on a dirt lane.
+    const a = pts[pts.length - 2];
+    const b = pts[pts.length - 1];
+    const len = Math.hypot(b.x - a.x, b.z - a.z) || 1;
+    fieldsOnDirtLane(
+      lots,
+      dirt,
+      spec,
+      b,
+      { x: (b.x - a.x) / len, z: (b.z - a.z) / len },
+      200 + i * 13,
+    );
+  });
+
+  // Outskirts: fields along the inland half of the spine, one row each side,
+  // each with its own dirt access track.
   const steps = 18;
-  for (let i = 0; i < steps; i++) {
+  for (let i = 6; i < steps; i++) {
     const a = roadPoint(spec, i / steps);
     const b = roadPoint(spec, (i + 1) / steps);
     const len = Math.hypot(b.x - a.x, b.z - a.z) || 1;
@@ -317,43 +506,20 @@ function lotsAlongRoad(spec: IslandSpec): { lots: Parcel[]; dirt: Road[] } {
     for (const side of [-1, 1] as const) {
       const p = { x: perp.x * side, z: perp.z * side };
       const h = hash(i * 17 + side * 9 + (spec.id === "north" ? 1 : 3));
-      const streetDepth = 18 + h * 14;
-      for (let k = 0; k < STREET_CUTS; k++) {
-        const sa = roadPoint(spec, (i + k / STREET_CUTS) / steps);
-        const sb = roadPoint(spec, (i + (k + 1) / STREET_CUTS) / steps);
-        const slen = Math.hypot(sb.x - sa.x, sb.z - sa.z) || 1;
-        const sperp = { x: -(sb.z - sa.z) / slen, z: (sb.x - sa.x) / slen };
-        const sp = { x: sperp.x * side, z: sperp.z * side };
-        const hk = hash(i * 17 + side * 9 + k * 13 + (spec.id === "north" ? 1 : 3));
-        const street = quad(sa, sb, sp, 18, streetDepth, (hk - 0.5) * 0.08);
-        pushParcel(lots, spec, street, "street", lots.length);
-      }
-      const fieldSetback = 18 + streetDepth + 10;
-      const fieldDepth = 32 + h * 18;
-      const field = quad(a, b, p, fieldSetback, fieldDepth, (h - 0.4) * 0.1);
-      const fieldBefore = lots.length;
+      const field = quad(a, b, p, 16, 40 + h * 24, (h - 0.4) * 0.1);
+      const before = lots.length;
       pushParcel(lots, spec, field, "field", lots.length);
-      if (lots.length > fieldBefore) {
+      if (lots.length > before) {
         const fieldPlot = lots[lots.length - 1];
         const inner = {
-          x: (a.x + b.x) / 2 + p.x * (fieldSetback + 2),
-          z: (a.z + b.z) / 2 + p.z * (fieldSetback + 2),
+          x: (a.x + b.x) / 2 + p.x * 14,
+          z: (a.z + b.z) / 2 + p.z * 14,
         };
         dirt.push({
           island: spec.id,
           kind: "dirt",
           points: [inner, { x: fieldPlot.x, z: fieldPlot.z }],
         });
-      }
-      // Rows 2-3: carpet the corridor in parcels so the map reads as land you
-      // can claim everywhere, not one strip. pushParcel culls water/hill/road.
-      let rowSetback = fieldSetback + fieldDepth + 8;
-      for (let row = 2; row <= 3; row++) {
-        const hr = hash(i * 23 + side * 7 + row * 31 + (spec.id === "north" ? 2 : 5));
-        const depth = 34 + hr * 22;
-        const ringR = quad(a, b, p, rowSetback, depth, (hr - 0.5) * 0.12);
-        pushParcel(lots, spec, ringR, "field", lots.length);
-        rowSetback += depth + 8;
       }
     }
   }
@@ -447,8 +613,16 @@ export function createLandBoard(): LandBoard {
   }
   seedNpcLots(plots);
   seedNpcTown(plots);
+  // Spine first per island: taxi and traffic treat roads[0] as the trunk.
   const roads = Object.values(ISLANDS).flatMap((spec) => [
-    { island: spec.id, kind: "paved" as const, nodes: roadNodes(spec), points: pavedPolyline(spec) },
+    {
+      island: spec.id,
+      kind: "paved" as const,
+      nodes: roadNodes(spec),
+      points: pavedPolyline(spec),
+      name: "Harbour Rd",
+    },
+    ...sideStreets(spec),
     ...dirt.filter((d) => d.island === spec.id),
   ]);
   return { plots, roads };
@@ -593,5 +767,6 @@ export function landSnapshot(board: LandBoard, visitor: Visitor) {
     },
     plots: board.plots,
     roads: board.roads,
+    stops: Object.values(ISLANDS).flatMap((spec) => taxiStops(spec)),
   };
 }

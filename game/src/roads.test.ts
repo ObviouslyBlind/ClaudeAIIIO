@@ -126,7 +126,8 @@ describe("paved street from spawn", () => {
     const paved = added.filter((m) => m.userData.roadKind === "paved");
     const pavedRoads = map.roads.filter((r) => r.kind === "paved");
     expect(paved.length).toBe(pavedRoads.length);
-    expect(paved.length).toBe(2);
+    // One spine plus its side streets, per island. Still one mesh per road.
+    expect(paved.length).toBeGreaterThanOrEqual(4);
 
     for (let i = 0; i < paved.length; i++) {
       const mesh = paved[i];

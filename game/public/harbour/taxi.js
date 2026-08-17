@@ -107,6 +107,72 @@ export function pavedDestFromMapClick(roads, islandId, spec, sx, sy, w, h) {
   return best;
 }
 
+/** Map tap → a named stop point, or null when the tap is not near one. */
+export function stopFromMapClick(stops, spec, sx, sy, w, h, pickPx = 26) {
+  const bounds = islandMapBounds(spec);
+  let best = null;
+  for (const s of stops || []) {
+    const m = worldToMapPx(bounds, s.x, s.z, w, h);
+    const d = Math.hypot(m.sx - sx, m.sy - sy);
+    if (d <= pickPx && (!best || d < best.d)) best = { stop: s, d };
+  }
+  return best ? best.stop : null;
+}
+
+/**
+ * Route across the paved network. Branch roads carry `joins` (their junction
+ * with the trunk), so any trip is: branch → junction → trunk → junction →
+ * branch. Same-road trips stay on that road. Data-driven: a new street on the
+ * map routes with no taxi changes.
+ */
+export function routeAcrossPaved(roads, islandId, fromX, fromZ, toX, toZ) {
+  const paved = (roads || []).filter(
+    (r) => r.kind === "paved" && r.island === islandId && r.points && r.points.length >= 2,
+  );
+  if (!paved.length) return null;
+  const trunk = paved.find((r) => !r.joins) || paved[0];
+
+  const nearest = (x, z) => {
+    let best = null;
+    for (const r of paved) {
+      const proj = projectOnPolyline(r.points, x, z);
+      if (!best || proj.dist < best.proj.dist) best = { road: r, proj };
+    }
+    return best;
+  };
+  const from = nearest(fromX, fromZ);
+  const to = nearest(toX, toZ);
+  if (!from || !to) return null;
+
+  if (from.road === to.road) {
+    const pts = pathAlongPolyline(from.road.points, from.proj.x, from.proj.z, to.proj.x, to.proj.z);
+    return { points: pts, road: to.road };
+  }
+
+  const legs = [];
+  let trunkStart = { x: from.proj.x, z: from.proj.z };
+  if (from.road !== trunk) {
+    legs.push(
+      pathAlongPolyline(from.road.points, from.proj.x, from.proj.z, from.road.joins.x, from.road.joins.z),
+    );
+    trunkStart = from.road.joins;
+  }
+  let trunkEnd = { x: to.proj.x, z: to.proj.z };
+  if (to.road !== trunk) trunkEnd = to.road.joins;
+  legs.push(pathAlongPolyline(trunk.points, trunkStart.x, trunkStart.z, trunkEnd.x, trunkEnd.z));
+  if (to.road !== trunk) {
+    legs.push(pathAlongPolyline(to.road.points, to.road.joins.x, to.road.joins.z, to.proj.x, to.proj.z));
+  }
+  const points = [];
+  for (const leg of legs) {
+    for (const p of leg) {
+      const last = points[points.length - 1];
+      if (!last || Math.hypot(p.x - last.x, p.z - last.z) > 0.25) points.push(p);
+    }
+  }
+  return points.length >= 2 ? { points, road: to.road } : null;
+}
+
 function taxiMat(color, extra = {}) {
   return new THREE.MeshLambertMaterial({ color, ...extra });
 }
@@ -601,11 +667,25 @@ export function createTaxi({
   }
 
   function driveTo(x, z) {
-    if (!road) return false;
-    const pts = pathAlongPolyline(road.points, mesh.position.x, mesh.position.z, x, z);
-    if (pts.length < 2) return false;
-    setPath(pts);
+    const map = getMap();
+    const route = routeAcrossPaved(
+      map ? map.roads : [],
+      island,
+      mesh.position.x,
+      mesh.position.z,
+      x,
+      z,
+    );
+    if (!route || route.points.length < 2) return false;
+    road = route.road;
+    setPath(route.points);
     return true;
+  }
+
+  function islandStops() {
+    const map = getMap();
+    if (!map || !map.stops) return [];
+    return map.stops.filter((s) => s.id.startsWith(island + "-"));
   }
 
   function parkOnPaved() {
@@ -657,6 +737,22 @@ export function createTaxi({
         else ctx.lineTo(m.sx, m.sy);
       });
       ctx.stroke();
+    }
+    // Named stops: the taxi is point-to-point, so points are the interface.
+    ctx.textAlign = "center";
+    ctx.font = "700 11px 'Segoe UI', system-ui, sans-serif";
+    for (const s of islandStops()) {
+      const m = worldToMapPx(bounds, s.x, s.z, w, h);
+      ctx.fillStyle = "#f4ead8";
+      ctx.beginPath();
+      ctx.arc(m.sx, m.sy, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#2a2a2e";
+      ctx.beginPath();
+      ctx.arc(m.sx, m.sy, 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#f4ead8";
+      ctx.fillText(s.name, m.sx, m.sy - 10);
     }
     const me = worldToMapPx(bounds, mesh.position.x, mesh.position.z, w, h);
     ctx.fillStyle = "#f0c430";
@@ -770,12 +866,24 @@ export function createTaxi({
     const sy = ((ev.clientY - rect.top) / rect.height) * overlayCanvas.height;
     const spec = specOf(island);
     const map = getMap();
-    const hit = map ? pavedDestFromMapClick(map.roads, island, spec, sx, sy, overlayCanvas.width, overlayCanvas.height) : null;
-    if (!hit) {
-      setStatus("No paved road here. PAPER.");
+    // Stops first: tap a named point and the cab routes across the network.
+    const stop = stopFromMapClick(islandStops(), spec, sx, sy, overlayCanvas.width, overlayCanvas.height);
+    if (stop) {
+      if (!driveTo(stop.x, stop.z)) {
+        setStatus("No route to " + stop.name + ". PAPER.");
+        return;
+      }
+      mode = "hauling";
+      setWalking(false);
+      closeOverlay();
+      setStatus("Taxi to " + stop.name + ". PAPER · SIMULATED.");
       return;
     }
-    road = hit.road;
+    const hit = map ? pavedDestFromMapClick(map.roads, island, spec, sx, sy, overlayCanvas.width, overlayCanvas.height) : null;
+    if (!hit) {
+      setStatus("Tap a stop point. PAPER.");
+      return;
+    }
     if (!driveTo(hit.proj.x, hit.proj.z)) {
       setStatus("Taxi stays on paved. Dirt is forbidden. PAPER.");
       return;
