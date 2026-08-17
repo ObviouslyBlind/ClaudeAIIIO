@@ -6,13 +6,13 @@ PAPER / SIMULATED. Grep these `kind` / `layer` / `.name` strings. Source of trut
 
 | Viewer | `data-overlay` | What you see | What a tap hits |
 | --- | --- | --- | --- |
-| World | `world` | the islands | walk. buildings / stands / port. **$ tags still lease** |
-| Lots | `lots` | boundary outlines | click the **$ title** or a lot to lease another section |
+| World | `world` | the islands | walk. buildings / stands / port. **$ tags buy** |
+| Lots | `lots` | boundary outlines | click the **$ title** or a lot to buy |
 | Foot traffic | `foot` | green / yellow / red ribbons + road names | walk only |
 | Logistics | `logistics` | van + roadside crate pads | crate / van / walk |
 | Minerals | `minerals` | empty on South v1 | walk only |
 
-Lease a plot by **clicking its $ price tag** (name, cost, Lease / Close). Left-click empty ground still walks.
+Buy a plot by **clicking its $ price tag** (that buys immediately). Lots overlay: click the lot dirt. The card $ line is **Buy lot**. Left-click empty ground in World still walks.
 
 ## Mesh kinds
 
