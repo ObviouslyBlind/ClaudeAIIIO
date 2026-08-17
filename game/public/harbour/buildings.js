@@ -380,6 +380,20 @@ function addTransom(g, x, y, z) {
 }
 
 /**
+ * Tiny kraft PAPER jamb beside the House door so the leaf reads as
+ * framed, not a blank plank. Original KRAFT — not a new hex.
+ * House door only — shop keeps its latch; shed stays bare.
+ * Offset from stoop, knocker, hinge, lintel, knob, sill, sconce,
+ * transom, doormat, and mailbox.
+ */
+function addJamb(g, x, y, z) {
+  const jamb = tagPaper(part(0.06, 0.36, 0.04, KRAFT, false), "jamb");
+  jamb.name = "jamb";
+  jamb.position.set(x, y, z);
+  g.add(jamb);
+}
+
+/**
  * Small kraft PAPER knocker on the House door so the leaf reads as a
  * front door, not a blank plank. Original WOOD / KRAFT — not a new hex.
  * House door only — shop gets a latch instead; shed and factory hall stay bare.
@@ -505,6 +519,7 @@ function cottage(kind) {
     addSill(g, -W * 0.12, 0.42, D / 2 + 0.12);
     addSconce(g, -W * 0.12 - 0.88, 1.48, D / 2 + 0.16);
     addTransom(g, -W * 0.12, 2.38, D / 2 + 0.20);
+    addJamb(g, -W * 0.12 + 0.52, 1.42, D / 2 + 0.18);
   }
   if (shop) {
     addLatch(g, -W * 0.12 + 0.28, 1.42, D / 2 + 0.18);

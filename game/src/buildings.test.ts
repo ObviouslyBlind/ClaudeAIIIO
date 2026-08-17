@@ -607,6 +607,63 @@ describe("paper building catalogue", () => {
     expect(shopParts.has("latch")).toBe(true);
   });
 
+  it("puts one tiny kraft PAPER jamb at the House door", () => {
+    const house = meshForUse("house", { area: 400 });
+    const jambs: Array<{
+      userData?: { part?: string; mode?: string };
+      material?: { color?: { getHex: () => number } };
+      geometry?: { type?: string; parameters?: { width: number; height: number; depth: number } };
+    }> = [];
+    const parts = new Set<string>();
+    const hexes: number[] = [];
+    house.traverse((obj: unknown) => {
+      const mesh = obj as {
+        userData?: { part?: string; mode?: string };
+        material?: { color?: { getHex: () => number } };
+        geometry?: { type?: string; parameters?: { width: number; height: number; depth: number } };
+      };
+      const part = mesh.userData?.part;
+      if (part) parts.add(part);
+      if (part !== "jamb") return;
+      jambs.push(mesh);
+      if (mesh.material?.color) hexes.push(mesh.material.color.getHex());
+    });
+    expect(jambs.length).toBeGreaterThanOrEqual(1);
+    expect(parts.has("stoop")).toBe(true);
+    expect(parts.has("knocker")).toBe(true);
+    expect(parts.has("hinge")).toBe(true);
+    expect(parts.has("lintel")).toBe(true);
+    expect(parts.has("knob")).toBe(true);
+    expect(parts.has("sill")).toBe(true);
+    expect(parts.has("sconce")).toBe(true);
+    expect(parts.has("transom")).toBe(true);
+    expect(parts.has("doormat")).toBe(true);
+    expect(parts.has("mailbox")).toBe(true);
+    for (const mesh of jambs) {
+      expect(mesh.userData?.mode).toBe("PAPER");
+      expect(mesh.geometry?.type).toBe("BoxGeometry");
+      const box = mesh.geometry?.parameters;
+      if (box) {
+        expect(box.width).toBeLessThan(0.16);
+        expect(box.height).toBeLessThan(0.5);
+        expect(box.depth).toBeLessThan(0.12);
+      }
+    }
+    expect(hexes.length).toBeGreaterThan(0);
+    expect(hexes.every((c) => c === 0xf4ead8)).toBe(true);
+    expect(hexes.every((c) => !isGrey(c))).toBe(true);
+
+    const shop = meshForUse("shop", { area: 400 });
+    const shopParts = new Set<string>();
+    shop.traverse((obj: unknown) => {
+      const mesh = obj as { userData?: { part?: string } };
+      const part = mesh.userData?.part;
+      if (part) shopParts.add(part);
+    });
+    expect(shopParts.has("jamb")).toBe(false);
+    expect(shopParts.has("latch")).toBe(true);
+  });
+
   it("puts a small kraft PAPER knocker on the House door", () => {
     const house = meshForUse("house", { area: 400 });
     const parts: string[] = [];
