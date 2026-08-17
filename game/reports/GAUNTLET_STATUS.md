@@ -164,11 +164,13 @@ Pixel: **rust hull stripe** at `http://localhost:8787/g/plate81`. Wide rust band
 
 `/g/plate81` **FAIL PLATE**: cream hull with one small rust buoy blob; 22 m stripe at buoy height still unread. **Plate round stopped.** Code stays; not pixel-held.
 
-`/g/teal82` **FAIL TEAL**: pier uniformly beige; 5.4 m teal cube sat inside the unread 12×16 cargo slab. Crate is now buoy-class (8.2 m), no kraft cap, stacked on top of that slab, east of the walk on the 11 m deck.
+`/g/teal82` **FAIL TEAL**: pier uniformly beige; 5.4 m teal cube sat inside the unread 12×16 cargo slab.
 
-Pixel: **teal pier crate** at `http://localhost:8787/g/teal83`. Ped-shirt teal cube sitting on the north timber (above the unread cargo), east of the walk. No RMB. Address bar must be `/g/teal83`. Do not restart play while the critic is on the page.
+`/g/teal83` **FAIL TEAL**: pier still uniformly beige; 8.2 m cube stacked on cargo unread. **Teal round stopped.** Code stays; not pixel-held.
 
-## Next pixel (after teal83 PASS, immediately, no wait)
+Pixel: **terracotta basin crate** at `http://localhost:8787/g/clay84`. Ped-shirt terracotta cube in the north water channel, between pier lip and sage dinghies. No RMB. Address bar must be `/g/clay84`. Do not restart play while the critic is on the page.
+
+## Next pixel (after clay84 PASS, immediately, no wait)
 
 ## Frozen
 
