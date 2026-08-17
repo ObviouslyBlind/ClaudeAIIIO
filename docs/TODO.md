@@ -56,6 +56,9 @@ Politics frozen. See `game/reports/GAUNTLET_STATUS.md`. New chat: `game/reports/
 - [x] `/g/south101` FAIL SOUTH — quay/foam trickle froze the idle (D043 cars+ferry only).
 - [x] `/g/south102` PASS SOUTH — ferry, real landfall, 60 s idle, no freeze.
 - [x] `/g/loop103` PASS LOOP — full session held end to end, zero freezes.
+- [ ] HUD clone lines — empty goods/persist no longer paint the same PAPER badge (D044). Pixel critic `/g/hud104`.
+- [ ] Market from harbour dock — Buy 1 fills, cash shared, PAPER labeled (`/g/mkt105` after HUD).
+- [ ] Persist Restore from a live dump.
 - [ ] Perf pass: return quay clutter / foam / trees without main-thread builds.
 - [x] Bug scout: south island void after ferry, invisible restored buildings, dead pier taps (D039).
 - [x] Playtest: taxi missing + 86 m pier on sand — taxi at boot, pier over water (D037).

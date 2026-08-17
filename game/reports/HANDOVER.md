@@ -8,9 +8,9 @@ This is a PAPER / SIMULATED harbour game in `/workspace/game`. The Polymarket pa
 
 Operator came back to **playtest**. Bar is **`http://localhost:8787/`**, inland spawn, walkable harbour.
 
-Gauntlet at a resting point. `/g/loop103` PASS LOOP — full session (walk, lease, House, Enter/Exit, taxi, ferry to South) with zero freezes. Next piece: operator playtest feedback, or a perf pass to return quay clutter / foam / trees off the main thread.
+Gauntlet at a resting point after `/g/loop103` PASS LOOP. Next piece: **HUD clone lines** (D044) then Market Buy 1. Operator screenshot stacked identical `PAPER · SIMULATED` goods + persist lines.
 
-Last playtest fix: D043 — trickle carries only cars + moving ferry (quay clutter / foam froze the 60 s idle). D042 ferry-hint observer loop killed. D040/41 no burst timer. D039 south landfall. D038 cheap lots. D037 taxi + pier. D036 no auto trees.
+Last playtest fix: D044 empty goods blank / persist `no dump`. D043 trickle cars+ferry only. D042 ferry-hint observer loop killed. D040/41 no burst timer. D039 south landfall. D038 cheap lots. D037 taxi + pier. D036 no auto trees.
 
 ## Play
 
@@ -90,4 +90,4 @@ If `/` looks like a broken harbour: they still have a stale `/g/` tab, or play w
 
 ## If they ask to resume the gauntlet
 
-One inspectable bar. Not more unread giant cubes. Building shells still wait (not in inland first frame; critic cannot RMB). Next useful bars are playtest bugs the operator names, not another funnel.
+One inspectable bar. Not more unread giant cubes. Building shells still wait (not in inland first frame; critic cannot RMB). Next useful bars: HUD clone lines (`/g/hud104`), Market Buy 1, persist Restore — not another funnel.

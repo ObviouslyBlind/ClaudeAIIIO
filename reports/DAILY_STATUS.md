@@ -2,7 +2,7 @@
 
 ## 2026-08-17 (latest)
 
-**Current status:** `/g/loop103` PASS LOOP — full session (walk, lease, House, Enter/Exit, taxi, ferry to South) with zero freezes. Base game is playable end to end. PAPER / SIMULATED. Politics frozen.
+**Current status:** Gauntlet resumed on playtest HUD clones. D044: empty goods stay blank; persist says `no dump`. Next critic `/g/hud104`. PAPER / SIMULATED. Politics frozen.
 
 ## 2026-08-16
 

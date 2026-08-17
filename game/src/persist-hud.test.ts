@@ -1,4 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   IDLE_LINE,
   POLL_MS,
@@ -62,6 +65,16 @@ describe("harbour PAPER persist restore HUD", () => {
     expect(formatPersistLine(DUMP).length).toBeLessThan(80);
     expect(formatPersistLine(DUMP).toLowerCase()).not.toContain("wallet");
     expect(formatPersistLine(DUMP).toLowerCase()).not.toContain("postgres");
+    expect(IDLE_LINE).toBe("PAPER · SIMULATED · no dump");
+  });
+
+  it("ships a no-dump first frame, not a clone of the PAPER badge", () => {
+    const html = readFileSync(
+      join(dirname(fileURLToPath(import.meta.url)), "../public/harbour/index.html"),
+      "utf8",
+    );
+    expect(html).toMatch(/id="persist-line">PAPER · SIMULATED · no dump</);
+    expect(html).not.toMatch(/id="persist-line">PAPER · SIMULATED</);
   });
 
   it("polls GET /api/persist and paints the dump", async () => {

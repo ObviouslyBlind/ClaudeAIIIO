@@ -36,7 +36,7 @@ Loop is **live** on playtest bugs (operator: “so many bugs, use the gauntlet�
 
 `/g/loop103` **PASS LOOP**: one session — walk, lease $209, House $40, Enter/Exit, taxi waiting on paved, $15 ferry to a real South, $508 left, zero freezes.
 
-Queue is empty. The base loop is pixel-held end to end on the playtest build. Next piece comes from the operator's playtest or a perf pass to bring quay clutter / foam / trees back off the main thread.
+D044: empty goods stay blank; persist says `no dump`. Critic `/g/hud104` next. Then Market Buy 1 (`/g/mkt105`).
 
 One **pixel critic** at a time. Unique `/g/…` path. No RMB. Do not restart play while a critic is on the page.
 
