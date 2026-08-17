@@ -141,6 +141,12 @@ Record of architecture and strategy decisions with reasoning.
 
 **Decision:** North spawn camera sits inland of the visitor (`z: -40`) and looks seaward (`look-at z: +90`) so the cream hull at `HOME_Z=-6835` is in the first frame. Do not ask computerUse critics to RMB-orbit.
 **Reason:** `/g/ferry35` FAIL HULL: inland look hid the boat behind the camera. `/g/ferry36` FAIL NO ORBIT: the critic environment cannot emit trusted right-button pointer events. Player still spawns 8 m inland of the north port. PAPER / SIMULATED. Not a live-trading change.
+**Superseded by D030** for `/` playtest. Seaward framing stays in the critic log; it is not the live spawn.
+
+## D030 — `/` playtest spawn looks inland (2026-08-17)
+
+**Decision:** Restore the inland third-person spawn on `/`. North camera offset `{ x: 20, y: 24, z: 40 }`, look-at `{ x: 0, y: 5, z: -120 }`. Strip unread giant north extras (brow, plate, ring, funnel, cargo, teal, clay, green). Keep pixel-held dinghies and the rust buoy.
+**Reason:** Operator came back to playtest and `localhost:8787` dumped them into the seaward critic harbour, which was a pile of unread 8–40 m cubes. Playtest is the bar. PAPER / SIMULATED.
 
 ## D015 — Supplemental merge before save (2026-03-18)
 

@@ -1,6 +1,6 @@
 # Gauntlet status
 
-Loop is **not finished**. Do not pause. User is the brake.
+Loop is **paused for playtest**. User asked to play `/`. Do not launch another seaward cube critic until they say so.
 
 One **pixel critic** at a time (one pair of eyes). The **live harbour** already runs the rest together on `/`: water, shore foam, both quays, roads, street props, trees, cart, traffic, taxi, ferry, stalls, pedestrians, nametags, interiors, econ/nearby/cart/staff HUD, lease/develop/hire/fire/enter/exit/ferry/taxi, market + hansard.
 
@@ -180,9 +180,13 @@ Pixel: **green hull crate** at `http://localhost:8787/g/green86`. Ped-shirt gree
 
 `/g/green86` **FAIL GREEN**: no green cube on the hull; x+5.2 sat in the wheelhouse. Block is now dinghy-deep, stacked above the held sage hulls in the center channel.
 
-Pixel: **green basin crate** at `http://localhost:8787/g/green87`. Ped-shirt green block above the sage dinghies, center water. No RMB. Address bar must be `/g/green87`. Do not restart play while the critic is on the page.
+`/g/green87` **paused**. Operator asked to playtest. Live `/` is inland spawn again. Unread giant extras (brow / plate / ring / funnel / cargo / teal / clay / green) are off the quay.
 
-## Next pixel (after green87 PASS, immediately, no wait)
+## Playtest (2026-08-17)
+
+Open **`http://localhost:8787/`**. First frame looks inland along the tarmac, not at the ferry basin. Close stale `/g/…` tabs. Click to walk, cart, lease → House → Enter → Exit. PAPER / SIMULATED.
+
+## Next pixel (paused until playtest)
 
 ## Frozen
 

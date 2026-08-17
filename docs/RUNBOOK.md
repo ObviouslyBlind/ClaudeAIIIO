@@ -12,11 +12,11 @@ npm test
 npm run play
 ```
 
-Open `http://localhost:8787/g/green87` — critics must use a unique `/g/` path, not a reused `/?g=` tab. Do not ask computerUse critics to RMB-orbit.
+Open **`http://localhost:8787/`** to playtest. Spawn looks inland along the tarmac (paved ribbon, dirt, cars, taxi, trees + cart). Close other Two Harbors tabs if the first frame looks like the old seaward critic harbour.
 
 - Port **8787**. Restart: `game/scripts/restart-play.sh` (tmux `two-harbors-play`).
-- Do **not** restart play while a critic is on the page.
 - Left click/tap = walk or use. RMB-hold = orbit. No WASD. No wallet.
+- Critics: unique `/g/` path. Do not ask computerUse to RMB-orbit. Cube rounds are paused while playtest is the bar.
 - Status: `game/reports/GAUNTLET_STATUS.md`.
 
 ## Live dashboard (public URL)

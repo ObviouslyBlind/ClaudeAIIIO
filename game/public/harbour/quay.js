@@ -240,36 +240,7 @@ function lifeRing() {
   return g;
 }
 
-/**
- * Short kraft wooden brow from the north timber lip toward the basin.
- * Paper boxes, wood hexes already in this file. Stops short of the ferry.
- */
-function gangplank() {
-  const g = new THREE.Group();
-  g.userData.dress = "brow";
-  g.userData.mode = "PAPER";
-
-  /** /g/brow67 FAIL BROW: 0.55 m slab was a line from spawn. Dinghy hulls
-   *  that passed are 2.4 m tall — match that height, keep dark vs teal. */
-  const plank = part(7.4, 2.4, 12, 0x4a3220);
-  plank.position.set(0, 0, 0);
-  plank.userData.part = "plank";
-  g.add(plank);
-
-  const wear = part(6.8, 0.35, 11.2, 0xc4b496, false);
-  wear.position.set(0, 1.3, 0);
-  g.add(wear);
-
-  for (const sx of [-3.5, 3.5]) {
-    const rail = part(0.32, 0.28, 11.4, 0x7a5230, false);
-    rail.position.set(sx, 1.55, 0);
-    g.add(rail);
-  }
-
-  return g;
-}
-
-/** Rust drum in the north basin channel. Brow at the lip never read from spawn. */
+/** Rust drum on the north cream hull. Pixel-held `/g/buoy70`. */
 function channelBuoy() {
   const g = new THREE.Group();
   g.userData.dress = "buoy";
@@ -286,147 +257,6 @@ function channelBuoy() {
   const cap = part(6.8, 0.8, 6.8, 0x8a6238, false);
   cap.position.y = 4.4;
   g.add(cap);
-
-  return g;
-}
-
-/** Camera-facing rust stripe at buoy height. Cargo round stopped.
- *  /g/plate79 FAIL PLATE: cube at x-8.8 sat on the far (port) side, occluded.
- *  /g/plate80 FAIL PLATE: y=2.4 waterline hid behind the sage dinghies. */
-function hullPlate() {
-  const g = new THREE.Group();
-  g.userData.dress = "plate";
-  g.userData.mode = "PAPER";
-
-  const body = part(22, 5.2, 4.2, 0x6e2e22);
-  body.userData.part = "body";
-  g.add(body);
-
-  const band = part(22.4, 1.0, 4.6, 0xc4b496, false);
-  band.position.y = 0.6;
-  g.add(band);
-
-  return g;
-}
-
-/** Terracotta/kraft life ring on the camera-facing hull, offset from the rust buoy.
- *  /g/ring71 FAIL RING: 1.2 m segs at r=2.8 read as hull furniture from spawn.
- *  /g/ring72 FAIL RING: 8 segs at x+10.2 sat on the wheelhouse and read as cabin.
- *  Copy the held buoy: one 8 m rust cube + kraft band, parked on the bow. */
-function basinRing() {
-  const g = new THREE.Group();
-  g.userData.dress = "ring";
-  g.userData.mode = "PAPER";
-
-  const body = part(8.2, 8.4, 8.2, 0x6e2e22);
-  body.userData.part = "body";
-  g.add(body);
-
-  const band = part(8.6, 1.6, 8.6, 0xc4b496, false);
-  band.position.y = 1.2;
-  g.add(band);
-
-  const face = part(8.4, 8.4, 1.4, 0xc4b496, false);
-  face.position.z = -4.6;
-  g.add(face);
-
-  return g;
-}
-
-/** Tall rust funnel above the held buoy. Ring round stopped: +X left the frame.
- *  /g/funnel74 FAIL FUNNEL: 12 m stick at y=14 sat inside the buoy blob. */
-function basinFunnel() {
-  const g = new THREE.Group();
-  g.userData.dress = "funnel";
-  g.userData.mode = "PAPER";
-
-  const body = part(3.6, 40.0, 3.6, 0x6e2e22);
-  body.userData.part = "body";
-  g.add(body);
-
-  const band = part(4.2, 3.0, 4.2, 0xc4b496, false);
-  band.position.y = 8;
-  g.add(band);
-
-  const cap = part(2.8, 1.2, 2.8, 0x8a6238, false);
-  cap.position.y = 20.4;
-  g.add(cap);
-
-  return g;
-}
-
-/** Buoy-class rust cargo on the north timber. Funnel round stopped: verticals unread. */
-function basinCargo() {
-  const g = new THREE.Group();
-  g.userData.dress = "cargo";
-  g.userData.mode = "PAPER";
-
-  /** /g/cargo77 FAIL CARGO: 8 m cube at x+4.2 had a kraft cap, so the
-   *  downward spawn camera read it as more beige decking. Rust TOP, pier-wide. */
-  const body = part(12, 6.4, 16, 0x6e2e22);
-  body.userData.part = "body";
-  g.add(body);
-
-  const band = part(12.4, 1.4, 16.4, 0xc4b496, false);
-  band.position.y = 0;
-  g.add(band);
-
-  const top = part(12.4, 0.5, 16.4, 0x6e2e22, false);
-  top.userData.part = "top";
-  top.position.y = 3.2;
-  g.add(top);
-
-  return g;
-}
-
-/** Ped-teal crate on the north timber. Plate round stopped: hull rust unread.
- *  Peds in 0x2a7a72 passed on this deck; rust-on-beige did not.
- *  /g/teal82 FAIL TEAL: 5.4 m cube at (x+3.5, deckY+2.4, along 36) sat
- *  inside the unread 12×16 cargo slab (along 32–48, x ±6) so the
- *  downward spawn camera only saw beige deck. Buoy-class, no kraft cap
- *  (cargo77: kraft top read as planks), stacked on top of that slab. */
-function pierTeal() {
-  const g = new THREE.Group();
-  g.userData.dress = "teal";
-  g.userData.mode = "PAPER";
-
-  const body = part(8.2, 8.2, 8.2, 0x2a7a72);
-  body.userData.part = "body";
-  g.add(body);
-
-  return g;
-}
-
-/** Ped-terracotta crate in the north basin. Teal round stopped: pier
- *  teal unread. 0xc45c3a already passed as a pier shirt; sage dinghies
- *  passed in this channel. No kraft cap.
- *  /g/clay84 FAIL CLAY: 8.2 cube at toward*80 (z≈-6870) sat inside the
- *  unread cargo slab (z -6880..-6864). Dinghy-deep, seaward of cargo,
- *  taller than the sage hulls so it pokes into the look-at. */
-function basinClay() {
-  const g = new THREE.Group();
-  g.userData.dress = "clay";
-  g.userData.mode = "PAPER";
-
-  const body = part(8.2, 8.2, 18, 0xc45c3a);
-  body.userData.part = "body";
-  g.add(body);
-
-  return g;
-}
-
-/** Ped-green crate. Clay round stopped: terracotta in the dinghy
- *  channel unread. /g/green86 FAIL GREEN: 6.2 m cube at x+5.2 on the
- *  hull sat in the wheelhouse and unread. Stack a dinghy-deep green
- *  block ABOVE the held sage hulls (ding65) in the center channel. */
-function hullGreen() {
-  const g = new THREE.Group();
-  g.userData.dress = "green";
-  g.userData.mode = "PAPER";
-
-  const body = part(8.2, 10, 18, 0x6a8f44);
-  body.userData.part = "body";
-  g.add(body);
 
   return g;
 }
@@ -622,62 +452,12 @@ export function makeQuay(spec, helpers) {
   root.add(d2);
 
   if (spec.id === "north") {
-    const brow = gangplank();
-    /** /g/brow68 FAIL BROW: dinghy-tall lip slab still unread. Round stopped. */
-    brow.position.set(x, 1.7, z + toward * 86);
-    root.add(brow);
-
-    /** /g/buoy69 FAIL BUOY: sat inside the sage dinghies at toward*102.
-     *  Park on the camera-facing cream hull — same slot as fend54. */
+    /** Pixel-held `/g/buoy70`. Unread giant extras (brow/plate/ring/funnel/
+     *  cargo/teal/clay/green) stay off the live quay so `/` is playable. */
     const buoy = channelBuoy();
     buoy.position.set(x, 5.4, z + toward * 116);
     root.add(buoy);
 
-    /** /g/plate79 FAIL PLATE: x-8.8 sat behind the hull from the east camera.
-     *  /g/plate80 FAIL PLATE: y=2.4 hid behind dinghies. Lift to buoy height. */
-    const plate = hullPlate();
-    plate.position.set(x, 5.4, z + toward * 116);
-    root.add(plate);
-
-    /** /g/ring72 FAIL RING: x+10.2 overlapped the wheelhouse (local x 6–11).
-     *  Park on the bow, right of the held buoy, clear of the cabin. */
-    const ring = basinRing();
-    ring.position.set(x + 15.4, 5.4, z + toward * 116);
-    root.add(ring);
-
-    /** /g/ring73 FAIL RING: bow cube at x+15.4 sat under the spawn camera.
-     *  Ring round stopped. Funnel uses the held buoy's x=0 slot, stacked up. */
-    /** /g/funnel74 FAIL FUNNEL: 12 m at y=14 sat inside the buoy blob.
-     *  Lift a 40 m rust stick into the cyan sky above that slot. */
-    const funnel = basinFunnel();
-    funnel.position.set(x, 32.0, z + toward * 116);
-    root.add(funnel);
-
-    /** /g/cargo77 FAIL CARGO: east-of-walk kraft-capped cube still unread.
-     *  Pier-wide rust slab on the centre lip so the overhead frame is rust. */
-    const cargo = basinCargo();
-    cargo.position.set(x, deckY + 3.2, pierZ + toward * 40);
-    root.add(cargo);
-
-    /** /g/teal82 FAIL TEAL: buried inside cargo. Sit on top of that slab,
-     *  east of the walk, still on the 11 m deck (bollards at ±5.15). */
-    const teal = pierTeal();
-    teal.position.set(x + 4.2, deckY + 10.4, pierZ + toward * 36);
-    root.add(teal);
-
-    /** /g/clay84 FAIL CLAY: toward*80 sat inside cargo. Park seaward of
-     *  that slab, dinghy-deep in the center channel, in front of the ferry. */
-    const clay = basinClay();
-    clay.position.set(x, 4.2, z + toward * 108);
-    root.add(clay);
-
-    /** /g/green86 FAIL GREEN: x+5.2 hull cube unread (wheelhouse). Sit
-     *  on the ding65 slot, above the sage hulls, center channel. */
-    const green = hullGreen();
-    green.position.set(x, 9.2, z + toward * 102);
-    root.add(green);
-
-    // Extra kraft stack on the north timber, west of the walk, short of the brow.
     const stackN = crateStack();
     stackN.position.set(x - 3.3, deckY, pierZ - toward * 12);
     stackN.rotation.y = 0.28;

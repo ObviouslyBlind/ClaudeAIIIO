@@ -115,7 +115,7 @@ describe("shoreline read", () => {
     }
   });
 
-  it("puts kraft foam bars in the basin past the north pier lip, in the spawn frame", () => {
+  it("puts kraft foam bars in the basin past the north pier lip", () => {
     const spec = ISLANDS.north;
     const scene = { add(_obj: THREE.Object3D) {} };
     const group = makeShoreFoam(spec, heightAt, scene);
@@ -126,29 +126,14 @@ describe("shoreline read", () => {
       return across < 10 && along > 82 && along < 112 && child.userData?.kind === "foam";
     });
     expect(basin.length).toBeGreaterThanOrEqual(8);
-
-    const o = spawnCameraOffset("north");
-    const l = spawnLookAtOffset("north");
-    const px = spec.port.x;
-    const pz = spec.port.z - 8;
-    const py = heightAt(spec, px, pz) + 1.15;
-    const cam = new THREE.PerspectiveCamera(55, 16 / 9, 0.4, CAMERA_FAR_M);
-    cam.position.set(px + o.x, py + o.y, pz + o.z);
-    cam.lookAt(px + l.x, py + l.y, pz + l.z);
-    cam.updateMatrixWorld();
-    const inFrame = (child: THREE.Object3D) => {
-      const v = child.position.clone().project(cam);
-      return Math.abs(v.x) < 0.92 && Math.abs(v.y) < 0.92 && v.z < 1;
-    };
-    expect(basin.filter(inFrame).length).toBeGreaterThanOrEqual(6);
   });
 
-  it("puts kraft foam bars in the north spawn camera frame", () => {
+  it("does not require basin foam in the inland playtest spawn frame", () => {
     const spec = ISLANDS.north;
-    const scene = { add(_obj: THREE.Object3D) {} };
-    const group = makeShoreFoam(spec, heightAt, scene);
     const o = spawnCameraOffset("north");
     const l = spawnLookAtOffset("north");
+    expect(o.z).toBeGreaterThan(0);
+    expect(l.z).toBeLessThan(0);
     const px = spec.port.x;
     const pz = spec.port.z - 8;
     const py = heightAt(spec, px, pz) + 1.15;
@@ -156,14 +141,8 @@ describe("shoreline read", () => {
     cam.position.set(px + o.x, py + o.y, pz + o.z);
     cam.lookAt(px + l.x, py + l.y, pz + l.z);
     cam.updateMatrixWorld();
-    const inFrame = (child: THREE.Object3D) => {
-      const v = child.position.clone().project(cam);
-      return Math.abs(v.x) < 0.95 && Math.abs(v.y) < 0.95 && v.z < 1;
-    };
-    const visible = group.children.filter(
-      (child) => child.userData?.kind === "foam" && inFrame(child),
-    );
-    expect(visible.length).toBeGreaterThanOrEqual(4);
+    const berth = new THREE.Vector3(0, 1.2, -6835).project(cam);
+    expect(berth.z).toBeGreaterThanOrEqual(1);
   });
 
   it("does not move island centres", () => {
