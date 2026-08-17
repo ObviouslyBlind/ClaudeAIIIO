@@ -269,6 +269,27 @@ function gangplank() {
   return g;
 }
 
+/** Rust drum in the north basin channel. Brow at the lip never read from spawn. */
+function channelBuoy() {
+  const g = new THREE.Group();
+  g.userData.dress = "buoy";
+  g.userData.mode = "PAPER";
+
+  const body = part(5.2, 8.4, 5.2, 0x6e2e22);
+  body.userData.part = "body";
+  g.add(body);
+
+  const band = part(5.6, 1.4, 5.6, 0xc4b496, false);
+  band.position.y = 1.6;
+  g.add(band);
+
+  const cap = part(4.4, 0.7, 4.4, 0x8a6238, false);
+  cap.position.y = 4.4;
+  g.add(cap);
+
+  return g;
+}
+
 /** Crate with a canvas tarp lashed over it. */
 function canvasCrate() {
   const g = new THREE.Group();
@@ -461,10 +482,14 @@ export function makeQuay(spec, helpers) {
 
   if (spec.id === "north") {
     const brow = gangplank();
-    /** /g/brow67 FAIL BROW: flat slab at the lip vanished. Same water gap,
-     *  dinghy-tall so it reads against teal between pier and ferry. */
+    /** /g/brow68 FAIL BROW: dinghy-tall lip slab still unread. Round stopped. */
     brow.position.set(x, 1.7, z + toward * 86);
     root.add(brow);
+
+    /** Same basin slot as ding65. Rust drum stands above the sage hulls. */
+    const buoy = channelBuoy();
+    buoy.position.set(x, 5.2, z + toward * 102);
+    root.add(buoy);
 
     // Extra kraft stack on the north timber, west of the walk, short of the brow.
     const stackN = crateStack();

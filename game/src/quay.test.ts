@@ -476,4 +476,27 @@ describe("quay harbour dressing", () => {
     expect(brow!.position.z).toBeGreaterThan(-6872);
     expect(brow!.position.z).toBeLessThan(-6860);
   });
+
+  it("stands a spawn-readable rust buoy in the north basin channel with the dinghies", () => {
+    const spec = ISLANDS.north;
+    const added: THREE.Object3D[] = [];
+    const scene = { add(obj: THREE.Object3D) { added.push(obj); } };
+    const root = makeQuay(spec, { scene, heightAt });
+    const buoy = root.children.find((c) => c.userData?.dress === "buoy");
+    expect(buoy).toBeTruthy();
+    let body: THREE.Mesh | null = null;
+    buoy!.traverse((obj) => {
+      if (obj.userData?.part === "body") body = obj as THREE.Mesh;
+    });
+    expect(body).not.toBeNull();
+    const bg = (body as THREE.Mesh).geometry as THREE.BoxGeometry;
+    expect(bg.parameters.width).toBeGreaterThanOrEqual(4);
+    expect(bg.parameters.height).toBeGreaterThanOrEqual(6);
+    const bm = (body as THREE.Mesh).material as THREE.MeshLambertMaterial;
+    expect(bm.color.getHex()).toBe(0x6e2e22);
+    expect(buoy!.position.y).toBeGreaterThan(4);
+    expect(Math.abs(buoy!.position.x)).toBeLessThan(2);
+    expect(buoy!.position.z).toBeGreaterThan(-6855);
+    expect(buoy!.position.z).toBeLessThan(-6840);
+  });
 });

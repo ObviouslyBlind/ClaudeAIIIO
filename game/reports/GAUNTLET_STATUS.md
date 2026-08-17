@@ -108,7 +108,11 @@ Pixel: **kraft gangplank / brow** at `http://localhost:8787/g/brow67`. Center wa
 
 Pixel: **kraft gangplank / brow** at `http://localhost:8787/g/brow68`. Dinghy-tall dark plank in the water gap past the north pier lip. No RMB. Address bar must be `/g/brow68`. Do not restart play while the critic is on the page.
 
-## Next pixel (after brow68 PASS, immediately, no wait)
+`/g/brow68` **FAIL BROW**: pier, cream ferry, NPCs, teal water in frame; lip slab still unread. Brow round stopped; not pixel-held.
+
+Pixel: **rust channel buoy** at `http://localhost:8787/g/buoy69`. Same north basin slot as ding65, tall rust drum + kraft band above the sage hulls. No RMB. Address bar must be `/g/buoy69`. Do not restart play while the critic is on the page.
+
+## Next pixel (after buoy69 PASS, immediately, no wait)
 
 ## Frozen
 
