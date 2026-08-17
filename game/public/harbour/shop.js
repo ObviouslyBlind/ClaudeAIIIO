@@ -8,7 +8,8 @@ import * as THREE from "three";
  * receipt slip, a small kraft receipt, a small kraft ink stamp, a tiny
  * kraft coin, a tiny kraft blotter, a tiny kraft pencil, a tiny kraft
  * ink pad, a tiny kraft ribbon, a tiny kraft twine coil, a tiny kraft wax
- * seal, a tiny kraft paper weight, a tiny kraft sponge, a short wall shelf
+ * seal, a tiny kraft paper weight, a tiny kraft sponge, a tiny kraft
+ * brush, a short wall shelf
  * with two kraft boxes,
  * plus two shelf bays
  * — not the house living room and not the warehouse. No WASD.
@@ -517,6 +518,28 @@ function kraftSponge(x, y, z) {
 }
 
 /**
+ * Tiny kraft PAPER brush on the counter: wood handle + cream head.
+ * Paper boxes only. Beside the sponge — not on the weight, seal, twine,
+ * ribbon, inkpad, pencil, blotter, coin, or receipt. Existing hexes only.
+ */
+function kraftBrush(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "shop-brush";
+  g.userData.kind = "shop-brush";
+  g.userData.mode = "PAPER";
+  g.userData.part = "brush";
+  g.position.set(x, y, z);
+  const handle = paperBox(0.055, 0.012, 0.012, WOOD, "shop-brush");
+  handle.userData.part = "brush";
+  g.add(handle);
+  const head = paperBox(0.022, 0.018, 0.02, CREAM, "shop-brush");
+  head.userData.part = "brush";
+  head.position.x = 0.036;
+  g.add(head);
+  return g;
+}
+
+/**
  * Small standing kraft PAPER shopping bag on the counter: cream body + two
  * thin strap handles. Paper boxes only. Beside the parcel / till, not on them.
  */
@@ -624,6 +647,8 @@ function makeCounter(x, z) {
   g.add(kraftPaperWeight(1.30, topY + 0.054, -0.34));
   // Tiny kraft sponge beside the weight — wood tray + cream pad.
   g.add(kraftSponge(1.48, topY + 0.054, -0.42));
+  // Tiny kraft brush beside the sponge — wood handle + cream head.
+  g.add(kraftBrush(1.62, topY + 0.054, -0.28));
   // Two small kraft / terracotta jars beside the till. Original TIN + CORAL.
   const kraftJar = paperBox(0.12, 0.16, 0.12, TIN, "shop-goods");
   kraftJar.position.set(0.48, topY + 0.13, -0.04);
