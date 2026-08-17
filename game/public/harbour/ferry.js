@@ -432,6 +432,15 @@ export function makeFerry() {
   wedge.userData.mode = "PAPER";
   wedge.position.set(-16.8, 1.86, 1.2);
   g.add(wedge);
+  // Tiny kraft PAPER hatch coaming on the port aft cream deck. Existing DECK
+  // hex, one box, not grey. Clear of wedge/grommet/hatch/scupper/hawser/bucket/
+  // oar/cleat/rail/fender/bollard/lantern/handle/smoke/horn.
+  const coaming = part(0.22, 0.06, 0.14, DECK, false);
+  coaming.name = "coaming";
+  coaming.userData.part = "coaming";
+  coaming.userData.mode = "PAPER";
+  coaming.position.set(-16.8, 1.86, -1.2);
+  g.add(coaming);
 
   const cabin = part(16.5, 3.35, 7.6, CABIN);
   cabin.position.set(-2.4, 3.52, 0);
