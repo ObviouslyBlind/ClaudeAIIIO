@@ -467,6 +467,14 @@ export function makeFerry() {
   chock.userData.mode = "PAPER";
   chock.position.set(-18.4, 1.86, -1.8);
   g.add(chock);
+  // Tiny kraft PAPER bitt on the aft cream deck. Kraft hex, one box, not
+  // grey. Clear of chock/stopper/plug/coaming/wedge/scupper/hatch/grommet.
+  const bitt = part(0.08, 0.05, 0.08, 0xc4b496, false);
+  bitt.name = "bitt";
+  bitt.userData.part = "bitt";
+  bitt.userData.mode = "PAPER";
+  bitt.position.set(-18.4, 1.86, 3.5);
+  g.add(bitt);
 
   const cabin = part(16.5, 3.35, 7.6, CABIN);
   cabin.position.set(-2.4, 3.52, 0);
