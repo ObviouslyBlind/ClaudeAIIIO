@@ -2188,3 +2188,188 @@ describe("house PAPER cruet", () => {
     expect(up.getObjectByName("saucer")).toBeFalsy();
   });
 });
+
+const GOBLET_HEX = new Set([0x5a3a22, 0xf4ead8, 0xf7f1e6]);
+
+describe("house PAPER goblet", () => {
+  it("puts one kraft PAPER goblet on the downstairs table, not upstairs", () => {
+    const g = makeInteriorScene();
+    const down = g.getObjectByName("downstairs")!;
+    const up = g.getObjectByName("upstairs")!;
+    const table = down.getObjectByName("table")!;
+    expect(table).toBeTruthy();
+
+    const goblets = collectKind(down, "interior-goblet");
+    expect(goblets.length).toBe(1);
+    expect(collectKind(up, "interior-goblet").length).toBe(0);
+
+    const goblet = goblets[0];
+    expect(goblet.userData.kind).toBe("interior-goblet");
+    expect(goblet.userData.mode).toBe("PAPER");
+    expect(goblet.userData.part).toBe("goblet");
+
+    const tablePos = new THREE.Vector3();
+    table.getWorldPosition(tablePos);
+    const gobletPos = new THREE.Vector3();
+    goblet.getWorldPosition(gobletPos);
+    expect(Math.hypot(gobletPos.x - tablePos.x, gobletPos.z - tablePos.z)).toBeLessThan(0.85);
+    expect(gobletPos.y).toBeGreaterThan(0.9);
+    expect(gobletPos.y).toBeLessThan(1.2);
+
+    const cruet = down.getObjectByName("cruet");
+    expect(cruet).toBeTruthy();
+    expect(cruet!.userData.part).toBe("cruet");
+    const cruetPos = new THREE.Vector3();
+    cruet!.getWorldPosition(cruetPos);
+    expect(Math.hypot(gobletPos.x - cruetPos.x, gobletPos.z - cruetPos.z)).toBeGreaterThan(0.25);
+    expect(collectKind(down, "interior-cruet").length).toBe(1);
+
+    const platter = down.getObjectByName("platter");
+    expect(platter).toBeTruthy();
+    expect(platter!.userData.part).toBe("platter");
+    const platterPos = new THREE.Vector3();
+    platter!.getWorldPosition(platterPos);
+    expect(Math.hypot(gobletPos.x - platterPos.x, gobletPos.z - platterPos.z)).toBeGreaterThan(0.25);
+    expect(collectKind(down, "interior-platter").length).toBe(1);
+
+    const tureen = down.getObjectByName("tureen");
+    expect(tureen).toBeTruthy();
+    expect(tureen!.userData.part).toBe("tureen");
+    const tureenPos = new THREE.Vector3();
+    tureen!.getWorldPosition(tureenPos);
+    expect(Math.hypot(gobletPos.x - tureenPos.x, gobletPos.z - tureenPos.z)).toBeGreaterThan(0.25);
+    expect(collectKind(down, "interior-tureen").length).toBe(1);
+
+    const crock = down.getObjectByName("crock");
+    expect(crock).toBeTruthy();
+    expect(crock!.userData.part).toBe("crock");
+    const crockPos = new THREE.Vector3();
+    crock!.getWorldPosition(crockPos);
+    expect(Math.hypot(gobletPos.x - crockPos.x, gobletPos.z - crockPos.z)).toBeGreaterThan(0.25);
+    expect(collectKind(down, "interior-crock").length).toBe(1);
+
+    const tray = down.getObjectByName("tray");
+    expect(tray).toBeTruthy();
+    expect(tray!.userData.part).toBe("tray");
+    const trayPos = new THREE.Vector3();
+    tray!.getWorldPosition(trayPos);
+    expect(Math.hypot(gobletPos.x - trayPos.x, gobletPos.z - trayPos.z)).toBeGreaterThan(0.25);
+    expect(collectKind(down, "interior-tray").length).toBe(1);
+
+    const pitcher = down.getObjectByName("pitcher");
+    expect(pitcher).toBeTruthy();
+    expect(pitcher!.userData.part).toBe("pitcher");
+    const pitcherPos = new THREE.Vector3();
+    pitcher!.getWorldPosition(pitcherPos);
+    expect(Math.hypot(gobletPos.x - pitcherPos.x, gobletPos.z - pitcherPos.z)).toBeGreaterThan(0.25);
+    expect(collectKind(down, "interior-pitcher").length).toBe(1);
+
+    const bowl = down.getObjectByName("bowl");
+    expect(bowl).toBeTruthy();
+    expect(bowl!.userData.part).toBe("bowl");
+    const bowlPos = new THREE.Vector3();
+    bowl!.getWorldPosition(bowlPos);
+    expect(Math.hypot(gobletPos.x - bowlPos.x, gobletPos.z - bowlPos.z)).toBeGreaterThan(0.25);
+    expect(collectKind(down, "interior-bowl").length).toBe(1);
+
+    const saucer = down.getObjectByName("saucer");
+    expect(saucer).toBeTruthy();
+    expect(saucer!.userData.part).toBe("saucer");
+    const saucerPos = new THREE.Vector3();
+    saucer!.getWorldPosition(saucerPos);
+    expect(Math.hypot(gobletPos.x - saucerPos.x, gobletPos.z - saucerPos.z)).toBeGreaterThan(0.25);
+
+    const mug = down.getObjectByName("mug");
+    expect(mug).toBeTruthy();
+    expect(mug!.userData.part).toBe("mug");
+    const mugPos = new THREE.Vector3();
+    mug!.getWorldPosition(mugPos);
+    expect(Math.hypot(gobletPos.x - mugPos.x, gobletPos.z - mugPos.z)).toBeGreaterThan(0.25);
+
+    const cup = down.getObjectByName("cup");
+    expect(cup).toBeTruthy();
+    expect(cup!.userData.part).toBe("cup");
+    const cupPos = new THREE.Vector3();
+    cup!.getWorldPosition(cupPos);
+    expect(Math.hypot(gobletPos.x - cupPos.x, gobletPos.z - cupPos.z)).toBeGreaterThan(0.25);
+
+    const plate = down.getObjectByName("plate");
+    expect(plate).toBeTruthy();
+    expect(plate!.userData.part).toBe("plate");
+    const platePos = new THREE.Vector3();
+    plate!.getWorldPosition(platePos);
+    expect(Math.hypot(gobletPos.x - platePos.x, gobletPos.z - platePos.z)).toBeGreaterThan(0.25);
+
+    const knife = down.getObjectByName("knife");
+    expect(knife).toBeTruthy();
+    expect(knife!.userData.part).toBe("knife");
+    const knifePos = new THREE.Vector3();
+    knife!.getWorldPosition(knifePos);
+    expect(Math.hypot(gobletPos.x - knifePos.x, gobletPos.z - knifePos.z)).toBeGreaterThan(0.25);
+
+    const fork = down.getObjectByName("fork");
+    expect(fork).toBeTruthy();
+    expect(fork!.userData.part).toBe("fork");
+    const forkPos = new THREE.Vector3();
+    fork!.getWorldPosition(forkPos);
+    expect(Math.hypot(gobletPos.x - forkPos.x, gobletPos.z - forkPos.z)).toBeGreaterThan(0.25);
+
+    const spoon = down.getObjectByName("spoon");
+    expect(spoon).toBeTruthy();
+    expect(spoon!.userData.part).toBe("spoon");
+    const spoonPos = new THREE.Vector3();
+    spoon!.getWorldPosition(spoonPos);
+    expect(Math.hypot(gobletPos.x - spoonPos.x, gobletPos.z - spoonPos.z)).toBeGreaterThan(0.25);
+
+    const napkin = down.getObjectByName("napkin");
+    expect(napkin).toBeTruthy();
+    expect(napkin!.userData.part).toBe("napkin");
+    const napkinPos = new THREE.Vector3();
+    napkin!.getWorldPosition(napkinPos);
+    expect(Math.hypot(gobletPos.x - napkinPos.x, gobletPos.z - napkinPos.z)).toBeGreaterThan(0.25);
+
+    const vase = down.getObjectByName("vase");
+    expect(vase).toBeTruthy();
+    const vasePos = new THREE.Vector3();
+    vase!.getWorldPosition(vasePos);
+    expect(Math.hypot(gobletPos.x - vasePos.x, gobletPos.z - vasePos.z)).toBeGreaterThan(0.25);
+
+    const book = down.getObjectByName("book");
+    expect(book).toBeTruthy();
+    const bookPos = new THREE.Vector3();
+    book!.getWorldPosition(bookPos);
+    expect(Math.hypot(gobletPos.x - bookPos.x, gobletPos.z - bookPos.z)).toBeGreaterThan(0.25);
+
+    const colors: number[] = [];
+    goblet.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      const mat = mesh.material as THREE.MeshLambertMaterial | undefined;
+      if (mesh.isMesh && mat?.color) {
+        const hex = mat.color.getHex();
+        colors.push(hex);
+        expect(GOBLET_HEX.has(hex)).toBe(true);
+        if (hex !== 0xf7f1e6) expect(isGrey(hex)).toBe(false);
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.kind).toBe("interior-goblet");
+        expect(mesh.userData.mode).toBe("PAPER");
+        expect(mesh.userData.part).toBe("goblet");
+      }
+    });
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.some((c) => c === 0x5a3a22)).toBe(true);
+    expect(colors.some((c) => c === 0xf4ead8)).toBe(true);
+    expect(colors.some((c) => c === 0xf7f1e6)).toBe(true);
+
+    expect(up.getObjectByName("goblet")).toBeFalsy();
+    expect(up.getObjectByName("cruet")).toBeFalsy();
+    expect(up.getObjectByName("platter")).toBeFalsy();
+    expect(up.getObjectByName("tureen")).toBeFalsy();
+    expect(up.getObjectByName("crock")).toBeFalsy();
+    expect(up.getObjectByName("tray")).toBeFalsy();
+    expect(up.getObjectByName("pitcher")).toBeFalsy();
+    expect(up.getObjectByName("bowl")).toBeFalsy();
+    expect(up.getObjectByName("mug")).toBeFalsy();
+    expect(up.getObjectByName("saucer")).toBeFalsy();
+  });
+});
+
