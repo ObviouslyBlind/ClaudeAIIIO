@@ -2090,3 +2090,126 @@ describe("factory PAPER kraft adze", () => {
     expect(adzeBoxes).toBeGreaterThanOrEqual(2);
   });
 });
+
+function factoryPaperAugers(root: THREE.Object3D) {
+  const out: THREE.Object3D[] = [];
+  root.traverse((obj) => {
+    if (obj.userData?.part === "auger") {
+      out.push(obj);
+    }
+  });
+  return out;
+}
+
+describe("factory PAPER kraft auger", () => {
+  it("puts one tiny kraft PAPER auger on a factory bench; adze, clamp, and vice remain", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressFactory(scene);
+
+    const dress = interior.getObjectByName("factory-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+
+    const augers = factoryPaperAugers(dress!);
+    expect(augers.length).toBe(1);
+    const auger = augers[0];
+    expect(auger.userData.part).toBe("auger");
+    expect(auger.userData.mode).toBe("PAPER");
+    expect(auger.userData.kind).toBe("factory-paper-auger");
+    expect(auger.userData.part).not.toBe("adze");
+    expect(auger.userData.part).not.toBe("clamp");
+    expect(auger.userData.part).not.toBe("vice");
+    expect(auger.userData.part).not.toBe("plane");
+    expect(auger.userData.part).not.toBe("gouge");
+    expect(auger.userData.part).not.toBe("mallet");
+    expect(auger.userData.part).not.toBe("chisel");
+    expect(auger.userData.part).not.toBe("file");
+    expect(auger.userData.part).not.toBe("rasp");
+    expect(auger.userData.part).not.toBe("awl");
+    expect(auger.userData.part).not.toBe("shaving");
+    expect(auger.userData.part).not.toBe("peg");
+    expect(auger.userData.part).not.toBe("cork");
+    expect(auger.userData.part).not.toBe("funnel");
+    expect(auger.userData.part).not.toBe("oilcan");
+    expect(auger.userData.part).not.toBe("rag");
+    expect(auger.userData.part).not.toBe("rivet");
+    expect(auger.userData.part).not.toBe("wrench");
+
+    expect(factoryPaperAdzes(dress!).length).toBe(1);
+    expect(factoryPaperClamps(dress!).length).toBe(1);
+    expect(factoryPaperVices(dress!).length).toBe(1);
+
+    const adze = factoryPaperAdzes(dress!)[0];
+    const clamp = factoryPaperClamps(dress!)[0];
+    const vice = factoryPaperVices(dress!)[0];
+    const plane = factoryPaperPlanes(dress!)[0];
+    const gouge = factoryPaperGouges(dress!)[0];
+    const mallet = factoryPaperMallets(dress!)[0];
+    const chisel = factoryPaperChisels(dress!)[0];
+    const file = factoryPaperFiles(dress!)[0];
+    const rasp = factoryPaperRasps(dress!)[0];
+    const awl = factoryPaperAwls(dress!)[0];
+    const shaving = factoryPaperShavings(dress!)[0];
+    const peg = factoryPaperPegs(dress!)[0];
+    const cork = factoryPaperCorks(dress!)[0];
+    const funnel = factoryPaperFunnels(dress!)[0];
+    const can = factoryPaperOilcans(dress!)[0];
+    const rag = factoryRags(dress!)[0];
+    const rivet = factoryRivets(dress!)[0];
+    const wrench = factoryTools(dress!)[0];
+    const toAdze = Math.hypot(auger.position.x - adze.position.x, auger.position.z - adze.position.z);
+    const toClamp = Math.hypot(auger.position.x - clamp.position.x, auger.position.z - clamp.position.z);
+    const toVice = Math.hypot(auger.position.x - vice.position.x, auger.position.z - vice.position.z);
+    const toPlane = Math.hypot(auger.position.x - plane.position.x, auger.position.z - plane.position.z);
+    const toGouge = Math.hypot(auger.position.x - gouge.position.x, auger.position.z - gouge.position.z);
+    const toMallet = Math.hypot(auger.position.x - mallet.position.x, auger.position.z - mallet.position.z);
+    const toChisel = Math.hypot(auger.position.x - chisel.position.x, auger.position.z - chisel.position.z);
+    const toFile = Math.hypot(auger.position.x - file.position.x, auger.position.z - file.position.z);
+    const toRasp = Math.hypot(auger.position.x - rasp.position.x, auger.position.z - rasp.position.z);
+    const toAwl = Math.hypot(auger.position.x - awl.position.x, auger.position.z - awl.position.z);
+    const toShaving = Math.hypot(auger.position.x - shaving.position.x, auger.position.z - shaving.position.z);
+    const toPeg = Math.hypot(auger.position.x - peg.position.x, auger.position.z - peg.position.z);
+    const toCork = Math.hypot(auger.position.x - cork.position.x, auger.position.z - cork.position.z);
+    const toFunnel = Math.hypot(auger.position.x - funnel.position.x, auger.position.z - funnel.position.z);
+    const toCan = Math.hypot(auger.position.x - can.position.x, auger.position.z - can.position.z);
+    const toRag = Math.hypot(auger.position.x - rag.position.x, auger.position.z - rag.position.z);
+    const toRivet = Math.hypot(auger.position.x - rivet.position.x, auger.position.z - rivet.position.z);
+    const toWrench = Math.hypot(auger.position.x - wrench.position.x, auger.position.z - wrench.position.z);
+    expect(toAdze).toBeGreaterThan(0.25);
+    expect(toClamp).toBeGreaterThan(0.25);
+    expect(toVice).toBeGreaterThan(0.25);
+    expect(toPlane).toBeGreaterThan(0.25);
+    expect(toGouge).toBeGreaterThan(0.25);
+    expect(toMallet).toBeGreaterThan(0.25);
+    expect(toChisel).toBeGreaterThan(0.25);
+    expect(toFile).toBeGreaterThan(0.25);
+    expect(toRasp).toBeGreaterThan(0.25);
+    expect(toAwl).toBeGreaterThan(0.25);
+    expect(toShaving).toBeGreaterThan(0.25);
+    expect(toPeg).toBeGreaterThan(0.25);
+    expect(toCork).toBeGreaterThan(0.25);
+    expect(toFunnel).toBeGreaterThan(0.25);
+    expect(toCan).toBeGreaterThan(0.25);
+    expect(toRag).toBeGreaterThan(0.25);
+    expect(toRivet).toBeGreaterThan(0.25);
+    expect(toWrench).toBeGreaterThan(0.25);
+
+    const augerColors = hexes(auger);
+    expect(augerColors.length).toBeGreaterThan(0);
+    expect(augerColors.some((c) => c === KRAFT)).toBe(true);
+    expect(augerColors.every((c) => [KRAFT, 0x9a6a40, 0x6a4a32].includes(c))).toBe(true);
+
+    let augerBoxes = 0;
+    auger.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        augerBoxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.mode).toBe("PAPER");
+      }
+    });
+    expect(augerBoxes).toBeGreaterThanOrEqual(2);
+  });
+});
