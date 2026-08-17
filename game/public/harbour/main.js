@@ -577,11 +577,21 @@ function addParcel(p) {
   if (p.use) useFor(p);
 }
 
-async function makeParcels() {
-  const plots = map.plots;
+/** Metres from the north port. First-frame lots only — the rest paints later. */
+export const SPAWN_PARCEL_M = 420;
+
+function nearNorthSpawn(p) {
+  const spec = specOf("north");
+  return p.island === "north" && Math.hypot(p.x - spec.port.x, p.z - spec.port.z) < SPAWN_PARCEL_M;
+}
+
+async function makeParcels(filter) {
+  const plots = filter ? map.plots.filter(filter) : map.plots;
   for (let i = 0; i < plots.length; i++) {
-    addParcel(plots[i]);
-    if (i % 48 === 47) await afterPaint();
+    const p = plots[i];
+    if (plotMeshes.has(p.id)) continue;
+    addParcel(p);
+    if (i % 20 === 19) await idle(32);
   }
 }
 
@@ -914,13 +924,14 @@ function loadSheetHuds() {
   return Promise.all(SHEET_HUD.map((p) => import(p)));
 }
 
+/** Yield so Edge can paint and take clicks. rAF + 0ms still froze the tab. */
+function idle(ms = 48) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 /** Let Chrome paint so boot cannot sit on "Loading…" until every mesh exists. */
 function afterPaint() {
-  return new Promise((resolve) => {
-    const later = () => setTimeout(resolve, 0);
-    if (typeof requestAnimationFrame === "function") requestAnimationFrame(later);
-    else later();
-  });
+  return idle(48);
 }
 
 function worldScene() {
@@ -972,85 +983,111 @@ async function ensureInterior() {
 
 async function loadDressing() {
   const target = worldScene();
-  const ferryMod = await import("./ferry.js");
-  tickFerry = ferryMod.tickFerry;
-  ferryMesh = ferryMod.makeFerry();
-  target.add(ferryMesh);
-  await afterPaint();
+  const step = async (fn) => {
+    await idle(80);
+    await fn();
+  };
 
-  const shoreMod = await import("./shore.js");
-  shoreMod.makeShoreFoam(specOf("north"), heightAt, target);
-  await afterPaint();
-
-  const quayMod = await import("./quay.js");
-  quayMod.makeQuay(specOf("north"), { scene: target, heightAt });
-  await afterPaint();
-
-  const pedMod = await import("./pedestrians.js");
-  pedestrians = pedMod.makePedestrians(map, {
-    scene: target,
-    specOf,
-    heightAt,
-    getPlayer: () => player,
+  await step(async () => {
+    const ferryMod = await import("./ferry.js");
+    tickFerry = ferryMod.tickFerry;
+    ferryMesh = ferryMod.makeFerry();
+    target.add(ferryMesh);
   });
-  await afterPaint();
 
-  const treeMod = await import("./trees.js");
-  treeMod.makeTrees(map, { scene: target, specOf, heightAt });
-  await afterPaint();
-
-  const propsMod = await import("./street-props.js");
-  propsMod.makeStreetProps(map, { scene: target, specOf, heightAt });
-  await afterPaint();
-
-  makeTerrain(specOf("south"));
-  makePort(specOf("south"));
-  quayMod.makeQuay(specOf("south"), { scene: target, heightAt });
-  shoreMod.makeShoreFoam(specOf("south"), heightAt, target);
-  makePalms(specOf("north"));
-  makePalms(specOf("south"));
-  await afterPaint();
-
-  const trafficMod = await import("./traffic.js");
-  traffic = trafficMod.createTraffic({
-    scene: target,
-    getMap: () => map,
-    specOf,
-    heightAt,
-    getPlayer: () => player,
-    getIslandId: () => islandId,
+  await step(async () => {
+    const quayMod = await import("./quay.js");
+    quayMod.makeQuay(specOf("north"), { scene: target, heightAt });
+    loadDressing.quayMod = quayMod;
   });
-  await afterPaint();
 
-  const stallMod = await import("./stalls.js");
-  stalls = stallMod.createStalls({
-    scene: target,
-    getMap: () => map,
-    specOf,
-    heightAt,
-    setStatus,
-    applySnapshot,
-    getPlayer: () => player,
+  await step(async () => {
+    const pedMod = await import("./pedestrians.js");
+    pedestrians = pedMod.makePedestrians(map, {
+      scene: target,
+      specOf,
+      heightAt,
+      getPlayer: () => player,
+    });
   });
-  await afterPaint();
 
-  const taxiMod = await import("./taxi.js");
-  taxi = taxiMod.createTaxi({
-    scene: target,
-    player,
-    getMap: () => map,
-    specOf,
-    heightAt,
-    getIslandId: () => islandId,
-    setWalking: (v) => {
-      walking = v;
-    },
-    setStatus,
-    button: btnTaxi,
+  await step(async () => {
+    await makeParcels();
   });
-  await afterPaint();
-  void ensureCatalog();
-  void ensureInterior();
+
+  await step(async () => {
+    const shoreMod = await import("./shore.js");
+    shoreMod.makeShoreFoam(specOf("north"), heightAt, target);
+    loadDressing.shoreMod = shoreMod;
+  });
+
+  await step(async () => {
+    makePalms(specOf("north"));
+  });
+
+  await step(async () => {
+    const propsMod = await import("./street-props.js");
+    propsMod.makeStreetProps(map, { scene: target, specOf, heightAt });
+  });
+
+  await step(async () => {
+    const treeMod = await import("./trees.js");
+    treeMod.makeTrees(map, { scene: target, specOf, heightAt });
+  });
+
+  await step(async () => {
+    makeTerrain(specOf("south"));
+    makePort(specOf("south"));
+    makePalms(specOf("south"));
+    if (loadDressing.quayMod) {
+      loadDressing.quayMod.makeQuay(specOf("south"), { scene: target, heightAt });
+    }
+    if (loadDressing.shoreMod) {
+      loadDressing.shoreMod.makeShoreFoam(specOf("south"), heightAt, target);
+    }
+  });
+
+  await step(async () => {
+    const trafficMod = await import("./traffic.js");
+    traffic = trafficMod.createTraffic({
+      scene: target,
+      getMap: () => map,
+      specOf,
+      heightAt,
+      getPlayer: () => player,
+      getIslandId: () => islandId,
+    });
+  });
+
+  await step(async () => {
+    const stallMod = await import("./stalls.js");
+    stalls = stallMod.createStalls({
+      scene: target,
+      getMap: () => map,
+      specOf,
+      heightAt,
+      setStatus,
+      applySnapshot,
+      getPlayer: () => player,
+    });
+  });
+
+  await step(async () => {
+    const taxiMod = await import("./taxi.js");
+    taxi = taxiMod.createTaxi({
+      scene: target,
+      player,
+      getMap: () => map,
+      specOf,
+      heightAt,
+      getIslandId: () => islandId,
+      setWalking: (v) => {
+        walking = v;
+      },
+      setStatus,
+      button: btnTaxi,
+    });
+  });
 }
 
 async function boot() {
@@ -1065,17 +1102,18 @@ async function boot() {
   spawnAt("north");
   startLoop();
   setStatus("North port · PAPER");
-  void loadSheetHuds();
-  await afterPaint();
+  await idle(48);
   makeTerrain(specOf("north"));
-  await afterPaint();
+  await idle(48);
   makeRoads(map, { scene, specOf, heightAt });
   makePort(specOf("north"));
   harbourGroup = wrapHarbourWorld(scene, { keep: [player, sun.target] });
-  await makeParcels();
+  await makeParcels(nearNorthSpawn);
   setStatus("Tap a piece of land. Lease it, then develop it.");
-  await afterPaint();
-  await loadDressing();
+  setTimeout(() => {
+    void loadSheetHuds();
+    void loadDressing();
+  }, 400);
 }
 
 canvas.addEventListener("pointerup", onPointer);

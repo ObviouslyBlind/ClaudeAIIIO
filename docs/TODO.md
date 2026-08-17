@@ -39,6 +39,7 @@ Politics frozen. See `game/reports/GAUNTLET_STATUS.md`. New chat: `game/reports/
 - [x] Restore inland playtest spawn on `/` (D030). Unread giant basin extras off the live quay.
 - [x] Playtest: `/` tab unresponsive after first frame — one asset nonce per play process (D031).
 - [x] Playtest: Edge “page not responding” on teal canvas — defer interiors/trees until after north walk (D032).
+- [x] Playtest: beige land then freeze — do not await dressing; nearby lots only (D033).
 - [x] Pixel green basin crate (`/g/green86`–`87` FAIL GREEN — round stopped, not pixel-held)
 
 ## Polymarket paper bot

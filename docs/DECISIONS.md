@@ -158,6 +158,11 @@ Record of architecture and strategy decisions with reasoning.
 **Decision:** `main.js` must not statically import `interior.js` / `trees.js` / `stalls.js` / `taxi.js` / `quay.js` / `buildings.js`. Spawn, north terrain, roads, and north port paint first. The rest loads after a paint yield. `canEnter` / `wrapHarbourWorld` live in `harbour-world.js`.
 **Reason:** Playtest on the tunnel: HUD and tick showed, canvas stayed teal with specks, Edge “page not responding.” Compiling factory/shop interiors plus trees before the first walk blocked the main thread. PAPER / SIMULATED.
 
+## D033 — Boot returns before dressing; nearby lots only (2026-08-17)
+
+**Decision:** After north terrain / road / port, `boot()` must return. Dressing (quay, trees, stalls, taxi, south) starts on a 400ms timer, one module per ~80ms idle. First lots are north plots within 420 m of the port. Do not compile interiors until Enter.
+**Reason:** Playtest: beige land and a tiny visitor appeared, then Edge froze again. `await loadDressing()` still compiled trees/interiors on the first click window. PAPER / SIMULATED.
+
 ## D015 — Supplemental merge before save (2026-03-18)
 
 **Decision:** Move `relevant_markets_*.json` save to AFTER supplemental /markets merge.
