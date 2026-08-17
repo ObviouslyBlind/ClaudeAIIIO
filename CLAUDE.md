@@ -25,4 +25,4 @@ One shard. The sim owns cash, plots, staff, and prices. The browser is a camera.
 
 ## Play
 `cd game && npm run play` then `npm run play:laptop` for a laptop/phone URL.
-South spawn. Click a $ tag to lease. Restart wipes.
+South spawn. Click a $ tag to buy. Lots overlay: click the lot dirt. Restart wipes.

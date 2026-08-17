@@ -44,8 +44,8 @@ export function mountChrome(opts) {
   let marketSku = null;
 
   const HINTS = {
-    world: "World: left-click walks. Lots overlay to buy more land.",
-    lots: "Lots: outlines on. Click the $ title above a lot to lease it.",
+    world: "World: left-click walks. Click a $ title to buy a lot.",
+    lots: "Lots: outlines on. Click the $ title or the lot dirt to buy it.",
     foot: "Foot traffic: green / yellow / red on each named road.",
     logistics: "Logistics: tap the crate. The van waits until you take it.",
     minerals: "Minerals: ore catalog is in. Overlay paint comes next.",
@@ -386,25 +386,23 @@ export function mountChrome(opts) {
       const crate = extras && extras.crate;
       const roadside = extras && extras.roadside;
       const title = roadside ? "Roadside crate" : plotDisplayName(plot);
+      const vacant = !roadside && !plot.owner;
       const price = roadside
         ? ""
-        : `<p class="price">${
-            plot.owner
-              ? plot.owner === "visitor"
-                ? "YOURS"
-                : "taken"
-              : money(plot.price) + " PAPER"
-          }</p>`;
-      const leaseBtnHtml = !roadside && !plot.owner ? `<button type="button" class="take-all" id="land-lease">Lease</button>` : "";
+        : vacant
+          ? `<button type="button" class="land-buy take-all" id="land-lease">${money(plot.price)} PAPER · Buy lot</button>`
+          : `<p class="price">${plot.owner === "visitor" ? "YOURS" : "taken"}</p>`;
+      const note = extras && extras.note ? `<p class="lease-note">${extras.note}</p>` : "";
       landCard.innerHTML = `
         <p class="float-kicker">PAPER · SIMULATED</p>
         <h2>${title}</h2>
         ${price}
+        ${note}
         ${band ? `<p><span class="band-dot ${band}"></span>Foot traffic ${band}</p>` : ""}
         ${
           roadside
             ? ""
-            : `<div class="land-row">${leaseBtnHtml}<button type="button" class="take-all" id="land-close">Close</button></div>`
+            : `<div class="land-row"><button type="button" class="take-all" id="land-close">Close</button></div>`
         }
         ${crate ? `<button type="button" class="take-all" id="land-take">Take all</button>` : ""}
         ${roadside ? `<button type="button" class="take-all" id="land-close">Close</button>` : ""}

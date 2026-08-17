@@ -12,6 +12,6 @@ npm run play
 npm run play:laptop   # pasteable https link
 ```
 
-South spawn. Left-click walks. Click a **$ tag** to lease. Taxi on paved. Ferry $15. Restarting play wipes.
+South spawn. Left-click walks. Click a **$ tag** to buy. Lots overlay: click the lot dirt. Taxi on paved. Ferry $15. Restarting play wipes.
 
 Spec: [game/PLAN.md](game/PLAN.md) · Loop: [game/reports/FIRST_LOOP.md](game/reports/FIRST_LOOP.md) · Kernel: [game/FOUNDATION.md](game/FOUNDATION.md)
