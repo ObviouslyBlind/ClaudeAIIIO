@@ -10,7 +10,7 @@ Operator came back to **playtest**. Bar is **`http://localhost:8787/`**, inland 
 
 Gauntlet live. `/g/house97` PASS HOUSE. Next `/g/ferry98` ($15 kraft ticket).
 
-Last playtest fix: D038 — spawn cheap street lots (after `/g/house96` FAIL HOUSE). D037 taxi + short pier. D036 no auto trees.
+Last playtest fix: D039 — ferry landfall builds south island; pier taps open the ferry; restored lots mesh. D038 cheap street lots. D037 taxi + short pier. D036 no auto trees.
 
 ## Play
 

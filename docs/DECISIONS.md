@@ -188,6 +188,11 @@ Record of architecture and strategy decisions with reasoning.
 **Decision:** First-frame parcels are vacant north street lots $1000 can lease and develop. Giant fields stay unmeshed. A tap near a starter lot snaps to it. Plot lines are clickable before dressing.
 **Reason:** `/g/house96` FAIL HOUSE: first inland tap selected a 6,522 m² field at $1,121 with $970 cash, so Lease stayed disabled. PAPER / SIMULATED.
 
+## D039 — Ferry landfall builds south; port is tappable (2026-08-17)
+
+**Decision:** `spawnAt` calls `ensureIsland(id)`: first arrival on an island builds its terrain, port, palms, and starter lots (boot pre-marks north). `applySnapshot` meshes restored visitor/used lots that were never drawn. Pier/shed/dock are in `clickTargets` so tapping the port opens the ferry.
+**Reason:** Bug scout for the operator playtest: confirming the $15 ferry dropped the visitor on an unbuilt south island (void), Restore could hand back invisible buildings, and pier taps were dead code. PAPER / SIMULATED.
+
 ## D015 — Supplemental merge before save (2026-03-18)
 
 **Decision:** Move `relevant_markets_*.json` save to AFTER supplemental /markets merge.

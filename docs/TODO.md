@@ -50,6 +50,7 @@ Politics frozen. See `game/reports/GAUNTLET_STATUS.md`. New chat: `game/reports/
 - [x] `/g/house96` FAIL HOUSE — first tap was a $1,121 field (D038 cheap street lots).
 - [x] `/g/house97` PASS HOUSE — street $242, House, Enter, Exit.
 - [ ] `/g/ferry98` FERRY — $15 kraft ticket north → south.
+- [x] Bug scout: south island void after ferry, invisible restored buildings, dead pier taps (D039).
 - [x] Playtest: taxi missing + 86 m pier on sand — taxi at boot, pier over water (D037).
 - [x] Pixel green basin crate (`/g/green86`–`87` FAIL GREEN — round stopped, not pixel-held)
 
