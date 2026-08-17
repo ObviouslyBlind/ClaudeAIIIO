@@ -288,7 +288,7 @@ export function makeNametagEyelet() {
   eyelet.frustumCulled = false;
   eyelet.renderOrder = 4;
   eyelet.material.depthTest = false;
-  eyelet.position.set(0.42, 1.16, 0.05);
+  eyelet.position.set(0.50, 1.22, 0.05);
   return eyelet;
 }
 
