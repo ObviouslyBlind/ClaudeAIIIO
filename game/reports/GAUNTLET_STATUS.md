@@ -14,7 +14,9 @@ Loop is **live** on playtest bugs (operator: “so many bugs, use the gauntlet�
 
 `/g/lease92` **FAIL LEASE**: click then “Page Unresponsive” while closing the North sheet. Dressing still started 5s after the first tap (`trees.js`). Lease stayed disabled. D036.
 
-Current piece: **`/g/scale93` SCALE** — inland spawn, person-scale shed/lamps/sign (no 32 m towers), one left click walks, no hang for 8s. No RMB.
+`/g/scale93` **PASS SCALE**: person-scale shed vs visitor, no 32 m towers, inland click walked, no hang for 8s.
+
+Current piece: **`/g/lease94` LEASE** — walk onto a vacant north lot, click Lease, cash drops and the plot reads yours. No RMB. No House/Enter. Do not close the sheet.
 
 One **pixel critic** at a time. Unique `/g/…` path. No RMB. Do not restart play while a critic is on the page.
 

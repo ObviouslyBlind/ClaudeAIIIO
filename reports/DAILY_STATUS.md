@@ -2,7 +2,7 @@
 
 ## 2026-08-17 (latest)
 
-**Current status:** Operator playtest: scale broken, tab dies in minutes. D036 shrinks towers and stops auto `trees.js`. Next `/g/scale93`. PAPER / SIMULATED. Politics frozen.
+**Current status:** `/g/scale93` PASS SCALE. Next `/g/lease94` (lease a vacant north lot). D036. PAPER / SIMULATED. Politics frozen.
 
 ## 2026-08-16
 

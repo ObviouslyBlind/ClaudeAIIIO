@@ -8,9 +8,9 @@ This is a PAPER / SIMULATED harbour game in `/workspace/game`. The Polymarket pa
 
 Operator came back to **playtest**. Bar is **`http://localhost:8787/`**, inland spawn, walkable harbour.
 
-Gauntlet live. `/g/walk91` PASS WALK. `/g/lease92` FAIL LEASE (freeze + scale). D036: human-metre meshes, no auto trees. Next `/g/scale93`.
+Gauntlet live. `/g/walk91` PASS WALK. `/g/scale93` PASS SCALE (D036). `/g/lease92` FAIL. Next `/g/lease94`.
 
-Last playtest fix: D036 — shrink critic towers; do not compile trees on a timer. D035/D034/D033/D032/D031 still apply for click/boot.
+Last playtest fix: D036 — person-scale meshes; no auto trees.
 
 ## Play
 
