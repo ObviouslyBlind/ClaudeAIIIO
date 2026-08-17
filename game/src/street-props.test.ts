@@ -1055,4 +1055,68 @@ describe("street prop setback", () => {
       }
     }
   });
+
+  it("sits a tiny kraft PAPER marlin on the village pump, fid tap spigot hook peg washer bolt remain", () => {
+    const map = createLandBoard();
+    const scene = { add(_obj: THREE.Object3D) {} };
+    const root = makeStreetProps(map, {
+      scene,
+      specOf: (id: "north" | "south") => ISLANDS[id],
+      heightAt,
+    });
+
+    const pumpGroups: THREE.Object3D[] = [];
+    const fids: THREE.Object3D[] = [];
+    const taps: THREE.Object3D[] = [];
+    const spigots: THREE.Object3D[] = [];
+    const hooks: THREE.Object3D[] = [];
+    const pegs: THREE.Object3D[] = [];
+    const washers: THREE.Object3D[] = [];
+    const bolts: THREE.Object3D[] = [];
+    root.traverse((obj) => {
+      if (obj.userData?.prop === "pump") pumpGroups.push(obj);
+      if (obj.userData?.part === "fid") fids.push(obj);
+      if (obj.userData?.part === "tap") taps.push(obj);
+      if (obj.userData?.part === "spigot") spigots.push(obj);
+      if (obj.userData?.part === "hook") hooks.push(obj);
+      if (obj.userData?.part === "peg") pegs.push(obj);
+      if (obj.userData?.part === "washer") washers.push(obj);
+      if (obj.userData?.part === "bolt") bolts.push(obj);
+    });
+    expect(pumpGroups.length).toBeGreaterThanOrEqual(1);
+    expect(fids.length).toBeGreaterThanOrEqual(1);
+    expect(taps.length).toBeGreaterThanOrEqual(1);
+    expect(spigots.length).toBeGreaterThanOrEqual(1);
+    expect(hooks.length).toBeGreaterThanOrEqual(1);
+    expect(pegs.length).toBeGreaterThanOrEqual(1);
+    expect(washers.length).toBeGreaterThanOrEqual(1);
+    expect(bolts.length).toBeGreaterThanOrEqual(1);
+
+    const kraft = new Set([0xc4b496]);
+    for (const pump of pumpGroups) {
+      expect(pump.userData.mode).toBe("PAPER");
+      const marlins: THREE.Object3D[] = [];
+      pump.traverse((obj) => {
+        if (obj.userData?.part === "marlin") marlins.push(obj);
+      });
+      expect(marlins.length).toBeGreaterThanOrEqual(1);
+      for (const m of marlins) {
+        expect(m.userData.part).toBe("marlin");
+        expect(m.userData.mode === "PAPER" || pump.userData.mode === "PAPER").toBe(true);
+        const mesh = m as THREE.Mesh;
+        expect(mesh.isMesh).toBe(true);
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        const mat = mesh.material as THREE.MeshLambertMaterial;
+        expect(mat.type).toBe("MeshLambertMaterial");
+        expect(kraft.has(mat.color.getHex())).toBe(true);
+        const { width, height, depth } = (mesh.geometry as THREE.BoxGeometry).parameters;
+        expect(width).toBeLessThan(0.12);
+        expect(height).toBeLessThan(0.12);
+        expect(depth).toBeLessThan(0.12);
+        expect(mesh.position.y).toBeGreaterThan(0.5);
+        expect(mesh.position.y).toBeLessThan(1.45);
+        expect(Math.hypot(mesh.position.x, mesh.position.z)).toBeLessThan(0.25);
+      }
+    }
+  });
 });

@@ -441,7 +441,13 @@ function villagePump(_side) {
   fid.userData.mode = "PAPER";
   fid.position.set(0.1, 0.7, -0.08);
 
-  g.add(shoe, post, head, handle, spout, basin, rim, water, dipper, crank, bolt, washer, peg, hook, spigot, tap, fid);
+  /** Tiny kraft PAPER marlinspike on the pump. Kraft 0xc4b496 — PAPER box, not grey iron. Offset from fid, tap, spigot, hook, peg, washer, bolt. */
+  const marlin = part(0.03, 0.07, 0.03, 0xc4b496, false);
+  marlin.userData.part = "marlin";
+  marlin.userData.mode = "PAPER";
+  marlin.position.set(-0.08, 0.62, 0.1);
+
+  g.add(shoe, post, head, handle, spout, basin, rim, water, dipper, crank, bolt, washer, peg, hook, spigot, tap, fid, marlin);
   return g;
 }
 
