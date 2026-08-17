@@ -459,6 +459,14 @@ export function makeFerry() {
   stopper.userData.mode = "PAPER";
   stopper.position.set(-18.4, 1.86, 1.6);
   g.add(stopper);
+  // Tiny kraft PAPER chock on the aft cream deck. Kraft hex, one box, not
+  // grey. Clear of stopper/plug/coaming/wedge/scupper/hatch/grommet.
+  const chock = part(0.08, 0.05, 0.08, 0xc4b496, false);
+  chock.name = "chock";
+  chock.userData.part = "chock";
+  chock.userData.mode = "PAPER";
+  chock.position.set(-18.4, 1.86, -1.8);
+  g.add(chock);
 
   const cabin = part(16.5, 3.35, 7.6, CABIN);
   cabin.position.set(-2.4, 3.52, 0);
