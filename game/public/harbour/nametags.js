@@ -39,6 +39,8 @@ export const NAMETAG_CLASP = true;
 export const NAMETAG_LOOP = true;
 /** Tiny kraft PAPER washer on the card. 3D box, kraft hex. */
 export const NAMETAG_WASHER = true;
+/** Tiny kraft PAPER eyelet on the card. 3D box, kraft hex. */
+export const NAMETAG_EYELET = true;
 
 const SKIN = 0xf2d2a8;
 const PANTS = 0x6e4a32;
@@ -270,6 +272,26 @@ export function makeNametagWasher() {
   return washer;
 }
 
+/**
+ * Tiny kraft PAPER eyelet on the card face. Kraft 0xc4b496 box —
+ * not grey metal. Offset from the washer (-0.22, 1.12, 0.05), loop,
+ * clasp, bead, rivet, stud, tab, and pin. Sprite-local so it stays an
+ * eyelet on the kraft card.
+ */
+export function makeNametagEyelet() {
+  const eyelet = paperBox(0.038, 0.038, 0.018, 0xc4b496);
+  eyelet.name = "paper-nametag-eyelet";
+  eyelet.userData.part = "eyelet";
+  eyelet.userData.mode = "PAPER";
+  eyelet.castShadow = false;
+  eyelet.receiveShadow = false;
+  eyelet.frustumCulled = false;
+  eyelet.renderOrder = 4;
+  eyelet.material.depthTest = false;
+  eyelet.position.set(0.42, 1.16, 0.05);
+  return eyelet;
+}
+
 /** Tracked letters so PAPER reads as a stamp even without canvas letterSpacing. */
 function fillSpaced(ctx, text, x, y, tracking) {
   const chars = String(text).split("");
@@ -420,6 +442,7 @@ export function makePaperNametag(name) {
   if (NAMETAG_CLASP) sprite.add(makeNametagClasp());
   if (NAMETAG_LOOP) sprite.add(makeNametagLoop());
   if (NAMETAG_WASHER) sprite.add(makeNametagWasher());
+  if (NAMETAG_EYELET) sprite.add(makeNametagEyelet());
   return sprite;
 }
 
