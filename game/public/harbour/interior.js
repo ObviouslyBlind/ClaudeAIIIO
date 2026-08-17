@@ -358,6 +358,21 @@ function makePlatter(x, y, z) {
   return g;
 }
 
+/** Tiny kraft PAPER cruet on the table — wood foot, plaster body, linen rim. Boxes only. */
+function makeCruet(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "cruet";
+  g.userData.kind = "interior-cruet";
+  g.userData.mode = "PAPER";
+  g.userData.part = "cruet";
+  g.position.set(x, y, z);
+  const paper = { mode: "PAPER", part: "cruet" };
+  g.add(box(0.03, 0.006, 0.03, WOOD, 0, 0.003, 0, "interior-cruet", paper));
+  g.add(box(0.036, 0.038, 0.036, PLASTER, 0, 0.025, 0, "interior-cruet", paper));
+  g.add(box(0.02, 0.01, 0.02, LINEN, 0, 0.049, 0, "interior-cruet", paper));
+  return g;
+}
+
 /** Tiny kraft PAPER saucer on the table — wood rim, plaster well, linen center. Boxes only. */
 function makeSaucer(x, y, z) {
   const g = new THREE.Group();
@@ -559,7 +574,7 @@ function makeBed(cx, floorY, cz) {
 
 /**
  * PAPER Caribbean house: plaster walls, wood floors, window openings,
- * downstairs table/chairs/stool/lamp/clock/picture/vase/mug/saucer/bowl/pitcher/tray/crock/tureen/platter/book/napkin/spoon/fork/knife/plate/cup, upstairs bed. Low-poly boxes only.
+ * downstairs table/chairs/stool/lamp/clock/picture/vase/mug/saucer/bowl/pitcher/tray/crock/tureen/platter/cruet/book/napkin/spoon/fork/knife/plate/cup, upstairs bed. Low-poly boxes only.
  */
 export function makeInteriorScene() {
   const group = new THREE.Group();
@@ -625,6 +640,8 @@ export function makeInteriorScene() {
   down.add(makeTureen(0.55, 0.955, 0.08));
   // Kraft PAPER platter on the table top — offset from tureen, crock, tray, pitcher, bowl, saucer, mug, napkin, spoon, fork, knife, plate, cup.
   down.add(makePlatter(0.66, 0.955, -0.2));
+  // Kraft PAPER cruet on the table top — offset from platter, tureen, crock, tray, pitcher, bowl.
+  down.add(makeCruet(-0.04, 0.955, -0.82));
   // Kraft PAPER book on the table top — offset from the mug and vase.
   down.add(makeBook(-0.05, 0.955, 0.08));
   // Kraft PAPER napkin on the table top — offset from the mug, vase, and book.
