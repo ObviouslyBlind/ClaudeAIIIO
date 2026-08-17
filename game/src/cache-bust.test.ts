@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bustHarbourAssets, bustModuleImports } from "./cache-bust.ts";
+import { ASSET_NONCE, bustHarbourAssets, bustModuleImports } from "./cache-bust.ts";
 
 describe("harbour cache bust", () => {
   it("stamps script and stylesheet so a fresh load is enough", () => {
@@ -29,5 +29,18 @@ import("./lease-hud.js?v=1");`;
     expect(out).toContain('import("./main.js?v=88")');
     expect(out).toContain('import("./lease-hud.js?v=88")');
     expect(out).not.toContain("v=1");
+  });
+
+  it("reuses one process nonce so first-frame ↔ main cannot chain new ?v= forever", () => {
+    const html = bustHarbourAssets(
+      `<script type="module" src="/harbour/first-frame.js"></script>`,
+    );
+    const first = bustModuleImports(`import("./main.js");`);
+    const main = bustModuleImports(`import { CAM, LOOK } from "./first-frame.js";`);
+    const again = bustModuleImports(`import("./main.js");`);
+    expect(html).toContain(`/harbour/first-frame.js?v=${ASSET_NONCE}`);
+    expect(first).toBe(`import("./main.js?v=${ASSET_NONCE}");`);
+    expect(main).toBe(`import { CAM, LOOK } from "./first-frame.js?v=${ASSET_NONCE}";`);
+    expect(again).toBe(first);
   });
 });

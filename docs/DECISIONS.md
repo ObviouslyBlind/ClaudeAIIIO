@@ -148,6 +148,11 @@ Record of architecture and strategy decisions with reasoning.
 **Decision:** Restore the inland third-person spawn on `/`. North camera offset `{ x: 20, y: 24, z: 40 }`, look-at `{ x: 0, y: 5, z: -120 }`. Strip unread giant north extras (brow, plate, ring, funnel, cargo, teal, clay, green). Keep pixel-held dinghies and the rust buoy.
 **Reason:** Operator came back to playtest and `localhost:8787` dumped them into the seaward critic harbour, which was a pile of unread 8–40 m cubes. Playtest is the bar. PAPER / SIMULATED.
 
+## D031 — One asset nonce per play process (2026-08-17)
+
+**Decision:** Stamp harbour HTML/JS with one `ASSET_NONCE` for the life of `npm run play`. Do not call `Date.now()` on every response.
+**Reason:** Playtest: `/` painted the cyan first frame (North port) then the tab stopped responding. `first-frame.js` dynamically imports `main.js`, and `main.js` statically imports `first-frame.js`. A fresh `?v=` per file turned that cycle into an infinite module fetch. PAPER / SIMULATED.
+
 ## D015 — Supplemental merge before save (2026-03-18)
 
 **Decision:** Move `relevant_markets_*.json` save to AFTER supplemental /markets merge.
