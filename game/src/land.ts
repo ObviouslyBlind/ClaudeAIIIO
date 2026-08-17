@@ -7,6 +7,7 @@ import {
 } from "./buildings.ts";
 import { bboxOverlap, ringBBox, ringsOverlap } from "./kernel/plots.ts";
 import { seedDeposits, type MineralId } from "./kernel/minerals.ts";
+import { zoneForBand, zoneUnlocked, type ZoneId } from "./zones.ts";
 import type { Visitor } from "./sim.ts";
 
 export { BUILDING_CATALOG, DEVELOP_COST };
@@ -49,6 +50,8 @@ export type Parcel = {
   name: string;
   /** In-world mineral, or null. Street lots stay empty. */
   deposit: MineralId | null;
+  /** Street = commercial. Fields / shore = residential. High density is government-locked. */
+  zone: ZoneId;
 };
 
 export type Road = {
@@ -424,6 +427,7 @@ function pushParcel(
     street,
     name: `${houseNumberFor(id)} ${street}`,
     deposit: null,
+    zone: zoneForBand(band),
   });
 }
 
@@ -734,6 +738,7 @@ export function leasePlot(
   if (!plot) return { ok: false, reason: "no_plot" };
   if (plot.class === "reserved") return { ok: false, reason: "reserved" };
   if (plot.owner) return { ok: false, reason: "owned" };
+  if (!zoneUnlocked(plot.zone)) return { ok: false, reason: "zone_locked" };
   if (visitor.cash < plot.price) return { ok: false, reason: "no_cash" };
   if (visitor.cash - plot.price < DEVELOP_COST) return { ok: false, reason: "need_develop_cash" };
   visitor.cash = Math.round((visitor.cash - plot.price) * 10000) / 10000;

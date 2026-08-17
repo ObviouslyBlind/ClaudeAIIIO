@@ -5,6 +5,7 @@ import * as THREE from "three";
  * PAPER / SIMULATED.
  *
  *   world      — walk. Buildings / stands. Land does not steal the click.
+ *   lots       — boundary outlines. Click a $ tag to lease another lot.
  *   foot       — green / yellow / red ribbons on each named paved road.
  *   logistics  — vans and roadside crates. Tap the crate.
  *   minerals   — empty on the South first loop.
@@ -15,6 +16,11 @@ export const VIEWERS = {
     id: "world",
     label: "World",
     hint: "Walk. Land does not steal taps. PAPER.",
+  },
+  lots: {
+    id: "lots",
+    label: "Lots",
+    hint: "Outlines on. Click the $ title to lease. Buy other sections the same way.",
   },
   foot: {
     id: "foot",
@@ -211,6 +217,44 @@ export function createOverlays({ scene, heightAt, specOf, getMap }) {
     }
   }
 
+  const ZONE_INK = {
+    commercial: 0xe2c04a,
+    residential: 0x6aa8d8,
+    high_commercial: 0x888888,
+    high_residential: 0x666666,
+  };
+
+  function drawLots(play, map) {
+    clear();
+    const plots = ((map && map.plots) || []).filter((p) => p.island === "south" && p.ring && p.ring.length >= 3);
+    for (const plot of plots) {
+      const spec = specOf(plot.island);
+      if (!spec) continue;
+      const pts = [];
+      for (const [x, z] of plot.ring) {
+        pts.push(x, heightAt(spec, x, z) + 0.7, z);
+      }
+      pts.push(plot.ring[0][0], heightAt(spec, plot.ring[0][0], plot.ring[0][1]) + 0.7, plot.ring[0][1]);
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute("position", new THREE.Float32BufferAttribute(pts, 3));
+      const yours = plot.owner === "visitor";
+      const color = yours ? 0x5dcc6a : ZONE_INK[plot.zone] || ZONE_INK.commercial;
+      const line = new THREE.Line(
+        geo,
+        new THREE.LineBasicMaterial({ color, depthTest: false, transparent: true, opacity: yours ? 1 : 0.88 }),
+      );
+      line.renderOrder = 7;
+      line.name = `lot-outline:${plot.id}`;
+      line.userData.kind = "lot-outline";
+      line.userData.label = plot.name || plot.id;
+      line.userData.layer = "lots";
+      line.userData.plotId = plot.id;
+      line.userData.zone = plot.zone;
+      line.userData.mode = "PAPER";
+      group.add(line);
+    }
+  }
+
   function drawLogistics(play) {
     clear();
     const deliveries = (play && play.deliveries) || [];
@@ -243,12 +287,14 @@ export function createOverlays({ scene, heightAt, specOf, getMap }) {
       mode = next;
       const board = map || (getMap && getMap());
       if (mode === "foot") drawFoot(play, board);
+      else if (mode === "lots") drawLots(play, board);
       else if (mode === "logistics") drawLogistics(play);
       else clear();
     },
     refresh(play, map) {
       const board = map || (getMap && getMap());
       if (mode === "foot") drawFoot(play, board);
+      else if (mode === "lots") drawLots(play, board);
       else if (mode === "logistics") drawLogistics(play);
     },
     get mode() {

@@ -6,7 +6,7 @@ import { VIEWERS, createOverlays } from "../public/harbour/overlays.js";
 
 describe("foot-traffic viewer (PAPER)", () => {
   it("exposes the four top-right viewers", () => {
-    expect(Object.keys(VIEWERS)).toEqual(["world", "foot", "logistics", "minerals"]);
+    expect(Object.keys(VIEWERS)).toEqual(["world", "lots", "foot", "logistics", "minerals"]);
   });
 
   it("paints a named green/yellow/red ribbon on each paved road", () => {
@@ -24,5 +24,20 @@ describe("foot-traffic viewer (PAPER)", () => {
     expect(ribbons.some((r) => r.userData.band === "green")).toBe(true);
     expect(ribbons.every((r) => r.userData.roadName && r.userData.label)).toBe(true);
     expect(ribbons[0].material.depthTest).toBe(false);
+  });
+
+  it("paints South lot outlines when the Lots viewer is on", () => {
+    const scene = new THREE.Scene();
+    const land = createLandBoard();
+    const overlays = createOverlays({
+      scene,
+      heightAt: () => 1,
+      specOf: (id) => ISLANDS[id],
+      getMap: () => land,
+    });
+    overlays.setMode("lots", {}, land);
+    const lines = overlays.group.children.filter((c) => c.userData.kind === "lot-outline");
+    expect(lines.length).toBeGreaterThan(8);
+    expect(lines.every((l) => l.userData.plotId && l.userData.zone)).toBe(true);
   });
 });

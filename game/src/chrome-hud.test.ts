@@ -8,6 +8,7 @@ describe("harbour chrome HUD", () => {
   it("ships the corner chrome, not a handheld-cart sheet as the main UI", () => {
     expect(html).toContain('class="game-name"');
     expect(html).toContain("Two Harbors");
+    expect(html).toContain('data-overlay="lots"');
     expect(html).toContain('data-overlay="foot"');
     expect(html).toContain('id="viewers"');
     expect(html).toContain('id="viewer-hint"');
@@ -16,7 +17,7 @@ describe("harbour chrome HUD", () => {
     expect(html).toContain('data-panel="market"');
     expect(html).toContain('data-panel="employees"');
     expect(html).toContain('id="chrome"');
-    expect(html).toContain("Click a $ tag to lease");
+    expect(html).toContain("click a $ title to lease");
     expect(html).toContain('id="cart">PAPER<');
     expect(html).not.toContain('data-panel="tutorials"');
     expect(html).not.toContain("Tutorials");
@@ -29,5 +30,13 @@ describe("harbour chrome HUD", () => {
     expect(chrome).toContain('id="land-close"');
     expect(chrome).toContain("onCloseLand");
     expect(chrome).toContain("PAPER");
+  });
+
+  it("walks the marketplace aisle → sku → deliver, and chirps on buy", () => {
+    expect(chrome).toContain("data-aisle");
+    expect(chrome).toContain("Deliver to");
+    expect(chrome).toContain("playPaperBuy");
+    expect(chrome).toContain("data-aisle");
+    expect(chrome).toContain("marketplace");
   });
 });

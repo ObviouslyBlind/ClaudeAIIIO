@@ -4,7 +4,7 @@
  * PAPER / SIMULATED.
  */
 
-export const VIEWERS = ["world", "foot", "logistics", "minerals"] as const;
+export const VIEWERS = ["world", "lots", "foot", "logistics", "minerals"] as const;
 export type ViewerId = (typeof VIEWERS)[number];
 
 export const KIND = {
@@ -21,13 +21,16 @@ export const KIND = {
   hotdogCart: "hotdog-cart",
   footRoad: "foot-road",
   footLabel: "foot-label",
+  lotOutline: "lot-outline",
   logisticsPad: "logistics-pad",
+  vendor: "vendor",
   building: "building",
   port: "port",
 } as const;
 
 export const LAYER = {
   world: "world",
+  lots: "lots",
   foot: "foot",
   logistics: "logistics",
   minerals: "minerals",
