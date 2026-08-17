@@ -582,7 +582,7 @@ describe("quay harbour dressing", () => {
     expect(bg.parameters.height).toBeGreaterThanOrEqual(6);
     expect(cargo!.position.x).toBeGreaterThan(4);
     expect(cargo!.position.y).toBeGreaterThan(3);
-    expect(cargo!.position.z).toBeGreaterThan(-6900);
-    expect(cargo!.position.z).toBeLessThan(-6875);
+    expect(cargo!.position.z).toBeGreaterThan(-6882);
+    expect(cargo!.position.z).toBeLessThan(-6868);
   });
 });

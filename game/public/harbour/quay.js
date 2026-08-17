@@ -573,10 +573,11 @@ export function makeQuay(spec, helpers) {
     funnel.position.set(x, 32.0, z + toward * 116);
     root.add(funnel);
 
-    /** /g/funnel75 FAIL FUNNEL: 40 m stick still unread from spawn. Round stopped.
-     *  Buoy-class rust cube on the timber, east of the walk, in the pier frame. */
+    /** /g/cargo76 FAIL CARGO: cube at pierZ+26 (z≈-6886) sat on the spawn
+     *  camera (z=-6888) and clipped out of the first frame. Park it on the
+     *  seaward lip, east of the walk, in the photographed pier band. */
     const cargo = basinCargo();
-    cargo.position.set(x + 6.4, deckY + 4.2, pierZ + toward * 26);
+    cargo.position.set(x + 4.2, deckY + 4.2, pierZ + toward * 38);
     root.add(cargo);
 
     // Extra kraft stack on the north timber, west of the walk, short of the brow.
