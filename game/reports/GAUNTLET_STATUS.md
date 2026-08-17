@@ -170,7 +170,11 @@ Pixel: **rust hull stripe** at `http://localhost:8787/g/plate81`. Wide rust band
 
 Pixel: **terracotta basin crate** at `http://localhost:8787/g/clay84`. Ped-shirt terracotta cube in the north water channel, between pier lip and sage dinghies. No RMB. Address bar must be `/g/clay84`. Do not restart play while the critic is on the page.
 
-## Next pixel (after clay84 PASS, immediately, no wait)
+`/g/clay84` **FAIL CLAY**: no terracotta mass in the basin; cube at toward*80 sat inside the unread cargo slab. Crate is now dinghy-deep, seaward of cargo, in front of the cream ferry.
+
+Pixel: **terracotta basin crate** at `http://localhost:8787/g/clay85`. Ped-shirt terracotta block in the center water, seaward of the pier cargo, in front of the cream ferry. No RMB. Address bar must be `/g/clay85`. Do not restart play while the critic is on the page.
+
+## Next pixel (after clay85 PASS, immediately, no wait)
 
 ## Frozen
 

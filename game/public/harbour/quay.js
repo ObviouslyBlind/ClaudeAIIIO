@@ -399,13 +399,16 @@ function pierTeal() {
 
 /** Ped-terracotta crate in the north basin. Teal round stopped: pier
  *  teal unread. 0xc45c3a already passed as a pier shirt; sage dinghies
- *  passed in this channel. No kraft cap. */
+ *  passed in this channel. No kraft cap.
+ *  /g/clay84 FAIL CLAY: 8.2 cube at toward*80 (z≈-6870) sat inside the
+ *  unread cargo slab (z -6880..-6864). Dinghy-deep, seaward of cargo,
+ *  taller than the sage hulls so it pokes into the look-at. */
 function basinClay() {
   const g = new THREE.Group();
   g.userData.dress = "clay";
   g.userData.mode = "PAPER";
 
-  const body = part(8.2, 8.2, 8.2, 0xc45c3a);
+  const body = part(8.2, 8.2, 18, 0xc45c3a);
   body.userData.part = "body";
   g.add(body);
 
@@ -646,12 +649,10 @@ export function makeQuay(spec, helpers) {
     teal.position.set(x + 4.2, deckY + 10.4, pierZ + toward * 36);
     root.add(teal);
 
-    /** /g/teal82–83 FAIL TEAL: pier teal unread (buried, then too high).
-     *  Round stopped. Terracotta ped-shirt hex in the dinghy channel,
-     *  between pier lip and sage hulls — not on beige timber, not inside
-     *  the dinghies (buoy69). */
+    /** /g/clay84 FAIL CLAY: toward*80 sat inside cargo. Park seaward of
+     *  that slab, dinghy-deep in the center channel, in front of the ferry. */
     const clay = basinClay();
-    clay.position.set(x, 4.2, z + toward * 80);
+    clay.position.set(x, 4.2, z + toward * 108);
     root.add(clay);
 
     // Extra kraft stack on the north timber, west of the walk, short of the brow.
