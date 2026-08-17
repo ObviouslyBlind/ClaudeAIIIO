@@ -30,7 +30,9 @@ Loop is **live** on playtest bugs (operator: “so many bugs, use the gauntlet�
 
 `/g/south100` **FAIL SOUTH**: “Page Unresponsive” at the Ferry click on a build with **no dressing** — real cause was the ferry-hint MutationObserver on `document.body` feeding its own repaint (D042). D041 also trickles dressing back click-safe.
 
-Current piece: **`/g/south101` SOUTH** — ferry ticket, real south landfall, 60 s idle, still responsive. No RMB.
+`/g/south101` **FAIL SOUTH**: ferry + landfall worked; froze during the 60 s idle while the quay-clutter / foam trickle steps built. D043: trickle carries only cars + moving ferry.
+
+Current piece: **`/g/south102` SOUTH** — ferry ticket, real south landfall, 60 s idle, still responsive. No RMB.
 
 One **pixel critic** at a time. Unique `/g/…` path. No RMB. Do not restart play while a critic is on the page.
 

@@ -1086,12 +1086,12 @@ async function ensureInterior() {
 }
 
 /**
- * Trickle dressing (D041). The old 45 s / 120 s timer compiled
- * quay/ferry/traffic in one burst mid-session and Chrome showed
- * "Page Unresponsive" (`/g/south99`, operator "crashes within 5 min").
- * Now each module compiles as its own step with long gaps, and the
- * trickle waits whenever the player has clicked recently, so decoration
- * never competes with input. Trees / stalls / peds stay off (D036).
+ * Trickle dressing (D041/D043). Each module compiles as its own step with
+ * long gaps, and the trickle waits whenever the player clicked recently.
+ * Only cars and the moving ferry load live — `/g/south101` froze during a
+ * 60 s idle while the quay-clutter and shore-foam steps built, so those
+ * stay off until they can load off the main thread. Trees / stalls / peds
+ * stay off too (D036).
  */
 const TRICKLE_START_MS = 8000;
 const TRICKLE_STEP_MS = 2500;
@@ -1124,16 +1124,6 @@ async function loadTrickleDressing() {
   tickFerry = ferryMod.tickFerry;
   ferryMesh = ferryMod.makeFerry();
   target.add(ferryMesh);
-
-  await quietStep();
-  const quayMod = await import("./quay.js");
-  await quietStep();
-  quayMod.makeQuay(specOf("north"), { scene: target, heightAt });
-
-  await quietStep();
-  const shoreMod = await import("./shore.js");
-  await quietStep();
-  shoreMod.makeShoreFoam(specOf("north"), heightAt, target);
 }
 
 async function boot() {
