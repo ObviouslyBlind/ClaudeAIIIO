@@ -1204,3 +1204,72 @@ describe("house PAPER saucer", () => {
     expect(up.getObjectByName("cup")).toBeFalsy();
   });
 });
+
+const BOWL_HEX = new Set([0x5a3a22, 0xf4ead8, 0xf7f1e6]);
+
+describe("house PAPER bowl", () => {
+  it("puts one kraft PAPER bowl on the downstairs table, not upstairs", () => {
+    const g = makeInteriorScene();
+    const down = g.getObjectByName("downstairs")!;
+    const up = g.getObjectByName("upstairs")!;
+    const table = down.getObjectByName("table")!;
+    expect(table).toBeTruthy();
+
+    const bowls = collectKind(down, "interior-bowl");
+    expect(bowls.length).toBe(1);
+    expect(collectKind(up, "interior-bowl").length).toBe(0);
+
+    const bowl = bowls[0];
+    expect(bowl.userData.kind).toBe("interior-bowl");
+    expect(bowl.userData.mode).toBe("PAPER");
+    expect(bowl.userData.part).toBe("bowl");
+
+    const tablePos = new THREE.Vector3();
+    table.getWorldPosition(tablePos);
+    const bowlPos = new THREE.Vector3();
+    bowl.getWorldPosition(bowlPos);
+    expect(Math.hypot(bowlPos.x - tablePos.x, bowlPos.z - tablePos.z)).toBeLessThan(0.85);
+    expect(bowlPos.y).toBeGreaterThan(0.9);
+    expect(bowlPos.y).toBeLessThan(1.2);
+
+    const mug = down.getObjectByName("mug");
+    expect(mug).toBeTruthy();
+    expect(mug!.userData.part).toBe("mug");
+    const mugPos = new THREE.Vector3();
+    mug!.getWorldPosition(mugPos);
+    expect(Math.hypot(bowlPos.x - mugPos.x, bowlPos.z - mugPos.z)).toBeGreaterThan(0.25);
+    expect(collectKind(down, "interior-mug").length).toBe(1);
+
+    const saucer = down.getObjectByName("saucer");
+    expect(saucer).toBeTruthy();
+    expect(saucer!.userData.part).toBe("saucer");
+    const saucerPos = new THREE.Vector3();
+    saucer!.getWorldPosition(saucerPos);
+    expect(Math.hypot(bowlPos.x - saucerPos.x, bowlPos.z - saucerPos.z)).toBeGreaterThan(0.25);
+    expect(collectKind(down, "interior-saucer").length).toBe(1);
+
+    const colors: number[] = [];
+    bowl.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      const mat = mesh.material as THREE.MeshLambertMaterial | undefined;
+      if (mesh.isMesh && mat?.color) {
+        const hex = mat.color.getHex();
+        colors.push(hex);
+        expect(BOWL_HEX.has(hex)).toBe(true);
+        if (hex !== 0xf7f1e6) expect(isGrey(hex)).toBe(false);
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.kind).toBe("interior-bowl");
+        expect(mesh.userData.mode).toBe("PAPER");
+        expect(mesh.userData.part).toBe("bowl");
+      }
+    });
+    expect(colors.length).toBeGreaterThan(0);
+    expect(colors.some((c) => c === 0x5a3a22)).toBe(true);
+    expect(colors.some((c) => c === 0xf4ead8)).toBe(true);
+    expect(colors.some((c) => c === 0xf7f1e6)).toBe(true);
+
+    expect(up.getObjectByName("bowl")).toBeFalsy();
+    expect(up.getObjectByName("mug")).toBeFalsy();
+    expect(up.getObjectByName("saucer")).toBeFalsy();
+  });
+});
