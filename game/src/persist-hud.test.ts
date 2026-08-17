@@ -62,20 +62,20 @@ describe("harbour PAPER persist restore HUD", () => {
     expect(formatPersistLine(DUMP, "restored")).toBe(
       "PAPER · SIMULATED · restored · tick 12 · $777",
     );
-    expect(formatPersistLine(null, "no_blob")).toBe("PAPER · SIMULATED · no dump");
+    expect(formatPersistLine(null, "no_blob")).toBe("PAPER · SIMULATED · restart wipes");
     expect(formatPersistLine(DUMP).includes("\n")).toBe(false);
     expect(formatPersistLine(DUMP).length).toBeLessThan(80);
     expect(formatPersistLine(DUMP).toLowerCase()).not.toContain("wallet");
     expect(formatPersistLine(DUMP).toLowerCase()).not.toContain("postgres");
-    expect(IDLE_LINE).toBe("PAPER · SIMULATED · no dump");
+    expect(IDLE_LINE).toBe("PAPER · SIMULATED · restart wipes");
   });
 
-  it("ships a no-dump first frame, not a clone of the PAPER badge", () => {
+  it("ships a restart-wipes first frame, not a clone of the PAPER badge", () => {
     const html = readFileSync(
       join(dirname(fileURLToPath(import.meta.url)), "../public/harbour/index.html"),
       "utf8",
     );
-    expect(html).toMatch(/id="persist-line">PAPER · SIMULATED · no dump</);
+    expect(html).toMatch(/id="persist-line">PAPER · SIMULATED · restart wipes</);
     expect(html).not.toMatch(/id="persist-line">PAPER · SIMULATED</);
   });
 

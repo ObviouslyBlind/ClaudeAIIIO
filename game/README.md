@@ -13,14 +13,15 @@ cd game
 npm install
 npm test
 npm run tick        # 1 simulated hour
-npm run play        # http://localhost:8787  (3D harbour)
+npm run play        # binds 0.0.0.0:8787
 ```
 
-From a **Cursor cloud agent**: plug icon (top-right of the agent panel) → make sure **8787** is forwarded → open `http://localhost:8787/`. If you are on cursor.com/agents in a browser only, 8787 is not on your laptop — use the agent Ports / Simple Browser.
+**How to actually open it**
 
-The harbour sits on **kernel K.1**: unique non-overlapping plots, buildings persist, a minerals catalog, stacked menus, interest queries. Still one paper visitor in play. Not 500 live sockets. Politics frozen.
+- **Cursor Desktop** (Agents Window): plug icon (top-right of this agent) → Auto-Forward Ports on → **Open 8787**. That is the only way the harbour lands on your machine. It may show as localhost *after* Desktop forwards it.
+- **cursor.com/agents in a browser only:** that port is not on your laptop. I can run the game here; you cannot type localhost and reach this VM.
 
-Open `/` for the harbour. **Minerals** lists in-game ore deposits. Tap a **piece of land** (not a given lot card), Lease, then Develop. **Ferry** near a port quotes the North ↔ South crossing (PAPER $15) before travel. **Taxi** rides the paved road only (PAPER). `/market/` is the paper goods HUD; cash is shared. Labelled PAPER / SIMULATED.
+**Play restart wipes.** No Restore button. A house lasts until we restart play. Labelled PAPER / SIMULATED.
 
 Visitor starts with $1,000. Tap ground to walk. The world still ticks if nobody clicks.
 

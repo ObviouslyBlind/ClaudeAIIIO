@@ -1,12 +1,11 @@
 /**
- * Harbour PAPER persist restore control on the sheet.
- * Polls GET /api/persist (~1/s) for the last in-memory shard dump.
- * Restore POSTs /api/persist/restore. Does not leave /. Does not restart play.
+ * Harbour PAPER persist strip. Restart wipes the shard on purpose while we iterate.
+ * Restore stays in this module for tests. Live play does not mount the button.
  * PAPER / SIMULATED. Never a wallet. Not Postgres.
  */
 
 export const POLL_MS = 1000;
-export const IDLE_LINE = "PAPER · SIMULATED · no dump";
+export const IDLE_LINE = "PAPER · SIMULATED · restart wipes";
 export const RESTORE_LABEL = "Restore";
 
 function money(n) {
@@ -24,12 +23,12 @@ function lookup(id) {
     : null;
 }
 
-/** Last PAPER dump as a short sheet line. Empty dump stays "no dump", not a clone of the badge. */
+/** Last PAPER dump as a short sheet line. Empty dump says restart wipes. */
 export function formatPersistLine(blob, phase) {
   const mode = (blob && blob.mode) || "PAPER";
   const provenance = (blob && blob.provenance) || "SIMULATED";
   if (phase === "busy") return `${mode} · ${provenance} · restoring…`;
-  if (phase === "no_blob") return `${mode} · ${provenance} · no dump`;
+  if (phase === "no_blob") return `${mode} · ${provenance} · restart wipes`;
   if (phase === "error") return `${mode} · ${provenance} · restore failed`;
   if (phase === "restored") {
     const bits = [`${mode} · ${provenance} · restored`];
@@ -41,7 +40,7 @@ export function formatPersistLine(blob, phase) {
     }
     return bits.join(" · ");
   }
-  if (!blob || typeof blob !== "object") return `${mode} · ${provenance} · no dump`;
+  if (!blob || typeof blob !== "object") return `${mode} · ${provenance} · restart wipes`;
   const tick = num(blob.tick);
   const cash = blob.visitor ? num(blob.visitor.cash) : null;
   const bits = [`${mode} · ${provenance}`];
@@ -224,9 +223,7 @@ export function mountPersistHud(opts = {}) {
 if (
   typeof document !== "undefined" &&
   document.getElementById &&
-  (document.getElementById("persist-line") ||
-    document.getElementById("btn-restore") ||
-    document.getElementById("sheet"))
+  (document.getElementById("persist-line") || document.getElementById("sheet"))
 ) {
-  mountPersistHud();
+  mountPersistHud({ btnEl: null });
 }

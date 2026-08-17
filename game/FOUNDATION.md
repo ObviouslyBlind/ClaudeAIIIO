@@ -76,6 +76,8 @@ cd game
 npm test
 ```
 
-Kernel tests must show: unique plot ids, zero overlapping rings, a developed house surviving serialize/restore, minerals catalog listing ore, 500 player records with bounded interest queries.
+Kernel tests must show: unique plot ids, zero overlapping rings, a developed house surviving a serialize/restore **blob** (for later Postgres), minerals catalog listing ore, 500 player records with bounded interest queries.
 
-Play stays `npm run play` → `http://localhost:8787/`. Labelled PAPER / SIMULATED.
+**Play restart wipes.** That is the rule while we iterate. There is no Restore button on the live sheet. A house you place stays for that play process, then dies when play restarts.
+
+Play: `npm run play` binds `0.0.0.0:8787`. On Cursor Desktop, plug icon → forward **8787** → Open in browser. The cursor.com/agents website cannot open that port on your laptop.
