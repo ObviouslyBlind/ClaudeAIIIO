@@ -314,6 +314,27 @@ function basinRing() {
   return g;
 }
 
+/** Tall rust funnel above the held buoy. Ring round stopped: +X left the frame. */
+function basinFunnel() {
+  const g = new THREE.Group();
+  g.userData.dress = "funnel";
+  g.userData.mode = "PAPER";
+
+  const body = part(4.4, 12.0, 4.4, 0x6e2e22);
+  body.userData.part = "body";
+  g.add(body);
+
+  const band = part(4.8, 1.6, 4.8, 0xc4b496, false);
+  band.position.y = 2.2;
+  g.add(band);
+
+  const cap = part(3.4, 0.8, 3.4, 0x8a6238, false);
+  cap.position.y = 6.2;
+  g.add(cap);
+
+  return g;
+}
+
 /** Crate with a canvas tarp lashed over it. */
 function canvasCrate() {
   const g = new THREE.Group();
@@ -521,6 +542,12 @@ export function makeQuay(spec, helpers) {
     const ring = basinRing();
     ring.position.set(x + 15.4, 5.4, z + toward * 116);
     root.add(ring);
+
+    /** /g/ring73 FAIL RING: bow cube at x+15.4 sat under the spawn camera.
+     *  Ring round stopped. Funnel uses the held buoy's x=0 slot, stacked up. */
+    const funnel = basinFunnel();
+    funnel.position.set(x, 14.2, z + toward * 116);
+    root.add(funnel);
 
     // Extra kraft stack on the north timber, west of the walk, short of the brow.
     const stackN = crateStack();

@@ -130,7 +130,11 @@ Pixel: **kraft/rust life ring** at `http://localhost:8787/g/ring72`. Same camera
 
 Pixel: **kraft/rust life ring** at `http://localhost:8787/g/ring73`. Solid 8 m rust cube + kraft band on the bow, right of the held buoy, clear of the wheelhouse. No RMB. Address bar must be `/g/ring73`. Do not restart play while the critic is on the page.
 
-## Next pixel (after ring73 PASS, immediately, no wait)
+`/g/ring73` **FAIL RING**: left-side rust buoy in frame; bow cube at x+15.4 sat under the spawn camera and the visible right hull stayed cream. **Ring round stopped.** Code stays; not pixel-held.
+
+Pixel: **rust funnel** at `http://localhost:8787/g/funnel74`. Tall rust chimney stacked on the held buoy slot (x=0), above the left-side rust mass. No RMB. Address bar must be `/g/funnel74`. Do not restart play while the critic is on the page.
+
+## Next pixel (after funnel74 PASS, immediately, no wait)
 
 ## Frozen
 
