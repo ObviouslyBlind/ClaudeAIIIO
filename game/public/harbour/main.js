@@ -272,7 +272,7 @@ function findParcelAt(x, z) {
     return hits.reduce((a, b) => (a.area <= b.area ? a : b));
   }
   let best = null;
-  let bestD = STARTER_SNAP_M;
+  let bestD = 70;
   for (const p of map.plots) {
     if (!parcelMapped(p)) continue;
     if (!(p.owner === "visitor" || canLeasePlot(p))) continue;
@@ -1119,7 +1119,26 @@ function onPointer(ev) {
     ferry();
     return;
   }
-  if (tapPt) goTo(tapPt.x, tapPt.z);
+  if (tapPt) {
+    if (viewer === "world") {
+      const p = findParcelAt(tapPt.x, tapPt.z);
+      if (p && chromeHud && chromeHud.paintLand) {
+        const prev = selected ? map.plots.find((x) => x.id === selected) : null;
+        selected = p.id;
+        if (prev) paintParcel(prev);
+        paintParcel(p);
+        if (parcelMap) parcelMap.setSelected(p.id);
+        lastInspectKey = p.id + ":" + (crateOn(p.id) ? crateOn(p.id).id : "") + ":" + bandForPlot(p);
+        const crate = crateOn(p.id);
+        chromeHud.paintLand(p, {
+          band: bandForPlot(p),
+          crate,
+          onTake: crate ? () => takeCrate(crate.id) : null,
+        });
+      }
+    }
+    goTo(tapPt.x, tapPt.z);
+  }
 }
 
 function applySnapshot(snapshot) {
@@ -1157,7 +1176,8 @@ async function lease() {
   }
   applySnapshot(body.snapshot);
   paintParcel(map.plots.find((x) => x.id === selected));
-  setStatus("This land is yours for $" + money(body.paid) + " (PAPER). Develop it.");
+  if (chromeHud) chromeHud.refresh();
+  setStatus("This land is yours for $" + money(body.paid) + " (PAPER). Order from Market.");
 }
 
 async function developAt(plotId, use) {
@@ -1522,6 +1542,17 @@ async function boot() {
   chromeHud = mountChrome({
     setStatus,
     lease,
+    onLeased(snapshot) {
+      applySnapshot(snapshot);
+      const ids = snapshot.visitor && snapshot.visitor.leases;
+      if (ids && ids.length) {
+        selected = ids[ids.length - 1];
+        const p = map.plots.find((x) => x.id === selected);
+        if (p) paintParcel(p);
+        if (parcelMap) parcelMap.setSelected(selected);
+      }
+      if (chromeHud) chromeHud.refresh();
+    },
     onOverlay(id) {
       if (overlays) overlays.setMode(id, chromeHud.getPlay(), map);
     },

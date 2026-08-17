@@ -4,7 +4,7 @@
  * PAPER / SIMULATED. Not a wallet.
  */
 
-import { getPlot, type IslandId, type LandBoard, type Parcel } from "./land.ts";
+import { getPlot, ISLANDS, type IslandId, type LandBoard, type Parcel } from "./land.ts";
 import { plotTrafficBand, type TrafficBand } from "./footTraffic.ts";
 import { roadsideDrop, type DropPoint } from "./roadside.ts";
 import type { Visitor } from "./sim.ts";
@@ -309,5 +309,17 @@ export function playSnapshot(visitor: Visitor, land: LandBoard) {
       price: p.price,
       band: plotTrafficBand(land, p),
     })),
+    leaseOptions: land.plots
+      .filter((p) => p.island === "south" && p.band === "street" && !p.owner && p.class === "by_right")
+      .sort((a, b) => {
+        const port = ISLANDS.south.port;
+        return Math.hypot(a.x - port.x, a.z - port.z) - Math.hypot(b.x - port.x, b.z - port.z);
+      })
+      .slice(0, 8)
+      .map((p) => ({
+        id: p.id,
+        price: p.price,
+        band: plotTrafficBand(land, p),
+      })),
   };
 }

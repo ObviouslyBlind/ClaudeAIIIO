@@ -23,5 +23,6 @@ describe("foot-traffic viewer (PAPER)", () => {
     expect(ribbons.length).toBeGreaterThan(3);
     expect(ribbons.some((r) => r.userData.band === "green")).toBe(true);
     expect(ribbons.every((r) => r.userData.roadName && r.userData.label)).toBe(true);
+    expect(ribbons[0].material.depthTest).toBe(false);
   });
 });

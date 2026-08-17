@@ -32,6 +32,13 @@ import {
 } from "./firstLoop.ts";
 import { footTrafficSnapshot } from "./footTraffic.ts";
 
+function playPayload() {
+  return {
+    ...playSnapshot(visitor, land),
+    traffic: footTrafficSnapshot(land),
+  };
+}
+
 const root = join(fileURLToPath(new URL(".", import.meta.url)), "..");
 const publicDir = join(root, "public");
 const port = Number(process.env.PORT ?? 8787);
@@ -154,10 +161,7 @@ const server = createServer(async (req, res) => {
   }
 
   if (req.method === "GET" && url.pathname === "/api/play") {
-    json(res, 200, {
-      ...playSnapshot(visitor, land),
-      traffic: footTrafficSnapshot(land),
-    });
+    json(res, 200, playPayload());
     return;
   }
 
@@ -168,49 +172,49 @@ const server = createServer(async (req, res) => {
       return;
     }
     const result = orderMarket(visitor, land, body);
-    json(res, result.ok ? 200 : 400, { ...result, play: playSnapshot(visitor, land) });
+    json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
     return;
   }
 
   if (req.method === "POST" && url.pathname === "/api/delivery/arrive") {
     const body = await readJsonBody(req);
     const result = markArrived(visitor, String(body?.deliveryId ?? ""));
-    json(res, result.ok ? 200 : 400, { ...result, play: playSnapshot(visitor, land) });
+    json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
     return;
   }
 
   if (req.method === "POST" && url.pathname === "/api/delivery/take") {
     const body = await readJsonBody(req);
     const result = takeAll(visitor, String(body?.deliveryId ?? ""));
-    json(res, result.ok ? 200 : 400, { ...result, play: playSnapshot(visitor, land) });
+    json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
     return;
   }
 
   if (req.method === "POST" && url.pathname === "/api/inventory/place") {
     const body = await readJsonBody(req);
     const result = placeStand(visitor, land, String(body?.plotId ?? ""));
-    json(res, result.ok ? 200 : 400, { ...result, play: playSnapshot(visitor, land) });
+    json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
     return;
   }
 
   if (req.method === "POST" && url.pathname === "/api/stand/stock") {
     const body = await readJsonBody(req);
     const result = stockStand(visitor, String(body?.standId ?? ""), Number(body?.qty ?? 0));
-    json(res, result.ok ? 200 : 400, { ...result, play: playSnapshot(visitor, land) });
+    json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
     return;
   }
 
   if (req.method === "POST" && url.pathname === "/api/stand/hire") {
     const body = await readJsonBody(req);
     const result = hireStand(visitor, String(body?.standId ?? ""));
-    json(res, result.ok ? 200 : 400, { ...result, play: playSnapshot(visitor, land) });
+    json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
     return;
   }
 
   if (req.method === "POST" && url.pathname === "/api/stand/attend") {
     const body = await readJsonBody(req);
     const result = attendStand(visitor, body?.standId ? String(body.standId) : null);
-    json(res, result.ok ? 200 : 400, { ...result, play: playSnapshot(visitor, land) });
+    json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
     return;
   }
 
@@ -221,7 +225,11 @@ const server = createServer(async (req, res) => {
       return;
     }
     const result = leasePlot(land, visitor, String(body.plotId ?? ""));
-    json(res, result.ok ? 200 : 400, { ...result, snapshot: staffMapSnapshot(land, visitor) });
+    json(res, result.ok ? 200 : 400, {
+      ...result,
+      snapshot: staffMapSnapshot(land, visitor),
+      play: playPayload(),
+    });
     return;
   }
 

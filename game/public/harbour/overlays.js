@@ -73,7 +73,7 @@ function ribbonStations(points) {
 function bandRibbon(spec, road, heightAt, color) {
   const pts = ribbonStations(road.points || []);
   if (pts.length < 2) return null;
-  const half = 3.4;
+  const half = 4.6;
   const n = pts.length;
   const positions = new Float32Array(n * 6);
   const indices = [];
@@ -93,7 +93,7 @@ function bandRibbon(spec, road, heightAt, color) {
     const tlen = Math.hypot(dx, dz) || 1;
     const rx = dz / tlen;
     const rz = -dx / tlen;
-    const y = heightAt(spec, pts[i].x, pts[i].z) + 0.28;
+    const y = heightAt(spec, pts[i].x, pts[i].z) + 0.9;
     const o = i * 6;
     positions[o] = pts[i].x - rx * half;
     positions[o + 1] = y;
@@ -112,15 +112,15 @@ function bandRibbon(spec, road, heightAt, color) {
   geo.computeVertexNormals();
   const mesh = new THREE.Mesh(
     geo,
-    new THREE.MeshLambertMaterial({
+    new THREE.MeshBasicMaterial({
       color,
+      side: THREE.DoubleSide,
+      depthTest: false,
       transparent: true,
-      opacity: 0.78,
-      depthWrite: false,
-      emissive: color,
-      emissiveIntensity: 0.35,
+      opacity: 0.92,
     }),
   );
+  mesh.renderOrder = 8;
   const name = road.name || "Harbour Rd";
   const band = road.band || "yellow";
   mesh.name = `foot-road:${road.island}:${name}`;
@@ -194,6 +194,7 @@ export function createOverlays({ scene, heightAt, specOf, getMap }) {
     const roads = footRoads(play, map);
     for (const road of roads) {
       const spec = specOf(road.island);
+      if (!spec) continue;
       const band = bandForRoad(road, specOf);
       const colored = { ...road, band };
       const ribbon = bandRibbon(spec, colored, heightAt, BAND_COLOR[band] || BAND_COLOR.yellow);

@@ -10,6 +10,7 @@ describe("harbour chrome HUD", () => {
     expect(html).toContain('data-overlay="foot"');
     expect(html).toContain('id="viewers"');
     expect(html).toContain('id="viewer-hint"');
+    expect(html).toContain('id="foot-legend"');
     expect(html).toContain('data-panel="inventory"');
     expect(html).toContain('data-panel="market"');
     expect(html).toContain('data-panel="employees"');

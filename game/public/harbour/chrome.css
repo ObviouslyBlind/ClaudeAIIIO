@@ -225,7 +225,7 @@ nav.dock.travel-dock {
   padding: 4px 8px;
 }
 
-#land-card, #stand-menu {
+#land-card, #stand-menu, #foot-legend {
   position: absolute;
   left: 72px;
   bottom: calc(64px + env(safe-area-inset-bottom));
@@ -236,7 +236,16 @@ nav.dock.travel-dock {
   border-radius: 12px;
   z-index: 10;
 }
-#land-card[hidden], #stand-menu[hidden], .float-panel[hidden] { display: none !important; }
+#foot-legend {
+  left: auto;
+  right: 12px;
+  top: 168px;
+  bottom: auto;
+  max-height: min(50vh, 360px);
+  overflow: auto;
+  pointer-events: none;
+}
+#land-card[hidden], #stand-menu[hidden], .float-panel[hidden], #foot-legend[hidden] { display: none !important; }
 #land-card h2, #stand-menu h2 { margin: 0 0 4px; font-size: 15px; }
 #land-card .price { color: var(--green); font-weight: 700; }
 

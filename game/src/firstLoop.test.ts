@@ -105,6 +105,8 @@ describe("South first loop", () => {
     expect(snap.island).toBe("south");
     expect(snap.stands).toHaveLength(1);
     expect(snap.mode).toBe("PAPER");
+    expect(snap.leaseOptions.length).toBeGreaterThan(0);
+    expect(snap.leases).toHaveLength(1);
   });
 
   it("does not sell when idle, does sell when the player attends", () => {

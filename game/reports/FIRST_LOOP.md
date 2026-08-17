@@ -22,11 +22,10 @@ Windows: `play.cmd` or `play-laptop.cmd`. From `game/`: `npm run play` / `npm ru
 
 ## Loop
 1. Foot traffic overlay (green / yellow / red on paved).
-2. Lease a South plot.
-3. Market: order hotdog cart ($85) + hotdogs ($3 for 20) to that plot.
-4. Van drives paved roads (same graph as taxi), drops the crate on the **side of the road**, drives away.
-5. Switch **Logistics** (or tap the crate). Take all → inventory.
-6. Place in world (foot traffic stays on).
-7. Stock the cart. Hire or run it. $0.10 PAPER per hotdog sold.
+2. Open **Market**. If you have no land yet, tap **Lease $…** on a South street lot, then **Order crate**.
+3. Van drives paved roads (same graph as taxi), drops the crate on the **side of the road**, drives away.
+4. Switch **Logistics** (or tap the crate). Take all → inventory.
+5. Place in world.
+6. Stock the cart. Hire or run it. $0.10 PAPER per hotdog sold.
 
 Handheld wagon on the player is gone. The cart is the starting stall.

@@ -56,6 +56,7 @@ export function mountChrome(opts) {
     if (hint) hint.textContent = (HINTS[id] || HINTS.world) + " PAPER · SIMULATED";
     if (opts.setStatus) opts.setStatus((HINTS[id] || HINTS.world) + " PAPER.");
     if (opts.onOverlay) opts.onOverlay(id);
+    paintFootLegend();
   }
 
   function closePanels() {
@@ -114,10 +115,24 @@ export function mountChrome(opts) {
           )
           .join("")
       : `<option value="">Lease South land first</option>`;
+    const starters = play.leaseOptions || [];
+    const leaseBlock = leases.length
+      ? ""
+      : `<p>Lease a South street lot first. PAPER · SIMULATED.</p>
+        ${starters
+          .map(
+            (l) => `
+        <div class="sku-row">
+          <span><span class="band-dot ${l.band || "yellow"}"></span>${l.id} · ${l.band || ""}</span>
+          <button type="button" class="go" data-lease-plot="${l.id}">Lease ${money(l.price)}</button>
+        </div>`,
+          )
+          .join("")}`;
     body.innerHTML = `
       <p class="float-kicker">PAPER · SIMULATED · South island</p>
       <h2>Market</h2>
       <p>Order a crate. A van drives paved roads, drops it on the kerb, and drives away.</p>
+      ${leaseBlock}
       ${play.catalog
         .map(
           (s) => `
@@ -129,12 +144,32 @@ export function mountChrome(opts) {
         .join("")}
       <label>Deliver to</label>
       <select id="deliver-plot">${optsHtml}</select>
-      <div class="sku-row"><span></span><button type="button" class="go" id="btn-order">Order crate</button></div>
+      <div class="sku-row"><span></span><button type="button" class="go" id="btn-order" ${leases.length ? "" : "disabled"}>Order crate</button></div>
     `;
     body.querySelectorAll("[data-sku]").forEach((box) => {
       box.addEventListener("change", () => {
         if (box.getAttribute("data-sku") === "hotdog_cart") skuCart = box.checked;
         if (box.getAttribute("data-sku") === "hotdogs") skuDogs = box.checked;
+      });
+    });
+    body.querySelectorAll("[data-lease-plot]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const plotId = btn.getAttribute("data-lease-plot");
+        const { ok, data } = await readJson("/api/lease", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ plotId }),
+        });
+        if (!ok) {
+          if (opts.setStatus) opts.setStatus("Lease failed: " + (data && data.reason) + " · PAPER");
+          return;
+        }
+        if (data.play) play = data.play;
+        if (opts.onLeased && data.snapshot) opts.onLeased(data.snapshot);
+        paintTop();
+        paintPanels();
+        paintFootLegend();
+        if (opts.setStatus) opts.setStatus("Leased. Order a crate. PAPER.");
       });
     });
     const orderBtn = body.querySelector("#btn-order");
@@ -160,6 +195,26 @@ export function mountChrome(opts) {
         if (opts.setStatus) opts.setStatus("Van rolling. PAPER · SIMULATED.");
       });
     }
+  }
+
+  function paintFootLegend() {
+    const el = document.getElementById("foot-legend");
+    if (!el) return;
+    const roads = ((play && play.traffic && play.traffic.roads) || []).filter((r) => r.island === "south");
+    if (overlay !== "foot" || !roads.length) {
+      el.hidden = true;
+      el.innerHTML = "";
+      return;
+    }
+    el.hidden = false;
+    el.innerHTML =
+      `<p class="float-kicker">PAPER · SIMULATED · Foot traffic</p>` +
+      roads
+        .map(
+          (r) =>
+            `<div class="sku-row"><span><span class="band-dot ${r.band}"></span>${r.name || "Harbour Rd"}</span><strong>${(r.band || "").toUpperCase()}</strong></div>`,
+        )
+        .join("");
   }
 
   function paintInv() {
@@ -283,6 +338,7 @@ export function mountChrome(opts) {
     if (data && data.mode === "PAPER") {
       play = data;
       paintTop();
+      paintFootLegend();
       if (openPanel) paintPanels();
       if (opts.onPlay) opts.onPlay(play);
     }
