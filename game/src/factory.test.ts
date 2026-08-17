@@ -1535,3 +1535,106 @@ describe("factory PAPER kraft mallet", () => {
     expect(malletBoxes).toBeGreaterThanOrEqual(2);
   });
 });
+
+function factoryPaperGouges(root: THREE.Object3D) {
+  const out: THREE.Object3D[] = [];
+  root.traverse((obj) => {
+    if (obj.userData?.part === "gouge") {
+      out.push(obj);
+    }
+  });
+  return out;
+}
+
+describe("factory PAPER kraft gouge", () => {
+  it("puts one tiny kraft PAPER gouge on a factory bench; mallet, chisel, and file remain", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressFactory(scene);
+
+    const dress = interior.getObjectByName("factory-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+
+    const gouges = factoryPaperGouges(dress!);
+    expect(gouges.length).toBe(1);
+    const gouge = gouges[0];
+    expect(gouge.userData.part).toBe("gouge");
+    expect(gouge.userData.mode).toBe("PAPER");
+    expect(gouge.userData.kind).toBe("factory-paper-gouge");
+    expect(gouge.userData.part).not.toBe("mallet");
+    expect(gouge.userData.part).not.toBe("chisel");
+    expect(gouge.userData.part).not.toBe("file");
+    expect(gouge.userData.part).not.toBe("rasp");
+    expect(gouge.userData.part).not.toBe("awl");
+    expect(gouge.userData.part).not.toBe("shaving");
+    expect(gouge.userData.part).not.toBe("peg");
+    expect(gouge.userData.part).not.toBe("cork");
+    expect(gouge.userData.part).not.toBe("funnel");
+    expect(gouge.userData.part).not.toBe("oilcan");
+    expect(gouge.userData.part).not.toBe("rag");
+    expect(gouge.userData.part).not.toBe("rivet");
+    expect(gouge.userData.part).not.toBe("wrench");
+
+    expect(factoryPaperMallets(dress!).length).toBe(1);
+    expect(factoryPaperChisels(dress!).length).toBe(1);
+    expect(factoryPaperFiles(dress!).length).toBe(1);
+
+    const mallet = factoryPaperMallets(dress!)[0];
+    const chisel = factoryPaperChisels(dress!)[0];
+    const file = factoryPaperFiles(dress!)[0];
+    const rasp = factoryPaperRasps(dress!)[0];
+    const awl = factoryPaperAwls(dress!)[0];
+    const shaving = factoryPaperShavings(dress!)[0];
+    const peg = factoryPaperPegs(dress!)[0];
+    const cork = factoryPaperCorks(dress!)[0];
+    const funnel = factoryPaperFunnels(dress!)[0];
+    const can = factoryPaperOilcans(dress!)[0];
+    const rag = factoryRags(dress!)[0];
+    const rivet = factoryRivets(dress!)[0];
+    const wrench = factoryTools(dress!)[0];
+    const toMallet = Math.hypot(gouge.position.x - mallet.position.x, gouge.position.z - mallet.position.z);
+    const toChisel = Math.hypot(gouge.position.x - chisel.position.x, gouge.position.z - chisel.position.z);
+    const toFile = Math.hypot(gouge.position.x - file.position.x, gouge.position.z - file.position.z);
+    const toRasp = Math.hypot(gouge.position.x - rasp.position.x, gouge.position.z - rasp.position.z);
+    const toAwl = Math.hypot(gouge.position.x - awl.position.x, gouge.position.z - awl.position.z);
+    const toShaving = Math.hypot(gouge.position.x - shaving.position.x, gouge.position.z - shaving.position.z);
+    const toPeg = Math.hypot(gouge.position.x - peg.position.x, gouge.position.z - peg.position.z);
+    const toCork = Math.hypot(gouge.position.x - cork.position.x, gouge.position.z - cork.position.z);
+    const toFunnel = Math.hypot(gouge.position.x - funnel.position.x, gouge.position.z - funnel.position.z);
+    const toCan = Math.hypot(gouge.position.x - can.position.x, gouge.position.z - can.position.z);
+    const toRag = Math.hypot(gouge.position.x - rag.position.x, gouge.position.z - rag.position.z);
+    const toRivet = Math.hypot(gouge.position.x - rivet.position.x, gouge.position.z - rivet.position.z);
+    const toWrench = Math.hypot(gouge.position.x - wrench.position.x, gouge.position.z - wrench.position.z);
+    expect(toMallet).toBeGreaterThan(0.25);
+    expect(toChisel).toBeGreaterThan(0.25);
+    expect(toFile).toBeGreaterThan(0.25);
+    expect(toRasp).toBeGreaterThan(0.25);
+    expect(toAwl).toBeGreaterThan(0.25);
+    expect(toShaving).toBeGreaterThan(0.25);
+    expect(toPeg).toBeGreaterThan(0.25);
+    expect(toCork).toBeGreaterThan(0.25);
+    expect(toFunnel).toBeGreaterThan(0.25);
+    expect(toCan).toBeGreaterThan(0.25);
+    expect(toRag).toBeGreaterThan(0.25);
+    expect(toRivet).toBeGreaterThan(0.25);
+    expect(toWrench).toBeGreaterThan(0.25);
+
+    const gougeColors = hexes(gouge);
+    expect(gougeColors.length).toBeGreaterThan(0);
+    expect(gougeColors.some((c) => c === KRAFT)).toBe(true);
+    expect(gougeColors.every((c) => [KRAFT, 0x9a6a40, 0x6a4a32].includes(c))).toBe(true);
+
+    let gougeBoxes = 0;
+    gouge.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        gougeBoxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.mode).toBe("PAPER");
+      }
+    });
+    expect(gougeBoxes).toBeGreaterThanOrEqual(2);
+  });
+});

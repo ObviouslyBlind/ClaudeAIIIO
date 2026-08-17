@@ -632,6 +632,28 @@ function paperMallet(x, z, yaw = 0) {
 }
 
 /**
+ * Tiny kraft PAPER gouge: KRAFT handle, KRAFT_LIGHT blade. Boxes only.
+ * Sits on the wood bench — not the mallet, chisel, file, rasp, awl, shaving, peg, cork, funnel, oilcan, rag, rivet, or wrench.
+ */
+function paperGouge(x, z, yaw = 0) {
+  const g = new THREE.Group();
+  g.name = "factory-paper-gouge";
+  g.userData.kind = "factory-paper-gouge";
+  g.userData.mode = "PAPER";
+  g.userData.part = "gouge";
+  // Wood-bench top: y0 0.16 + 0.78, top half 0.04.
+  const sitY = 0.16 + 0.78 + 0.04;
+  g.position.set(x, sitY, z);
+  g.rotation.y = yaw;
+  const handle = paperBox(0.04, 0.018, 0.018, KRAFT, "factory-paper-gouge");
+  handle.position.set(-0.015, 0.01, 0);
+  const blade = paperBox(0.05, 0.012, 0.03, KRAFT_LIGHT, "factory-paper-gouge");
+  blade.position.set(0.028, 0.01, 0);
+  g.add(handle, blade);
+  return g;
+}
+
+/**
  * Small kraft/iron PAPER oil can: short box body, thinner spout.
  * Sits on the first workbench top — not a mill, not the hanging wrench.
  */
@@ -781,6 +803,8 @@ function makeFactoryDress() {
   // Wood-bench north-east. Off chisel, file, rasp, awl, shaving, peg, cork, funnel, oilcan, rag, rivet, wrench.
   // (3.52, -2.10) is past the rotated top and onto the hanging wrench; keep it on the wood.
   g.add(paperMallet(3.36, -0.28, 0.05));
+  // Wood-bench mid-east, between rasp and chisel. Off mallet, chisel, file, rasp, awl, shaving, peg, cork, funnel, oilcan, rag, rivet, wrench.
+  g.add(paperGouge(3.34, -1.16, 0.06));
   // Left wall, opposite the wood bench. Off the centre aisle (x≈0).
   g.add(scrapBin(-3.22, -2.62, 0.08));
   // Right wall, door side. Off the centre aisle (x≈0). Flat on the floor.
