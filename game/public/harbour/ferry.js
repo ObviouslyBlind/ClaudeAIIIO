@@ -484,6 +484,15 @@ export function makeFerry() {
   tiller.userData.mode = "PAPER";
   tiller.position.set(-18.4, 1.86, -3.5);
   g.add(tiller);
+  // Tiny kraft PAPER thimble on the aft cream deck. Kraft hex, one box, not
+  // grey. Clear of tiller/bitt/chock/stopper/plug/coaming/wedge/scupper/hatch/
+  // grommet/handle/bollard/lifering.
+  const thimble = part(0.08, 0.05, 0.08, 0xc4b496, false);
+  thimble.name = "thimble";
+  thimble.userData.part = "thimble";
+  thimble.userData.mode = "PAPER";
+  thimble.position.set(-14.0, 1.86, -4.5);
+  g.add(thimble);
 
   const cabin = part(16.5, 3.35, 7.6, CABIN);
   cabin.position.set(-2.4, 3.52, 0);
