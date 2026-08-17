@@ -1971,3 +1971,122 @@ describe("factory PAPER kraft clamp", () => {
     expect(clampBoxes).toBeGreaterThanOrEqual(2);
   });
 });
+
+function factoryPaperAdzes(root: THREE.Object3D) {
+  const out: THREE.Object3D[] = [];
+  root.traverse((obj) => {
+    if (obj.userData?.part === "adze") {
+      out.push(obj);
+    }
+  });
+  return out;
+}
+
+describe("factory PAPER kraft adze", () => {
+  it("puts one tiny kraft PAPER adze on a factory bench; clamp, vice, and plane remain", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressFactory(scene);
+
+    const dress = interior.getObjectByName("factory-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+
+    const adzes = factoryPaperAdzes(dress!);
+    expect(adzes.length).toBe(1);
+    const adze = adzes[0];
+    expect(adze.userData.part).toBe("adze");
+    expect(adze.userData.mode).toBe("PAPER");
+    expect(adze.userData.kind).toBe("factory-paper-adze");
+    expect(adze.userData.part).not.toBe("clamp");
+    expect(adze.userData.part).not.toBe("vice");
+    expect(adze.userData.part).not.toBe("plane");
+    expect(adze.userData.part).not.toBe("gouge");
+    expect(adze.userData.part).not.toBe("mallet");
+    expect(adze.userData.part).not.toBe("chisel");
+    expect(adze.userData.part).not.toBe("file");
+    expect(adze.userData.part).not.toBe("rasp");
+    expect(adze.userData.part).not.toBe("awl");
+    expect(adze.userData.part).not.toBe("shaving");
+    expect(adze.userData.part).not.toBe("peg");
+    expect(adze.userData.part).not.toBe("cork");
+    expect(adze.userData.part).not.toBe("funnel");
+    expect(adze.userData.part).not.toBe("oilcan");
+    expect(adze.userData.part).not.toBe("rag");
+    expect(adze.userData.part).not.toBe("rivet");
+    expect(adze.userData.part).not.toBe("wrench");
+
+    expect(factoryPaperClamps(dress!).length).toBe(1);
+    expect(factoryPaperVices(dress!).length).toBe(1);
+    expect(factoryPaperPlanes(dress!).length).toBe(1);
+
+    const clamp = factoryPaperClamps(dress!)[0];
+    const vice = factoryPaperVices(dress!)[0];
+    const plane = factoryPaperPlanes(dress!)[0];
+    const gouge = factoryPaperGouges(dress!)[0];
+    const mallet = factoryPaperMallets(dress!)[0];
+    const chisel = factoryPaperChisels(dress!)[0];
+    const file = factoryPaperFiles(dress!)[0];
+    const rasp = factoryPaperRasps(dress!)[0];
+    const awl = factoryPaperAwls(dress!)[0];
+    const shaving = factoryPaperShavings(dress!)[0];
+    const peg = factoryPaperPegs(dress!)[0];
+    const cork = factoryPaperCorks(dress!)[0];
+    const funnel = factoryPaperFunnels(dress!)[0];
+    const can = factoryPaperOilcans(dress!)[0];
+    const rag = factoryRags(dress!)[0];
+    const rivet = factoryRivets(dress!)[0];
+    const wrench = factoryTools(dress!)[0];
+    const toClamp = Math.hypot(adze.position.x - clamp.position.x, adze.position.z - clamp.position.z);
+    const toVice = Math.hypot(adze.position.x - vice.position.x, adze.position.z - vice.position.z);
+    const toPlane = Math.hypot(adze.position.x - plane.position.x, adze.position.z - plane.position.z);
+    const toGouge = Math.hypot(adze.position.x - gouge.position.x, adze.position.z - gouge.position.z);
+    const toMallet = Math.hypot(adze.position.x - mallet.position.x, adze.position.z - mallet.position.z);
+    const toChisel = Math.hypot(adze.position.x - chisel.position.x, adze.position.z - chisel.position.z);
+    const toFile = Math.hypot(adze.position.x - file.position.x, adze.position.z - file.position.z);
+    const toRasp = Math.hypot(adze.position.x - rasp.position.x, adze.position.z - rasp.position.z);
+    const toAwl = Math.hypot(adze.position.x - awl.position.x, adze.position.z - awl.position.z);
+    const toShaving = Math.hypot(adze.position.x - shaving.position.x, adze.position.z - shaving.position.z);
+    const toPeg = Math.hypot(adze.position.x - peg.position.x, adze.position.z - peg.position.z);
+    const toCork = Math.hypot(adze.position.x - cork.position.x, adze.position.z - cork.position.z);
+    const toFunnel = Math.hypot(adze.position.x - funnel.position.x, adze.position.z - funnel.position.z);
+    const toCan = Math.hypot(adze.position.x - can.position.x, adze.position.z - can.position.z);
+    const toRag = Math.hypot(adze.position.x - rag.position.x, adze.position.z - rag.position.z);
+    const toRivet = Math.hypot(adze.position.x - rivet.position.x, adze.position.z - rivet.position.z);
+    const toWrench = Math.hypot(adze.position.x - wrench.position.x, adze.position.z - wrench.position.z);
+    expect(toClamp).toBeGreaterThan(0.25);
+    expect(toVice).toBeGreaterThan(0.25);
+    expect(toPlane).toBeGreaterThan(0.25);
+    expect(toGouge).toBeGreaterThan(0.25);
+    expect(toMallet).toBeGreaterThan(0.25);
+    expect(toChisel).toBeGreaterThan(0.25);
+    expect(toFile).toBeGreaterThan(0.25);
+    expect(toRasp).toBeGreaterThan(0.25);
+    expect(toAwl).toBeGreaterThan(0.25);
+    expect(toShaving).toBeGreaterThan(0.25);
+    expect(toPeg).toBeGreaterThan(0.25);
+    expect(toCork).toBeGreaterThan(0.25);
+    expect(toFunnel).toBeGreaterThan(0.25);
+    expect(toCan).toBeGreaterThan(0.25);
+    expect(toRag).toBeGreaterThan(0.25);
+    expect(toRivet).toBeGreaterThan(0.25);
+    expect(toWrench).toBeGreaterThan(0.25);
+
+    const adzeColors = hexes(adze);
+    expect(adzeColors.length).toBeGreaterThan(0);
+    expect(adzeColors.some((c) => c === KRAFT)).toBe(true);
+    expect(adzeColors.every((c) => [KRAFT, 0x9a6a40, 0x6a4a32].includes(c))).toBe(true);
+
+    let adzeBoxes = 0;
+    adze.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        adzeBoxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.mode).toBe("PAPER");
+      }
+    });
+    expect(adzeBoxes).toBeGreaterThanOrEqual(2);
+  });
+});
