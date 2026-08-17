@@ -415,6 +415,22 @@ function basinClay() {
   return g;
 }
 
+/** Ped-green crate on the camera-facing cream hull. Clay round stopped:
+ *  terracotta in the dinghy channel unread. Same slot family as buoy70
+ *  (rust on cream passed). 0x6a8f44 already passed as a pier shirt.
+ *  x+5.2 sits right of the held buoy, left of the wheelhouse (local x 6–11). */
+function hullGreen() {
+  const g = new THREE.Group();
+  g.userData.dress = "green";
+  g.userData.mode = "PAPER";
+
+  const body = part(6.2, 8.2, 6.2, 0x6a8f44);
+  body.userData.part = "body";
+  g.add(body);
+
+  return g;
+}
+
 /** Crate with a canvas tarp lashed over it. */
 function canvasCrate() {
   const g = new THREE.Group();
@@ -654,6 +670,13 @@ export function makeQuay(spec, helpers) {
     const clay = basinClay();
     clay.position.set(x, 4.2, z + toward * 108);
     root.add(clay);
+
+    /** /g/clay85 FAIL CLAY: dinghy-deep terracotta still unread in the
+     *  sage channel. Round stopped. Ped-green on the cream hull, right
+     *  of the held rust buoy, left of the wheelhouse. */
+    const green = hullGreen();
+    green.position.set(x + 5.2, 5.4, z + toward * 116);
+    root.add(green);
 
     // Extra kraft stack on the north timber, west of the walk, short of the brow.
     const stackN = crateStack();

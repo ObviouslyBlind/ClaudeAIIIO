@@ -174,7 +174,11 @@ Pixel: **terracotta basin crate** at `http://localhost:8787/g/clay84`. Ped-shirt
 
 Pixel: **terracotta basin crate** at `http://localhost:8787/g/clay85`. Ped-shirt terracotta block in the center water, seaward of the pier cargo, in front of the cream ferry. No RMB. Address bar must be `/g/clay85`. Do not restart play while the critic is on the page.
 
-## Next pixel (after clay85 PASS, immediately, no wait)
+`/g/clay85` **FAIL CLAY**: sage dinghies in frame; no terracotta mass. **Clay round stopped.** Code stays; not pixel-held.
+
+Pixel: **green hull crate** at `http://localhost:8787/g/green86`. Ped-shirt green cube on the camera-facing cream hull, right of the held rust buoy. No RMB. Address bar must be `/g/green86`. Do not restart play while the critic is on the page.
+
+## Next pixel (after green86 PASS, immediately, no wait)
 
 ## Frozen
 
