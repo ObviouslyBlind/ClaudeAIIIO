@@ -85,7 +85,7 @@ function labelGood(g) {
   return String(g).replace(/_/g, " ");
 }
 
-/** Visible PAPER market stand: deck, posts, price board, striped awning, counter, crates, hanging scale, produce basket, oil lantern, melon, kraft cone, hanging fish, ground crate, kraft price slate, kraft stool, kraft cup, kraft knife, kraft napkin, kraft plate, kraft lemon, kraft lime, kraft orange, kraft banana, kraft pear, kraft grape, kraft peach. */
+/** Visible PAPER market stand: deck, posts, price board, striped awning, counter, crates, hanging scale, produce basket, oil lantern, melon, kraft cone, hanging fish, ground crate, kraft price slate, kraft stool, kraft cup, kraft knife, kraft napkin, kraft plate, kraft lemon, kraft lime, kraft orange, kraft banana, kraft pear, kraft grape, kraft peach, kraft mango, kraft kiwi. */
 export function makeStallMesh(plot) {
   const g = new THREE.Group();
   g.name = "npc-stall";
@@ -672,6 +672,28 @@ export function makeStallMesh(plot) {
     stem.userData.part = "mango";
     mango.add(body, stem);
     g.add(mango);
+  }
+
+  // One tiny kraft PAPER kiwi on the counter so the stall reads as a
+  // working stand, not only produce. Kraft body + wood stem. Local
+  // offset only — stall world pose stays put. PAPER boxes. Existing
+  // hexes. Offset from mango, peach, grape, pear, banana, orange, lime,
+  // lemon, plate, napkin, knife, cup, stool, melon, cone, goods-crate.
+  if (!g.children.some((c) => c.userData.part === "kiwi")) {
+    const kiwi = new THREE.Group();
+    kiwi.name = "kiwi";
+    kiwi.userData.part = "kiwi";
+    kiwi.userData.mode = "PAPER";
+    kiwi.userData.paper = true;
+    kiwi.position.set(-0.52, 0.9, 1.22);
+    const body = paperBox(0.06, 0.055, 0.06, KRAFT, false);
+    body.position.y = 0.028;
+    body.userData.part = "kiwi";
+    const stem = paperBox(0.015, 0.02, 0.015, WOOD, false);
+    stem.position.y = 0.065;
+    stem.userData.part = "kiwi";
+    kiwi.add(body, stem);
+    g.add(kiwi);
   }
 
   const back = paperBox(3.9, 1.6, 0.12, PLASTER);
