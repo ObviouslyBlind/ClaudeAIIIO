@@ -57,8 +57,8 @@ describe("harbour PAPER taxi fare hint", () => {
     expect(formatTaxiHint(MAP, false)).toBe("");
   });
 
-  it("is active when the taxi button is on or the map overlay is up", () => {
-    expect(isTaxiHintActive({ disabled: false }, { hidden: true })).toBe(true);
+  it("is active only when the taxi map overlay is up, not because Taxi exists", () => {
+    expect(isTaxiHintActive({ disabled: false }, { hidden: true })).toBe(false);
     expect(isTaxiHintActive({ disabled: true }, { hidden: false })).toBe(true);
     expect(isTaxiHintActive({ disabled: true }, { hidden: true })).toBe(false);
   });

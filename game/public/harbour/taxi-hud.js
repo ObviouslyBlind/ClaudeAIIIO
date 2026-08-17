@@ -1,7 +1,7 @@
 /**
  * Harbour PAPER taxi fare hint on the sheet.
- * When #btn-taxi is enabled or #taxi-map is up, paint
- * "Taxi · PAPER · $5 · dirt forbidden".
+ * When #taxi-map is up, paint "Taxi · PAPER · $5 · dirt forbidden".
+ * Spawn does not paint the fare just because Taxi exists (`/g/hud107`).
  * Fare from GET /api/map if present, else 5. PAPER / SIMULATED. Never a wallet.
  */
 
@@ -55,10 +55,9 @@ export function fareOf(data) {
   return FALLBACK_FARE;
 }
 
+/** Fare hint only while the taxi map is open. The Taxi button stays enabled at spawn. */
 export function isTaxiHintActive(btn, overlay) {
-  const btnOn = Boolean(btn && !btn.disabled);
-  const overlayOn = Boolean(overlay && overlay.hidden === false);
-  return btnOn || overlayOn;
+  return Boolean(overlay && overlay.hidden === false);
 }
 
 export function formatTaxiHint(data, active) {

@@ -44,7 +44,11 @@ Loop is **live** on playtest bugs (operator: “so many bugs, use the gauntlet�
 
 `/g/mkt108` **PASS MARKET**: dock Market → Buy 1 corn, cash $1,000.00 → $999.73, held 0 → 1, PAPER · SIMULATED · not the 3D harbour. Unique `/g/mkt108`.
 
-`/g/persist109` **FAIL PERSIST**: Restore posted (status `Not Postgres. Does not restart play.`) but persist-line snapped back to `tick · $` because the 1 s dump poll cleared `restored` (D046). Re-critic `/g/persist110`.
+`/g/persist109` **FAIL PERSIST**: Restore posted (status `Not Postgres. Does not restart play.`) but persist-line snapped back to `tick · $` because the 1 s dump poll cleared `restored` (D046).
+
+`/g/persist110` **PASS PERSIST**: Restore enabled on a dump; after 2 s persist-line still `PAPER · SIMULATED · restored · tick · $1,000`. Unique `/g/persist110`.
+
+Next: quiet the spawn taxi hint (always-on `$5 · dirt forbidden`), then nearby meshes / perf pass.
 
 One **pixel critic** at a time. Unique `/g/…` path. No RMB. Do not restart play while a critic is on the page.
 
