@@ -166,6 +166,10 @@ Pixel: **rust hull stripe** at `http://localhost:8787/g/plate81`. Wide rust band
 
 Pixel: **teal pier crate** at `http://localhost:8787/g/teal82`. Ped-shirt teal cube on the north timber, east of the walk. No RMB. Address bar must be `/g/teal82`. Do not restart play while the critic is on the page.
 
+Critic **in flight** on `/g/teal82` (play restarted after plate81; JS serves `pierTeal()`). Do not restart play until that critic finishes.
+
+Stash-pop conflict markers on harbour extras were resolved by keeping HEAD (`842a570f`). House stoop already existed — no duplicate.
+
 ## Next pixel (after teal82 PASS, immediately, no wait)
 
 ## Frozen
