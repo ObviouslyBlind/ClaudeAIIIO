@@ -196,4 +196,13 @@ describe("harbour land board", () => {
     expect(standingOnParcel(insideX, insideZ, field)).toBe(true);
     expect(standingOnParcel(0, 0, field)).toBe(false);
   });
+  it("names every lot as a house number on the street it fronts", () => {
+    const board = createLandBoard();
+    expect(board.plots.every((p) => /^\d+ .+$/.test(p.name))).toBe(true);
+    expect(board.plots.some((p) => p.street === "Harbour Rd")).toBe(true);
+    expect(board.plots.some((p) => p.street === "Mill St")).toBe(true);
+    const mill = board.plots.filter((p) => p.street === "Mill St");
+    expect(mill.length).toBeGreaterThan(0);
+    expect(mill.every((p) => p.name.endsWith("Mill St"))).toBe(true);
+  });
 });

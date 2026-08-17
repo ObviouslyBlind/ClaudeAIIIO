@@ -1,14 +1,15 @@
 # Two Harbors
 
-Fable 5 harbour + kernel K.1. PAPER / SIMULATED. No wallet.
+Fable 5 harbour with the South first-loop HUD (PR #32). PAPER / SIMULATED. No wallet.
 
 ```bash
+cd game
 npm install
 npm test
 npm run play
-npm run play:public   # https link for a laptop / phone
+npm run play:laptop   # https link for a laptop / phone
 ```
 
-Tap land → Lease → Develop. Taxi on paved. Ferry $15. Minerals lists ore. Restart wipes.
+South spawn. Left-click walks. Click a **$ tag** to lease. Foot traffic / logistics overlays. Van drops on the kerb. Restart wipes.
 
-[PLAN](PLAN.md) · [FOUNDATION](FOUNDATION.md) · [LAND](LAND.md) · [BACKEND](BACKEND.md) · [Fable 5](reports/FABLE5_NOTES.md)
+[PLAN](PLAN.md) · [FOUNDATION](FOUNDATION.md) · [FIRST_LOOP](reports/FIRST_LOOP.md)

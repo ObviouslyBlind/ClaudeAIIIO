@@ -23,5 +23,5 @@ This repo is the harbour game. One shard. The sim owns cash, plots, staff, and p
 - Restart the pixel-critic swarm
 
 ## Play
-`cd game && npm run play` then `npm run play:public` for a laptop/phone URL.
-Restart wipes.
+`cd game && npm run play` then `npm run play:laptop` for a laptop/phone URL.
+South spawn. Click a $ tag to lease. Restart wipes.

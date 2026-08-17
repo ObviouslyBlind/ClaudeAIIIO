@@ -127,9 +127,15 @@ function drawRibbon(scene, spec, road, heightAt, widthM, color, roadKind, matOpt
   const m = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ color, ...matOpts }));
   m.castShadow = false;
   m.receiveShadow = true;
-  m.userData.kind = "ground";
+  const roadName = road.name || (roadKind === "paved" ? "Harbour Rd" : "dirt track");
+  m.name = `road:${road.island}:${roadName}`;
+  m.userData.kind = "road";
+  m.userData.label = roadName;
+  m.userData.island = road.island;
   m.userData.roadKind = roadKind;
+  m.userData.roadName = roadName;
   m.userData.widthM = widthM;
+  m.userData.mode = "PAPER";
   scene.add(m);
 }
 

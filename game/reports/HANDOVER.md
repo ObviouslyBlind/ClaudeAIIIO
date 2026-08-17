@@ -1,18 +1,14 @@
 # Two Harbors handover
 
-Fable 5 harbour + kernel K.1. PAPER / SIMULATED. No wallet.
+Play surface is **PR #32 South first-loop** on the Fable 5 harbour. PAPER / SIMULATED.
 
-Kernel: [FOUNDATION.md](../FOUNDATION.md). Fable 5: [FABLE5_NOTES.md](FABLE5_NOTES.md).
-
-## Play
+South spawn. Left-click walks. Click a **$ tag** to lease. Foot traffic / logistics. Van on the kerb. Restart wipes.
 
 ```bash
 cd game
 npm test
 npm run play
-npm run play:public
+npm run play:laptop
 ```
-
-Tap to walk. Taxi on paved. Ferry $15. Restart wipes. Politics frozen.
 
 Draft PR: https://github.com/ObviouslyBlind/ClaudeAIIIO/pull/33
