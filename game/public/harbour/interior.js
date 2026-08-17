@@ -373,6 +373,21 @@ function makeCruet(x, y, z) {
   return g;
 }
 
+/** Tiny kraft PAPER goblet on the table — wood foot, plaster bowl, linen rim. Boxes only. */
+function makeGoblet(x, y, z) {
+  const g = new THREE.Group();
+  g.name = "goblet";
+  g.userData.kind = "interior-goblet";
+  g.userData.mode = "PAPER";
+  g.userData.part = "goblet";
+  g.position.set(x, y, z);
+  const paper = { mode: "PAPER", part: "goblet" };
+  g.add(box(0.026, 0.006, 0.026, WOOD, 0, 0.003, 0, "interior-goblet", paper));
+  g.add(box(0.032, 0.042, 0.032, PLASTER, 0, 0.027, 0, "interior-goblet", paper));
+  g.add(box(0.018, 0.008, 0.018, LINEN, 0, 0.052, 0, "interior-goblet", paper));
+  return g;
+}
+
 /** Tiny kraft PAPER saucer on the table — wood rim, plaster well, linen center. Boxes only. */
 function makeSaucer(x, y, z) {
   const g = new THREE.Group();
@@ -574,7 +589,7 @@ function makeBed(cx, floorY, cz) {
 
 /**
  * PAPER Caribbean house: plaster walls, wood floors, window openings,
- * downstairs table/chairs/stool/lamp/clock/picture/vase/mug/saucer/bowl/pitcher/tray/crock/tureen/platter/cruet/book/napkin/spoon/fork/knife/plate/cup, upstairs bed. Low-poly boxes only.
+ * downstairs table/chairs/stool/lamp/clock/picture/vase/mug/saucer/bowl/pitcher/tray/crock/tureen/platter/cruet/goblet/book/napkin/spoon/fork/knife/plate/cup, upstairs bed. Low-poly boxes only.
  */
 export function makeInteriorScene() {
   const group = new THREE.Group();
@@ -642,6 +657,8 @@ export function makeInteriorScene() {
   down.add(makePlatter(0.66, 0.955, -0.2));
   // Kraft PAPER cruet on the table top — offset from platter, tureen, crock, tray, pitcher, bowl.
   down.add(makeCruet(-0.04, 0.955, -0.82));
+  // Kraft PAPER goblet on the table top — offset from bowl, pitcher, tray, crock, tureen, platter, cruet, saucer, mug, napkin, spoon, fork, knife, plate, cup.
+  down.add(makeGoblet(0.5, 0.955, -0.75));
   // Kraft PAPER book on the table top — offset from the mug and vase.
   down.add(makeBook(-0.05, 0.955, 0.08));
   // Kraft PAPER napkin on the table top — offset from the mug, vase, and book.
