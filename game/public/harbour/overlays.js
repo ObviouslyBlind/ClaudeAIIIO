@@ -135,6 +135,7 @@ function bandRibbon(spec, road, heightAt, color) {
 }
 
 function roadLabelSprite(text, x, y, z) {
+  if (typeof document === "undefined") return null;
   const canvas = document.createElement("canvas");
   canvas.width = 256;
   canvas.height = 64;
@@ -199,14 +200,13 @@ export function createOverlays({ scene, heightAt, specOf, getMap }) {
       if (ribbon) group.add(ribbon);
       const mid = roadMid(road);
       const name = road.name || "Harbour Rd";
-      group.add(
-        roadLabelSprite(
-          `${name} · ${band.toUpperCase()}`,
-          mid.x,
-          heightAt(spec, mid.x, mid.z),
-          mid.z,
-        ),
+      const spr = roadLabelSprite(
+        `${name} · ${band.toUpperCase()}`,
+        mid.x,
+        heightAt(spec, mid.x, mid.z),
+        mid.z,
       );
+      if (spr) group.add(spr);
     }
   }
 
