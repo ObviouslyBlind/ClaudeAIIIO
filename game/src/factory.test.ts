@@ -1856,3 +1856,118 @@ describe("factory PAPER kraft vice", () => {
     expect(viceBoxes).toBeGreaterThanOrEqual(2);
   });
 });
+
+function factoryPaperClamps(root: THREE.Object3D) {
+  const out: THREE.Object3D[] = [];
+  root.traverse((obj) => {
+    if (obj.userData?.part === "clamp") {
+      out.push(obj);
+    }
+  });
+  return out;
+}
+
+describe("factory PAPER kraft clamp", () => {
+  it("puts one tiny kraft PAPER clamp on a factory bench; vice, plane, and gouge remain", () => {
+    const scene = new THREE.Scene();
+    const interior = makeInteriorScene();
+    scene.add(interior);
+    dressFactory(scene);
+
+    const dress = interior.getObjectByName("factory-dress");
+    expect(dress).toBeTruthy();
+    expect(dress!.userData.mode).toBe("PAPER");
+
+    const clamps = factoryPaperClamps(dress!);
+    expect(clamps.length).toBe(1);
+    const clamp = clamps[0];
+    expect(clamp.userData.part).toBe("clamp");
+    expect(clamp.userData.mode).toBe("PAPER");
+    expect(clamp.userData.kind).toBe("factory-paper-clamp");
+    expect(clamp.userData.part).not.toBe("vice");
+    expect(clamp.userData.part).not.toBe("plane");
+    expect(clamp.userData.part).not.toBe("gouge");
+    expect(clamp.userData.part).not.toBe("mallet");
+    expect(clamp.userData.part).not.toBe("chisel");
+    expect(clamp.userData.part).not.toBe("file");
+    expect(clamp.userData.part).not.toBe("rasp");
+    expect(clamp.userData.part).not.toBe("awl");
+    expect(clamp.userData.part).not.toBe("shaving");
+    expect(clamp.userData.part).not.toBe("peg");
+    expect(clamp.userData.part).not.toBe("cork");
+    expect(clamp.userData.part).not.toBe("funnel");
+    expect(clamp.userData.part).not.toBe("oilcan");
+    expect(clamp.userData.part).not.toBe("rag");
+    expect(clamp.userData.part).not.toBe("rivet");
+    expect(clamp.userData.part).not.toBe("wrench");
+
+    expect(factoryPaperVices(dress!).length).toBe(1);
+    expect(factoryPaperPlanes(dress!).length).toBe(1);
+    expect(factoryPaperGouges(dress!).length).toBe(1);
+
+    const vice = factoryPaperVices(dress!)[0];
+    const plane = factoryPaperPlanes(dress!)[0];
+    const gouge = factoryPaperGouges(dress!)[0];
+    const mallet = factoryPaperMallets(dress!)[0];
+    const chisel = factoryPaperChisels(dress!)[0];
+    const file = factoryPaperFiles(dress!)[0];
+    const rasp = factoryPaperRasps(dress!)[0];
+    const awl = factoryPaperAwls(dress!)[0];
+    const shaving = factoryPaperShavings(dress!)[0];
+    const peg = factoryPaperPegs(dress!)[0];
+    const cork = factoryPaperCorks(dress!)[0];
+    const funnel = factoryPaperFunnels(dress!)[0];
+    const can = factoryPaperOilcans(dress!)[0];
+    const rag = factoryRags(dress!)[0];
+    const rivet = factoryRivets(dress!)[0];
+    const wrench = factoryTools(dress!)[0];
+    const toVice = Math.hypot(clamp.position.x - vice.position.x, clamp.position.z - vice.position.z);
+    const toPlane = Math.hypot(clamp.position.x - plane.position.x, clamp.position.z - plane.position.z);
+    const toGouge = Math.hypot(clamp.position.x - gouge.position.x, clamp.position.z - gouge.position.z);
+    const toMallet = Math.hypot(clamp.position.x - mallet.position.x, clamp.position.z - mallet.position.z);
+    const toChisel = Math.hypot(clamp.position.x - chisel.position.x, clamp.position.z - chisel.position.z);
+    const toFile = Math.hypot(clamp.position.x - file.position.x, clamp.position.z - file.position.z);
+    const toRasp = Math.hypot(clamp.position.x - rasp.position.x, clamp.position.z - rasp.position.z);
+    const toAwl = Math.hypot(clamp.position.x - awl.position.x, clamp.position.z - awl.position.z);
+    const toShaving = Math.hypot(clamp.position.x - shaving.position.x, clamp.position.z - shaving.position.z);
+    const toPeg = Math.hypot(clamp.position.x - peg.position.x, clamp.position.z - peg.position.z);
+    const toCork = Math.hypot(clamp.position.x - cork.position.x, clamp.position.z - cork.position.z);
+    const toFunnel = Math.hypot(clamp.position.x - funnel.position.x, clamp.position.z - funnel.position.z);
+    const toCan = Math.hypot(clamp.position.x - can.position.x, clamp.position.z - can.position.z);
+    const toRag = Math.hypot(clamp.position.x - rag.position.x, clamp.position.z - rag.position.z);
+    const toRivet = Math.hypot(clamp.position.x - rivet.position.x, clamp.position.z - rivet.position.z);
+    const toWrench = Math.hypot(clamp.position.x - wrench.position.x, clamp.position.z - wrench.position.z);
+    expect(toVice).toBeGreaterThan(0.25);
+    expect(toPlane).toBeGreaterThan(0.25);
+    expect(toGouge).toBeGreaterThan(0.25);
+    expect(toMallet).toBeGreaterThan(0.25);
+    expect(toChisel).toBeGreaterThan(0.25);
+    expect(toFile).toBeGreaterThan(0.25);
+    expect(toRasp).toBeGreaterThan(0.25);
+    expect(toAwl).toBeGreaterThan(0.25);
+    expect(toShaving).toBeGreaterThan(0.25);
+    expect(toPeg).toBeGreaterThan(0.25);
+    expect(toCork).toBeGreaterThan(0.25);
+    expect(toFunnel).toBeGreaterThan(0.25);
+    expect(toCan).toBeGreaterThan(0.25);
+    expect(toRag).toBeGreaterThan(0.25);
+    expect(toRivet).toBeGreaterThan(0.25);
+    expect(toWrench).toBeGreaterThan(0.25);
+
+    const clampColors = hexes(clamp);
+    expect(clampColors.length).toBeGreaterThan(0);
+    expect(clampColors.some((c) => c === KRAFT)).toBe(true);
+    expect(clampColors.every((c) => [KRAFT, 0x9a6a40, 0x6a4a32].includes(c))).toBe(true);
+
+    let clampBoxes = 0;
+    clamp.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        clampBoxes += 1;
+        expect(mesh.geometry.type).toBe("BoxGeometry");
+        expect(mesh.userData.mode).toBe("PAPER");
+      }
+    });
+    expect(clampBoxes).toBeGreaterThanOrEqual(2);
+  });
+});
