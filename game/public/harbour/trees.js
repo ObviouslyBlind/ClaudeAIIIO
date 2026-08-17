@@ -1572,6 +1572,78 @@ function plantNorthPortBloom(root) {
   root.add(bloom);
 }
 
+function markCatkin(mesh) {
+  mesh.userData.part = "catkin";
+  mesh.userData.dress = "catkin";
+  mesh.userData.mode = "PAPER";
+  mesh.userData.provenance = "PAPER";
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+}
+
+/**
+ * One tiny kraft PAPER catkin (one box) on a north-port palm trunk —
+ * not instead of the bloom, bud, sap, acorn, needle, lichen, moss, knot,
+ * bark, twig, vine, husk, frond, leaf, coconut, bird, nest, or egg. Hexes
+ * already in this file: trunk kraft. Reuses the nest twig box so
+ * geometry count stays put. Unique mesh — one box — so the phone mesh
+ * budget stays tiny. Trunks, leaves, coconuts, bird, nest, egg, leaf,
+ * frond, husk, vine, twig, bark, knot, moss, lichen, needle, acorn,
+ * sap, bud, and bloom stay put.
+ */
+function plantNorthPortCatkin(root) {
+  const placed = root.userData.placed || [];
+  const sites = placed.filter((p) => p.island === "north" && p.dress === "north-port-palm");
+  if (!sites.length) return;
+
+  let nest = null;
+  root.traverse((obj) => {
+    if (!nest && obj.userData.kind === "nest") nest = obj;
+  });
+  if (!nest) return;
+
+  let geo = null;
+  nest.traverse((obj) => {
+    if (geo) return;
+    if (obj.isMesh && obj.geometry && obj.userData.part === "nest") geo = obj.geometry;
+  });
+  if (!geo) return;
+
+  const nestPos = new THREE.Vector3();
+  nest.getWorldPosition(nestPos);
+  let p = sites[0];
+  let best = Infinity;
+  for (const s of sites) {
+    const d = Math.hypot(s.x - nestPos.x, s.z - nestPos.z);
+    if (d < best) {
+      best = d;
+      p = s;
+    }
+  }
+
+  const mat = new THREE.MeshLambertMaterial({ color: TRUNK });
+  const catkin = new THREE.Group();
+  catkin.name = "catkin";
+  catkin.userData.kind = "catkin";
+  catkin.userData.part = "catkin";
+  catkin.userData.dress = "catkin";
+  catkin.userData.mode = "PAPER";
+  catkin.userData.provenance = "PAPER";
+  // Sit on the palm trunk, offset from bloom, bud, sap, acorn, needle, lichen, moss, knot, bark.
+  const yaw = 4.55;
+  const rad = 0.22;
+  catkin.position.set(p.x + Math.cos(yaw) * rad, p.y + 3.92, p.z + Math.sin(yaw) * rad);
+  catkin.rotation.set(-0.22, yaw, 0.3);
+
+  const box = new THREE.Mesh(geo, mat);
+  box.name = "catkin-box";
+  markCatkin(box);
+  box.scale.set(0.18, 0.4, 0.2);
+
+  catkin.add(box);
+  root.add(catkin);
+}
+
 /**
  * Low-poly PAPER trees on hills, inland slopes, and behind street lots.
  * Palms stay on the quay (makePalms). helpers: { scene, specOf, heightAt }.
@@ -1608,6 +1680,7 @@ export function makeTrees(map, helpers) {
   plantNorthPortSap(root);
   plantNorthPortBud(root);
   plantNorthPortBloom(root);
+  plantNorthPortCatkin(root);
   scene.add(root);
   return root;
 }
