@@ -146,7 +146,11 @@ Pixel: **rust cargo** at `http://localhost:8787/g/cargo76`. Buoy-class rust cube
 
 Pixel: **rust cargo** at `http://localhost:8787/g/cargo77`. Buoy-class rust cube on the north timber pier lip, east of the walk, between beige deck and cream ferry. No RMB. Address bar must be `/g/cargo77`. Do not restart play while the critic is on the page.
 
-## Next pixel (after cargo77 PASS, immediately, no wait)
+`/g/cargo77` **FAIL CARGO**: beige pier, NPCs, cream ferry in frame; no rust cube on the deck. Kraft cap on the 8 m cube read as more decking from the downward spawn camera. Cargo is now a pier-wide rust slab (rust TOP, no kraft cap) on the centre lip.
+
+Pixel: **rust cargo** at `http://localhost:8787/g/cargo78`. Pier-wide rust slab on the north timber, seaward lip, centre of the walk. No RMB. Address bar must be `/g/cargo78`. Do not restart play while the critic is on the page.
+
+## Next pixel (after cargo78 PASS, immediately, no wait)
 
 ## Frozen
 

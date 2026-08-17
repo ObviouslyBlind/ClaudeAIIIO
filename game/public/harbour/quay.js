@@ -342,17 +342,20 @@ function basinCargo() {
   g.userData.dress = "cargo";
   g.userData.mode = "PAPER";
 
-  const body = part(8.2, 8.4, 8.2, 0x6e2e22);
+  /** /g/cargo77 FAIL CARGO: 8 m cube at x+4.2 had a kraft cap, so the
+   *  downward spawn camera read it as more beige decking. Rust TOP, pier-wide. */
+  const body = part(12, 6.4, 16, 0x6e2e22);
   body.userData.part = "body";
   g.add(body);
 
-  const band = part(8.6, 1.6, 8.6, 0xc4b496, false);
-  band.position.y = 1.2;
+  const band = part(12.4, 1.4, 16.4, 0xc4b496, false);
+  band.position.y = 0;
   g.add(band);
 
-  const cap = part(6.8, 0.8, 6.8, 0x8a6238, false);
-  cap.position.y = 4.4;
-  g.add(cap);
+  const top = part(12.4, 0.5, 16.4, 0x6e2e22, false);
+  top.userData.part = "top";
+  top.position.y = 3.2;
+  g.add(top);
 
   return g;
 }
@@ -573,11 +576,10 @@ export function makeQuay(spec, helpers) {
     funnel.position.set(x, 32.0, z + toward * 116);
     root.add(funnel);
 
-    /** /g/cargo76 FAIL CARGO: cube at pierZ+26 (z≈-6886) sat on the spawn
-     *  camera (z=-6888) and clipped out of the first frame. Park it on the
-     *  seaward lip, east of the walk, in the photographed pier band. */
+    /** /g/cargo77 FAIL CARGO: east-of-walk kraft-capped cube still unread.
+     *  Pier-wide rust slab on the centre lip so the overhead frame is rust. */
     const cargo = basinCargo();
-    cargo.position.set(x + 4.2, deckY + 4.2, pierZ + toward * 38);
+    cargo.position.set(x, deckY + 3.2, pierZ + toward * 40);
     root.add(cargo);
 
     // Extra kraft stack on the north timber, west of the walk, short of the brow.
