@@ -180,7 +180,7 @@ Pixel: **green hull crate** at `http://localhost:8787/g/green86`. Ped-shirt gree
 
 `/g/green86` **FAIL GREEN**: no green cube on the hull; x+5.2 sat in the wheelhouse. Block is now dinghy-deep, stacked above the held sage hulls in the center channel.
 
-`/g/green87` **paused**. Operator asked to playtest. Live `/` is inland spawn again. Unread giant extras (brow / plate / ring / funnel / cargo / teal / clay / green) are off the quay.
+`/g/green87` **FAIL GREEN**: first frame still only sage dinghies, cream ferry, beige pier, and a tiny green shirt. No large distinct green mass in the basin. **Green round stopped.** Code is off the live quay (playtest restore); not pixel-held.
 
 ## Playtest (2026-08-17)
 
