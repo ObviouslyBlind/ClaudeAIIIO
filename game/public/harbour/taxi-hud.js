@@ -111,7 +111,8 @@ export function mountTaxiHud(opts = {}) {
 
   function paint() {
     if (!el) return;
-    el.textContent = formatTaxiHint(lastData, active());
+    const next = formatTaxiHint(lastData, active());
+    if (el.textContent !== next) el.textContent = next;
   }
 
   async function refresh() {

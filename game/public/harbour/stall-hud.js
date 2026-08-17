@@ -126,7 +126,8 @@ export function mountStallHud(opts = {}) {
 
   function paint() {
     if (!el) return;
-    el.textContent = formatStallHint(lastData, active(), goodOf(statusEl, el));
+    const next = formatStallHint(lastData, active(), goodOf(statusEl, el));
+    if (el.textContent !== next) el.textContent = next;
   }
 
   async function refresh() {

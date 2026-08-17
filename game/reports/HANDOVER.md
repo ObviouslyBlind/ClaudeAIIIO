@@ -8,9 +8,9 @@ This is a PAPER / SIMULATED harbour game in `/workspace/game`. The Polymarket pa
 
 Operator came back to **playtest**. Bar is **`http://localhost:8787/`**, inland spawn, walkable harbour.
 
-Gauntlet live. `/g/south99` FAIL SOUTH (dressing freeze). D040: no delayed dressing. Next `/g/south100`.
+Gauntlet live. `/g/south100` FAIL SOUTH — real freeze was the ferry-hint body observer loop (D042), not module compiles. Next `/g/south101`.
 
-Last playtest fix: D041 — trickle dressing (cars/ferry/quay/foam return one step at a time, pausing for clicks). D040 killed the burst timer that froze tabs. D039 ferry landfall builds south. D038 cheap street lots. D037 taxi + short pier. D036 no auto trees.
+Last playtest fix: D042 — ferry-hint observer loop killed (the real "Page Unresponsive"). D041 trickle dressing. D040 no burst timer. D039 ferry landfall builds south. D038 cheap street lots. D037 taxi + short pier. D036 no auto trees.
 
 ## Play
 

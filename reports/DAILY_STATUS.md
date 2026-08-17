@@ -2,7 +2,7 @@
 
 ## 2026-08-17 (latest)
 
-**Current status:** D041 trickle dressing (cars/ferry/quay/foam return, click-safe). D040 killed the freeze timer. Next `/g/south100`, then a dressing critic. PAPER / SIMULATED. Politics frozen.
+**Current status:** D042 — the real freeze was a ferry-hint MutationObserver loop, now killed. D041 trickle dressing live. Next `/g/south101`. PAPER / SIMULATED. Politics frozen.
 
 ## 2026-08-16
 
