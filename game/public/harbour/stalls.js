@@ -85,7 +85,7 @@ function labelGood(g) {
   return String(g).replace(/_/g, " ");
 }
 
-/** Visible PAPER market stand: deck, posts, price board, striped awning, counter, crates, hanging scale, produce basket, oil lantern, melon, kraft cone, hanging fish, ground crate, kraft price slate, kraft stool, kraft cup, kraft knife, kraft napkin, kraft plate, kraft lemon, kraft lime, kraft orange, kraft banana, kraft pear, kraft grape, kraft peach, kraft mango, kraft kiwi, kraft cherry. */
+/** Visible PAPER market stand: deck, posts, price board, striped awning, counter, crates, hanging scale, produce basket, oil lantern, melon, kraft cone, hanging fish, ground crate, kraft price slate, kraft stool, kraft cup, kraft knife, kraft napkin, kraft plate, kraft lemon, kraft lime, kraft orange, kraft banana, kraft pear, kraft grape, kraft peach, kraft mango, kraft kiwi, kraft cherry, kraft nectarine. */
 export function makeStallMesh(plot) {
   const g = new THREE.Group();
   g.name = "npc-stall";
@@ -716,6 +716,27 @@ export function makeStallMesh(plot) {
     stem.userData.part = "cherry";
     cherry.add(body, stem);
     g.add(cherry);
+  }
+
+  // One tiny kraft PAPER nectarine on the counter so the stall reads as a
+  // working stand, not only produce. Kraft body + wood stem. Local
+  // offset only — stall world pose stays put. PAPER boxes. Existing
+  // hexes. Offset from cherry, kiwi, mango, peach, grape, pear, banana.
+  if (!g.children.some((c) => c.userData.part === "nectarine")) {
+    const nectarine = new THREE.Group();
+    nectarine.name = "nectarine";
+    nectarine.userData.part = "nectarine";
+    nectarine.userData.mode = "PAPER";
+    nectarine.userData.paper = true;
+    nectarine.position.set(-1.05, 0.9, 1.22);
+    const body = paperBox(0.06, 0.055, 0.06, KRAFT, false);
+    body.position.y = 0.028;
+    body.userData.part = "nectarine";
+    const stem = paperBox(0.015, 0.02, 0.015, WOOD, false);
+    stem.position.y = 0.065;
+    stem.userData.part = "nectarine";
+    nectarine.add(body, stem);
+    g.add(nectarine);
   }
 
   const back = paperBox(3.9, 1.6, 0.12, PLASTER);
