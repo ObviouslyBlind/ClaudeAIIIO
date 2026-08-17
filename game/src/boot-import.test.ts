@@ -24,6 +24,8 @@ describe("harbour boot import graph", () => {
     expect(src).not.toContain("await loadDressing(");
     expect(src).toContain("void loadDressing()");
     expect(src).toContain("SPAWN_PARCEL_M = 420");
+    expect(src).toContain("clickTargets()");
+    expect(src).not.toContain("intersectObjects(root.children, true)");
     const dressing = src.slice(src.indexOf("async function loadDressing"), src.indexOf("async function boot"));
     expect(dressing).not.toContain("ensureInterior");
     expect(dressing).not.toContain("ensureCatalog");

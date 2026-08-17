@@ -163,6 +163,11 @@ Record of architecture and strategy decisions with reasoning.
 **Decision:** After north terrain / road / port, `boot()` must return. Dressing (quay, trees, stalls, taxi, south) starts on a 400ms timer, one module per ~80ms idle. First lots are north plots within 420 m of the port. Do not compile interiors until Enter.
 **Reason:** Playtest: beige land and a tiny visitor appeared, then Edge froze again. `await loadDressing()` still compiled trees/interiors on the first click window. PAPER / SIMULATED.
 
+## D034 — Clicks raycast ground and lots only (2026-08-17)
+
+**Decision:** `onPointer` intersects `clickTargets()` (terrain, plot lines, buildings), not `harbourGroup` recursively. Tree InstancedMeshes have a no-op `raycast`. Do not dump every island plot into the scene during dressing.
+**Reason:** `/g/walk89` FAIL WALK: left click on inland ground opened “Page Unresponsive.” Full-scene recursive raycast against trees/props/peds blocked the main thread. PAPER / SIMULATED.
+
 ## D015 — Supplemental merge before save (2026-03-18)
 
 **Decision:** Move `relevant_markets_*.json` save to AFTER supplemental /markets merge.

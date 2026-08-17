@@ -228,7 +228,12 @@ function pointInRing(x, z, ring) {
 }
 
 function findParcelAt(x, z) {
-  const hits = map.plots.filter((p) => pointInRing(x, z, p.ring));
+  const hits = [];
+  for (const p of map.plots) {
+    const reach = Math.max(80, Math.sqrt(p.area || 0) * 2);
+    if (Math.hypot(x - p.x, z - p.z) > reach) continue;
+    if (pointInRing(x, z, p.ring)) hits.push(p);
+  }
   if (!hits.length) return undefined;
   return hits.reduce((a, b) => (a.area <= b.area ? a : b));
 }
@@ -643,8 +648,10 @@ function goTo(x, z) {
 }
 
 function selectLand(p, walk) {
+  const prev = selected ? map.plots.find((x) => x.id === selected) : null;
   selected = p.id;
-  for (const q of map.plots) paintParcel(q);
+  if (prev) paintParcel(prev);
+  paintParcel(p);
   refreshHud();
   if (walk && !nearParcel(p)) {
     goTo(p.x, p.z);
@@ -683,6 +690,16 @@ function leaveInterior() {
   refreshHud();
 }
 
+function clickTargets() {
+  const objs = ground.slice();
+  for (const rec of plotMeshes.values()) {
+    objs.push(rec.line);
+    if (rec.fill) objs.push(rec.fill);
+  }
+  for (const mesh of useMeshes.values()) objs.push(mesh);
+  return objs.filter(Boolean);
+}
+
 function onPointer(ev) {
   if (ev.button != null && ev.button !== 0) return;
   if (Date.now() - lastTap < 180) return;
@@ -697,12 +714,7 @@ function onPointer(ev) {
     refreshHud();
     return;
   }
-  if (stalls && stalls.handleRay(raycaster)) {
-    refreshHud();
-    return;
-  }
-  const root = harbourGroup || scene;
-  const hits = raycaster.intersectObjects(root.children, true);
+  const hits = raycaster.intersectObjects(clickTargets(), false);
   const buildingHit = hits.find((h) => objectWithKind(h.object, "building"));
   const plotHit = hits.find(
     (h) => h.object.userData.kind === "plot" || h.object.userData.kind === "plot-line",
@@ -752,6 +764,10 @@ function onPointer(ev) {
     const p = findParcelAt(groundHit.point.x, groundHit.point.z);
     if (p) selectLand(p, true);
     else goTo(groundHit.point.x, groundHit.point.z);
+    return;
+  }
+  if (stalls && stalls.handleRay(raycaster)) {
+    refreshHud();
   }
 }
 
@@ -1009,10 +1025,6 @@ async function loadDressing() {
       heightAt,
       getPlayer: () => player,
     });
-  });
-
-  await step(async () => {
-    await makeParcels();
   });
 
   await step(async () => {
