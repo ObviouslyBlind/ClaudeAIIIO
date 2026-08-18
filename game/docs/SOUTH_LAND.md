@@ -18,9 +18,10 @@ Harbour, Island Hwy, town centres, and access roads sit on one flat grade. The v
 
 ## Roads
 
-- Island Hwy: 2+2 lanes, stone median — the only dual carriageway.
-- Arterials (named Rd / Strand): 7.2 m tarmac + sidewalks. Spurs meet the roundabout **ring**.
-- Local T-stubs (Rows, alleys, forks, spokes): narrower 5.2 m, stop at the kerb, do not cross the trunk.
+- Island Hwy: 2+2 lanes, stone median — the only dual carriageway. It **stops at the circus ring**; it does not chord through the island.
+- Harbour Circus radials: Quayward Rd and South Strand only, on the **ring**, headings > 35° apart.
+- Channel Sands **Y-forks off Island Hwy** east of the circus. Palm Arc **Y-forks off South Strand**. They are not extra ribbons into the same ring.
+- Arterials (named Rd): 7.2 m tarmac + sidewalks. Locals (Row / Alley / Fork / Lane / Loop) are narrower T-stubs.
 - Dirt tracks: thin packed earth with larger field plots.
 - Quayward is a **block loop** around the green, not a hash of streets through each other.
 

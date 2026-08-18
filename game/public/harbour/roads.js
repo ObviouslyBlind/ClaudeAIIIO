@@ -148,6 +148,13 @@ function drawRibbon(scene, spec, road, heightAt, widthM, color, roadKind, matOpt
   scene.add(m);
 }
 
+/** Dual-carriageway stations inside this radius of a circus are omitted. */
+export const HIGHWAY_RAB_OMIT_M = 28;
+/** Skip ribbon faces across a gap this wide — must be < 2 × omit so the highway cannot chord the island. */
+export const HIGHWAY_RAB_SKIP_M = 32;
+/** Stone disc inside the circulatory ring. */
+export const RAB_ISLAND_R_M = 16.6;
+
 function distToPoly(pts, x, z) {
   let best = Infinity;
   for (let i = 0; i < pts.length - 1; i++) {
@@ -191,7 +198,11 @@ function yieldGap(other) {
 
 function trimYielding(pts, road, paved) {
   const rnk = roadRank(road);
-  const others = (paved || []).filter((o) => o !== road && o.points && o.points.length >= 2 && roadRank(o) > rnk);
+  // Roundabout *rings* are not yield targets — distance-to-ring would nuke a
+  // 40 m disk around every circus and leave a star of overlapping stubs.
+  const others = (paved || []).filter(
+    (o) => o !== road && !o.roundabout && o.points && o.points.length >= 2 && roadRank(o) > rnk,
+  );
   if (!others.length) return pts;
   const out = pts.filter((p) => others.every((o) => distToPoly(o.points, p.x, p.z) >= yieldGap(o)));
   return out.length >= 2 ? out : pts;
@@ -249,12 +260,22 @@ function drawSidewalks(scene, spec, road, heightAt, centres, paved) {
 
 /** 2+2 lanes, stone median. Each carriageway is still a 7.2 m ribbon. */
 function drawHighway(scene, spec, road, heightAt, centres) {
-  const pts = omitNearCentres(ribbonStations(road.points), centres, 22);
+  const pts = omitNearCentres(ribbonStations(road.points), centres, HIGHWAY_RAB_OMIT_M);
   if (pts.length < 2) return;
   const lane = 5.6;
-  drawRibbon(scene, spec, { ...road, points: offsetPolyline(pts, -lane) }, heightAt, PAVED_WIDTH_M, ASPHALT, "paved", {}, 44);
-  drawRibbon(scene, spec, { ...road, points: offsetPolyline(pts, lane) }, heightAt, PAVED_WIDTH_M, ASPHALT, "paved", {}, 44);
-  drawRibbon(scene, spec, { ...road, name: (road.name || "Island Hwy") + " median" }, heightAt, 3.2, STONE, "median", {}, 44);
+  drawRibbon(scene, spec, { ...road, points: offsetPolyline(pts, -lane) }, heightAt, PAVED_WIDTH_M, ASPHALT, "paved", {}, HIGHWAY_RAB_SKIP_M);
+  drawRibbon(scene, spec, { ...road, points: offsetPolyline(pts, lane) }, heightAt, PAVED_WIDTH_M, ASPHALT, "paved", {}, HIGHWAY_RAB_SKIP_M);
+  drawRibbon(
+    scene,
+    spec,
+    { ...road, name: (road.name || "Island Hwy") + " median", points: pts },
+    heightAt,
+    3.2,
+    STONE,
+    "median",
+    {},
+    HIGHWAY_RAB_SKIP_M,
+  );
 }
 
 function drawRoundaboutIsland(scene, spec, road, heightAt) {
@@ -270,7 +291,7 @@ function drawRoundaboutIsland(scene, spec, road, heightAt) {
   z /= pts.length;
   const y = heightAt(spec, x, z);
   const disc = new THREE.Mesh(
-    new THREE.CylinderGeometry(14.2, 14.2, 0.32, 24),
+    new THREE.CylinderGeometry(RAB_ISLAND_R_M, RAB_ISLAND_R_M, 0.32, 24),
     new THREE.MeshLambertMaterial({ color: STONE }),
   );
   disc.position.set(x, y + 0.16, z);

@@ -10,10 +10,13 @@ import {
   FOG_NEAR_M,
   PAVED_WIDTH_M,
   LOCAL_WIDTH_M,
+  HIGHWAY_RAB_OMIT_M,
+  HIGHWAY_RAB_SKIP_M,
   makeRoads,
   spawnCameraOffset,
   spawnLookAtOffset,
 } from "../public/harbour/roads.js";
+import { SOUTH_RAB } from "./southGeom.ts";
 
 function lum(hex: number) {
   const r = ((hex >> 16) & 255) / 255;
@@ -178,6 +181,16 @@ describe("paved street from spawn", () => {
     if (rowMesh) {
       expect(ribbonWidthM(rowMesh)).toBeCloseTo(LOCAL_WIDTH_M, 1);
       expect(LOCAL_WIDTH_M).toBeLessThan(PAVED_WIDTH_M);
+    }
+
+    expect(HIGHWAY_RAB_SKIP_M).toBeLessThan(HIGHWAY_RAB_OMIT_M * 2);
+    const harbour = SOUTH_RAB.harbour;
+    for (const mesh of hwyMeshes) {
+      const pos = mesh.geometry.attributes.position;
+      for (let i = 0; i < pos.count; i++) {
+        const d = Math.hypot(pos.getX(i) - harbour.x, pos.getZ(i) - harbour.z);
+        expect(d).toBeGreaterThan(20);
+      }
     }
   });
 
