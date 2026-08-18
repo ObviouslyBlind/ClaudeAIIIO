@@ -38,14 +38,15 @@ function mockCtx() {
   };
 }
 
-describe("visitor You · PAPER tag", () => {
-  it("keeps LABEL PAPER, a kraft folded corner, and still stamps PAPER", () => {
-    expect(LABEL).toContain("PAPER");
+describe("visitor You tag", () => {
+  it("paints You without a PAPER stamp", () => {
+    expect(LABEL).toBe("You");
     expect(PLAYER_TAG_FOLD).toBe(true);
     const ctx = mockCtx();
     paintPlayerTagCard(ctx, 512, 128);
     const written = ctx.texts.join("");
-    expect(written).toContain("PAPER");
+    expect(written).toContain("You");
+    expect(written).not.toContain("PAPER");
     expect(makePlayerTag()).toBeNull();
   });
 });

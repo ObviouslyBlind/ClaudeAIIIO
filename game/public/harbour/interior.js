@@ -862,34 +862,34 @@ export function createInterior({ scene, player, setStatus, heightAt, specOf }) {
       undressShop(scene);
       undressHouseShop(scene);
       dressFactory(scene);
-      if (setStatus) setStatus("Inside factory (PAPER). Tap the door or Exit to leave.");
+      if (setStatus) setStatus("Inside factory. Tap the door or Exit to leave.");
     } else if (isWarehousePlot(p)) {
       undressFactory(scene);
       undressShop(scene);
       undressHouseShop(scene);
       dressWarehouse(scene);
-      if (setStatus) setStatus("Inside warehouse (PAPER). Tap the door or Exit to leave.");
+      if (setStatus) setStatus("Inside warehouse. Tap the door or Exit to leave.");
     } else if (isHouseShopPlot(p)) {
       undressWarehouse(scene);
       undressFactory(scene);
       undressShop(scene);
       dressHouseShop(scene);
       if (setStatus) {
-        setStatus("Inside house-shop (PAPER). Counter downstairs, living room at the back. Exit at the door.");
+        setStatus("Inside house-shop. Counter downstairs, living room at the back. Exit at the door.");
       }
     } else if (isShopPlot(p)) {
       undressWarehouse(scene);
       undressFactory(scene);
       undressHouseShop(scene);
       dressShop(scene);
-      if (setStatus) setStatus("Inside shop (PAPER). Tap the door or Exit to leave.");
+      if (setStatus) setStatus("Inside shop. Tap the door or Exit to leave.");
     } else {
       undressWarehouse(scene);
       undressFactory(scene);
       undressShop(scene);
       undressHouseShop(scene);
       if (setStatus) {
-        setStatus("Inside downstairs (PAPER). Tap stairs for upstairs. Exit returns to your plot.");
+        setStatus("Inside downstairs. Tap stairs for upstairs. Exit returns to your plot.");
       }
     }
     return true;
@@ -919,17 +919,17 @@ export function createInterior({ scene, player, setStatus, heightAt, specOf }) {
     }
     plot = null;
     floor = "downstairs";
-    if (setStatus) setStatus("Back at your plot (PAPER).");
+    if (setStatus) setStatus("Back at your plot.");
     return left;
   }
 
   function goStairs() {
     if (floor === "downstairs") {
       placePlayer("upstairs");
-      if (setStatus) setStatus("Upstairs (PAPER). Tap stairs to go down.");
+      if (setStatus) setStatus("Upstairs. Tap stairs to go down.");
     } else {
       placePlayer("downstairs");
-      if (setStatus) setStatus("Downstairs (PAPER). Tap the door or Exit to leave.");
+      if (setStatus) setStatus("Downstairs. Tap the door or Exit to leave.");
     }
   }
 

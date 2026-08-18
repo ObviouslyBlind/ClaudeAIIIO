@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 const html = readFileSync(new URL("../public/harbour/index.html", import.meta.url), "utf8");
 const chrome = readFileSync(new URL("../public/harbour/chrome.js", import.meta.url), "utf8");
 const css = readFileSync(new URL("../public/harbour/chrome.css", import.meta.url), "utf8");
+const fonts = readFileSync(new URL("../public/harbour/chrome-fonts.css", import.meta.url), "utf8");
 
 describe("harbour chrome HUD", () => {
   it("keeps launchers in the corners and dock, with one compact submenu", () => {
@@ -24,6 +25,9 @@ describe("harbour chrome HUD", () => {
     expect(html).toContain('id="taxi-map-exit"');
     expect(html).toContain("Keep riding");
     expect(html).toContain('id="chrome"');
+    expect(html).toContain('id="stand-veil"');
+    expect(html).toContain('id="stand-menu"');
+    expect(chrome).toContain('data-stock="inventory"');
     expect(html).toContain('id="buy-ask"');
     expect(html).toContain('id="lot-tags"');
     expect(html).toContain('id="storage-fee"');
@@ -39,11 +43,12 @@ describe("harbour chrome HUD", () => {
     expect(css).toMatch(/max-height:\s*min\(42vh/);
     expect(css).toContain("Big Shoulders Display");
     expect(css).toContain("Red Hat Text");
-    expect(css).not.toContain("font-weight: 600 700");
-    expect(css).not.toContain("font-weight: 500 700");
     expect(css).toContain('font-weight: 700');
+    expect(css).toContain("translate(-50%, -50%)");
     expect(css).not.toContain("Fraunces");
     expect(css).not.toContain("Figtree");
+    expect(html).toContain("chrome-fonts.css");
+    expect(fonts).toContain("data:font/woff2");
     expect(html).toContain("cash-plate");
     expect(html).toContain('aria-label="Inventory"');
     expect(html).toContain('aria-label="Warehouse"');
@@ -63,10 +68,14 @@ describe("harbour chrome HUD", () => {
     expect(chrome).toContain("extras.onTake()");
     expect(chrome).toContain("data-place");
     expect(chrome).toContain("data-stock");
+    expect(chrome).toContain('data-stock="warehouse"');
     expect(chrome).toContain("data-hire-person");
     expect(chrome).toContain("place-cancel");
     expect(chrome).toContain("today-price");
+    expect(chrome).toContain("stock-ticks");
+    expect(chrome).toContain('type="range"');
     expect(chrome).toContain("Store in warehouse");
+    expect(chrome).not.toContain("Stock cart");
     expect(chrome).not.toContain("data-pin");
     expect(chrome).not.toContain("Run it myself");
   });
@@ -75,7 +84,7 @@ describe("harbour chrome HUD", () => {
     expect(chrome).toContain("data-aisle");
     expect(chrome).toContain("Deliver to");
     expect(chrome).toContain("playPaperBuy");
-    expect(chrome).toContain("marketplace");
+    expect(chrome).toContain("Marketplace");
     expect(chrome).toContain("← Marketplace");
     expect(chrome).not.toContain("first loop");
   });

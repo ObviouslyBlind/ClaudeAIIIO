@@ -12,7 +12,7 @@ describe("buy-ask (PAPER)", () => {
     expect(model).toEqual({
       question: "Do you want to buy this lot?",
       name: "14 Harbour Rd",
-      priceLabel: "$242 PAPER",
+      priceLabel: "$242",
       yes: "Yes, buy",
       no: "No",
     });

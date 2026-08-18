@@ -167,7 +167,7 @@ describe("harbour PAPER staff sheet hook", () => {
       plotId: "farm-1",
       action: "hire",
     });
-    await vi.waitFor(() => expect(statuses.some((s) => s.includes("PAPER"))).toBe(true));
+    await vi.waitFor(() => expect(statuses.some((s) => s.includes("Hired"))).toBe(true));
     expect(snaps).toHaveLength(1);
   });
 
@@ -207,6 +207,5 @@ describe("harbour PAPER staff sheet hook", () => {
     await vi.waitFor(() => expect(calls.length).toBe(1));
     expect(calls[0]!.url).toBe("/api/staff");
     await vi.waitFor(() => expect(statuses.join(" ")).toMatch(/no_cash/));
-    expect(statuses.join(" ")).toMatch(/PAPER/);
   });
 });

@@ -37,6 +37,7 @@ export function mountChrome(opts) {
   const onlineEl = document.getElementById("online");
   const landCard = document.getElementById("land-card");
   const buyAsk = document.getElementById("buy-ask");
+  const standVeil = document.getElementById("stand-veil");
   const standMenu = document.getElementById("stand-menu");
 
   let play = null;
@@ -89,6 +90,8 @@ export function mountChrome(opts) {
       return;
     }
     closePanels();
+    if (standMenu) standMenu.hidden = true;
+    if (standVeil) standVeil.hidden = true;
     openPanel = id;
     const panel = document.getElementById("panel-" + id);
     if (panel) {
@@ -144,7 +147,7 @@ export function mountChrome(opts) {
     if (!marketAisle) {
       body.innerHTML = `
         ${title("Market", "market")}
-        <p>South marketplace. Street carts and stock land in the island warehouse unless you send the van.</p>
+        <p>Street carts. Buys sit in the dock warehouse unless you send the van.</p>
         ${aisles
           .map(
             (a) => `
@@ -287,9 +290,7 @@ export function mountChrome(opts) {
     if (!body || !play) return;
     const rows = play.inventory || [];
     const whCart = ((play.warehouse && play.warehouse.items) || []).some((r) => r.kind === "hotdog_cart" && r.qty > 0);
-    const whStock = ((play.warehouse && play.warehouse.items) || []).some((r) => r.kind === "hotdogs" && r.qty > 0);
     const canPlace = rows.some((r) => r.kind === "hotdog_cart") || whCart;
-    const canStock = (rows.some((r) => r.kind === "hotdogs") || whStock) && (play.stands || []).length;
     body.innerHTML = `
       ${title("Inventory", "inventory")}
       ${
@@ -302,9 +303,7 @@ export function mountChrome(opts) {
           ${
             r.kind === "hotdog_cart"
               ? `<button type="button" data-place="1">Place in world</button>`
-              : r.kind === "hotdogs" && (play.stands || []).length
-                ? `<button type="button" data-stock="1">Stock cart</button>`
-                : ""
+              : ""
           }
         </div>`,
               )
@@ -314,11 +313,6 @@ export function mountChrome(opts) {
       ${
         !rows.some((r) => r.kind === "hotdog_cart") && canPlace
           ? `<div class="inv-row"><span>Cart in warehouse</span><button type="button" data-place="1">Place in world</button></div>`
-          : ""
-      }
-      ${
-        !rows.some((r) => r.kind === "hotdogs") && canStock
-          ? `<div class="inv-row"><span>Stock in warehouse</span><button type="button" data-stock="1">Stock cart</button></div>`
           : ""
       }
     `;
@@ -337,27 +331,6 @@ export function mountChrome(opts) {
         if (opts.onPlaceMode) opts.onPlaceMode(true);
       });
     }
-    const stockBtn = body.querySelector("[data-stock]");
-    if (stockBtn) {
-      stockBtn.addEventListener("click", async () => {
-        const stand = (play.stands || [])[0];
-        if (!stand) return;
-        const { ok, data } = await readJson("/api/stand/stock", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ standId: stand.id }),
-        });
-        if (data && data.play) play = data.play;
-        paintTop();
-        paintPanels();
-        if (opts.setStatus) {
-          opts.setStatus(
-            ok ? "Stock in the cart." : "Could not stock: " + ((data && data.reason) || "fail"),
-          );
-        }
-        if (opts.onStocked && ok) opts.onStocked(stand.id);
-      });
-    }
   }
 
   function plotNameFor(stand) {
@@ -369,7 +342,6 @@ export function mountChrome(opts) {
     const body = document.getElementById("staff-body");
     if (!body || !play) return;
     const stands = play.stands || [];
-    const roster = play.hireRoster || [];
     body.innerHTML = `
       ${title("Staff", "employees")}
       ${
@@ -378,20 +350,12 @@ export function mountChrome(opts) {
               .map((s) => {
                 const where = plotNameFor(s);
                 if (s.hired) {
-                  const person = roster.find((p) => p.id === s.staffId) || roster[0];
-                  const tip = !s.upgraded && person && person.suggest ? `<p class="suggest">${s.staffName}: ${person.suggest}</p><button type="button" class="go" data-upgrade="${s.id}">Add fridge · $200</button>` : "";
-                  return `<div class="stand-row"><span>${s.staffName || "Vendor"} · ${where}</span><strong>hired</strong></div>${tip}`;
+                  return `<div class="stand-row"><span>${s.staffName || "Vendor"}</span><strong>${where}</strong></div>`;
                 }
-                const people = roster
-                  .map(
-                    (p) =>
-                      `<button type="button" class="take-all" data-hire-stand="${s.id}" data-hire-person="${p.id}">${p.name} · ${p.role} at ${where}</button>`,
-                  )
-                  .join("");
-                return `<div class="hire-block"><p>A cart does not sell until you hire someone to run it at ${where}.</p>${people}</div>`;
+                return `<div class="stand-row"><span>${where}</span><strong>Tap the cart</strong></div>`;
               })
               .join("")
-          : "<p>Place a cart first, then hire a person onto that lot.</p>"
+          : "<p>Place a cart, then tap it to hire.</p>"
       }
     `;
     body.querySelectorAll("[data-hire-person]").forEach((btn) => {
@@ -558,6 +522,12 @@ export function mountChrome(opts) {
       if (opts.setStatus) opts.setStatus("Place cancelled.");
     });
   }
+  if (standVeil) {
+    standVeil.addEventListener("click", () => {
+      standMenu.hidden = true;
+      standVeil.hidden = true;
+    });
+  }
 
   setOverlay("world");
 
@@ -631,43 +601,176 @@ export function mountChrome(opts) {
         });
       }
     },
-    paintStandMenu(stand, onStock, onHire) {
+    paintStandMenu: function paintStandMenu(stand, onStock, onHire) {
       if (!standMenu) return;
       if (!stand) {
         standMenu.hidden = true;
+        if (standVeil) standVeil.hidden = true;
         return;
       }
+      closePanels();
       standMenu.hidden = false;
-      const today = money(play && play.todayPrice != null ? play.todayPrice : 5);
-      const sticker = stand.stickerPrice != null ? stand.stickerPrice : 5;
+      if (standVeil) standVeil.hidden = false;
+      const todayN = Number(play && play.todayPrice != null ? play.todayPrice : 5);
+      const today = money(todayN);
+      const sticker = Number(stand.stickerPrice != null ? stand.stickerPrice : 5);
+      const cap = Number(stand.storageCap || 20);
+      const have = Number(stand.hotdogs) || 0;
+      const tickN = 20;
+      const filled = Math.round((have / Math.max(cap, 1)) * tickN);
+      const ticks = Array.from(
+        { length: tickN },
+        (_, i) => `<i class="${i < filled ? "on" : ""}"></i>`,
+      ).join("");
+      const invQty = ((play && play.inventory) || []).find((r) => r.kind === "hotdogs")?.qty || 0;
+      const whQty = ((play && play.warehouse && play.warehouse.items) || []).find((r) => r.kind === "hotdogs")?.qty || 0;
+      const room = Math.max(0, cap - have);
+      const maxFromInv = Math.min(invQty, room);
+      const maxFromWh = Math.min(whQty, room);
+      const maxQty = Math.max(maxFromInv, maxFromWh);
+      const pip = Math.max(0, Math.min(100, ((todayN - 1) / 11) * 100));
+      const vs =
+        sticker < todayN - 0.01 ? "is-low" : sticker > todayN + 0.01 ? "is-high" : "is-today";
+      const roster = (play && play.hireRoster) || [];
       standMenu.innerHTML = `
-        <h2>Street cart</h2>
-        <p>${stand.hired ? (stand.staffName || "Vendor") + " is working" : "Closed until you hire"} · stock ${stand.hotdogs}/${stand.storageCap || 20}</p>
-        <label class="sticker-label" for="sticker-price">Your price</label>
-        <div class="sticker-row">
-          <input id="sticker-price" type="number" min="0.01" step="0.5" value="${sticker}" />
-          <span class="today-price">${today} is today's price</span>
+        <div class="stand-head">
+          <h2>Cart</h2>
+          <button type="button" class="stand-x" id="stand-close">Close</button>
         </div>
-        <button type="button" class="take-all" id="stand-stock">Stock from warehouse</button>
-        ${stand.hired ? "" : `<button type="button" class="take-all" id="stand-hire" style="margin-top:6px;background:#c4a574">Hire someone</button>`}
+        <div class="stock-ticks" title="Stock">${ticks}</div>
+        <p class="stock-read">${have}<small>/${cap}</small></p>
+        <div class="source-row">
+          <button type="button" class="source src-pocket" data-stock="inventory" ${maxFromInv ? "" : "disabled"}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8h10l1.2 12H5.8L7 8z"/><path d="M9 8V6.4a3 3 0 0 1 6 0V8"/></svg>
+            <strong>${invQty}</strong><span>Pockets</span>
+          </button>
+          <button type="button" class="source src-wh" data-stock="warehouse" ${maxFromWh ? "" : "disabled"}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10.5 12 4l8 6.5V20H4z"/><path d="M4 10.5h16M12 10.5V20"/></svg>
+            <strong>${whQty}</strong><span>Warehouse</span>
+          </button>
+        </div>
+        ${
+          maxQty
+            ? `<div class="slider-row"><input id="stock-qty" class="qty-slider" type="range" min="1" max="${maxQty}" value="${maxQty}" /><span data-qty-out>${maxQty}</span></div>`
+            : ""
+        }
+        <div class="price-block">
+          <div class="price-track-wrap">
+            <span class="today-pip" style="left:${pip}%"></span>
+            <input id="sticker-price" type="range" min="1" max="12" step="0.5" value="${sticker}" />
+          </div>
+          <div class="price-readout ${vs}">
+            <strong data-price-out>${money(sticker)}</strong>
+            <span class="today-price">today ${today}</span>
+          </div>
+        </div>
+        ${
+          stand.hired
+            ? `<p class="hired-pill">${stand.staffName || "Vendor"} on</p>`
+            : `<div class="hire-row">${roster
+                .map(
+                  (p) =>
+                    `<button type="button" class="hire-chip" data-hire-stand="${stand.id}" data-hire-person="${p.id}">${p.name}</button>`,
+                )
+                .join("")}</div>`
+        }
+        ${
+          stand.hired && !stand.upgraded
+            ? `<button type="button" class="go fridge" data-upgrade="${stand.id}">Fridge · $200</button>`
+            : ""
+        }
       `;
-      standMenu.querySelector("#stand-stock")?.addEventListener("click", onStock);
-      standMenu.querySelector("#stand-hire")?.addEventListener("click", onHire);
-      const input = standMenu.querySelector("#sticker-price");
-      if (input) {
-        input.addEventListener("change", async () => {
+      function closeStand() {
+        standMenu.hidden = true;
+        if (standVeil) standVeil.hidden = true;
+      }
+      standMenu.querySelector("#stand-close")?.addEventListener("click", closeStand);
+      const priceEl = standMenu.querySelector("#sticker-price");
+      const priceOut = standMenu.querySelector("[data-price-out]");
+      const readout = standMenu.querySelector(".price-readout");
+      function paintVs(v) {
+        const n = Number(v);
+        if (priceOut) priceOut.textContent = money(n);
+        if (readout) {
+          readout.classList.toggle("is-low", n < todayN - 0.01);
+          readout.classList.toggle("is-high", n > todayN + 0.01);
+          readout.classList.toggle("is-today", Math.abs(n - todayN) <= 0.01);
+        }
+      }
+      const qtyEl = standMenu.querySelector("#stock-qty");
+      const qtyOut = standMenu.querySelector("[data-qty-out]");
+      if (qtyEl && qtyOut) {
+        qtyEl.addEventListener("input", () => {
+          qtyOut.textContent = String(qtyEl.value);
+        });
+      }
+      if (priceEl) {
+        priceEl.addEventListener("input", () => paintVs(priceEl.value));
+        priceEl.addEventListener("change", async () => {
           const { data } = await readJson("/api/stand/price", {
             method: "POST",
             headers: { "content-type": "application/json" },
-            body: JSON.stringify({ standId: stand.id, price: Number(input.value) }),
+            body: JSON.stringify({ standId: stand.id, price: Number(priceEl.value) }),
           });
           if (data && data.play) play = data.play;
           paintTop();
         });
       }
+      async function stockFrom(from) {
+        const qtyEl = standMenu.querySelector("#stock-qty");
+        const qty = qtyEl ? Number(qtyEl.value) : 0;
+        const { ok, data } = await readJson("/api/stand/stock", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ standId: stand.id, qty, from }),
+        });
+        if (data && data.play) play = data.play;
+        paintTop();
+        const fresh = ((play && play.stands) || []).find((s) => s.id === stand.id);
+        paintStandMenu(fresh, onStock, onHire);
+        if (opts.setStatus) {
+          opts.setStatus(ok ? "Stock in the cart." : "Could not stock: " + ((data && data.reason) || "fail"));
+        }
+        if (ok && typeof onStock === "function") onStock();
+        if (ok && opts.onStocked) opts.onStocked(stand.id);
+      }
+      standMenu.querySelectorAll("[data-stock]").forEach((btn) => {
+        btn.addEventListener("click", () => stockFrom(btn.getAttribute("data-stock")));
+      });
+      standMenu.querySelectorAll("[data-hire-person]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const { ok, data } = await readJson("/api/stand/hire", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              standId: btn.getAttribute("data-hire-stand"),
+              personId: btn.getAttribute("data-hire-person"),
+            }),
+          });
+          if (data && data.play) play = data.play;
+          paintTop();
+          const fresh = ((play && play.stands) || []).find((s) => s.id === stand.id);
+          paintStandMenu(fresh, onStock, onHire);
+          if (ok && typeof onHire === "function") onHire();
+        });
+      });
+      standMenu.querySelectorAll("[data-upgrade]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const { data } = await readJson("/api/stand/upgrade", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ standId: btn.getAttribute("data-upgrade") }),
+          });
+          if (data && data.play) play = data.play;
+          paintTop();
+          const fresh = ((play && play.stands) || []).find((s) => s.id === stand.id);
+          paintStandMenu(fresh, onStock, onHire);
+        });
+      });
     },
     hideStandMenu() {
       if (standMenu) standMenu.hidden = true;
+      if (standVeil) standVeil.hidden = true;
     },
   };
 }

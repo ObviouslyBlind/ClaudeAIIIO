@@ -1,13 +1,13 @@
 import * as THREE from "three";
 
 /**
- * Billboard "You · PAPER" above the player figure.
+ * Billboard "You" above the player figure.
  * Kraft card + brown ink + dashed PAPER rubber-stamp.
  * Same outdoor walker-card recipe. Camera-facing THREE.Sprite.
  * Not a HUD, not a CoD plate, not Capital Rift UI.
  */
 
-export const LABEL = "You · PAPER";
+export const LABEL = "You";
 const NAME = "You";
 const LABEL_Y = 2.12;
 /** World metres. Same kraft card as outdoor walker nametags. */
@@ -97,9 +97,7 @@ export function paintPlayerTagCard(ctx, w, h) {
   ctx.font = "600 44px Georgia, 'Times New Roman', serif";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText(NAME, w / 2, 48);
-
-  drawPaperStamp(ctx, w / 2, h - 36);
+  ctx.fillText(NAME, w / 2, h / 2);
 }
 
 export function makePlayerTag() {
