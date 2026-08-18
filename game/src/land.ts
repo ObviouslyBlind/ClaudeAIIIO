@@ -17,6 +17,7 @@ import {
   SOUTH_VOLCANO,
 } from "./southGeom.ts";
 import { buildSouthLand, southTaxiStops } from "./southLand.ts";
+import type { RoadGraph } from "./roadGraph.ts";
 
 export { BUILDING_CATALOG, DEVELOP_COST };
 export type { LandUseId };
@@ -76,11 +77,19 @@ export type Road = {
   lanes?: 2 | 4;
   /** Visual ring only. Taxi / cars skip these. */
   roundabout?: boolean;
+  /** Road class from the graph. Drives width, sidewalks and junction size. */
+  cls?: "highway" | "avenue" | "street" | "lane" | "track";
+  /** Graph edge this view was derived from. */
+  edgeId?: string;
+  /** Graph node this ring was derived from. */
+  nodeId?: string;
 };
 
 export type LandBoard = {
   plots: Parcel[];
   roads: Road[];
+  /** Nodes and edges behind the roads. Junctions are real points here. */
+  graph: RoadGraph;
 };
 
 /**
@@ -697,7 +706,7 @@ export function createLandBoard(): LandBoard {
     ...built.dirt,
     ...southBuilt.roads,
   ];
-  return { plots, roads };
+  return { plots, roads, graph: southBuilt.graph };
 }
 
 export function buildPlots(): Parcel[] {
@@ -872,6 +881,7 @@ export function landSnapshot(board: LandBoard, visitor: Visitor) {
     },
     plots: board.plots,
     roads: board.roads,
+    graph: board.graph,
     stops: Object.values(ISLANDS).flatMap((spec) => taxiStops(spec)),
   };
 }

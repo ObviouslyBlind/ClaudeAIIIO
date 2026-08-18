@@ -18,6 +18,16 @@ Harbour, Island Hwy, town centres, and access roads sit on one flat grade. The v
 
 ## Roads
 
+Authored as a graph. See `docs/ROADS.md` for the model, the class table and why it was rebuilt.
+
+- Island Hwy (dual carriageway) runs quay → Harbour → Cane → Ash → Haven → east shore, meeting each circus on its kerb.
+- Avenues leave the circuses for the towns: Quayward Rd, South Strand, Canebrake Rd, Pass Rd, Haven Rd.
+- Streets fill the towns: Quayward Loop, Saltwind High St, Haven Crescent, Channel Sands, Palm Arc.
+- Lanes are single-track hamlet rows and alleys. Field tracks are dirt and carry on past the lane ends.
+- Town junctions sit short of the green — a town square is not a crossroads.
+
+### Old notes
+
 - Island Hwy is **five dual-carriageway spans** that meet circus rings. Taxi never chords the island.
 - Harbour Circus: asphalt ring + stone island. Only Quayward Rd leaves it besides the highway.
 - Side roads **T-join their parent**. `joins` is that kerb, not a circus kilometres away.

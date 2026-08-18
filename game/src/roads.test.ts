@@ -18,6 +18,7 @@ import {
   spawnCameraOffset,
   spawnLookAtOffset,
 } from "../public/harbour/roads.js";
+import { ROAD_CLASSES, carriagewayWidthM, roadWidthM } from "../public/harbour/roadclass.js";
 import { SOUTH_RAB } from "./southGeom.ts";
 
 function lum(hex: number) {
@@ -69,8 +70,6 @@ describe("paved street from spawn", () => {
     expect(PAVED_WIDTH_M).toBeGreaterThanOrEqual(6);
     expect(PAVED_WIDTH_M).toBeLessThanOrEqual(8);
     expect(paved[0].geometry.parameters).toBeUndefined();
-    expect(ribbonWidthM(paved[0])).toBeCloseTo(PAVED_WIDTH_M, 3);
-    expect(paved[0].userData.widthM).toBe(PAVED_WIDTH_M);
     expect(dirt[0].geometry.parameters).toBeUndefined();
     expect(ribbonWidthM(dirt[0])).toBeCloseTo(DIRT_WIDTH_M, 3);
     expect(dirt[0].userData.widthM).toBe(DIRT_WIDTH_M);
@@ -86,6 +85,76 @@ describe("paved street from spawn", () => {
     const dirtKinds = new Set(map.roads.filter((r) => r.kind === "dirt").map((r) => r.kind));
     expect(dirtKinds.has("dirt")).toBe(true);
     expect(added.some((m) => m.userData.roadKind === "dirt" && ribbonWidthM(m) >= 6)).toBe(false);
+  });
+
+  it("reads as a hierarchy: highway wider than avenue wider than street wider than lane", () => {
+    const map = createLandBoard();
+    const added: RoadMesh[] = [];
+    const scene = { add(obj: RoadMesh) { added.push(obj); } };
+    makeRoads(map, { scene, specOf: (id: "north" | "south") => ISLANDS[id], heightAt });
+
+    const widthFor = (cls: string) => {
+      const road = map.roads.find((r) => r.cls === cls && !r.roundabout);
+      expect(road, `no ${cls} authored`).toBeTruthy();
+      const mesh = added.find(
+        (m) => m.userData.roadKind === "paved" && m.userData.roadName === road!.name,
+      );
+      expect(mesh, `no mesh for ${cls}`).toBeTruthy();
+      return ribbonWidthM(mesh!);
+    };
+
+    const highway = widthFor("highway");
+    const avenue = widthFor("avenue");
+    const street = widthFor("street");
+    const lane = widthFor("lane");
+
+    // One highway carriageway is narrower than an avenue; the pair plus the
+    // median is what makes it read big, so compare the full footprint too.
+    expect(carriagewayWidthM("highway")).toBeGreaterThan(roadWidthM("avenue"));
+    expect(roadWidthM("avenue")).toBeGreaterThan(roadWidthM("street"));
+    expect(roadWidthM("street")).toBeGreaterThan(roadWidthM("lane"));
+    expect(roadWidthM("lane")).toBeGreaterThan(roadWidthM("track"));
+    // Each step is big enough to see from the play camera, not a 2 m nuance.
+    expect(roadWidthM("avenue") - roadWidthM("street")).toBeGreaterThan(3);
+    expect(roadWidthM("street") - roadWidthM("lane")).toBeGreaterThan(3);
+
+    expect(highway).toBeCloseTo(ROAD_CLASSES.highway.carriageM, 3);
+    expect(avenue).toBeCloseTo(ROAD_CLASSES.avenue.carriageM, 3);
+    expect(street).toBeCloseTo(ROAD_CLASSES.street.carriageM, 3);
+    expect(lane).toBeCloseTo(ROAD_CLASSES.lane.carriageM, 3);
+  });
+
+  it("gives every paved road a shoulder and every junction a slab of tarmac", () => {
+    const map = createLandBoard();
+    const added: RoadMesh[] = [];
+    const scene = { add(obj: RoadMesh) { added.push(obj); } };
+    makeRoads(map, { scene, specOf: (id: "north" | "south") => ISLANDS[id], heightAt });
+
+    // A road with no rim reads as black tape laid on sand.
+    const shoulders = added.filter((m) => m.userData.roadKind === "shoulder");
+    expect(shoulders.length).toBeGreaterThan(10);
+    for (const road of map.roads.filter((r) => r.kind === "paved" && !r.roundabout)) {
+      const tarmac = added.find(
+        (m) => m.userData.roadKind === "paved" && m.userData.roadName === road.name,
+      );
+      const rim = shoulders.find((m) => String(m.userData.roadName || "").startsWith(road.name || ""));
+      expect(rim, `no shoulder for ${road.name}`).toBeTruthy();
+      if (tarmac) expect(ribbonWidthM(rim!)).toBeGreaterThan(ribbonWidthM(tarmac));
+    }
+
+    // Junctions are covered, not carved out of the minor road.
+    const pads = added.filter((m) => m.userData.roadKind === "junction");
+    const junctions = map.graph.nodes.filter((n) => n.kind === "junction");
+    expect(junctions.length).toBeGreaterThan(8);
+    expect(pads.length).toBeGreaterThanOrEqual(junctions.length);
+    for (const node of junctions) {
+      const arms = map.graph.edges.filter((e) => e.a === node.id || e.b === node.id);
+      const widest = Math.max(...arms.map((e) => carriagewayWidthM(e.cls)));
+      const pad = pads.find(
+        (m) => Math.abs((m.userData.widthM ?? 0) - (widest + 2.4)) < 0.01,
+      );
+      expect(pad, `junction ${node.id} pad too small for its arms`).toBeTruthy();
+    }
   });
 
   it("extrudes each dirt polyline as one brown ribbon, not a chain of box slabs", () => {
@@ -146,7 +215,8 @@ describe("paved street from spawn", () => {
       const pos = mesh.geometry.attributes.position;
       expect(pos.count).toBeGreaterThan(8);
       expect(mesh.geometry.index?.count ?? 0).toBeGreaterThan(24);
-      expect(ribbonWidthM(mesh)).toBeCloseTo(PAVED_WIDTH_M, 3);
+      const cls = /Harbour Rd/.test(northRoads[i].name ?? "") ? "avenue" : "street";
+      expect(ribbonWidthM(mesh)).toBeCloseTo(ROAD_CLASSES[cls].carriageM, 3);
 
       const start = { x: pos.getX(0), z: pos.getZ(0) };
       const last = pos.count - 4;

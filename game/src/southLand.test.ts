@@ -108,14 +108,24 @@ describe("South land (no buildings)", () => {
     expect(board.roads.some((r) => r.name === "Quayward Loop")).toBe(true);
     expect(board.roads.some((r) => r.name?.startsWith("Ash Spoke"))).toBe(false);
     const mill = board.roads.find((r) => r.name === "Mill Fork")!;
-    const cane = board.roads.find((r) => r.name === "Canebrake Rd")!;
     const town = SOUTH_TOWNS.find((t) => t.id === "canebrake")!;
     expect(mill).toBeTruthy();
+    // A town green is not a crossroads: side roads meet the approach, not the square.
     expect(Math.hypot(mill.points[0]!.x - town.x, mill.points[0]!.z - town.z)).toBeGreaterThan(20);
-    expect(distToPolyline(cane.points, mill.points[0]!.x, mill.points[0]!.z)).toBeGreaterThan(5);
-    const row = board.roads.find((r) => r.island === "south" && r.name?.includes("Cane Row"));
+
+    // A side road must *touch* its parent at a shared node. The old model kept
+    // stubs standing off the parent, which is exactly what read as loose blots.
+    const row = board.graph.edges.find((e) => e.name?.includes("Cane Row"))!;
     expect(row).toBeTruthy();
-    expect(distToPolyline(cane.points, row!.points[0]!.x, row!.points[0]!.z)).toBeGreaterThan(5);
+    const joint = board.graph.nodes.find((n) => n.id === row.a)!;
+    expect(joint.kind).toBe("junction");
+    const parents = board.graph.edges.filter((e) => e.id !== row.id && (e.a === joint.id || e.b === joint.id));
+    expect(parents.some((e) => e.name === "Canebrake Rd")).toBe(true);
+    expect(Math.hypot(row.points[0]!.x - joint.x, row.points[0]!.z - joint.z)).toBeLessThan(0.01);
+    for (const parent of parents) {
+      const ends = [parent.points[0]!, parent.points[parent.points.length - 1]!];
+      expect(Math.min(...ends.map((p) => Math.hypot(p.x - joint.x, p.z - joint.z)))).toBeLessThan(0.01);
+    }
 
     const harbour = SOUTH_RAB.harbour;
     const nearCircus = board.roads.filter(
