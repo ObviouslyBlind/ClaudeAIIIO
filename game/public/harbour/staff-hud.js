@@ -161,16 +161,16 @@ export function mountStaffHud(opts = {}) {
       const body = await res.json();
       if (body && body.snapshot) applySnapshot(body.snapshot);
       if (!body || !body.ok) {
-        setStatus("Could not " + action + ": " + ((body && body.reason) || "error") + " (PAPER)");
+        setStatus("Could not " + action + ": " + ((body && body.reason) || "error") + "");
         return;
       }
       setStatus(
         action === "hire"
-          ? "Hired PAPER staff on this " + plot.use + "."
-          : "Fired PAPER staff on this " + plot.use + ".",
+          ? "Hired staff on this " + plot.use + "."
+          : "Fired staff on this " + plot.use + ".",
       );
     } catch {
-      setStatus("Could not " + action + " (PAPER)");
+      setStatus("Could not " + action + "");
     } finally {
       busy = false;
       sync();

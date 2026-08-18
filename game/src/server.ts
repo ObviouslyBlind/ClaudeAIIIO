@@ -257,7 +257,12 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "POST" && url.pathname === "/api/stand/stock") {
     const body = await readJsonBody(req);
-    const result = stockStand(visitor, String(body?.standId ?? ""), Number(body?.qty ?? 0));
+    const result = stockStand(
+      visitor,
+      String(body?.standId ?? ""),
+      Number(body?.qty ?? 0),
+      body?.from ? String(body.from) : undefined,
+    );
     json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
     return;
   }

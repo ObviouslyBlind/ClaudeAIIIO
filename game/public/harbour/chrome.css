@@ -1,42 +1,7 @@
 /* Two Harbors chrome — dusk-ferry instrument cluster.
    THESIS: brass fittings on a dark hull, not Segoe rectangles.
-   Corners stay. No blur filters (phone 30fps). */
-
-@font-face {
-  font-family: "Big Shoulders Display";
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url("/harbour/fonts/big-shoulders.woff2") format("woff2");
-}
-@font-face {
-  font-family: "Big Shoulders Display";
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url("/harbour/fonts/big-shoulders.woff2") format("woff2");
-}
-@font-face {
-  font-family: "Red Hat Text";
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url("/harbour/fonts/red-hat-text.woff2") format("woff2");
-}
-@font-face {
-  font-family: "Red Hat Text";
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url("/harbour/fonts/red-hat-text.woff2") format("woff2");
-}
-@font-face {
-  font-family: "Red Hat Text";
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url("/harbour/fonts/red-hat-text.woff2") format("woff2");
-}
+   Corners stay. No blur filters (phone 30fps).
+   Faces live in chrome-fonts.css (data URIs) so the browser cannot skip the woff fetch. */
 
 :root {
   --ink: #f4f1e6;
@@ -48,8 +13,6 @@
   --line: rgba(212, 176, 122, 0.42);
   --green: #5fe3a0;
   --radius: 10px;
-  --font-display: "Big Shoulders Display", "Arial Narrow", sans-serif;
-  --font-ui: "Red Hat Text", "Segoe UI", system-ui, sans-serif;
   --shadow: 0 10px 22px rgba(0, 0, 0, 0.45);
   --inset: inset 0 1px 0 rgba(244, 241, 230, 0.14);
 }
@@ -62,12 +25,16 @@
   overflow: hidden;
 }
 
+html, body {
+  font-family: "Red Hat Text", "Segoe UI", system-ui, sans-serif;
+}
+
 #chrome {
   position: absolute;
   inset: 0;
   z-index: 8;
   pointer-events: none;
-  font-family: var(--font-ui);
+  font-family: "Red Hat Text", "Segoe UI", system-ui, sans-serif;
   color: var(--ink);
   text-shadow: 0 1px 2px #061418;
   font-synthesis: none;
@@ -81,6 +48,7 @@
 .float-panel,
 #land-card,
 #buy-ask,
+#stand-veil,
 #stand-menu,
 #place-hint {
   pointer-events: auto;
@@ -104,7 +72,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-family: var(--font-display);
+  font-family: "Big Shoulders Display", "Arial Narrow", sans-serif;
   font-size: 22px;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -254,7 +222,7 @@ nav.dock.travel-dock {
   border: 1px solid var(--line);
   border-radius: 16px;
   box-shadow: var(--shadow), var(--inset);
-  font-family: var(--font-ui);
+  font-family: "Red Hat Text", "Segoe UI", system-ui, sans-serif;
 }
 .travel-dock button {
   min-height: 40px;
@@ -378,7 +346,7 @@ nav.dock.travel-dock {
 
 .float-panel h2 {
   margin: 0 0 8px;
-  font-family: var(--font-display);
+  font-family: "Big Shoulders Display", "Arial Narrow", sans-serif;
   font-size: 20px;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -459,7 +427,7 @@ nav.dock.travel-dock {
   border-radius: 8px;
   background: linear-gradient(180deg, #1a2620 0%, #121814 100%);
   color: var(--ink);
-  font-family: var(--font-ui);
+  font-family: "Red Hat Text", "Segoe UI", system-ui, sans-serif;
   font-weight: 700;
   font-size: 13px;
   letter-spacing: 0.02em;
@@ -535,7 +503,7 @@ nav.dock.travel-dock {
 #buy-ask[hidden] { display: none !important; }
 #buy-ask h2 {
   margin: 0 0 6px;
-  font-family: var(--font-display);
+  font-family: "Big Shoulders Display", "Arial Narrow", sans-serif;
   font-size: 18px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -546,7 +514,7 @@ nav.dock.travel-dock {
 #buy-ask .land-row .take-all { margin-top: 0; }
 #buy-ask-no { background: #2c3c40; color: #e8e4d8; }
 
-#land-card, #stand-menu, #foot-legend {
+#land-card, #foot-legend {
   position: absolute;
   left: 68px;
   bottom: calc(56px + env(safe-area-inset-bottom));
@@ -558,6 +526,30 @@ nav.dock.travel-dock {
   z-index: 10;
   box-shadow: var(--shadow), var(--inset);
 }
+#stand-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 13;
+  background: rgba(6, 16, 20, 0.58);
+  cursor: pointer;
+}
+#stand-menu {
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  bottom: auto;
+  right: auto;
+  transform: translate(-50%, -50%);
+  width: min(340px, calc(100vw - 28px));
+  max-height: min(78vh, 520px);
+  overflow: auto;
+  padding: 14px 16px 16px;
+  background: linear-gradient(180deg, #1a2e32 0%, var(--hull) 100%);
+  border: 1px solid var(--brass-hi);
+  border-radius: 16px;
+  z-index: 14;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55), var(--inset);
+}
 #foot-legend {
   left: auto;
   right: 12px;
@@ -567,14 +559,162 @@ nav.dock.travel-dock {
   overflow: auto;
   pointer-events: none;
 }
-#land-card[hidden], #stand-menu[hidden], .float-panel[hidden], #foot-legend[hidden] { display: none !important; }
+#land-card[hidden], #stand-menu[hidden], #stand-veil[hidden], .float-panel[hidden], #foot-legend[hidden] { display: none !important; }
 #land-card h2, #stand-menu h2 {
-  margin: 0 0 4px;
-  font-family: var(--font-display);
-  font-size: 18px;
+  margin: 0;
+  font-family: "Big Shoulders Display", "Arial Narrow", sans-serif;
+  font-size: 20px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
+.stand-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.stand-x {
+  min-height: 32px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: #2c3c40;
+  color: var(--ink);
+  font-weight: 700;
+  cursor: pointer;
+}
+.stock-ticks {
+  display: grid;
+  grid-template-columns: repeat(20, 1fr);
+  gap: 3px;
+  height: 26px;
+  margin-bottom: 6px;
+}
+.stock-ticks i {
+  display: block;
+  border-radius: 3px;
+  background: #132428;
+  border: 1px solid var(--line);
+}
+.stock-ticks i.on {
+  background: linear-gradient(180deg, #7dffb4, var(--green));
+  border-color: #3aa86a;
+}
+.stock-meter {
+  height: 10px;
+  border-radius: 999px;
+  background: #132428;
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+.stock-fill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #2f8a4c, var(--green));
+}
+.stock-read {
+  margin: 4px 0 10px;
+  font-size: 22px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+.stock-read small { font-size: 13px; color: var(--muted); font-weight: 600; }
+.source-row { display: flex; gap: 8px; }
+.source {
+  flex: 1;
+  min-height: 72px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #132428;
+  color: var(--ink);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  gap: 1px;
+  padding: 8px 6px 6px;
+}
+.source svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linejoin: round;
+}
+.source strong { font-size: 22px; font-variant-numeric: tabular-nums; line-height: 1; }
+.source span { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.source.src-pocket { border-color: rgba(95, 227, 160, 0.55); color: var(--green); }
+.source.src-wh { border-color: var(--brass-hi); color: var(--brass-hi); }
+.source.src-pocket:not(:disabled):hover { background: #1a3d28; }
+.source.src-wh:not(:disabled):hover { background: #2a2418; }
+.source:disabled { opacity: 0.35; cursor: default; color: var(--ink); }
+.slider-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+.slider-row span {
+  min-width: 1.6em;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--green);
+}
+.qty-slider, #stand-menu input[type="range"] {
+  width: 100%;
+  margin: 0;
+  accent-color: var(--btn);
+  height: 28px;
+}
+.price-block { margin-top: 10px; }
+.price-track-wrap { position: relative; }
+.today-pip {
+  position: absolute;
+  top: -3px;
+  width: 3px;
+  height: 10px;
+  background: var(--brass-hi);
+  border-radius: 2px;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+#stand-menu .sticker-label { margin-top: 12px; }
+.price-readout {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 4px 0 8px;
+  font-variant-numeric: tabular-nums;
+}
+.price-readout strong { font-size: 26px; }
+.price-readout.is-low strong { color: var(--green); }
+.price-readout.is-today strong { color: var(--brass-hi); }
+.price-readout.is-high strong { color: #e08a6a; }
+.price-readout .today-price { font-size: 12px; color: var(--muted); }
+.hire-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.hire-chip {
+  min-height: 36px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--brass-hi), var(--btn));
+  color: #1a140c;
+  font-weight: 700;
+  cursor: pointer;
+}
+.hired-pill {
+  margin: 8px 0 0;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: #1a3d28;
+  color: var(--green);
+  font-weight: 700;
+  text-align: center;
+}
+#stand-menu .fridge { margin-top: 8px; width: 100%; }
 #land-card .price { color: var(--green); font-weight: 700; }
 #land-card .land-buy { margin-top: 8px; font-size: 16px; }
 #land-card .lease-note { margin: 8px 0 0; font-size: 12px; color: #e2c04a; }
@@ -620,12 +760,12 @@ nav.dock.travel-dock {
   border: 1px solid var(--line);
   border-radius: 12px;
   color: var(--ink);
-  font-family: var(--font-ui);
+  font-family: "Red Hat Text", "Segoe UI", system-ui, sans-serif;
   box-shadow: var(--shadow), var(--inset);
 }
 .ferry-pass h2 {
   margin: 0 0 6px;
-  font-family: var(--font-display);
+  font-family: "Big Shoulders Display", "Arial Narrow", sans-serif;
   font-size: 22px;
   font-weight: 700;
   letter-spacing: 0.04em;

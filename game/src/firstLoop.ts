@@ -467,12 +467,15 @@ export function stockStand(
   visitor: Visitor,
   standId: string,
   qty = 0,
+  from?: string,
 ): LoopOk<{ stand: Stand }> | LoopFail {
   const play = ensurePlay(visitor);
   const stand = play.stands.find((s) => s.id === standId);
   if (!stand) return fail("no_stand");
-  const fromInv = play.inventory.find((r) => r.kind === "hotdogs")?.qty ?? 0;
-  const fromWh = warehouseQty(play, "hotdogs");
+  let fromInv = play.inventory.find((r) => r.kind === "hotdogs")?.qty ?? 0;
+  let fromWh = warehouseQty(play, "hotdogs");
+  if (from === "inventory") fromWh = 0;
+  else if (from === "warehouse") fromInv = 0;
   const room = Math.max(0, stand.storageCap - stand.hotdogs);
   const want = qty > 0 ? Math.min(qty, fromInv + fromWh, room) : Math.min(fromInv + fromWh, room);
   if (want <= 0) return fail(room <= 0 ? "full" : "no_hotdogs");

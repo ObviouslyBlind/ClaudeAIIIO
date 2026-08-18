@@ -17,7 +17,7 @@ export function buyAskModel(plot) {
   return {
     question: "Do you want to buy this lot?",
     name: plotDisplayName(plot),
-    priceLabel: askMoney(plot.price) + " PAPER",
+    priceLabel: askMoney(plot.price),
     yes: "Yes, buy",
     no: "No",
   };

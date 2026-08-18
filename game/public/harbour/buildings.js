@@ -835,7 +835,7 @@ export function createCatalogPicker({ onPick, onCancel }) {
     document.body.appendChild(el);
   }
   el.innerHTML =
-    '<p class="catalog-badge">PAPER · SIMULATED</p>' +
+    '<p class="catalog-badge">Buildings</p>' +
     '<p class="catalog-hint">Pick a building, then tap your leased land.</p>' +
     '<div class="catalog-grid"></div>' +
     '<button type="button" id="catalog-cancel">Cancel</button>';

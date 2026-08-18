@@ -794,7 +794,7 @@ export function createTaxi({
     attachPlayer();
     openOverlay();
     setRide(true);
-    setStatus("Taxi collected you. Tap the map to ride. PAPER · SIMULATED.");
+    setStatus("Taxi collected you. Tap the map to ride..");
     return true;
   }
 
@@ -825,7 +825,7 @@ export function createTaxi({
     waitStartedAtMs = null;
     mesh.visible = false;
     closeOverlay();
-    setStatus("Taxi drove away. PAPER.");
+    setStatus("Taxi drove away..");
   }
 
   function call() {
@@ -834,12 +834,12 @@ export function createTaxi({
     const pz = player.position.z;
     const hit = closestPaved(px, pz, island);
     if (!hit) {
-      setStatus("No paved road here. PAPER.");
+      setStatus("No paved road here..");
       return;
     }
     if (mode === "boarded" || mode === "hauling") {
       hopOut();
-      setStatus("Out of the taxi. PAPER.");
+      setStatus("Out of the taxi..");
       return;
     }
     const sameIsland = mesh.visible && road && road.island === island;
@@ -849,7 +849,7 @@ export function createTaxi({
     driveTo(hit.proj.x, hit.proj.z);
     mode = "coming";
     waitStartedAtMs = Date.now();
-    setStatus("Taxi coming along the paved road. PAPER.");
+    setStatus("Taxi coming along the paved road..");
   }
 
   /**
@@ -878,28 +878,28 @@ export function createTaxi({
     const stop = stopFromMapClick(islandStops(), spec, sx, sy, overlayCanvas.width, overlayCanvas.height);
     if (stop) {
       if (!driveTo(stop.x, stop.z)) {
-        setStatus("No route to " + stop.name + ". PAPER.");
+        setStatus("No route to " + stop.name + "..");
         return;
       }
       mode = "hauling";
       setWalking(false);
       closeOverlay();
-      setStatus("Taxi to " + stop.name + ". PAPER · SIMULATED.");
+      setStatus("Taxi to " + stop.name + "..");
       return;
     }
     const hit = map ? pavedDestFromMapClick(map.roads, island, spec, sx, sy, overlayCanvas.width, overlayCanvas.height) : null;
     if (!hit) {
-      setStatus("Tap a stop point. PAPER.");
+      setStatus("Tap a stop point..");
       return;
     }
     if (!driveTo(hit.proj.x, hit.proj.z)) {
-      setStatus("Taxi stays on paved. Dirt is forbidden. PAPER.");
+      setStatus("Taxi stays on paved. Dirt is forbidden..");
       return;
     }
     mode = "hauling";
     setWalking(false);
     closeOverlay();
-    setStatus("Taxi on paved. PAPER · SIMULATED.");
+    setStatus("Taxi on paved..");
   }
 
   function tick(dt, nowMs = Date.now()) {
@@ -942,11 +942,11 @@ export function createTaxi({
           driveTo(proj.x, proj.z);
         } else if (!tryCollect()) {
           mode = "waiting";
-          setStatus("Taxi waiting on paved. Walk to the road. PAPER.");
+          setStatus("Taxi waiting on paved. Walk to the road..");
         }
       } else if (!tryCollect()) {
         mode = "waiting";
-        setStatus("Taxi waiting on paved. Walk to the road. PAPER.");
+        setStatus("Taxi waiting on paved. Walk to the road..");
       }
     }
 
@@ -966,7 +966,7 @@ export function createTaxi({
     if (mode === "hauling" && pathDone()) {
       mode = "boarded";
       setRide(true);
-      setStatus("Taxi stopped. Tap Exit taxi or pick another stop. PAPER · SIMULATED.");
+      setStatus("Taxi stopped. Tap Exit taxi or pick another stop..");
       openOverlay();
     }
 
@@ -988,13 +988,13 @@ export function createTaxi({
   if (overlayClose) {
     overlayClose.addEventListener("click", () => {
       closeOverlay();
-      setStatus("Map closed. Exit taxi is on the dock. PAPER.");
+      setStatus("Map closed. Exit taxi is on the dock..");
     });
   }
   if (overlayExit) {
     overlayExit.addEventListener("click", () => {
       hopOut();
-      setStatus("Out of the taxi. PAPER.");
+      setStatus("Out of the taxi..");
     });
   }
 

@@ -48,7 +48,7 @@ function bootFirstFrame() {
   const canvas = document.getElementById("c");
   if (!canvas) return;
   const statusEl = document.getElementById("status");
-  if (statusEl) statusEl.textContent = "South port · PAPER";
+  if (statusEl) statusEl.textContent = "South port";
   try {
     globalThis.__harbourFirst = paintFirstFrame(canvas);
   } catch (err) {

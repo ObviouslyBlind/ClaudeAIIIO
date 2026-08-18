@@ -208,6 +208,39 @@ describe("South first loop", () => {
     expect(visitor.play.warehouse.items.find((i) => i.kind === "hotdogs")?.qty).toBe(20);
   });
 
+  it("stocks a stand from the warehouse without taking pockets", () => {
+    const { land, visitor, plot } = leaseCheapSouth();
+    const cart = orderMarket(visitor, land, { plotId: plot.id, skus: ["hotdog_cart"] });
+    if (!cart.ok) return;
+    takeAll(visitor, cart.delivery.id);
+    const dogs = orderMarket(visitor, land, { skus: ["hotdogs"], dest: "warehouse" });
+    if (!dogs.ok) return;
+    const placed = placeStand(visitor, land, plot.id);
+    if (!placed.ok) return;
+    expect(visitor.play.inventory.find((i) => i.kind === "hotdogs")).toBeUndefined();
+    expect(stockStand(visitor, placed.stand.id, 0, "warehouse").ok).toBe(true);
+    expect(placed.stand.hotdogs).toBe(20);
+    expect(visitor.play.warehouse.items.find((i) => i.kind === "hotdogs")).toBeUndefined();
+  });
+
+  it("stocks a stand from pockets without emptying the warehouse", () => {
+    const { land, visitor, plot } = leaseCheapSouth();
+    const cart = orderMarket(visitor, land, { plotId: plot.id, skus: ["hotdog_cart"] });
+    if (!cart.ok) return;
+    takeAll(visitor, cart.delivery.id);
+    const dogs = orderMarket(visitor, land, { skus: ["hotdogs"], dest: "warehouse" });
+    if (!dogs.ok) return;
+    expect(withdrawWarehouse(visitor, "hotdogs", 8).ok).toBe(true);
+    const placed = placeStand(visitor, land, plot.id);
+    if (!placed.ok) return;
+    expect(visitor.play.inventory.find((i) => i.kind === "hotdogs")?.qty).toBe(8);
+    expect(visitor.play.warehouse.items.find((i) => i.kind === "hotdogs")?.qty).toBe(12);
+    expect(stockStand(visitor, placed.stand.id, 0, "inventory").ok).toBe(true);
+    expect(placed.stand.hotdogs).toBe(8);
+    expect(visitor.play.inventory.find((i) => i.kind === "hotdogs")).toBeUndefined();
+    expect(visitor.play.warehouse.items.find((i) => i.kind === "hotdogs")?.qty).toBe(12);
+  });
+
   it("lets staff sell at the sticker you set, and upgrade storage", () => {
     const { land, visitor, plot } = leaseCheapSouth();
     const order = orderMarket(visitor, land, { plotId: plot.id, skus: ["hotdog_cart", "hotdogs"] });

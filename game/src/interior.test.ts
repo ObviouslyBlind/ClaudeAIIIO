@@ -231,7 +231,7 @@ describe("owned building interiors", () => {
     expect(harbour.visible).toBe(false);
     expect(scene.children).toContain(harbour);
     expect(harbour.parent).toBe(scene);
-    expect(statuses.some((s) => s.includes("PAPER"))).toBe(true);
+    expect(statuses.some((s) => s.includes("Inside"))).toBe(true);
 
     interior.goStairs();
     expect(interior.currentFloor()).toBe("upstairs");
