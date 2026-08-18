@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { ROAD_CLASSES, carriagewayWidthM, roadClassSpec } from "./roadclass.js";
-import { junctionPad, trimPolylineForPads } from "./roadnet.js";
+import { junctionPad, trimPolylineForPads, pointInJunctionPad } from "./roadnet.js";
 
 /** Grit shoulder under the tarmac edge, so a road has a rim instead of a cut edge. */
 export const SHOULDER = 0x6f6a5e;
@@ -239,6 +239,32 @@ function omitNearCentres(pts, centres, gap = 20) {
   return pts.filter((p) => centres.every((c) => Math.hypot(p.x - c.x, p.z - c.z) >= gap));
 }
 
+function omitInsidePads(pts, graph, extra) {
+  if (!graph || !pts.length) return pts;
+  return pts.filter((p) => {
+    for (const node of graph.nodes) {
+      const pad = junctionPad(graph, node);
+      if (pad && pointInJunctionPad(node, pad, p.x, p.z, extra)) return false;
+    }
+    return true;
+  });
+}
+
+function splitRuns(pts, maxGap) {
+  const runs = [];
+  let run = [];
+  for (const p of pts) {
+    const last = run[run.length - 1];
+    if (last && Math.hypot(p.x - last.x, p.z - last.z) > maxGap) {
+      if (run.length >= 2) runs.push(run);
+      run = [];
+    }
+    run.push(p);
+  }
+  if (run.length >= 2) runs.push(run);
+  return runs;
+}
+
 function drawSidewalks(scene, spec, road, heightAt, centres, graph) {
   if (!hasSidewalk(road)) return;
   const cls = classOf(road);
@@ -246,8 +272,14 @@ function drawSidewalks(scene, spec, road, heightAt, centres, graph) {
   const pts = omitNearCentres(drawablePoints(road, graph), centres, 30);
   if (pts.length < 2) return;
   const offset = roadClassSpec(cls).carriageM / 2 + SHOULDER_PAD_M / 2 + walk / 2;
-  drawRibbon(scene, spec, { ...road, points: offsetPolyline(pts, -offset) }, heightAt, walk, SIDEWALK, "sidewalk");
-  drawRibbon(scene, spec, { ...road, points: offsetPolyline(pts, offset) }, heightAt, walk, SIDEWALK, "sidewalk");
+  // Offset walks would otherwise keep going and hash through the junction
+  // as a grey plus. Clip them to the plate, then the corner frame wraps.
+  for (const side of [-1, 1]) {
+    const clipped = omitInsidePads(offsetPolyline(pts, offset * side), graph, walk + 0.4);
+    for (const run of splitRuns(clipped, 10)) {
+      drawRibbon(scene, spec, { ...road, points: run }, heightAt, walk, SIDEWALK, "sidewalk");
+    }
+  }
 }
 
 /** 2+2 lanes with a stone median. Widths come from the class table. */
@@ -339,6 +371,46 @@ function addJunctionPlate(scene, spec, heightAt, pad) {
   scene.add(mesh);
 }
 
+function worldOffset(pad, lx, lz) {
+  const c = Math.cos(pad.yaw || 0);
+  const s = Math.sin(pad.yaw || 0);
+  return { x: pad.x + lx * c + lz * s, z: pad.z - lx * s + lz * c };
+}
+
+/** Sidewalk around a corner plate so the walks turn with the L instead of hashing through it. */
+function drawWalkFrame(scene, spec, heightAt, pad) {
+  const walk = pad.walkM;
+  if (!walk) return;
+  const y = heightAt(spec, pad.x, pad.z) + 0.16;
+  const mid = pad.side / 2 + walk / 2;
+  const len = pad.side + walk;
+  const strips = [
+    { lx: 0, lz: mid, w: len, d: walk },
+    { lx: 0, lz: -mid, w: len, d: walk },
+    { lx: mid, lz: 0, w: walk, d: len },
+    { lx: -mid, lz: 0, w: walk, d: len },
+  ];
+  for (const s of strips) {
+    const at = worldOffset(pad, s.lx, s.lz);
+    const mesh = new THREE.Mesh(
+      new THREE.PlaneGeometry(s.w, s.d),
+      new THREE.MeshLambertMaterial({ color: SIDEWALK }),
+    );
+    mesh.rotation.order = "YXZ";
+    mesh.rotation.set(-Math.PI / 2, pad.yaw || 0, 0);
+    mesh.position.set(at.x, y, at.z);
+    mesh.castShadow = false;
+    mesh.receiveShadow = true;
+    mesh.userData.kind = "road";
+    mesh.userData.roadKind = "sidewalk";
+    mesh.userData.island = pad.island;
+    mesh.userData.roadName = (pad.label || "junction") + " walk";
+    mesh.userData.widthM = walk;
+    mesh.userData.mode = "PAPER";
+    scene.add(mesh);
+  }
+}
+
 /**
  * A slab of tarmac where roads actually meet.
  *
@@ -359,6 +431,8 @@ function drawJunctions(scene, map, specOf, heightAt) {
         z: node.z,
         side: spec.side,
         yaw: spec.yaw,
+        kind: spec.kind,
+        walkM: spec.walkM,
         label: node.name || "junction",
       });
     }
@@ -379,6 +453,7 @@ function drawJunctions(scene, map, specOf, heightAt) {
 
   for (const pad of pads) {
     addJunctionPlate(scene, specOf(pad.island), heightAt, pad);
+    if (pad.kind === "corner") drawWalkFrame(scene, specOf(pad.island), heightAt, pad);
   }
 }
 
