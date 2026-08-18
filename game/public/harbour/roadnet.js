@@ -286,8 +286,10 @@ export function junctionPad(graph, node) {
       trim[a.edge.id] = 0;
       continue;
     }
+    // Overlap the through carriageway by more than a hairline. 0.2 m read as a
+    // grey seam (shoulder or sand) between two black rectangles.
     const other = Math.max(...paved.filter((o) => o.edge.id !== a.edge.id).map((o) => o.width));
-    trim[a.edge.id] = Math.max(0, other / 2 - 0.2);
+    trim[a.edge.id] = Math.max(0, other / 2 - 1.4);
   }
 
   return {
@@ -326,7 +328,7 @@ export function junctionRadiusM(graph, node) {
 }
 
 function cutEndAt(pts, node, trimM, head) {
-  if (trimM <= 0.5 || pts.length < 3) return pts;
+  if (trimM <= 0.5 || !pts || pts.length < 2) return pts;
   const seq = head ? pts.slice() : pts.slice().reverse();
   let i = 0;
   while (i < seq.length && Math.hypot(seq[i].x - node.x, seq[i].z - node.z) < trimM) i += 1;
@@ -346,7 +348,7 @@ function cutEndAt(pts, node, trimM, head) {
  * node, so the taxi and the lots keep the real join.
  */
 export function trimPolylineForPads(pts, graph, edge) {
-  if (!graph || !edge || !pts || pts.length < 3) return pts;
+  if (!graph || !edge || !pts || pts.length < 2) return pts;
   let out = pts;
   const a = nodeById(graph, edge.a);
   const b = nodeById(graph, edge.b);

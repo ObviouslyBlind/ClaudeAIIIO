@@ -161,6 +161,18 @@ describe("paved street from spawn", () => {
         expect(d, "sidewalk hashed through the Quayward corner").toBeGreaterThan(swPad!.side / 2 - 0.8);
       }
     }
+
+    const se = map.graph.nodes.find((n) => n.id === "s-quay-se")!;
+    const loopWalks = walks.filter((m) => m.userData.roadName === "Quayward Loop");
+    expect(loopWalks.length).toBeGreaterThan(0);
+    let nearest = Infinity;
+    for (const mesh of loopWalks) {
+      const pos = mesh.geometry.attributes.position;
+      for (let i = 0; i < pos.count; i++) {
+        nearest = Math.min(nearest, Math.hypot(pos.getX(i) - se.x, pos.getZ(i) - se.z));
+      }
+    }
+    expect(nearest, "kerb vanished a block before the SE hub").toBeLessThan(10);
   });
 
   it("extrudes each dirt polyline as one brown ribbon, not a chain of box slabs", () => {

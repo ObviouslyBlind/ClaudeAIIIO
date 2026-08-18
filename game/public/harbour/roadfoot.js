@@ -113,7 +113,7 @@ export function buildHubFootprint(graph, node, pad) {
   const grit = [];
   const walk = [];
   if (!graph || !node || !pad) return { tarmac: [], shoulder: [], sidewalk: [] };
-  const along = pad.side / 2 + 0.8;
+  const along = pad.side / 2 + 1.2;
   for (const e of graph.edges) {
     if (e.a !== node.id && e.b !== node.id) continue;
     if (!e.points || e.points.length < 2) continue;

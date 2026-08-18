@@ -241,4 +241,42 @@ describe("road graph", () => {
       }
     }
   });
+
+  it("trims a 2-point stem at a T, not only polylines with 3+ stations", () => {
+    const graph = createLandBoard().graph;
+    const sw = graph.nodes.find((n) => n.id === "s-quay-sw")!;
+    const loopEast = graph.edges.find((e) => {
+      if (e.name !== "Quayward Loop" || (e.a !== sw.id && e.b !== sw.id)) return false;
+      const p = e.a === sw.id ? e.points[1]! : e.points[e.points.length - 2]!;
+      return p.x > sw.x + 10;
+    })!;
+    const two = [loopEast.points[0]!, loopEast.points[loopEast.points.length - 1]!];
+    const trimmed = trimPolylineForPads(two, graph, loopEast);
+    const end = loopEast.a === sw.id ? trimmed[0]! : trimmed[trimmed.length - 1]!;
+    expect(trimmed.length).toBe(2);
+    expect(Math.hypot(end.x - sw.x, end.z - sw.z)).toBeGreaterThan(2);
+  });
+
+  it("overlaps every South T stem with the through road by at least a metre", () => {
+    const graph = createLandBoard().graph;
+    const thin: string[] = [];
+    for (const node of graph.nodes) {
+      if (node.island !== "south") continue;
+      const pad = junctionPad(graph, node);
+      if (!pad || pad.kind !== "tee") continue;
+      const arms = graph.edges.filter(
+        (e) => e.cls !== "track" && (e.a === node.id || e.b === node.id),
+      );
+      for (const e of arms) {
+        const trimM = pad.trim[e.id] || 0;
+        if (trimM <= 0.5) continue;
+        const other = Math.max(
+          ...arms.filter((o) => o.id !== e.id).map((o) => carriagewayWidthM(o.cls)),
+        );
+        const overlap = other / 2 - trimM;
+        if (overlap < 1) thin.push(`${node.id} ${e.name} ${overlap.toFixed(2)}m`);
+      }
+    }
+    expect(thin).toEqual([]);
+  });
 });
