@@ -10,6 +10,6 @@ Bar: live `http://localhost:8787/` (operator plays the public Cloudflare tunnel)
 - Quayward Loop is a rectangle; north arms due east-west
 - Outer sidewalk at 90° is a square L, not a stair-step ribbon
 
-Last operator shot: **FAIL** — stair-step outer walk + smashed diagonal on the north loop. This round squares the loop and replaces 3-point miter ribbons with L-shaped kerb quads. Colours unchanged.
+Last operator shot: stacked black rectangles and broken grey kerbs. This round unions the local street network into one tarmac polygon and one sidewalk band (Clipper/Martinez). Highway duals and circuses unchanged.
 
 Politics frozen. Operator is the brake. Do not merge unless asked.

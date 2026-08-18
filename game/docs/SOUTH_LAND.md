@@ -27,6 +27,7 @@ Authored as a graph. See `docs/ROADS.md` for the model, the class table and why 
 - Streets fill the towns: Quayward Loop, Saltwind High St, Haven Crescent, Channel Sands, Palm Arc.
 - Lanes are single-track hamlet rows and alleys. Field tracks are dirt and carry on past the lane ends.
 - Town junctions sit short of the green — a town square is not a crossroads.
+- Local streets are drawn as **one unioned tarmac polygon** plus a walk band, not overlapping strips. See `docs/ROAD_MESH.md`.
 
 ### Old notes
 
