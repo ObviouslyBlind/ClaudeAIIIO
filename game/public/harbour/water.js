@@ -115,10 +115,11 @@ export function tickHarbourWater(meshes, t) {
       const z0 = rest[i * 3 + 2];
       arr[i * 3 + 2] =
         z0 +
-        0.07 * Math.sin(x * 0.18 + time * 1.35) +
-        0.045 * Math.sin(y * 0.14 - time * 1.05);
+        0.38 * Math.sin(x * 0.16 + time * 1.45) +
+        0.22 * Math.sin(y * 0.12 - time * 1.15);
     }
     pos.needsUpdate = true;
+    mesh.geometry.computeVertexNormals();
   }
 }
 
