@@ -12,6 +12,7 @@ One shard. The sim owns cash, plots, staff, and prices. The browser is a camera.
 
 ## Do
 - Follow `game/PLAN.md` and `game/FOUNDATION.md`
+- Skills: `game/SKILLS.md`. Grab `two-harbors-job-index`, then `two-harbors-director` (overrides arcade Three.js packs)
 - Keep `createWorld` in `game/src/server.ts`
 - Keep `heightAt` in `game/src/land.ts` and `game/public/harbour/main.js` in sync
 - Label money PAPER / SIMULATED
