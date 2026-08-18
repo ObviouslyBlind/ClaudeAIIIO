@@ -35,10 +35,44 @@ type HeightFn = (spec: IslandSpec, x: number, z: number) => number;
 
 const STREET_CLEAR = 11;
 const RAB_R = 18;
+const RAB_GAP = RAB_R + 4;
 
 function hash(n: number): number {
   const x = Math.sin(n * 12.9898) * 43758.5453;
   return x - Math.floor(x);
+}
+
+function polylineLen(pts: XZ[]): number {
+  let n = 0;
+  for (let i = 0; i < pts.length - 1; i++) {
+    n += Math.hypot(pts[i + 1]!.x - pts[i]!.x, pts[i + 1]!.z - pts[i]!.z);
+  }
+  return n;
+}
+
+function pointAlong(pts: XZ[], dist: number): { at: XZ; dir: XZ } | null {
+  let left = dist;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const a = pts[i]!;
+    const b = pts[i + 1]!;
+    const len = Math.hypot(b.x - a.x, b.z - a.z) || 1;
+    if (left <= len) {
+      const t = left / len;
+      return {
+        at: { x: a.x + (b.x - a.x) * t, z: a.z + (b.z - a.z) * t },
+        dir: { x: (b.x - a.x) / len, z: (b.z - a.z) / len },
+      };
+    }
+    left -= len;
+  }
+  return null;
+}
+
+/** Spurs start at the roundabout ring, not the circus centre. */
+function trimNearPoint(pts: XZ[], join: XZ, gap = RAB_GAP): XZ[] {
+  if (pts.length < 3) return pts;
+  const out = pts.filter((p) => Math.hypot(p.x - join.x, p.z - join.z) >= gap);
+  return out.length >= 2 ? out : pts;
 }
 
 function houseNumberFor(id: string): number {
@@ -214,8 +248,9 @@ function lotsAlong(
         const plen = Math.hypot(perp.x, perp.z) || 1;
         const p = { x: perp.x / plen, z: perp.z / plen };
         const hk = hash(opts.seed + i * 17 + k * 13 + side * 9);
-        const depth = (opts.band === "shore" ? 14 : 16) + hk * 12;
-        const lot = quad(sa, sb, p, opts.setback ?? 13, depth, (hk - 0.5) * 0.08);
+        const depth =
+          opts.band === "field" ? 70 + hk * 28 : opts.band === "shore" ? 12 + hk * 8 : 12 + hk * 8;
+        const lot = quad(sa, sb, p, opts.setback ?? (opts.band === "field" ? 16 : 11), depth, (hk - 0.5) * 0.06);
         pushParcel(lots, lot, opts);
       }
     }
@@ -259,10 +294,40 @@ function paved(
     island: "south",
     kind: "paved",
     name,
-    points,
+    points: trimNearPoint(points, joins),
     joins,
     ...extra,
   };
+}
+
+function addHamletsAlong(roads: Road[], pts: XZ[], join: XZ, stem: string, seed: number): void {
+  const len = polylineLen(pts);
+  let d = 190;
+  let n = 0;
+  while (d < len - 100 && n < 8) {
+    const hit = pointAlong(pts, d);
+    if (hit && !inVolcanoExclusion(hit.at.x, hit.at.z, 60)) {
+      const perp = { x: -hit.dir.z, z: hit.dir.x };
+      const half = 44 + hash(seed + n) * 18;
+      const a = { x: hit.at.x - perp.x * half, z: hit.at.z - perp.z * half };
+      const b = { x: hit.at.x + perp.x * half, z: hit.at.z + perp.z * half };
+      roads.push(paved(`${stem} Row ${n + 1}`, linePoints(a, b, 4), join));
+      const dirtA = {
+        x: a.x - perp.x * (62 + hash(seed + n + 3) * 36),
+        z: a.z - perp.z * (62 + hash(seed + n + 3) * 36),
+      };
+      roads.push(dirt(`${stem} Track ${n + 1}`, wiggleLine(a, dirtA, 5, 10, seed + n)));
+      if (n % 2 === 0) {
+        const dirtB = {
+          x: b.x + perp.x * (78 + hash(seed + n + 5) * 42),
+          z: b.z + perp.z * (78 + hash(seed + n + 5) * 42),
+        };
+        roads.push(dirt(`${stem} Field ${n + 1}`, wiggleLine(b, dirtB, 6, 12, seed + n + 11)));
+      }
+    }
+    d += 210 + hash(seed + n) * 50;
+    n += 1;
+  }
 }
 
 function dirt(name: string, points: XZ[]): Road {
@@ -327,18 +392,18 @@ export function buildSouthLand(spec: IslandSpec, heightAt: HeightFn): SouthBuilt
   const quaySpur = linePoints(harbour, quayward, 5);
   roads.push(paved("Quayward Rd", quaySpur, harbour));
 
-  // Tight grid — three east–west, three north–south, not a clone of the others.
-  const gridEw = [-42, 0, 44];
-  const gridNs = [-48, 8, 52];
+  // Two streets around the plaza — not a 3×3 through the green.
+  const gridEw = [-38, 40];
+  const gridNs = [-42, 46];
   for (const dz of gridEw) {
     const a = { x: quayward.x - 72, z: quayward.z + dz };
     const b = { x: quayward.x + 78, z: quayward.z + dz + 3 };
-    roads.push(paved(`Quayward ${dz < 0 ? "South" : dz > 0 ? "North" : "Mid"}`, linePoints(a, b, 4), harbour));
+    roads.push(paved(`Quayward ${dz < 0 ? "South" : "North"}`, linePoints(a, b, 4), harbour));
   }
   for (const dx of gridNs) {
     const a = { x: quayward.x + dx, z: quayward.z - 58 };
     const b = { x: quayward.x + dx + 2, z: quayward.z + 62 };
-    roads.push(paved(`Quayward ${dx < 0 ? "West" : dx > 0 ? "East" : "Spine"}`, linePoints(a, b, 4), harbour));
+    roads.push(paved(`Quayward ${dx < 0 ? "West" : "East"}`, linePoints(a, b, 4), harbour));
   }
 
   const caneSpur = wiggleLine(cane, canebrake, 12, 36, 7);
@@ -414,6 +479,11 @@ export function buildSouthLand(spec: IslandSpec, heightAt: HeightFn): SouthBuilt
   );
   roads.push(dirt("Pass Path", wiggleLine(ashPass, eastHaven, 9, 22, 37)));
 
+  addHamletsAlong(roads, caneSpur, cane, "Cane", 41);
+  addHamletsAlong(roads, havenSpur, haven, "Haven", 53);
+  addHamletsAlong(roads, roads.find((r) => r.name === "South Strand")!.points, harbour, "Strand", 67);
+  addHamletsAlong(roads, highwayPts, harbour, "Hwy", 79);
+
   const clear: ClearRoad[] = roads.map((r) => ({
     points: r.points,
     clear: r.name === "Island Hwy" || r.lanes === 4 ? HIGHWAY_CLEAR_M : r.roundabout ? 14 : STREET_CLEAR,
@@ -427,79 +497,95 @@ export function buildSouthLand(spec: IslandSpec, heightAt: HeightFn): SouthBuilt
   plazaAt(lots, ashPass, "Ash Pass", base, 20, 20);
   plazaAt(lots, { x: eastHaven.x, z: eastHaven.z }, "East Haven", base, 24, 20);
 
-  const streetOpts = { ...base, band: "street" as const, fromM: 28, toM: 900, cutM: 32, seed: 3 };
+  const streetOpts = { ...base, band: "street" as const, fromM: 16, toM: 1200, cutM: 20, seed: 3, sides: [-1, 1] as (-1 | 1)[] };
 
-  lotsAlong(lots, quaySpur, { ...streetOpts, street: "Quayward Rd", toM: 160, seed: 11 });
+  lotsAlong(lots, quaySpur, { ...streetOpts, street: "Quayward Rd", toM: 180, seed: 11 });
   for (const r of roads.filter((x) => x.name?.startsWith("Quayward ") && x.name !== "Quayward Rd" && x.name !== "Quayward Path")) {
-    lotsAlong(lots, r.points, { ...streetOpts, street: r.name || "Quayward", toM: 140, cutM: 28, seed: 15 });
+    lotsAlong(lots, r.points, { ...streetOpts, street: r.name || "Quayward", toM: 160, cutM: 18, seed: 15 });
   }
 
-  lotsAlong(lots, caneSpur, { ...streetOpts, street: "Canebrake Rd", fromM: 80, toM: 980, cutM: 36, seed: 21 });
-  lotsAlong(lots, ySw, { ...streetOpts, street: "Mill Fork", toM: 140, seed: 22 });
-  lotsAlong(lots, ySe, { ...streetOpts, street: "Cane End", toM: 150, seed: 23 });
-  lotsAlong(lots, yW, { ...streetOpts, street: "Brake Lane", toM: 110, seed: 24 });
+  lotsAlong(lots, caneSpur, { ...streetOpts, street: "Canebrake Rd", fromM: 40, toM: 1100, cutM: 22, seed: 21 });
+  lotsAlong(lots, ySw, { ...streetOpts, street: "Mill Fork", toM: 160, seed: 22 });
+  lotsAlong(lots, ySe, { ...streetOpts, street: "Cane End", toM: 170, seed: 23 });
+  lotsAlong(lots, yW, { ...streetOpts, street: "Brake Lane", toM: 130, seed: 24 });
 
-  lotsAlong(lots, highStreet, { ...streetOpts, street: "Saltwind High St", fromM: 20, toM: 520, cutM: 30, seed: 31 });
+  lotsAlong(lots, highStreet, { ...streetOpts, street: "Saltwind High St", fromM: 12, toM: 560, cutM: 20, seed: 31 });
   for (const r of roads.filter((x) => x.name?.startsWith("Saltwind Alley"))) {
-    lotsAlong(lots, r.points, { ...streetOpts, street: r.name || "Alley", toM: 70, cutM: 26, sides: [1], seed: 32 });
+    lotsAlong(lots, r.points, { ...streetOpts, street: r.name || "Alley", toM: 80, cutM: 18, seed: 32 });
   }
 
-  lotsAlong(lots, passSpur, { ...streetOpts, street: "Pass Rd", toM: 120, seed: 41 });
+  lotsAlong(lots, passSpur, { ...streetOpts, street: "Pass Rd", toM: 140, seed: 41 });
   for (const r of roads.filter((x) => x.name?.startsWith("Ash Spoke"))) {
-    lotsAlong(lots, r.points, { ...streetOpts, street: r.name || "Spoke", fromM: 16, toM: 90, cutM: 28, seed: 42 });
+    lotsAlong(lots, r.points, { ...streetOpts, street: r.name || "Spoke", fromM: 12, toM: 100, cutM: 20, seed: 42 });
   }
 
-  lotsAlong(lots, havenSpur, { ...streetOpts, street: "Haven Rd", fromM: 60, toM: 1100, cutM: 36, seed: 51 });
-  lotsAlong(lots, loop, { ...streetOpts, street: "Haven Crescent", fromM: 8, toM: 900, cutM: 34, seed: 52 });
+  lotsAlong(lots, havenSpur, { ...streetOpts, street: "Haven Rd", fromM: 40, toM: 1200, cutM: 22, seed: 51 });
+  lotsAlong(lots, loop, { ...streetOpts, street: "Haven Crescent", fromM: 8, toM: 900, cutM: 22, seed: 52 });
   lotsAlong(lots, roads.find((r) => r.name === "Haven Chord")!.points, {
     ...streetOpts,
     street: "Haven Chord",
-    toM: 160,
+    toM: 180,
     seed: 53,
   });
+
+  for (const r of roads.filter((x) => x.kind === "paved" && x.name?.includes(" Row "))) {
+    lotsAlong(lots, r.points, { ...streetOpts, street: r.name || "Row", fromM: 6, toM: 140, cutM: 18, seed: 60 });
+  }
 
   const shoreOpts = {
     ...base,
     band: "shore" as const,
     zone: "commercial" as const,
-    fromM: 40,
-    toM: 900,
-    cutM: 22,
-    setback: 12,
-    sides: [1] as (-1 | 1)[],
+    fromM: 24,
+    toM: 1100,
+    cutM: 20,
+    setback: 11,
+    sides: [-1, 1] as (-1 | 1)[],
     seed: 70,
   };
   lotsAlong(lots, roads.find((r) => r.name === "Channel Sands")!.points, {
     ...shoreOpts,
     street: "Channel Sands",
-    toM: 720,
+    toM: 760,
     seed: 71,
   });
   lotsAlong(lots, roads.find((r) => r.name === "Palm Arc")!.points, {
     ...shoreOpts,
     street: "Palm Arc",
-    toM: 480,
+    toM: 520,
     seed: 72,
   });
   lotsAlong(lots, roads.find((r) => r.name === "South Strand")!.points, {
     ...shoreOpts,
     street: "South Strand",
-    fromM: 80,
-    toM: 1100,
-    cutM: 24,
+    fromM: 40,
+    toM: 1200,
+    cutM: 20,
     seed: 73,
   });
 
-  // Inland fields off dirt and the long Canebrake drive (ore lives on fields).
-  const fieldRoads = [
-    ...roads.filter((x) => x.kind === "dirt"),
-    roads.find((x) => x.name === "Canebrake Rd")!,
-    roads.find((x) => x.name === "Haven Rd")!,
-  ].filter(Boolean);
+  const fieldOpts = {
+    ...base,
+    band: "field" as const,
+    fromM: 8,
+    toM: 220,
+    cutM: 36,
+    setback: 16,
+    sides: [-1, 1] as (-1 | 1)[],
+    seed: 80,
+  };
+  for (const r of roads.filter((x) => x.kind === "dirt")) {
+    lotsAlong(lots, r.points, { ...fieldOpts, street: r.name || "Field Lane", seed: 81 + (r.name?.length ?? 0) });
+  }
+
+  // Extra inland fields off the long drives.
+  const fieldRoads = [roads.find((x) => x.name === "Canebrake Rd")!, roads.find((x) => x.name === "Haven Rd")!].filter(
+    Boolean,
+  );
   for (const r of fieldRoads) {
     const pts = r.points;
     if (pts.length < 3) continue;
-    for (const frac of [0.35, 0.55, 0.75]) {
+    for (const frac of [0.28, 0.48, 0.68, 0.84]) {
       const i = Math.min(pts.length - 2, Math.max(1, Math.floor(frac * (pts.length - 1))));
       const a = pts[i]!;
       const b = pts[i + 1]!;
@@ -508,7 +594,7 @@ export function buildSouthLand(spec: IslandSpec, heightAt: HeightFn): SouthBuilt
       const len = Math.hypot(dx, dz) || 1;
       for (const side of [-1, 1] as const) {
         const p = { x: (-dz / len) * side, z: (dx / len) * side };
-        const field = quad(a, b, p, 18, 48 + hash(frac * 9 + side + (r.name?.length ?? 1)) * 22, 0.05);
+        const field = quad(a, b, p, 18, 72 + hash(frac * 9 + side + (r.name?.length ?? 1)) * 24, 0.04);
         pushParcel(lots, field, { ...base, street: "Field Lane", band: "field" });
       }
     }

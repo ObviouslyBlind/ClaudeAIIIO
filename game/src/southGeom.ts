@@ -17,8 +17,10 @@ export const VOLCANO_R = 780;
 export const VOLCANO_CRATER_R = 72;
 export const VOLCANO_RIM_R = 125;
 export const HIGHWAY_CLEAR_M = 16;
-export const SOUTH_MIN_LOT_M2 = 120;
-export const SOUTH_MAX_LOT_M2 = 9000;
+export const SOUTH_MIN_LOT_M2 = 90;
+export const SOUTH_MAX_LOT_M2 = 12000;
+/** Harbour / street grade. Keep in sync with heightAt. */
+export const SOUTH_GRADE_Y = 1.28;
 
 /** Spawn on the quay, a few metres inland along the highway (+X). */
 export function southSpawnPad(): XZ {
@@ -87,8 +89,44 @@ export function distToPolyline(pts: XZ[], x: number, z: number): number {
   return best;
 }
 
+let _hwySpline: XZ[] | null = null;
+export function southHighwaySpline(): XZ[] {
+  if (!_hwySpline) _hwySpline = sampleSpline(SOUTH_HIGHWAY_NODES, 8);
+  return _hwySpline;
+}
+
+/** Distance to the sampled highway spline, not the 10 control nodes. */
 export function distToHighway(x: number, z: number): number {
-  return distToPolyline(SOUTH_HIGHWAY_NODES, x, z);
+  return distToPolyline(southHighwaySpline(), x, z);
+}
+
+/** Town access + beach corridors that must sit on the same grade as the highway. */
+function southGradeLines(): [XZ, XZ][] {
+  const quayward = SOUTH_TOWNS[0]!;
+  const canebrake = SOUTH_TOWNS[1]!;
+  const saltwind = SOUTH_TOWNS[2]!;
+  const ashPass = SOUTH_TOWNS[3]!;
+  const eastHaven = SOUTH_TOWNS[4]!;
+  return [
+    [SOUTH_PORT, SOUTH_RAB.harbour],
+    [SOUTH_RAB.harbour, quayward],
+    [SOUTH_RAB.west, canebrake],
+    [SOUTH_RAB.harbour, saltwind],
+    [SOUTH_RAB.pass, ashPass],
+    [SOUTH_RAB.east, eastHaven],
+    [SOUTH_RAB.harbour, { x: -420, z: 7220 }],
+    [SOUTH_RAB.harbour, { x: -1680, z: 8380 }],
+  ];
+}
+
+/** Metres to the flattened harbour / street grade (highway spline, towns, access). */
+export function distToSouthGrade(x: number, z: number): number {
+  let d = distToHighway(x, z);
+  const p = { x, z };
+  for (const [a, b] of southGradeLines()) d = Math.min(d, distToSegment(p, a, b));
+  for (const t of SOUTH_TOWNS) d = Math.min(d, Math.hypot(x - t.x, z - t.z));
+  for (const r of Object.values(SOUTH_RAB)) d = Math.min(d, Math.hypot(x - r.x, z - r.z));
+  return d;
 }
 
 export function volcanoDist(x: number, z: number): number {

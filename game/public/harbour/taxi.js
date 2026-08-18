@@ -10,6 +10,21 @@ const SPEED = 42;
 const TAXI_Y = 0.04;
 /** Hailed cab leaves if nobody boards. */
 export const TAXI_WAIT_MS = 60_000;
+/** Hail wait before the cab stages and drives in. */
+export const TAXI_ETA_MIN_MS = 5_000;
+export const TAXI_ETA_MAX_MS = 30_000;
+
+export function rollTaxiEtaMs(rng = Math.random) {
+  return TAXI_ETA_MIN_MS + Math.round(rng() * (TAXI_ETA_MAX_MS - TAXI_ETA_MIN_MS));
+}
+
+/** Bottom-right chip copy. No PAPER on the player-facing plate. */
+export function formatTaxiEta(remainMs) {
+  const s = Math.max(0, Math.ceil(remainMs / 1000));
+  const m = Math.floor(s / 60);
+  const r = s % 60;
+  return `Taxi in ${m}:${String(r).padStart(2, "0")}`;
+}
 
 /**
  * Closest point on a polyline in XZ. Used to stay on paved points only.
@@ -599,6 +614,9 @@ export function createTaxi({
   setStatus,
   button,
   onRide,
+  onEta,
+  etaRng = Math.random,
+  now: nowFn = () => Date.now(),
 }) {
   const mesh = makeTaxiMesh();
   mesh.visible = false;
@@ -609,19 +627,25 @@ export function createTaxi({
   const overlayClose = typeof document !== "undefined" ? document.getElementById("taxi-map-close") : null;
   const overlayExit = typeof document !== "undefined" ? document.getElementById("taxi-map-exit") : null;
 
-  /** idle | coming | waiting | boarded | hauling */
+  /** idle | called | coming | waiting | boarded | hauling */
   let mode = "idle";
   let island = "north";
   let road = null;
   let path = [];
   let pi = 0;
   let waitStartedAtMs = null;
+  let calledAtMs = null;
+  let etaMs = 0;
   let overlayOpen = false;
+
+  function emitEta(label) {
+    if (typeof onEta === "function") onEta(label);
+  }
 
   function pavedRoads(islandId) {
     const map = getMap();
     if (!map) return [];
-    return map.roads.filter((r) => r.kind === "paved" && r.island === islandId);
+    return map.roads.filter((r) => r.kind === "paved" && !r.roundabout && r.island === islandId);
   }
 
   function closestPaved(x, z, islandId) {
@@ -809,6 +833,8 @@ export function createTaxi({
     path = [];
     pi = 0;
     waitStartedAtMs = null;
+    calledAtMs = null;
+    emitEta(null);
     closeOverlay();
     if (riding) {
       const spec = specOf(island);
@@ -823,9 +849,58 @@ export function createTaxi({
     pi = 0;
     road = null;
     waitStartedAtMs = null;
+    calledAtMs = null;
+    emitEta(null);
     mesh.visible = false;
     closeOverlay();
     setStatus("Taxi drove away..");
+  }
+
+  function pointAlongRoad(points, dist) {
+    let left = dist;
+    for (let i = 0; i < points.length - 1; i++) {
+      const a = points[i];
+      const b = points[i + 1];
+      const len = Math.hypot(b.x - a.x, b.z - a.z);
+      if (len < 1e-4) continue;
+      if (left <= len) {
+        const t = left / len;
+        return {
+          x: a.x + (b.x - a.x) * t,
+          z: a.z + (b.z - a.z) * t,
+          yaw: Math.atan2(b.x - a.x, b.z - a.z),
+        };
+      }
+      left -= len;
+    }
+    const a = points[points.length - 2];
+    const b = points[points.length - 1];
+    return { x: b.x, z: b.z, yaw: Math.atan2(b.x - a.x, b.z - a.z) };
+  }
+
+  function dispatchComing() {
+    const px = player.position.x;
+    const pz = player.position.z;
+    const hit = closestPaved(px, pz, island);
+    if (!hit) {
+      mode = "idle";
+      emitEta(null);
+      setStatus("No paved road here..");
+      return;
+    }
+    road = hit.road;
+    const offset = 80 + etaRng() * 60;
+    let startAlong = hit.proj.along - offset;
+    if (startAlong < 12) startAlong = hit.proj.along + offset;
+    const start = pointAlongRoad(hit.road.points, Math.max(0, startAlong));
+    place(start.x, start.z, start.yaw);
+    mesh.visible = true;
+    driveTo(hit.proj.x, hit.proj.z);
+    mode = "coming";
+    calledAtMs = null;
+    waitStartedAtMs = nowFn();
+    emitEta(null);
+    setStatus("Taxi coming along the paved road..");
   }
 
   function call() {
@@ -842,14 +917,17 @@ export function createTaxi({
       setStatus("Out of the taxi..");
       return;
     }
-    const sameIsland = mesh.visible && road && road.island === island;
+    if (mode === "called" || mode === "coming" || mode === "waiting") return;
     road = hit.road;
-    if (!sameIsland) parkOnPaved();
-    mesh.visible = true;
-    driveTo(hit.proj.x, hit.proj.z);
-    mode = "coming";
-    waitStartedAtMs = Date.now();
-    setStatus("Taxi coming along the paved road..");
+    etaMs = rollTaxiEtaMs(etaRng);
+    calledAtMs = nowFn();
+    waitStartedAtMs = null;
+    mesh.visible = false;
+    path = [];
+    pi = 0;
+    mode = "called";
+    emitEta(formatTaxiEta(etaMs));
+    setStatus(formatTaxiEta(etaMs));
   }
 
   /**
@@ -902,7 +980,13 @@ export function createTaxi({
     setStatus("Taxi on paved..");
   }
 
-  function tick(dt, nowMs = Date.now()) {
+  function tick(dt, nowMs = nowFn()) {
+    if (mode === "called") {
+      const remain = etaMs - (nowMs - calledAtMs);
+      emitEta(formatTaxiEta(remain));
+      if (remain <= 0) dispatchComing();
+      return;
+    }
     if (taxiWaitExpired(mode, waitStartedAtMs, nowMs)) {
       dismissUnboarded();
       return;
@@ -1006,5 +1090,6 @@ export function createTaxi({
     tick,
     mapOpen: () => overlayOpen,
     riding: () => mode === "boarded" || mode === "hauling",
+    mode: () => mode,
   };
 }

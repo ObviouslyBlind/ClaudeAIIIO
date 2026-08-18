@@ -89,6 +89,35 @@ function lookup(id) {
     : null;
 }
 
+function ensureTaxiEta() {
+  if (typeof document === "undefined" || !document.getElementById) return null;
+  let el = document.getElementById("taxi-eta");
+  if (el) return el;
+  el = document.createElement("p");
+  el.id = "taxi-eta";
+  el.className = "taxi-eta";
+  el.hidden = true;
+  el.setAttribute("aria-live", "polite");
+  const chrome = document.getElementById("chrome");
+  if (chrome) chrome.appendChild(el);
+  else if (document.body) document.body.appendChild(el);
+  else return null;
+  return el;
+}
+
+/** Bottom-right hail chip. Paint a label or hide. Never writes PAPER. */
+export function mountTaxiEtaChip(opts = {}) {
+  const el = opts.el !== undefined ? opts.el : ensureTaxiEta();
+  return {
+    set(label) {
+      if (!el) return;
+      const text = label ? String(label) : "";
+      if (el.textContent !== text) el.textContent = text;
+      el.hidden = !text;
+    },
+  };
+}
+
 export function mountTaxiHud(opts = {}) {
   const el = opts.el !== undefined ? opts.el : ensureTaxiHint();
   const fetchImpl = opts.fetch || globalThis.fetch;
