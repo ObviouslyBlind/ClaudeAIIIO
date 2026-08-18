@@ -18,8 +18,13 @@ Harbour, Island Hwy, town centres, and access roads sit on one flat grade. The v
 
 ## Roads
 
-- Island Hwy: 2+2 lanes with a **wide stone median** — the only dual carriageway. It **stops at the circus ring**; it does not chord through the island.
-- Harbour Circus is a **flat asphalt ring + stone island**, not stacked polylines. Only **Quayward Rd** leaves that ring (plus the highway). South Strand Y-forks off Quayward; Channel Sands Y-forks off Island Hwy; Palm Arc Y-forks off Strand.
+- Island Hwy is **five dual-carriageway spans** that meet circus rings. Taxi never chords the island.
+- Harbour Circus: asphalt ring + stone island. Only Quayward Rd leaves it besides the highway.
+- Side roads **T-join their parent**. `joins` is that kerb, not a circus kilometres away.
+- Channel Sands / Strand / Palm / Saltwind High St are Y-forks off the parent street.
+- Dirt is **field stubs only**. No dirt path cuts across paved. A stub that would overlay another street is omitted.
+- Taxi routes a **paved graph** (span → circus ring → span). It hops the kerb only. It will not lerp through dirt toward a circus that is not on that street.
+- Lots clear the highway **spine** as well as the split carriageways, so parcels do not sit in the omitted circus chords.
 - Channel Sands **Y-forks off Island Hwy** east of the circus. Palm Arc **Y-forks off South Strand**. They are not extra ribbons into the same ring.
 - Arterials (named Rd): 7.2 m tarmac + sidewalks. Locals (Row / Alley / Fork / Lane / Loop) are narrower T-stubs.
 - Dirt tracks: thin packed earth with larger field plots.

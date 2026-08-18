@@ -175,7 +175,8 @@ describe("paved street from spawn", () => {
     const hwy = pavedRoads.find((r) => r.lanes === 4);
     expect(hwy).toBeTruthy();
     const hwyMeshes = paved.filter((m) => m.userData.roadName === "Island Hwy");
-    expect(hwyMeshes.length).toBe(2);
+    expect(hwyMeshes.length).toBeGreaterThanOrEqual(2);
+    expect(hwyMeshes.length % 2).toBe(0);
     expect(added.some((m) => m.userData.roadKind === "median")).toBe(true);
     expect(added.some((m) => m.userData.roadKind === "island")).toBe(true);
 

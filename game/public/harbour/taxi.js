@@ -135,17 +135,45 @@ export function stopFromMapClick(stops, spec, sx, sy, w, h, pickPx = 26) {
 }
 
 /**
- * Route across the paved network. Branch roads carry `joins` (their junction
- * with the trunk), so any trip is: branch → junction → trunk → junction →
- * branch. Same-road trips stay on that road. Data-driven: a new street on the
- * map routes with no taxi changes.
+ * Route across the paved network. Roads are a graph: two polylines connect
+ * when an end (or `joins`) sits within TAXI_TRANSFER_M of the other. The cab
+ * walks each polyline and only hops the kerb. It never lerps kilometres
+ * through dirt toward a circus that is not on that street.
  */
+export const TAXI_TRANSFER_M = 22;
+
+function transferBetween(a, b, snapM) {
+  let best = null;
+  const ends = (r) => {
+    const s = [r.points[0], r.points[r.points.length - 1]];
+    // `joins` is a kerb on this polyline. A circus centre kilometres off
+    // the street is not a hop — that was the dirt-cut taxi bug.
+    if (r.joins) {
+      const onSelf = projectOnPolyline(r.points, r.joins.x, r.joins.z);
+      if (onSelf.dist <= snapM) s.push(r.joins);
+    }
+    return s;
+  };
+  for (const s of ends(a)) {
+    const p = projectOnPolyline(b.points, s.x, s.z);
+    if (p.dist <= snapM && (!best || p.dist < best.dist)) {
+      best = { dist: p.dist, onA: { x: s.x, z: s.z }, onB: { x: p.x, z: p.z } };
+    }
+  }
+  for (const s of ends(b)) {
+    const p = projectOnPolyline(a.points, s.x, s.z);
+    if (p.dist <= snapM && (!best || p.dist < best.dist)) {
+      best = { dist: p.dist, onA: { x: p.x, z: p.z }, onB: { x: s.x, z: s.z } };
+    }
+  }
+  return best;
+}
+
 export function routeAcrossPaved(roads, islandId, fromX, fromZ, toX, toZ) {
   const paved = (roads || []).filter(
-    (r) => r.kind === "paved" && !r.roundabout && r.island === islandId && r.points && r.points.length >= 2,
+    (r) => r.kind === "paved" && r.island === islandId && r.points && r.points.length >= 2,
   );
   if (!paved.length) return null;
-  const trunk = paved.find((r) => !r.joins) || paved[0];
 
   const nearest = (x, z) => {
     let best = null;
@@ -164,25 +192,59 @@ export function routeAcrossPaved(roads, islandId, fromX, fromZ, toX, toZ) {
     return { points: pts, road: to.road };
   }
 
-  const legs = [];
-  let trunkStart = { x: from.proj.x, z: from.proj.z };
-  if (from.road !== trunk) {
-    legs.push(
-      pathAlongPolyline(from.road.points, from.proj.x, from.proj.z, from.road.joins.x, from.road.joins.z),
-    );
-    trunkStart = from.road.joins;
+  const adj = paved.map(() => []);
+  for (let i = 0; i < paved.length; i++) {
+    for (let j = i + 1; j < paved.length; j++) {
+      const t = transferBetween(paved[i], paved[j], TAXI_TRANSFER_M);
+      if (!t) continue;
+      adj[i].push({ j, onThis: t.onA, onThat: t.onB });
+      adj[j].push({ j: i, onThis: t.onB, onThat: t.onA });
+    }
   }
-  let trunkEnd = { x: to.proj.x, z: to.proj.z };
-  if (to.road !== trunk) trunkEnd = to.road.joins;
-  legs.push(pathAlongPolyline(trunk.points, trunkStart.x, trunkStart.z, trunkEnd.x, trunkEnd.z));
-  if (to.road !== trunk) {
-    legs.push(pathAlongPolyline(to.road.points, to.road.joins.x, to.road.joins.z, to.proj.x, to.proj.z));
+
+  const startI = paved.indexOf(from.road);
+  const goalI = paved.indexOf(to.road);
+  const prev = new Array(paved.length).fill(-1);
+  const via = new Array(paved.length).fill(null);
+  const q = [startI];
+  prev[startI] = startI;
+  for (let qi = 0; qi < q.length; qi++) {
+    const i = q[qi];
+    if (i === goalI) break;
+    for (const e of adj[i]) {
+      if (prev[e.j] !== -1) continue;
+      prev[e.j] = i;
+      via[e.j] = e;
+      q.push(e.j);
+    }
   }
+  if (prev[goalI] === -1) return null;
+
+  const chain = [];
+  for (let i = goalI; i !== startI; i = prev[i]) chain.push(i);
+  chain.push(startI);
+  chain.reverse();
+
   const points = [];
-  for (const leg of legs) {
+  const pushLeg = (leg) => {
     for (const p of leg) {
       const last = points[points.length - 1];
       if (!last || Math.hypot(p.x - last.x, p.z - last.z) > 0.25) points.push(p);
+    }
+  };
+
+  let entry = { x: from.proj.x, z: from.proj.z };
+  for (let c = 0; c < chain.length; c++) {
+    const road = paved[chain[c]];
+    const exit =
+      c === chain.length - 1
+        ? { x: to.proj.x, z: to.proj.z }
+        : via[chain[c + 1]].onThis;
+    pushLeg(pathAlongPolyline(road.points, entry.x, entry.z, exit.x, exit.z));
+    if (c < chain.length - 1) {
+      const hop = via[chain[c + 1]].onThat;
+      pushLeg([{ x: hop.x, z: hop.z }]);
+      entry = hop;
     }
   }
   return points.length >= 2 ? { points, road: to.road } : null;
@@ -645,7 +707,7 @@ export function createTaxi({
   function pavedRoads(islandId) {
     const map = getMap();
     if (!map) return [];
-    return map.roads.filter((r) => r.kind === "paved" && !r.roundabout && r.island === islandId);
+    return map.roads.filter((r) => r.kind === "paved" && r.island === islandId);
   }
 
   function closestPaved(x, z, islandId) {

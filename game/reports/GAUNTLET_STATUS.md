@@ -1,10 +1,10 @@
 # Gauntlet status
 
-Piece in play: **South roads — highway, ring exits, Y-forks (not stacked ribbons)**.
+Piece in play: **South roads from scratch — paved graph, taxi never on dirt**.
 
-Bar: live `http://localhost:8787/` — stay at spawn (camera north of Island Hwy, looking toward Harbour Circus).
-- Island Hwy reads as 2+2 with a stone median
-- Harbour Circus is a ring with **one** town radial (Quayward); Strand / Channel / Palm are Y-forks, not extra ribbons into the same point
-- Highway does not chord the island
+Bar: live `http://localhost:8787/`
+- Dual Island Hwy in the foreground (two black tarmacs + stone median)
+- Harbour Circus is a ring, not overlapping strips
+- Hail Taxi: cab stays on black tarmac. It must not cut a brown dirt path across a paved road.
 
 Politics frozen. Operator is the brake. Do not merge unless asked.
