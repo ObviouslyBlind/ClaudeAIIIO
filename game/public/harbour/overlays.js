@@ -20,7 +20,7 @@ export const VIEWERS = {
   lots: {
     id: "lots",
     label: "Lots",
-    hint: "Outlines on. Click a $ bar or the lot. You will be asked if you want to buy.",
+    hint: "Lots on. Click Lots again to hide. Click a $ bar to be asked if you want to buy.",
   },
   foot: {
     id: "foot",
@@ -38,6 +38,13 @@ export const VIEWERS = {
     hint: "Minerals: ore catalog is in. Overlay paint comes next. PAPER.",
   },
 };
+
+/** Clicking an already-on viewer (Lots, Foot, …) hides it and returns to World. */
+export function toggleViewer(current, clicked) {
+  if (!clicked) return "world";
+  if (clicked === current && clicked !== "world") return "world";
+  return clicked;
+}
 
 const BAND_COLOR = {
   green: 0x3dcc6a,

@@ -2,11 +2,18 @@ import { describe, expect, it } from "vitest";
 import * as THREE from "three";
 import { createLandBoard, ISLANDS } from "./land.ts";
 import { footTrafficSnapshot } from "./footTraffic.ts";
-import { VIEWERS, createOverlays } from "../public/harbour/overlays.js";
+import { VIEWERS, createOverlays, toggleViewer } from "../public/harbour/overlays.js";
 
 describe("foot-traffic viewer (PAPER)", () => {
   it("exposes the four top-right viewers", () => {
     expect(Object.keys(VIEWERS)).toEqual(["world", "lots", "foot", "logistics", "minerals"]);
+  });
+
+  it("toggles Lots off back to World so outlines can hide", () => {
+    expect(toggleViewer("world", "lots")).toBe("lots");
+    expect(toggleViewer("lots", "lots")).toBe("world");
+    expect(toggleViewer("lots", "foot")).toBe("foot");
+    expect(toggleViewer("world", "world")).toBe("world");
   });
 
   it("paints a named green/yellow/red ribbon on each paved road", () => {

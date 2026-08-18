@@ -19,7 +19,7 @@ describe("harbour chrome HUD", () => {
     expect(html).toContain('id="chrome"');
     expect(html).toContain('id="buy-ask"');
     expect(html).toContain('id="lot-tags"');
-    expect(html).toContain("asked if you want to buy");
+    expect(html).toContain("Click again to hide");
     expect(html).not.toContain("first loop");
     expect(html).toContain('id="cart">PAPER<');
     expect(html).not.toContain('data-panel="tutorials"');
@@ -30,6 +30,7 @@ describe("harbour chrome HUD", () => {
   it("lease card and buy-ask ask before a lot is bought", () => {
     expect(chrome).toContain("plotDisplayName");
     expect(chrome).toContain("buyAskModel");
+    expect(chrome).toContain("toggleViewer");
     expect(chrome).toContain("paintBuyAsk");
     expect(chrome).toContain('id="buy-ask-yes"');
     expect(chrome).toContain('id="buy-ask-no"');
