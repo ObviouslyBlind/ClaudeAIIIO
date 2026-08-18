@@ -291,8 +291,13 @@ function findParcelAt(x, z) {
 
 function setStatus(t) {
   if (statusEl) statusEl.textContent = t;
-  const hint = document.getElementById("viewer-hint");
-  if (hint) hint.textContent = t;
+}
+
+function dismissLooseLandUi() {
+  if (landPinned) return;
+  lastInspectKey = "";
+  if (chromeHud && chromeHud.hideBuyAsk) chromeHud.hideBuyAsk();
+  if (chromeHud && chromeHud.paintLand) chromeHud.paintLand(null);
 }
 
 function leaseFailText(reason) {
@@ -922,6 +927,7 @@ function goTo(x, z) {
   walkTarget.set(x, h + 1.15, z);
   walking = true;
   islandId = nearestIsland(x, z);
+  dismissLooseLandUi();
   if (walkPath) {
     walkPath.show(
       player.position,
@@ -1076,51 +1082,27 @@ function closeLandCard() {
 }
 
 function inspectNearbyLand() {
+  // Never auto-open a lot card. Standing on 76 Shore Rd was pinning Buy lot
+  // over the walk, and Close could not stick because this ran every frame.
   if (landPinned) return;
   if (!map || !chromeHud || !chromeHud.paintLand) return;
-  const p = findParcelAt(player.position.x, player.position.z);
-  let crate = p ? crateOn(p.id) : null;
-  if (!crate) {
-    for (const [id, mesh] of crateMeshes) {
-      if (Math.hypot(mesh.position.x - player.position.x, mesh.position.z - player.position.z) < 10) {
-        crate = { id };
-        break;
-      }
+  let crate = null;
+  for (const [id, mesh] of crateMeshes) {
+    if (Math.hypot(mesh.position.x - player.position.x, mesh.position.z - player.position.z) < 10) {
+      crate = { id };
+      break;
     }
   }
-  const band = p ? bandForPlot(p) : "";
-  const key = (p ? p.id : "") + ":" + (crate ? crate.id : "") + ":" + band;
+  const key = crate ? "crate:" + crate.id : "";
   if (key === lastInspectKey) return;
   lastInspectKey = key;
-  if (!p) {
-    if (selected) {
-      const prev = map.plots.find((x) => x.id === selected);
-      selected = null;
-      if (prev) paintParcel(prev);
-      if (parcelMap) parcelMap.setSelected(null);
-    }
-    if (crate) {
-      chromeHud.paintLand(
-        { id: "roadside", owner: "visitor", price: 0 },
-        { crate, roadside: true, onTake: () => takeCrate(crate.id) },
-      );
-    } else {
-      chromeHud.paintLand(null);
-    }
+  if (crate) {
+    chromeHud.paintLand(
+      { id: "roadside", owner: "visitor", price: 0 },
+      { crate, roadside: true, onTake: () => takeCrate(crate.id) },
+    );
     return;
   }
-  if (selected !== p.id) {
-    const prev = selected ? map.plots.find((x) => x.id === selected) : null;
-    selected = p.id;
-    if (prev) paintParcel(prev);
-    paintParcel(p);
-    if (parcelMap) parcelMap.setSelected(p.id);
-  }
-  chromeHud.paintLand(p, {
-    band: bandForPlot(p),
-    crate,
-    onTake: crate ? () => takeCrate(crate.id) : null,
-  });
 }
 
 function onPointer(ev) {

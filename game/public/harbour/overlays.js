@@ -234,32 +234,45 @@ export function createOverlays({ scene, heightAt, specOf, getMap }) {
   function drawLots(play, map) {
     clear();
     const plots = ((map && map.plots) || []).filter((p) => p.island === "south" && p.ring && p.ring.length >= 3);
+    const pos = [];
+    const col = [];
     for (const plot of plots) {
       const spec = specOf(plot.island);
       if (!spec) continue;
-      const pts = [];
-      for (const [x, z] of plot.ring) {
-        pts.push(x, heightAt(spec, x, z) + 0.7, z);
-      }
-      pts.push(plot.ring[0][0], heightAt(spec, plot.ring[0][0], plot.ring[0][1]) + 0.7, plot.ring[0][1]);
-      const geo = new THREE.BufferGeometry();
-      geo.setAttribute("position", new THREE.Float32BufferAttribute(pts, 3));
-      const yours = plot.owner === "visitor";
-      const color = yours ? 0x5dcc6a : ZONE_INK[plot.zone] || ZONE_INK.commercial;
-      const line = new THREE.Line(
-        geo,
-        new THREE.LineBasicMaterial({ color, depthTest: false, transparent: true, opacity: yours ? 1 : 0.88 }),
+      const ink = new THREE.Color(
+        plot.owner === "visitor" ? 0x5dcc6a : ZONE_INK[plot.zone] || ZONE_INK.commercial,
       );
-      line.renderOrder = 7;
-      line.name = `lot-outline:${plot.id}`;
-      line.userData.kind = "lot-outline";
-      line.userData.label = plot.name || plot.id;
-      line.userData.layer = "lots";
-      line.userData.plotId = plot.id;
-      line.userData.zone = plot.zone;
-      line.userData.mode = "PAPER";
-      group.add(line);
+      const ring = plot.ring;
+      for (let i = 0; i < ring.length; i++) {
+        const [ax, az] = ring[i];
+        const [bx, bz] = ring[(i + 1) % ring.length];
+        const ay = heightAt(spec, ax, az) + 0.85;
+        const by = heightAt(spec, bx, bz) + 0.85;
+        pos.push(ax, ay, az, bx, by, bz);
+        col.push(ink.r, ink.g, ink.b, ink.r, ink.g, ink.b);
+      }
     }
+    if (!pos.length) return;
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+    geo.setAttribute("color", new THREE.Float32BufferAttribute(col, 3));
+    const lines = new THREE.LineSegments(
+      geo,
+      new THREE.LineBasicMaterial({
+        vertexColors: true,
+        depthTest: false,
+        transparent: true,
+        opacity: 0.95,
+      }),
+    );
+    lines.renderOrder = 8;
+    lines.name = "lot-outlines";
+    lines.userData.kind = "lot-outline";
+    lines.userData.label = "lot outlines";
+    lines.userData.layer = "lots";
+    lines.userData.mode = "PAPER";
+    lines.userData.plotCount = plots.length;
+    group.add(lines);
   }
 
   function drawLogistics(play) {
