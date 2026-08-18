@@ -319,7 +319,7 @@ function aimPointer(ev) {
 }
 
 const HUD_BLOCK =
-  "nav, a, #taxi-map, #ferry-ticket, #catalog-picker, #harbour-sheet, #land-card, #buy-ask, #stand-menu, #place-hint";
+  "nav, a, #taxi-map, #ferry-ticket, #catalog-picker, .float-panel, #land-card, #buy-ask, #stand-menu, #place-hint";
 
 function parcelLabel(p) {
   const kind = p.band === "field" ? "field" : p.band === "shore" ? "shore land" : "street land";
@@ -1208,7 +1208,7 @@ function onPointer(ev) {
   if (taxi && typeof taxi.mapOpen === "function" && taxi.mapOpen()) return;
   const placing = Boolean(chromeHud && chromeHud.isPlacing && chromeHud.isPlacing());
   if (ev.target.closest && ev.target.closest(HUD_BLOCK) && !placing) return;
-  if (placing && ev.target.closest && ev.target.closest(".lot-tag, #harbour-sheet, [data-overlay], nav, #taxi-map, #buy-ask, #stand-menu, #place-hint")) {
+  if (placing && ev.target.closest && ev.target.closest(".lot-tag, [data-panel], [data-overlay], nav, #taxi-map, .float-panel, #buy-ask, #stand-menu, #place-hint")) {
     return;
   }
   aimPointer(ev);
