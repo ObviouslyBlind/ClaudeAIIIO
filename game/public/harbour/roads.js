@@ -12,7 +12,7 @@ export const DIRT = 0x8a6238;
 export const STONE = 0x9a8a72;
 /** Pale coping walk beside the tarmac. Same cap family as the south quay. */
 export const SIDEWALK = 0xb0a48c;
-export const SIDEWALK_WIDTH_M = 2.4;
+export const SIDEWALK_WIDTH_M = 2.8;
 /** Dusty lift so field tracks do not crush to paved black under Lambert. */
 const DIRT_DUST = 0x9a6a40;
 
@@ -90,7 +90,7 @@ function drawRibbon(scene, spec, road, heightAt, widthM, color, roadKind, matOpt
       const dot = rx * (sz / sl) + rz * (-sx / sl);
       if (dot > 0.25) scale = Math.min(half / dot, half * 3);
     }
-    const y = heightAt(spec, pts[i].x, pts[i].z) + 0.1;
+    const y = heightAt(spec, pts[i].x, pts[i].z) + (roadKind === "sidewalk" ? 0.16 : 0.1);
     const lx = pts[i].x - rx * scale;
     const lz = pts[i].z - rz * scale;
     const qx = pts[i].x + rx * scale;

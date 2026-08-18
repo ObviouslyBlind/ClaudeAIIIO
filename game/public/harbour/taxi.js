@@ -1060,7 +1060,9 @@ export function createTaxi({
     }
   }
 
-  button.addEventListener("click", call);
+  if (button && typeof button.addEventListener === "function") {
+    button.addEventListener("click", call);
+  }
   if (typeof getIslandId === "function") island = getIslandId() || island;
   parkOnPaved();
   if (overlayCanvas) {
