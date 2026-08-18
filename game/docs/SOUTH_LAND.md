@@ -18,11 +18,11 @@ Harbour, Island Hwy, town centres, and access roads sit on one flat grade. The v
 
 ## Roads
 
-- Island Hwy: 2+2 lanes, stone median, west quay → east coast, around the volcano.
-- Spurs start at the roundabout **ring**, not the circus centre. Highway ribbons leave a gap at each circus.
-- Pale stone sidewalks beside ordinary streets (not the highway, not roundabouts).
-- Hamlets (short cross streets + dirt tracks) along Canebrake Rd, Haven Rd, South Strand, and the highway so long runs are not a void.
-- Dirt tracks carry larger field plots on both sides.
+- Island Hwy: 2+2 lanes, stone median — the only dual carriageway.
+- Arterials (named Rd / Strand): 7.2 m tarmac + sidewalks. Spurs meet the roundabout **ring**.
+- Local T-stubs (Rows, alleys, forks, spokes): narrower 5.2 m, stop at the kerb, do not cross the trunk.
+- Dirt tracks: thin packed earth with larger field plots.
+- Quayward is a **block loop** around the green, not a hash of streets through each other.
 
 ## Lots
 
