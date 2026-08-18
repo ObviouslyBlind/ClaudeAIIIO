@@ -155,27 +155,10 @@ function drawRibbon(scene, spec, road, heightAt, widthM, color, roadKind, matOpt
 
 export const HIGHWAY_LANE_OFFSET_M = 8;
 export const HIGHWAY_MEDIAN_M = 8;
-/** Dual-carriageway stations inside this radius of a circus are omitted. */
-export const HIGHWAY_RAB_OMIT_M = 36;
-/** Skip ribbon faces across a gap this wide — must be < 2 × omit so the highway cannot chord the island. */
+/** Skip ribbon faces across a gap this wide so a broken span cannot chord a circus island. */
 export const HIGHWAY_RAB_SKIP_M = 40;
 /** Stone disc inside the circulatory ring. */
 export const RAB_ISLAND_R_M = 24;
-
-function distToPoly(pts, x, z) {
-  let best = Infinity;
-  for (let i = 0; i < pts.length - 1; i++) {
-    const a = pts[i];
-    const b = pts[i + 1];
-    const vx = b.x - a.x;
-    const vz = b.z - a.z;
-    const len2 = vx * vx + vz * vz || 1;
-    let t = ((x - a.x) * vx + (z - a.z) * vz) / len2;
-    t = Math.max(0, Math.min(1, t));
-    best = Math.min(best, Math.hypot(x - (a.x + vx * t), z - (a.z + vz * t)));
-  }
-  return best;
-}
 
 function isLocalStreet(road) {
   if (!road || road.roundabout || road.lanes === 4) return false;
@@ -261,10 +244,13 @@ function drawSidewalks(scene, spec, road, heightAt, centres) {
 }
 
 /** 2+2 lanes with a stone median. Widths come from the class table. */
-function drawHighway(scene, spec, road, heightAt, centres) {
+function drawHighway(scene, spec, road, heightAt) {
   const cls = classOf(road);
   const s = roadClassSpec(cls);
-  const pts = omitNearCentres(ribbonStations(road.points), centres, HIGHWAY_RAB_OMIT_M);
+  // Graph edges already stop on the circus kerb. Omitting the last stations
+  // was a leftover from when the spline ran through the island — it left a
+  // sand gap between the dual ribbons and the ring.
+  const pts = ribbonStations(road.points);
   if (pts.length < 2) return;
   const lane = s.medianM / 2 + s.carriageM / 2;
 
@@ -355,6 +341,44 @@ function drawJunctions(scene, map, specOf, heightAt) {
     mesh.userData.widthM = pad.r * 2;
     mesh.userData.mode = "PAPER";
     scene.add(mesh);
+  }
+}
+
+/**
+ * A short asphalt disc on each circus arm, at the kerb where the edge stops.
+ * Dual ribbons sit 9 m off the centreline; without this pad they can look as
+ * if they miss the ring even when the graph is exact.
+ */
+function drawCircusApproaches(scene, map, specOf, heightAt) {
+  const graph = map.graph;
+  if (!graph || !graph.nodes) return;
+  for (const node of graph.nodes) {
+    if (node.kind !== "circus" || !node.radius) continue;
+    const spec = specOf(node.island);
+    const y = heightAt(spec, node.x, node.z);
+    for (const edge of graph.edges) {
+      if (edge.a !== node.id && edge.b !== node.id) continue;
+      const pts = edge.points;
+      if (!pts || pts.length < 2) continue;
+      const p = edge.a === node.id ? pts[0] : pts[pts.length - 1];
+      const r = Math.min(9, carriagewayWidthM(edge.cls) / 2 + 1.5);
+      const mesh = new THREE.Mesh(
+        new THREE.CircleGeometry(r, 18),
+        new THREE.MeshLambertMaterial({ color: ASPHALT }),
+      );
+      mesh.rotation.x = -Math.PI / 2;
+      mesh.position.set(p.x, y + 0.14, p.z);
+      mesh.castShadow = false;
+      mesh.receiveShadow = true;
+      mesh.userData.kind = "road";
+      mesh.userData.roadKind = "junction";
+      mesh.userData.island = node.island;
+      mesh.userData.roadName = (node.name || "Circus") + " arm";
+      mesh.userData.label = mesh.userData.roadName;
+      mesh.userData.widthM = r * 2;
+      mesh.userData.mode = "PAPER";
+      scene.add(mesh);
+    }
   }
 }
 
@@ -534,7 +558,7 @@ export function makeRoads(map, helpers) {
   for (const road of map.roads) {
     const spec = specOf(road.island);
     if (road.kind === "paved" && road.lanes === 4) {
-      drawHighway(scene, spec, road, heightAt, centres);
+      drawHighway(scene, spec, road, heightAt);
     } else if (road.kind === "paved" && road.roundabout) {
       drawRoundabout(scene, spec, road, heightAt, map.graph);
     } else if (road.kind === "paved") {
@@ -545,5 +569,6 @@ export function makeRoads(map, helpers) {
     }
   }
   drawJunctions(scene, map, specOf, heightAt);
+  drawCircusApproaches(scene, map, specOf, heightAt);
   drawNorthPortCurbs(scene, map, specOf, heightAt);
 }

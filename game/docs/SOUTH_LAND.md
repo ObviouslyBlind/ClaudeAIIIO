@@ -21,7 +21,8 @@ Harbour, Island Hwy, town centres, and access roads sit on one flat grade. The v
 Authored as a graph. See `docs/ROADS.md` for the model, the class table and why it was rebuilt.
 
 - Island Hwy (dual carriageway) runs quay → Harbour → Cane → Ash → Haven → east shore, meeting each circus on its kerb.
-- Avenues leave the circuses for the towns: Quayward Rd, South Strand, Canebrake Rd, Pass Rd, Haven Rd.
+- Avenues leave the circuses for the towns: Quayward Rd, Canebrake Rd, Pass Rd, Haven Rd.
+- South Strand T-joins Quayward Loop at the SW corner and runs the coast to Saltwind. It does not cut through the block.
 - Streets fill the towns: Quayward Loop, Saltwind High St, Haven Crescent, Channel Sands, Palm Arc.
 - Lanes are single-track hamlet rows and alleys. Field tracks are dirt and carry on past the lane ends.
 - Town junctions sit short of the green — a town square is not a crossroads.
@@ -31,7 +32,7 @@ Authored as a graph. See `docs/ROADS.md` for the model, the class table and why 
 - Island Hwy is **five dual-carriageway spans** that meet circus rings. Taxi never chords the island.
 - Harbour Circus: asphalt ring + stone island. Only Quayward Rd leaves it besides the highway.
 - Side roads **T-join their parent**. `joins` is that kerb, not a circus kilometres away.
-- Channel Sands / Strand / Palm / Saltwind High St are Y-forks off the parent street.
+- Channel Sands / Palm / Saltwind High St are Y-forks off the parent street. Strand T-joins the Loop.
 - Dirt is **field stubs only**. No dirt path cuts across paved. A stub that would overlay another street is omitted.
 - Taxi routes a **paved graph** (span → circus ring → span). It hops the kerb only. It will not lerp through dirt toward a circus that is not on that street.
 - On Island Hwy the cab sits in a **black carriageway**, not on the stone median.

@@ -8,6 +8,24 @@ function nodeOf(graph: { nodes: { id: string }[] }, id: string) {
   return graph.nodes.find((n) => n.id === id)!;
 }
 
+function orient(a: { x: number; z: number }, b: { x: number; z: number }, c: { x: number; z: number }) {
+  return (b.x - a.x) * (c.z - a.z) - (b.z - a.z) * (c.x - a.x);
+}
+
+/** Strict crossing: touching at a shared endpoint does not count. */
+function properIntersect(
+  a: { x: number; z: number },
+  b: { x: number; z: number },
+  c: { x: number; z: number },
+  d: { x: number; z: number },
+) {
+  const o1 = orient(a, b, c);
+  const o2 = orient(a, b, d);
+  const o3 = orient(c, d, a);
+  const o4 = orient(c, d, b);
+  return o1 * o2 < -1e-6 && o3 * o4 < -1e-6;
+}
+
 describe("road graph", () => {
   it("ends every edge exactly on its nodes, so roads physically meet", () => {
     const graph = createLandBoard().graph;
@@ -113,5 +131,26 @@ describe("road graph", () => {
       const onTrack = Math.min(...tracks.map((t) => projectOnEdge(t, p.x, p.z).dist));
       expect(onTrack).toBeGreaterThan(2);
     }
+  });
+
+  it("never lets paved roads cut through each other without a shared node", () => {
+    const graph = createLandBoard().graph;
+    const paved = graph.edges.filter((e) => e.cls !== "track");
+    const hits: string[] = [];
+    for (let i = 0; i < paved.length; i++) {
+      const A = paved[i]!;
+      for (let j = i + 1; j < paved.length; j++) {
+        const B = paved[j]!;
+        if (A.a === B.a || A.a === B.b || A.b === B.a || A.b === B.b) continue;
+        for (let u = 0; u < A.points.length - 1; u++) {
+          for (let v = 0; v < B.points.length - 1; v++) {
+            if (properIntersect(A.points[u]!, A.points[u + 1]!, B.points[v]!, B.points[v + 1]!)) {
+              hits.push(`${A.name} × ${B.name}`);
+            }
+          }
+        }
+      }
+    }
+    expect(hits).toEqual([]);
   });
 });

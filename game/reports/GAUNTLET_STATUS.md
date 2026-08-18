@@ -1,12 +1,15 @@
 # Gauntlet status
 
-Piece in play: **South roads from scratch — paved graph, taxi never on dirt**.
+Piece in play: **South roads — graph junctions, no crossings, highway meets the circus**.
 
-Bar: live `http://localhost:8787/`
+Bar: live `http://localhost:8787/` (operator plays the public Cloudflare tunnel)
 - Dual Island Hwy in the foreground (two black tarmacs + stone median)
-- Harbour Circus is a ring, not overlapping strips
-- Hail Taxi: the **yellow** cab (roof lamp) stays on **black tarmac**. Not the stone median. Not a brown dirt cut. Coloured sedans are NPC traffic.
+- Network, not patches: side streets T-join; paved ribbons do not cut through each other
+- Harbour Circus is a ring the highway actually meets
+- Hierarchy readable (highway > avenue > street > lane > dirt)
 
-Last critic (pixels): dual hwy and circus ring **pass**. Yellow-cab-on-median call does not match the spawn frame (cab is on a black ribbon) or the suite (`park the South cab in a highway lane`). No dirt polyline enters Harbour Circus. Lead is not looping that call.
+Last critic (Grok 4.6, `bc-b5061c0f`): **FAIL**. Dual ribbons locally OK. Biggest pixel gap: disconnected highway patches, sand between spans, no readable circus ring. That was the leftover **omit-near-circus** draw (graph already ended on the kerb; renderer deleted the last metres). Operator also saw roads through roads: South Strand cut Quayward Loop with no shared node.
+
+This round: Strand T-joins the Loop SW corner; highway draw runs to the kerb; circus arm pads; paved-crossing invariant in `roadGraph.test.ts`. Do not reintroduce `trimYielding` or omit-near-circus.
 
 Politics frozen. Operator is the brake. Do not merge unless asked.
