@@ -70,7 +70,7 @@ describe("harbour boot import graph", () => {
     expect(src).toContain("function dismissLooseLandUi");
     expect(src).toContain("function plotToPlace");
     expect(src).toContain("takenCrates");
-    expect(src).toContain("function hideCrateCard");
+    expect(src).toContain("function showCrateCard");
     expect(src).toContain("function pruneCrates");
     expect(src).not.toContain('const hint = document.getElementById("viewer-hint")');
     expect(src).toContain('viewer === "lots" && tapPt');

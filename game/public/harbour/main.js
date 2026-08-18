@@ -470,6 +470,18 @@ function pruneCrates(play) {
   }
 }
 
+function showCrateCard(deliveryId) {
+  if (!deliveryId || takenCrates.has(deliveryId)) return false;
+  lastInspectKey = "crate:" + deliveryId;
+  if (!chromeHud || !chromeHud.paintLand) return false;
+  chromeHud.paintLand(
+    { id: "roadside", owner: "visitor", price: 0 },
+    { crate: { id: deliveryId }, roadside: true, onTake: () => takeCrate(deliveryId) },
+  );
+  setStatus("Crate on the kerb. Take all. PAPER.");
+  return true;
+}
+
 async function takeCrate(deliveryId) {
   if (!deliveryId) return;
   takenCrates.add(deliveryId);
@@ -1264,18 +1276,12 @@ function onPointer(ev) {
   if (crateHit && (viewer === "logistics" || viewer === "world")) {
     const crate = objectWithKind(crateHit.object, "crate");
     const id = crate && crate.userData.deliveryId;
-    if (id) {
-      void takeCrate(id);
-      return;
-    }
+    if (id && showCrateCard(id)) return;
   }
   if (padHit && viewer === "logistics") {
     const pad = objectWithKind(padHit.object, "logistics-pad");
     const id = pad && pad.userData.deliveryId;
-    if (id) {
-      void takeCrate(id);
-      return;
-    }
+    if (id && showCrateCard(id)) return;
   }
   if (vanHit && viewer === "logistics") {
     setStatus("Van on the paved road. Crate drops on the kerb. PAPER.");
