@@ -37,6 +37,14 @@ describe("harbour chrome HUD", () => {
     expect(css).toContain("pos-inv");
     expect(css).toMatch(/width:\s*min\(280px/);
     expect(css).toMatch(/max-height:\s*min\(42vh/);
+    expect(css).toContain("Big Shoulders Display");
+    expect(css).toContain("Red Hat Text");
+    expect(css).toContain("/harbour/fonts/big-shoulders.woff2");
+    expect(css).not.toContain("Fraunces");
+    expect(css).not.toContain("Figtree");
+    expect(html).toContain("cash-plate");
+    expect(html).toContain('aria-label="Inventory"');
+    expect(html).toContain('aria-label="Warehouse"');
   });
 
   it("lease card and buy-ask ask before a lot is bought", () => {

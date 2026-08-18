@@ -1,13 +1,36 @@
-/* Two Harbors chrome — floating HUD. Cheap fades, no blur filters. */
+/* Two Harbors chrome — dusk-ferry instrument cluster.
+   THESIS: brass fittings on a dark hull, not Segoe rectangles.
+   Corners stay. No blur filters (phone 30fps). */
+
+@font-face {
+  font-family: "Big Shoulders Display";
+  font-style: normal;
+  font-weight: 600 700;
+  font-display: swap;
+  src: url("/harbour/fonts/big-shoulders.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Red Hat Text";
+  font-style: normal;
+  font-weight: 500 700;
+  font-display: swap;
+  src: url("/harbour/fonts/red-hat-text.woff2") format("woff2");
+}
 
 :root {
   --ink: #f4f1e6;
-  --muted: #c5d0cc;
-  --btn: #c9a36a;
-  --panel: rgba(8, 18, 22, 0.92);
-  --line: rgba(201, 163, 106, 0.35);
+  --muted: #b7d0c8;
+  --btn: #d4b07a;
+  --brass-hi: #f0d5a4;
+  --hull: #0a1418;
+  --panel: rgba(8, 18, 22, 0.94);
+  --line: rgba(212, 176, 122, 0.42);
   --green: #5fe3a0;
-  --radius: 8px;
+  --radius: 10px;
+  --font-display: "Big Shoulders Display", "Arial Narrow", sans-serif;
+  --font-ui: "Red Hat Text", "Segoe UI", system-ui, sans-serif;
+  --shadow: 0 10px 22px rgba(0, 0, 0, 0.45);
+  --inset: inset 0 1px 0 rgba(244, 241, 230, 0.14);
 }
 
 .legacy-hud {
@@ -23,11 +46,15 @@
   inset: 0;
   z-index: 8;
   pointer-events: none;
-  font-family: "Segoe UI", system-ui, sans-serif;
+  font-family: var(--font-ui);
   color: var(--ink);
   text-shadow: 0 1px 2px #061418;
+  font-synthesis: none;
 }
-
+#chrome ::selection {
+  background: var(--btn);
+  color: #1a140c;
+}
 #chrome button,
 #chrome a,
 .float-panel,
@@ -37,6 +64,12 @@
 #place-hint {
   pointer-events: auto;
   text-shadow: none;
+  font-family: inherit;
+}
+#chrome button:focus-visible,
+.travel-dock button:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
 }
 
 .chrome-tl {
@@ -47,25 +80,55 @@
 }
 .game-name {
   margin: 0;
-  font-size: 18px;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-  color: var(--green);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1;
+  color: var(--ink);
+}
+.harbour-mark {
+  width: 22px;
+  height: 14px;
+  flex: 0 0 auto;
+  color: var(--btn);
 }
 .chrome-tl .meta {
-  margin: 2px 0 0;
-  font-size: 12px;
-  color: var(--muted);
+  margin: 6px 0 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--btn);
+}
+.cash-plate {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 8px 0 0;
+  padding: 7px 12px 8px;
+  background: linear-gradient(180deg, #162428 0%, var(--hull) 100%);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow), var(--inset);
 }
 #balance {
-  margin: 4px 0 0;
-  font-size: 16px;
+  margin: 0;
+  font-size: 20px;
   font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  color: var(--ink);
 }
 #income {
-  margin-left: 8px;
-  font-size: 13px;
+  margin: 0;
+  font-size: 12px;
   font-weight: 600;
+  font-variant-numeric: tabular-nums;
   color: var(--green);
 }
 #income.is-zero { color: var(--muted); }
@@ -84,57 +147,78 @@
   gap: 6px;
 }
 .chip {
-  min-height: 28px;
-  padding: 0 8px;
+  min-height: 30px;
+  padding: 0 11px;
   border: 1px solid var(--line);
-  border-radius: 6px;
-  background: var(--panel);
+  border-radius: 999px;
+  background: linear-gradient(180deg, #152226 0%, var(--hull) 100%);
   color: var(--ink);
-  font-weight: 700;
+  font-weight: 600;
   font-size: 11px;
+  letter-spacing: 0.04em;
   cursor: pointer;
+  box-shadow: var(--inset), 0 4px 10px rgba(0, 0, 0, 0.28);
 }
-.chip:hover { border-color: var(--green); }
+.chip:hover { border-color: var(--brass-hi); color: var(--brass-hi); }
 .chip.is-on {
-  background: #1a3d28;
-  border-color: var(--green);
-  color: var(--green);
+  background: linear-gradient(180deg, var(--brass-hi), var(--btn));
+  border-color: var(--brass-hi);
+  color: #1a140c;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 4px 10px rgba(0, 0, 0, 0.28);
 }
 .viewer-hint {
   margin: 0;
   max-width: 280px;
   text-align: right;
   font-size: 11px;
-  line-height: 1.35;
+  line-height: 1.4;
   color: var(--muted);
 }
 
 .chrome-left {
   position: absolute;
   left: 12px;
-  top: 96px;
+  top: 108px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 .rail-btn {
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 52px;
+  padding: 6px 4px 5px;
   border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--panel);
+  border-radius: 14px;
+  background: linear-gradient(180deg, #162428 0%, var(--hull) 100%);
   color: var(--ink);
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   cursor: pointer;
   display: grid;
-  place-items: center;
-  text-align: center;
-  line-height: 1.15;
+  justify-items: center;
+  align-content: center;
+  gap: 3px;
+  box-shadow: var(--inset), 0 6px 14px rgba(0, 0, 0, 0.32);
 }
-.rail-btn:hover, .rail-btn.is-on {
-  border-color: var(--green);
-  color: var(--green);
+.rail-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.rail-btn:hover {
+  border-color: var(--brass-hi);
+  color: var(--brass-hi);
+}
+.rail-btn.is-on {
+  background: linear-gradient(180deg, var(--brass-hi), var(--btn));
+  border-color: var(--brass-hi);
+  color: #1a140c;
 }
 
 nav.dock.travel-dock {
@@ -143,34 +227,51 @@ nav.dock.travel-dock {
   width: auto;
   flex-wrap: nowrap;
   transform: translateX(-50%);
+  gap: 6px;
+  padding: 6px 8px;
+  background: linear-gradient(180deg, #162428 0%, var(--hull) 100%);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: var(--shadow), var(--inset);
+  font-family: var(--font-ui);
 }
 .travel-dock button {
   min-height: 40px;
-  min-width: 72px;
+  min-width: 76px;
   border: 0;
-  border-radius: 8px;
-  background: var(--btn);
+  border-radius: 10px;
+  background: linear-gradient(180deg, var(--brass-hi), var(--btn));
   color: #1a140c;
   font-weight: 700;
   font-size: 13px;
+  letter-spacing: 0.02em;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.32);
 }
 .travel-dock button:disabled { opacity: 0.35; }
-.travel-dock #btn-taxi { background: #e2c04a; }
+.travel-dock #btn-taxi {
+  background: linear-gradient(180deg, #f0d56a, #d4a82a);
+}
 
 .float-panel {
   position: absolute;
   width: min(280px, calc(100vw - 72px));
   max-height: min(42vh, 360px);
   overflow: auto;
-  padding: 10px 12px 12px;
-  background: var(--panel);
+  padding: 12px 14px 14px;
+  background: linear-gradient(180deg, #142226 0%, var(--hull) 100%);
   border: 1px solid var(--line);
-  border-radius: 10px;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4);
+  border-radius: 12px;
+  box-shadow: var(--shadow), var(--inset);
+  scrollbar-color: var(--btn) transparent;
   opacity: 0;
   transform: translateY(6px);
   pointer-events: none;
-  transition: opacity 140ms ease, transform 140ms ease;
+  transition: opacity 160ms cubic-bezier(0.2, 0.8, 0.2, 1), transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.float-panel::-webkit-scrollbar { width: 8px; }
+.float-panel::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 8px;
 }
 .float-panel.is-open {
   opacity: 1;
@@ -178,16 +279,16 @@ nav.dock.travel-dock {
   pointer-events: auto;
 }
 .chrome-tl .whisper {
-  margin: 4px 0 0;
+  margin: 6px 0 0;
   font-size: 11px;
   font-weight: 500;
   color: var(--muted);
 }
-.float-panel.pos-inv { left: 64px; top: 96px; }
-.float-panel.pos-warehouse { left: 64px; top: 146px; }
-.float-panel.pos-market { left: 64px; top: 196px; }
-.float-panel.pos-staff { left: 64px; top: 246px; }
-.float-panel.pos-tr { right: 12px; top: 86px; }
+.float-panel.pos-inv { left: 68px; top: 108px; }
+.float-panel.pos-warehouse { left: 68px; top: 168px; }
+.float-panel.pos-market { left: 68px; top: 228px; }
+.float-panel.pos-staff { left: 68px; top: 288px; }
+.float-panel.pos-tr { right: 12px; top: 92px; }
 
 .whisper {
   margin: 0 0 8px;
@@ -213,8 +314,9 @@ nav.dock.travel-dock {
   cursor: pointer;
 }
 .dest.is-on {
-  border-color: var(--green);
-  color: var(--green);
+  border-color: var(--btn);
+  color: #1a140c;
+  background: linear-gradient(180deg, var(--brass-hi), var(--btn));
 }
 
 .sticker-label {
@@ -239,6 +341,7 @@ nav.dock.travel-dock {
   font-size: 16px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+  caret-color: var(--btn);
 }
 .today-price {
   font-size: 13px;
@@ -253,17 +356,14 @@ nav.dock.travel-dock {
 #stand-menu input { pointer-events: auto; }
 
 .float-panel h2 {
-  margin: 0 0 6px;
-  font-size: 15px;
-}
-.float-kicker {
-  margin: 0 0 10px;
-  font-size: 10px;
-  letter-spacing: 0.12em;
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--btn);
 }
-.float-panel p { margin: 0 0 8px; font-size: 13px; color: var(--muted); }
+.float-panel p { margin: 0 0 8px; font-size: 13px; line-height: 1.4; color: var(--muted); }
 .sku-row, .inv-row, .stand-row {
   display: flex;
   align-items: center;
@@ -277,7 +377,7 @@ nav.dock.travel-dock {
   min-height: 32px;
   padding: 0 10px;
   border: 0;
-  border-radius: 7px;
+  border-radius: 8px;
   background: var(--green);
   color: #0b1a10;
   font-weight: 700;
@@ -298,7 +398,9 @@ nav.dock.travel-dock {
   background: #132428;
   color: var(--ink);
   cursor: pointer;
+  box-shadow: var(--inset);
 }
+.aisle-btn:hover { border-color: var(--brass-hi); }
 .aisle-btn strong { display: block; font-size: 14px; }
 .aisle-btn span { display: block; margin-top: 3px; font-size: 12px; color: var(--muted); }
 .float-panel .back {
@@ -332,30 +434,28 @@ nav.dock.travel-dock {
   pointer-events: auto;
   min-height: 36px;
   padding: 0 12px;
-  border: 0;
+  border: 1px solid var(--line);
   border-radius: 8px;
-  background: rgba(24, 30, 20, 0.92);
-  color: #f4f2ea;
-  font-weight: 800;
+  background: linear-gradient(180deg, #1a2620 0%, #121814 100%);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-weight: 700;
   font-size: 13px;
   letter-spacing: 0.02em;
   cursor: pointer;
   white-space: nowrap;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4), var(--inset);
 }
-.lot-tag.is-buy {
-  background: rgba(24, 30, 20, 0.94);
-  color: #f4f2ea;
-}
-.lot-tag.is-buy:hover { box-shadow: 0 0 0 2px #5dcc6a; }
+.lot-tag.is-buy:hover { border-color: var(--green); }
 .lot-tag.is-taken {
   background: rgba(40, 36, 32, 0.9);
   color: #c5c0b2;
   cursor: default;
 }
 .lot-tag.is-yours {
-  background: rgba(38, 128, 66, 0.92);
+  background: linear-gradient(180deg, #2f8a4c, #1f6a38);
   color: #f4f2ea;
+  border-color: #5fe3a0;
   cursor: default;
 }
 
@@ -382,6 +482,7 @@ nav.dock.travel-dock {
   gap: 8px;
   align-items: center;
   justify-content: center;
+  box-shadow: var(--shadow);
 }
 #place-hint button {
   pointer-events: auto;
@@ -390,7 +491,7 @@ nav.dock.travel-dock {
   padding: 0 16px;
   border: 0;
   border-radius: 8px;
-  background: #5dcc6a;
+  background: var(--green);
   color: #0a161a;
   font-weight: 800;
 }
@@ -403,43 +504,56 @@ nav.dock.travel-dock {
   transform: translateX(-50%);
   width: min(280px, calc(100vw - 24px));
   padding: 12px 14px 14px;
-  background: var(--panel);
+  background: linear-gradient(180deg, #142226 0%, var(--hull) 100%);
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: 12px;
   z-index: 12;
   pointer-events: auto;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45), var(--inset);
 }
 #buy-ask[hidden] { display: none !important; }
-#buy-ask h2 { margin: 0 0 6px; font-size: 16px; }
+#buy-ask h2 {
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-size: 18px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
 #buy-ask .buy-ask-name { margin: 0 0 4px; font-size: 14px; color: var(--muted); }
-#buy-ask .price { margin: 0; color: var(--green); font-weight: 800; font-size: 18px; }
+#buy-ask .price { margin: 0; color: var(--green); font-weight: 800; font-size: 18px; font-variant-numeric: tabular-nums; }
 #buy-ask .land-row { display: flex; gap: 8px; margin-top: 12px; }
 #buy-ask .land-row .take-all { margin-top: 0; }
 #buy-ask-no { background: #2c3c40; color: #e8e4d8; }
 
 #land-card, #stand-menu, #foot-legend {
   position: absolute;
-  left: 64px;
+  left: 68px;
   bottom: calc(56px + env(safe-area-inset-bottom));
   width: min(260px, calc(100vw - 80px));
   padding: 10px;
-  background: var(--panel);
+  background: linear-gradient(180deg, #142226 0%, var(--hull) 100%);
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: 12px;
   z-index: 10;
+  box-shadow: var(--shadow), var(--inset);
 }
 #foot-legend {
   left: auto;
   right: 12px;
-  top: 86px;
+  top: 92px;
   bottom: auto;
   max-height: min(36vh, 280px);
   overflow: auto;
   pointer-events: none;
 }
 #land-card[hidden], #stand-menu[hidden], .float-panel[hidden], #foot-legend[hidden] { display: none !important; }
-#land-card h2, #stand-menu h2 { margin: 0 0 4px; font-size: 15px; }
+#land-card h2, #stand-menu h2 {
+  margin: 0 0 4px;
+  font-family: var(--font-display);
+  font-size: 18px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
 #land-card .price { color: var(--green); font-weight: 700; }
 #land-card .land-buy { margin-top: 8px; font-size: 16px; }
 #land-card .lease-note { margin: 8px 0 0; font-size: 12px; color: #e2c04a; }
@@ -478,3 +592,7 @@ nav.dock.travel-dock {
 .band-dot.green { background: #3dcc6a; }
 .band-dot.yellow { background: #e2c04a; }
 .band-dot.red { background: #c45a3a; }
+
+@media (prefers-reduced-motion: reduce) {
+  .float-panel { transition: none; }
+}
