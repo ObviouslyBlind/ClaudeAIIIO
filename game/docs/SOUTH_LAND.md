@@ -24,6 +24,7 @@ Harbour, Island Hwy, town centres, and access roads sit on one flat grade. The v
 - Channel Sands / Strand / Palm / Saltwind High St are Y-forks off the parent street.
 - Dirt is **field stubs only**. No dirt path cuts across paved. A stub that would overlay another street is omitted.
 - Taxi routes a **paved graph** (span → circus ring → span). It hops the kerb only. It will not lerp through dirt toward a circus that is not on that street.
+- On Island Hwy the cab sits in a **black carriageway**, not on the stone median.
 - Lots clear the highway **spine** as well as the split carriageways, so parcels do not sit in the omitted circus chords.
 - Channel Sands **Y-forks off Island Hwy** east of the circus. Palm Arc **Y-forks off South Strand**. They are not extra ribbons into the same ring.
 - Arterials (named Rd): 7.2 m tarmac + sidewalks. Locals (Row / Alley / Fork / Lane / Loop) are narrower T-stubs.

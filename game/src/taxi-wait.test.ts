@@ -780,4 +780,28 @@ describe("taxi roof lamp", () => {
       80,
     );
   });
+
+  it("parks the South cab in a highway lane, not on the stone median", () => {
+    const board = createLandBoard();
+    const spec = ISLANDS.south;
+    const player = {
+      position: { x: spec.port.x + 10, y: 2, z: spec.port.z },
+      rotation: { y: 0 },
+    };
+    const taxi = createTaxi({
+      scene: { add() {} },
+      player,
+      getMap: () => board,
+      specOf: (id: "north" | "south") => ISLANDS[id],
+      heightAt,
+      getIslandId: () => "south" as const,
+      setWalking: () => {},
+      setStatus: () => {},
+      button: { addEventListener() {} },
+    });
+    const hwy = board.roads.find((r) => r.lanes === 4 && r.island === "south")!;
+    const d = projectOnPolyline(hwy.points, taxi.mesh.position.x, taxi.mesh.position.z).dist;
+    expect(d).toBeGreaterThan(6);
+    expect(d).toBeLessThan(10);
+  });
 });
