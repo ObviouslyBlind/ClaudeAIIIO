@@ -39,7 +39,9 @@ describe("harbour chrome HUD", () => {
     expect(css).toMatch(/max-height:\s*min\(42vh/);
     expect(css).toContain("Big Shoulders Display");
     expect(css).toContain("Red Hat Text");
-    expect(css).toContain("/harbour/fonts/big-shoulders.woff2");
+    expect(css).not.toContain("font-weight: 600 700");
+    expect(css).not.toContain("font-weight: 500 700");
+    expect(css).toContain('font-weight: 700');
     expect(css).not.toContain("Fraunces");
     expect(css).not.toContain("Figtree");
     expect(html).toContain("cash-plate");

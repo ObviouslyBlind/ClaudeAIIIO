@@ -1,13 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { ASSET_NONCE, bustHarbourAssets, bustModuleImports } from "./cache-bust.ts";
+import { ASSET_NONCE, bustFontUrls, bustHarbourAssets, bustModuleImports } from "./cache-bust.ts";
 
 describe("harbour cache bust", () => {
   it("stamps script and stylesheet so a fresh load is enough", () => {
     const html = `<title>Two Harbors — harbour</title>
 <link rel="stylesheet" href="/harbour/style.css" />
+<link rel="preload" href="/harbour/fonts/red-hat-text.woff2" as="font" />
 <script type="module" src="/harbour/main.js?v=12"></script>`;
     const out = bustHarbourAssets(html, 99);
     expect(out).toContain("/harbour/style.css?v=99");
+    expect(out).toContain("/harbour/fonts/red-hat-text.woff2?v=99");
     expect(out).toContain("/harbour/main.js?v=99");
     expect(out).toContain("harbour · 99");
     expect(out).not.toContain("v=12");
@@ -29,6 +31,11 @@ import("./lease-hud.js?v=1");`;
     expect(out).toContain('import("./main.js?v=88")');
     expect(out).toContain('import("./lease-hud.js?v=88")');
     expect(out).not.toContain("v=1");
+  });
+
+  it("stamps harbour @font-face urls", () => {
+    const css = `@font-face { src: url("/harbour/fonts/red-hat-text.woff2") format("woff2"); }`;
+    expect(bustFontUrls(css, 55)).toContain('/harbour/fonts/red-hat-text.woff2?v=55');
   });
 
   it("reuses one process nonce so first-frame ↔ main cannot chain new ?v= forever", () => {
