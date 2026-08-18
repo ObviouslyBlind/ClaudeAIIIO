@@ -121,7 +121,7 @@ export type Delivery = {
   status: "en_route" | "arrived" | "stored";
   drop: DropPoint | null;
   arrivedAtMs: number | null;
-  dest: "warehouse" | "road";
+  dest: "warehouse" | "road" | "cart";
   mode: "PAPER";
   provenance: "SIMULATED";
 };
@@ -265,14 +265,16 @@ export function orderMarket(
   if (island !== "south") return fail("south_only");
 
   const destRaw = body.dest != null ? String(body.dest) : "";
-  const dest: "warehouse" | "road" =
-    destRaw === "warehouse" || destRaw === "store"
-      ? "warehouse"
-      : destRaw === "road"
-        ? "road"
-        : body.plotId
+  const dest: "warehouse" | "road" | "cart" =
+    destRaw === "cart" || destRaw === "pocket" || destRaw === "inventory"
+      ? "cart"
+      : destRaw === "warehouse" || destRaw === "store"
+        ? "warehouse"
+        : destRaw === "road"
           ? "road"
-          : "warehouse";
+          : body.plotId
+            ? "road"
+            : "warehouse";
   const wanted = Array.isArray(body.skus) ? body.skus.map((id) => String(id)) : [];
   if (!wanted.length) return fail("empty_order");
 
@@ -298,6 +300,23 @@ export function orderMarket(
 
   if (visitor.cash < paid) return fail("no_cash");
   visitor.cash = roundMoney(visitor.cash - paid);
+
+  if (dest === "cart") {
+    for (const item of items) addInv(play, item.kind, item.qty);
+    const delivery: Delivery = {
+      id: `del-${play.nextId++}`,
+      island: "south",
+      plotId: "cart",
+      items,
+      status: "stored",
+      drop: null,
+      arrivedAtMs: Date.now(),
+      dest: "cart",
+      mode: "PAPER",
+      provenance: "SIMULATED",
+    };
+    return ok({ delivery, paid, stored: true as const });
+  }
 
   if (dest === "warehouse") {
     for (const item of items) addWarehouse(play, item.kind, item.qty);

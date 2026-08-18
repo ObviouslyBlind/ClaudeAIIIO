@@ -198,6 +198,18 @@ describe("South first loop", () => {
     expect(visitor.play.inventory.find((i) => i.kind === "hotdog_cart")?.qty).toBe(1);
   });
 
+  it("puts a cart buy into pockets when dest is cart, not the warehouse", () => {
+    const { land, visitor } = leaseCheapSouth();
+    const order = orderMarket(visitor, land, { skus: ["hotdog_cart", "hotdogs"], dest: "cart" });
+    expect(order.ok).toBe(true);
+    if (!order.ok) return;
+    expect(order.stored).toBe(true);
+    expect(order.delivery.dest).toBe("cart");
+    expect(visitor.play.warehouse.items).toEqual([]);
+    expect(visitor.play.inventory.find((i) => i.kind === "hotdog_cart")?.qty).toBe(1);
+    expect(visitor.play.inventory.find((i) => i.kind === "hotdogs")?.qty).toBe(20);
+  });
+
   it("returns a missed roadside crate to the warehouse after 3 minutes", () => {
     const { land, visitor, plot } = leaseCheapSouth();
     const order = orderMarket(visitor, land, { plotId: plot.id, skus: ["hotdogs"], dest: "road" });

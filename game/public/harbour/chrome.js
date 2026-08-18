@@ -7,6 +7,7 @@ import { plotDisplayName } from "./parcel-map.js";
 import { buyAskModel } from "./buy-ask.js";
 import { playPaperBuy } from "./paper-sfx.js";
 import { toggleViewer, footLevel } from "./overlays.js";
+import { mountPackShift } from "./pack.js";
 
 export const POLL_MS = 1000;
 
@@ -44,9 +45,8 @@ export function mountChrome(opts) {
   let openPanel = null;
   let overlay = "world";
   let placing = false;
-  let marketAisle = null;
-  let marketSku = null;
-  let marketDest = "warehouse";
+  let marketDest = "cart";
+  const packShift = mountPackShift();
 
   function setPlaceHint(text, show) {
     const hint = document.getElementById("place-hint");
@@ -56,11 +56,9 @@ export function mountChrome(opts) {
   }
 
   const HINTS = {
-    world: "World: left-click walks. Lots chip shows lot outlines and $ bars.",
+    world: "World: left-click walks. Lots shows lot outlines and $ bars.",
     lots: "Lots on. Nearby $ bars only — walk to see more. Click Lots again to hide. Click a $ bar to buy.",
     foot: "Foot traffic: High (green) / Moderate (yellow) / Low (red) on each named road.",
-    logistics: "Logistics: tap the crate. The van waits until you take it.",
-    minerals: "Minerals: ore catalog is in. Overlay paint comes next.",
   };
 
   function setOverlay(id) {
@@ -139,114 +137,68 @@ export function mountChrome(opts) {
       hiddenCash.textContent =
         "Cash $" + Number(play.cash).toLocaleString("en-US", { maximumFractionDigits: 0 });
     }
+    const cartLine = document.getElementById("cart-line");
+    if (cartLine) {
+      const rows = Array.isArray(play.cart) ? play.cart : [];
+      const bits = rows
+        .filter((r) => r && r.goodId && Number(r.qty) > 0)
+        .map((r) => `${r.goodId} × ${r.qty}`);
+      const kit = ((play.inventory) || []).filter((r) => r.qty > 0).map((r) => `${r.kind} × ${r.qty}`);
+      const all = bits.concat(kit);
+      cartLine.textContent = all.length ? `Cart ${all.join(" · ")} · PAPER` : "Cart empty · PAPER";
+    }
   }
 
   function paintMarket() {
     const body = document.getElementById("market-body");
     if (!body || !play) return;
-    const leases = play.leases || [];
-    const aisles = play.aisles || [];
     const catalog = play.catalog || [];
-    const sku = catalog.find((s) => s.id === marketSku) || null;
     const fee = play.warehouse ? money(play.warehouse.feePerDay) : "$5.00";
-
-    if (!marketAisle) {
-      body.innerHTML = `
-        ${title("Market", "market")}
-        <p>Street carts. Buys sit in the dock warehouse unless you send the van.</p>
-        ${aisles
-          .map(
-            (a) => `
-          <button type="button" class="aisle-btn" data-aisle="${a.id}">
-            <strong>${a.label}</strong>
-            <span>${a.note}</span>
-          </button>`,
-          )
-          .join("")}
-      `;
-      body.querySelectorAll("[data-aisle]").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          marketAisle = btn.getAttribute("data-aisle");
-          marketSku = null;
-          paintMarket();
-        });
-      });
-      return;
-    }
-
-    if (!sku) {
-      const rows = catalog.filter((s) => s.aisle === marketAisle);
-      body.innerHTML = `
-        ${title(rows[0] ? rows[0].aisleLabel : "Section", "market")}
-        <button type="button" class="back" id="mkt-back">← Marketplace</button>
-        ${rows
-          .map(
-            (s) => `
-          <button type="button" class="aisle-btn" data-pick="${s.id}">
-            <strong>${s.label} · ${money(s.paperPrice)}</strong>
-            <span>${s.note} · ${s.zone}</span>
-          </button>`,
-          )
-          .join("")}
-      `;
-      body.querySelector("#mkt-back")?.addEventListener("click", () => {
-        marketAisle = null;
-        paintMarket();
-      });
-      body.querySelectorAll("[data-pick]").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          marketSku = btn.getAttribute("data-pick");
-          paintMarket();
-        });
-      });
-      return;
-    }
-
-    const dests = leases
-      .filter((l) => !sku.zone || l.zone === sku.zone)
-      .map((l) => `<option value="${l.id}">${l.name || l.id} · ${l.zone || ""} · by the road</option>`)
-      .join("");
-    const roadOk = Boolean(dests);
-    const canBuy = marketDest === "warehouse" || roadOk;
+    const prices = play.lastPricesSouth || {};
+    const goods = play.goods || Object.keys(prices);
+    const destCart = marketDest === "cart";
     body.innerHTML = `
-      ${title(sku.label, "market")}
-      <button type="button" class="back" id="mkt-back">← ${sku.aisleLabel}</button>
-      <p>${sku.note}</p>
-      <div class="sku-row"><span>Price</span><strong>${money(sku.paperPrice)}</strong></div>
+      ${title("Market", "market")}
+      <p>One sheet. Stock the cart, or park kit in the warehouse. No aisles.</p>
       <div class="dest-row">
-        <button type="button" class="dest ${marketDest === "warehouse" ? "is-on" : ""}" data-dest="warehouse">Store in warehouse</button>
-        <button type="button" class="dest ${marketDest === "road" ? "is-on" : ""}" data-dest="road">Deliver to me</button>
+        <button type="button" class="dest ${destCart ? "is-on" : ""}" data-dest="cart">Stock cart</button>
+        <button type="button" class="dest ${marketDest === "warehouse" ? "is-on" : ""}" data-dest="warehouse">Warehouse</button>
       </div>
-      ${
-        marketDest === "warehouse"
-          ? `<p class="whisper">South warehouse ${fee}/day while it sits. Shared dock, every player.</p>`
-          : `<label>Deliver to</label>
-      <select id="deliver-plot">${dests || `<option value="">Lease a ${sku.zone} lot first (Lots overlay)</option>`}</select>`
-      }
-      <div class="sku-row"><span></span><button type="button" class="go" id="btn-order" ${canBuy ? "" : "disabled"}>Buy · ${money(sku.paperPrice)}</button></div>
+      <p class="whisper">${destCart ? "Goes in your cart / pockets. Place from Inv." : "South warehouse " + fee + "/day."}</p>
+      ${catalog
+        .map(
+          (s) => `
+        <div class="inv-row">
+          <span>${s.label} · ${money(s.paperPrice)}</span>
+          <button type="button" class="go" data-order="${s.id}">Buy</button>
+        </div>`,
+        )
+        .join("")}
+      <h3 class="sheet-kicker">Twelve goods · South last price</h3>
+      ${goods
+        .map((id) => {
+          const px = Number(prices[id]);
+          const label = String(id).replace("_", " ");
+          const cost = Number.isFinite(px) ? money(px) : "—";
+          return `<div class="inv-row"><span>${label} · ${cost}</span><button type="button" class="go" data-buy="${id}">Buy 1</button></div>`;
+        })
+        .join("")}
     `;
-    body.querySelector("#mkt-back")?.addEventListener("click", () => {
-      marketSku = null;
-      paintMarket();
-    });
     body.querySelectorAll("[data-dest]").forEach((btn) => {
       btn.addEventListener("click", () => {
-        marketDest = btn.getAttribute("data-dest") || "warehouse";
+        marketDest = btn.getAttribute("data-dest") || "cart";
         paintMarket();
       });
     });
-    const orderBtn = body.querySelector("#btn-order");
-    if (orderBtn) {
-      orderBtn.addEventListener("click", async () => {
-        const plotId = body.querySelector("#deliver-plot")?.value;
+    body.querySelectorAll("[data-order]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
         const { ok, data } = await readJson("/api/market/order", {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
-            plotId,
-            skus: [sku.id],
+            skus: [btn.getAttribute("data-order")],
             island: "south",
-            dest: marketDest,
+            dest: marketDest === "cart" ? "cart" : "warehouse",
           }),
         });
         if (!ok) {
@@ -257,16 +209,40 @@ export function mountChrome(opts) {
         play = data.play;
         paintTop();
         paintPanels();
-        if (marketDest === "road" && opts.onOrder) opts.onOrder(data.delivery);
         if (opts.setStatus) {
           opts.setStatus(
-            marketDest === "warehouse"
-              ? "In the South warehouse. Open Warehouse when you want it."
-              : "Van rolling. It waits at the kerb for 3 minutes, then goes back to the warehouse.",
+            marketDest === "cart"
+              ? "On the cart. Open Inv to place it, or Pack for a shift bonus."
+              : "In the South warehouse.",
           );
         }
       });
-    }
+    });
+    body.querySelectorAll("[data-buy]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const { ok, data } = await readJson("/api/buy", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            island: "south",
+            goodId: btn.getAttribute("data-buy"),
+            qty: 1,
+          }),
+        });
+        if (!ok) {
+          if (opts.setStatus) opts.setStatus("Buy failed: " + (data && data.reason));
+          return;
+        }
+        playPaperBuy();
+        if (data && data.snapshot && data.snapshot.visitor) {
+          play.cash = data.snapshot.visitor.cash;
+          play.cart = data.snapshot.visitor.cart || [];
+        }
+        paintTop();
+        paintMarket();
+        if (opts.setStatus) opts.setStatus("In the cart · PAPER · SIMULATED");
+      });
+    });
   }
 
   function paintFootLegend() {
@@ -416,6 +392,10 @@ export function mountChrome(opts) {
       <div class="stand-row"><span>Balance</span><strong>${money(play.cash)}</strong></div>
       <div class="stand-row"><span>Income</span><strong>${money(play.incomePerMinute)}/min</strong></div>
       <div class="stand-row"><span>Island bank</span><strong>${money(play.gameBank)}</strong></div>
+      <h3 class="sheet-kicker">South street carts</h3>
+      <div class="stand-row"><span>You</span><strong>${money(play.cash)}</strong></div>
+      <div class="stand-row"><span>Mill St cart (NPC)</span><strong>$412.40</strong></div>
+      <div class="stand-row"><span>Harbour Rd cart (NPC)</span><strong>$188.10</strong></div>
     `;
   }
 
@@ -471,7 +451,6 @@ export function mountChrome(opts) {
   root.querySelectorAll("[data-overlay]").forEach((btn) => {
     btn.addEventListener("click", () => {
       setOverlay(toggleViewer(overlay, btn.getAttribute("data-overlay")));
-      if (btn.closest("#panel-view")) closePanels();
     });
   });
 
@@ -533,6 +512,30 @@ export function mountChrome(opts) {
     standVeil.addEventListener("click", () => {
       standMenu.hidden = true;
       standVeil.hidden = true;
+    });
+  }
+  const packBtn = document.getElementById("btn-pack");
+  if (packBtn) {
+    packBtn.addEventListener("click", () => {
+      closePanels();
+      packShift.open({
+        async onDone(hits) {
+          const { ok, data } = await readJson("/api/shift/pack", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ hits }),
+          });
+          if (data && data.play) play = data.play;
+          paintTop();
+          if (opts.setStatus) {
+            opts.setStatus(
+              ok
+                ? `Pack bonus ${money(data.bonus)} · PAPER · stall already ran`
+                : "Pack: " + ((data && data.reason) || "skipped"),
+            );
+          }
+        },
+      });
     });
   }
 

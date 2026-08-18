@@ -44,11 +44,15 @@ import {
   withdrawWarehouse,
 } from "./firstLoop.ts";
 import { footTrafficSnapshot } from "./footTraffic.ts";
+import { completePackShift } from "./shiftBonus.ts";
 
 function playPayload() {
   return {
     ...playSnapshot(visitor, land),
     traffic: footTrafficSnapshot(land),
+    cart: dumpCart(visitor.cart),
+    lastPricesSouth: world.lastPriceSouth,
+    goods: GOOD_IDS,
   };
 }
 
@@ -284,6 +288,13 @@ const server = createServer(async (req, res) => {
   if (req.method === "POST" && url.pathname === "/api/stand/upgrade") {
     const body = await readJsonBody(req);
     const result = upgradeStand(visitor, String(body?.standId ?? ""));
+    json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/shift/pack") {
+    const body = await readJsonBody(req);
+    const result = completePackShift(visitor, body || {});
     json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
     return;
   }

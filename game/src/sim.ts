@@ -238,6 +238,8 @@ export type Visitor = {
   goods: Record<GoodId, number>;
   staffSlots: StaffSlot[];
   cart: CartLine[];
+  /** Last client-side pack shift. Bonus only. */
+  lastPackAtMs?: number;
   /** South first-loop inventory / stands / crates. */
   play: PlayState;
 };
