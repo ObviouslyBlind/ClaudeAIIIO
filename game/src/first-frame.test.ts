@@ -9,7 +9,7 @@ describe("first harbour frame", () => {
   });
 
   it("looks inland along the tarmac, not at the seaward berth", () => {
-    expect(CAM.x).toBe(-2292);
+    expect(CAM.x).toBe(-2278);
     expect(CAM.z).toBeLessThan(7280);
     expect(LOOK.x).toBeGreaterThan(CAM.x);
     expect(LOOK.z).toBeGreaterThan(CAM.z);

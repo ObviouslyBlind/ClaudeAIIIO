@@ -949,12 +949,32 @@ nav.dock.travel-dock {
 .sticker-read.is-today { color: var(--green); }
 .sticker-read.is-near { color: #e2c04a; }
 .sticker-read.is-far { color: #e25b6a; }
+.sticker-band {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 10px;
+  height: 8px;
+  border-radius: 4px;
+  pointer-events: none;
+  z-index: 0;
+  background: linear-gradient(
+    90deg,
+    #e25b6a 0%,
+    #e25b6a 18%,
+    #e2c04a 32%,
+    #3d9a5a 50%,
+    #e2c04a 68%,
+    #e25b6a 82%,
+    #e25b6a 100%
+  );
+}
 .sticker-zone {
   position: absolute;
   top: 10px;
   height: 8px;
   background: #e2c04a;
-  opacity: 0.55;
+  opacity: 0.35;
   border-radius: 4px;
   pointer-events: none;
   z-index: 1;
@@ -962,6 +982,12 @@ nav.dock.travel-dock {
 .sticker-track {
   position: relative;
   height: 28px;
+}
+.upg-row small {
+  margin-left: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--green);
 }
 .sticker-mark {
   position: absolute;

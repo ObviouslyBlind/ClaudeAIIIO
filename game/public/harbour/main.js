@@ -14,8 +14,8 @@ import { createFerryTicket } from "./ferry-ticket.js";
 import { makeWater, tickHarbourWater } from "./water.js";
 import { makeSky } from "./sky.js";
 import { CAM, LOOK } from "./first-frame.js";
-import { dressPlayer } from "./player.js";
-import { makeStreetCart, makeCrate, makeVendor } from "./cart.js";
+import { dressPlayer, stepPlayerWalk } from "./player.js";
+import { makeStreetCart, makeCrate, makeVendor, detachVendor, findVendor } from "./cart.js";
 import { playPaperBuy } from "./paper-sfx.js";
 import { createWalkPath } from "./walk-path.js";
 import { mountChrome } from "./chrome.js";
@@ -534,7 +534,7 @@ async function placeCartOn(plot, x, z) {
 }
 
 function attachVendor(cart) {
-  if (!cart || cart.getObjectByName("vendor")) return;
+  if (!cart || findVendor(cart)) return;
   const vendor = makeVendor();
   vendor.position.set(1.05, 0, 0.15);
   cart.add(vendor);
@@ -542,7 +542,7 @@ function attachVendor(cart) {
 
 function tickVendors(t) {
   for (const mesh of standMeshes.values()) {
-    const vendor = mesh.getObjectByName("vendor");
+    const vendor = findVendor(mesh);
     if (!vendor) continue;
     vendor.position.x = 1.05 + Math.sin(t * 1.7) * 0.22;
     vendor.position.z = 0.15 + Math.cos(t * 1.1) * 0.12;
@@ -1683,6 +1683,7 @@ function tick(dt) {
   pulseCrateGlow();
   tickVendors(clock.elapsedTime);
   if (econHud) econHud.tick(dt);
+  stepPlayerWalk(player, clock.elapsedTime, walking);
   if (walking) {
     const dx = walkTarget.x - player.position.x;
     const dz = walkTarget.z - player.position.z;
@@ -2007,13 +2008,24 @@ async function boot() {
     },
     onHired(standId) {
       const playNow = chromeHud && chromeHud.getPlay && chromeHud.getPlay();
-      const hired = playNow && (playNow.stands || []).find((s) => s.id === standId);
+      const hired =
+        playNow &&
+        ((playNow.stands || []).find((s) => s.id === standId) ||
+          (playNow.sites || []).find((s) => s.id === standId));
       if (hired) syncStandMesh({ ...hired, hired: true });
       setStatus("Hired.");
     },
     onFired(standId) {
-      const mesh = standMeshes.get(standId);
-      if (mesh) detachVendor(mesh);
+      const playNow = chromeHud && chromeHud.getPlay && chromeHud.getPlay();
+      const fired =
+        playNow &&
+        ((playNow.stands || []).find((s) => s.id === standId) ||
+          (playNow.sites || []).find((s) => s.id === standId));
+      if (fired) syncStandMesh({ ...fired, hired: false });
+      else {
+        const mesh = standMeshes.get(standId);
+        if (mesh) detachVendor(mesh);
+      }
       setStatus("Fired.");
     },
     onStocked() {},
@@ -2032,8 +2044,10 @@ async function boot() {
       pruneCrates(play);
       for (const d of play.deliveries || []) {
         if (takenCrates.has(d.id)) continue;
-        if (d.status === "en_route" && deliveries) {
-          deliveries.start(d, d.drop || map.plots.find((p) => p.id === d.plotId));
+        if (d.status === "en_route") {
+          void ensureDeliveries().then(() => {
+            deliveries.start(d, d.drop || (map && map.plots.find((p) => p.id === d.plotId)));
+          });
         }
         if (d.status === "arrived") syncCrateMesh(d);
       }
@@ -2048,7 +2062,8 @@ async function boot() {
         return;
       }
       void ensureDeliveries().then(() => {
-        deliveries.start(delivery, delivery.drop);
+        const dest = delivery.drop || (map && map.plots.find((p) => p.id === delivery.plotId));
+        deliveries.start(delivery, dest);
         setStatus("Van on the way.");
       });
     },

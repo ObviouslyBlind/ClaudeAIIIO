@@ -28,6 +28,20 @@ describe("delivery van (PAPER)", () => {
     expect(scene.children.length).toBe(0);
   });
 
+  it("still starts when the drop only has x/z, not curbX", () => {
+    const scene = new THREE.Scene();
+    const vans = createDeliveries({
+      scene,
+      getMap: () => ({ roads: [] }),
+      specOf: () => ({ port: { x: 0, z: 0 } }),
+      heightAt: () => 0,
+      onDrop: () => {},
+    });
+    vans.start({ id: "del-xz", island: "south", drop: { x: 12, z: 0, awayX: 40, awayZ: 0 } }, null);
+    expect(scene.children.length).toBe(1);
+    expect(scene.children[0]!.name).toBe("delivery-van");
+  });
+
   it("builds a box van with a cab, lamps, and wheels", () => {
     const van = makeVan();
     const parts = new Set<string>();

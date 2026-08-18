@@ -42,7 +42,7 @@ export function mountPackShift() {
   }
 
   let hits = 0;
-  let left = PACK_SECONDS;
+  let startedAt = 0;
   let timer = 0;
   let falling = 0;
   let running = false;
@@ -95,7 +95,7 @@ export function mountPackShift() {
 
   function open(opts) {
     hits = 0;
-    left = PACK_SECONDS;
+    startedAt = performance.now();
     spawnMs = 720;
     running = true;
     onDone = opts && opts.onDone;
@@ -105,15 +105,15 @@ export function mountPackShift() {
     root.hidden = false;
     slots.innerHTML = "";
     paintHits();
-    if (clock) clock.textContent = left.toFixed(0) + "s";
+    if (clock) clock.textContent = PACK_SECONDS.toFixed(0) + "s";
     spawn();
     if (timer) clearInterval(timer);
     if (falling) clearInterval(falling);
     falling = setInterval(spawn, spawnMs);
     timer = setInterval(() => {
-      left -= 0.1;
-      if (clock) clock.textContent = Math.max(0, left).toFixed(0) + "s";
-      const spent = PACK_SECONDS - left;
+      const spent = (performance.now() - startedAt) / 1000;
+      const left = Math.max(0, PACK_SECONDS - spent);
+      if (clock) clock.textContent = left.toFixed(0) + "s";
       const nextMs = Math.max(380, 720 - spent * 14);
       if (Math.abs(nextMs - spawnMs) > 40) {
         spawnMs = nextMs;

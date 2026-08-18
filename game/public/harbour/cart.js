@@ -151,6 +151,37 @@ export function makeCrate() {
   return g;
 }
 
+export function findVendor(root) {
+  if (!root) return null;
+  if (root.name === "vendor" || (root.userData && root.userData.kind === "vendor")) return root;
+  if (typeof root.getObjectByName === "function") {
+    const named = root.getObjectByName("vendor");
+    if (named) return named;
+  }
+  let found = null;
+  if (typeof root.traverse === "function") {
+    root.traverse((obj) => {
+      if (found) return;
+      if (obj.name === "vendor" || (obj.userData && obj.userData.kind === "vendor")) found = obj;
+    });
+  }
+  return found;
+}
+
+/** Fire / unhire: remove every vendor mesh under this cart. */
+export function detachVendor(root) {
+  if (!root) return false;
+  let removed = false;
+  let vendor = findVendor(root);
+  while (vendor) {
+    if (vendor.parent) vendor.parent.remove(vendor);
+    else break;
+    removed = true;
+    vendor = findVendor(root);
+  }
+  return removed;
+}
+
 /** Hired vendor. Stands by the cart. ~1.7 m like the player. */
 export function makeVendor() {
   const g = new THREE.Group();

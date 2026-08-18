@@ -191,10 +191,12 @@ function hasKit(play: PlayState): boolean {
 /** Metres from your lot toward the paved road where a cart may sit. */
 export const PLACE_CORRIDOR_M = 22;
 
-export const SITE_UPGRADES: { id: string; label: string; cost: number }[] = [
-  { id: "fridge", label: "Fridge", cost: STORAGE_UPGRADE_COST },
-  { id: "sign", label: "Sign", cost: 80 },
-  { id: "awning", label: "Awning", cost: 120 },
+export const SITE_UPGRADES: { id: string; label: string; cost: number; appeal: number }[] = [
+  { id: "fridge", label: "Fridge", cost: STORAGE_UPGRADE_COST, appeal: 3 },
+  { id: "sign", label: "Sign", cost: 80, appeal: 0.8 },
+  { id: "awning", label: "Awning", cost: 120, appeal: 0.7 },
+  { id: "lights", label: "Lights", cost: 60, appeal: 0.4 },
+  { id: "stools", label: "Stools", cost: 50, appeal: 0.4 },
 ];
 
 /** One Hire. An AI vendor appears and runs the site. */
@@ -431,7 +433,15 @@ export function rivalsOnStreet(land: LandBoard, play: PlayState, plotId: string,
 function scoreWork(
   land: LandBoard,
   play: PlayState,
-  row: { id: string; plotId: string; hired: boolean; stock: number; upgraded: boolean; boostLeft: number },
+  row: {
+    id: string;
+    plotId: string;
+    hired: boolean;
+    stock: number;
+    upgraded: boolean;
+    upgrades?: string[];
+    boostLeft: number;
+  },
 ): SiteScore {
   const plot = getPlot(land, row.plotId);
   const band = plot ? plotTrafficBand(land, plot) : "red";
@@ -439,6 +449,7 @@ function scoreWork(
     hired: row.hired,
     stocked: row.stock >= 1,
     upgraded: row.upgraded,
+    upgrades: ownedUpgrades(row),
     traffic: band,
     rivalsOnStreet: rivalsOnStreet(land, play, row.plotId, row.id),
     boostLeft: row.boostLeft,
@@ -452,6 +463,7 @@ export function scoreForStand(stand: Stand, land: LandBoard, play: PlayState): S
     hired: stand.hired,
     stock: stand.hotdogs,
     upgraded: stand.upgraded,
+    upgrades: stand.upgrades,
     boostLeft: stand.boostLeft || 0,
   });
 }
@@ -530,7 +542,7 @@ export function stickerBand(price: number, today = TODAY_PRICE): "green" | "yell
   return "red";
 }
 
-function stickerSellMul(band: "green" | "yellow" | "red"): number {
+export function stickerSellMul(band: "green" | "yellow" | "red"): number {
   if (band === "green") return 1;
   if (band === "yellow") return 1.6;
   return 2.8;
@@ -1158,6 +1170,7 @@ export function tickHotdogSales(visitor: Visitor, land: LandBoard): number {
           hired: site.hired,
           stock: site.stock,
           upgraded: site.upgraded,
+          upgrades: site.upgrades,
           boostLeft: site.boostLeft || 0,
         }),
       );
@@ -1187,6 +1200,9 @@ export function playSnapshot(visitor: Visitor, land: LandBoard) {
   const stands = play.stands.map((s) => {
     const cart = cartKindForStand(s);
     const scored = scoreForStand(s, land, play);
+    const plot = getPlot(land, s.plotId);
+    const band = stickerBand(s.stickerPrice);
+    const ticks = sellTicksAt(s.stickerPrice, scored);
     return {
       ...s,
       kind: cart.id,
@@ -1197,13 +1213,16 @@ export function playSnapshot(visitor: Visitor, land: LandBoard) {
       siteClass: "cart" as const,
       needs: standNeeds(s),
       desirability: scored.score,
-      sellTicks: sellTicksAt(s.stickerPrice, scored),
+      sellTicks: ticks,
       parts: scored.parts,
       searching: scored.searching,
       cap: scored.cap,
       rivalsOnStreet: scored.rivalsOnStreet,
-      perMinute: perMinuteAt(s.stickerPrice, sellTicksAt(s.stickerPrice, scored)),
+      perMinute: perMinuteAt(s.stickerPrice, ticks),
       boostLeft: s.boostLeft || 0,
+      stickerBand: band,
+      stickerMul: stickerSellMul(band),
+      trafficBand: plot ? plotTrafficBand(land, plot) : "red",
     };
   });
   const work = play.workSites.map((s) => {
@@ -1213,8 +1232,12 @@ export function playSnapshot(visitor: Visitor, land: LandBoard) {
       hired: s.hired,
       stock: s.stock,
       upgraded: s.upgraded,
+      upgrades: s.upgrades,
       boostLeft: s.boostLeft || 0,
     });
+    const plot = getPlot(land, s.plotId);
+    const band = stickerBand(s.stickerPrice);
+    const ticks = sellTicksAt(s.stickerPrice, scored);
     return {
       ...s,
       hotdogs: s.stock,
@@ -1222,13 +1245,16 @@ export function playSnapshot(visitor: Visitor, land: LandBoard) {
       siteClass: s.siteClass,
       needs: siteNeeds(s),
       desirability: scored.score,
-      sellTicks: sellTicksAt(s.stickerPrice, scored),
+      sellTicks: ticks,
       parts: scored.parts,
       searching: scored.searching,
       cap: scored.cap,
       rivalsOnStreet: scored.rivalsOnStreet,
-      perMinute: perMinuteAt(s.stickerPrice, sellTicksAt(s.stickerPrice, scored)),
+      perMinute: perMinuteAt(s.stickerPrice, ticks),
       boostLeft: s.boostLeft || 0,
+      stickerBand: band,
+      stickerMul: stickerSellMul(band),
+      trafficBand: plot ? plotTrafficBand(land, plot) : "red",
     };
   });
   return {

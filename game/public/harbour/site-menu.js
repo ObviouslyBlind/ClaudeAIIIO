@@ -26,9 +26,11 @@ const TABS = [
 ];
 
 const DEFAULT_UPGRADES = [
-  { id: "fridge", label: "Fridge", cost: 200 },
-  { id: "sign", label: "Sign", cost: 80 },
-  { id: "awning", label: "Awning", cost: 120 },
+  { id: "fridge", label: "Fridge", cost: 200, appeal: 3 },
+  { id: "sign", label: "Sign", cost: 80, appeal: 0.8 },
+  { id: "awning", label: "Awning", cost: 120, appeal: 0.7 },
+  { id: "lights", label: "Lights", cost: 60, appeal: 0.4 },
+  { id: "stools", label: "Stools", cost: 50, appeal: 0.4 },
 ];
 
 export const SITE_GAMES = {
@@ -114,6 +116,7 @@ function paintStock(site, play) {
     <div class="sticker-slide">
       <span class="sticker-read ${vs}" data-sticker-out>${money(sticker)}</span>
       <div class="sticker-track">
+        <i class="sticker-band" aria-hidden="true"></i>
         <i class="sticker-zone" style="left:${zoneLeft}%;width:${zoneWidth}%"></i>
         <i class="sticker-mark" style="left:${mark}%"></i>
         <input id="sticker-price" type="range" min="${min}" max="${max}" step="0.5" value="${sticker}" />
@@ -155,10 +158,12 @@ function paintUpgrades(site, play) {
     const done = owned.includes(u.id);
     const prev = i > 0 ? catalog[i - 1] : null;
     const open = !prev || owned.includes(prev.id);
+    const appeal = Number(u.appeal != null ? u.appeal : 0);
+    const appealTxt = appeal ? ` +${appeal.toFixed(1)}` : "";
     if (done) {
       rows.push(`
         <div class="upg-row is-on">
-          <span>${esc(u.label)}</span>
+          <span>${esc(u.label)}<small>${appealTxt}</small></span>
           <strong class="upg-tick" aria-label="Bought">✓</strong>
         </div>`);
       continue;
@@ -166,7 +171,7 @@ function paintUpgrades(site, play) {
     if (open) {
       rows.push(`
         <div class="upg-row">
-          <span>${esc(u.label)}</span>
+          <span>${esc(u.label)}<small>${appealTxt}</small></span>
           <button type="button" class="go" data-upgrade="${esc(site.id)}" data-upgrade-id="${esc(u.id)}">${money(u.cost)}</button>
         </div>`);
       break;
@@ -183,6 +188,12 @@ function paintStats(site) {
   const sellTicks = Number(site.sellTicks != null ? site.sellTicks : 18);
   const perMin = Number(site.perMinute != null ? site.perMinute : 0);
   const windowSales = Math.round(180 / Math.max(1, sellTicks));
+  const sticker = Number(site.stickerPrice != null ? site.stickerPrice : 6);
+  const band = site.stickerBand || stickerTone(sticker, 6).replace("is-today", "green").replace("is-near", "yellow").replace("is-far", "red");
+  const mul = Number(site.stickerMul != null ? site.stickerMul : 1);
+  const area = site.trafficBand || "red";
+  const boost = Number(site.boostLeft != null ? site.boostLeft : 0);
+  const shiftLine = boost > 0 ? `Shift speeding ×${boost}` : "Shift idle — Play on Run";
   return `
     <p class="site-score"><strong>${score.toFixed(1)}</strong><span>/ 10</span></p>
     <ul class="site-parts">
@@ -193,10 +204,14 @@ function paintStats(site) {
         )
         .join("")}
     </ul>
+    <div class="stand-row"><span>Area</span><strong>${esc(area)}</strong></div>
+    <div class="stand-row"><span>Sticker</span><strong>${money(sticker)} ${esc(band)} ×${mul.toFixed(1)}</strong></div>
     <div class="stand-row"><span>Street</span><strong>${searching}</strong></div>
     <div class="stand-row"><span>Rivals</span><strong>${rivals}</strong></div>
+    <div class="stand-row"><span>Sale every</span><strong>${sellTicks}s</strong></div>
     <div class="stand-row"><span>Sales</span><strong>~${windowSales} / 3 min</strong></div>
     <div class="stand-row"><span>$ / min</span><strong>${money(perMin)}</strong></div>
+    <div class="stand-row"><span>Shift</span><strong>${esc(shiftLine)}</strong></div>
   `;
 }
 

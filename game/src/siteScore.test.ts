@@ -30,6 +30,22 @@ describe("site desirability", () => {
     expect(s.sellTicks).toBe(BASE_SELL_TICKS * 2);
   });
 
+  it("lists each owned upgrade's appeal instead of one Upgraded blob", () => {
+    const s = scoreSite({
+      hired: true,
+      stocked: true,
+      upgraded: true,
+      upgrades: ["fridge", "sign"],
+      traffic: "green",
+      rivalsOnStreet: 0,
+    });
+    expect(s.parts.find((p) => p.id === "fridge")?.points).toBe(3);
+    expect(s.parts.find((p) => p.id === "sign")?.points).toBe(0.8);
+    expect(s.parts.some((p) => p.id === "upgrade")).toBe(false);
+    expect(s.raw).toBe(10.8);
+    expect(s.score).toBe(10);
+  });
+
   it("speeds the next sales when a mini-game lands hits", () => {
     const boosted = scoreSite({
       hired: true,

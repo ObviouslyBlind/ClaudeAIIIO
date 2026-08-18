@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 import * as THREE from "three";
-import { HOTDOG_CART_MESH_COUNT, dressCart, makeCrate, makeHotdogCart, makeVendor } from "../public/harbour/cart.js";
+import {
+  HOTDOG_CART_MESH_COUNT,
+  detachVendor,
+  dressCart,
+  makeCrate,
+  makeHotdogCart,
+  makeVendor,
+} from "../public/harbour/cart.js";
 import { dressPlayer } from "../public/harbour/player.js";
 
 function meshCount(root: THREE.Object3D) {
@@ -44,6 +51,17 @@ describe("street cart (kerb stall, not a handheld wagon)", () => {
     const crate = makeCrate();
     expect(crate.userData.kind).toBe("crate");
     expect(meshCount(crate)).toBeGreaterThan(1);
+  });
+
+  it("detaches a hired vendor from the cart", () => {
+    const cart = makeHotdogCart();
+    const vendor = makeVendor();
+    vendor.position.set(1.05, 0, 0.15);
+    cart.add(vendor);
+    expect(cart.getObjectByName("vendor")).toBeTruthy();
+    expect(detachVendor(cart)).toBe(true);
+    expect(cart.getObjectByName("vendor")).toBeUndefined();
+    expect(detachVendor(cart)).toBe(false);
   });
 
   it("builds a hired vendor under door height", () => {

@@ -147,6 +147,11 @@ describe("South first loop", () => {
     expect(placed.stand.x).toBeDefined();
     expect(snap.stands[0]!.siteClass).toBe("cart");
     expect(snap.stands[0]!.desirability).toBeGreaterThan(0);
+    expect(snap.stands[0]!.stickerBand).toBe("green");
+    expect(snap.stands[0]!.stickerMul).toBe(1);
+    expect(snap.stands[0]!.parts.some((p) => p.id === "fridge" && p.points === 3)).toBe(true);
+    expect(snap.upgradeCatalog.some((u) => u.id === "lights" && u.appeal === 0.4)).toBe(true);
+    expect(snap.upgradeCatalog.some((u) => u.id === "stools")).toBe(true);
   });
 
   it("lets you place the cart on the verge out toward the main road", () => {

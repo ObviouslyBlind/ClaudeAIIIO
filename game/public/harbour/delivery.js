@@ -101,6 +101,15 @@ function drivePath(map, island, from, to) {
   return densify(pts);
 }
 
+function curbOf(drop, dest) {
+  for (const c of [drop, dest]) {
+    if (!c) continue;
+    if (Number.isFinite(c.curbX) && Number.isFinite(c.curbZ)) return { x: c.curbX, z: c.curbZ };
+    if (Number.isFinite(c.x) && Number.isFinite(c.z)) return { x: c.x, z: c.z };
+  }
+  return null;
+}
+
 export function createDeliveries({ scene, getMap, specOf, heightAt, onDrop }) {
   const vans = new Map();
 
@@ -127,21 +136,28 @@ export function createDeliveries({ scene, getMap, specOf, heightAt, onDrop }) {
 
   return {
     start(delivery, dest) {
-      if (!delivery || vans.has(delivery.id)) return;
-      const map = getMap();
+      if (!delivery) return;
+      const existing = vans.get(delivery.id);
+      if (existing) {
+        if (existing.mesh && !existing.mesh.parent) scene.add(existing.mesh);
+        return;
+      }
+      const map = getMap() || {};
       const spec = specOf(delivery.island);
-      const from = spec.port;
+      const from = spec && spec.port;
+      if (!from || !Number.isFinite(from.x) || !Number.isFinite(from.z)) return;
       const drop =
         delivery.drop ||
-        (dest && Number.isFinite(dest.curbX)
+        (dest && Number.isFinite(dest.curbX) && Number.isFinite(dest.curbZ)
           ? dest
-          : dest && Number.isFinite(dest.x)
+          : dest && Number.isFinite(dest.x) && Number.isFinite(dest.z) && map.roads
             ? roadsideDrop(map.roads, delivery.island, dest.x, dest.z)
-            : null);
-      const curb = drop ? { x: drop.curbX, z: drop.curbZ } : dest;
-      if (!curb || !Number.isFinite(curb.x) || !Number.isFinite(curb.z)) return;
-      const path = drivePath(map, delivery.island, from, curb);
-      if (!path.length) return;
+            : dest);
+      const curb = curbOf(drop, dest) || curbOf(from, null);
+      if (!curb) return;
+      let path = drivePath(map, delivery.island, from, curb);
+      if (path.length < 2) path = densify([from, curb]);
+      if (path.length < 2) path = [from, curb];
       const mesh = makeVan();
       mesh.userData.deliveryId = delivery.id;
       mesh.userData.island = delivery.island;

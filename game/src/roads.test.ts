@@ -331,17 +331,17 @@ describe("paved street from spawn", () => {
     const nl = spawnLookAtOffset("north");
     const sl = spawnLookAtOffset("south");
 
-    expect(n.y).toBeGreaterThan(8);
-    expect(n.y).toBeLessThan(22);
+    expect(n.y).toBeGreaterThan(4);
+    expect(n.y).toBeLessThan(12);
     expect(s.y).toBeGreaterThanOrEqual(n.y);
-    expect(s.y).toBeLessThan(22);
-    expect(Math.abs(n.x)).toBeLessThan(40);
+    expect(s.y).toBeLessThan(12);
+    expect(Math.abs(n.x)).toBeLessThan(20);
     expect(n.z).toBeGreaterThan(0);
     expect(s.x).toBeLessThan(0);
     expect(s.z).toBeLessThan(0);
-    expect(sl.x).toBeGreaterThan(40);
-    expect(sl.z).toBeGreaterThan(40);
-    expect(nl.z).toBeLessThan(-40);
+    expect(sl.x).toBeGreaterThan(16);
+    expect(sl.z).toBeGreaterThan(14);
+    expect(nl.z).toBeLessThan(-20);
 
     const farM = ISLANDS.south.port.z - ISLANDS.north.port.z;
     const fogged = (farM - FOG_NEAR_M) / (FOG_FAR_M - FOG_NEAR_M);

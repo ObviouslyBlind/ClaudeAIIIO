@@ -19,10 +19,30 @@ export type SiteScorePart = {
   points: number;
 };
 
+export type SiteUpgradePart = {
+  id: string;
+  label: string;
+  points: number;
+};
+
+/** Fridge is the big one. Later kit adds smaller street appeal. */
+export const UPGRADE_APPEAL: SiteUpgradePart[] = [
+  { id: "fridge", label: "Fridge", points: 3 },
+  { id: "sign", label: "Sign", points: 0.8 },
+  { id: "awning", label: "Awning", points: 0.7 },
+  { id: "lights", label: "Lights", points: 0.4 },
+  { id: "stools", label: "Stools", points: 0.4 },
+];
+
+export function appealFor(id: string): number {
+  return UPGRADE_APPEAL.find((u) => u.id === id)?.points ?? 0;
+}
+
 export type SiteScoreInput = {
   hired: boolean;
   stocked: boolean;
   upgraded: boolean;
+  upgrades?: string[];
   traffic: TrafficBand;
   rivalsOnStreet: number;
   boostLeft?: number;
@@ -54,15 +74,26 @@ export function searchingOnStreet(traffic: TrafficBand, rivals: number): number 
   return Math.max(1, base - rivals);
 }
 
+function upgradeParts(input: SiteScoreInput): SiteScorePart[] {
+  const ids = Array.isArray(input.upgrades) ? input.upgrades : [];
+  if (ids.length) {
+    return ids.map((id) => {
+      const spec = UPGRADE_APPEAL.find((u) => u.id === id);
+      return { id, label: spec?.label || id, points: spec?.points ?? 0 };
+    });
+  }
+  return [{ id: "upgrade", label: "Upgraded", points: input.upgraded ? 3 : 0 }];
+}
+
 /**
- * Staff 2.5, stock 2.5, fridge/upgrade 3, foot traffic up to 2 → 10.
+ * Staff 2.5, stock 2.5, fridge 3, extras, foot traffic up to 2.
  * Two or more rivals on the same street cap the score at 5.
  */
 export function scoreSite(input: SiteScoreInput): SiteScore {
   const parts: SiteScorePart[] = [
     { id: "staff", label: "Staffed", points: input.hired ? 2.5 : 0 },
     { id: "stock", label: "Stocked", points: input.stocked ? 2.5 : 0 },
-    { id: "upgrade", label: "Upgraded", points: input.upgraded ? 3 : 0 },
+    ...upgradeParts(input),
     { id: "traffic", label: "Foot traffic", points: trafficPoints(input.traffic) },
   ];
   const raw = round1(parts.reduce((sum, p) => sum + p.points, 0));
