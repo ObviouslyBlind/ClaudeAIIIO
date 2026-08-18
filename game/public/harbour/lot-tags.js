@@ -16,9 +16,9 @@ export function tagKindFor(plot) {
   return "buy";
 }
 
-export function tagLabelFor(plot) {
+export function tagLabelFor(plot, placing = false) {
   const kind = tagKindFor(plot);
-  if (kind === "yours") return "YOURS";
+  if (kind === "yours") return placing ? "PLACE" : "YOURS";
   if (kind === "taken") return "TAKEN";
   if (kind === "buy") {
     return (
@@ -61,7 +61,7 @@ export function ndcToLayer(ndc, rect) {
   };
 }
 
-export function mountLotTags({ canvas, camera, heightAt, specOf, getPlots, onBuy, onInspect }) {
+export function mountLotTags({ canvas, camera, heightAt, specOf, getPlots, onBuy, onInspect, onPlace }) {
   let root = document.getElementById("lot-tags");
   if (!root) {
     root = document.createElement("div");
@@ -71,6 +71,7 @@ export function mountLotTags({ canvas, camera, heightAt, specOf, getPlots, onBuy
   const buttons = [];
   const tmp = new THREE.Vector3();
   let clock = 0;
+  let placingMode = false;
 
   function buttonAt(i) {
     if (buttons[i]) return buttons[i];
@@ -85,7 +86,12 @@ export function mountLotTags({ canvas, camera, heightAt, specOf, getPlots, onBuy
       const plots = getPlots() || [];
       const plot = plots.find((p) => p.id === id);
       if (!plot) return;
-      if (tagKindFor(plot) === "buy") {
+      const kind = tagKindFor(plot);
+      if (placingMode) {
+        if (kind === "yours" && onPlace) onPlace(plot);
+        return;
+      }
+      if (kind === "buy") {
         if (onBuy) onBuy(plot);
       } else if (onInspect) {
         onInspect(plot);
@@ -96,7 +102,8 @@ export function mountLotTags({ canvas, camera, heightAt, specOf, getPlots, onBuy
     return btn;
   }
 
-  function tick(playerPos, dt = 0.016, overlay = "world") {
+  function tick(playerPos, dt = 0.016, overlay = "world", placing = false) {
+    placingMode = Boolean(placing);
     if (overlay !== "lots") {
       root.hidden = true;
       for (const btn of buttons) {
@@ -111,7 +118,9 @@ export function mountLotTags({ canvas, camera, heightAt, specOf, getPlots, onBuy
     if (!camera || !canvas) return;
     const rect = canvas.getBoundingClientRect();
     if (rect.width < 8 || rect.height < 8) return;
-    const shown = pickTagPlots(getPlots(), playerPos, overlay, TAG_POOL);
+    const shown = pickTagPlots(getPlots(), playerPos, overlay, TAG_POOL).filter((slot) =>
+      placingMode ? slot.kind === "yours" : true,
+    );
     for (let i = 0; i < TAG_POOL; i++) {
       const btn = buttonAt(i);
       const slot = shown[i];
@@ -130,7 +139,7 @@ export function mountLotTags({ canvas, camera, heightAt, specOf, getPlots, onBuy
         continue;
       }
       const kind = slot.kind;
-      const text = tagLabelFor(p);
+      const text = tagLabelFor(p, placingMode);
       btn.hidden = false;
       btn.dataset.plotId = p.id;
       btn.dataset.kind = kind;

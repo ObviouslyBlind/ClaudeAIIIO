@@ -8,7 +8,7 @@ PAPER / SIMULATED. Grep these `kind` / `layer` / `.name` strings. Source of trut
 | --- | --- | --- | --- |
 | World | `world` | the islands | walk. buildings / stands / port. **$ tags buy** |
 | Lots | `lots` | boundary outlines | click the **$ title** or a lot to buy |
-| Foot traffic | `foot` | green / yellow / red ribbons + road names | walk only |
+| Foot traffic | `foot` | High / Moderate / Low ribbons + road names | walk only |
 | Logistics | `logistics` | van + roadside crate pads | crate / van / walk |
 | Minerals | `minerals` | empty on South v1 | walk only |
 
@@ -28,7 +28,7 @@ Buy a plot by **clicking its $ price tag** (that buys immediately). Lots overlay
 | `hotdog-cart` | `hotdog-cart:<standId>` | `public/harbour/cart.js` |
 | `vendor` | `vendor` | `public/harbour/cart.js` |
 | `foot-road` | `foot-road:<island>:<street>` | `public/harbour/overlays.js` |
-| `foot-label` | `foot-label:<Street · BAND>` | `public/harbour/overlays.js` |
+| `foot-label` | `foot-label:<Street · High>` | `public/harbour/overlays.js` |
 | `logistics-pad` | `logistics-pad:<deliveryId>` | `public/harbour/overlays.js` |
 | `ground` | terrain / curbs | `public/harbour/main.js`, `roads.js` |
 | `port` | pier / shed | `public/harbour/main.js` |

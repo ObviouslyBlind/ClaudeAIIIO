@@ -288,6 +288,26 @@ nav.dock.travel-dock {
   cursor: default;
 }
 
+#place-hint {
+  position: absolute;
+  left: 50%;
+  bottom: calc(88px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 12;
+  pointer-events: none;
+  margin: 0;
+  padding: 8px 14px;
+  max-width: min(360px, calc(100vw - 24px));
+  text-align: center;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--ink);
+  font-weight: 700;
+  font-size: 13px;
+}
+#place-hint[hidden] { display: none !important; }
+
 #buy-ask {
   position: absolute;
   left: 50%;

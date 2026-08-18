@@ -154,6 +154,9 @@ let lastInspectKey = "";
 let landPinned = false;
 const standMeshes = new Map();
 const crateMeshes = new Map();
+const takenCrates = new Set();
+/** Must match game/src/firstLoop.ts PLACE_CORRIDOR_M. */
+const PLACE_CORRIDOR_M = 22;
 const propsBuilt = new Set();
 let rmbDown = null;
 
@@ -375,11 +378,19 @@ async function placeCartOn(plot, x, z) {
   const res = await fetch("/api/inventory/place", {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ plotId: plot && plot.id, x, z }),
+    body: JSON.stringify({ plotId: (plot && plot.id) || "", x, z }),
   });
   const data = await res.json();
   if (!res.ok) {
     setStatus("Could not place: " + (data.reason || "fail") + " · PAPER");
+    const hint = document.getElementById("place-hint");
+    if (hint) {
+      hint.hidden = false;
+      hint.textContent =
+        data.reason === "not_yours"
+          ? "Tap the green YOURS lot, or the verge out to the road."
+          : "Could not place: " + (data.reason || "fail") + " · PAPER";
+    }
     return;
   }
   if (chromeHud) chromeHud.clearPlacing();
@@ -442,10 +453,30 @@ function dropCrate(deliveryId) {
     mesh.parent && mesh.parent.remove(mesh);
     crateMeshes.delete(deliveryId);
   }
+}
+
+function hideCrateCard() {
   lastInspectKey = "";
+  if (chromeHud && chromeHud.paintLand) chromeHud.paintLand(null);
+}
+
+function pruneCrates(play) {
+  const live = new Set();
+  for (const d of (play && play.deliveries) || []) {
+    if (!takenCrates.has(d.id)) live.add(d.id);
+  }
+  for (const id of [...crateMeshes.keys()]) {
+    if (!live.has(id)) dropCrate(id);
+  }
 }
 
 async function takeCrate(deliveryId) {
+  if (!deliveryId) return;
+  takenCrates.add(deliveryId);
+  landPinned = false;
+  hideCrateCard();
+  dropCrate(deliveryId);
+  if (deliveries && typeof deliveries.release === "function") deliveries.release(deliveryId);
   const res = await fetch("/api/delivery/take", {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -453,13 +484,13 @@ async function takeCrate(deliveryId) {
   });
   const data = await res.json();
   if (!res.ok) {
+    takenCrates.delete(deliveryId);
     setStatus("Take all failed: " + (data.reason || "fail"));
     return;
   }
-  dropCrate(deliveryId);
-  if (deliveries && typeof deliveries.release === "function") deliveries.release(deliveryId);
+  hideCrateCard();
   if (chromeHud) chromeHud.refresh();
-  setStatus("In your inventory. Place the cart, then stock it. PAPER.");
+  setStatus("In your inventory. Open Inv → Place in world. PAPER.");
 }
 
 function objectWithStand(obj) {
@@ -513,7 +544,42 @@ function openStandMenu(standId) {
 }
 
 
-/** Selected leased lot, or the parcel under the tap. Placement must not require a second hunt. */
+function vacantMine(p) {
+  return Boolean(p && p.owner === "visitor" && !p.use);
+}
+
+function minePlot(p) {
+  return Boolean(p && p.owner === "visitor");
+}
+
+function visitorSouthPlot() {
+  return (map.plots || []).find((p) => p.island === "south" && p.owner === "visitor");
+}
+
+function plotToPlace(hitPlotId, x, z) {
+  const hit = hitPlotId ? map.plots.find((p) => p.id === hitPlotId) : undefined;
+  if (minePlot(hit)) return hit;
+  if (x != null && z != null) {
+    for (const p of map.plots || []) {
+      if (minePlot(p) && p.ring && pointInRing(x, z, p.ring)) return p;
+    }
+    let best = null;
+    let bestD = PLACE_CORRIDOR_M;
+    for (const p of map.plots || []) {
+      if (!minePlot(p) || p.island !== "south") continue;
+      const d = Math.hypot(x - p.x, z - p.z);
+      if (d <= bestD) {
+        best = p;
+        bestD = d;
+      }
+    }
+    if (best) return best;
+  }
+  const sel = selected ? map.plots.find((p) => p.id === selected) : undefined;
+  if (minePlot(sel)) return sel;
+  return visitorSouthPlot() || null;
+}
+
 function plotToDevelop(hitPlotId, x, z) {
   const hit = hitPlotId ? map.plots.find((p) => p.id === hitPlotId) : undefined;
   if (vacantMine(hit)) return hit;
@@ -1085,24 +1151,30 @@ function inspectNearbyLand() {
   // Never auto-open a lot card. Standing on 76 Shore Rd was pinning Buy lot
   // over the walk, and Close could not stick because this ran every frame.
   if (landPinned) return;
+  if (chromeHud && chromeHud.isPlacing && chromeHud.isPlacing()) return;
   if (!map || !chromeHud || !chromeHud.paintLand) return;
   let crate = null;
   for (const [id, mesh] of crateMeshes) {
+    if (takenCrates.has(id)) continue;
     if (Math.hypot(mesh.position.x - player.position.x, mesh.position.z - player.position.z) < 10) {
       crate = { id };
       break;
     }
   }
   const key = crate ? "crate:" + crate.id : "";
-  if (key === lastInspectKey) return;
-  lastInspectKey = key;
-  if (crate) {
-    chromeHud.paintLand(
-      { id: "roadside", owner: "visitor", price: 0 },
-      { crate, roadside: true, onTake: () => takeCrate(crate.id) },
-    );
+  if (!crate) {
+    if (String(lastInspectKey).indexOf("crate:") === 0) {
+      lastInspectKey = "";
+      chromeHud.paintLand(null);
+    }
     return;
   }
+  if (key === lastInspectKey) return;
+  lastInspectKey = key;
+  chromeHud.paintLand(
+    { id: "roadside", owner: "visitor", price: 0 },
+    { crate, roadside: true, onTake: () => takeCrate(crate.id) },
+  );
 }
 
 function onPointer(ev) {
@@ -1110,7 +1182,11 @@ function onPointer(ev) {
   if (Date.now() - lastTap < 180) return;
   lastTap = Date.now();
   if (taxi && typeof taxi.mapOpen === "function" && taxi.mapOpen()) return;
-  if (ev.target.closest && ev.target.closest(HUD_BLOCK)) return;
+  const placing = Boolean(chromeHud && chromeHud.isPlacing && chromeHud.isPlacing());
+  if (ev.target.closest && ev.target.closest(HUD_BLOCK) && !placing) return;
+  if (placing && ev.target.closest && ev.target.closest(".lot-tag, [data-panel], [data-overlay], nav, #taxi-map, .float-panel, #buy-ask, #stand-menu")) {
+    return;
+  }
   aimPointer(ev);
   raycaster.setFromCamera(pointer, camera);
   if (interior && interior.isInside()) {
@@ -1133,7 +1209,7 @@ function onPointer(ev) {
   const tap = walkPoint(hits);
   const tapPt = tap && tap.point;
   if (chromeHud && chromeHud.isPlacing && chromeHud.isPlacing()) {
-    const tapped = plotToDevelop(plotHit?.object.userData.plotId, tapPt?.x, tapPt?.z);
+    const tapped = plotToPlace(plotHit?.object.userData.plotId, tapPt?.x, tapPt?.z);
     void placeCartOn(tapped, tapPt?.x, tapPt?.z);
     return;
   }
@@ -1392,7 +1468,14 @@ function tick(dt) {
   }
   if (ferryMesh && tickFerry) tickFerry(ferryMesh, dt);
   if (parcelMap) parcelMap.tick(player.position, dt, viewerMode());
-  if (lotTags) lotTags.tick(player.position, dt, viewerMode());
+  if (lotTags) {
+    lotTags.tick(
+      player.position,
+      dt,
+      viewerMode(),
+      Boolean(chromeHud && chromeHud.isPlacing && chromeHud.isPlacing()),
+    );
+  }
   inspectNearbyLand();
   btnFerry.disabled = !nearPort();
   refreshHud();
@@ -1644,6 +1727,9 @@ async function boot() {
     getPlots: () => (map ? map.plots : []),
     onBuy: askToBuy,
     onInspect: showLandCard,
+    onPlace(plot) {
+      void placeCartOn(plot, plot.x, plot.z);
+    },
   });
   ground.push(...parcelMap.buildIsland("south"));
   overlays = createOverlays({
@@ -1673,9 +1759,17 @@ async function boot() {
       const play = chromeHud && typeof chromeHud.getPlay === "function" ? chromeHud.getPlay() : null;
       if (overlays) overlays.setMode(id, play, map);
     },
+    onPlaceMode(on) {
+      if (!on) return;
+      landPinned = false;
+      hideCrateCard();
+      if (chromeHud && chromeHud.hideBuyAsk) chromeHud.hideBuyAsk();
+    },
     onPlay(play) {
       if (overlays) overlays.refresh(play, map);
+      pruneCrates(play);
       for (const d of play.deliveries || []) {
+        if (takenCrates.has(d.id)) continue;
         if (d.status === "en_route" && deliveries) {
           const plot = map.plots.find((p) => p.id === d.plotId);
           if (plot) deliveries.start(d, plot);
@@ -1690,7 +1784,6 @@ async function boot() {
         if (plot) deliveries.start(delivery, plot);
       });
     },
-    onPlaceMode() {},
   });
   setStatus("World viewer. Left-click walks. Lots chip shows outlines. PAPER.");
   onResize();
@@ -1702,6 +1795,15 @@ async function boot() {
 }
 
 canvas.addEventListener("pointerup", onPointer);
+window.addEventListener(
+  "pointerup",
+  (ev) => {
+    if (!(chromeHud && chromeHud.isPlacing && chromeHud.isPlacing())) return;
+    if (ev.target === canvas || (canvas && canvas.contains && canvas.contains(ev.target))) return;
+    onPointer(ev);
+  },
+  true,
+);
 canvas.addEventListener("contextmenu", (ev) => ev.preventDefault());
 canvas.addEventListener("pointerdown", (ev) => {
   if (ev.button === 2) rmbDown = { t: Date.now(), x: ev.clientX, y: ev.clientY };

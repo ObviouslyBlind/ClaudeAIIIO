@@ -7,6 +7,13 @@ export const TRAFFIC_NOTE =
 
 export type TrafficBand = "green" | "yellow" | "red";
 
+/** What the player reads. Green sells fastest. Red is the slow band. */
+export const BAND_LEVEL: Record<TrafficBand, "High" | "Moderate" | "Low"> = {
+  green: "High",
+  yellow: "Moderate",
+  red: "Low",
+};
+
 /** Metres from port centroid. Town streets stay green. */
 export const GREEN_PORT_M = 420;
 export const YELLOW_PORT_M = 1100;
