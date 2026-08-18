@@ -138,7 +138,7 @@ for (const node of padNodes) {
     const dir = armDir(node, e);
     if (trimM > 0.5) {
       const end = { x: node.x + dir.x * trimM, z: node.z + dir.z * trimM };
-      const along = pad.side / 2 + 0.8;
+      const along = pad.along?.[e.id] ?? pad.side / 2 + 1.2;
       if (trimM > along + 0.05) {
         issue(`trim past hub ${node.id} ${e.name} trim=${trimM.toFixed(2)} along=${along.toFixed(2)}`);
       }
@@ -146,21 +146,22 @@ for (const node of padNodes) {
         hubGap += 1;
         issue(`hub misses trimmed ribbon end ${node.id} ${e.name} at ${trimM.toFixed(2)}m`);
       }
-    }
-    if (pad.kind === "tee" && trimM > 0.5) {
-      const other = Math.max(...arms.filter((o) => o.id !== e.id).map((o) => roadClassSpec(o.cls).carriageM));
-      const throughHalf = other / 2;
-      const overlap = throughHalf - trimM;
+      const overlap = along - trimM;
       if (overlap < 1) {
         teeHairline += 1;
         issue(
-          `T stem/through overlap only ${overlap.toFixed(2)}m at ${node.id} ${e.name} (trim ${trimM.toFixed(2)}, through half ${throughHalf.toFixed(2)})`,
+          `ribbon/hub overlap only ${overlap.toFixed(2)}m at ${node.id} ${e.name} (trim ${trimM.toFixed(2)}, hub along ${along.toFixed(2)})`,
         );
       }
     }
     if (spec.sidewalkM > 0) {
       const walkR = spec.carriageM / 2 + 1.1 + spec.sidewalkM / 2;
-      const sample = { x: node.x + dir.x * 6 + -dir.z * walkR, z: node.z + dir.z * 6 + dir.x * walkR };
+      const alongM = pad.along?.[e.id] ?? pad.side / 2 + 1.2;
+      const alongSample = Math.max(6, alongM - 0.8);
+      const sample = {
+        x: node.x + dir.x * alongSample + -dir.z * walkR,
+        z: node.z + dir.z * alongSample + dir.x * walkR,
+      };
       if (multiContains(foot.tarmac, sample.x, sample.z)) {
         sidewalkOnTarmac += 1;
         issue(`walk sample on hub tarmac ${node.id} ${e.name}`);

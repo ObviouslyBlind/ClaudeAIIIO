@@ -280,9 +280,10 @@ function armDir(node, edge) {
 }
 
 /**
- * How a junction is drawn. A 90° corner is a square plate the ribbons stop at,
- * so they meet as an L instead of two strips crossing as a plus. A T trims the
- * stem only — the through road keeps running. Collinear 2-arm splits are a
+ * How a junction is drawn. Each arm stops once it has entered the other
+ * carriageway, so a 90° street T is one plate and a 45° fork onto the dual
+ * highway meets the outer lane instead of dying in the median. Dual through
+ * arms keep running (median stays a median). Collinear 2-arm splits are a
  * continuation, not a corner, so they get no plate.
  */
 export function junctionPad(graph, node) {
@@ -315,16 +316,31 @@ export function junctionPad(graph, node) {
   const corner = paved.length === 2 || !collinear;
   const side = corner ? Math.max(widest + 2.4, widest * Math.SQRT2 + 0.4) : widest + 2.4;
   const throughEdgeIds = collinear && through ? [through[0].edge.id, through[1].edge.id] : [];
+  const OVERLAP_M = 1.6;
+  const MIN_TRIM_M = 2.2;
+  const SIN_FLOOR = 0.35;
   const trim = {};
+  const along = {};
   for (const a of paved) {
-    if (throughEdgeIds.includes(a.edge.id)) {
-      trim[a.edge.id] = 0;
-      continue;
+    let clear = 0;
+    for (const o of paved) {
+      if (o.edge.id === a.edge.id) continue;
+      const dot = a.dir.x * o.dir.x + a.dir.z * o.dir.z;
+      if (dot < -0.72) continue;
+      const sin = Math.max(Math.abs(a.dir.x * o.dir.z - a.dir.z * o.dir.x), SIN_FLOOR);
+      clear = Math.max(clear, o.width / 2 / sin);
     }
-    // Overlap the through carriageway by more than a hairline. 0.2 m read as a
-    // grey seam (shoulder or sand) between two black rectangles.
-    const other = Math.max(...paved.filter((o) => o.edge.id !== a.edge.id).map((o) => o.width));
-    trim[a.edge.id] = Math.max(0, other / 2 - 1.4);
+    const walkM = roadClassSpec(a.edge.cls).sidewalkM || 0;
+    if (roadClassSpec(a.edge.cls).dual) {
+      trim[a.edge.id] = 0;
+      along[a.edge.id] = Math.max(clear, a.width / 2) + 1.2;
+    } else if (clear <= 0) {
+      trim[a.edge.id] = 0;
+      along[a.edge.id] = side / 2 + 1.2;
+    } else {
+      trim[a.edge.id] = Math.max(MIN_TRIM_M, clear - OVERLAP_M);
+      along[a.edge.id] = clear + 1.2 + walkM;
+    }
   }
 
   return {
@@ -333,6 +349,7 @@ export function junctionPad(graph, node) {
     yaw: Math.atan2(paved[0].dir.x, paved[0].dir.z),
     throughEdgeIds,
     trim,
+    along,
     walkM: Math.max(0, ...paved.map((a) => roadClassSpec(a.edge.cls).sidewalkM || 0)),
   };
 }

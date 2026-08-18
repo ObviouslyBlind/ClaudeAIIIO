@@ -65,4 +65,46 @@ describe("road hub footprints", () => {
     expect(multiContains(foot.tarmac, node.x + px * 9, node.z + pz * 9)).toBe(true);
     expect(multiContains(foot.tarmac, node.x - px * 9, node.z - pz * 9)).toBe(true);
   });
+
+  it("meets Island Hwy at the outer lane, not the median", () => {
+    const graph = createLandBoard().graph;
+    const node = graph.nodes.find((n) => n.id === "s-hwy-hc-j1")!;
+    const pad = junctionPad(graph, node)!;
+    const sands = graph.edges.find((e) => e.name === "Channel Sands" && (e.a === node.id || e.b === node.id))!;
+    const hwy = graph.edges.find((e) => e.cls === "highway" && (e.a === node.id || e.b === node.id))!;
+    const trimM = pad.trim[sands.id] || 0;
+    expect(trimM).toBeGreaterThan(14);
+    expect(pad.trim[hwy.id] || 0).toBe(0);
+    const sPts = sands.points;
+    const sFromA = sands.a === node.id;
+    const sa = sFromA ? sPts[0]! : sPts[sPts.length - 1]!;
+    const sb = sFromA ? sPts[1]! : sPts[sPts.length - 2]!;
+    const sLen = Math.hypot(sb.x - sa.x, sb.z - sa.z) || 1;
+    const sx = (sb.x - sa.x) / sLen;
+    const sz = (sb.z - sa.z) / sLen;
+    const hPts = hwy.points;
+    const hFromA = hwy.a === node.id;
+    const ha = hFromA ? hPts[0]! : hPts[hPts.length - 1]!;
+    const hb = hFromA ? hPts[1]! : hPts[hPts.length - 2]!;
+    const hLen = Math.hypot(hb.x - ha.x, hb.z - ha.z) || 1;
+    const hx = (hb.x - ha.x) / hLen;
+    const hz = (hb.z - ha.z) / hLen;
+    const end = { x: node.x + sx * trimM, z: node.z + sz * trimM };
+    const dist = Math.abs((end.x - node.x) * hz - (end.z - node.z) * hx);
+    expect(dist).toBeGreaterThan(8);
+    expect(dist).toBeLessThan(13.5);
+    const foot = buildHubFootprint(graph, node, pad);
+    expect(multiContains(foot.tarmac, end.x, end.z)).toBe(true);
+  });
+
+  it("keeps hub sidewalk off the tarmac heart at the joins you can see from spawn", () => {
+    const graph = createLandBoard().graph;
+    for (const id of ["s-quay-sw", "s-quay-se", "s-hwy-hc-j1"]) {
+      const n = graph.nodes.find((x) => x.id === id)!;
+      const pad = junctionPad(graph, n)!;
+      const fp = buildHubFootprint(graph, n, pad);
+      expect(multiContains(fp.tarmac, n.x, n.z), `${id} tarmac`).toBe(true);
+      expect(multiContains(fp.sidewalk, n.x, n.z), `${id} walk on tarmac`).toBe(false);
+    }
+  });
 });

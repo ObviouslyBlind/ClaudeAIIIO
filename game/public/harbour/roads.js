@@ -296,7 +296,8 @@ function collectHubs(graph) {
 
 function insideHubWalk(hubs, x, z) {
   for (const h of hubs) {
-    if (h.foot.sidewalk && h.foot.sidewalk.length && multiContains(h.foot.sidewalk, x, z)) return true;
+    const clip = h.foot.clip || h.foot.sidewalk;
+    if (clip && clip.length && multiContains(clip, x, z)) return true;
     if (h.foot.tarmac && multiContains(h.foot.tarmac, x, z)) return true;
   }
   return false;

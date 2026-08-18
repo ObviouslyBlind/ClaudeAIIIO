@@ -77,6 +77,17 @@ export function unionGeoms(geoms) {
   return acc;
 }
 
+export function diffGeoms(subject, clip) {
+  if (!subject || !subject.length) return [];
+  if (!clip || !clip.length) return subject;
+  try {
+    const out = polygonClipping.difference(subject, clip);
+    return out && out.length ? out : subject;
+  } catch {
+    return subject;
+  }
+}
+
 export function ringContains(ring, x, z) {
   let inside = false;
   const n = ring.length;
@@ -166,13 +177,14 @@ export function buildHubFootprint(graph, node, pad) {
   const grit = [];
   const walk = [];
   if (!graph || !node || !pad) return { tarmac: [], shoulder: [], sidewalk: [] };
-  const along = pad.side / 2 + 1.2;
+  const alongDefault = pad.side / 2 + 1.2;
   for (const e of graph.edges) {
     if (e.a !== node.id && e.b !== node.id) continue;
     if (!e.points || e.points.length < 2) continue;
     const spec = roadClassSpec(e.cls);
     if (spec.dirt) continue;
     const dir = armDir(node, e);
+    const along = pad.along && pad.along[e.id] != null ? pad.along[e.id] : alongDefault;
     const far = { x: node.x + dir.x * along, z: node.z + dir.z * along };
     const origin = { x: node.x, z: node.z };
     const half = carriagewayWidthM(e.cls) / 2;
@@ -182,10 +194,16 @@ export function buildHubFootprint(graph, node, pad) {
       walk.push([segmentRing(origin, far, half + FOOT_SHOULDER_M / 2 + spec.sidewalkM)]);
     }
   }
+  const tar = unionGeoms(tarmac);
+  const gritU = unionGeoms(grit);
+  const walkU = unionGeoms(walk);
   return {
-    tarmac: unionGeoms(tarmac),
-    shoulder: unionGeoms(grit),
-    sidewalk: unionGeoms(walk),
+    tarmac: tar,
+    /** Rim, not a slab under the black. */
+    shoulder: gritU.length ? diffGeoms(gritU, tar) : [],
+    /** L/T kerb ring. Offset walks clip against `clip`, which still includes the heart. */
+    sidewalk: walkU.length ? diffGeoms(walkU, tar) : [],
+    clip: walkU.length ? walkU : tar,
   };
 }
 

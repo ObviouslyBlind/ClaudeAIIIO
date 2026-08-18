@@ -3,6 +3,7 @@ import { createLandBoard } from "./land.ts";
 import { SOUTH_PORT, SOUTH_TOWNS, ROAD_TURN_DEG } from "./southGeom.ts";
 import { carriagewayWidthM, roadClassSpec } from "../public/harbour/roadclass.js";
 import { drivableEdges, projectOnEdge, routeOnGraph, junctionPad, trimPolylineForPads } from "../public/harbour/roadnet.js";
+import { buildHubFootprint, multiContains } from "../public/harbour/roadfoot.js";
 
 function nodeOf(graph: { nodes: { id: string }[] }, id: string) {
   return graph.nodes.find((n) => n.id === id)!;
@@ -272,26 +273,44 @@ describe("road graph", () => {
     expect(Math.hypot(end.x - sw.x, end.z - sw.z)).toBeGreaterThan(2);
   });
 
-  it("overlaps every South T stem with the through road by at least a metre", () => {
+  it("puts every trimmed South ribbon end inside the hub tarmac", () => {
     const graph = createLandBoard().graph;
-    const thin: string[] = [];
+    const misses: string[] = [];
     for (const node of graph.nodes) {
       if (node.island !== "south") continue;
       const pad = junctionPad(graph, node);
-      if (!pad || pad.kind !== "tee") continue;
+      if (!pad) continue;
+      const fp = buildHubFootprint(graph, node, pad);
       const arms = graph.edges.filter(
         (e) => e.cls !== "track" && (e.a === node.id || e.b === node.id),
       );
       for (const e of arms) {
         const trimM = pad.trim[e.id] || 0;
-        if (trimM <= 0.5) continue;
-        const other = Math.max(
-          ...arms.filter((o) => o.id !== e.id).map((o) => carriagewayWidthM(o.cls)),
-        );
-        const overlap = other / 2 - trimM;
-        if (overlap < 1) thin.push(`${node.id} ${e.name} ${overlap.toFixed(2)}m`);
+        if (trimM < 0.4) continue;
+        const pts = e.points;
+        const fromA = e.a === node.id;
+        const a = fromA ? pts[0]! : pts[pts.length - 1]!;
+        const b = fromA ? pts[1]! : pts[pts.length - 2]!;
+        const dx = b.x - a.x;
+        const dz = b.z - a.z;
+        const len = Math.hypot(dx, dz) || 1;
+        const x = node.x + (dx / len) * trimM;
+        const z = node.z + (dz / len) * trimM;
+        if (!multiContains(fp.tarmac, x, z)) {
+          misses.push(`${node.id} ${e.name} trim ${trimM.toFixed(1)}m`);
+        }
       }
     }
-    expect(thin).toEqual([]);
+    expect(misses).toEqual([]);
+  });
+
+  it("stops the through street on the hub at the Quayward SW T", () => {
+    const graph = createLandBoard().graph;
+    const sw = graph.nodes.find((n) => n.id === "s-quay-sw")!;
+    const pad = junctionPad(graph, sw)!;
+    const strand = graph.edges.find(
+      (e) => e.name === "South Strand" && (e.a === sw.id || e.b === sw.id),
+    )!;
+    expect(pad.trim[strand.id]).toBeGreaterThan(2);
   });
 });
