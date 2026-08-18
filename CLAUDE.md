@@ -1,6 +1,7 @@
 # Two Harbors — Fable 5
 
 This repo is a harbour MMO shard, not a loop game and not a trading bot.
+There is no Polymarket code, SENTINEL dashboard, or paper-trading pipeline here. Do not put them back.
 One shard. The sim owns cash, plots, staff, and prices. The browser is a camera.
 
 ## What to build

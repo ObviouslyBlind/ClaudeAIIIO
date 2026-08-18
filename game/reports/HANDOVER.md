@@ -1,8 +1,8 @@
 # Two Harbors handover
 
-PAPER / SIMULATED harbour MMO shard. One visitor on this process. No wallet. Politics frozen. Do **not** merge unless the operator asks.
+PAPER / SIMULATED harbour MMO shard. One visitor on this process. No wallet. Politics frozen. This repo is **not** a trading bot. There is no Polymarket pipeline, dashboard, or paper ledger here.
 
-Ignore root `CLAUDE.md` (Polymarket bot). Live product is `game/`. Spec: `game/PLAN.md`. Skills: `two-harbors-sim`, `-net`, `-map`, `-client`, `-gauntlet`.
+Live product is `game/`. Spec: `game/PLAN.md`. Root `CLAUDE.md` is Two Harbors. Skills: `two-harbors-sim`, `-net`, `-map`, `-client`, `-gauntlet`.
 
 ## Play
 
@@ -20,13 +20,11 @@ bash scripts/restart-play.sh
 
 Restart wipes in-memory play. After JS/CSS changes, restart `tsx src/server.ts` so `ASSET_NONCE` changes, then hard-refresh the public URL.
 
-If the tunnel hostname 404s / does not resolve, start a new quick tunnel to `http://127.0.0.1:8787` and put the new URL here + in PR **#35**.
+If the tunnel hostname 404s / does not resolve, start a new quick tunnel to `http://127.0.0.1:8787` and put the new URL here.
 
 ## Branch / PR
 
-- Branch: `cursor/south-land-3710`
-- Draft PR: https://github.com/ObviouslyBlind/ClaudeAIIIO/pull/35 (base `main`)
-- Tip: `14914b59` `fix(taxi): peel right at circuses, auto-board dual, grass underfoot`
+South land (roads, taxi peel, grass underfoot) is on **`main`** via https://github.com/ObviouslyBlind/ClaudeAIIIO/pull/35.
 
 Keep `createWorld` in `game/src/server.ts`. Keep `heightAt` in `game/src/land.ts` and `game/public/harbour/main.js` **in sync**.
 
@@ -60,7 +58,7 @@ Audit: `cd game && npx tsx scripts/audit-roads.ts`
 
 ## Do not
 
-- Merge unless asked
+- Rebuild a Polymarket / SENTINEL / timer-bot pipeline
 - Wallet, private keys, autonomous live trading
 - Clone Capital Rift client / Earth / OSM / protocol / branding
 - Fan out politics (House / Senate / councils / elections / amendments)
