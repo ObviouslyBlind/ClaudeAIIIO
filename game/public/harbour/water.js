@@ -92,14 +92,27 @@ function channelStrip() {
   return mesh;
 }
 
+function harbourSea(cx, cz) {
+  const geo = new THREE.PlaneGeometry(2800, 2800, 40, 40);
+  ripple(geo, 0.22, cx, cz);
+  const mesh = addWaterMesh(
+    geo,
+    new THREE.MeshLambertMaterial({ color: WATER_COLOR }),
+    0.04,
+  );
+  mesh.position.x = cx;
+  mesh.position.z = cz;
+  return mesh;
+}
+
 function stashRest(mesh) {
   const arr = mesh.geometry.attributes.position.array;
   mesh.userData.waterRest = new Float32Array(arr);
 }
 
 /**
- * Cheap quay chop. Only the basin + channel (a few hundred verts), never the
- * 80 km ocean plane. Local +Z is world height after the plane rotation.
+ * Cheap harbour chop. Far ocean stays a 4-vert quad. Near each port a 2.8 km
+ * patch (plus the quay basin) moves. Local +Z is world height after rotation.
  */
 export function tickHarbourWater(meshes, t) {
   if (!meshes || !meshes.length) return;
@@ -115,8 +128,8 @@ export function tickHarbourWater(meshes, t) {
       const z0 = rest[i * 3 + 2];
       arr[i * 3 + 2] =
         z0 +
-        0.38 * Math.sin(x * 0.16 + time * 1.45) +
-        0.22 * Math.sin(y * 0.12 - time * 1.15);
+        0.45 * Math.sin(x * 0.11 + time * 1.35) +
+        0.28 * Math.sin(y * 0.09 - time * 1.05);
     }
     pos.needsUpdate = true;
     mesh.geometry.computeVertexNormals();
@@ -138,9 +151,10 @@ export function makeWater(scene) {
     return mesh;
   }
   addLive(channelStrip());
-  // Centre the pocket on HOME_Z so the cream hull sits on the deep lane.
   addLive(harbourBasin(-6835));
   addLive(harbourBasin(6835));
+  addLive(harbourSea(-2280, 7280));
+  addLive(harbourSea(0, -6950));
   scene.userData.harbourWater = live;
   return water;
 }

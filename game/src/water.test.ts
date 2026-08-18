@@ -9,7 +9,7 @@ describe("harbour water", () => {
     makeWater(scene);
     const live = scene.userData.harbourWater;
     expect(Array.isArray(live)).toBe(true);
-    expect(live.length).toBe(3);
+    expect(live.length).toBe(5);
     const basin = live[1];
     const z0 = basin.geometry.attributes.position.getZ(0);
     tickHarbourWater(live, 1.7);
