@@ -291,13 +291,13 @@ nav.dock.travel-dock {
 #place-hint {
   position: absolute;
   left: 50%;
-  bottom: calc(88px + env(safe-area-inset-bottom));
+  bottom: 28%;
   transform: translateX(-50%);
-  z-index: 12;
-  pointer-events: none;
+  z-index: 20;
+  pointer-events: auto;
   margin: 0;
-  padding: 8px 14px;
-  max-width: min(360px, calc(100vw - 24px));
+  padding: 10px 12px;
+  max-width: min(420px, calc(100vw - 24px));
   text-align: center;
   background: var(--panel);
   border: 1px solid var(--line);
@@ -306,19 +306,22 @@ nav.dock.travel-dock {
   font-weight: 700;
   font-size: 13px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  flex-wrap: wrap;
   gap: 8px;
   align-items: center;
+  justify-content: center;
 }
 #place-hint button {
   pointer-events: auto;
-  min-height: 40px;
+  min-height: 44px;
+  min-width: 96px;
   padding: 0 16px;
   border: 0;
   border-radius: 8px;
-  background: #2c3c40;
-  color: #e8e4d8;
-  font-weight: 700;
+  background: #5dcc6a;
+  color: #0a161a;
+  font-weight: 800;
 }
 #place-hint[hidden] { display: none !important; }
 

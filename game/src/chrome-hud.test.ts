@@ -16,6 +16,7 @@ describe("harbour chrome HUD", () => {
     expect(html).toContain('id="place-hint"');
     expect(html).toContain('id="place-cancel"');
     expect(html).toContain('id="taxi-map-exit"');
+    expect(html).toContain("Keep riding");
     expect(html).toContain('data-panel="inventory"');
     expect(html).toContain('data-panel="market"');
     expect(html).toContain('data-panel="employees"');
