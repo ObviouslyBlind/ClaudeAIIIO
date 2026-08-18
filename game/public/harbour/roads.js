@@ -99,7 +99,7 @@ function drawRibbon(scene, spec, road, heightAt, widthM, color, roadKind, matOpt
       const dot = rx * (sz / sl) + rz * (-sx / sl);
       if (dot > 0.25) scale = Math.min(half / dot, half * 3);
     }
-    const y = heightAt(spec, pts[i].x, pts[i].z) + (roadKind === "sidewalk" ? 0.16 : 0.1) + yLift;
+    const y = heightAt(spec, pts[i].x, pts[i].z) + (roadKind === "sidewalk" ? 0.12 : 0.1) + yLift;
     const lx = pts[i].x - rx * scale;
     const lz = pts[i].z - rz * scale;
     const qx = pts[i].x + rx * scale;
@@ -190,6 +190,23 @@ function hasSidewalk(road) {
  */
 const SHOULDER_PAD_M = 2.2;
 
+function densifyPts(pts, step) {
+  if (!pts || pts.length < 2) return pts || [];
+  const out = [];
+  for (let i = 0; i < pts.length - 1; i++) {
+    const a = pts[i];
+    const b = pts[i + 1];
+    const len = Math.hypot(b.x - a.x, b.z - a.z);
+    const n = Math.max(1, Math.ceil(len / step));
+    for (let s = 0; s < n; s++) {
+      const t = s / n;
+      out.push({ x: a.x + (b.x - a.x) * t, z: a.z + (b.z - a.z) * t });
+    }
+  }
+  out.push(pts[pts.length - 1]);
+  return ribbonStations(out);
+}
+
 function drawablePoints(road, graph) {
   let pts = ribbonStations(road.points);
   const edge = graph && road.edgeId ? graph.edges.find((e) => e.id === road.edgeId) : null;
@@ -271,13 +288,15 @@ function drawSidewalks(scene, spec, road, heightAt, centres, graph) {
   if (!hasSidewalk(road)) return;
   const cls = classOf(road);
   const walk = roadClassSpec(cls).sidewalkM;
-  const pts = omitNearCentres(drawablePoints(road, graph), centres, 30);
+  const pts = omitNearCentres(densifyPts(drawablePoints(road, graph), 4), centres, 30);
   if (pts.length < 2) return;
   const offset = roadClassSpec(cls).carriageM / 2 + SHOULDER_PAD_M / 2 + walk / 2;
   // Offset walks would otherwise keep going and hash through the junction
-  // as a grey plus. Clip them to the plate; L-shaped kerb quads fill the join.
+  // as a grey plus. Clip them to the plate; the hub walk fills the join.
+  // Graph stations are ~26 m apart — without densify the last kept point is
+  // a block away and the kerb vanishes before every T/L.
   for (const side of [-1, 1]) {
-    const clipped = omitInsidePads(offsetPolyline(pts, offset * side), graph, walk + 0.4);
+    const clipped = omitInsidePads(offsetPolyline(pts, offset * side), graph, walk + 0.8);
     for (const run of splitRuns(clipped, 10)) {
       drawRibbon(scene, spec, { ...road, points: run }, heightAt, walk, SIDEWALK, "sidewalk");
     }
@@ -710,12 +729,12 @@ function drawHubs(scene, map, specOf, heightAt) {
       roadName: (node.name || "junction") + " walk",
       widthM: pad.walkM || 2,
     });
-    addMultiPolygonMesh(scene, foot.shoulder, y + 0.11, SHOULDER, {
+    addMultiPolygonMesh(scene, foot.shoulder, y + 0.13, SHOULDER, {
       ...base,
       roadKind: "shoulder",
       roadName: (node.name || "junction") + " hub",
     });
-    addMultiPolygonMesh(scene, foot.tarmac, y + 0.15, ASPHALT, {
+    addMultiPolygonMesh(scene, foot.tarmac, y + 0.2, ASPHALT, {
       ...base,
       roadKind: "junction",
       roadName: (node.name || "junction") + " hub",

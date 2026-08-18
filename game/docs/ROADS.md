@@ -37,7 +37,7 @@ Each step is big enough to see from 30 m up.
 ## Drawing
 
 - Local paved **runs** are ribbons. A **join** is a small union of the 2–4 arm-end rectangles (a hub). That is a T or an L. It is not the whole island boolean-unioned into a splat. See `docs/ROAD_MESH.md`.
-- Offset sidewalks are clipped out of the hub. The hub itself draws the walk as a wider union under the tarmac, so the outer kerb is one piece.
+- Offset sidewalks are densified and clipped out of the hub. The hub itself draws the walk as a wider union under the tarmac, so the outer kerb is one piece. Stem ribbons overlap the through road by ~1.4 m so a grey hairline cannot show between two black rectangles.
 - Quayward Loop is a **rectangle**. Quayward Rd hits the north edge at **45°** from Harbour Circus.
 - Circuses are an asphalt annulus reaching the node's kerb radius, plus a stone island.
 - Highway ribbons run **to the kerb**. The graph already stops there; do not omit the last stations near a circus (that leftover from the old through-island spline left sand between the dual carriageway and the ring).

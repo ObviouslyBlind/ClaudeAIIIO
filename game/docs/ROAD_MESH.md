@@ -37,4 +37,11 @@
  * the last metres of each arm are buffered and unioned (2–4 rectangles). That
  * is a T or an L. Island-wide union was tried and filled greens / merged
  * nearby streets into a splat — do not do that.
+ *
+ * Draw rules that keep joins from looking like stacked rectangles:
+ * - Trim the stem so it overlaps the through carriageway by ~1.4 m, not 0.2 m.
+ * - Trim works on 2-point edges (node→node), not only 3+ station polylines.
+ * - Offset sidewalks are densified to 4 m so they meet the hub instead of
+ *   stopping a whole densify-step (26 m) short.
+ * - Hub tarmac sits above ribbon sidewalks so leftover grey cannot hash on top.
  */
