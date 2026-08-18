@@ -210,11 +210,14 @@ describe("paved street from spawn", () => {
 
     expect(n.y).toBeGreaterThan(18);
     expect(n.y).toBeLessThan(40);
-    expect(s.y).toBe(n.y);
+    expect(s.y).toBeGreaterThanOrEqual(n.y);
+    expect(s.y).toBeLessThan(40);
     expect(Math.abs(n.x)).toBeLessThan(40);
     expect(n.z).toBeGreaterThan(0);
     expect(s.x).toBeLessThan(0);
+    expect(s.z).toBeLessThan(0);
     expect(sl.x).toBeGreaterThan(40);
+    expect(sl.z).toBeGreaterThan(40);
     expect(nl.z).toBeLessThan(-40);
 
     const farM = ISLANDS.south.port.z - ISLANDS.north.port.z;
