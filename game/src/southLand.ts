@@ -1,17 +1,19 @@
 /**
- * South island roads, empty town footprints, beach stall lots.
+ * South island road network, empty town footprints, beach and field lots.
  * Zero buildings. NPC town seeding stays North-only.
+ *
+ * Roads are authored as a graph (see roadGraph.ts): every junction is a node
+ * and every edge physically ends on its nodes. Nothing is "near" anything —
+ * the network is connected by construction, so the renderer and the taxi
+ * cannot disagree about where the tarmac is.
  */
 
 import { bboxOverlap, ringBBox, ringsOverlap } from "./kernel/plots.ts";
 import {
-  circlePolyline,
   distToPolyline,
-  HIGHWAY_CLEAR_M,
   inVolcanoExclusion,
   linePoints,
   sampleSpline,
-  SOUTH_HIGHWAY_NODES,
   SOUTH_MIN_LOT_M2,
   SOUTH_MAX_LOT_M2,
   SOUTH_PORT,
@@ -23,6 +25,14 @@ import {
   wiggleLine,
   type XZ,
 } from "./southGeom.ts";
+import {
+  RoadGraphBuilder,
+  graphToRoads,
+  roadWidthM,
+  type RoadClass,
+  type RoadGraph,
+  type RoadNode,
+} from "./roadGraph.ts";
 import { zoneForBand } from "./zones.ts";
 import type { IslandSpec, Parcel, PlotBand, PlotClass, Ring, Road, TaxiStop } from "./land.ts";
 
@@ -30,14 +40,13 @@ export type SouthBuilt = {
   plots: Parcel[];
   roads: Road[];
   stops: TaxiStop[];
+  graph: RoadGraph;
 };
 
 type HeightFn = (spec: IslandSpec, x: number, z: number) => number;
 
-const STREET_CLEAR = 11;
-/** Circulatory ring. Spurs start outside this, never at the circus centre. */
-const RAB_R = 32;
-const RAB_GAP = 34;
+/** Circus kerb radius. Edges stop here; the ring carries traffic round. */
+const RAB_R = 34;
 
 function hash(n: number): number {
   const x = Math.sin(n * 12.9898) * 43758.5453;
@@ -52,7 +61,9 @@ function polylineLen(pts: XZ[]): number {
   return n;
 }
 
-function pointAlong(pts: XZ[], dist: number): { at: XZ; dir: XZ } | null {
+type Station = { at: XZ; dir: XZ; perp: XZ };
+
+function stationAt(pts: XZ[], dist: number): Station | null {
   let left = dist;
   for (let i = 0; i < pts.length - 1; i++) {
     const a = pts[i]!;
@@ -60,9 +71,11 @@ function pointAlong(pts: XZ[], dist: number): { at: XZ; dir: XZ } | null {
     const len = Math.hypot(b.x - a.x, b.z - a.z) || 1;
     if (left <= len) {
       const t = left / len;
+      const dir = { x: (b.x - a.x) / len, z: (b.z - a.z) / len };
       return {
         at: { x: a.x + (b.x - a.x) * t, z: a.z + (b.z - a.z) * t },
-        dir: { x: (b.x - a.x) / len, z: (b.z - a.z) / len },
+        dir,
+        perp: { x: -dir.z, z: dir.x },
       };
     }
     left -= len;
@@ -70,41 +83,23 @@ function pointAlong(pts: XZ[], dist: number): { at: XZ; dir: XZ } | null {
   return null;
 }
 
-/** Spurs start at the roundabout ring, not the circus centre. */
-function trimNearPoint(pts: XZ[], join: XZ, gap = RAB_GAP): XZ[] {
-  if (pts.length < 2) return pts;
-  const out = pts.filter((p) => Math.hypot(p.x - join.x, p.z - join.z) >= gap - 0.25);
-  return out.length >= 2 ? out : pts;
+/** Interior shaping points strictly between two distances along a path. */
+function sliceBetween(pts: XZ[], fromM: number, toM: number): XZ[] {
+  const out: XZ[] = [];
+  let acc = 0;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const a = pts[i]!;
+    const b = pts[i + 1]!;
+    const len = Math.hypot(b.x - a.x, b.z - a.z) || 1;
+    const at = acc + len;
+    if (at > fromM + 1 && at < toM - 1) out.push({ x: b.x, z: b.z });
+    acc = at;
+  }
+  return out;
 }
 
-/** First station on the ring, then the rest of the path. Never includes the centre. */
-function leaveRing(center: XZ, rest: XZ[], r = RAB_GAP): XZ[] {
-  const dest = rest.find((p) => Math.hypot(p.x - center.x, p.z - center.z) > r) ?? rest[rest.length - 1]!;
-  const dx = dest.x - center.x;
-  const dz = dest.z - center.z;
-  const len = Math.hypot(dx, dz) || 1;
-  const start = { x: center.x + (dx / len) * r, z: center.z + (dz / len) * r };
-  const tail = rest.filter((p) => Math.hypot(p.x - center.x, p.z - center.z) > r + 1);
-  return [start, ...tail];
-}
-
-/**
- * Y-fork: peel off a trunk toward dest. Start at the kerb so the ribbons
- * do not stack on the parent carriageway.
- */
-function forkFromTrunk(trunk: XZ[], alongM: number, dest: XZ[], kerb: number): { pts: XZ[]; at: XZ } | null {
-  const hit = pointAlong(trunk, alongM);
-  if (!hit) return null;
-  const first = dest[0]!;
-  const vx = first.x - hit.at.x;
-  const vz = first.z - hit.at.z;
-  const len = Math.hypot(vx, vz) || 1;
-  const dir = { x: vx / len, z: vz / len };
-  const along = hit.dir.x * dir.x + hit.dir.z * dir.z;
-  if (Math.abs(along) > 0.92) return null;
-  const start = offsetBy(hit.at, dir, kerb + 1.2);
-  const tail = dest.filter((p) => Math.hypot(p.x - hit.at.x, p.z - hit.at.z) > kerb + 10);
-  return { pts: [start, ...tail], at: hit.at };
+function offsetBy(at: XZ, dir: XZ, m: number): XZ {
+  return { x: at.x + dir.x * m, z: at.z + dir.z * m };
 }
 
 function houseNumberFor(id: string): number {
@@ -158,7 +153,9 @@ function quad(a: XZ, b: XZ, perp: XZ, setback: number, depth: number, skew: numb
 function priceOf(area: number, band: PlotBand, portDist: number): number {
   const bandMul = band === "shore" ? 1.55 : band === "street" ? 1 : 0.62;
   const distMul = 1.35 - Math.min(0.7, portDist / 520);
-  return Math.max(24, Math.round(area * 0.12 * bandMul * distMul));
+  // Floor low enough that a small South stall plot still prices below North
+  // land per m². A $24 floor made the tiniest lots the dearest on the board.
+  return Math.max(12, Math.round(area * 0.12 * bandMul * distMul));
 }
 
 function publicQuay(x: number, z: number): boolean {
@@ -170,9 +167,58 @@ function publicQuay(x: number, z: number): boolean {
   return false;
 }
 
-type ClearRoad = { points: XZ[]; clear: number };
+type Box = { minX: number; maxX: number; minZ: number; maxZ: number };
+type ClearRoad = { points: XZ[]; clear: number; box?: Box };
+
+function pointsBox(pts: XZ[], pad: number): Box {
+  let minX = Infinity;
+  let maxX = -Infinity;
+  let minZ = Infinity;
+  let maxZ = -Infinity;
+  for (const p of pts) {
+    if (p.x < minX) minX = p.x;
+    if (p.x > maxX) maxX = p.x;
+    if (p.z < minZ) minZ = p.z;
+    if (p.z > maxZ) maxZ = p.z;
+  }
+  return { minX: minX - pad, maxX: maxX + pad, minZ: minZ - pad, maxZ: maxZ + pad };
+}
+
+function ringBox(ring: Ring): Box {
+  let minX = Infinity;
+  let maxX = -Infinity;
+  let minZ = Infinity;
+  let maxZ = -Infinity;
+  for (const [x, z] of ring) {
+    if (x < minX) minX = x;
+    if (x > maxX) maxX = x;
+    if (z < minZ) minZ = z;
+    if (z > maxZ) maxZ = z;
+  }
+  return { minX, maxX, minZ, maxZ };
+}
+
+function boxesMiss(a: Box, b: Box): boolean {
+  return a.maxX < b.minX || a.minX > b.maxX || a.maxZ < b.minZ || a.minZ > b.maxZ;
+}
+
+/** Keep a lot off the tarmac, the sidewalk, and a metre of verge past it. */
+function clearanceFor(road: Road): number {
+  if (road.roundabout) return RAB_R + 10;
+  return roadWidthM((road.cls ?? "street") as RoadClass) / 2 + 4;
+}
 
 function ringHitsRoads(ring: Ring, roads: ClearRoad[]): boolean {
+  // Most roads are nowhere near most lots. Reject on bounding boxes first;
+  // without this the per-lot polyline sweep dominates board build time.
+  const box = ringBox(ring);
+  const near: ClearRoad[] = [];
+  for (const r of roads) {
+    const rb = r.box ?? (r.box = pointsBox(r.points, r.clear + 2));
+    if (!boxesMiss(box, rb)) near.push(r);
+  }
+  if (!near.length) return false;
+
   for (let i = 0; i < ring.length; i++) {
     const a = ring[i]!;
     const b = ring[(i + 1) % ring.length]!;
@@ -182,13 +228,14 @@ function ringHitsRoads(ring: Ring, roads: ClearRoad[]): boolean {
       const t = s / n;
       const x = a[0] + (b[0] - a[0]) * t;
       const z = a[1] + (b[1] - a[1]) * t;
-      for (const r of roads) {
+      for (const r of near) {
         if (distToPolyline(r.points, x, z) < r.clear) return true;
       }
     }
   }
-  for (const r of roads) {
+  for (const r of near) {
     for (const p of r.points) {
+      if (p.x < box.minX || p.x > box.maxX || p.z < box.minZ || p.z > box.maxZ) continue;
       if (pointInRing(p.x, p.z, ring)) return true;
     }
   }
@@ -280,9 +327,8 @@ function lotsAlong(
         const plen = Math.hypot(perp.x, perp.z) || 1;
         const p = { x: perp.x / plen, z: perp.z / plen };
         const hk = hash(opts.seed + i * 17 + k * 13 + side * 9);
-        const depth =
-          opts.band === "field" ? 70 + hk * 28 : opts.band === "shore" ? 12 + hk * 8 : 12 + hk * 8;
-        const lot = quad(sa, sb, p, opts.setback ?? (opts.band === "field" ? 16 : 11), depth, (hk - 0.5) * 0.06);
+        const depth = opts.band === "field" ? 70 + hk * 28 : 12 + hk * 8;
+        const lot = quad(sa, sb, p, opts.setback ?? 12, depth, (hk - 0.5) * 0.06);
         pushParcel(lots, lot, opts);
       }
     }
@@ -316,148 +362,195 @@ function plazaAt(
   if (last && last.class === "reserved") last.name = `${street} Green`;
 }
 
-function paved(
+/**
+ * A run of road broken at real junction nodes.
+ * Returns the nodes so side roads can hang off them.
+ */
+function runWithJunctions(
+  g: RoadGraphBuilder,
   name: string,
-  points: XZ[],
-  joins: XZ,
-  extra: Partial<Road> = {},
-  gap = RAB_GAP,
-  trimAt: XZ = joins,
-): Road {
-  return {
-    island: "south",
-    kind: "paved",
-    name,
-    points: trimNearPoint(points, trimAt, gap),
-    joins,
-    ...extra,
-  };
+  cls: RoadClass,
+  from: RoadNode,
+  to: RoadNode,
+  path: XZ[],
+  fractions: number[],
+  idStem: string,
+  smooth = false,
+): { nodes: RoadNode[]; path: XZ[] } {
+  const len = polylineLen(path);
+  const cuts = fractions
+    .map((f) => ({ f, d: len * f }))
+    .filter((c) => c.d > 60 && c.d < len - 60)
+    .sort((a, b) => a.d - b.d);
+
+  const nodes: RoadNode[] = [];
+  let prev = from;
+  let prevD = 0;
+  cuts.forEach((cut, i) => {
+    const st = stationAt(path, cut.d);
+    if (!st) return;
+    const node = g.node(`${idStem}-j${i + 1}`, st.at.x, st.at.z, "junction");
+    g.edge({ name, cls, from: prev, to: node, via: sliceBetween(path, prevD, cut.d), smooth });
+    nodes.push(node);
+    prev = node;
+    prevD = cut.d;
+  });
+  g.edge({ name, cls, from: prev, to, via: sliceBetween(path, prevD, len), smooth });
+  return { nodes, path };
 }
 
-function offsetBy(at: XZ, dir: XZ, m: number): XZ {
-  return { x: at.x + dir.x * m, z: at.z + dir.z * m };
-}
-
-/** T-stubs off a trunk. They meet the kerb; they do not cross the carriageway. */
-/** Field dirt may T off a row end. It must not then cut a named paved street. */
-function dirtClearOfPaved(pts: XZ[], roads: Road[], origin: XZ): boolean {
-  for (const p of pts) {
-    if (Math.hypot(p.x - origin.x, p.z - origin.z) < 16) continue;
-    for (const r of roads) {
-      if (r.kind !== "paved") continue;
-      if (distToPolyline(r.points, p.x, p.z) < 8) return false;
-    }
-  }
-  return true;
-}
-
-function addHamletsAlong(
-  roads: Road[],
-  pts: XZ[],
-  join: XZ,
-  stem: string,
+/** A field track running on past the end of a paved lane. */
+function fieldTrack(
+  g: RoadGraphBuilder,
+  from: RoadNode,
+  dir: XZ,
+  name: string,
+  id: string,
   seed: number,
-  kerb = 7.2,
-  opts: { fromM?: number; avoid?: XZ[] } = {},
 ): void {
-  const len = polylineLen(pts);
-  const avoid = opts.avoid ?? [];
-  let d = opts.fromM ?? 190;
-  let n = 0;
-  while (d < len - 100 && n < 8) {
-    const hit = pointAlong(pts, d);
-    if (
-      hit &&
-      !inVolcanoExclusion(hit.at.x, hit.at.z, 60) &&
-      avoid.every((c) => Math.hypot(hit.at.x - c.x, hit.at.z - c.z) > 90)
-    ) {
-      const perp = { x: -hit.dir.z, z: hit.dir.x };
-      const depth = 48 + hash(seed + n) * 18;
-      const a0 = offsetBy(hit.at, perp, kerb);
-      const a1 = offsetBy(hit.at, perp, kerb + depth);
-      roads.push(paved(`${stem} Row ${n + 1}`, linePoints(a0, a1, 4), hit.at, {}, kerb, hit.at));
-      const dirtEnd = offsetBy(a1, perp, 58 + hash(seed + n + 3) * 36);
-      const track = wiggleLine(a1, dirtEnd, 5, 10, seed + n);
-      if (dirtClearOfPaved(track, roads, a1)) roads.push(dirt(`${stem} Track ${n + 1}`, track));
-      if (n % 2 === 0) {
-        const b0 = offsetBy(hit.at, perp, -kerb);
-        const b1 = offsetBy(hit.at, perp, -(kerb + depth * 0.9));
-        roads.push(paved(`${stem} Row ${n + 1}b`, linePoints(b0, b1, 4), hit.at, {}, kerb, hit.at));
-        const dirtB = offsetBy(b1, perp, -(70 + hash(seed + n + 5) * 42));
-        const field = wiggleLine(b1, dirtB, 6, 12, seed + n + 11);
-        if (dirtClearOfPaved(field, roads, b1)) roads.push(dirt(`${stem} Field ${n + 1}`, field));
-      }
-    }
-    d += 220 + hash(seed + n) * 40;
-    n += 1;
-  }
-}
-
-function dirt(name: string, points: XZ[]): Road {
-  return { island: "south", kind: "dirt", name, points };
-}
-
-function isRabNode(p: XZ): boolean {
-  return Object.values(SOUTH_RAB).some((r) => Math.hypot(p.x - r.x, p.z - r.z) < 1);
-}
-
-/** Dual carriageway as separate spans that meet the circus rings, never the island. */
-function splitIslandHwy(): Road[] {
-  const nodes = SOUTH_HIGHWAY_NODES;
-  const spans: XZ[][] = [];
-  let cur: XZ[] = [nodes[0]!];
-  for (let i = 1; i < nodes.length; i++) {
-    cur.push(nodes[i]!);
-    if (isRabNode(nodes[i]!) || i === nodes.length - 1) {
-      spans.push(cur);
-      cur = [nodes[i]!];
-    }
-  }
-  return spans
-    .filter((s) => s.length >= 2)
-    .map((span) => {
-      let pts = sampleSpline(span, 8);
-      for (const n of span) {
-        if (isRabNode(n)) pts = trimNearPoint(pts, n, RAB_GAP);
-      }
-      return {
-        island: "south" as const,
-        kind: "paved" as const,
-        name: "Island Hwy",
-        lanes: 4 as const,
-        points: pts,
-        nodes: span.map((p) => ({ ...p })),
-      };
-    });
-}
-
-function rabRoad(c: XZ, name: string): Road {
-  return {
-    island: "south",
-    kind: "paved",
+  const len = 70 + hash(seed) * 46;
+  const end = offsetBy({ x: from.x, z: from.z }, dir, len);
+  if (inVolcanoExclusion(end.x, end.z, 40)) return;
+  const endNode = g.node(id, end.x, end.z, "terminus");
+  g.edge({
     name,
-    points: circlePolyline(c, RAB_R, 28),
-    roundabout: true,
-    joins: { x: c.x, z: c.z },
-  };
+    cls: "track",
+    from,
+    to: endNode,
+    via: wiggleLine({ x: from.x, z: from.z }, end, 5, 12, seed).slice(1, -1),
+  });
 }
 
-export function buildSouthLand(spec: IslandSpec, heightAt: HeightFn): SouthBuilt {
-  const lots: Parcel[] = [];
-  const roads: Road[] = [];
-  const hwySegs = splitIslandHwy();
-  for (const seg of hwySegs) roads.push(seg);
+/** Direction a dead-end lane was heading when it stopped. */
+function headingInto(node: RoadNode, prev: XZ): XZ {
+  const dx = node.x - prev.x;
+  const dz = node.z - prev.z;
+  const len = Math.hypot(dx, dz) || 1;
+  return { x: dx / len, z: dz / len };
+}
+
+/** A single-track lane off a junction, with a field track carrying on past it. */
+function spurFrom(
+  g: RoadGraphBuilder,
+  node: RoadNode,
+  path: XZ[],
+  stem: string,
+  index: number,
+  side: 1 | -1,
+  seed: number,
+): void {
+  const along = polylineLen(path);
+  const st = stationAt(path, Math.min(along - 1, Math.max(1, nearestAlong(path, node))));
+  if (!st) return;
+  const perp = { x: st.perp.x * side, z: st.perp.z * side };
+  const depth = 74 + hash(seed + index) * 30;
+  const end = offsetBy({ x: node.x, z: node.z }, perp, depth);
+  const endNode = g.node(`${stem}-row${index}-end`, end.x, end.z, "terminus");
+  g.edge({ name: `${stem} Row ${index}`, cls: "lane", from: node, to: endNode });
+  fieldTrack(g, endNode, perp, `${stem} Track ${index}`, `${stem}-track${index}-end`, seed + index);
+}
+
+function nearestAlong(pts: XZ[], at: XZ): number {
+  let acc = 0;
+  let bestAlong = 0;
+  let bestD = Infinity;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const a = pts[i]!;
+    const b = pts[i + 1]!;
+    const vx = b.x - a.x;
+    const vz = b.z - a.z;
+    const len = Math.hypot(vx, vz) || 1;
+    let t = ((at.x - a.x) * vx + (at.z - a.z) * vz) / (len * len);
+    t = Math.max(0, Math.min(1, t));
+    const d = Math.hypot(at.x - (a.x + vx * t), at.z - (a.z + vz * t));
+    if (d < bestD) {
+      bestD = d;
+      bestAlong = acc + t * len;
+    }
+    acc += len;
+  }
+  return bestAlong;
+}
+
+/**
+ * Field tracks wander, and a wandering track can swing back over a street.
+ * Drop any that does. Dirt crossing tarmac is exactly what the taxi used to
+ * be blamed for, and it looks wrong even when nothing drives it.
+ */
+const TRACK_CLEAR_M = 7;
+
+function pruneStrayTracks(graph: RoadGraph): RoadGraph {
+  const paved = graph.edges.filter((e) => e.cls !== "track");
+  const boxes = paved.map((e) => ({ e, box: pointsBox(e.points, TRACK_CLEAR_M + 2) }));
+  const keep = graph.edges.filter((edge) => {
+    if (edge.cls !== "track") return true;
+    const start = edge.points[0]!;
+    for (const p of edge.points) {
+      // The first stretch legitimately touches the lane it leaves.
+      if (Math.hypot(p.x - start.x, p.z - start.z) < 20) continue;
+      for (const { e, box } of boxes) {
+        if (p.x < box.minX || p.x > box.maxX || p.z < box.minZ || p.z > box.maxZ) continue;
+        if (distToPolyline(e.points, p.x, p.z) < TRACK_CLEAR_M) return false;
+      }
+    }
+    return true;
+  });
+  const used = new Set(keep.flatMap((e) => [e.a, e.b]));
+  return { nodes: graph.nodes.filter((n) => used.has(n.id)), edges: keep };
+}
+
+/** The whole South network, authored once as nodes and edges. */
+function buildSouthGraph(): RoadGraph {
+  const g = new RoadGraphBuilder("south");
 
   const harbour = SOUTH_RAB.harbour;
   const cane = SOUTH_RAB.west;
   const ash = SOUTH_RAB.pass;
   const haven = SOUTH_RAB.east;
-  const circuses: XZ[] = [harbour, cane, ash, haven];
 
-  roads.push(rabRoad(harbour, SOUTH_RAB.harbour.name));
-  roads.push(rabRoad(cane, SOUTH_RAB.west.name));
-  roads.push(rabRoad(ash, SOUTH_RAB.pass.name));
-  roads.push(rabRoad(haven, SOUTH_RAB.east.name));
+  const nPort = g.node("s-port", SOUTH_PORT.x, SOUTH_PORT.z, "terminus", "South Port");
+  const nHarbour = g.circus("s-rab-harbour", harbour.x, harbour.z, RAB_R, harbour.name);
+  const nCane = g.circus("s-rab-cane", cane.x, cane.z, RAB_R, cane.name);
+  const nAsh = g.circus("s-rab-ash", ash.x, ash.z, RAB_R, ash.name);
+  const nHaven = g.circus("s-rab-haven", haven.x, haven.z, RAB_R, haven.name);
+  const nEast = g.node("s-east", 2920, 7860, "terminus", "East Shore");
+
+  const HWY = "Island Hwy";
+  g.edge({ name: HWY, cls: "highway", from: nPort, to: nHarbour });
+  // Channel Sands needs a real junction on this span, so the span is built in
+  // two edges that meet at that node rather than one edge it merely touches.
+  const hwyHarbourCanePath = sampleSpline(
+    [
+      { x: harbour.x, z: harbour.z },
+      { x: -1520, z: 7560 },
+      { x: cane.x, z: cane.z },
+    ],
+    8,
+  );
+  const hwyHarbourCane = runWithJunctions(
+    g,
+    HWY,
+    "highway",
+    nHarbour,
+    nCane,
+    hwyHarbourCanePath,
+    [0.32],
+    "s-hwy-hc",
+    true,
+  );
+  g.edge({
+    name: HWY,
+    cls: "highway",
+    from: nCane,
+    to: nAsh,
+    via: [
+      { x: -240, z: 7840 },
+      { x: 480, z: 7960 },
+    ],
+    smooth: true,
+  });
+  g.edge({ name: HWY, cls: "highway", from: nAsh, to: nHaven, via: [{ x: 1920, z: 7780 }], smooth: true });
+  g.edge({ name: HWY, cls: "highway", from: nHaven, to: nEast });
 
   const quayward = SOUTH_TOWNS[0]!;
   const canebrake = SOUTH_TOWNS[1]!;
@@ -465,146 +558,186 @@ export function buildSouthLand(spec: IslandSpec, heightAt: HeightFn): SouthBuilt
   const ashPass = SOUTH_TOWNS[3]!;
   const eastHaven = SOUTH_TOWNS[4]!;
 
-  // Harbour Circus: highway + Quayward only. Strand forks off Quayward so the
-  // circus is a 3-exit ring, not a star of beach roads through one point.
-  const quayPts = trimNearPoint(leaveRing(harbour, [quayward]), quayward, 20);
-  roads.push(paved("Quayward Rd", quayPts, harbour, {}, 0));
-  const quayRoad = roads.find((r) => r.name === "Quayward Rd")!;
-  const strandDest = sampleSpline(
+  // Harbour Circus keeps three exits: the two highway spans and Quayward Rd.
+  const nQuayward = g.node("s-quayward", quayward.x, quayward.z - 58, "junction");
+  const quaywardPath = linePoints({ x: harbour.x, z: harbour.z }, { x: quayward.x, z: quayward.z - 58 }, 6);
+  const quaywardRun = runWithJunctions(
+    g,
+    "Quayward Rd",
+    "avenue",
+    nHarbour,
+    nQuayward,
+    quaywardPath,
+    [0.55],
+    "s-quayward-rd",
+  );
+
+  // A block of streets round the green, not a hash of ribbons through it.
+  const hx = 74;
+  const hz = 52;
+  const corners: RoadNode[] = [
+    g.node("s-quay-nw", quayward.x - hx, quayward.z - hz, "junction"),
+    g.node("s-quay-ne", quayward.x + hx, quayward.z - hz, "junction"),
+    g.node("s-quay-se", quayward.x + hx, quayward.z + hz, "junction"),
+    g.node("s-quay-sw", quayward.x - hx, quayward.z + hz, "junction"),
+  ];
+  g.edge({ name: "Quayward Loop", cls: "street", from: nQuayward, to: corners[0]! });
+  g.edge({ name: "Quayward Loop", cls: "street", from: nQuayward, to: corners[1]! });
+  g.edge({ name: "Quayward Loop", cls: "street", from: corners[1]!, to: corners[2]! });
+  g.edge({ name: "Quayward Loop", cls: "street", from: corners[2]!, to: corners[3]! });
+  g.edge({ name: "Quayward Loop", cls: "street", from: corners[3]!, to: corners[0]! });
+
+  // South Strand leaves Quayward Rd at a real T and runs the coast to Saltwind.
+  const strandStart = quaywardRun.nodes[0] ?? nQuayward;
+  const nSaltwind = g.node("s-saltwind", saltwind.x, saltwind.z, "junction");
+  const strandPath = sampleSpline(
     [
-      { x: -2220, z: 8120 },
-      { x: -2140, z: 9180 },
+      { x: strandStart.x, z: strandStart.z },
+      { x: -2210, z: 8240 },
+      { x: -2130, z: 9180 },
       { x: saltwind.x, z: saltwind.z },
     ],
     6,
   );
-  const strandAlong = Math.min(90, polylineLen(quayRoad.points) * 0.42);
-  const strandFork = forkFromTrunk(quayRoad.points, strandAlong, strandDest, 7.2);
-  if (!strandFork) throw new Error("south land: South Strand must Y-fork off Quayward Rd");
-  roads.push(paved("South Strand", trimNearPoint(strandFork.pts, saltwind, 18), strandFork.at, {}, 0));
-
-  const eastHwy = hwySegs[1];
-  const channelDest = sampleSpline(
-    [
-      { x: -1600, z: 7260 },
-      { x: -980, z: 7240 },
-      { x: -420, z: 7220 },
-    ],
-    6,
+  const strandRun = runWithJunctions(
+    g,
+    "South Strand",
+    "avenue",
+    strandStart,
+    nSaltwind,
+    strandPath,
+    [0.26, 0.62],
+    "s-strand",
+    true,
   );
-  const channelFork = eastHwy ? forkFromTrunk(eastHwy.points, 80, channelDest, 16) : null;
-  if (!channelFork) throw new Error("south land: Channel Sands must Y-fork off Island Hwy");
-  roads.push(paved("Channel Sands", channelFork.pts, channelFork.at, {}, 0));
 
-  const strandRoad = roads.find((r) => r.name === "South Strand")!;
-  const palmDest = sampleSpline(
-    [
-      { x: -1680, z: 8380 },
-      { x: -1480, z: 8680 },
-    ],
-    6,
+  // Palm Arc peels off the Strand toward the sand.
+  if (strandRun.nodes[0]) {
+    const palmEnd = g.node("s-palm-end", -1470, 8700, "terminus");
+    g.edge({
+      name: "Palm Arc",
+      cls: "street",
+      from: strandRun.nodes[0],
+      to: palmEnd,
+      via: [{ x: -1760, z: 8420 }],
+      smooth: true,
+    });
+  }
+
+  // Channel Sands leaves the highway east of Harbour Circus, not the ring.
+  const nChannel = hwyHarbourCane.nodes[0];
+  if (nChannel) {
+    const nChannelEnd = g.node("s-channel-end", -420, 7220, "terminus");
+    g.edge({
+      name: "Channel Sands",
+      cls: "street",
+      from: nChannel,
+      to: nChannelEnd,
+      via: [
+        { x: -1400, z: 7320 },
+        { x: -980, z: 7250 },
+      ],
+      smooth: true,
+    });
+  }
+
+  // Saltwind High St crosses the town green from the Strand.
+  const nHighEast = g.node("s-high-east", saltwind.x + 280, saltwind.z + 120, "terminus");
+  const highPath = linePoints({ x: saltwind.x, z: saltwind.z }, { x: saltwind.x + 280, z: saltwind.z + 120 }, 5);
+  const highRun = runWithJunctions(
+    g,
+    "Saltwind High St",
+    "street",
+    nSaltwind,
+    nHighEast,
+    highPath,
+    [0.34, 0.68],
+    "s-high",
   );
-  const palmAlong = Math.min(240, polylineLen(strandRoad.points) * 0.28);
-  const palmFork = forkFromTrunk(strandRoad.points, palmAlong, palmDest, 7.2);
-  if (!palmFork) throw new Error("south land: Palm Arc must Y-fork off South Strand");
-  roads.push(paved("Palm Arc", palmFork.pts, palmFork.at, {}, 0));
-
-  // One block loop around the green — not a hash of streets through each other.
-  const hx = 68;
-  const hz = 46;
-  const quayLoop: XZ[] = [
-    { x: quayward.x - hx, z: quayward.z - hz },
-    { x: quayward.x + hx, z: quayward.z - hz },
-    { x: quayward.x + hx, z: quayward.z + hz },
-    { x: quayward.x - hx, z: quayward.z + hz },
-    { x: quayward.x - hx, z: quayward.z - hz },
-  ];
-  roads.push(paved("Quayward Loop", quayLoop, quayward, {}, 16));
-
-  const caneStart = leaveRing(cane, [canebrake])[0]!;
-  const caneSpur = wiggleLine(caneStart, canebrake, 12, 36, 7);
-  roads.push(paved("Canebrake Rd", trimNearPoint(caneSpur, canebrake, 16), cane, {}, 0));
-  // Y-fork on one kerb — two peels, not a cross stacked on the town point.
-  const caneLen = polylineLen(caneSpur);
-  const millHit = pointAlong(caneSpur, Math.max(90, caneLen * 0.72));
-  if (millHit) {
-    const left = { x: -millHit.dir.z, z: millHit.dir.x };
-    const fwd = millHit.dir;
-    const peel = (ang: number, depth: number): XZ[] => {
-      const c = Math.cos(ang);
-      const s = Math.sin(ang);
-      const dir = { x: left.x * c + fwd.x * s, z: left.z * c + fwd.z * s };
-      return linePoints(offsetBy(millHit.at, dir, 7.2), offsetBy(millHit.at, dir, depth), 4);
-    };
-    roads.push(paved("Mill Fork", peel(0.42, 96), millHit.at, {}, 7.2, millHit.at));
-    roads.push(paved("Cane End", peel(-0.42, 88), millHit.at, {}, 7.2, millHit.at));
-  }
-  const brakeHit = pointAlong(caneSpur, caneLen * 0.48);
-  if (brakeHit) {
-    const left = { x: -brakeHit.dir.z, z: brakeHit.dir.x };
-    const side = hash(17) > 0.5 ? 1 : -1;
-    roads.push(
-      paved(
-        "Brake Lane",
-        linePoints(offsetBy(brakeHit.at, left, 7.2 * side), offsetBy(brakeHit.at, left, 70 * side), 4),
-        brakeHit.at,
-        {},
-        7.2,
-        brakeHit.at,
-      ),
-    );
-  }
-
-  const strandForHigh = roads.find((r) => r.name === "South Strand")!;
-  const highDest = sampleSpline(
-    [
-      { x: saltwind.x - 240, z: saltwind.z - 80 },
-      { x: saltwind.x + 260, z: saltwind.z + 110 },
-    ],
-    6,
-  );
-  const highAlong = Math.max(40, polylineLen(strandForHigh.points) * 0.78);
-  const highFork = forkFromTrunk(strandForHigh.points, highAlong, highDest, 7.2);
-  const highStreet = highFork ? highFork.pts : wiggleLine({ x: saltwind.x - 240, z: saltwind.z - 80 }, { x: saltwind.x + 260, z: saltwind.z + 110 }, 10, 12, 19);
-  roads.push(paved("Saltwind High St", highStreet, highFork?.at ?? strandForHigh.points[strandForHigh.points.length - 1]!, {}, 0));
-  for (let i = 0; i < 4; i++) {
-    const hit = pointAlong(highStreet, polylineLen(highStreet) * (0.2 + i * 0.2));
-    if (!hit) continue;
-    const side = i % 2 ? 1 : -1;
-    const kerb = 7.2;
-    const start = offsetBy(hit.at, { x: -hit.dir.z * side, z: hit.dir.x * side }, kerb);
-    const end = offsetBy(hit.at, { x: -hit.dir.z * side, z: hit.dir.x * side }, kerb + 48 + i * 6);
-    roads.push(paved(`Saltwind Alley ${i + 1}`, linePoints(start, end, 3), hit.at, {}, kerb, hit.at));
-  }
-
-  const passSpur = trimNearPoint(leaveRing(ash, [ashPass]), ashPass, 16);
-  roads.push(paved("Pass Rd", passSpur, ash, {}, 0));
-
-  const havenStart = leaveRing(haven, [eastHaven])[0]!;
-  const havenSpur = trimNearPoint(wiggleLine(havenStart, eastHaven, 12, 28, 23), eastHaven, 24);
-  roads.push(paved("Haven Rd", havenSpur, haven, {}, 0));
-  const loop: XZ[] = [];
-  for (let i = 0; i <= 20; i++) {
-    const t = (i / 20) * Math.PI * 2;
-    loop.push({ x: eastHaven.x + Math.cos(t) * 92, z: eastHaven.z + Math.sin(t) * 68 });
-  }
-  roads.push(paved("Haven Crescent", loop, eastHaven, {}, 22));
-
-  addHamletsAlong(roads, caneSpur, cane, "Cane", 41, 7.2, { avoid: circuses });
-  addHamletsAlong(roads, havenSpur, haven, "Haven", 53, 7.2, { avoid: circuses });
-  addHamletsAlong(roads, roads.find((r) => r.name === "South Strand")!.points, harbour, "Strand", 67, 7.2, {
-    avoid: circuses,
+  highRun.nodes.forEach((node, i) => {
+    const side: 1 | -1 = i % 2 ? 1 : -1;
+    const st = stationAt(highPath, nearestAlong(highPath, node));
+    if (!st) return;
+    const dir = { x: st.perp.x * side, z: st.perp.z * side };
+    const end = offsetBy({ x: node.x, z: node.z }, dir, 62 + i * 8);
+    const endNode = g.node(`s-high-alley${i + 1}`, end.x, end.z, "terminus");
+    g.edge({ name: `Saltwind Alley ${i + 1}`, cls: "lane", from: node, to: endNode });
+    fieldTrack(g, endNode, dir, `Saltwind Track ${i + 1}`, `s-high-track${i + 1}`, 130 + i);
   });
-  for (const seg of hwySegs) addHamletsAlong(roads, seg.points, harbour, "Hwy", 79, 16, { avoid: circuses });
-  addHamletsAlong(roads, passSpur, ash, "Ash", 88, 7.2, { fromM: 70, avoid: circuses });
 
-  const clear: ClearRoad[] = roads.map((r) => ({
-    points: r.points,
-    clear: r.name === "Island Hwy" || r.lanes === 4 ? HIGHWAY_CLEAR_M : r.roundabout ? 22 : STREET_CLEAR,
-  }));
-  // Split spans omit the circus chords; lots must still clear the highway spine
-  // that distToPaved / height grade use (ROAD_CLEAR = STREET_CLEAR = 11).
-  clear.push({ points: southHighwaySpline(), clear: STREET_CLEAR });
+  // Canebrake Rd runs inland off Cane Circus with hamlet junctions on the way.
+  // The junction sits short of the green — a town square is not a crossroads.
+  const nCanebrake = g.node("s-canebrake", canebrake.x, canebrake.z - 62, "junction");
+  const canePath = wiggleLine({ x: cane.x, z: cane.z }, { x: canebrake.x, z: canebrake.z - 62 }, 10, 40, 7);
+  const caneRun = runWithJunctions(
+    g,
+    "Canebrake Rd",
+    "avenue",
+    nCane,
+    nCanebrake,
+    canePath,
+    [0.32, 0.55, 0.78],
+    "s-cane",
+    true,
+  );
+  caneRun.nodes.forEach((node, i) => spurFrom(g, node, canePath, "Cane", i + 1, i % 2 ? 1 : -1, 41));
+  const nMill = g.node("s-mill-end", canebrake.x + 108, canebrake.z - 96, "terminus");
+  g.edge({ name: "Mill Fork", cls: "lane", from: nCanebrake, to: nMill });
+  fieldTrack(g, nMill, headingInto(nMill, nCanebrake), "Mill Track", "s-mill-track", 61);
+  const nBrake = g.node("s-brake-end", canebrake.x - 96, canebrake.z - 88, "terminus");
+  g.edge({ name: "Brake Lane", cls: "lane", from: nCanebrake, to: nBrake });
+  fieldTrack(g, nBrake, headingInto(nBrake, nCanebrake), "Brake Track", "s-brake-track", 67);
+
+  // Pass Rd off Ash Circus.
+  const nAshPass = g.node("s-ashpass", ashPass.x, ashPass.z - 58, "junction");
+  const passPath = linePoints({ x: ash.x, z: ash.z }, { x: ashPass.x, z: ashPass.z - 58 }, 5);
+  const passRun = runWithJunctions(g, "Pass Rd", "avenue", nAsh, nAshPass, passPath, [0.42, 0.7], "s-pass");
+  passRun.nodes.forEach((node, i) => spurFrom(g, node, passPath, "Ash", i + 1, i % 2 ? 1 : -1, 88));
+
+  // Haven Rd and a crescent round East Haven.
+  const nHavenTown = g.node("s-easthaven", eastHaven.x, eastHaven.z - 70, "junction");
+  const havenPath = wiggleLine({ x: haven.x, z: haven.z }, { x: eastHaven.x, z: eastHaven.z - 70 }, 10, 32, 23);
+  const havenRun = runWithJunctions(
+    g,
+    "Haven Rd",
+    "avenue",
+    nHaven,
+    nHavenTown,
+    havenPath,
+    [0.34, 0.58, 0.8],
+    "s-haven",
+    true,
+  );
+  havenRun.nodes.forEach((node, i) => spurFrom(g, node, havenPath, "Haven", i + 1, i % 2 ? -1 : 1, 53));
+  const cw = g.node("s-haven-w", eastHaven.x - 96, eastHaven.z + 12, "junction");
+  const ce = g.node("s-haven-e", eastHaven.x + 96, eastHaven.z + 12, "junction");
+  const cs = g.node("s-haven-s", eastHaven.x, eastHaven.z + 96, "junction");
+  g.edge({ name: "Haven Crescent", cls: "street", from: nHavenTown, to: cw, via: [{ x: eastHaven.x - 92, z: eastHaven.z - 48 }], smooth: true });
+  g.edge({ name: "Haven Crescent", cls: "street", from: cw, to: cs, via: [{ x: eastHaven.x - 78, z: eastHaven.z + 74 }], smooth: true });
+  g.edge({ name: "Haven Crescent", cls: "street", from: cs, to: ce, via: [{ x: eastHaven.x + 78, z: eastHaven.z + 74 }], smooth: true });
+  g.edge({ name: "Haven Crescent", cls: "street", from: ce, to: nHavenTown, via: [{ x: eastHaven.x + 92, z: eastHaven.z - 48 }], smooth: true });
+  fieldTrack(g, cs, { x: 0, z: 1 }, "Haven Track", "s-haven-track-s", 71);
+  fieldTrack(g, nAshPass, { x: 0, z: 1 }, "Pass Track", "s-pass-track", 77);
+  fieldTrack(g, nCanebrake, { x: 0, z: 1 }, "Canebrake Track", "s-cane-track-s", 83);
+
+  return pruneStrayTracks(g.build());
+}
+
+export function buildSouthLand(spec: IslandSpec, heightAt: HeightFn): SouthBuilt {
+  const lots: Parcel[] = [];
+  const graph = buildSouthGraph();
+  const roads = graphToRoads(graph);
+
+  const quayward = SOUTH_TOWNS[0]!;
+  const canebrake = SOUTH_TOWNS[1]!;
+  const saltwind = SOUTH_TOWNS[2]!;
+  const ashPass = SOUTH_TOWNS[3]!;
+  const eastHaven = SOUTH_TOWNS[4]!;
+
+  const clear: ClearRoad[] = roads.map((r) => ({ points: r.points, clear: clearanceFor(r) }));
+  // Split spans stop at the circus kerb, but the island spine still runs through
+  // the middle of each circus. Lots clear that too (see distToPaved in land.ts).
+  clear.push({ points: southHighwaySpline(), clear: 17 });
 
   const base = { spec, heightAt, clear };
 
@@ -612,126 +745,94 @@ export function buildSouthLand(spec: IslandSpec, heightAt: HeightFn): SouthBuilt
   plazaAt(lots, canebrake, "Canebrake", base, 26, 20);
   plazaAt(lots, saltwind, "Saltwind", base, 30, 16);
   plazaAt(lots, ashPass, "Ash Pass", base, 20, 20);
-  plazaAt(lots, { x: eastHaven.x, z: eastHaven.z }, "East Haven", base, 24, 20);
+  plazaAt(lots, eastHaven, "East Haven", base, 24, 20);
 
-  const streetOpts = { ...base, band: "street" as const, fromM: 16, toM: 1200, cutM: 16, seed: 3, sides: [-1, 1] as (-1 | 1)[] };
+  const byName = (name: string) => roads.filter((r) => r.name === name && !r.roundabout);
+  const streetOpts = {
+    ...base,
+    band: "street" as const,
+    fromM: 8,
+    toM: 4000,
+    cutM: 17,
+    seed: 3,
+    sides: [-1, 1] as (-1 | 1)[],
+  };
 
-  lotsAlong(lots, roads.find((r) => r.name === "Quayward Rd")!.points, {
-    ...streetOpts,
-    street: "Quayward Rd",
-    toM: 180,
-    seed: 11,
-  });
-  for (const r of roads.filter((x) => x.name?.startsWith("Quayward ") && x.name !== "Quayward Rd" && x.name !== "Quayward Path")) {
-    lotsAlong(lots, r.points, { ...streetOpts, street: r.name || "Quayward", toM: 160, cutM: 16, seed: 15 });
+  const frontages: { name: string; seed: number; cut?: number }[] = [
+    { name: "Quayward Rd", seed: 11 },
+    { name: "Quayward Loop", seed: 15, cut: 16 },
+    { name: "South Strand", seed: 21 },
+    { name: "Saltwind High St", seed: 31, cut: 16 },
+    { name: "Canebrake Rd", seed: 41 },
+    { name: "Pass Rd", seed: 45 },
+    { name: "Haven Rd", seed: 51 },
+    { name: "Haven Crescent", seed: 52, cut: 18 },
+    { name: "Mill Fork", seed: 55, cut: 15 },
+    { name: "Brake Lane", seed: 56, cut: 15 },
+  ];
+  for (const f of frontages) {
+    for (const road of byName(f.name)) {
+      lotsAlong(lots, road.points, {
+        ...streetOpts,
+        street: f.name,
+        cutM: f.cut ?? streetOpts.cutM,
+        setback: clearanceFor(road) + 1,
+        seed: f.seed,
+      });
+    }
   }
 
-  lotsAlong(lots, roads.find((r) => r.name === "Canebrake Rd")!.points, {
-    ...streetOpts,
-    street: "Canebrake Rd",
-    fromM: 24,
-    toM: 1100,
-    cutM: 16,
-    seed: 21,
-  });
-  for (const name of ["Mill Fork", "Cane End", "Brake Lane"]) {
-    const r = roads.find((x) => x.name === name);
-    if (r) lotsAlong(lots, r.points, { ...streetOpts, street: name, toM: 160, seed: 22 });
-  }
-
-  lotsAlong(lots, highStreet, { ...streetOpts, street: "Saltwind High St", fromM: 12, toM: 560, cutM: 20, seed: 31 });
-  for (const r of roads.filter((x) => x.name?.startsWith("Saltwind Alley"))) {
-    lotsAlong(lots, r.points, { ...streetOpts, street: r.name || "Alley", toM: 80, cutM: 18, seed: 32 });
-  }
-
-  lotsAlong(lots, passSpur, { ...streetOpts, street: "Pass Rd", toM: 140, seed: 41 });
-
-  lotsAlong(lots, havenSpur, { ...streetOpts, street: "Haven Rd", fromM: 40, toM: 1200, cutM: 22, seed: 51 });
-  lotsAlong(lots, loop, { ...streetOpts, street: "Haven Crescent", fromM: 8, toM: 900, cutM: 22, seed: 52 });
-
-  for (const r of roads.filter((x) => x.kind === "paved" && x.name?.includes(" Row "))) {
-    lotsAlong(lots, r.points, { ...streetOpts, street: r.name || "Row", fromM: 6, toM: 140, cutM: 18, seed: 60 });
+  for (const road of roads.filter((r) => r.cls === "lane")) {
+    lotsAlong(lots, road.points, {
+      ...streetOpts,
+      street: road.name || "Lane",
+      cutM: 15,
+      setback: clearanceFor(road) + 1,
+      seed: 60 + (road.name?.length ?? 0),
+    });
   }
 
   const shoreOpts = {
     ...base,
     band: "shore" as const,
     zone: "commercial" as const,
-    fromM: 24,
-    toM: 1100,
-    cutM: 20,
-    setback: 11,
+    fromM: 12,
+    toM: 3000,
+    cutM: 19,
     sides: [-1, 1] as (-1 | 1)[],
     seed: 70,
   };
-  lotsAlong(lots, roads.find((r) => r.name === "Channel Sands")!.points, {
-    ...shoreOpts,
-    street: "Channel Sands",
-    toM: 760,
-    seed: 71,
-  });
-  lotsAlong(lots, roads.find((r) => r.name === "Palm Arc")!.points, {
-    ...shoreOpts,
-    street: "Palm Arc",
-    toM: 520,
-    seed: 72,
-  });
-  lotsAlong(lots, roads.find((r) => r.name === "South Strand")!.points, {
-    ...shoreOpts,
-    street: "South Strand",
-    fromM: 40,
-    toM: 1200,
-    cutM: 20,
-    seed: 73,
-  });
+  for (const name of ["Channel Sands", "Palm Arc"]) {
+    for (const road of byName(name)) {
+      lotsAlong(lots, road.points, {
+        ...shoreOpts,
+        street: name,
+        setback: clearanceFor(road) + 1,
+        seed: 71 + name.length,
+      });
+    }
+  }
 
   const fieldOpts = {
     ...base,
     band: "field" as const,
-    fromM: 8,
-    toM: 220,
-    cutM: 36,
-    setback: 16,
+    fromM: 6,
+    toM: 400,
+    cutM: 38,
+    setback: 14,
     sides: [-1, 1] as (-1 | 1)[],
     seed: 80,
   };
-  for (const r of roads.filter((x) => x.kind === "dirt")) {
-    lotsAlong(lots, r.points, { ...fieldOpts, street: r.name || "Field Lane", seed: 81 + (r.name?.length ?? 0) });
+  for (const road of roads.filter((r) => r.cls === "track")) {
+    lotsAlong(lots, road.points, {
+      ...fieldOpts,
+      street: road.name || "Field Lane",
+      seed: 81 + (road.name?.length ?? 0),
+    });
   }
 
-  // Extra inland fields off the long drives.
-  const fieldRoads = [roads.find((x) => x.name === "Canebrake Rd")!, roads.find((x) => x.name === "Haven Rd")!].filter(
-    Boolean,
-  );
-  for (const r of fieldRoads) {
-    const pts = r.points;
-    if (pts.length < 3) continue;
-    for (const frac of [0.28, 0.48, 0.68, 0.84]) {
-      const i = Math.min(pts.length - 2, Math.max(1, Math.floor(frac * (pts.length - 1))));
-      const a = pts[i]!;
-      const b = pts[i + 1]!;
-      const dx = b.x - a.x;
-      const dz = b.z - a.z;
-      const len = Math.hypot(dx, dz) || 1;
-      for (const side of [-1, 1] as const) {
-        const p = { x: (-dz / len) * side, z: (dx / len) * side };
-        const field = quad(a, b, p, 18, 72 + hash(frac * 9 + side + (r.name?.length ?? 1)) * 24, 0.04);
-        pushParcel(lots, field, { ...base, street: "Field Lane", band: "field" });
-      }
-    }
-  }
-
-  const stops: TaxiStop[] = [
-    { id: "south-port", name: "South Port", x: SOUTH_PORT.x, z: SOUTH_PORT.z },
-    { id: "south-harbour-circus", name: SOUTH_RAB.harbour.name, x: harbour.x, z: harbour.z },
-    { id: "south-cane-circus", name: SOUTH_RAB.west.name, x: cane.x, z: cane.z },
-    { id: "south-ash-circus", name: SOUTH_RAB.pass.name, x: ash.x, z: ash.z },
-    { id: "south-haven-circus", name: SOUTH_RAB.east.name, x: haven.x, z: haven.z },
-    ...SOUTH_TOWNS.map((t) => ({ id: `south-town-${t.id}`, name: t.name, x: t.x, z: t.z })),
-    { id: "south-east-shore", name: "East Shore", x: 2920, z: 7860 },
-  ];
-
-  return { plots: lots, roads, stops };
+  const stops = southTaxiStops();
+  return { plots: lots, roads, stops, graph };
 }
 
 export function southTaxiStops(): TaxiStop[] {

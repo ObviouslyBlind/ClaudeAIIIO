@@ -1,4 +1,9 @@
 import * as THREE from "three";
+import { ROAD_CLASSES, carriagewayWidthM, roadClassSpec } from "./roadclass.js";
+import { junctionRadiusM } from "./roadnet.js";
+
+/** Grit shoulder under the tarmac edge, so a road has a rim instead of a cut edge. */
+export const SHOULDER = 0x6f6a5e;
 
 /** Metres. A black tarmac ribbon, not a kerbed highway kit. */
 export const PAVED_WIDTH_M = 7.2;
@@ -14,7 +19,7 @@ export const STONE = 0x9a8a72;
 export const SIDEWALK = 0xb0a48c;
 export const SIDEWALK_WIDTH_M = 2.8;
 /** Local T-stubs and town lanes — narrower than the arterial. */
-export const LOCAL_WIDTH_M = 5.2;
+export const LOCAL_WIDTH_M = ROAD_CLASSES.lane.carriageM;
 /** Dusty lift so field tracks do not crush to paved black under Lambert. */
 const DIRT_DUST = 0x9a6a40;
 
@@ -55,7 +60,7 @@ function ribbonStations(points) {
  * One prism along the polyline: mitered left/right edges, world-up
  * (no Frenet twist). Reads as a continuous ribbon, not paving slabs.
  */
-function drawRibbon(scene, spec, road, heightAt, widthM, color, roadKind, matOpts = {}, skipGap = Infinity) {
+function drawRibbon(scene, spec, road, heightAt, widthM, color, roadKind, matOpts = {}, skipGap = Infinity, yLift = 0) {
   const pts = ribbonStations(road.points);
   if (pts.length < 2) return;
 
@@ -92,7 +97,7 @@ function drawRibbon(scene, spec, road, heightAt, widthM, color, roadKind, matOpt
       const dot = rx * (sz / sl) + rz * (-sx / sl);
       if (dot > 0.25) scale = Math.min(half / dot, half * 3);
     }
-    const y = heightAt(spec, pts[i].x, pts[i].z) + (roadKind === "sidewalk" ? 0.16 : 0.1);
+    const y = heightAt(spec, pts[i].x, pts[i].z) + (roadKind === "sidewalk" ? 0.16 : 0.1) + yLift;
     const lx = pts[i].x - rx * scale;
     const lz = pts[i].z - rz * scale;
     const qx = pts[i].x + rx * scale;
@@ -174,47 +179,40 @@ function distToPoly(pts, x, z) {
 
 function isLocalStreet(road) {
   if (!road || road.roundabout || road.lanes === 4) return false;
+  if (road.cls) return road.cls === "lane";
   const n = road.name || "";
   if (/Island Hwy|Harbour Rd/.test(n)) return false;
   return /Row |Alley |Spoke |Fork|Lane|Loop|End\b/.test(n);
 }
 
+/** Legacy North roads carry no class. Give them the nearest one. */
+function classOf(road) {
+  if (road.cls) return road.cls;
+  if (road.kind === "dirt") return "track";
+  if (road.lanes === 4) return "highway";
+  if (isLocalStreet(road)) return "lane";
+  return /Harbour Rd/.test(road.name || "") ? "avenue" : "street";
+}
+
 function hasSidewalk(road) {
-  if (!road || road.roundabout || road.lanes === 4 || isLocalStreet(road)) return false;
-  const n = road.name || "";
-  return /Rd$|High St|Harbour Rd/.test(n);
+  if (!road || road.roundabout) return false;
+  return roadClassSpec(classOf(road)).sidewalkM > 0;
 }
 
-function roadRank(road) {
-  if (road.lanes === 4) return 4;
-  if (road.roundabout) return 3;
-  if (isLocalStreet(road)) return 1;
-  return 2;
-}
+/**
+ * Carriageway plus a metre of grit each side. The band is what stops the
+ * tarmac reading as black tape laid on bare sand.
+ */
+const SHOULDER_PAD_M = 2.2;
 
-function yieldGap(other) {
-  if (other.lanes === 4) return 14;
-  if (other.roundabout) return 20;
-  return 6.5;
-}
-
-function trimYielding(pts, road, paved) {
-  const rnk = roadRank(road);
-  // Roundabout *rings* are not yield targets — distance-to-ring would nuke a
-  // 40 m disk around every circus and leave a star of overlapping stubs.
-  const others = (paved || []).filter(
-    (o) => o !== road && !o.roundabout && o.points && o.points.length >= 2 && roadRank(o) > rnk,
-  );
-  if (!others.length) return pts;
-  const out = pts.filter((p) => others.every((o) => distToPoly(o.points, p.x, p.z) >= yieldGap(o)));
-  return out.length >= 2 ? out : pts;
-}
-
-function drawPaved(scene, spec, road, heightAt, paved) {
-  const pts = trimYielding(ribbonStations(road.points), road, paved);
+function drawPaved(scene, spec, road, heightAt) {
+  const pts = ribbonStations(road.points);
   if (pts.length < 2) return;
-  const width = isLocalStreet(road) ? LOCAL_WIDTH_M : PAVED_WIDTH_M;
-  drawRibbon(scene, spec, { ...road, points: pts }, heightAt, width, ASPHALT, "paved");
+  const cls = classOf(road);
+  const width = roadClassSpec(cls).carriageM;
+  const shaped = { ...road, points: pts };
+  drawRibbon(scene, spec, shaped, heightAt, width + SHOULDER_PAD_M, SHOULDER, "shoulder", {}, Infinity, -0.03);
+  drawRibbon(scene, spec, shaped, heightAt, width, ASPHALT, "paved");
 }
 
 export function offsetPolyline(points, dist) {
@@ -251,52 +249,113 @@ function omitNearCentres(pts, centres, gap = 20) {
   return pts.filter((p) => centres.every((c) => Math.hypot(p.x - c.x, p.z - c.z) >= gap));
 }
 
-function drawSidewalks(scene, spec, road, heightAt, centres, paved) {
+function drawSidewalks(scene, spec, road, heightAt, centres) {
   if (!hasSidewalk(road)) return;
-  const pts = trimYielding(omitNearCentres(ribbonStations(road.points), centres, 36), road, paved);
+  const cls = classOf(road);
+  const walk = roadClassSpec(cls).sidewalkM;
+  const pts = omitNearCentres(ribbonStations(road.points), centres, 30);
   if (pts.length < 2) return;
-  const offset = PAVED_WIDTH_M / 2 + SIDEWALK_WIDTH_M / 2 + 0.12;
-  drawRibbon(scene, spec, { ...road, points: offsetPolyline(pts, -offset) }, heightAt, SIDEWALK_WIDTH_M, SIDEWALK, "sidewalk");
-  drawRibbon(scene, spec, { ...road, points: offsetPolyline(pts, offset) }, heightAt, SIDEWALK_WIDTH_M, SIDEWALK, "sidewalk");
+  const offset = roadClassSpec(cls).carriageM / 2 + SHOULDER_PAD_M / 2 + walk / 2;
+  drawRibbon(scene, spec, { ...road, points: offsetPolyline(pts, -offset) }, heightAt, walk, SIDEWALK, "sidewalk");
+  drawRibbon(scene, spec, { ...road, points: offsetPolyline(pts, offset) }, heightAt, walk, SIDEWALK, "sidewalk");
 }
 
-/** 2+2 lanes, stone median. Each carriageway is still a 7.2 m ribbon. */
+/** 2+2 lanes with a stone median. Widths come from the class table. */
 function drawHighway(scene, spec, road, heightAt, centres) {
+  const cls = classOf(road);
+  const s = roadClassSpec(cls);
   const pts = omitNearCentres(ribbonStations(road.points), centres, HIGHWAY_RAB_OMIT_M);
   if (pts.length < 2) return;
+  const lane = s.medianM / 2 + s.carriageM / 2;
+
   drawRibbon(
     scene,
     spec,
-    { ...road, points: offsetPolyline(pts, -HIGHWAY_LANE_OFFSET_M) },
+    { ...road, name: (road.name || "Island Hwy") + " shoulder", points: pts },
     heightAt,
-    PAVED_WIDTH_M,
-    ASPHALT,
-    "paved",
+    carriagewayWidthM(cls) + SHOULDER_PAD_M,
+    SHOULDER,
+    "shoulder",
     {},
     HIGHWAY_RAB_SKIP_M,
+    -0.03,
   );
-  drawRibbon(
-    scene,
-    spec,
-    { ...road, points: offsetPolyline(pts, HIGHWAY_LANE_OFFSET_M) },
-    heightAt,
-    PAVED_WIDTH_M,
-    ASPHALT,
-    "paved",
-    {},
-    HIGHWAY_RAB_SKIP_M,
-  );
+  for (const side of [-1, 1]) {
+    drawRibbon(
+      scene,
+      spec,
+      { ...road, points: offsetPolyline(pts, lane * side) },
+      heightAt,
+      s.carriageM,
+      ASPHALT,
+      "paved",
+      {},
+      HIGHWAY_RAB_SKIP_M,
+    );
+  }
   drawRibbon(
     scene,
     spec,
     { ...road, name: (road.name || "Island Hwy") + " median", points: pts },
     heightAt,
-    HIGHWAY_MEDIAN_M,
+    s.medianM,
     STONE,
     "median",
     {},
     HIGHWAY_RAB_SKIP_M,
+    0.02,
   );
+}
+
+/**
+ * A slab of tarmac where roads actually meet.
+ *
+ * Junctions used to be made by deleting the minor road near the major one,
+ * which left stubs ending in the sand. A pad sized to the widest arm covers
+ * the mitre seams instead, so a T reads as a T.
+ */
+function drawJunctions(scene, map, specOf, heightAt) {
+  const graph = map.graph;
+  const pads = [];
+  if (graph && graph.nodes) {
+    for (const node of graph.nodes) {
+      if (node.kind !== "junction") continue;
+      const r = junctionRadiusM(graph, node);
+      if (r > 0) pads.push({ island: node.island, x: node.x, z: node.z, r, label: node.name || "junction" });
+    }
+  }
+  // Legacy roads (North) still describe a junction with `joins`.
+  for (const road of map.roads || []) {
+    if (road.cls || road.roundabout || !road.joins) continue;
+    pads.push({
+      island: road.island,
+      x: road.joins.x,
+      z: road.joins.z,
+      r: PAVED_WIDTH_M / 2 + 1.2,
+      label: road.name || "junction",
+    });
+  }
+
+  for (const pad of pads) {
+    const spec = specOf(pad.island);
+    const y = heightAt(spec, pad.x, pad.z);
+    const mesh = new THREE.Mesh(
+      new THREE.CircleGeometry(pad.r, 20),
+      new THREE.MeshLambertMaterial({ color: ASPHALT }),
+    );
+    mesh.rotation.x = -Math.PI / 2;
+    mesh.position.set(pad.x, y + 0.175, pad.z);
+    mesh.castShadow = false;
+    mesh.receiveShadow = true;
+    mesh.userData.kind = "road";
+    mesh.userData.roadKind = "junction";
+    mesh.userData.island = pad.island;
+    mesh.userData.roadName = pad.label;
+    mesh.userData.label = pad.label;
+    mesh.userData.widthM = pad.r * 2;
+    mesh.userData.mode = "PAPER";
+    scene.add(mesh);
+  }
 }
 
 function rabCenter(road) {
@@ -311,13 +370,15 @@ function rabCenter(road) {
 }
 
 /** Flat asphalt annulus + stone island. Not a mitered polyline (those stacked at the circus). */
-function drawRoundabout(scene, spec, road, heightAt) {
+function drawRoundabout(scene, spec, road, heightAt, graph) {
   const pts = road.points || [];
   if (pts.length < 8) return;
   const { x, z } = rabCenter(road);
   const y = heightAt(spec, x, z);
-  const inner = RAB_ISLAND_R_M;
-  const outer = inner + PAVED_WIDTH_M + 1.8;
+  // Edges stop on the node's kerb radius, so the ring has to reach it.
+  const node = graph && road.nodeId ? graph.nodes.find((n) => n.id === road.nodeId) : null;
+  const outer = node && node.radius ? node.radius + 3.2 : RAB_ISLAND_R_M + PAVED_WIDTH_M + 1.8;
+  const inner = Math.max(6, outer - (PAVED_WIDTH_M + 5));
   const ring = new THREE.Mesh(
     new THREE.RingGeometry(inner, outer, 32),
     new THREE.MeshLambertMaterial({ color: ASPHALT }),
@@ -470,19 +531,19 @@ function drawNorthPortCurbs(scene, map, specOf, heightAt) {
 export function makeRoads(map, helpers) {
   const { scene, specOf, heightAt } = helpers;
   const centres = rabCentres(map);
-  const paved = (map.roads || []).filter((r) => r.kind === "paved");
   for (const road of map.roads) {
     const spec = specOf(road.island);
     if (road.kind === "paved" && road.lanes === 4) {
       drawHighway(scene, spec, road, heightAt, centres);
     } else if (road.kind === "paved" && road.roundabout) {
-      drawRoundabout(scene, spec, road, heightAt);
+      drawRoundabout(scene, spec, road, heightAt, map.graph);
     } else if (road.kind === "paved") {
-      drawPaved(scene, spec, road, heightAt, paved);
-      drawSidewalks(scene, spec, road, heightAt, centres, paved);
+      drawPaved(scene, spec, road, heightAt);
+      drawSidewalks(scene, spec, road, heightAt, centres);
     } else {
       drawDirt(scene, spec, road, heightAt);
     }
   }
+  drawJunctions(scene, map, specOf, heightAt);
   drawNorthPortCurbs(scene, map, specOf, heightAt);
 }

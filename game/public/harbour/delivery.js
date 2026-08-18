@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { routeAcrossPaved } from "./taxi.js";
+import { routeTaxi } from "./taxi.js";
 import { roadsideDrop, vanAwayPath } from "./roadside.js";
 
 /** Delivery van. Same paved graph as the taxi. PAPER / SIMULATED. */
@@ -73,7 +73,7 @@ export function createDeliveries({ scene, getMap, specOf, heightAt, onDrop }) {
         delivery.drop ||
         roadsideDrop(map.roads, delivery.island, dest.x, dest.z);
       const curb = drop ? { x: drop.curbX, z: drop.curbZ } : dest;
-      const route = routeAcrossPaved(map.roads, delivery.island, from.x, from.z, curb.x, curb.z);
+      const route = routeTaxi(map, delivery.island, from.x, from.z, curb.x, curb.z);
       const path = (route && route.points) || [{ x: curb.x, z: curb.z }];
       const mesh = makeVan();
       mesh.userData.deliveryId = delivery.id;

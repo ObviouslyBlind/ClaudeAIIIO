@@ -1,5 +1,7 @@
 import * as THREE from "three";
 import { HIGHWAY_LANE_OFFSET_M, offsetPolyline } from "./roads.js";
+import { laneOffsetM } from "./roadclass.js";
+import { nearestEdge, projectOnEdge, routeOnGraph } from "./roadnet.js";
 
 /** Metres. On the carriageway (paved width 6.2). */
 const ON_PAVED = 6.5;
@@ -131,8 +133,12 @@ export function mapPxToWorld(bounds, sx, sy, w, h) {
 }
 
 /** Rough map tap → closest paved point. Dirt is never a destination. */
-export function pavedDestFromMapClick(roads, islandId, spec, sx, sy, w, h) {
+export function pavedDestFromMapClick(roads, islandId, spec, sx, sy, w, h, graph) {
   const world = mapPxToWorld(islandMapBounds(spec), sx, sy, w, h);
+  if (graph && graph.edges && graph.edges.some((e) => e.island === islandId)) {
+    const hit = nearestEdge(graph, islandId, world.x, world.z);
+    return hit ? { road: hit.edge, proj: hit.proj } : null;
+  }
   let best = null;
   for (const r of roads) {
     if (r.kind !== "paved" || r.roundabout || r.island !== islandId || !r.points || r.points.length < 2) continue;
@@ -187,6 +193,18 @@ function transferBetween(a, b, snapM) {
     }
   }
   return best;
+}
+
+/**
+ * Route the cab. When the island has a road graph, walk that: edges physically
+ * meet at their nodes, so a route is always tarmac. The polyline fallback below
+ * only serves islands still on the legacy road list (North).
+ */
+export function routeTaxi(map, islandId, fromX, fromZ, toX, toZ) {
+  const graph = map && map.graph;
+  const hasIsland = graph && graph.edges && graph.edges.some((e) => e.island === islandId);
+  if (hasIsland) return routeOnGraph(graph, islandId, fromX, fromZ, toX, toZ);
+  return routeAcrossPaved(map ? map.roads : [], islandId, fromX, fromZ, toX, toZ);
 }
 
 export function routeAcrossPaved(roads, islandId, fromX, fromZ, toX, toZ) {
@@ -780,15 +798,7 @@ export function createTaxi({
   }
 
   function driveTo(x, z) {
-    const map = getMap();
-    const route = routeAcrossPaved(
-      map ? map.roads : [],
-      island,
-      mesh.position.x,
-      mesh.position.z,
-      x,
-      z,
-    );
+    const route = routeTaxi(getMap(), island, mesh.position.x, mesh.position.z, x, z);
     if (!route || route.points.length < 2) return false;
     road = route.road;
     setPath(route.points);
@@ -802,6 +812,23 @@ export function createTaxi({
   }
 
   function parkOnPaved() {
+    const map = getMap();
+    const graph = map && map.graph;
+    const onGraph = graph && nearestEdge(graph, island, player.position.x, player.position.z);
+    if (onGraph) {
+      road = onGraph.edge;
+      const pts = onGraph.edge.points;
+      const proj = onGraph.proj;
+      const a = pts[proj.i];
+      const b = pts[Math.min(proj.i + 1, pts.length - 1)];
+      const off = laneOffsetM(onGraph.edge.cls);
+      const dx = b.x - a.x;
+      const dz = b.z - a.z;
+      const len = Math.hypot(dx, dz) || 1;
+      place(proj.x + (dz / len) * off, proj.z - (dx / len) * off, Math.atan2(dx, dz));
+      mesh.visible = true;
+      return true;
+    }
     const hit = closestPaved(player.position.x, player.position.z, island);
     if (!hit) return false;
     road = hit.road;
@@ -1053,7 +1080,9 @@ export function createTaxi({
       setStatus("Taxi to " + stop.name + "..");
       return;
     }
-    const hit = map ? pavedDestFromMapClick(map.roads, island, spec, sx, sy, overlayCanvas.width, overlayCanvas.height) : null;
+    const hit = map
+      ? pavedDestFromMapClick(map.roads, island, spec, sx, sy, overlayCanvas.width, overlayCanvas.height, map.graph)
+      : null;
     if (!hit) {
       setStatus("Tap a stop point..");
       return;
