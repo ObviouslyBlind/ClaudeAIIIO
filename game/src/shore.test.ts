@@ -40,6 +40,15 @@ describe("shoreline read", () => {
     expect(dist(mid, sand)).toBeLessThan(dist(mid, grass));
   });
 
+  it("paints harbour grade as grass underfoot, not a sand sheet", () => {
+    const apron = paintShoreColor(1.28, 0.58, grass, sand, rock, { grade: 1 });
+    expect(dist(apron, grass)).toBeLessThan(dist(apron, sand));
+
+    const verge = paintShoreColor(1.28, 0.58, grass, sand, rock, { grade: 1, verge: true });
+    expect(dist(verge, grass)).toBeLessThan(dist(verge, sand));
+    expect(dist(verge, apron)).toBeGreaterThan(0.02);
+  });
+
   it("keeps the interior grassy and the peak rocky", () => {
     const inland = paintShoreColor(18, 0.22, grass, sand, rock);
     expect(dist(inland, grass)).toBeLessThan(dist(inland, sand));

@@ -119,6 +119,21 @@ describe("road graph", () => {
     }
   });
 
+  it("peels right around Harbour Circus onto Quayward, not the long way north", () => {
+    const graph = createLandBoard().graph;
+    const harbour = graph.nodes.find((n) => n.id === "s-rab-harbour")!;
+    const qw = SOUTH_TOWNS[0]!;
+    const route = routeOnGraph(graph, "south", SOUTH_PORT.x + 10, SOUTH_PORT.z, qw.x, qw.z)!;
+    const r = harbour.radius ?? 34;
+    const ring = route.points.filter(
+      (p) => Math.abs(Math.hypot(p.x - harbour.x, p.z - harbour.z) - r) < 10,
+    );
+    expect(ring.length).toBeGreaterThan(3);
+    const south = ring.filter((p) => p.z > harbour.z + 6).length;
+    const north = ring.filter((p) => p.z < harbour.z - 6).length;
+    expect(south, "right peel stays on the inland/south lip").toBeGreaterThan(north);
+  });
+
   it("never routes the cab down a field track", () => {
     const board = createLandBoard();
     const graph = board.graph;

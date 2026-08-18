@@ -45,7 +45,7 @@ Each step is big enough to see from 30 m up.
 
 ## Routing
 
-`public/harbour/roadnet.js`. Dijkstra over nodes, walking edge geometry, with a kerb arc across a circus. Dual carriageways are offset to a driving lane so nothing drives the median. Field tracks are excluded — the cab does not take dirt.
+`public/harbour/roadnet.js`. Dijkstra over nodes, walking edge geometry, with a kerb arc across a circus. The arc peels **right** for a first exit so the cab does not go the long way around. Dual carriageways are offset to the driving lane nearer the player so nothing drives the median. Field tracks are excluded — the cab does not take dirt.
 
 A track that wanders back within 7 m of tarmac is dropped at build time.
 

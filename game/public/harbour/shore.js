@@ -34,7 +34,8 @@ function smoothstep(a, b, x) {
  * A later 0.5–0.8 blend still read as a green cliff from spawn: olive mid-slope
  * met the lagoon. Widen the apron and wet the lip before the water tint.
  */
-export function paintShoreColor(h, t, grass, sand, rock) {
+export function paintShoreColor(h, t, grass, sand, rock, opts) {
+  const grade = opts && opts.grade != null ? clamp01(opts.grade) : 0;
   if (h <= 0) {
     const u = clamp01((-h) / 5.5);
     return sand.clone().lerp(WATER, 0.16 + 0.84 * u * u);
@@ -51,6 +52,15 @@ export function paintShoreColor(h, t, grass, sand, rock) {
   if (h < 2.45) {
     const wet = sand.clone().lerp(WATER, 0.36);
     c.lerp(wet, smoothstep(2.45, 0.12, h));
+  }
+
+  // Harbour / street grade is flat and low, so the beach tint would paint
+  // every walkable metre sand. Pull it back to grass and a clay verge.
+  if (grade > 0.04) {
+    const packed = grass.clone().lerp(sand, 0.28);
+    const lawn = grass.clone();
+    const mottled = packed.clone().lerp(lawn, opts && opts.verge ? 0.35 : 0.72);
+    c.lerp(mottled, grade);
   }
   return c;
 }

@@ -89,19 +89,47 @@ export function edgePartial(edge, proj, toNodeId) {
   return slicePoints(edge.points, proj.i, proj, 0, edge.points[0]);
 }
 
-/** Arc round a circus kerb from one entry point to another, the short way. */
-export function circusArc(node, from, to, steps = 10) {
+/**
+ * Signed sweep from entry to exit on a circus.
+ * Pick the arc whose midpoint sits to the driver's RIGHT, so a first-exit
+ * right does not send the cab the long way around the back of the island.
+ */
+export function circusDelta(from, to, node, inbound) {
+  const a0 = Math.atan2(from.z - node.z, from.x - node.x);
+  const a1 = Math.atan2(to.z - node.z, to.x - node.x);
+  let short = a1 - a0;
+  while (short > Math.PI) short -= Math.PI * 2;
+  while (short < -Math.PI) short += Math.PI * 2;
+  const long = short > 0 ? short - Math.PI * 2 : short + Math.PI * 2;
+  const hx = inbound && (inbound.x || inbound.z) ? inbound.x : node.x - from.x;
+  const hz = inbound && (inbound.x || inbound.z) ? inbound.z : node.z - from.z;
+  // Heading (hx,hz) in +Z-south: right is south when heading east → (-hz, hx).
+  const rx = -hz;
+  const rz = hx;
+  const score = (delta) => {
+    const a = a0 + delta / 2;
+    return Math.cos(a) * rx + Math.sin(a) * rz;
+  };
+  const sl = score(short);
+  const ll = score(long);
+  const extra = Math.PI * 0.55;
+  if (ll > sl && Math.abs(long) <= Math.abs(short) + extra) return long;
+  if (sl > ll && Math.abs(short) <= Math.abs(long) + extra) return short;
+  return Math.abs(short) <= Math.abs(long) ? short : long;
+}
+
+/** Arc round a circus kerb. Sits in the ring tarmac, not on the stone island. */
+export function circusArc(node, from, to, steps = 12, inbound) {
   const r = node.radius || 0;
   if (!r) return [];
   const a0 = Math.atan2(from.z - node.z, from.x - node.x);
-  const a1 = Math.atan2(to.z - node.z, to.x - node.x);
-  let delta = a1 - a0;
-  while (delta > Math.PI) delta -= Math.PI * 2;
-  while (delta < -Math.PI) delta += Math.PI * 2;
+  const delta = circusDelta(from, to, node, inbound);
+  const driveR = Math.max(8, r - 3.5);
+  const n = Math.max(6, Math.ceil((Math.abs(delta) / Math.PI) * steps));
   const out = [];
-  for (let i = 1; i < steps; i++) {
-    const a = a0 + (delta * i) / steps;
-    out.push({ x: node.x + Math.cos(a) * r, z: node.z + Math.sin(a) * r });
+  for (let i = 1; i < n; i++) {
+    const a = a0 + (delta * i) / n;
+    out.push({ x: node.x + Math.cos(a) * driveR, z: node.z + Math.sin(a) * driveR });
   }
   return out;
 }
@@ -173,6 +201,13 @@ function toCarriageway(run, cls) {
   return out;
 }
 
+function headingOf(run) {
+  if (!run || run.length < 2) return null;
+  const a = run[run.length - 2];
+  const b = run[run.length - 1];
+  return { x: b.x - a.x, z: b.z - a.z };
+}
+
 function pushRun(points, run) {
   for (const p of run) {
     const last = points[points.length - 1];
@@ -215,7 +250,7 @@ export function routeOnGraph(graph, islandId, fromX, fromZ, toX, toZ) {
     const hub = nodeById(graph, prevId);
     const run = toCarriageway(edgeRun(step.edge, prevId), step.edge.cls);
     if (hub && hub.kind === "circus" && points.length) {
-      pushRun(points, circusArc(hub, points[points.length - 1], run[0]));
+      pushRun(points, circusArc(hub, points[points.length - 1], run[0], 12, headingOf(points)));
     }
     pushRun(points, run);
   }
@@ -225,7 +260,7 @@ export function routeOnGraph(graph, islandId, fromX, fromZ, toX, toZ) {
   const tail = toCarriageway(tailRun, to.edge.cls);
   const hub = nodeById(graph, lastNode);
   if (hub && hub.kind === "circus" && points.length && tail.length) {
-    pushRun(points, circusArc(hub, points[points.length - 1], tail[0]));
+    pushRun(points, circusArc(hub, points[points.length - 1], tail[0], 12, headingOf(points)));
   }
   pushRun(points, tail);
 
