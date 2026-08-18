@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createLandBoard } from "./land.ts";
 import { SOUTH_PORT, SOUTH_TOWNS } from "./southGeom.ts";
 import { carriagewayWidthM, roadClassSpec } from "../public/harbour/roadclass.js";
-import { drivableEdges, projectOnEdge, routeOnGraph } from "../public/harbour/roadnet.js";
+import { drivableEdges, projectOnEdge, routeOnGraph, junctionPad, trimPolylineForPads } from "../public/harbour/roadnet.js";
 
 function nodeOf(graph: { nodes: { id: string }[] }, id: string) {
   return graph.nodes.find((n) => n.id === id)!;
@@ -152,5 +152,23 @@ describe("road graph", () => {
       }
     }
     expect(hits).toEqual([]);
+  });
+
+  it("stops block-corner ribbons at the plate, so they meet as an L not a plus", () => {
+    const graph = createLandBoard().graph;
+    const sw = graph.nodes.find((n) => n.id === "s-quay-sw");
+    expect(sw).toBeTruthy();
+    const pad = junctionPad(graph, sw);
+    expect(pad?.kind).toBe("corner");
+    expect(pad!.side).toBeGreaterThan(6.6);
+    const arms = graph.edges.filter((e) => e.cls !== "track" && (e.a === sw!.id || e.b === sw!.id));
+    expect(arms.length).toBeGreaterThanOrEqual(3);
+    for (const edge of arms) {
+      const trimmed = trimPolylineForPads(edge.points, graph, edge);
+      const orig = edge.a === sw!.id ? edge.points[0]! : edge.points[edge.points.length - 1]!;
+      const end = edge.a === sw!.id ? trimmed[0]! : trimmed[trimmed.length - 1]!;
+      expect(Math.hypot(orig.x - sw!.x, orig.z - sw!.z)).toBeLessThan(0.01);
+      expect(Math.hypot(end.x - sw!.x, end.z - sw!.z)).toBeGreaterThan(2);
+    }
   });
 });
