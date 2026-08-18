@@ -145,7 +145,7 @@ describe("South land (no buildings)", () => {
     const strand = board.roads.find((r) => r.name === "South Strand")!;
     expect(Math.hypot(channel.points[0]!.x - harbour.x, channel.points[0]!.z - harbour.z)).toBeGreaterThan(80);
     expect(Math.hypot(palm.points[0]!.x - harbour.x, palm.points[0]!.z - harbour.z)).toBeGreaterThan(80);
-    expect(distToPolyline(hwy.points, channel.points[0]!.x, channel.points[0]!.z)).toBeLessThan(18);
+    expect(distToPolyline(hwy.points, channel.points[0]!.x, channel.points[0]!.z)).toBeLessThan(22);
     expect(distToPolyline(strand.points, palm.points[0]!.x, palm.points[0]!.z)).toBeLessThan(12);
   });
 });

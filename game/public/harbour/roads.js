@@ -148,10 +148,12 @@ function drawRibbon(scene, spec, road, heightAt, widthM, color, roadKind, matOpt
   scene.add(m);
 }
 
+export const HIGHWAY_LANE_OFFSET_M = 8;
+export const HIGHWAY_MEDIAN_M = 8;
 /** Dual-carriageway stations inside this radius of a circus are omitted. */
-export const HIGHWAY_RAB_OMIT_M = 28;
+export const HIGHWAY_RAB_OMIT_M = 34;
 /** Skip ribbon faces across a gap this wide — must be < 2 × omit so the highway cannot chord the island. */
-export const HIGHWAY_RAB_SKIP_M = 32;
+export const HIGHWAY_RAB_SKIP_M = 40;
 /** Stone disc inside the circulatory ring. */
 export const RAB_ISLAND_R_M = 16.6;
 
@@ -262,15 +264,34 @@ function drawSidewalks(scene, spec, road, heightAt, centres, paved) {
 function drawHighway(scene, spec, road, heightAt, centres) {
   const pts = omitNearCentres(ribbonStations(road.points), centres, HIGHWAY_RAB_OMIT_M);
   if (pts.length < 2) return;
-  const lane = 5.6;
-  drawRibbon(scene, spec, { ...road, points: offsetPolyline(pts, -lane) }, heightAt, PAVED_WIDTH_M, ASPHALT, "paved", {}, HIGHWAY_RAB_SKIP_M);
-  drawRibbon(scene, spec, { ...road, points: offsetPolyline(pts, lane) }, heightAt, PAVED_WIDTH_M, ASPHALT, "paved", {}, HIGHWAY_RAB_SKIP_M);
+  drawRibbon(
+    scene,
+    spec,
+    { ...road, points: offsetPolyline(pts, -HIGHWAY_LANE_OFFSET_M) },
+    heightAt,
+    PAVED_WIDTH_M,
+    ASPHALT,
+    "paved",
+    {},
+    HIGHWAY_RAB_SKIP_M,
+  );
+  drawRibbon(
+    scene,
+    spec,
+    { ...road, points: offsetPolyline(pts, HIGHWAY_LANE_OFFSET_M) },
+    heightAt,
+    PAVED_WIDTH_M,
+    ASPHALT,
+    "paved",
+    {},
+    HIGHWAY_RAB_SKIP_M,
+  );
   drawRibbon(
     scene,
     spec,
     { ...road, name: (road.name || "Island Hwy") + " median", points: pts },
     heightAt,
-    3.2,
+    HIGHWAY_MEDIAN_M,
     STONE,
     "median",
     {},
@@ -278,23 +299,47 @@ function drawHighway(scene, spec, road, heightAt, centres) {
   );
 }
 
-function drawRoundaboutIsland(scene, spec, road, heightAt) {
+function rabCenter(road) {
   const pts = road.points || [];
-  if (pts.length < 8) return;
   let x = 0;
   let z = 0;
   for (const p of pts) {
     x += p.x;
     z += p.z;
   }
-  x /= pts.length;
-  z /= pts.length;
+  return { x: x / pts.length, z: z / pts.length };
+}
+
+/** Flat asphalt annulus + stone island. Not a mitered polyline (those stacked at the circus). */
+function drawRoundabout(scene, spec, road, heightAt) {
+  const pts = road.points || [];
+  if (pts.length < 8) return;
+  const { x, z } = rabCenter(road);
   const y = heightAt(spec, x, z);
+  const inner = RAB_ISLAND_R_M;
+  const outer = inner + PAVED_WIDTH_M + 1.8;
+  const ring = new THREE.Mesh(
+    new THREE.RingGeometry(inner, outer, 32),
+    new THREE.MeshLambertMaterial({ color: ASPHALT }),
+  );
+  ring.rotation.x = -Math.PI / 2;
+  ring.position.set(x, y + 0.12, z);
+  ring.castShadow = false;
+  ring.receiveShadow = true;
+  ring.userData.kind = "road";
+  ring.userData.roadKind = "paved";
+  ring.userData.island = road.island;
+  ring.userData.roadName = road.name;
+  ring.userData.label = road.name;
+  ring.userData.widthM = outer - inner;
+  ring.userData.mode = "PAPER";
+  scene.add(ring);
+
   const disc = new THREE.Mesh(
-    new THREE.CylinderGeometry(RAB_ISLAND_R_M, RAB_ISLAND_R_M, 0.32, 24),
+    new THREE.CylinderGeometry(inner - 0.25, inner - 0.25, 0.36, 24),
     new THREE.MeshLambertMaterial({ color: STONE }),
   );
-  disc.position.set(x, y + 0.16, z);
+  disc.position.set(x, y + 0.18, z);
   disc.castShadow = false;
   disc.receiveShadow = true;
   disc.userData.kind = "road";
@@ -430,10 +475,11 @@ export function makeRoads(map, helpers) {
     const spec = specOf(road.island);
     if (road.kind === "paved" && road.lanes === 4) {
       drawHighway(scene, spec, road, heightAt, centres);
+    } else if (road.kind === "paved" && road.roundabout) {
+      drawRoundabout(scene, spec, road, heightAt);
     } else if (road.kind === "paved") {
       drawPaved(scene, spec, road, heightAt, paved);
-      if (road.roundabout) drawRoundaboutIsland(scene, spec, road, heightAt);
-      else drawSidewalks(scene, spec, road, heightAt, centres, paved);
+      drawSidewalks(scene, spec, road, heightAt, centres, paved);
     } else {
       drawDirt(scene, spec, road, heightAt);
     }
