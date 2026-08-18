@@ -10,9 +10,8 @@ Spawn: South port. Cash is $.
 ```
 
 ## UI
-- Top left: **Two Harbors**, cash, $/min, warehouse fee when occupied
-- Dock: **Harbour** opens one dusk-glass ledger (chapters on the left)
-- Chapters: Market, Warehouse, Carts, Map, You. Back drills out. Close puts you on the quay.
+- Corners stay: cash top-left, viewers top-right, Inv/Wh/Mkt/Staff on the left, travel dock at the bottom
+- Click a launcher → **one compact submenu** next to it. Back drills in (Market → aisle → buy). Click again to close.
 - Cart sticker: type a price. Next to it: **$5.00 is today's price**
 - Market default: **Store in warehouse**. Or **Deliver to me**
 

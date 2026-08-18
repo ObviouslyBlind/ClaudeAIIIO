@@ -3,20 +3,22 @@ import { describe, expect, it } from "vitest";
 
 const html = readFileSync(new URL("../public/harbour/index.html", import.meta.url), "utf8");
 const chrome = readFileSync(new URL("../public/harbour/chrome.js", import.meta.url), "utf8");
+const css = readFileSync(new URL("../public/harbour/chrome.css", import.meta.url), "utf8");
 
 describe("harbour chrome HUD", () => {
-  it("ships one dusk-glass ledger, not a stack of floating panels", () => {
+  it("keeps launchers in the corners and dock, with one compact submenu", () => {
     expect(html).toContain('class="game-name"');
     expect(html).toContain("Two Harbors");
-    expect(html).toContain('id="harbour-sheet"');
-    expect(html).toContain('id="btn-harbour"');
-    expect(html).toContain('data-chapter="market"');
-    expect(html).toContain('data-chapter="warehouse"');
-    expect(html).toContain('data-chapter="carts"');
-    expect(html).toContain('data-chapter="map"');
+    expect(html).toContain('class="chrome-tl"');
+    expect(html).toContain('class="chrome-tr"');
+    expect(html).toContain('class="chrome-left"');
+    expect(html).toContain('id="viewers"');
     expect(html).toContain('data-overlay="lots"');
     expect(html).toContain('data-overlay="foot"');
-    expect(html).toContain('id="viewers"');
+    expect(html).toContain('data-panel="inventory"');
+    expect(html).toContain('data-panel="warehouse"');
+    expect(html).toContain('data-panel="market"');
+    expect(html).toContain('data-panel="employees"');
     expect(html).toContain('id="place-hint"');
     expect(html).toContain('id="place-cancel"');
     expect(html).toContain('id="taxi-map-exit"');
@@ -25,10 +27,16 @@ describe("harbour chrome HUD", () => {
     expect(html).toContain('id="buy-ask"');
     expect(html).toContain('id="lot-tags"');
     expect(html).toContain('id="storage-fee"');
+    expect(html).not.toContain("harbour-sheet");
+    expect(html).not.toContain("btn-harbour");
     expect(html).not.toContain("first loop");
-    expect(html).not.toContain("float-panel");
     expect(html).not.toContain("Tutorials");
-    expect(html).not.toContain("script-coach");
+    expect(css).toContain(".chrome-tl");
+    expect(css).toContain(".chrome-tr");
+    expect(css).toContain(".chrome-left");
+    expect(css).toContain("pos-inv");
+    expect(css).toMatch(/width:\s*min\(280px/);
+    expect(css).toMatch(/max-height:\s*min\(42vh/);
   });
 
   it("lease card and buy-ask ask before a lot is bought", () => {
@@ -53,11 +61,12 @@ describe("harbour chrome HUD", () => {
     expect(chrome).not.toContain("Run it myself");
   });
 
-  it("walks the marketplace aisle → sku → warehouse or van, and chirps on buy", () => {
+  it("nests market aisle → sku → warehouse or van inside one submenu", () => {
     expect(chrome).toContain("data-aisle");
     expect(chrome).toContain("Deliver to");
     expect(chrome).toContain("playPaperBuy");
     expect(chrome).toContain("marketplace");
+    expect(chrome).toContain("← Marketplace");
     expect(chrome).not.toContain("first loop");
   });
 });
