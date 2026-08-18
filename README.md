@@ -1,6 +1,6 @@
 # Two Harbors
 
-Two Harbors is a PAPER / SIMULATED harbour MMO shard. No wallet.
+PAPER / SIMULATED harbour MMO shard. No wallet. Not a trading bot.
 
 One shard. The sim owns cash, plots, staff, and prices. The browser is a camera. Live sockets and Postgres are not in yet.
 
@@ -14,4 +14,4 @@ npm run play:laptop   # pasteable https link
 
 South spawn. **World:** left-click walks. **Lots** chip shows outlines — click it again to hide. $ bar opens a buy ask. Taxi on paved. Ferry $15. Restarting play wipes.
 
-Spec: [game/PLAN.md](game/PLAN.md) · Loop: [game/reports/FIRST_LOOP.md](game/reports/FIRST_LOOP.md) · Kernel: [game/FOUNDATION.md](game/FOUNDATION.md)
+Spec: [game/PLAN.md](game/PLAN.md) · Loop: [game/reports/FIRST_LOOP.md](game/reports/FIRST_LOOP.md) · Kernel: [game/FOUNDATION.md](game/FOUNDATION.md) · Live status: [game/reports/HANDOVER.md](game/reports/HANDOVER.md)
