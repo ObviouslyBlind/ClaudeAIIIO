@@ -829,65 +829,61 @@ const QUAY_STONE = 0x9a8a72;
 const QUAY_DARK = 0x7a6e5a;
 const QUAY_CAP = 0xb0a48c;
 
-/** Stone seawall from the water up to grade. Terrain is the deck, not a slab on grass. */
+/** Stone seawall from the water up past grade. Visible from spawn looking inland. */
 function makeSouthQuay(spec) {
   const { x, z } = spec.port;
   const deckY = SOUTH_GRADE_Y;
-  const waterY = 0.02;
-  const wallH = deckY - waterY + 0.42;
+  const waterY = -0.2;
+  const wallH = 3.6;
   const wallCy = waterY + wallH / 2;
   const toward = -1;
   const BLOCK = 8;
+  const faceZ = z + toward * 7.8;
 
-  function wallBlock(w, d, bx, bz, markPort) {
-    const face = box(w, wallH, d, QUAY_DARK, bx, wallCy, bz, false);
+  function cap(w, d, bx, by, bz, markPort) {
+    const m = box(w, 0.28, d, QUAY_CAP, bx, by, bz, false);
+    m.userData.kind = "port";
+    if (markPort) ports.push(m);
+    return m;
+  }
+
+  // Channel face: tall parapet, not a pancake on the grass.
+  for (let i = 0; i < 9; i++) {
+    const bx = x - 24 + i * BLOCK;
+    const face = box(BLOCK * 0.96, wallH, 1.7, QUAY_DARK, bx, wallCy, faceZ, false);
     face.userData.kind = "port";
-    const cap = box(w + 0.35, 0.22, d + 0.4, QUAY_CAP, bx, deckY + 0.12, bz, false);
-    cap.userData.kind = "port";
-    if (markPort) ports.push(cap);
-    return cap;
+    cap(BLOCK * 0.96, 2.2, bx, deckY + 0.85, faceZ + toward * 0.15, i === 4 || i === 5);
   }
-
-  // Channel face (−Z), modular coping.
-  for (let i = 0; i < 8; i++) {
-    const bx = x - 20 + i * BLOCK;
-    wallBlock(BLOCK * 0.94, 1.45, bx, z + toward * 7.4, i === 3 || i === 4);
+  // West return — in the spawn camera's left frame (camera sits west, looks east).
+  for (let i = 0; i < 5; i++) {
+    const pz = z + toward * (10 + i * BLOCK);
+    const face = box(1.7, wallH, BLOCK * 0.96, QUAY_DARK, x - 28, wallCy, pz, false);
+    face.userData.kind = "port";
+    cap(2.2, BLOCK * 0.96, x - 28, deckY + 0.85, pz, i === 1);
   }
-  // West return into the cove.
-  for (let i = 0; i < 4; i++) {
-    const pz = z + toward * (12 + i * BLOCK);
-    wallBlock(1.45, BLOCK * 0.94, x - 24, pz, i === 1);
-  }
-  // East wrap: wall steps down into sand, not a pancake on the grass.
-  for (let i = 0; i < 6; i++) {
-    const bx = x + 44 + i * BLOCK;
-    const drop = i * 0.12;
-    const h = Math.max(0.7, wallH - drop);
+  // East wrap into sand: stepped wall, still has height.
+  for (let i = 0; i < 7; i++) {
+    const bx = x + 48 + i * BLOCK;
+    const drop = i * 0.22;
+    const h = Math.max(1.1, wallH - drop * 1.4);
     const cy = waterY + h / 2;
-    const face = box(BLOCK * 0.94, h, 1.2, i < 3 ? QUAY_DARK : QUAY_STONE, bx, cy, z + toward * 4.2 + i * 2.1, false);
+    const face = box(BLOCK * 0.94, h, 1.35, i < 3 ? QUAY_DARK : QUAY_STONE, bx, cy, z + toward * 4.4 + i * 2.2, false);
     face.userData.kind = "port";
-    const cap = box(BLOCK * 0.94, 0.18, 1.55, QUAY_CAP, bx, deckY + 0.08 - drop * 0.4, z + toward * 3.8 + i * 2.1, false);
-    cap.userData.kind = "port";
-    if (i < 3) ports.push(cap);
+    cap(BLOCK * 0.94, 1.7, bx, deckY + 0.7 - drop * 0.35, z + toward * 4 + i * 2.2, i < 2);
   }
-  // Finger into the cove — walkable coping, piles in the water.
-  const finger = box(6.2, 0.28, 18, QUAY_CAP, x - 4, deckY + 0.14, z + toward * 20);
+  const finger = box(6.4, 0.32, 20, QUAY_CAP, x - 6, deckY + 0.22, z + toward * 22);
   finger.userData.kind = "port";
   ports.push(finger);
-  for (let i = 0; i < 5; i++) {
-    const pz = z + toward * (12 + i * 3.4);
-    box(0.42, 2.6, 0.42, QUAY_DARK, x - 6.6, waterY + 0.9, pz, false);
-    box(0.42, 2.6, 0.42, QUAY_DARK, x - 1.4, waterY + 0.9, pz, false);
+  for (let i = 0; i < 6; i++) {
+    const pz = z + toward * (12 + i * 3.6);
+    box(0.48, 3.2, 0.48, QUAY_DARK, x - 8.4, waterY + 1.2, pz, false);
+    box(0.48, 3.2, 0.48, QUAY_DARK, x - 3.6, waterY + 1.2, pz, false);
   }
-  for (let i = 0; i < 9; i++) {
-    const bx = x - 20 + i * 7.4;
-    const bollard = box(0.42, 0.78, 0.42, QUAY_DARK, bx, deckY + 0.5, z + toward * 6.6, false);
+  for (let i = 0; i < 10; i++) {
+    const bx = x - 22 + i * 7.2;
+    const bollard = box(0.46, 1.05, 0.46, QUAY_DARK, bx, deckY + 0.95, z + toward * 6.4, false);
     bollard.userData.kind = "port";
-    box(0.55, 0.12, 0.55, 0x3d2a1c, bx, deckY + 0.92, z + toward * 6.6, false);
-  }
-  for (let i = 0; i < 5; i++) {
-    const bx = x + 44 + i * 8;
-    box(0.38, 0.62, 0.38, QUAY_DARK, bx, deckY + 0.4, z + 0.8, false);
+    box(0.6, 0.14, 0.6, 0x3d2a1c, bx, deckY + 1.5, z + toward * 6.4, false);
   }
 }
 
@@ -2031,6 +2027,12 @@ btnLease.addEventListener("click", () => {
   if (p) askToBuy(p);
 });
 btnDevelop.addEventListener("click", openCatalog);
+if (btnTaxi) {
+  btnTaxi.addEventListener("click", async () => {
+    const t = await ensureTaxi();
+    if (t && typeof t.call === "function") t.call();
+  });
+}
 if (btnEnter) {
   btnEnter.addEventListener("click", () => {
     if (!selected || !map) return;

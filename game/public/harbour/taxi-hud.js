@@ -98,9 +98,7 @@ function ensureTaxiEta() {
   el.className = "taxi-eta";
   el.hidden = true;
   el.setAttribute("aria-live", "polite");
-  const chrome = document.getElementById("chrome");
-  if (chrome) chrome.appendChild(el);
-  else if (document.body) document.body.appendChild(el);
+  if (document.body) document.body.appendChild(el);
   else return null;
   return el;
 }
@@ -114,6 +112,8 @@ export function mountTaxiEtaChip(opts = {}) {
       const text = label ? String(label) : "";
       if (el.textContent !== text) el.textContent = text;
       el.hidden = !text;
+      if (el.classList && el.classList.toggle) el.classList.toggle("is-on", Boolean(text));
+      if (el.style) el.style.display = text ? "block" : "none";
     },
   };
 }

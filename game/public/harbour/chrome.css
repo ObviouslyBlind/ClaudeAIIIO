@@ -242,23 +242,29 @@ nav.dock.travel-dock {
 }
 
 .taxi-eta {
-  position: absolute;
-  right: max(12px, env(safe-area-inset-right));
-  bottom: calc(88px + env(safe-area-inset-bottom));
+  position: fixed;
+  right: max(14px, env(safe-area-inset-right));
+  bottom: calc(92px + env(safe-area-inset-bottom));
+  z-index: 24;
   margin: 0;
-  padding: 8px 14px 9px;
+  padding: 9px 16px 10px;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: linear-gradient(180deg, #162428 0%, var(--hull) 100%);
   color: var(--brass-hi);
   font-family: "Red Hat Text", "Segoe UI", system-ui, sans-serif;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   font-variant-numeric: tabular-nums;
   box-shadow: var(--shadow), var(--inset);
   pointer-events: none;
+  display: none;
+}
+.taxi-eta.is-on,
+.taxi-eta:not([hidden]) {
+  display: block;
 }
 .taxi-eta[hidden] {
   display: none !important;
