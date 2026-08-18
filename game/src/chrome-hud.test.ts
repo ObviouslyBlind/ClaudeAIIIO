@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 const html = readFileSync(new URL("../public/harbour/index.html", import.meta.url), "utf8");
 const chrome = readFileSync(new URL("../public/harbour/chrome.js", import.meta.url), "utf8");
 const css = readFileSync(new URL("../public/harbour/chrome.css", import.meta.url), "utf8");
+const pageCss = readFileSync(new URL("../public/harbour/style.css", import.meta.url), "utf8");
 const fonts = readFileSync(new URL("../public/harbour/chrome-fonts.css", import.meta.url), "utf8");
 
 describe("harbour chrome HUD", () => {
@@ -16,6 +17,15 @@ describe("harbour chrome HUD", () => {
     expect(html).toContain('id="viewers"');
     expect(html).toContain('data-overlay="lots"');
     expect(html).toContain('data-overlay="foot"');
+    expect(html).toContain('data-panel="view"');
+    expect(html).toContain('id="panel-view"');
+    expect(html).toContain('data-panel="account"');
+    expect(html).toContain("You");
+    const tr = html.slice(html.indexOf('class="chrome-tr"'), html.indexOf('id="panel-view"'));
+    expect(tr).toContain('data-overlay="lots"');
+    expect(tr).not.toContain("Foot traffic");
+    expect(tr).not.toContain("Leaderboard");
+    expect(chrome).toContain("#panel-view");
     expect(html).toContain('data-panel="inventory"');
     expect(html).toContain('data-panel="warehouse"');
     expect(html).toContain('data-panel="market"');
@@ -41,6 +51,11 @@ describe("harbour chrome HUD", () => {
     expect(css).toContain("pos-inv");
     expect(css).toMatch(/width:\s*min\(280px/);
     expect(css).toMatch(/max-height:\s*min\(42vh/);
+    expect(css).toContain("overflow: hidden");
+    expect(css).toContain("flex-wrap: nowrap");
+    expect(pageCss).toContain("100dvh");
+    expect(pageCss).toContain("overscroll-behavior: none");
+    expect(pageCss).toContain("position: fixed");
     expect(css).toContain("Big Shoulders Display");
     expect(css).toContain("Red Hat Text");
     expect(css).toContain('font-weight: 700');

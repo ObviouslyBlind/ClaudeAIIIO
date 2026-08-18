@@ -465,6 +465,7 @@ export function mountChrome(opts) {
   root.querySelectorAll("[data-overlay]").forEach((btn) => {
     btn.addEventListener("click", () => {
       setOverlay(toggleViewer(overlay, btn.getAttribute("data-overlay")));
+      if (btn.closest("#panel-view")) closePanels();
     });
   });
 

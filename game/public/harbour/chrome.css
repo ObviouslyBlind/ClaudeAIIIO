@@ -33,6 +33,7 @@ html, body {
   position: absolute;
   inset: 0;
   z-index: 8;
+  overflow: hidden;
   pointer-events: none;
   font-family: "Red Hat Text", "Segoe UI", system-ui, sans-serif;
   color: var(--ink);
@@ -63,9 +64,9 @@ html, body {
 
 .chrome-tl {
   position: absolute;
-  left: 14px;
-  top: 12px;
-  max-width: 42%;
+  left: max(10px, env(safe-area-inset-left));
+  top: max(8px, env(safe-area-inset-top));
+  max-width: min(46%, 280px);
 }
 .game-name {
   margin: 0;
@@ -73,7 +74,7 @@ html, body {
   align-items: center;
   gap: 8px;
   font-family: "Big Shoulders Display", "Arial Narrow", sans-serif;
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -87,8 +88,8 @@ html, body {
   color: var(--btn);
 }
 .chrome-tl .meta {
-  margin: 6px 0 0;
-  font-size: 11px;
+  margin: 4px 0 0;
+  font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -97,9 +98,9 @@ html, body {
 .cash-plate {
   display: inline-flex;
   align-items: baseline;
-  gap: 10px;
-  margin: 8px 0 0;
-  padding: 7px 12px 8px;
+  gap: 8px;
+  margin: 6px 0 0;
+  padding: 5px 10px 6px;
   background: linear-gradient(180deg, #162428 0%, var(--hull) 100%);
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -107,7 +108,7 @@ html, body {
 }
 #balance {
   margin: 0;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;
@@ -124,12 +125,13 @@ html, body {
 
 .chrome-tr {
   position: absolute;
-  right: 12px;
-  top: 12px;
+  right: max(10px, env(safe-area-inset-right));
+  top: max(8px, env(safe-area-inset-top));
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 8px;
+  gap: 6px;
+  max-width: min(52vw, 280px);
 }
 .chrome-row {
   display: flex;
@@ -156,25 +158,25 @@ html, body {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 4px 10px rgba(0, 0, 0, 0.28);
 }
 .viewer-hint {
-  margin: 0;
-  max-width: 280px;
-  text-align: right;
-  font-size: 11px;
-  line-height: 1.4;
-  color: var(--muted);
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
 }
 
 .chrome-left {
   position: absolute;
-  left: 12px;
-  top: 108px;
+  left: max(10px, env(safe-area-inset-left));
+  top: 76px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 .rail-btn {
-  width: 48px;
-  height: 52px;
+  width: 44px;
+  height: 44px;
   padding: 6px 4px 5px;
   border: 1px solid var(--line);
   border-radius: 14px;
@@ -214,10 +216,11 @@ nav.dock.travel-dock {
   left: 50%;
   right: auto;
   width: auto;
+  max-width: calc(100vw - 16px);
   flex-wrap: nowrap;
   transform: translateX(-50%);
   gap: 6px;
-  padding: 6px 8px;
+  padding: 5px 7px;
   background: linear-gradient(180deg, #162428 0%, var(--hull) 100%);
   border: 1px solid var(--line);
   border-radius: 16px;
@@ -225,8 +228,9 @@ nav.dock.travel-dock {
   font-family: "Red Hat Text", "Segoe UI", system-ui, sans-serif;
 }
 .travel-dock button {
-  min-height: 40px;
-  min-width: 76px;
+  min-height: 36px;
+  min-width: 64px;
+  flex: 0 0 auto;
   border: 0;
   border-radius: 10px;
   background: linear-gradient(180deg, var(--brass-hi), var(--btn));
@@ -302,11 +306,11 @@ nav.dock.travel-dock {
   font-weight: 500;
   color: var(--muted);
 }
-.float-panel.pos-inv { left: 68px; top: 108px; }
-.float-panel.pos-warehouse { left: 68px; top: 168px; }
-.float-panel.pos-market { left: 68px; top: 228px; }
-.float-panel.pos-staff { left: 68px; top: 288px; }
-.float-panel.pos-tr { right: 12px; top: 92px; }
+.float-panel.pos-inv { left: 62px; top: 76px; }
+.float-panel.pos-warehouse { left: 62px; top: 128px; }
+.float-panel.pos-market { left: 62px; top: 180px; }
+.float-panel.pos-staff { left: 62px; top: 232px; }
+.float-panel.pos-tr { right: max(10px, env(safe-area-inset-right)); top: 52px; }
 
 .whisper {
   margin: 0 0 8px;
@@ -850,6 +854,24 @@ nav.dock.travel-dock {
 .ferry-pass button:focus-visible {
   outline: 2px solid var(--green);
   outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+  .game-title,
+  .chrome-tl .meta { display: none; }
+  .chrome-tl { max-width: 42%; }
+  .chrome-left { top: 62px; }
+  .rail-btn span { display: none; }
+  .rail-btn {
+    width: 44px;
+    height: 44px;
+    padding: 8px;
+    border-radius: 12px;
+  }
+  .float-panel.pos-inv,
+  .float-panel.pos-warehouse,
+  .float-panel.pos-market,
+  .float-panel.pos-staff { top: 62px; left: 56px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

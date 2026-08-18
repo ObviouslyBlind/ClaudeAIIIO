@@ -11,7 +11,7 @@ import {
 import { canEnter, objectWithKind, wrapHarbourWorld } from "./harbour-world.js";
 import { createPlayCamera } from "./camera.js";
 import { createFerryTicket } from "./ferry-ticket.js";
-import { makeWater } from "./water.js";
+import { makeWater, tickHarbourWater } from "./water.js";
 import { makeSky } from "./sky.js";
 import { CAM, LOOK } from "./first-frame.js";
 import { dressPlayer } from "./player.js";
@@ -1655,6 +1655,7 @@ function tick(dt) {
     }
   }
   if (ferryMesh && tickFerry) tickFerry(ferryMesh, dt);
+  if (scene.userData.harbourWater) tickHarbourWater(scene.userData.harbourWater, clock.elapsedTime);
   if (parcelMap) parcelMap.tick(player.position, dt, viewerMode());
   if (lotTags) {
     lotTags.tick(

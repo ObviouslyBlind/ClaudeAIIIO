@@ -92,6 +92,36 @@ function channelStrip() {
   return mesh;
 }
 
+function stashRest(mesh) {
+  const arr = mesh.geometry.attributes.position.array;
+  mesh.userData.waterRest = new Float32Array(arr);
+}
+
+/**
+ * Cheap quay chop. Only the basin + channel (a few hundred verts), never the
+ * 80 km ocean plane. Local +Z is world height after the plane rotation.
+ */
+export function tickHarbourWater(meshes, t) {
+  if (!meshes || !meshes.length) return;
+  const time = Number(t) || 0;
+  for (const mesh of meshes) {
+    const rest = mesh.userData && mesh.userData.waterRest;
+    const pos = mesh.geometry && mesh.geometry.attributes && mesh.geometry.attributes.position;
+    if (!rest || !pos) continue;
+    const arr = pos.array;
+    for (let i = 0; i < pos.count; i++) {
+      const x = rest[i * 3];
+      const y = rest[i * 3 + 1];
+      const z0 = rest[i * 3 + 2];
+      arr[i * 3 + 2] =
+        z0 +
+        0.07 * Math.sin(x * 0.18 + time * 1.35) +
+        0.045 * Math.sin(y * 0.14 - time * 1.05);
+    }
+    pos.needsUpdate = true;
+  }
+}
+
 export function makeWater(scene) {
   const water = addWaterMesh(
     new THREE.PlaneGeometry(80000, 80000),
@@ -99,9 +129,17 @@ export function makeWater(scene) {
     0,
   );
   scene.add(water);
-  scene.add(channelStrip());
+  const live = [];
+  function addLive(mesh) {
+    stashRest(mesh);
+    live.push(mesh);
+    scene.add(mesh);
+    return mesh;
+  }
+  addLive(channelStrip());
   // Centre the pocket on HOME_Z so the cream hull sits on the deep lane.
-  scene.add(harbourBasin(-6835));
-  scene.add(harbourBasin(6835));
+  addLive(harbourBasin(-6835));
+  addLive(harbourBasin(6835));
+  scene.userData.harbourWater = live;
   return water;
 }
