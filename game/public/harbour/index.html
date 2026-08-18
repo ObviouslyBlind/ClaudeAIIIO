@@ -4,6 +4,12 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Two Harbors — harbour</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,600;7..72,700&family=Sora:wght@400;500;600;700&display=swap"
+    />
     <link rel="stylesheet" href="/harbour/style.css" />
     <link rel="stylesheet" href="/harbour/chrome.css" />
     <style>
@@ -18,6 +24,14 @@
     </style>
   </head>
   <body>
+    <!--
+      THESIS: One harbour ledger, not a stack of floating windows.
+      OWN-WORLD: Dusk glass, brass spine, sea-green select; Literata chapters, Sora pages.
+      STORY: Cash stays on the quay. Everything else is a chapter you drill into.
+      FIRST VIEWPORT: Cash top-left. Harbour button on the dock. Sheet slides up: chapters | page.
+      FORM: Mix of dusk ferry (A) and harbour ledger (C). Seed: operator lock A+C.
+      FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
+    -->
     <header class="bar legacy-hud">
       <p class="badge" id="boot-badge">BASE · 3D HARBOUR · PAPER · SIMULATED</p>
       <h1 id="place">South port</h1>
@@ -50,35 +64,37 @@
       <div class="chrome-tl">
         <h1 class="game-name">Two Harbors</h1>
         <p class="meta" id="online">1 online</p>
-        <p><span id="balance">$1,000.00</span> <span id="income" class="is-zero">+$0.00/min</span></p>
+        <p class="cash-line">
+          <span id="balance">$1,000.00</span>
+          <span id="income" class="is-zero">+$0.00/min</span>
+        </p>
         <p class="whisper" id="storage-fee" hidden>South warehouse $5.00/day</p>
       </div>
-      <div class="chrome-tr">
-        <div class="chrome-row">
-          <button type="button" class="chip" data-panel="leaderboard">Leaderboard</button>
-          <button type="button" class="chip" data-panel="account">Account</button>
-        </div>
-        <div class="chrome-row" id="viewers">
-          <button type="button" class="chip" data-overlay="world" title="Walk. Land does not steal taps.">World</button>
-          <button type="button" class="chip" data-overlay="lots" title="Show or hide lot outlines. Click again to hide.">Lots</button>
-          <button type="button" class="chip" data-overlay="foot" title="High / Moderate / Low on each road.">Foot traffic</button>
-          <button type="button" class="chip" data-overlay="logistics" title="Vans and roadside crates.">Logistics</button>
-          <button type="button" class="chip" data-overlay="minerals" title="Ore catalog is in. Overlay paint comes next.">Minerals</button>
-        </div>
-        <p class="viewer-hint" id="viewer-hint">World: left-click walks. Lots chip shows outlines and $ bars.</p>
+      <p class="viewer-hint" id="viewer-hint" hidden></p>
+      <div id="viewers" hidden>
+        <button type="button" data-overlay="world">World</button>
+        <button type="button" data-overlay="lots">Lots</button>
+        <button type="button" data-overlay="foot">Foot traffic</button>
+        <button type="button" data-overlay="logistics">Logistics</button>
+        <button type="button" data-overlay="minerals">Minerals</button>
       </div>
-      <div class="chrome-left">
-        <button type="button" class="rail-btn" data-panel="inventory">Inv</button>
-        <button type="button" class="rail-btn" data-panel="warehouse">Wh</button>
-        <button type="button" class="rail-btn" data-panel="market">Mkt</button>
-        <button type="button" class="rail-btn" data-panel="employees">Staff</button>
+      <div id="harbour-sheet" hidden>
+        <aside class="ledger-spine">
+          <p class="spine-title">Harbour</p>
+          <button type="button" class="chapter" data-chapter="market">Market</button>
+          <button type="button" class="chapter" data-chapter="warehouse">Warehouse</button>
+          <button type="button" class="chapter" data-chapter="carts">Carts</button>
+          <button type="button" class="chapter" data-chapter="map">Map</button>
+          <button type="button" class="chapter" data-chapter="you">You</button>
+        </aside>
+        <div class="ledger-page">
+          <div class="page-bar">
+            <button type="button" class="text-btn" id="sheet-back">Back</button>
+            <button type="button" class="text-btn" id="sheet-close">Close</button>
+          </div>
+          <div id="sheet-body"></div>
+        </div>
       </div>
-      <div id="panel-inventory" class="float-panel pos-inv" hidden><div id="inv-body"></div></div>
-      <div id="panel-warehouse" class="float-panel pos-warehouse" hidden><div id="warehouse-body"></div></div>
-      <div id="panel-market" class="float-panel pos-market" hidden><div id="market-body"></div></div>
-      <div id="panel-employees" class="float-panel pos-staff" hidden><div id="staff-body"></div></div>
-      <div id="panel-leaderboard" class="float-panel pos-tr" hidden><div id="board-body"></div></div>
-      <div id="panel-account" class="float-panel pos-tr" hidden><div id="acct-body"></div></div>
       <div id="land-card" hidden></div>
       <div id="buy-ask" hidden></div>
       <div id="stand-menu" hidden></div>
@@ -113,6 +129,7 @@
       </div>
     </div>
     <nav class="dock travel-dock">
+      <button type="button" id="btn-harbour">Harbour</button>
       <button type="button" id="btn-lease" disabled>Lease</button>
       <button type="button" id="btn-develop" hidden>Develop</button>
       <button type="button" id="btn-hire" hidden>Hire</button>

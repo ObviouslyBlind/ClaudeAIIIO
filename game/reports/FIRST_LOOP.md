@@ -10,12 +10,11 @@ Spawn: South port. Cash is $.
 ```
 
 ## UI
-- Top left: **Two Harbors**, players online, balance + $/min, warehouse fee when you have stock there
-- Top right: World / Lots / Foot traffic / Logistics / Minerals
-- Left rail: Inv / Warehouse / Market / Staff
-- Panels pin and drag. Keep Staff and Cart open together.
+- Top left: **Two Harbors**, cash, $/min, warehouse fee when occupied
+- Dock: **Harbour** opens one dusk-glass ledger (chapters on the left)
+- Chapters: Market, Warehouse, Carts, Map, You. Back drills out. Close puts you on the quay.
 - Cart sticker: type a price. Next to it: **$5.00 is today's price**
-- Market default: **Store in warehouse**. Or **Deliver to me** (van, 3 minutes, then warehouse)
+- Market default: **Store in warehouse**. Or **Deliver to me**
 
 ## Loop
 1. Buy a lot from a nearby $ bar.
