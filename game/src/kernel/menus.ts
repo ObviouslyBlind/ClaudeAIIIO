@@ -1,15 +1,20 @@
 /**
- * HUD menu stack. Systems nest (inspect → develop → staff → minerals).
+ * HUD menu stack. Play systems nest (Menu → market / cart / pack).
+ * Inspect still nests (plot → develop → staff → minerals).
  * Client renders frames. Server does not own chrome.
  */
 
 export const MENU_IDS = [
   "root",
+  "play",
   "inspect",
   "develop",
   "staff",
   "minerals",
   "inventory",
+  "market",
+  "warehouse",
+  "pack",
 ] as const;
 
 export type MenuId = (typeof MENU_IDS)[number];
@@ -28,11 +33,15 @@ const ROOT: MenuFrame = { id: "root", title: "Harbour" };
 
 export const MENU_TITLES: Record<MenuId, string> = {
   root: "Harbour",
+  play: "Menu",
   inspect: "Plot",
   develop: "Develop",
   staff: "Staff",
   minerals: "Minerals",
-  inventory: "Inventory",
+  inventory: "Cart",
+  market: "Market",
+  warehouse: "Warehouse",
+  pack: "Pack",
 };
 
 export function createMenuStack(): MenuStack {

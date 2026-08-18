@@ -81,4 +81,15 @@ describe("harbour menu stack", () => {
     expect(popMenu(stack).id).toBe("inspect");
     expect(popMenu(stack).id).toBe("root");
   });
+
+  it("nests market under the play menu and pops back", () => {
+    const stack = createMenuStack();
+    pushMenu(stack, { id: "play", title: "Menu" });
+    pushMenu(stack, { id: "market", title: "Market" });
+    pushMenu(stack, { id: "inventory", title: "Cart" });
+    expect(crumbs(stack)).toEqual(["Harbour", "Menu", "Market", "Cart"]);
+    expect(popMenu(stack).id).toBe("market");
+    expect(popMenu(stack).id).toBe("play");
+    expect(popMenu(stack).id).toBe("root");
+  });
 });

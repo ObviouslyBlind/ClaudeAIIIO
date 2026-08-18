@@ -210,16 +210,21 @@ h1 { margin: 2px 0; font-size: 20px; }
 
 #menu-stack {
   position: absolute;
-  left: 8px;
-  right: 8px;
+  left: 50%;
   bottom: calc(64px + env(safe-area-inset-bottom));
-  z-index: 5;
-  background: var(--panel);
-  border-radius: var(--radius);
-  padding: 10px;
+  transform: translateX(-50%);
+  width: min(420px, calc(100vw - 16px));
+  z-index: 22;
+  background: linear-gradient(180deg, #142226 0%, var(--hull) 100%);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px 14px 14px;
   pointer-events: auto;
-  max-height: 52vh;
+  max-height: min(72vh, 640px);
   overflow: auto;
+  box-shadow: var(--shadow), var(--inset);
+  font-family: "Red Hat Text", "Segoe UI", system-ui, sans-serif;
+  color: var(--ink);
 }
 #menu-stack[hidden] { display: none !important; }
 #menu-stack .menu-badge {
@@ -236,7 +241,11 @@ h1 { margin: 2px 0; font-size: 20px; }
 }
 #menu-title {
   margin: 4px 0 8px;
-  font-size: 18px;
+  font-family: "Big Shoulders Display", "Arial Narrow", sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 #menu-body {
   font-size: 13px;
@@ -258,6 +267,48 @@ h1 { margin: 2px 0; font-size: 20px; }
 #menu-body .mineral-row p {
   margin: 0 0 4px;
   color: var(--muted);
+}
+#menu-body h2 {
+  margin: 0 0 8px;
+  font-family: "Big Shoulders Display", "Arial Narrow", sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+#menu-body p { margin: 0 0 8px; font-size: 13px; line-height: 1.4; color: var(--muted); }
+#menu-body .go,
+#menu-body .inv-row button {
+  min-height: 32px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--green);
+  color: #0b1a10;
+  font-weight: 700;
+  cursor: pointer;
+}
+.menu-dir {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.menu-dir button {
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: linear-gradient(180deg, #162428 0%, var(--hull) 100%);
+  color: var(--ink);
+  font-weight: 700;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: var(--inset);
+}
+.menu-dir button:hover {
+  border-color: var(--brass-hi);
+  color: var(--brass-hi);
 }
 .menu-actions {
   display: flex;

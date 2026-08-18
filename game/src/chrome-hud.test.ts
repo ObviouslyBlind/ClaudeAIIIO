@@ -7,14 +7,15 @@ const css = readFileSync(new URL("../public/harbour/chrome.css", import.meta.url
 const pageCss = readFileSync(new URL("../public/harbour/style.css", import.meta.url), "utf8");
 const fonts = readFileSync(new URL("../public/harbour/chrome-fonts.css", import.meta.url), "utf8");
 const pack = readFileSync(new URL("../public/harbour/pack.js", import.meta.url), "utf8");
+const menus = readFileSync(new URL("../public/harbour/menu-stack.js", import.meta.url), "utf8");
+const kernelMenus = readFileSync(new URL("./kernel/menus.ts", import.meta.url), "utf8");
 
 describe("harbour chrome HUD", () => {
-  it("keeps launchers in the corners and dock, with chips not nested View menus", () => {
+  it("keeps walking chrome in the corners and dock, with play systems in the menu stack", () => {
     expect(html).toContain('class="game-name"');
     expect(html).toContain("Two Harbors");
     expect(html).toContain('class="chrome-tl"');
     expect(html).toContain('class="chrome-tr"');
-    expect(html).toContain('class="chrome-left"');
     expect(html).toContain('id="viewers"');
     expect(html).toContain('data-overlay="lots"');
     expect(html).toContain('data-overlay="foot"');
@@ -26,16 +27,22 @@ describe("harbour chrome HUD", () => {
     expect(chips).toContain('data-overlay="lots"');
     expect(chips).toContain('data-overlay="foot"');
     expect(chips).not.toContain("Leaderboard");
-    const tr = html.slice(html.indexOf('class="chrome-tr"'), html.indexOf('class="chrome-left"'));
+    const tr = html.slice(html.indexOf('class="chrome-tr"'), html.indexOf('id="land-card"'));
     expect(tr).toContain('id="panel-account"');
     expect(tr).toContain('id="foot-legend"');
     expect(tr).not.toContain('id="panel-view"');
     expect(css).toContain(".chrome-tr .float-panel");
     expect(css).toContain("flex-wrap: nowrap");
-    expect(html).toContain('data-panel="inventory"');
-    expect(html).toContain('data-panel="warehouse"');
-    expect(html).toContain('data-panel="market"');
-    expect(html).toContain('data-panel="employees"');
+    expect(html).not.toContain('data-panel="inventory"');
+    expect(html).not.toContain('data-panel="warehouse"');
+    expect(html).not.toContain('data-panel="market"');
+    expect(html).not.toContain('data-panel="employees"');
+    expect(html).not.toContain('class="chrome-left"');
+    expect(html).not.toContain('id="cart-line"');
+    expect(html).not.toContain('id="btn-pack"');
+    expect(html).toContain('id="btn-menu"');
+    expect(html).toContain('id="menu-stack"');
+    expect(html).toContain('id="menu-body"');
     expect(html).toContain('id="place-hint"');
     expect(html).toContain('id="place-cancel"');
     expect(html).toContain('id="taxi-map-exit"');
@@ -47,16 +54,13 @@ describe("harbour chrome HUD", () => {
     expect(html).toContain('id="buy-ask"');
     expect(html).toContain('id="lot-tags"');
     expect(html).toContain('id="storage-fee"');
-    expect(html).toContain('id="cart-line"');
     expect(html).toContain('id="pack-shift"');
-    expect(html).toContain('id="btn-pack"');
     expect(html).not.toContain("harbour-sheet");
     expect(html).not.toContain("btn-harbour");
     expect(html).not.toContain("first loop");
     expect(html).not.toContain("Tutorials");
     expect(css).toContain(".chrome-tl");
     expect(css).toContain(".chrome-tr");
-    expect(css).toContain(".chrome-left");
     expect(css).toContain("pos-inv");
     expect(css).toMatch(/max-height:\s*min\(62vh/);
     expect(css).toContain("overflow: hidden");
@@ -73,8 +77,6 @@ describe("harbour chrome HUD", () => {
     expect(html).toContain("chrome-fonts.css");
     expect(fonts).toContain("data:font/woff2");
     expect(html).toContain("cash-plate");
-    expect(html).toContain('aria-label="Inventory"');
-    expect(html).toContain('aria-label="Warehouse"');
   });
 
   it("lease card and buy-ask ask before a lot is bought", () => {
@@ -102,16 +104,31 @@ describe("harbour chrome HUD", () => {
     expect(chrome).not.toContain("Run it myself");
   });
 
-  it("buys kit and goods from one market sheet, stock cart first", () => {
+  it("buys kit and goods from one market sheet inside the menu stack", () => {
     expect(chrome).toContain("Stock cart");
     expect(chrome).toContain("Twelve goods");
     expect(chrome).toContain("/api/buy");
     expect(chrome).toContain("/api/shift/pack");
     expect(chrome).toContain("dest: marketDest === \"cart\" ? \"cart\" : \"warehouse\"");
+    expect(chrome).toContain("openPlayMenu");
+    expect(chrome).toContain("harbourMenus");
+    expect(chrome).toContain('data-menu="market"');
+    expect(chrome).toContain('data-menu="inventory"');
+    expect(chrome).toContain('data-menu="pack"');
+    expect(chrome).toContain("data-pack-start");
     expect(chrome).not.toContain("← Marketplace");
     expect(chrome).not.toContain("data-aisle");
     expect(chrome).not.toContain("first loop");
+    expect(html).toContain('id="btn-menu"');
+    expect(html).not.toContain('id="btn-pack"');
+    expect(html).not.toContain('id="cart-line"');
     expect(pack).toContain("PACK_SECONDS");
     expect(pack).toContain("pack-good");
+    expect(menus).toContain("play:");
+    expect(menus).toContain("setRender");
+    expect(kernelMenus).toContain('"play"');
+    expect(kernelMenus).toContain('"market"');
+    expect(kernelMenus).toContain('"warehouse"');
+    expect(kernelMenus).toContain('"pack"');
   });
 });

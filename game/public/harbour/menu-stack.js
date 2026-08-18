@@ -1,15 +1,19 @@
 /**
- * HUD menu stack. Systems nest (inspect → minerals → inventory).
- * PAPER / SIMULATED. Mirrors game/src/kernel/menus.ts for the browser.
+ * HUD menu stack. Play systems nest here (Menu → market / cart / pack).
+ * Walking chrome stays on the camera. Mirrors game/src/kernel/menus.ts.
  */
 
 export const MENU_TITLES = {
   root: "Harbour",
+  play: "Menu",
   inspect: "Plot",
   develop: "Develop",
   staff: "Staff",
   minerals: "Minerals",
-  inventory: "Inventory",
+  inventory: "Cart",
+  market: "Market",
+  warehouse: "Warehouse",
+  pack: "Pack",
 };
 
 export function createMenuStack() {
@@ -63,22 +67,31 @@ export function mountMenuStack(opts = {}) {
   const closeBtn = opts.closeBtn !== undefined ? opts.closeBtn : lookup("menu-close");
   const stack = createMenuStack();
   let bodyHtml = "";
+  let render = opts.render || null;
 
   function paint() {
     const top = topMenu(stack);
     if (titleEl) titleEl.textContent = top.title;
     if (crumbsEl) crumbsEl.textContent = crumbs(stack).join(" · ");
-    if (bodyEl) bodyEl.innerHTML = top.id === "root" ? "" : bodyHtml;
     if (root) {
       if (stack.frames.length <= 1) root.setAttribute("hidden", "");
       else root.removeAttribute("hidden");
     }
     if (backBtn) backBtn.disabled = stack.frames.length <= 1;
+    if (typeof render === "function") {
+      render(top, bodyEl, stack);
+    } else if (bodyEl) {
+      bodyEl.innerHTML = top.id === "root" ? "" : top.html || bodyHtml;
+    }
+    return top;
   }
 
   function open(frame, html) {
-    pushMenu(stack, frame);
-    bodyHtml = html || "";
+    const next = pushMenu(stack, frame);
+    if (html != null) {
+      next.html = html;
+      bodyHtml = html;
+    }
     paint();
     return topMenu(stack);
   }
@@ -97,11 +110,24 @@ export function mountMenuStack(opts = {}) {
     return topMenu(stack);
   }
 
+  function setRender(fn) {
+    render = fn;
+  }
+
   if (backBtn && backBtn.addEventListener) backBtn.addEventListener("click", back);
   if (closeBtn && closeBtn.addEventListener) closeBtn.addEventListener("click", close);
   paint();
 
-  return { stack, open, back, close, paint, top: () => topMenu(stack) };
+  return {
+    stack,
+    open,
+    back,
+    close,
+    paint,
+    setRender,
+    top: () => topMenu(stack),
+    isOpen: () => stack.frames.length > 1,
+  };
 }
 
 let mounted = null;

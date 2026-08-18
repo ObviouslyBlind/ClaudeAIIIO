@@ -86,10 +86,15 @@ describe("shard kernel K.1", () => {
   it("stacks HUD menus and pops back without losing the root", () => {
     const stack = createMenuStack();
     expect(menuDepth(stack)).toBe(1);
+    pushMenu(stack, { id: "play", title: "Menu" });
+    pushMenu(stack, { id: "market", title: "Market" });
+    expect(crumbs(stack)).toEqual(["Harbour", "Menu", "Market"]);
+    expect(popMenu(stack).id).toBe("play");
     pushMenu(stack, { id: "inspect", title: "Plot", plotId: "north-street-0" });
     pushMenu(stack, { id: "minerals", title: "Minerals" });
-    expect(crumbs(stack)).toEqual(["Harbour", "Plot", "Minerals"]);
+    expect(crumbs(stack)).toEqual(["Harbour", "Menu", "Plot", "Minerals"]);
     expect(popMenu(stack).id).toBe("inspect");
+    expect(popMenu(stack).id).toBe("play");
     expect(popMenu(stack).id).toBe("root");
     expect(popMenu(stack).id).toBe("root");
   });
