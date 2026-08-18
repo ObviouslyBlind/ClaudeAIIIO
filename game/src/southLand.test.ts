@@ -47,7 +47,9 @@ describe("South land (no buildings)", () => {
   it("links towns with named dirt paths at moderate foot traffic, and seeds beach stall lots", () => {
     const board = createLandBoard();
     const dirt = board.roads.filter((r) => r.island === "south" && r.kind === "dirt" && r.name);
-    expect(dirt.length).toBeGreaterThanOrEqual(4);
+    expect(dirt.length).toBeGreaterThanOrEqual(12);
+    const rows = board.roads.filter((r) => r.island === "south" && r.name?.includes(" Row "));
+    expect(rows.length).toBeGreaterThan(6);
     const shore = board.plots.filter((p) => p.island === "south" && p.band === "shore");
     expect(shore.length).toBeGreaterThan(20);
     expect(shore.every((p) => p.zone === "commercial")).toBe(true);
@@ -60,5 +62,37 @@ describe("South land (no buildings)", () => {
     const northNpc = board.plots.filter((p) => p.island === "north" && p.owner === "npc");
     expect(northNpc.length).toBeGreaterThan(8);
     expect(board.roads.some((r) => r.island === "north" && r.name === "Harbour Rd")).toBe(true);
+  });
+
+  it("holds a flat harbour grade on the west quay and along Island Hwy", () => {
+    const s = ISLANDS.south;
+    const yPort = heightAt(s, SOUTH_PORT.x, SOUTH_PORT.z);
+    const yHwy = heightAt(s, SOUTH_PORT.x + 80, SOUTH_PORT.z + 8);
+    const yRab = heightAt(s, -2080, 7440);
+    expect(Math.abs(yPort - 1.28)).toBeLessThan(0.08);
+    expect(Math.abs(yHwy - 1.28)).toBeLessThan(0.08);
+    expect(Math.abs(yRab - 1.28)).toBeLessThan(0.08);
+    expect(Math.abs(yHwy - yPort)).toBeLessThan(0.08);
+  });
+
+  it("puts street lots on both sides and seeds hamlets so long roads are not a void", () => {
+    const board = createLandBoard();
+    const south = board.plots.filter((p) => p.island === "south");
+    expect(south.length).toBeGreaterThan(200);
+    const cane = board.roads.find((r) => r.name === "Canebrake Rd")!;
+    const mid = cane.points[Math.floor(cane.points.length / 2)]!;
+    const a = cane.points[Math.floor(cane.points.length / 2) + 1]!;
+    const dx = a.x - mid.x;
+    const dz = a.z - mid.z;
+    const len = Math.hypot(dx, dz) || 1;
+    const px = -dz / len;
+    const pz = dx / len;
+    const left = south.filter((p) => Math.hypot(p.x - (mid.x + px * 18), p.z - (mid.z + pz * 18)) < 40);
+    const right = south.filter((p) => Math.hypot(p.x - (mid.x - px * 18), p.z - (mid.z - pz * 18)) < 40);
+    expect(left.length).toBeGreaterThan(0);
+    expect(right.length).toBeGreaterThan(0);
+    const fields = south.filter((p) => p.band === "field");
+    expect(fields.length).toBeGreaterThan(20);
+    expect(fields.some((p) => p.area > 2000)).toBe(true);
   });
 });

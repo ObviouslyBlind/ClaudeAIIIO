@@ -3,17 +3,72 @@ import * as THREE from "three";
 import { createLandBoard, heightAt, ISLANDS } from "./land.ts";
 import {
   TAXI_WAIT_MS,
+  TAXI_ETA_MIN_MS,
+  TAXI_ETA_MAX_MS,
   createTaxi,
+  formatTaxiEta,
   makeTaxiMesh,
   pavedDestFromMapClick,
   projectOnPolyline,
+  rollTaxiEtaMs,
   taxiWaitExpired,
   worldToMapPx,
   islandMapBounds,
 } from "../public/harbour/taxi.js";
 
+describe("taxi hail wait", () => {
+  it("rolls 5–30s and prints Taxi in m:ss", () => {
+    expect(TAXI_ETA_MIN_MS).toBe(5_000);
+    expect(TAXI_ETA_MAX_MS).toBe(30_000);
+    expect(rollTaxiEtaMs(() => 0)).toBe(5_000);
+    expect(rollTaxiEtaMs(() => 1)).toBe(30_000);
+    expect(formatTaxiEta(5_000)).toBe("Taxi in 0:05");
+    expect(formatTaxiEta(12_001)).toBe("Taxi in 0:13");
+    expect(formatTaxiEta(30_000)).toBe("Taxi in 0:30");
+    expect(formatTaxiEta(0).toLowerCase()).not.toContain("paper");
+  });
+
+  it("stays called until the ETA, then the cab comes along paved", () => {
+    const board = createLandBoard();
+    const spec = ISLANDS.south;
+    const player = {
+      position: { x: spec.port.x + 10, y: 2, z: spec.port.z },
+      rotation: { y: 0 },
+    };
+    let clock = 1_000_000;
+    const labels: Array<string | null> = [];
+    const taxi = createTaxi({
+      scene: { add() {} },
+      player,
+      getMap: () => board,
+      specOf: (id: "north" | "south") => ISLANDS[id],
+      heightAt,
+      getIslandId: () => "south" as const,
+      setWalking: () => {},
+      setStatus: () => {},
+      button: { addEventListener() {} },
+      etaRng: () => 0,
+      now: () => clock,
+      onEta: (label: string | null) => labels.push(label),
+    });
+    expect(taxi.mesh.visible).toBe(true);
+    taxi.call();
+    expect(taxi.mode()).toBe("called");
+    expect(taxi.mesh.visible).toBe(false);
+    expect(labels[labels.length - 1]).toBe("Taxi in 0:05");
+    clock += 4_999;
+    taxi.tick(0.016, clock);
+    expect(taxi.mode()).toBe("called");
+    clock += 1;
+    taxi.tick(0.016, clock);
+    expect(taxi.mode()).toBe("coming");
+    expect(taxi.mesh.visible).toBe(true);
+    expect(labels[labels.length - 1]).toBe(null);
+  });
+});
+
 describe("taxi wait timeout", () => {
-  it("leaves after 60s while coming or waiting, not while boarded", () => {
+  it("leaves after 60s while coming or waiting, not while boarded or called", () => {
     expect(TAXI_WAIT_MS).toBe(60_000);
     expect(taxiWaitExpired("coming", 1_000, 60_999)).toBe(false);
     expect(taxiWaitExpired("coming", 1_000, 61_000)).toBe(true);
@@ -22,6 +77,7 @@ describe("taxi wait timeout", () => {
     expect(taxiWaitExpired("boarded", 0, 120_000)).toBe(false);
     expect(taxiWaitExpired("hauling", 0, 120_000)).toBe(false);
     expect(taxiWaitExpired("idle", 0, 60_000)).toBe(false);
+    expect(taxiWaitExpired("called", 0, 60_000)).toBe(false);
     expect(taxiWaitExpired("coming", null, 60_000)).toBe(false);
   });
 });

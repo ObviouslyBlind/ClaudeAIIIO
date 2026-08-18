@@ -9,7 +9,13 @@ import { bboxOverlap, ringBBox, ringsOverlap } from "./kernel/plots.ts";
 import { seedDeposits, type MineralId } from "./kernel/minerals.ts";
 import { zoneForBand, zoneUnlocked, type ZoneId } from "./zones.ts";
 import type { Visitor } from "./sim.ts";
-import { distToHighway, SOUTH_HIGHWAY_NODES, SOUTH_PORT, SOUTH_VOLCANO } from "./southGeom.ts";
+import {
+  distToSouthGrade,
+  SOUTH_GRADE_Y,
+  SOUTH_HIGHWAY_NODES,
+  SOUTH_PORT,
+  SOUTH_VOLCANO,
+} from "./southGeom.ts";
 import { buildSouthLand, southTaxiStops } from "./southLand.ts";
 
 export { BUILDING_CATALOG, DEVELOP_COST };
@@ -797,8 +803,8 @@ export function heightAt(spec: IslandSpec, x: number, z: number): number {
   const across = Math.abs(x - spec.port.x);
   if (spec.id === "south") {
     const east = x - spec.port.x;
-    if (across < 36 && along > -18 && along < 16) return 1.18;
-    if (east > 18 && east < 280 && along > -24 && along < 8) return 1.16;
+    if (across < 36 && along > -18 && along < 16) return SOUTH_GRADE_Y;
+    if (east > 18 && east < 280 && along > -24 && along < 8) return SOUTH_GRADE_Y;
   } else if (across < 22 && along > -16 && along < 14) {
     return 1.12;
   }
@@ -821,22 +827,25 @@ export function heightAt(spec: IslandSpec, x: number, z: number): number {
       h += 210 * cone ** 1.55;
       if (hillD < 125) h = Math.max(h, 92 + (125 - hillD) * 0.45);
     }
-    const hw = distToHighway(x, z);
-    if (hw < 22) {
-      const u = hw / 22;
-      const grade = 1.35 + hw * 0.012;
-      h = h * u + grade * (1 - u);
-      h = Math.max(h, 1.2);
+    const g = distToSouthGrade(x, z);
+    if (hillD >= 72) {
+      if (g < 90) h = SOUTH_GRADE_Y;
+      else if (g < 240) {
+        const u = (g - 90) / 150;
+        h = SOUTH_GRADE_Y * (1 - u) + h * u;
+      }
     }
   } else {
     h += spec.peak * 0.7 * Math.max(0, 1 - hillD / 900) ** 2;
   }
-  if (portD < 160) {
+  if (spec.id !== "south" && portD < 160) {
     const flatten = 1.15 + portD * 0.002;
     h = Math.min(Math.max(h, 1.05), flatten);
   }
   const beachStart = spec.id === "south" ? 0.68 : 0.8;
-  if (t > beachStart) {
+  const skipBeach =
+    spec.id === "south" && (distToSouthGrade(x, z) < 100 || portD < 200);
+  if (t > beachStart && !skipBeach) {
     const beach = (t - beachStart) / (1 - beachStart);
     h = h * (1 - beach) + 0.32 * beach;
   }

@@ -10,6 +10,9 @@ export const ASPHALT = 0x141414;
 export const DIRT = 0x8a6238;
 /** Same stone as house plinth / window sills — original palette, not a new hex. */
 export const STONE = 0x9a8a72;
+/** Pale coping walk beside the tarmac. Same cap family as the south quay. */
+export const SIDEWALK = 0xb0a48c;
+export const SIDEWALK_WIDTH_M = 2.4;
 /** Dusty lift so field tracks do not crush to paved black under Lambert. */
 const DIRT_DUST = 0x9a6a40;
 
@@ -50,7 +53,7 @@ function ribbonStations(points) {
  * One prism along the polyline: mitered left/right edges, world-up
  * (no Frenet twist). Reads as a continuous ribbon, not paving slabs.
  */
-function drawRibbon(scene, spec, road, heightAt, widthM, color, roadKind, matOpts = {}) {
+function drawRibbon(scene, spec, road, heightAt, widthM, color, roadKind, matOpts = {}, skipGap = Infinity) {
   const pts = ribbonStations(road.points);
   if (pts.length < 2) return;
 
@@ -110,6 +113,8 @@ function drawRibbon(scene, spec, road, heightAt, widthM, color, roadKind, matOpt
   }
 
   for (let i = 0; i < n - 1; i++) {
+    const gap = Math.hypot(pts[i + 1].x - pts[i].x, pts[i + 1].z - pts[i].z);
+    if (gap > skipGap) continue;
     const a = i * 4;
     const b = a + 4;
     indices.push(a, b, b + 1, a, b + 1, a + 1);
@@ -168,14 +173,34 @@ function offsetPolyline(points, dist) {
   return out;
 }
 
+function rabCentres(map) {
+  return (map.roads || [])
+    .filter((r) => r.roundabout)
+    .map((r) => r.joins || { x: r.points[0].x, z: r.points[0].z });
+}
+
+function omitNearCentres(pts, centres, gap = 20) {
+  if (!centres.length) return pts;
+  return pts.filter((p) => centres.every((c) => Math.hypot(p.x - c.x, p.z - c.z) >= gap));
+}
+
+function drawSidewalks(scene, spec, road, heightAt, centres) {
+  if (road.roundabout || road.lanes === 4) return;
+  const pts = omitNearCentres(ribbonStations(road.points), centres, 18);
+  if (pts.length < 2) return;
+  const offset = PAVED_WIDTH_M / 2 + SIDEWALK_WIDTH_M / 2 + 0.12;
+  drawRibbon(scene, spec, { ...road, points: offsetPolyline(pts, -offset) }, heightAt, SIDEWALK_WIDTH_M, SIDEWALK, "sidewalk");
+  drawRibbon(scene, spec, { ...road, points: offsetPolyline(pts, offset) }, heightAt, SIDEWALK_WIDTH_M, SIDEWALK, "sidewalk");
+}
+
 /** 2+2 lanes, stone median. Each carriageway is still a 7.2 m ribbon. */
-function drawHighway(scene, spec, road, heightAt) {
-  const pts = ribbonStations(road.points);
+function drawHighway(scene, spec, road, heightAt, centres) {
+  const pts = omitNearCentres(ribbonStations(road.points), centres, 20);
   if (pts.length < 2) return;
   const lane = 4.8;
-  drawRibbon(scene, spec, { ...road, points: offsetPolyline(pts, -lane) }, heightAt, PAVED_WIDTH_M, ASPHALT, "paved");
-  drawRibbon(scene, spec, { ...road, points: offsetPolyline(pts, lane) }, heightAt, PAVED_WIDTH_M, ASPHALT, "paved");
-  drawRibbon(scene, spec, { ...road, name: (road.name || "Island Hwy") + " median" }, heightAt, 2.4, STONE, "median");
+  drawRibbon(scene, spec, { ...road, points: offsetPolyline(pts, -lane) }, heightAt, PAVED_WIDTH_M, ASPHALT, "paved", {}, 40);
+  drawRibbon(scene, spec, { ...road, points: offsetPolyline(pts, lane) }, heightAt, PAVED_WIDTH_M, ASPHALT, "paved", {}, 40);
+  drawRibbon(scene, spec, { ...road, name: (road.name || "Island Hwy") + " median" }, heightAt, 2.4, STONE, "median", {}, 40);
 }
 
 function drawRoundaboutIsland(scene, spec, road, heightAt) {
@@ -324,13 +349,15 @@ function drawNorthPortCurbs(scene, map, specOf, heightAt) {
  */
 export function makeRoads(map, helpers) {
   const { scene, specOf, heightAt } = helpers;
+  const centres = rabCentres(map);
   for (const road of map.roads) {
     const spec = specOf(road.island);
     if (road.kind === "paved" && road.lanes === 4) {
-      drawHighway(scene, spec, road, heightAt);
+      drawHighway(scene, spec, road, heightAt, centres);
     } else if (road.kind === "paved") {
       drawPaved(scene, spec, road, heightAt);
       if (road.roundabout) drawRoundaboutIsland(scene, spec, road, heightAt);
+      else drawSidewalks(scene, spec, road, heightAt, centres);
     } else {
       drawDirt(scene, spec, road, heightAt);
     }

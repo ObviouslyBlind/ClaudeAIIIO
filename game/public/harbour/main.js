@@ -196,6 +196,7 @@ function specOf(id) {
 }
 
 /** Keep in sync with game/src/land.ts heightAt and game/src/southGeom.ts */
+const SOUTH_GRADE_Y = 1.28;
 const SOUTH_HIGHWAY_NODES = [
   { x: -2280, z: 7280 },
   { x: -2080, z: 7440 },
@@ -208,20 +209,75 @@ const SOUTH_HIGHWAY_NODES = [
   { x: 2480, z: 7980 },
   { x: 2920, z: 7860 },
 ];
+const SOUTH_TOWN_PTS = [
+  { x: -1960, z: 7620 },
+  { x: -1080, z: 8720 },
+  { x: -1860, z: 10020 },
+  { x: 1480, z: 8080 },
+  { x: 2520, z: 9120 },
+];
+const SOUTH_RAB_PTS = [
+  { x: -2080, z: 7440 },
+  { x: -980, z: 7680 },
+  { x: 1320, z: 7860 },
+  { x: 2480, z: 7980 },
+];
+const SOUTH_GRADE_LINES = [
+  [SOUTH_HIGHWAY_NODES[0], SOUTH_RAB_PTS[0]],
+  [SOUTH_RAB_PTS[0], SOUTH_TOWN_PTS[0]],
+  [SOUTH_RAB_PTS[1], SOUTH_TOWN_PTS[1]],
+  [SOUTH_RAB_PTS[0], SOUTH_TOWN_PTS[2]],
+  [SOUTH_RAB_PTS[2], SOUTH_TOWN_PTS[3]],
+  [SOUTH_RAB_PTS[3], SOUTH_TOWN_PTS[4]],
+  [SOUTH_RAB_PTS[0], { x: -420, z: 7220 }],
+  [SOUTH_RAB_PTS[0], { x: -1680, z: 8380 }],
+];
 
-function distToSouthHighway(x, z) {
-  let best = Infinity;
-  for (let i = 0; i < SOUTH_HIGHWAY_NODES.length - 1; i++) {
-    const a = SOUTH_HIGHWAY_NODES[i];
-    const b = SOUTH_HIGHWAY_NODES[i + 1];
-    const vx = b.x - a.x;
-    const vz = b.z - a.z;
-    const len2 = vx * vx + vz * vz || 1;
-    let t = ((x - a.x) * vx + (z - a.z) * vz) / len2;
-    t = Math.max(0, Math.min(1, t));
-    best = Math.min(best, Math.hypot(x - (a.x + vx * t), z - (a.z + vz * t)));
+function catmull1(p0, p1, p2, p3, t) {
+  const t2 = t * t;
+  const t3 = t2 * t;
+  return 0.5 * (2 * p1 + (-p0 + p2) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2 + (-p0 + 3 * p1 - 3 * p2 + p3) * t3);
+}
+
+function sampleSouthHwySpline(nodes, perSeg = 8) {
+  const out = [];
+  for (let i = 0; i < nodes.length - 1; i++) {
+    const p0 = nodes[Math.max(0, i - 1)];
+    const p1 = nodes[i];
+    const p2 = nodes[i + 1];
+    const p3 = nodes[Math.min(nodes.length - 1, i + 2)];
+    const n = i === nodes.length - 2 ? perSeg : perSeg - 1;
+    for (let s = 0; s <= n; s++) {
+      const t = s / perSeg;
+      out.push({ x: catmull1(p0.x, p1.x, p2.x, p3.x, t), z: catmull1(p0.z, p1.z, p2.z, p3.z, t) });
+    }
   }
+  return out;
+}
+
+const SOUTH_HWY_SPLINE = sampleSouthHwySpline(SOUTH_HIGHWAY_NODES, 8);
+
+function distToSegXZ(x, z, a, b) {
+  const vx = b.x - a.x;
+  const vz = b.z - a.z;
+  const len2 = vx * vx + vz * vz || 1;
+  let t = ((x - a.x) * vx + (z - a.z) * vz) / len2;
+  t = Math.max(0, Math.min(1, t));
+  return Math.hypot(x - (a.x + vx * t), z - (a.z + vz * t));
+}
+
+function distToPolyXZ(pts, x, z) {
+  let best = Infinity;
+  for (let i = 0; i < pts.length - 1; i++) best = Math.min(best, distToSegXZ(x, z, pts[i], pts[i + 1]));
   return best;
+}
+
+function distToSouthGrade(x, z) {
+  let d = distToPolyXZ(SOUTH_HWY_SPLINE, x, z);
+  for (const [a, b] of SOUTH_GRADE_LINES) d = Math.min(d, distToSegXZ(x, z, a, b));
+  for (const t of SOUTH_TOWN_PTS) d = Math.min(d, Math.hypot(x - t.x, z - t.z));
+  for (const r of SOUTH_RAB_PTS) d = Math.min(d, Math.hypot(x - r.x, z - r.z));
+  return d;
 }
 
 function heightAt(spec, x, z) {
@@ -235,8 +291,8 @@ function heightAt(spec, x, z) {
   const across = Math.abs(x - spec.port.x);
   if (spec.id === "south") {
     const east = x - spec.port.x;
-    if (across < 36 && along > -18 && along < 16) return 1.18;
-    if (east > 18 && east < 280 && along > -24 && along < 8) return 1.16;
+    if (across < 36 && along > -18 && along < 16) return SOUTH_GRADE_Y;
+    if (east > 18 && east < 280 && along > -24 && along < 8) return SOUTH_GRADE_Y;
   } else if (across < 22 && along > -16 && along < 14) {
     return 1.12;
   }
@@ -257,22 +313,24 @@ function heightAt(spec, x, z) {
       h += 210 * cone ** 1.55;
       if (hillD < 125) h = Math.max(h, 92 + (125 - hillD) * 0.45);
     }
-    const hw = distToSouthHighway(x, z);
-    if (hw < 22) {
-      const u = hw / 22;
-      const grade = 1.35 + hw * 0.012;
-      h = h * u + grade * (1 - u);
-      h = Math.max(h, 1.2);
+    const g = distToSouthGrade(x, z);
+    if (hillD >= 72) {
+      if (g < 90) h = SOUTH_GRADE_Y;
+      else if (g < 240) {
+        const u = (g - 90) / 150;
+        h = SOUTH_GRADE_Y * (1 - u) + h * u;
+      }
     }
   } else {
     h += spec.peak * 0.7 * Math.max(0, 1 - hillD / 900) ** 2;
   }
-  if (portD < 160) {
+  if (spec.id !== "south" && portD < 160) {
     const flatten = 1.15 + portD * 0.002;
     h = Math.min(Math.max(h, 1.05), flatten);
   }
   const beachStart = spec.id === "south" ? 0.68 : 0.8;
-  if (t > beachStart) {
+  const skipBeach = spec.id === "south" && (distToSouthGrade(x, z) < 100 || portD < 200);
+  if (t > beachStart && !skipBeach) {
     const beach = (t - beachStart) / (1 - beachStart);
     h = h * (1 - beach) + 0.32 * beach;
   }
@@ -719,8 +777,8 @@ function makeTerrain(spec) {
   // Dense enough to carry the cove and the port apron. 96x64 cells were 90 m
   // wide: the carved pier slot dragged whole cells underwater and the harbour
   // rendered as an inland lake.
-  const segsX = 224;
-  const segsZ = 144;
+  const segsX = spec.id === "south" ? 280 : 224;
+  const segsZ = spec.id === "south" ? 180 : 144;
   const geo = new THREE.PlaneGeometry(spec.rx * 2.15, spec.rz * 2.15, segsX, segsZ);
   geo.rotateX(-Math.PI / 2);
   const pos = geo.attributes.position;
@@ -771,41 +829,65 @@ const QUAY_STONE = 0x9a8a72;
 const QUAY_DARK = 0x7a6e5a;
 const QUAY_CAP = 0xb0a48c;
 
-/** Stone L-quay wrapping east into sand. No shed, no timber pier. */
+/** Stone seawall from the water up to grade. Terrain is the deck, not a slab on grass. */
 function makeSouthQuay(spec) {
   const { x, z } = spec.port;
-  const y = heightAt(spec, x, z);
+  const deckY = SOUTH_GRADE_Y;
+  const waterY = 0.02;
+  const wallH = deckY - waterY + 0.42;
+  const wallCy = waterY + wallH / 2;
   const toward = -1;
-  const deck = box(54, 0.55, 14, QUAY_STONE, x + 8, y + 0.28, z + 2);
-  deck.userData.kind = "port";
-  ports.push(deck);
-  const face = box(54, 1.4, 1.1, QUAY_DARK, x + 8, y - 0.2, z + toward * 6.4, false);
-  face.userData.kind = "port";
-  const wrap1 = box(36, 0.5, 12, QUAY_STONE, x + 48, y + 0.26, z + 6);
-  wrap1.userData.kind = "port";
-  ports.push(wrap1);
-  const wrap2 = box(28, 0.42, 10, QUAY_CAP, x + 88, y + 0.22, z + 10);
-  wrap2.userData.kind = "port";
-  ports.push(wrap2);
-  const wrap3 = box(22, 0.32, 8, QUAY_CAP, x + 124, y + 0.18, z + 14, false);
-  wrap3.userData.kind = "port";
-  const finger = box(6.4, 0.45, 16, QUAY_STONE, x, y + 0.22, z + toward * 18);
+  const BLOCK = 8;
+
+  function wallBlock(w, d, bx, bz, markPort) {
+    const face = box(w, wallH, d, QUAY_DARK, bx, wallCy, bz, false);
+    face.userData.kind = "port";
+    const cap = box(w + 0.35, 0.22, d + 0.4, QUAY_CAP, bx, deckY + 0.12, bz, false);
+    cap.userData.kind = "port";
+    if (markPort) ports.push(cap);
+    return cap;
+  }
+
+  // Channel face (−Z), modular coping.
+  for (let i = 0; i < 8; i++) {
+    const bx = x - 20 + i * BLOCK;
+    wallBlock(BLOCK * 0.94, 1.45, bx, z + toward * 7.4, i === 3 || i === 4);
+  }
+  // West return into the cove.
+  for (let i = 0; i < 4; i++) {
+    const pz = z + toward * (12 + i * BLOCK);
+    wallBlock(1.45, BLOCK * 0.94, x - 24, pz, i === 1);
+  }
+  // East wrap: wall steps down into sand, not a pancake on the grass.
+  for (let i = 0; i < 6; i++) {
+    const bx = x + 44 + i * BLOCK;
+    const drop = i * 0.12;
+    const h = Math.max(0.7, wallH - drop);
+    const cy = waterY + h / 2;
+    const face = box(BLOCK * 0.94, h, 1.2, i < 3 ? QUAY_DARK : QUAY_STONE, bx, cy, z + toward * 4.2 + i * 2.1, false);
+    face.userData.kind = "port";
+    const cap = box(BLOCK * 0.94, 0.18, 1.55, QUAY_CAP, bx, deckY + 0.08 - drop * 0.4, z + toward * 3.8 + i * 2.1, false);
+    cap.userData.kind = "port";
+    if (i < 3) ports.push(cap);
+  }
+  // Finger into the cove — walkable coping, piles in the water.
+  const finger = box(6.2, 0.28, 18, QUAY_CAP, x - 4, deckY + 0.14, z + toward * 20);
   finger.userData.kind = "port";
   ports.push(finger);
   for (let i = 0; i < 5; i++) {
-    const pz = z + toward * (12 + i * 3.2);
-    box(0.4, 2.2, 0.4, QUAY_DARK, x - 2.8, y - 0.6, pz, false);
-    box(0.4, 2.2, 0.4, QUAY_DARK, x + 2.8, y - 0.6, pz, false);
+    const pz = z + toward * (12 + i * 3.4);
+    box(0.42, 2.6, 0.42, QUAY_DARK, x - 6.6, waterY + 0.9, pz, false);
+    box(0.42, 2.6, 0.42, QUAY_DARK, x - 1.4, waterY + 0.9, pz, false);
   }
-  for (let i = 0; i < 8; i++) {
-    const bx = x - 16 + i * 7.2;
-    const bollard = box(0.42, 0.7, 0.42, QUAY_DARK, bx, y + 0.72, z + toward * 5.2, false);
+  for (let i = 0; i < 9; i++) {
+    const bx = x - 20 + i * 7.4;
+    const bollard = box(0.42, 0.78, 0.42, QUAY_DARK, bx, deckY + 0.5, z + toward * 6.6, false);
     bollard.userData.kind = "port";
-    box(0.55, 0.12, 0.55, 0x3d2a1c, bx, y + 1.1, z + toward * 5.2, false);
+    box(0.55, 0.12, 0.55, 0x3d2a1c, bx, deckY + 0.92, z + toward * 6.6, false);
   }
   for (let i = 0; i < 5; i++) {
-    const bx = x + 40 + i * 8;
-    box(0.38, 0.62, 0.38, QUAY_DARK, bx, y + 0.62, z + 1.5, false);
+    const bx = x + 44 + i * 8;
+    box(0.38, 0.62, 0.38, QUAY_DARK, bx, deckY + 0.4, z + 0.8, false);
   }
 }
 
@@ -1666,6 +1748,8 @@ async function ensureCatalog() {
 async function ensureTaxi() {
   if (taxi) return taxi;
   const taxiMod = await import("./taxi.js");
+  const taxiHudMod = await import("./taxi-hud.js");
+  const etaChip = taxiHudMod.mountTaxiEtaChip();
   taxi = taxiMod.createTaxi({
     scene: worldScene(),
     player,
@@ -1678,6 +1762,7 @@ async function ensureTaxi() {
     },
     setStatus,
     button: btnTaxi,
+    onEta: (label) => etaChip.set(label),
     onRide() {
       refreshHud();
     },

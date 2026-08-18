@@ -1,6 +1,6 @@
 # South land (v1, land only)
 
-No buildings on this pass. Lots and road centrelines only.
+No buildings on this pass. Lots, roads, sidewalks, and a stone seawall. Zero houses.
 
 ## Which island is “more developed”?
 
@@ -8,34 +8,29 @@ No buildings on this pass. Lots and road centrelines only.
 
 **South** is cheaper, food and ore, export-dependent, lives on the ferry. Spawn is South, so the **coast** is settled — stone quay, sand, market-town footprints — but it is not the foundry island.
 
-~10,000 owners **across both islands** is a capacity target, not 10,000 meshes this pass.
-
 ## Port
 
-Moved to the **west / left** of South (from spawn looking inland). Channel-facing so the ferry still crosses.
+West / left-hand channel quay. Terrain is the deck (flat grade 1.28 m). The mesh is a **seawall** from the water up to coping, wrapping east into sand. Not a slab sitting on the grass.
 
-Stone quay: limestone L that wraps **east** into a natural sandy beach. No shed.
+## Grade
+
+Harbour, Island Hwy, town centres, and access roads sit on one flat grade. The volcano cone is unchanged. Beach dip stays off the paved apron.
 
 ## Roads
 
-- Three beach roads off **Harbour Circus**.
-- That roundabout feeds **Island Hwy**: 2 lanes up, 2 down, stone median, slight bends, west quay → east coast. Goes **around** the volcano, not through the crater.
-- Further roundabouts branch to towns.
+- Island Hwy: 2+2 lanes, stone median, west quay → east coast, around the volcano.
+- Spurs start at the roundabout **ring**, not the circus centre. Highway ribbons leave a gap at each circus.
+- Pale stone sidewalks beside ordinary streets (not the highway, not roundabouts).
+- Hamlets (short cross streets + dirt tracks) along Canebrake Rd, Haven Rd, South Strand, and the highway so long runs are not a void.
+- Dirt tracks carry larger field plots on both sides.
 
-## Five towns (empty centres)
+## Lots
 
-West of the volcano (3), staggered:
+Street lots on **both** sides. Five empty town greens (reserved, no buildings). Shore stall lots. Field plots off dirt.
 
-1. **Quayward** — tight grid, just off the highway.
-2. **Canebrake** — organic Y-forks, a real drive inland.
-3. **Saltwind** — one high street + alleys on the south sand.
+## Taxi
 
-East of the volcano (2):
-
-4. **Ash Pass** — radial spokes, just off the highway after the cone.
-5. **East Haven** — crescent loop around a green, longer inland drive.
-
-Dirt paths (light/moderate foot traffic) link the towns. Volcano crater is a no-walk, no-lease hole.
+Hail waits 5–30 s. Bottom-right chip: `Taxi in 0:12`. Then the cab stages down the paved road and drives in. Cab is already parked on paved at spawn (roof lamp in the first frame). 60 s unboarded leave still applies after it arrives.
 
 ## Verify
 
@@ -43,4 +38,4 @@ Dirt paths (light/moderate foot traffic) link the towns. Volcano crater is a no-
 cd game && npm test
 ```
 
-Spawn South: west stone quay, sand wrapping east, highway heading inland (+X), no houses.
+Spawn South: west seawall, flat apron, sidewalks, lots both sides, highway heading inland (+X).

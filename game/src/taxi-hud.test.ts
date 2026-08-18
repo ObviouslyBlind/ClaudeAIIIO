@@ -5,6 +5,7 @@ import {
   fareOf,
   isTaxiHintActive,
   mountTaxiHud,
+  mountTaxiEtaChip,
   POLL_MS,
 } from "../public/harbour/taxi-hud.js";
 
@@ -124,5 +125,17 @@ describe("harbour PAPER taxi fare hint", () => {
   it("does not throw when #taxi-hint is missing", () => {
     expect(() => mountTaxiHud({ el: null })).not.toThrow();
     expect(() => mountTaxiHud({})).not.toThrow();
+  });
+
+  it("paints a bottom-right Taxi in chip without PAPER", () => {
+    const node: { textContent: string; hidden: boolean } = { textContent: "", hidden: true };
+    const chip = mountTaxiEtaChip({ el: node });
+    chip.set("Taxi in 0:12");
+    expect(node.textContent).toBe("Taxi in 0:12");
+    expect(node.hidden).toBe(false);
+    expect(node.textContent.toLowerCase()).not.toContain("paper");
+    chip.set(null);
+    expect(node.hidden).toBe(true);
+    expect(node.textContent).toBe("");
   });
 });

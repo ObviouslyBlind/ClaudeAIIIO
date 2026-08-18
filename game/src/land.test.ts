@@ -19,6 +19,7 @@ import {
   standingOnParcel,
 } from "./land.ts";
 import { createVisitor } from "./sim.ts";
+import { SOUTH_MIN_LOT_M2 } from "./southGeom.ts";
 
 describe("harbour land board", () => {
   it("authors two Caribbean-scale islands with a channel between the ports", () => {
@@ -39,7 +40,7 @@ describe("harbour land board", () => {
     expect(plots.length).toBeGreaterThan(40);
     expect(plots.every((p) => p.ring.length >= 4)).toBe(true);
     expect(plots.filter((p) => p.island === "north").every((p) => p.area > 180)).toBe(true);
-    expect(plots.filter((p) => p.island === "south").every((p) => p.area > 100)).toBe(true);
+    expect(plots.filter((p) => p.island === "south").every((p) => p.area > SOUTH_MIN_LOT_M2)).toBe(true);
     expect(plots.some((p) => p.band === "field")).toBe(true);
     expect(plots.some((p) => p.band === "street")).toBe(true);
     const sample = plots[0];

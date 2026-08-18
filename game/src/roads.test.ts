@@ -54,6 +54,9 @@ describe("paved street from spawn", () => {
 
     expect(paved.length).toBe(pavedRoads.length + extraCarriages);
     expect(extras.length).toBe(0);
+    const walks = added.filter((m) => m.userData.roadKind === "sidewalk");
+    expect(walks.length).toBeGreaterThan(4);
+    expect(walks.every((m) => ribbonWidthM(m) < PAVED_WIDTH_M)).toBe(true);
     expect(dirt.length).toBe(dirtRoads.length);
     expect(dirt.length).toBeGreaterThan(4);
 
