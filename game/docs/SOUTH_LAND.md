@@ -22,6 +22,7 @@ Authored as a graph. See `docs/ROADS.md` for the model, the class table and why 
 
 - Island Hwy (dual carriageway) runs quay → Harbour → Cane → Ash → Haven → east shore, meeting each circus on its kerb.
 - Avenues leave the circuses for the towns: Quayward Rd, Canebrake Rd, Pass Rd, Haven Rd.
+- Quayward Loop is a rectangle around the green. Quayward Rd meets the north edge at 45° from Harbour Circus.
 - South Strand continues the west side of Quayward Loop **due south** (90°), then 90° east and 90° south into Saltwind. Palm Arc leaves it at 90° then 45°. No smashed diagonals.
 - Streets fill the towns: Quayward Loop, Saltwind High St, Haven Crescent, Channel Sands, Palm Arc.
 - Lanes are single-track hamlet rows and alleys. Field tracks are dirt and carry on past the lane ends.

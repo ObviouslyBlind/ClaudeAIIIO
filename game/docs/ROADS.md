@@ -38,7 +38,8 @@ Each step is big enough to see from 30 m up.
 
 - Every paved edge gets a **grit shoulder** 2.2 m wider than its tarmac, so a road has a rim instead of a cut edge on bare sand.
 - Every junction that is actually a corner gets a **square tarmac plate**. Ribbons stop at the plate, so two streets meet as an L — they do not keep going and draw a plus through each other.
-- Offset sidewalks are clipped out of the plate. Each wedge between arms gets a **mitered** walk (15/30/45/90°), so grey stays on the kerb and does not hash through the tarmac.
+- Offset sidewalks are clipped out of the plate. Each wedge between arms gets **L-shaped kerb quads** (square at 90°, mitered at 15/30/45°). A 3-point ribbon through a 270° outer corner stair-steps; the quads do not.
+- Quayward Loop is a **rectangle**. Quayward Rd hits the north edge at **45°** from Harbour Circus, so those north arms are due east-west.
 - Circuses are an asphalt annulus reaching the node's kerb radius, plus a stone island.
 - Highway ribbons run **to the kerb**. The graph already stops there; do not omit the last stations near a circus (that leftover from the old through-island spline left sand between the dual carriageway and the ring).
 - Each circus arm gets a short tarmac disc at the kerb so the dual ribbons (offset off the centreline) actually read as meeting the ring.

@@ -199,4 +199,46 @@ describe("road graph", () => {
       }
     }
   });
+
+  it("keeps Quayward Loop a rectangle and Quayward Rd at 45° from Harbour Circus", () => {
+    const graph = createLandBoard().graph;
+    const qw = graph.nodes.find((n) => n.id === "s-quayward")!;
+    const nw = graph.nodes.find((n) => n.id === "s-quay-nw")!;
+    const ne = graph.nodes.find((n) => n.id === "s-quay-ne")!;
+    const se = graph.nodes.find((n) => n.id === "s-quay-se")!;
+    const sw = graph.nodes.find((n) => n.id === "s-quay-sw")!;
+    expect(qw.z).toBeCloseTo(nw.z, 5);
+    expect(ne.z).toBeCloseTo(nw.z, 5);
+    expect(se.z).toBeCloseTo(sw.z, 5);
+    expect(nw.x).toBeCloseTo(sw.x, 5);
+    expect(ne.x).toBeCloseTo(se.x, 5);
+    expect(Math.abs(ne.x - nw.x)).toBeGreaterThan(100);
+    expect(Math.abs(sw.z - nw.z)).toBeGreaterThan(80);
+
+    const harbour = graph.nodes.find((n) => n.id === "s-rab-harbour")!;
+    expect(Math.abs(Math.abs(qw.x - harbour.x) - Math.abs(qw.z - harbour.z))).toBeLessThan(0.5);
+
+    const legal = [...ROAD_TURN_DEG, 180, 135, 150, 165];
+    for (const id of ["s-quayward", "s-quay-nw", "s-quay-ne", "s-quay-se", "s-quay-sw"]) {
+      const node = graph.nodes.find((n) => n.id === id)!;
+      const arms = graph.edges.filter((e) => e.cls !== "track" && (e.a === node.id || e.b === node.id));
+      const dirs = arms.map((e) => {
+        const p = e.a === node.id ? e.points[1]! : e.points[e.points.length - 2]!;
+        const x = p.x - node.x;
+        const z = p.z - node.z;
+        const n = Math.hypot(x, z) || 1;
+        return { x: x / n, z: z / n };
+      });
+      for (let i = 0; i < dirs.length; i++) {
+        for (let j = i + 1; j < dirs.length; j++) {
+          const dot = Math.max(-1, Math.min(1, dirs[i]!.x * dirs[j]!.x + dirs[i]!.z * dirs[j]!.z));
+          const deg = (Math.acos(dot) * 180) / Math.PI;
+          expect(
+            legal.some((d) => Math.abs(deg - d) < 4),
+            `${id} arm angle ${deg.toFixed(1)}° is not 15/30/45/90/135/180`,
+          ).toBe(true);
+        }
+      }
+    }
+  });
 });
