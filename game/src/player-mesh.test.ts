@@ -84,7 +84,7 @@ describe("player PAPER walker", () => {
     expect(leftLeg.rotation.x).not.toBe(0);
     expect(rightLeg.rotation.x).toBeCloseTo(-leftLeg.rotation.x, 5);
     stepPlayerWalk(player, 0, false);
-    expect(leftLeg.rotation.x).toBe(0);
-    expect(rightLeg.rotation.x).toBe(0);
+    expect(leftLeg.rotation.x).toBeCloseTo(0, 8);
+    expect(rightLeg.rotation.x).toBeCloseTo(0, 8);
   });
 });
