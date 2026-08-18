@@ -84,6 +84,25 @@ describe("road node traffic", () => {
     }
   });
 
+  it("puts South highway cars in a black carriageway, not on the stone median", () => {
+    const board = createLandBoard();
+    const scene = { add() {} };
+    const traffic = createTraffic({
+      scene,
+      getMap: () => board,
+      specOf: (id: "north" | "south") => ISLANDS[id],
+      heightAt,
+    });
+    const hwy = board.roads.find((r) => r.island === "south" && r.lanes === 4)!;
+    const south = traffic.cars.filter((c) => c.islandId === "south" && c.roadIdx === 0);
+    expect(south.length).toBeGreaterThan(2);
+    for (const car of south) {
+      const d = projectOnPolyline(hwy.points, car.mesh.position.x, car.mesh.position.z).dist;
+      expect(d).toBeGreaterThan(6);
+      expect(d).toBeLessThan(10);
+    }
+  });
+
   it("builds a sedan mesh: painted body, cabin glass, bumpers, wheels — no debug mast", () => {
     const board = createLandBoard();
     const scene = { add() {} };
