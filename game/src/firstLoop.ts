@@ -23,6 +23,9 @@ export const WAREHOUSE_RENT_TICKS = 3600;
 export const DELIVERY_WAIT_MS = 60_000;
 export const ORDER_MAX_QTY = 10;
 export const STORAGE_UPGRADE_COST = 200;
+export const HIRE_COST = 30;
+export const STICKER_MIN = 1;
+export const STICKER_MAX = 11;
 export const CART_STORAGE = 20;
 export const CART_PAPER_PRICE = 85;
 export const HOTDOG_PACK_PRICE = 3;
@@ -186,6 +189,12 @@ function hasKit(play: PlayState): boolean {
 /** Metres from your lot toward the paved road where a cart may sit. */
 export const PLACE_CORRIDOR_M = 22;
 
+export const SITE_UPGRADES: { id: string; label: string; cost: number }[] = [
+  { id: "fridge", label: "Fridge", cost: STORAGE_UPGRADE_COST },
+  { id: "sign", label: "Sign", cost: 80 },
+  { id: "awning", label: "Awning", cost: 120 },
+];
+
 /** One Hire. An AI vendor appears and runs the site. */
 export const HIRE_ROSTER: { id: string; name: string; role: string; suggest: string }[] = [
   {
@@ -214,24 +223,11 @@ export type CartNeed = {
 /** What a placed street cart still wants before it earns. */
 export function standNeeds(stand: Stand, today = TODAY_PRICE): CartNeed[] {
   const needs: CartNeed[] = [];
-  if (!stand.hired) {
-    needs.push({ id: "hire", label: "Hire a vendor. Carts do not sell without staff." });
-  }
-  if (Number(stand.hotdogs) < 1) {
-    const food = cartKindForStand(stand).stockLabel.toLowerCase();
-    needs.push({ id: "stock", label: `Load ${food} from what you are carrying, or the warehouse.` });
-  }
-  if (!stand.upgraded) {
-    needs.push({
-      id: "fridge",
-      label: "A $200 fridge doubles this cart's storage.",
-    });
-  }
+  if (!stand.hired) needs.push({ id: "hire", label: "Hire" });
+  if (Number(stand.hotdogs) < 1) needs.push({ id: "stock", label: "Stock" });
+  if (!stand.upgraded) needs.push({ id: "fridge", label: "Fridge" });
   if (Math.abs(Number(stand.stickerPrice) - today) > 0.01) {
-    needs.push({
-      id: "sticker",
-      label: `Set a sticker. $${today.toFixed(2)} is today's price.`,
-    });
+    needs.push({ id: "sticker", label: `Sticker $${today.toFixed(2)}` });
   }
   return needs;
 }
@@ -282,6 +278,7 @@ export type Stand = {
   stickerPrice: number;
   storageCap: number;
   upgraded: boolean;
+  upgrades: string[];
   sellAcc: number;
   boostLeft: number;
   mode: "PAPER";
@@ -303,6 +300,7 @@ export type WorkSite = {
   stickerPrice: number;
   storageCap: number;
   upgraded: boolean;
+  upgrades: string[];
   sellAcc: number;
   boostLeft: number;
   stockId: InvKind | null;
@@ -360,7 +358,12 @@ export function ensurePlay(visitor: Visitor): PlayState {
     if (!Number.isFinite(stand.stickerPrice)) stand.stickerPrice = TODAY_PRICE;
     if (!Number.isFinite(stand.storageCap)) stand.storageCap = CART_STORAGE;
     if (stand.upgraded == null) stand.upgraded = false;
+    if (!Array.isArray(stand.upgrades)) stand.upgrades = stand.upgraded ? ["fridge"] : [];
     if (!Number.isFinite(stand.boostLeft)) stand.boostLeft = 0;
+  }
+  for (const site of play.workSites) {
+    if (site.upgraded == null) site.upgraded = false;
+    if (!Array.isArray(site.upgrades)) site.upgrades = site.upgraded ? ["fridge"] : [];
   }
   return play;
 }
@@ -480,6 +483,7 @@ export function syncWorkSites(play: PlayState, land: LandBoard): WorkSite[] {
         stickerPrice: TODAY_PRICE,
         storageCap: CART_STORAGE,
         upgraded: false,
+        upgrades: [],
         sellAcc: 0,
         boostLeft: 0,
         stockId: cls === "shop" ? "hotdogs" : null,
@@ -511,17 +515,24 @@ function findStandOrSite(
   return null;
 }
 
+function ownedUpgrades(row: { upgraded?: boolean; upgrades?: string[] }): string[] {
+  const list = Array.isArray(row.upgrades) ? [...row.upgrades] : [];
+  if (row.upgraded && !list.includes("fridge")) list.unshift("fridge");
+  return list;
+}
+
 function autoStockStand(play: PlayState, stand: Stand): void {
-  if (!stand.hired || stand.hotdogs >= 1) return;
+  if (!stand.hired) return;
   const stockId = cartKindForStand(stand).stockId;
   const room = Math.max(0, stand.storageCap - stand.hotdogs);
+  if (room <= 0) return;
   const have = warehouseQty(play, stockId);
   const n = Math.min(have, room);
   if (n > 0 && takeWarehouse(play, stockId, n)) stand.hotdogs = roundMoney(stand.hotdogs + n);
 }
 
 function autoStockWork(play: PlayState, site: WorkSite): void {
-  if (!site.hired || site.stock >= 1) return;
+  if (!site.hired) return;
   const room = Math.max(0, site.storageCap - site.stock);
   if (room <= 0) return;
   if (site.siteClass === "mine") {
@@ -575,6 +586,7 @@ export function sellShiftBurst(
   syncWorkSites(play, land);
   const found = findStandOrSite(play, siteId);
   if (!found) return { sold: 0, earned: 0 };
+  if (found.row.hired) return { sold: 0, earned: 0 };
   const want = burstCount(hits);
   if (want < 1) return { sold: 0, earned: 0 };
   let have = found.kind === "stand" ? found.row.hotdogs : found.row.stock;
@@ -592,20 +604,11 @@ export function sellShiftBurst(
 
 function siteNeeds(site: WorkSite, today = TODAY_PRICE): CartNeed[] {
   const needs: CartNeed[] = [];
-  if (!site.hired) {
-    needs.push({ id: "hire", label: "Hire a vendor. This site does not run without staff." });
-  }
-  if (site.siteClass === "shop" && Number(site.stock) < 1) {
-    needs.push({ id: "stock", label: "Load stock from what you are carrying, or the warehouse." });
-  }
-  if (!site.upgraded) {
-    needs.push({ id: "fridge", label: "A $200 upgrade doubles this site's storage." });
-  }
+  if (!site.hired) needs.push({ id: "hire", label: "Hire" });
+  if (site.siteClass === "shop" && Number(site.stock) < 1) needs.push({ id: "stock", label: "Stock" });
+  if (!site.upgraded) needs.push({ id: "fridge", label: "Fridge" });
   if (Math.abs(Number(site.stickerPrice) - today) > 0.01) {
-    needs.push({
-      id: "sticker",
-      label: `Set a sticker. $${today.toFixed(2)} is today's price.`,
-    });
+    needs.push({ id: "sticker", label: `Sticker $${today.toFixed(2)}` });
   }
   return needs;
 }
@@ -758,15 +761,14 @@ export function orderMarket(
     visitor.cash = roundMoney(visitor.cash + paid);
     return fail("no_road");
   }
-  const now = Date.now();
   const delivery: Delivery = {
     id: `del-${play.nextId++}`,
     island: "south",
     plotId: plot?.id ?? "road",
     items,
-    status: "arrived",
+    status: "en_route",
     drop,
-    arrivedAtMs: now,
+    arrivedAtMs: null,
     dest: "road",
     mode: "PAPER",
     provenance: "SIMULATED",
@@ -908,6 +910,7 @@ export function placeStand(
     stickerPrice: TODAY_PRICE,
     storageCap: CART_STORAGE,
     upgraded: false,
+    upgrades: [],
     sellAcc: 0,
     boostLeft: 0,
     mode: "PAPER",
@@ -971,10 +974,31 @@ export function hireStand(
   const found = findStandOrSite(play, standId);
   if (!found) return fail("no_stand");
   if (found.row.hired) return fail("already_hired");
+  if (visitor.cash < HIRE_COST) return fail("no_cash");
+  visitor.cash = roundMoney(visitor.cash - HIRE_COST);
+  play.gameBank = roundMoney(play.gameBank + HIRE_COST);
   const person = HIRE_ROSTER[0]!;
   found.row.hired = true;
   found.row.staffId = person.id;
   found.row.staffName = person.name;
+  if (found.kind === "stand") autoStockStand(play, found.row);
+  else autoStockWork(play, found.row);
+  if (found.kind === "stand") return ok({ stand: found.row });
+  return ok({ site: found.row });
+}
+
+export function fireStand(
+  visitor: Visitor,
+  standId: string,
+): LoopOk<{ stand: Stand } | { site: WorkSite }> | LoopFail {
+  const play = ensurePlay(visitor);
+  const found = findStandOrSite(play, standId);
+  if (!found) return fail("no_stand");
+  if (!found.row.hired) return fail("not_hired");
+  found.row.hired = false;
+  found.row.staffId = null;
+  found.row.staffName = null;
+  if (found.kind === "stand") found.row.attending = false;
   if (found.kind === "stand") return ok({ stand: found.row });
   return ok({ site: found.row });
 }
@@ -988,22 +1012,39 @@ export function setStandPrice(
   const found = findStandOrSite(play, standId);
   if (!found) return fail("no_stand");
   const n = Number(price);
-  if (!Number.isFinite(n) || n < 0.01 || n > 1000) return fail("bad_price");
+  if (!Number.isFinite(n) || n < STICKER_MIN || n > STICKER_MAX) return fail("bad_price");
   found.row.stickerPrice = roundMoney(n);
   if (found.kind === "stand") return ok({ stand: found.row });
   return ok({ site: found.row });
 }
 
-export function upgradeStand(visitor: Visitor, standId: string): LoopOk<{ stand: Stand } | { site: WorkSite }> | LoopFail {
+export function upgradeStand(
+  visitor: Visitor,
+  standId: string,
+  upgradeId?: string,
+): LoopOk<{ stand: Stand } | { site: WorkSite }> | LoopFail {
   const play = ensurePlay(visitor);
   const found = findStandOrSite(play, standId);
   if (!found) return fail("no_stand");
-  if (found.row.upgraded) return fail("already_upgraded");
-  if (visitor.cash < STORAGE_UPGRADE_COST) return fail("no_cash");
-  visitor.cash = roundMoney(visitor.cash - STORAGE_UPGRADE_COST);
-  play.gameBank = roundMoney(play.gameBank + STORAGE_UPGRADE_COST);
-  found.row.upgraded = true;
-  found.row.storageCap = CART_STORAGE * 2;
+  const id = upgradeId && String(upgradeId) ? String(upgradeId) : "fridge";
+  const spec = SITE_UPGRADES.find((u) => u.id === id);
+  if (!spec) return fail("unknown_upgrade");
+  const owned = ownedUpgrades(found.row);
+  if (owned.includes(id)) return fail("already_upgraded");
+  const idx = SITE_UPGRADES.findIndex((u) => u.id === id);
+  if (idx > 0 && !owned.includes(SITE_UPGRADES[idx - 1]!.id)) return fail("need_prior");
+  if (visitor.cash < spec.cost) return fail("no_cash");
+  visitor.cash = roundMoney(visitor.cash - spec.cost);
+  play.gameBank = roundMoney(play.gameBank + spec.cost);
+  found.row.upgrades = [...owned, id];
+  if (id === "fridge") {
+    found.row.upgraded = true;
+    found.row.storageCap = CART_STORAGE * 2;
+  }
+  if (found.row.hired) {
+    if (found.kind === "stand") autoStockStand(play, found.row);
+    else autoStockWork(play, found.row);
+  }
   if (found.kind === "stand") return ok({ stand: found.row });
   return ok({ site: found.row });
 }
@@ -1139,6 +1180,8 @@ export function playSnapshot(visitor: Visitor, land: LandBoard) {
     cash: visitor.cash,
     incomePerMinute: incomePerMinute(play),
     todayPrice: TODAY_PRICE,
+    hireCost: HIRE_COST,
+    upgradeCatalog: SITE_UPGRADES.map((u) => ({ ...u })),
     deliveryWaitMs: DELIVERY_WAIT_MS,
     salesTax: SALES_TAX,
     gameBank: play.gameBank,

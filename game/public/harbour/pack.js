@@ -51,7 +51,7 @@ export function mountPackShift() {
   let spawnMs = 720;
 
   function paintHits() {
-    if (hitsEl) hitsEl.textContent = hits + " sliced · finish to sell 5–10";
+    if (hitsEl) hitsEl.textContent = String(hits);
   }
 
   function spawn() {
@@ -100,8 +100,8 @@ export function mountPackShift() {
     running = true;
     onDone = opts && opts.onDone;
     goods = opts && Array.isArray(opts.goods) && opts.goods.length ? opts.goods : FRUIT_SLICE;
-    if (badge) badge.textContent = ((opts && opts.title) || "Fruit slice") + " · PAPER";
-    if (hint) hint.textContent = "Tap fruit as they fall. A full shift sells a handful.";
+    if (badge) badge.textContent = (opts && opts.title) || "Fruit slice";
+    if (hint) hint.textContent = "Tap fruit.";
     root.hidden = false;
     slots.innerHTML = "";
     paintHits();

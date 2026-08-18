@@ -374,7 +374,7 @@ export function mountChrome(opts) {
                 return `<div class="stand-row"><span>${s.label || "Site"} · ${where}</span><button type="button" class="go" data-open-stand="${s.id}">Open</button></div>`;
               })
               .join("")
-          : "<p>Place a cart or tap your shop or mine. Hire from that site. Sites do not run without staff.</p>"
+          : "<p>Open a site to hire.</p>"
       }
     `;
   }
@@ -418,6 +418,8 @@ export function mountChrome(opts) {
   }
 
   function startPack(goods, standId, title) {
+    const site = findSite(standId);
+    if (site && site.hired) return;
     packShift.open({
       goods,
       title,
@@ -433,11 +435,7 @@ export function mountChrome(opts) {
         const fresh = findSite(standId);
         if (fresh) paintStandMenu(fresh);
         if (opts.setStatus) {
-          opts.setStatus(
-            ok
-              ? `Shift sold ${data.sold || 0} · ${money(data.earned || 0)} PAPER`
-              : "Pack: " + ((data && data.reason) || "skipped"),
-          );
+          opts.setStatus(ok ? `Sold ${data.sold || 0}` : "Pack skipped");
         }
       },
     });
@@ -480,17 +478,25 @@ export function mountChrome(opts) {
       });
     });
     const priceEl = standMenu.querySelector("#sticker-price");
+    const priceOut = standMenu.querySelector("[data-sticker-out]");
     if (priceEl) {
+      const todayN = Number(play && play.todayPrice != null ? play.todayPrice : 6);
+      const paintRead = () => {
+        const v = Number(priceEl.value);
+        if (!priceOut) return;
+        priceOut.textContent = money(v);
+        priceOut.classList.toggle("is-today", Math.abs(v - todayN) < 0.01);
+        priceOut.classList.toggle("is-low", v < todayN - 0.01);
+        priceOut.classList.toggle("is-high", v > todayN + 0.01);
+      };
+      priceEl.addEventListener("input", paintRead);
       priceEl.addEventListener("change", async () => {
-        const { data } = await readJson("/api/stand/price", {
+        await readJson("/api/stand/price", {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ standId: live.id, price: Number(priceEl.value) }),
         });
-        if (data && data.play) play = data.play;
         paintTop();
-        const fresh = findSite(live.id);
-        if (fresh) paintStandMenu(fresh, onStock, onHire);
       });
     }
     const qtyEl = standMenu.querySelector("#stock-qty");
@@ -534,6 +540,23 @@ export function mountChrome(opts) {
         const fresh = findSite(live.id);
         paintStandMenu(fresh, onStock, onHire);
         if (ok && typeof onHire === "function") onHire();
+        if (ok && opts.onHired) opts.onHired(live.id);
+      });
+    }
+    const fireBtn = standMenu.querySelector("[data-fire-site]");
+    if (fireBtn) {
+      fireBtn.addEventListener("click", async () => {
+        const id = fireBtn.getAttribute("data-fire-site");
+        const { ok, data } = await readJson("/api/stand/fire", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ standId: id }),
+        });
+        if (data && data.play) play = data.play;
+        paintTop();
+        const fresh = findSite(live.id);
+        paintStandMenu(fresh, onStock, onHire);
+        if (ok && opts.onFired) opts.onFired(id);
       });
     }
     standMenu.querySelectorAll("[data-upgrade]").forEach((btn) => {
@@ -541,7 +564,10 @@ export function mountChrome(opts) {
         const { data } = await readJson("/api/stand/upgrade", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ standId: btn.getAttribute("data-upgrade") }),
+          body: JSON.stringify({
+            standId: btn.getAttribute("data-upgrade"),
+            upgradeId: btn.getAttribute("data-upgrade-id") || "fridge",
+          }),
         });
         if (data && data.play) play = data.play;
         paintTop();
@@ -549,8 +575,11 @@ export function mountChrome(opts) {
         paintStandMenu(fresh, onStock, onHire);
       });
     });
-    standMenu.querySelector("[data-pack-start]")?.addEventListener("click", () => {
-      startPack(gamesForSite(live), live.id, (live.games && live.games[0]) || "Fruit slice");
+    standMenu.querySelectorAll("[data-pack-start]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (live.hired) return;
+        startPack(gamesForSite(live), live.id, btn.getAttribute("data-game") || (live.games && live.games[0]) || "Fruit slice");
+      });
     });
   }
 

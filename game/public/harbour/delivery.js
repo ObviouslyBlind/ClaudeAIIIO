@@ -4,7 +4,7 @@ import { roadsideDrop, vanAwayPath } from "./roadside.js";
 
 /** Delivery van. Same paved graph as the taxi. PAPER / SIMULATED. */
 
-const SPEED = 28;
+const SPEED = 22;
 const YELLOW = 0xe2c04a;
 const STEEL = 0x3a4046;
 const GLASS = 0x7ec8e0;
@@ -23,19 +23,19 @@ export function makeVan() {
   g.userData.label = "delivery van";
   g.userData.layer = "logistics";
   g.userData.mode = "PAPER";
-  const body = box(1.7, 1.35, 3.4, YELLOW);
-  body.position.y = 1.05;
+  const body = box(2.8, 2.05, 5.4, YELLOW);
+  body.position.y = 1.48;
   body.userData.part = "body";
-  const cabin = box(1.65, 0.7, 1.1, GLASS);
-  cabin.position.set(0, 1.55, 1.05);
+  const cabin = box(2.7, 1.0, 1.55, GLASS);
+  cabin.position.set(0, 2.28, 1.65);
   cabin.userData.part = "cabin";
   const wheel = (x, z) => {
-    const w = box(0.22, 0.44, 0.44, STEEL);
-    w.position.set(x, 0.22, z);
+    const w = box(0.26, 0.52, 0.52, STEEL);
+    w.position.set(x, 0.26, z);
     w.userData.part = "wheel";
     return w;
   };
-  g.add(body, cabin, wheel(-0.8, 1.1), wheel(0.8, 1.1), wheel(-0.8, -1.1), wheel(0.8, -1.1));
+  g.add(body, cabin, wheel(-1.0, 1.45), wheel(1.0, 1.45), wheel(-1.0, -1.45), wheel(1.0, -1.45));
   return g;
 }
 
@@ -71,8 +71,13 @@ export function createDeliveries({ scene, getMap, specOf, heightAt, onDrop }) {
       const from = spec.port;
       const drop =
         delivery.drop ||
-        roadsideDrop(map.roads, delivery.island, dest.x, dest.z);
+        (dest && Number.isFinite(dest.curbX)
+          ? dest
+          : dest && Number.isFinite(dest.x)
+            ? roadsideDrop(map.roads, delivery.island, dest.x, dest.z)
+            : null);
       const curb = drop ? { x: drop.curbX, z: drop.curbZ } : dest;
+      if (!curb || !Number.isFinite(curb.x) || !Number.isFinite(curb.z)) return;
       const route = routeTaxi(map, delivery.island, from.x, from.z, curb.x, curb.z);
       const path = (route && route.points) || [{ x: curb.x, z: curb.z }];
       const mesh = makeVan();
@@ -98,20 +103,16 @@ export function createDeliveries({ scene, getMap, specOf, heightAt, onDrop }) {
         if (!done) continue;
         if (job.phase === "in") {
           if (onDrop) onDrop(job.delivery, job.drop);
-          if (job.leaveAfterDrop) {
-            job.phase = "out";
-            job.path = vanAwayPath(
-              job.drop || {
-                curbX: job.mesh.position.x,
-                curbZ: job.mesh.position.z,
-                awayX: job.mesh.position.x,
-                awayZ: job.mesh.position.z,
-              },
-            );
-            job.i = 0;
-          } else {
-            job.phase = "wait";
-          }
+          job.phase = "out";
+          job.path = vanAwayPath(
+            job.drop || {
+              curbX: job.mesh.position.x,
+              curbZ: job.mesh.position.z,
+              awayX: job.mesh.position.x,
+              awayZ: job.mesh.position.z,
+            },
+          );
+          job.i = 0;
           continue;
         }
         scene.remove(job.mesh);

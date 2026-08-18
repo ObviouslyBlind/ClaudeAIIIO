@@ -916,6 +916,83 @@ nav.dock.travel-dock {
   background: linear-gradient(180deg, #7dffb4, var(--green));
   border-color: #3aa86a;
 }
+.stock-num {
+  margin: 0 0 10px;
+  font-family: "Big Shoulders Display", "Arial Narrow", sans-serif;
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+.stock-num small {
+  margin-left: 2px;
+  font-size: 22px;
+  font-weight: 600;
+  opacity: 0.72;
+}
+.stock-num.is-low { color: #e25b6a; }
+.stock-num.is-mid { color: #e2c04a; }
+.stock-num.is-full { color: var(--green); }
+.sticker-slide {
+  display: grid;
+  gap: 6px;
+  margin-top: 12px;
+}
+.sticker-read {
+  font-size: 28px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  line-height: 1;
+}
+.sticker-read.is-today { color: var(--green); }
+.sticker-read.is-low,
+.sticker-read.is-high { color: #e25b6a; }
+.sticker-track {
+  position: relative;
+  height: 28px;
+}
+.sticker-mark {
+  position: absolute;
+  top: -2px;
+  left: 50%;
+  width: 4px;
+  height: 12px;
+  background: var(--green);
+  border-radius: 2px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 1;
+}
+.sticker-track input[type="range"] {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  margin: 0;
+  height: 28px;
+  accent-color: var(--green);
+}
+.upg-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 40px;
+  padding: 2px 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+.upg-row.is-on span { color: var(--muted); }
+.upg-tick {
+  color: var(--green);
+  font-size: 20px;
+  font-weight: 700;
+}
+.upg-row .go {
+  min-height: 32px;
+  padding: 0 12px;
+}
 .stock-meter {
   height: 10px;
   border-radius: 999px;

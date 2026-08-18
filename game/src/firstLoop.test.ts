@@ -7,6 +7,7 @@ import {
   CART_KINDS,
   CART_PAPER_PRICE,
   DELIVERY_WAIT_MS,
+  HIRE_COST,
   HIRE_ROSTER,
   HOTDOG_PACK_PRICE,
   HOTDOG_SALE_PRICE,
@@ -18,8 +19,10 @@ import {
   WAREHOUSE_FEE_PER_DAY,
   WAREHOUSE_RENT_TICKS,
   cartLoopNeeds,
+  fireStand,
   hireStand,
   incomePerMinute,
+  markArrived,
   orderMarket,
   placeStand,
   playSnapshot,
@@ -86,7 +89,8 @@ describe("South first loop", () => {
     if (!order.ok) return;
     expect(order.paid).toBe(CART_PAPER_PRICE + HOTDOG_PACK_PRICE);
     expect(visitor.cash).toBe(before - order.paid);
-    expect(order.delivery.status).toBe("arrived");
+    expect(order.delivery.status).toBe("en_route");
+    expect(order.delivery.arrivedAtMs).toBeNull();
     expect(order.delivery.drop).toBeTruthy();
     expect(order.delivery.drop?.roadName).toBeTruthy();
     expect(order.delivery.drop!.x !== plot.x || order.delivery.drop!.z !== plot.z).toBe(true);
@@ -124,7 +128,7 @@ describe("South first loop", () => {
     for (let i = 0; i < ticks; i++) tickHotdogSales(visitor, land);
     const net = HOTDOG_SALE_PRICE * (1 - SALES_TAX);
     expect(visitor.cash).toBeCloseTo(cash0 - STORAGE_UPGRADE_COST + net, 8);
-    expect(visitor.play.gameBank).toBeCloseTo(HOTDOG_SALE_PRICE * SALES_TAX + STORAGE_UPGRADE_COST, 8);
+    expect(visitor.play.gameBank).toBeCloseTo(HOTDOG_SALE_PRICE * SALES_TAX + STORAGE_UPGRADE_COST + HIRE_COST, 8);
     expect(placed.stand.hotdogs).toBe(19);
     expect(incomePerMinute(visitor.play)).toBeGreaterThan(0);
 
@@ -171,7 +175,7 @@ describe("South first loop", () => {
     const order = orderMarket(visitor, land, { plotId: home!.id, skus: ["hotdog_cart"] });
     expect(order.ok).toBe(true);
     if (!order.ok) return;
-    expect(order.delivery.status).toBe("arrived");
+    expect(order.delivery.status).toBe("en_route");
     expect(takeAll(visitor, order.delivery.id).ok).toBe(true);
     const placed = placeStand(visitor, land, home!.id);
     expect(placed.ok).toBe(false);
@@ -192,8 +196,9 @@ describe("South first loop", () => {
     expect(visitor.cash).toBe(cash0);
     expect(hireStand(visitor, placed.stand.id, "rui").ok).toBe(true);
     expect(placed.stand.staffName).toBe("Vendor");
+    const cash1 = visitor.cash;
     for (let i = 0; i < 40; i++) tickHotdogSales(visitor, land);
-    expect(visitor.cash).toBeGreaterThan(cash0);
+    expect(visitor.cash).toBeGreaterThan(cash1);
   });
 
   it("stores a buy in the island warehouse and charges $5 a sim day", () => {
@@ -229,8 +234,9 @@ describe("South first loop", () => {
     const order = orderMarket(visitor, land, { plotId: plot.id, skus: ["hotdogs"], dest: "road" });
     expect(order.ok).toBe(true);
     if (!order.ok) return;
-    expect(order.delivery.status).toBe("arrived");
+    expect(order.delivery.status).toBe("en_route");
     expect(DELIVERY_WAIT_MS).toBe(60_000);
+    expect(markArrived(visitor, order.delivery.id).ok).toBe(true);
     visitor.play.deliveries[0]!.arrivedAtMs = 1;
     expect(recallStaleDeliveries(visitor, 1 + DELIVERY_WAIT_MS)).toBe(1);
     expect(visitor.play.deliveries).toHaveLength(0);
@@ -254,7 +260,7 @@ describe("South first loop", () => {
     });
     expect(kerb.ok).toBe(true);
     if (!kerb.ok) return;
-    expect(kerb.delivery.status).toBe("arrived");
+    expect(kerb.delivery.status).toBe("en_route");
     expect(kerb.delivery.drop).toBeTruthy();
   });
 
@@ -324,7 +330,7 @@ describe("South first loop", () => {
     expect(stockStand(visitor, placed.stand.id, 0, "inventory").ok).toBe(true);
     expect(setStandPrice(visitor, placed.stand.id, 8).ok).toBe(true);
     expect(standNeeds(placed.stand).map((n) => n.id)).toEqual(["fridge", "sticker"]);
-    expect(standNeeds(placed.stand).some((n) => n.label.includes("today's price"))).toBe(true);
+    expect(standNeeds(placed.stand).some((n) => n.label.includes("Sticker $"))).toBe(true);
     expect(upgradeStand(visitor, placed.stand.id).ok).toBe(true);
     expect(setStandPrice(visitor, placed.stand.id, TODAY_PRICE).ok).toBe(true);
     expect(standNeeds(placed.stand)).toEqual([]);
@@ -383,6 +389,53 @@ describe("South first loop", () => {
     expect(shop!.id).toBe(`site-${plot!.id}`);
     expect(hireStand(visitor, shop!.id).ok).toBe(true);
     expect(playSnapshot(visitor, land).sites.find((s) => s.id === shop!.id)!.staffName).toBe("Vendor");
+  });
+
+  it("charges $30 to hire, lets you fire, and fills extra fridge room while hired", () => {
+    const { land, visitor, plot } = leaseCheapSouth();
+    const kit = orderMarket(visitor, land, { skus: ["hotdog_cart"], dest: "cart" });
+    expect(kit.ok).toBe(true);
+    const dogs = orderMarket(visitor, land, { skus: ["hotdogs"], dest: "warehouse", qty: 2 });
+    expect(dogs.ok).toBe(true);
+    const placed = placeStand(visitor, land, plot.id);
+    expect(placed.ok).toBe(true);
+    if (!placed.ok) return;
+    visitor.cash = 10;
+    expect(hireStand(visitor, placed.stand.id).reason).toBe("no_cash");
+    visitor.cash = 80;
+    const cash0 = visitor.cash;
+    expect(hireStand(visitor, placed.stand.id).ok).toBe(true);
+    expect(visitor.cash).toBeCloseTo(cash0 - HIRE_COST, 8);
+    expect(placed.stand.hired).toBe(true);
+    expect(placed.stand.hotdogs).toBe(20);
+    expect(visitor.play.warehouse.items.find((i) => i.kind === "hotdogs")?.qty).toBe(20);
+    visitor.cash = 250;
+    expect(upgradeStand(visitor, placed.stand.id, "fridge").ok).toBe(true);
+    expect(placed.stand.storageCap).toBe(40);
+    expect(placed.stand.hotdogs).toBe(40);
+    expect(visitor.play.warehouse.items.find((i) => i.kind === "hotdogs")).toBeUndefined();
+    expect(fireStand(visitor, placed.stand.id).ok).toBe(true);
+    expect(placed.stand.hired).toBe(false);
+    expect(placed.stand.staffName).toBeNull();
+    expect(fireStand(visitor, placed.stand.id).reason).toBe("not_hired");
+  });
+
+  it("does not sell a mini-game burst while a vendor is manning", () => {
+    const { land, visitor, plot } = leaseCheapSouth();
+    const order = orderMarket(visitor, land, { plotId: plot.id, skus: ["hotdog_cart", "hotdogs"] });
+    expect(order.ok).toBe(true);
+    if (!order.ok) return;
+    takeAll(visitor, order.delivery.id);
+    const placed = placeStand(visitor, land, plot.id);
+    expect(placed.ok).toBe(true);
+    if (!placed.ok) return;
+    expect(stockStand(visitor, placed.stand.id).ok).toBe(true);
+    expect(hireStand(visitor, placed.stand.id).ok).toBe(true);
+    const cash0 = visitor.cash;
+    const burst = sellShiftBurst(visitor, land, placed.stand.id, 8);
+    expect(burst.sold).toBe(0);
+    expect(placed.stand.hotdogs).toBe(20);
+    expect(visitor.cash).toBe(cash0);
   });
 
   it("lets you buy the fridge before anyone is hired", () => {

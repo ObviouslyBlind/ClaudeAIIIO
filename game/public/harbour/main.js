@@ -540,6 +540,11 @@ function attachVendor(cart) {
   cart.add(vendor);
 }
 
+function detachVendor(cart) {
+  const vendor = cart && cart.getObjectByName("vendor");
+  if (vendor) cart.remove(vendor);
+}
+
 function syncStandMesh(stand) {
   if (!stand) return;
   let mesh = standMeshes.get(stand.id);
@@ -561,6 +566,7 @@ function syncStandMesh(stand) {
   }
   mesh.position.set(x, heightAt(specOf(island), x, z), z);
   if (stand.hired) attachVendor(mesh);
+  else detachVendor(mesh);
 }
 
 function syncCrateMesh(delivery) {
@@ -1834,7 +1840,7 @@ async function ensureDeliveries() {
         syncCrateMesh({ ...delivery, status: "arrived", drop: drop || delivery.drop });
         if (chromeHud) chromeHud.refresh();
         if (overlays) overlays.refresh(chromeHud && chromeHud.getPlay(), map);
-        setStatus("Van waiting. Take the crate — it will not leave first..");
+        setStatus("Crate on the kerb. Tap it.");
       });
     },
   });
@@ -1997,7 +2003,12 @@ async function boot() {
       const playNow = chromeHud && chromeHud.getPlay && chromeHud.getPlay();
       const hired = playNow && (playNow.stands || []).find((s) => s.id === standId);
       if (hired) syncStandMesh({ ...hired, hired: true });
-      setStatus("Hired. They stand by the cart..");
+      setStatus("Hired.");
+    },
+    onFired(standId) {
+      const mesh = standMeshes.get(standId);
+      if (mesh) detachVendor(mesh);
+      setStatus("Fired.");
     },
     onStocked() {},
     onOverlay(id) {
@@ -2016,8 +2027,7 @@ async function boot() {
       for (const d of play.deliveries || []) {
         if (takenCrates.has(d.id)) continue;
         if (d.status === "en_route" && deliveries) {
-          const plot = map.plots.find((p) => p.id === d.plotId);
-          if (plot) deliveries.start(d, plot);
+          deliveries.start(d, d.drop || map.plots.find((p) => p.id === d.plotId));
         }
         if (d.status === "arrived") syncCrateMesh(d);
       }
@@ -2028,12 +2038,12 @@ async function boot() {
       if (chromeHud && chromeHud.closePanels) chromeHud.closePanels();
       if (delivery.status === "arrived") {
         syncCrateMesh(delivery);
-        setStatus("Green package on the kerb. Tap it — Take all or Close.");
+        setStatus("Green package on the kerb. Tap it.");
         return;
       }
       void ensureDeliveries().then(() => {
-        const plot = map.plots.find((p) => p.id === delivery.plotId);
-        if (plot) deliveries.start(delivery, plot);
+        deliveries.start(delivery, delivery.drop);
+        setStatus("Van on the way.");
       });
     },
   });
@@ -2042,6 +2052,13 @@ async function boot() {
   await idle(80);
   await ensureTaxi();
   await ensureDeliveries();
+  const pending = chromeHud && chromeHud.getPlay && chromeHud.getPlay();
+  if (pending && deliveries) {
+    for (const d of pending.deliveries || []) {
+      if (d.status === "en_route") deliveries.start(d, d.drop);
+      if (d.status === "arrived") syncCrateMesh(d);
+    }
+  }
   void loadSheetHuds();
   void loadTrickleDressing();
 }

@@ -33,6 +33,7 @@ import {
 } from "./kernel/index.ts";
 import {
   hireStand,
+  fireStand,
   markArrived,
   orderMarket,
   placeStand,
@@ -282,6 +283,13 @@ const server = createServer(async (req, res) => {
     return;
   }
 
+  if (req.method === "POST" && url.pathname === "/api/stand/fire") {
+    const body = await readJsonBody(req);
+    const result = fireStand(visitor, String(body?.standId ?? ""));
+    json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
+    return;
+  }
+
   if (req.method === "POST" && url.pathname === "/api/stand/price") {
     const body = await readJsonBody(req);
     const result = setStandPrice(visitor, String(body?.standId ?? ""), Number(body?.price));
@@ -291,7 +299,7 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "POST" && url.pathname === "/api/stand/upgrade") {
     const body = await readJsonBody(req);
-    const result = upgradeStand(visitor, String(body?.standId ?? ""));
+    const result = upgradeStand(visitor, String(body?.standId ?? ""), body?.upgradeId ? String(body.upgradeId) : undefined);
     json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
     return;
   }
@@ -309,8 +317,20 @@ const server = createServer(async (req, res) => {
       });
       return;
     }
-    const result = completePackShift(visitor, body || {});
     const standId = typeof body?.standId === "string" ? body.standId : "";
+    const hiredSite =
+      play.stands.find((s) => s.id === standId) || (play.workSites || []).find((s) => s.id === standId);
+    if (hiredSite && hiredSite.hired) {
+      json(res, 400, {
+        ok: false,
+        reason: "hired",
+        mode: "PAPER",
+        provenance: "SIMULATED",
+        play: playPayload(),
+      });
+      return;
+    }
+    const result = completePackShift(visitor, body || {});
     const burst =
       result.ok && standId ? sellShiftBurst(visitor, land, standId, result.hits) : { sold: 0, earned: 0 };
     json(res, result.ok ? 200 : 400, { ...result, sold: burst.sold, earned: burst.earned, play: playPayload() });
