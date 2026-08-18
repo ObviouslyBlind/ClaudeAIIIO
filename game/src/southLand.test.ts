@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createLandBoard, heightAt, ISLANDS } from "./land.ts";
-import { SOUTH_PORT, SOUTH_TOWNS, SOUTH_VOLCANO, volcanoDist, distToPolyline } from "./southGeom.ts";
+import { SOUTH_PORT, SOUTH_RAB, SOUTH_TOWNS, SOUTH_VOLCANO, volcanoDist, distToPolyline } from "./southGeom.ts";
 import { canWalk } from "./walk.ts";
 
 describe("South land (no buildings)", () => {
@@ -80,17 +80,23 @@ describe("South land (no buildings)", () => {
     const south = board.plots.filter((p) => p.island === "south");
     expect(south.length).toBeGreaterThan(200);
     const cane = board.roads.find((r) => r.name === "Canebrake Rd")!;
-    const mid = cane.points[Math.floor(cane.points.length / 2)]!;
-    const a = cane.points[Math.floor(cane.points.length / 2) + 1]!;
-    const dx = a.x - mid.x;
-    const dz = a.z - mid.z;
-    const len = Math.hypot(dx, dz) || 1;
-    const px = -dz / len;
-    const pz = dx / len;
-    const left = south.filter((p) => Math.hypot(p.x - (mid.x + px * 18), p.z - (mid.z + pz * 18)) < 40);
-    const right = south.filter((p) => Math.hypot(p.x - (mid.x - px * 18), p.z - (mid.z - pz * 18)) < 40);
-    expect(left.length).toBeGreaterThan(0);
-    expect(right.length).toBeGreaterThan(0);
+    const midI = Math.floor(cane.points.length / 2);
+    const sample = cane.points.slice(Math.max(1, midI - 2), midI + 3);
+    let left = 0;
+    let right = 0;
+    for (let i = 0; i < sample.length - 1; i++) {
+      const mid = sample[i]!;
+      const a = sample[i + 1]!;
+      const dx = a.x - mid.x;
+      const dz = a.z - mid.z;
+      const len = Math.hypot(dx, dz) || 1;
+      const px = -dz / len;
+      const pz = dx / len;
+      left += south.filter((p) => Math.hypot(p.x - (mid.x + px * 18), p.z - (mid.z + pz * 18)) < 40).length;
+      right += south.filter((p) => Math.hypot(p.x - (mid.x - px * 18), p.z - (mid.z - pz * 18)) < 40).length;
+    }
+    expect(left).toBeGreaterThan(0);
+    expect(right).toBeGreaterThan(0);
     const fields = south.filter((p) => p.band === "field");
     expect(fields.length).toBeGreaterThan(20);
     expect(fields.some((p) => p.area > 2000)).toBe(true);
@@ -100,6 +106,7 @@ describe("South land (no buildings)", () => {
     const board = createLandBoard();
     expect(board.roads.some((r) => r.name === "Haven Chord")).toBe(false);
     expect(board.roads.some((r) => r.name === "Quayward Loop")).toBe(true);
+    expect(board.roads.some((r) => r.name?.startsWith("Ash Spoke"))).toBe(false);
     const mill = board.roads.find((r) => r.name === "Mill Fork")!;
     const cane = board.roads.find((r) => r.name === "Canebrake Rd")!;
     const town = SOUTH_TOWNS.find((t) => t.id === "canebrake")!;
@@ -109,5 +116,36 @@ describe("South land (no buildings)", () => {
     const row = board.roads.find((r) => r.island === "south" && r.name?.includes("Cane Row"));
     expect(row).toBeTruthy();
     expect(distToPolyline(cane.points, row!.points[0]!.x, row!.points[0]!.z)).toBeGreaterThan(5);
+
+    const harbour = SOUTH_RAB.harbour;
+    const nearCircus = board.roads.filter(
+      (r) =>
+        r.island === "south" &&
+        r.kind === "paved" &&
+        !r.roundabout &&
+        r.lanes !== 4 &&
+        r.points.some((p) => Math.hypot(p.x - harbour.x, p.z - harbour.z) < 40),
+    );
+    const names = nearCircus.map((r) => r.name).sort();
+    expect(names).toEqual(["Quayward Rd", "South Strand"]);
+    const headings = nearCircus.map((r) => {
+      const p = r.points.reduce(
+        (best, q) => (Math.hypot(q.x - harbour.x, q.z - harbour.z) < best.d ? { d: Math.hypot(q.x - harbour.x, q.z - harbour.z), p: q } : best),
+        { d: Infinity, p: r.points[0]! },
+      ).p;
+      return Math.atan2(p.z - harbour.z, p.x - harbour.x);
+    });
+    let gap = Math.abs(headings[0]! - headings[1]!);
+    if (gap > Math.PI) gap = Math.PI * 2 - gap;
+    expect(gap).toBeGreaterThan((35 * Math.PI) / 180);
+
+    const channel = board.roads.find((r) => r.name === "Channel Sands")!;
+    const palm = board.roads.find((r) => r.name === "Palm Arc")!;
+    const hwy = board.roads.find((r) => r.name === "Island Hwy")!;
+    const strand = board.roads.find((r) => r.name === "South Strand")!;
+    expect(Math.hypot(channel.points[0]!.x - harbour.x, channel.points[0]!.z - harbour.z)).toBeGreaterThan(80);
+    expect(Math.hypot(palm.points[0]!.x - harbour.x, palm.points[0]!.z - harbour.z)).toBeGreaterThan(80);
+    expect(distToPolyline(hwy.points, channel.points[0]!.x, channel.points[0]!.z)).toBeLessThan(18);
+    expect(distToPolyline(strand.points, palm.points[0]!.x, palm.points[0]!.z)).toBeLessThan(12);
   });
 });
