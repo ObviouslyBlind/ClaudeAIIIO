@@ -6,6 +6,7 @@
 import { plotDisplayName } from "./parcel-map.js";
 import { buyAskModel } from "./buy-ask.js";
 import { playPaperBuy } from "./paper-sfx.js";
+import { toggleViewer } from "./overlays.js";
 
 export const POLL_MS = 1000;
 
@@ -46,8 +47,8 @@ export function mountChrome(opts) {
   let marketSku = null;
 
   const HINTS = {
-    world: "World: left-click walks. Click a $ bar to be asked if you want to buy.",
-    lots: "Lots: click a $ bar or the lot. A small ask appears before you buy.",
+    world: "World: left-click walks. Lots chip shows lot outlines and $ bars.",
+    lots: "Lots on. Click Lots again to hide. Click a $ bar — you will be asked if you want to buy.",
     foot: "Foot traffic: green / yellow / red on each named road.",
     logistics: "Logistics: tap the crate. The van waits until you take it.",
     minerals: "Minerals: ore catalog is in. Overlay paint comes next.",
@@ -344,7 +345,7 @@ export function mountChrome(opts) {
   });
   root.querySelectorAll("[data-overlay]").forEach((btn) => {
     btn.addEventListener("click", () => {
-      setOverlay(btn.getAttribute("data-overlay"));
+      setOverlay(toggleViewer(overlay, btn.getAttribute("data-overlay")));
     });
   });
 
@@ -393,7 +394,7 @@ export function mountChrome(opts) {
     }
   }
 
-  setOverlay("lots");
+  setOverlay("world");
 
   return {
     stop() {

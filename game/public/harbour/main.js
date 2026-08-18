@@ -311,7 +311,7 @@ function aimPointer(ev) {
 }
 
 const HUD_BLOCK =
-  "nav, a, button, #taxi-map, #ferry-ticket, #catalog-picker, .float-panel, #land-card, #buy-ask, #lot-tags, #stand-menu";
+  "nav, a, #taxi-map, #ferry-ticket, #catalog-picker, .float-panel, #land-card, #buy-ask, #stand-menu";
 
 function parcelLabel(p) {
   const kind = p.band === "field" ? "field" : p.band === "shore" ? "shore land" : "street land";
@@ -1156,7 +1156,7 @@ function onPointer(ev) {
     return;
   }
   const tagPick =
-    (viewer === "world" || viewer === "lots") &&
+    viewer === "lots" &&
     parcelMap &&
     typeof parcelMap.pickLabel === "function"
       ? parcelMap.pickLabel(camera, ev.clientX, ev.clientY, window.innerWidth, window.innerHeight, canvas)
@@ -1168,7 +1168,7 @@ function onPointer(ev) {
       return;
     }
   }
-  if (labelHit && (viewer === "world" || viewer === "lots")) {
+  if (labelHit && viewer === "lots") {
     const spr = objectWithKind(labelHit.object, "parcel-label");
     const id = spr && (spr.userData.plotId || (spr.userData.plot && spr.userData.plot.id));
     const p = id && map && map.plots.find((x) => x.id === id);
@@ -1192,13 +1192,13 @@ function onPointer(ev) {
     setStatus("Tap land you leased that has no building yet.");
     return;
   }
-  if ((viewer === "world" || viewer === "lots") && tapPt) {
+  if (viewer === "lots" && tapPt) {
     const p = findParcelAt(tapPt.x, tapPt.z);
-    if (p && !p.owner) {
+    if (p && !p.owner && pointInRing(tapPt.x, tapPt.z, p.ring)) {
       askToBuy(p);
       return;
     }
-    if (p && viewer === "lots") {
+    if (p && p.owner && pointInRing(tapPt.x, tapPt.z, p.ring)) {
       showLandCard(p);
       return;
     }
@@ -1688,7 +1688,8 @@ async function boot() {
       if (chromeHud) chromeHud.refresh();
     },
     onOverlay(id) {
-      if (overlays) overlays.setMode(id, chromeHud.getPlay(), map);
+      const play = chromeHud && typeof chromeHud.getPlay === "function" ? chromeHud.getPlay() : null;
+      if (overlays) overlays.setMode(id, play, map);
     },
     onPlay(play) {
       if (overlays) overlays.refresh(play, map);
@@ -1709,7 +1710,7 @@ async function boot() {
     },
     onPlaceMode() {},
   });
-  setStatus("Lots viewer. Click a $ bar — you will be asked if you want to buy. PAPER.");
+  setStatus("World viewer. Left-click walks. Lots chip shows outlines. PAPER.");
   onResize();
   await idle(80);
   await ensureTaxi();

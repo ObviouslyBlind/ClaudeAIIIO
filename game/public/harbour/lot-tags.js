@@ -97,6 +97,14 @@ export function mountLotTags({ canvas, camera, heightAt, specOf, getPlots, onBuy
   }
 
   function tick(playerPos, dt = 0.016, overlay = "world") {
+    if (overlay !== "lots") {
+      root.hidden = true;
+      for (const btn of buttons) {
+        if (btn) btn.hidden = true;
+      }
+      return;
+    }
+    root.hidden = false;
     clock -= dt;
     if (clock > 0) return;
     clock = overlay === "lots" ? 0.12 : 0.28;

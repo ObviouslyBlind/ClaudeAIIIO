@@ -66,7 +66,9 @@ describe("harbour boot import graph", () => {
     expect(src).toContain("mountLotTags");
     expect(src).toContain("parcel-label");
     expect(src).toContain("pickLabel");
-    expect(src).toContain("you will be asked if you want to buy");
+    expect(src).toContain("Left-click walks");
+    expect(src).toContain('viewer === "lots" && tapPt');
+    expect(src).not.toContain('viewer === "world" || viewer === "lots"');
     expect(src).toContain("clickTargets()");
     expect(src).not.toContain("function inspectLandAt");
     expect(src).not.toContain("intersectObjects(root.children, true)");

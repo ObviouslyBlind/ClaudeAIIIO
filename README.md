@@ -12,6 +12,6 @@ npm run play
 npm run play:laptop   # pasteable https link
 ```
 
-South spawn. Click a **$ bar** — a small ask: do you want to buy? Yes / No. Taxi on paved. Ferry $15. Restarting play wipes.
+South spawn. **World:** left-click walks. **Lots** chip shows outlines — click it again to hide. $ bar opens a buy ask. Taxi on paved. Ferry $15. Restarting play wipes.
 
 Spec: [game/PLAN.md](game/PLAN.md) · Loop: [game/reports/FIRST_LOOP.md](game/reports/FIRST_LOOP.md) · Kernel: [game/FOUNDATION.md](game/FOUNDATION.md)
