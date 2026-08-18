@@ -11,7 +11,7 @@ import { createVisitor, createWorld, hud, tick } from "./sim.ts";
 import { cancelOrder } from "./cancelOrder.ts";
 import { listOpenOrders, placeAsk, placeBid } from "./orders.ts";
 import { postStaff, staffMapSnapshot } from "./staff-http.ts";
-import { ASSET_NONCE, bustHarbourAssets, bustModuleImports } from "./cache-bust.ts";
+import { ASSET_NONCE, bustFontUrls, bustHarbourAssets, bustModuleImports } from "./cache-bust.ts";
 import { resolvePublicPath } from "./public-path.ts";
 import { confirmFerry, listFerryRoutes } from "./ferry-routes.ts";
 import { calendarHud } from "./calendar.ts";
@@ -488,6 +488,10 @@ const server = createServer(async (req, res) => {
     const headers: Record<string, string> = {
       "content-type": types[ext] ?? "application/octet-stream",
     };
+    if (ext === ".woff2") {
+      headers["access-control-allow-origin"] = "*";
+      headers["cache-control"] = "no-store, no-cache, must-revalidate";
+    }
     if (ext === ".js" || ext === ".css" || ext === ".html") {
       headers["cache-control"] = "no-store, no-cache, must-revalidate";
       headers["pragma"] = "no-cache";
@@ -495,6 +499,9 @@ const server = createServer(async (req, res) => {
     }
     if (ext === ".html") {
       data = bustHarbourAssets(data.toString("utf8"), ASSET_NONCE);
+    }
+    if (ext === ".css" && pathname.startsWith("/harbour/")) {
+      data = bustFontUrls(data.toString("utf8"), ASSET_NONCE);
     }
     if (ext === ".js" && pathname.startsWith("/harbour/")) {
       data = bustModuleImports(data.toString("utf8"), ASSET_NONCE);
