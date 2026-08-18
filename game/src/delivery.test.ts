@@ -3,7 +3,7 @@ import * as THREE from "three";
 import { createDeliveries } from "../public/harbour/delivery.js";
 
 describe("delivery van (PAPER)", () => {
-  it("waits at the kerb until the crate is taken", () => {
+  it("drops the crate then drives away", () => {
     const scene = new THREE.Scene();
     let dropped = 0;
     const vans = createDeliveries({
@@ -25,9 +25,6 @@ describe("delivery van (PAPER)", () => {
     );
     for (let i = 0; i < 80; i++) vans.tick(1);
     expect(dropped).toBe(1);
-    expect(scene.children.length).toBe(1);
-    vans.release("del-1");
-    for (let i = 0; i < 80; i++) vans.tick(1);
     expect(scene.children.length).toBe(0);
   });
 });
