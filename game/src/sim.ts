@@ -17,7 +17,7 @@ import { matchVisitorOrders } from "./orders.ts";
 import { tickStaff, type StaffSlot } from "./staff.ts";
 import { tickUpkeep, type UpkeepLand } from "./upkeep.ts";
 import { createVisitorCart, type CartLine } from "./visitorCart.ts";
-import { createPlayState, tickHotdogSales, type PlayState } from "./firstLoop.ts";
+import { createPlayState, tickPlay, type PlayState } from "./firstLoop.ts";
 
 export {
   BOOK_ISLANDS,
@@ -223,7 +223,7 @@ export function tick(world: World, visitor?: Visitor, land?: UpkeepLand): void {
   if (visitor) tickStaff(world, visitor);
   if (visitor && land) {
     tickUpkeep(world, visitor, land);
-    tickHotdogSales(visitor, land);
+    tickPlay(visitor, land as never, world.tick);
   }
 }
 

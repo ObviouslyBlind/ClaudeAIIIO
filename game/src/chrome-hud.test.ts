@@ -18,14 +18,15 @@ describe("harbour chrome HUD", () => {
     expect(html).toContain('id="taxi-map-exit"');
     expect(html).toContain("Keep riding");
     expect(html).toContain('data-panel="inventory"');
+    expect(html).toContain('data-panel="warehouse"');
     expect(html).toContain('data-panel="market"');
     expect(html).toContain('data-panel="employees"');
     expect(html).toContain('id="chrome"');
     expect(html).toContain('id="buy-ask"');
     expect(html).toContain('id="lot-tags"');
+    expect(html).toContain('id="storage-fee"');
     expect(html).toContain("Click again to hide");
     expect(html).not.toContain("first loop");
-    expect(html).toContain('id="cart">PAPER<');
     expect(html).not.toContain('data-panel="tutorials"');
     expect(html).not.toContain("Tutorials");
     expect(html).not.toContain("script-coach");
@@ -41,13 +42,16 @@ describe("harbour chrome HUD", () => {
     expect(chrome).toContain('id="land-lease"');
     expect(chrome).toContain('id="land-close"');
     expect(chrome).toContain("onCloseLand");
-    expect(chrome).toContain("PAPER");
     expect(chrome).toContain("landCard.hidden = true");
     expect(chrome).toContain("extras.onTake()");
     expect(chrome).toContain("data-place");
     expect(chrome).toContain("data-stock");
     expect(chrome).toContain("data-hire-person");
     expect(chrome).toContain("place-cancel");
+    expect(chrome).toContain("today-price");
+    expect(chrome).toContain("Store in warehouse");
+    expect(chrome).toContain("data-pin");
+    expect(chrome).not.toContain("Run it myself");
   });
 
   it("walks the marketplace aisle → sku → deliver, and chirps on buy", () => {

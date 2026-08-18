@@ -32,14 +32,16 @@ import {
   mineralsSnapshot,
 } from "./kernel/index.ts";
 import {
-  attendStand,
   hireStand,
   markArrived,
   orderMarket,
   placeStand,
   playSnapshot,
+  setStandPrice,
   stockStand,
   takeAll,
+  upgradeStand,
+  withdrawWarehouse,
 } from "./firstLoop.ts";
 import { footTrafficSnapshot } from "./footTraffic.ts";
 
@@ -267,9 +269,24 @@ const server = createServer(async (req, res) => {
     return;
   }
 
-  if (req.method === "POST" && url.pathname === "/api/stand/attend") {
+  if (req.method === "POST" && url.pathname === "/api/stand/price") {
     const body = await readJsonBody(req);
-    const result = attendStand(visitor, body?.standId ? String(body.standId) : null);
+    const result = setStandPrice(visitor, String(body?.standId ?? ""), Number(body?.price));
+    json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/stand/upgrade") {
+    const body = await readJsonBody(req);
+    const result = upgradeStand(visitor, String(body?.standId ?? ""));
+    json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/warehouse/withdraw") {
+    const body = await readJsonBody(req);
+    const kind = String(body?.kind ?? "") as "hotdog_cart" | "hotdogs";
+    const result = withdrawWarehouse(visitor, kind, Number(body?.qty ?? 0));
     json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
     return;
   }

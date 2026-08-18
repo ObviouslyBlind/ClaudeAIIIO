@@ -33,7 +33,8 @@
 .float-panel,
 #land-card,
 #buy-ask,
-#stand-menu {
+#stand-menu,
+#place-hint {
   pointer-events: auto;
   text-shadow: none;
 }
@@ -176,9 +177,104 @@ nav.dock.travel-dock {
   transform: translateY(0) scale(1);
   pointer-events: auto;
 }
-.float-panel.pos-inv { left: 72px; top: 108px; }
-.float-panel.pos-market { left: 72px; top: 164px; }
-.float-panel.pos-staff { left: 72px; top: 220px; }
+.chrome-tl .whisper {
+  margin: 4px 0 0;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--muted);
+}
+.float-panel.pos-warehouse { left: 72px; top: 164px; }
+.float-panel.pos-market { left: 72px; top: 220px; }
+.float-panel.pos-staff { left: 72px; top: 276px; }
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 0 8px;
+  cursor: grab;
+}
+.panel-head h2 { margin: 0; font-size: 15px; }
+.panel-head .pin {
+  min-height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.panel-head .pin.is-on {
+  border-color: var(--green);
+  color: var(--green);
+}
+
+.whisper {
+  margin: 0 0 10px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.dest-row {
+  display: flex;
+  gap: 6px;
+  margin: 10px 0 8px;
+}
+.dest {
+  flex: 1;
+  min-height: 36px;
+  padding: 0 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #132428;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.dest.is-on {
+  border-color: var(--green);
+  color: var(--green);
+}
+
+.sticker-label {
+  margin: 10px 0 4px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.sticker-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 0 0 10px;
+}
+.sticker-row input {
+  width: 88px;
+  min-height: 36px;
+  padding: 4px 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #132428;
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.today-price {
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 500;
+}
+.suggest {
+  margin: 6px 0 8px;
+  font-size: 13px;
+  color: var(--ink);
+}
+#stand-menu input { pointer-events: auto; }
 .float-panel.pos-tr { right: 12px; top: 96px; }
 
 .float-panel h2 {

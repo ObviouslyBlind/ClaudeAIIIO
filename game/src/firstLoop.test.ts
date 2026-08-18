@@ -5,20 +5,30 @@ import { BAND_LEVEL, footTrafficSnapshot, plotTrafficBand, roadTrafficBand } fro
 import { roadsideDrop } from "./roadside.ts";
 import {
   CART_PAPER_PRICE,
+  DELIVERY_WAIT_MS,
   HIRE_ROSTER,
   HOTDOG_PACK_PRICE,
   HOTDOG_SALE_PRICE,
   PLACE_CORRIDOR_M,
-  attendStand,
+  SALES_TAX,
+  STORAGE_UPGRADE_COST,
+  TODAY_PRICE,
+  WAREHOUSE_FEE_PER_DAY,
+  WAREHOUSE_RENT_TICKS,
   hireStand,
   incomePerMinute,
   markArrived,
   orderMarket,
   placeStand,
   playSnapshot,
+  recallStaleDeliveries,
+  setStandPrice,
   stockStand,
   takeAll,
   tickHotdogSales,
+  tickWarehouseRent,
+  upgradeStand,
+  withdrawWarehouse,
 } from "./firstLoop.ts";
 
 function leaseCheapSouth() {
@@ -83,7 +93,7 @@ describe("South first loop", () => {
     expect(visitor.play.deliveries).toHaveLength(0);
   });
 
-  it("places the cart, stocks it, hires, and earns $0.10 PAPER per hotdog", () => {
+  it("places the cart, stocks it, hires, and earns after 20% sales tax", () => {
     const { land, visitor, plot } = leaseCheapSouth();
     const order = orderMarket(visitor, land, {
       plotId: plot.id,
@@ -100,12 +110,15 @@ describe("South first loop", () => {
     expect(placed.stand.hotdogs).toBe(20);
     expect(hireStand(visitor, placed.stand.id, "pat").ok).toBe(true);
     expect(placed.stand.staffName).toBe("Pat K.");
+    expect(placed.stand.stickerPrice).toBe(TODAY_PRICE);
 
     const cash0 = visitor.cash;
     const band = plotTrafficBand(land, plot);
     const ticks = band === "green" ? 8 : band === "yellow" ? 16 : 32;
     for (let i = 0; i < ticks; i++) tickHotdogSales(visitor, land);
-    expect(visitor.cash).toBeCloseTo(cash0 + HOTDOG_SALE_PRICE, 8);
+    const net = HOTDOG_SALE_PRICE * (1 - SALES_TAX);
+    expect(visitor.cash).toBeCloseTo(cash0 + net, 8);
+    expect(visitor.play.gameBank).toBeCloseTo(HOTDOG_SALE_PRICE * SALES_TAX, 8);
     expect(placed.stand.hotdogs).toBe(19);
     expect(incomePerMinute(visitor.play)).toBeGreaterThan(0);
 
@@ -113,7 +126,8 @@ describe("South first loop", () => {
     expect(snap.island).toBe("south");
     expect(snap.stands).toHaveLength(1);
     expect(snap.hireRoster).toEqual(HIRE_ROSTER);
-    expect(snap.mode).toBe("PAPER");
+    expect(snap.todayPrice).toBe(TODAY_PRICE);
+    expect(snap.salesTax).toBe(SALES_TAX);
     expect(snap.leaseOptions.length).toBeGreaterThan(0);
     expect(snap.leases).toHaveLength(1);
     expect(snap.aisles.some((a) => a.id === "street_carts")).toBe(true);
@@ -150,7 +164,7 @@ describe("South first loop", () => {
     expect(order.reason).toBe("zone_mismatch");
   });
 
-  it("does not sell when idle, does sell when the player attends", () => {
+  it("does not sell until someone is hired, even if you stand there", () => {
     const { land, visitor, plot } = leaseCheapSouth();
     const order = orderMarket(visitor, land, { plotId: plot.id, skus: ["hotdog_cart", "hotdogs"] });
     if (!order.ok) return;
@@ -161,8 +175,56 @@ describe("South first loop", () => {
     const cash0 = visitor.cash;
     for (let i = 0; i < 40; i++) tickHotdogSales(visitor, land);
     expect(visitor.cash).toBe(cash0);
-    expect(attendStand(visitor, placed.stand.id).ok).toBe(true);
+    expect(hireStand(visitor, placed.stand.id, "rui").ok).toBe(true);
     for (let i = 0; i < 40; i++) tickHotdogSales(visitor, land);
     expect(visitor.cash).toBeGreaterThan(cash0);
+  });
+
+  it("stores a buy in the island warehouse and charges $5 a sim day", () => {
+    const { land, visitor } = leaseCheapSouth();
+    const before = visitor.cash;
+    const order = orderMarket(visitor, land, { skus: ["hotdog_cart"], dest: "warehouse" });
+    expect(order.ok).toBe(true);
+    if (!order.ok) return;
+    expect(order.stored).toBe(true);
+    expect(visitor.play.warehouse.items.find((i) => i.kind === "hotdog_cart")?.qty).toBe(1);
+    expect(visitor.play.deliveries).toHaveLength(0);
+    const fee = tickWarehouseRent(visitor, WAREHOUSE_RENT_TICKS);
+    expect(fee).toBe(WAREHOUSE_FEE_PER_DAY);
+    expect(visitor.cash).toBeCloseTo(before - CART_PAPER_PRICE - WAREHOUSE_FEE_PER_DAY, 8);
+    expect(withdrawWarehouse(visitor, "hotdog_cart").ok).toBe(true);
+    expect(visitor.play.inventory.find((i) => i.kind === "hotdog_cart")?.qty).toBe(1);
+  });
+
+  it("returns a missed roadside crate to the warehouse after 3 minutes", () => {
+    const { land, visitor, plot } = leaseCheapSouth();
+    const order = orderMarket(visitor, land, { plotId: plot.id, skus: ["hotdogs"], dest: "road" });
+    expect(order.ok).toBe(true);
+    if (!order.ok) return;
+    markArrived(visitor, order.delivery.id);
+    visitor.play.deliveries[0]!.arrivedAtMs = 1;
+    expect(recallStaleDeliveries(visitor, 1 + DELIVERY_WAIT_MS)).toBe(1);
+    expect(visitor.play.deliveries).toHaveLength(0);
+    expect(visitor.play.warehouse.items.find((i) => i.kind === "hotdogs")?.qty).toBe(20);
+  });
+
+  it("lets staff sell at the sticker you set, and upgrade storage", () => {
+    const { land, visitor, plot } = leaseCheapSouth();
+    const order = orderMarket(visitor, land, { plotId: plot.id, skus: ["hotdog_cart", "hotdogs"] });
+    if (!order.ok) return;
+    takeAll(visitor, order.delivery.id);
+    const placed = placeStand(visitor, land, plot.id);
+    if (!placed.ok) return;
+    stockStand(visitor, placed.stand.id);
+    hireStand(visitor, placed.stand.id, "sam");
+    expect(setStandPrice(visitor, placed.stand.id, 8).ok).toBe(true);
+    const cash0 = visitor.cash;
+    const band = plotTrafficBand(land, plot);
+    const ticks = band === "green" ? 8 : band === "yellow" ? 16 : 32;
+    for (let i = 0; i < ticks; i++) tickHotdogSales(visitor, land);
+    expect(visitor.cash).toBeCloseTo(cash0 + 8 * (1 - SALES_TAX), 8);
+    expect(upgradeStand(visitor, placed.stand.id).ok).toBe(true);
+    expect(placed.stand.storageCap).toBe(40);
+    expect(visitor.cash).toBeCloseTo(cash0 + 8 * (1 - SALES_TAX) - STORAGE_UPGRADE_COST, 8);
   });
 });
