@@ -33,8 +33,8 @@
  * 4. Prefab kits
  *    Unreal City Sample / CS composition pieces. We do not ship a road kit.
  *
- * Chosen: (2) for local paved streets. One unioned tarmac polygon, grit as a
- * slightly larger union under it, sidewalk = (tarmac + walk) minus grit.
- * Highway duals and circuses stay as they are (already one ring / two ribbons).
- * The graph is unchanged. Taxi still drives edges.
+ * Chosen: **hub + truncated ribbons**. Each street is still a ribbon. At a join,
+ * the last metres of each arm are buffered and unioned (2–4 rectangles). That
+ * is a T or an L. Island-wide union was tried and filled greens / merged
+ * nearby streets into a splat — do not do that.
  */

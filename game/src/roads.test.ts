@@ -19,7 +19,7 @@ import {
 } from "../public/harbour/roads.js";
 import { ROAD_CLASSES, carriagewayWidthM, roadWidthM } from "../public/harbour/roadclass.js";
 import { junctionPad } from "../public/harbour/roadnet.js";
-import { buildIslandFootprints, isNetworkRoad, multiContains } from "../public/harbour/roadfoot.js";
+import { buildHubFootprint, multiContains } from "../public/harbour/roadfoot.js";
 import { SOUTH_RAB } from "./southGeom.ts";
 
 function lum(hex: number) {
@@ -59,10 +59,8 @@ describe("paved street from spawn", () => {
     const pavedRoads = map.roads.filter((r) => r.kind === "paved");
     const dirtRoads = map.roads.filter((r) => r.kind === "dirt");
     const extraCarriages = pavedRoads.filter((r) => r.lanes === 4).length;
-    const specialPaved = pavedRoads.filter((r) => !isNetworkRoad(r)).length;
 
-    expect(paved.length).toBeGreaterThanOrEqual(specialPaved + extraCarriages);
-    expect(paved.some((m) => m.userData.footprint && m.userData.island === "south")).toBe(true);
+    expect(paved.length).toBe(pavedRoads.length + extraCarriages);
     expect(extras.length).toBe(0);
     const walks = added.filter((m) => m.userData.roadKind === "sidewalk");
     expect(walks.length).toBeGreaterThan(4);
@@ -99,14 +97,11 @@ describe("paved street from spawn", () => {
     const widthFor = (cls: string) => {
       const road = map.roads.find((r) => r.cls === cls && !r.roundabout);
       expect(road, `no ${cls} authored`).toBeTruthy();
-      if (cls === "highway") {
-        const mesh = added.find(
-          (m) => m.userData.roadKind === "paved" && m.userData.roadName === road!.name,
-        );
-        expect(mesh, `no mesh for ${cls}`).toBeTruthy();
-        return ribbonWidthM(mesh!);
-      }
-      return carriagewayWidthM(cls);
+      const mesh = added.find(
+        (m) => m.userData.roadKind === "paved" && m.userData.roadName === road!.name,
+      );
+      expect(mesh, `no mesh for ${cls}`).toBeTruthy();
+      return ribbonWidthM(mesh!);
     };
 
     const highway = widthFor("highway");
@@ -128,12 +123,6 @@ describe("paved street from spawn", () => {
     expect(avenue).toBeCloseTo(ROAD_CLASSES.avenue.carriageM, 3);
     expect(street).toBeCloseTo(ROAD_CLASSES.street.carriageM, 3);
     expect(lane).toBeCloseTo(ROAD_CLASSES.lane.carriageM, 3);
-
-    const southFoot = buildIslandFootprints(map.roads.filter((r) => r.island === "south" && isNetworkRoad(r)));
-    const strand = map.roads.find((r) => r.name === "South Strand")!;
-    const mid = strand.points[Math.floor(strand.points.length / 2)]!;
-    expect(multiContains(southFoot.tarmac, mid.x, mid.z)).toBe(true);
-    expect(multiContains(southFoot.tarmac, mid.x + 20, mid.z)).toBe(false);
   });
 
   it("gives every paved road a shoulder and every junction a slab of tarmac", () => {
@@ -144,9 +133,8 @@ describe("paved street from spawn", () => {
 
     // A road with no rim reads as black tape laid on sand.
     const shoulders = added.filter((m) => m.userData.roadKind === "shoulder");
-    expect(shoulders.length).toBeGreaterThan(4);
-    expect(shoulders.some((m) => m.userData.footprint)).toBe(true);
-    for (const road of map.roads.filter((r) => r.kind === "paved" && r.lanes === 4)) {
+    expect(shoulders.length).toBeGreaterThan(10);
+    for (const road of map.roads.filter((r) => r.kind === "paved" && !r.roundabout)) {
       const tarmac = added.find(
         (m) => m.userData.roadKind === "paved" && m.userData.roadName === road.name,
       );
@@ -155,25 +143,24 @@ describe("paved street from spawn", () => {
       if (tarmac) expect(ribbonWidthM(rim!)).toBeGreaterThan(ribbonWidthM(tarmac));
     }
 
-    const southFoot = buildIslandFootprints(map.roads.filter((r) => r.island === "south" && isNetworkRoad(r)));
-    const junctions = map.graph.nodes.filter((n) => n.kind === "junction" && n.island === "south");
-    expect(junctions.length).toBeGreaterThan(8);
-    for (const node of junctions) {
-      const spec = junctionPad(map.graph, node);
-      if (!spec) continue;
-      expect(multiContains(southFoot.tarmac, node.x, node.z), `junction ${node.id} not in unioned tarmac`).toBe(
-        true,
-      );
-    }
-
+    const hubs = added.filter((m) => m.userData.roadKind === "junction" && m.userData.footprint);
+    expect(hubs.length).toBeGreaterThan(8);
     const sw = map.graph.nodes.find((n) => n.id === "s-quay-sw");
     expect(sw).toBeTruthy();
     const swPad = junctionPad(map.graph, sw);
     expect(swPad?.kind).toBe("tee");
-    const walks = added.filter((m) => m.userData.roadKind === "sidewalk");
-    expect(walks.length).toBeGreaterThan(0);
-    expect(multiContains(southFoot.tarmac, sw!.x, sw!.z)).toBe(true);
-    expect(multiContains(southFoot.tarmac, sw!.x + 8, sw!.z + 8)).toBe(false);
+    const hub = buildHubFootprint(map.graph, sw, swPad);
+    expect(multiContains(hub.tarmac, sw!.x, sw!.z)).toBe(true);
+    expect(multiContains(hub.tarmac, sw!.x + 12, sw!.z + 12)).toBe(false);
+    const walks = added.filter((m) => m.userData.roadKind === "sidewalk" && !m.userData.footprint);
+    expect(walks.length).toBeGreaterThan(4);
+    for (const mesh of walks) {
+      const pos = mesh.geometry.attributes.position;
+      for (let i = 0; i < pos.count; i++) {
+        const d = Math.hypot(pos.getX(i) - sw!.x, pos.getZ(i) - sw!.z);
+        expect(d, "sidewalk hashed through the Quayward corner").toBeGreaterThan(swPad!.side / 2 - 0.8);
+      }
+    }
   });
 
   it("extrudes each dirt polyline as one brown ribbon, not a chain of box slabs", () => {
@@ -223,10 +210,9 @@ describe("paved street from spawn", () => {
 
     const paved = added.filter((m) => m.userData.roadKind === "paved");
     const pavedRoads = map.roads.filter((r) => r.kind === "paved");
-    const northRoads = pavedRoads.filter((r) => r.island === "north" && !isNetworkRoad(r));
-    const northMeshes = paved.filter((m) => m.userData.island === "north" && !m.userData.footprint);
+    const northRoads = pavedRoads.filter((r) => r.island === "north");
+    const northMeshes = paved.filter((m) => m.userData.island === "north");
     expect(northMeshes.length).toBe(northRoads.length);
-    expect(paved.some((m) => m.userData.footprint && m.userData.island === "north")).toBe(true);
     expect(paved.length).toBeGreaterThanOrEqual(4);
 
     for (let i = 0; i < northRoads.length; i++) {
@@ -271,7 +257,7 @@ describe("paved street from spawn", () => {
     expect(added.some((m) => m.userData.roadKind === "island")).toBe(true);
 
     const rowMesh = paved.find((m) => String(m.userData.roadName || "").includes("Row"));
-    if (rowMesh && !rowMesh.userData.footprint) {
+    if (rowMesh) {
       expect(ribbonWidthM(rowMesh)).toBeCloseTo(LOCAL_WIDTH_M, 1);
       expect(LOCAL_WIDTH_M).toBeLessThan(PAVED_WIDTH_M);
     }

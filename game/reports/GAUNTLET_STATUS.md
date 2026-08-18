@@ -10,6 +10,6 @@ Bar: live `http://localhost:8787/` (operator plays the public Cloudflare tunnel)
 - Quayward Loop is a rectangle; north arms due east-west
 - Outer sidewalk at 90° is a square L, not a stair-step ribbon
 
-Last operator shot: stacked black rectangles and broken grey kerbs. This round unions the local street network into one tarmac polygon and one sidewalk band (Clipper/Martinez). Highway duals and circuses unchanged.
+Last operator shot: island-wide union was a splat. This round draws ribbons again and unions **only the 2–4 arm ends at each join**.
 
 Politics frozen. Operator is the brake. Do not merge unless asked.

@@ -1,14 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { createLandBoard } from "./land.ts";
-import {
-  buildIslandFootprints,
-  isNetworkRoad,
-  multiContains,
-  segmentRing,
-  unionGeoms,
-} from "../public/harbour/roadfoot.js";
+import { junctionPad } from "../public/harbour/roadnet.js";
+import { buildHubFootprint, multiContains, segmentRing, unionGeoms } from "../public/harbour/roadfoot.js";
 
-describe("road footprints", () => {
+describe("road hub footprints", () => {
   it("unions two overlapping rectangles into one T, not two stacked strips", () => {
     const thru = segmentRing({ x: 0, z: 0 }, { x: 40, z: 0 }, 3);
     const stem = segmentRing({ x: 20, z: 0 }, { x: 20, z: 20 }, 3);
@@ -22,16 +17,14 @@ describe("road footprints", () => {
     expect(multiContains(u, 10, 10)).toBe(false);
   });
 
-  it("covers Quayward corners with one tarmac polygon and a walk outside the kerb", () => {
-    const map = createLandBoard();
-    const roads = map.roads.filter((r) => r.island === "south" && isNetworkRoad(r));
-    const foot = buildIslandFootprints(roads);
-    const sw = map.graph.nodes.find((n) => n.id === "s-quay-sw")!;
-    const se = map.graph.nodes.find((n) => n.id === "s-quay-se")!;
-    expect(multiContains(foot.tarmac, sw.x, sw.z)).toBe(true);
+  it("fills a Quayward 90° corner as one L, and keeps the walk outside the tarmac", () => {
+    const graph = createLandBoard().graph;
+    const se = graph.nodes.find((n) => n.id === "s-quay-se")!;
+    const pad = junctionPad(graph, se)!;
+    const foot = buildHubFootprint(graph, se, pad);
     expect(multiContains(foot.tarmac, se.x, se.z)).toBe(true);
-    // Outer kerb exists: a few metres SE of the SE corner, on the walk band.
     expect(multiContains(foot.sidewalk, se.x + 6, se.z + 6)).toBe(true);
     expect(multiContains(foot.tarmac, se.x + 6, se.z + 6)).toBe(false);
+    expect(multiContains(foot.tarmac, se.x + 20, se.z + 20)).toBe(false);
   });
 });

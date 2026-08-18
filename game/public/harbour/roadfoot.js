@@ -1,11 +1,9 @@
 /**
- * Road footprints: buffer each centreline segment, boolean-union the lot.
+ * Junction hubs: buffer the last metres of each arm and union those
+ * 2–4 rectangles. That is a T or an L. It is not the whole island.
  *
- * Overlapping ribbons at a T are two rectangles drawn on top of each other.
- * Union of those rectangles is one T-shaped polygon. That is the join.
- *
- * Clipper/Martinez lives in ./vendor/polygon-clipping.js (Angus Johnson /
- * Martinez–Rueda–Feito). Graph + taxi are unchanged.
+ * Island-wide union filled greens and merged nearby streets into a splat.
+ * Ribbons still draw the runs. Hubs only exist at joins.
  */
 import polygonClipping from "./vendor/polygon-clipping.js";
 import { roadClassSpec } from "./roadclass.js";
@@ -37,9 +35,18 @@ function snap(n) {
   return Math.round(n * 50) / 50;
 }
 
-/** Square-capped rectangle for one centreline segment, GeoJSON ring.
- *  Ends extend by `half` so a 90° L's outer corner is a square and the
- *  node sits inside the tarmac, not on the outline. */
+function armDir(node, edge) {
+  const pts = edge.points;
+  const fromA = edge.a === node.id;
+  const a = fromA ? pts[0] : pts[pts.length - 1];
+  const b = fromA ? pts[1] : pts[pts.length - 2];
+  const dx = b.x - a.x;
+  const dz = b.z - a.z;
+  const len = Math.hypot(dx, dz) || 1;
+  return { x: dx / len, z: dz / len };
+}
+
+/** Square-capped rectangle. Ends stick out by `half` so a 90° outer corner is square. */
 export function segmentRing(a, b, half) {
   const dx = b.x - a.x;
   const dz = b.z - a.z;
@@ -60,18 +67,6 @@ export function segmentRing(a, b, half) {
   ]);
 }
 
-export function polylineRings(points, half) {
-  const out = [];
-  if (!points || points.length < 2) return out;
-  for (let i = 0; i < points.length - 1; i++) {
-    const a = points[i];
-    const b = points[i + 1];
-    if (Math.hypot(b.x - a.x, b.z - a.z) < 0.25) continue;
-    out.push([segmentRing(a, b, half)]);
-  }
-  return out;
-}
-
 export function unionGeoms(geoms) {
   if (!geoms.length) return [];
   if (geoms.length === 1) return [geoms[0]];
@@ -80,12 +75,6 @@ export function unionGeoms(geoms) {
     acc = polygonClipping.union(acc, geoms[i]);
   }
   return acc;
-}
-
-export function differenceGeoms(subject, clip) {
-  if (!subject.length) return [];
-  if (!clip.length) return subject;
-  return polygonClipping.difference(subject, clip);
 }
 
 export function ringContains(ring, x, z) {
@@ -103,7 +92,6 @@ export function ringContains(ring, x, z) {
   return inside;
 }
 
-/** Point-in-multipolygon, holes respected. */
 export function multiContains(mp, x, z) {
   if (!mp) return false;
   for (const poly of mp) {
@@ -117,35 +105,36 @@ export function multiContains(mp, x, z) {
   return false;
 }
 
-function halfFor(road, extra) {
-  return roadClassSpec(clsOf(road)).carriageM / 2 + extra;
-}
-
-export function buildIslandFootprints(roads) {
+/**
+ * Union of the arm-end rectangles at one node. 2–4 rects. Not the island.
+ */
+export function buildHubFootprint(graph, node, pad) {
   const tarmac = [];
   const grit = [];
   const walk = [];
-  for (const road of roads) {
-    if (!isNetworkRoad(road) || !road.points) continue;
-    const spec = roadClassSpec(clsOf(road));
-    tarmac.push(...polylineRings(road.points, spec.carriageM / 2));
-    grit.push(...polylineRings(road.points, spec.carriageM / 2 + FOOT_SHOULDER_M / 2));
+  if (!graph || !node || !pad) return { tarmac: [], shoulder: [], sidewalk: [] };
+  const along = pad.side / 2 + 0.8;
+  for (const e of graph.edges) {
+    if (e.a !== node.id && e.b !== node.id) continue;
+    if (!e.points || e.points.length < 2) continue;
+    const spec = roadClassSpec(e.cls);
+    if (spec.dirt) continue;
+    const dir = armDir(node, e);
+    const far = { x: node.x + dir.x * along, z: node.z + dir.z * along };
+    const origin = { x: node.x, z: node.z };
+    tarmac.push([segmentRing(origin, far, spec.carriageM / 2)]);
+    grit.push([segmentRing(origin, far, spec.carriageM / 2 + FOOT_SHOULDER_M / 2)]);
     if (spec.sidewalkM > 0) {
-      walk.push(
-        ...polylineRings(road.points, spec.carriageM / 2 + FOOT_SHOULDER_M / 2 + spec.sidewalkM),
-      );
+      walk.push([
+        segmentRing(origin, far, spec.carriageM / 2 + FOOT_SHOULDER_M / 2 + spec.sidewalkM),
+      ]);
     }
   }
-  const tarmacU = unionGeoms(tarmac);
-  const gritU = unionGeoms(grit);
-  const walkU = unionGeoms(walk);
-  // Draw walk, then grit, then tarmac. Difference is what crashes Martinez on
-  // this network; stacking the unions is the same picture from above.
   return {
-    tarmac: tarmacU,
-    shoulder: gritU,
-    sidewalk: walkU,
+    tarmac: unionGeoms(tarmac),
+    shoulder: unionGeoms(grit),
+    sidewalk: unionGeoms(walk),
   };
 }
 
-export { halfFor, clsOf };
+export { clsOf };
