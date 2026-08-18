@@ -65,6 +65,43 @@ describe("taxi hail wait", () => {
     expect(taxi.mesh.visible).toBe(true);
     expect(labels[labels.length - 1]).toBe(null);
   });
+
+  it("boards you when the cab arrives on the dual, and left click does not hop out", () => {
+    const board = createLandBoard();
+    const spec = ISLANDS.south;
+    const player = {
+      position: { x: spec.port.x + 40, y: 2, z: spec.port.z + 8 },
+      rotation: { y: 0 },
+    };
+    let clock = 2_000_000;
+    const taxi = createTaxi({
+      scene: { add() {} },
+      player,
+      getMap: () => board,
+      specOf: (id: "north" | "south") => ISLANDS[id],
+      heightAt,
+      getIslandId: () => "south" as const,
+      setWalking: () => {},
+      setStatus: () => {},
+      button: { addEventListener() {} },
+      etaRng: () => 0,
+      now: () => clock,
+    });
+    taxi.call();
+    clock += 5_000;
+    taxi.tick(0.016, clock);
+    expect(taxi.mode()).toBe("coming");
+    for (let i = 0; i < 400 && taxi.mode() !== "boarded"; i++) {
+      clock += 50;
+      taxi.tick(0.05, clock);
+    }
+    expect(taxi.mode()).toBe("boarded");
+    expect(taxi.riding()).toBe(true);
+    expect(taxi.handleTap(player.position.x + 4, player.position.z, "south")).toBe(true);
+    expect(taxi.riding()).toBe(true);
+    taxi.hopOut();
+    expect(taxi.riding()).toBe(false);
+  });
 });
 
 describe("taxi wait timeout", () => {

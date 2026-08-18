@@ -3,12 +3,10 @@ import { HIGHWAY_LANE_OFFSET_M, offsetPolyline } from "./roads.js";
 import { laneOffsetM } from "./roadclass.js";
 import { nearestEdge, projectOnEdge, routeOnGraph } from "./roadnet.js";
 
-/** Metres. On the carriageway (paved width 6.2). */
-const ON_PAVED = 6.5;
-/** Metres. Player can board from the verge. */
-const NEAR_PAVED = 12;
-/** Metres. Dirt-track hit, not a taxi destination. */
-const ON_DIRT = 5;
+/** Metres. Player can board from the verge, including a dual carriageway lip. */
+const NEAR_PAVED = 22;
+/** Metres. Cab that has arrived at you just collects — no extra walk onto the tarmac. */
+const BOARD_CAB_M = 24;
 const SPEED = 42;
 const TAXI_Y = 0.04;
 /** Hailed cab leaves if nobody boards. */
@@ -85,7 +83,7 @@ export function carriagewayPath(points, road) {
   return offsetPolyline(points, HIGHWAY_LANE_OFFSET_M);
 }
 
-function carriagewayAt(road, proj) {
+function carriagewayAt(road, proj, toward) {
   const p = { x: proj.x, z: proj.z };
   if (!road || road.lanes !== 4 || !road.points || road.points.length < 2) return p;
   const a = road.points[proj.i];
@@ -95,7 +93,12 @@ function carriagewayAt(road, proj) {
   const len = Math.hypot(dx, dz) || 1;
   const rx = dz / len;
   const rz = -dx / len;
-  return { x: p.x + rx * HIGHWAY_LANE_OFFSET_M, z: p.z + rz * HIGHWAY_LANE_OFFSET_M };
+  let sign = 1;
+  if (toward) {
+    const side = (toward.x - p.x) * rx + (toward.z - p.z) * rz;
+    if (side < 0) sign = -1;
+  }
+  return { x: p.x + rx * HIGHWAY_LANE_OFFSET_M * sign, z: p.z + rz * HIGHWAY_LANE_OFFSET_M * sign };
 }
 
 /**
@@ -750,7 +753,7 @@ export function createTaxi({
   function pavedRoads(islandId) {
     const map = getMap();
     if (!map) return [];
-    return map.roads.filter((r) => r.kind === "paved" && r.island === islandId);
+    return map.roads.filter((r) => r.kind === "paved" && !r.roundabout && r.island === islandId);
   }
 
   function closestPaved(x, z, islandId) {
@@ -759,17 +762,6 @@ export function createTaxi({
       if (!r.points || r.points.length < 2) continue;
       const proj = projectOnPolyline(r.points, x, z);
       if (!best || proj.dist < best.proj.dist) best = { road: r, proj };
-    }
-    return best;
-  }
-
-  function nearestDirt(x, z, islandId) {
-    const map = getMap();
-    if (!map) return Infinity;
-    let best = Infinity;
-    for (const r of map.roads) {
-      if (r.kind !== "dirt" || r.island !== islandId || !r.points || r.points.length < 2) continue;
-      best = Math.min(best, projectOnPolyline(r.points, x, z).dist);
     }
     return best;
   }
@@ -921,19 +913,21 @@ export function createTaxi({
     if (overlayEl) overlayEl.hidden = true;
   }
 
-  function tryCollect() {
+  function tryCollect(force = false) {
     const px = player.position.x;
     const pz = player.position.z;
-    const hit = road ? { proj: projectOnPolyline(road.points, px, pz) } : closestPaved(px, pz, island);
-    if (!hit || hit.proj.dist > NEAR_PAVED) return false;
-    if (Math.hypot(px - mesh.position.x, pz - mesh.position.z) > 16) return false;
+    const d = Math.hypot(px - mesh.position.x, pz - mesh.position.z);
+    const hit = closestPaved(px, pz, island);
+    const nearRoad = hit && hit.proj.dist <= NEAR_PAVED;
+    if (!force && d > BOARD_CAB_M) return false;
+    if (d > 80 && !(force && nearRoad)) return false;
     setWalking(false);
     mode = "boarded";
     waitStartedAtMs = null;
     attachPlayer();
     openOverlay();
     setRide(true);
-    setStatus("Taxi collected you. Tap the map to ride..");
+    setStatus("Taxi collected you. Tap a stop, or Exit taxi..");
     return true;
   }
 
@@ -1008,9 +1002,12 @@ export function createTaxi({
     let startAlong = hit.proj.along - offset;
     if (startAlong < 12) startAlong = hit.proj.along + offset;
     const start = pointAlongRoad(hit.road.points, Math.max(0, startAlong));
-    place(start.x, start.z, start.yaw);
+    const startProj = projectOnPolyline(hit.road.points, start.x, start.z);
+    const lane = carriagewayAt(hit.road, startProj, player);
+    place(lane.x, lane.z, start.yaw);
     mesh.visible = true;
-    driveTo(hit.proj.x, hit.proj.z);
+    const hail = carriagewayAt(hit.road, hit.proj, player);
+    driveTo(hail.x, hail.z);
     mode = "coming";
     calledAtMs = null;
     waitStartedAtMs = nowFn();
@@ -1028,8 +1025,8 @@ export function createTaxi({
       return;
     }
     if (mode === "boarded" || mode === "hauling") {
-      hopOut();
-      setStatus("Out of the taxi..");
+      openOverlay();
+      setStatus("Still in the taxi. Tap a stop, or Exit taxi..");
       return;
     }
     if (mode === "called" || mode === "coming" || mode === "waiting") return;
@@ -1050,12 +1047,10 @@ export function createTaxi({
    */
   function handleTap(x, z, tapIsland) {
     if (overlayOpen) return true;
-    if (mode !== "boarded" && mode !== "hauling") return false;
-    hopOut();
-    const onDirt = nearestDirt(x, z, island) <= ON_DIRT;
-    setStatus(
-      onDirt ? "Taxi stays on paved. Dirt is forbidden. PAPER." : "Out of the taxi. PAPER.",
-    );
+    if (mode === "boarded" || mode === "hauling") {
+      setStatus("Exit taxi is on the dock. Left click does not hop out.");
+      return true;
+    }
     return false;
   }
 
@@ -1134,30 +1129,30 @@ export function createTaxi({
     }
 
     if (mode === "coming" && pathDone()) {
-      const px = player.position.x;
-      const pz = player.position.z;
-      const proj = road ? projectOnPolyline(road.points, px, pz) : null;
-      if (proj && proj.dist <= NEAR_PAVED) {
-        const d = Math.hypot(mesh.position.x - proj.x, mesh.position.z - proj.z);
-        if (d > 4) {
-          driveTo(proj.x, proj.z);
-        } else if (!tryCollect()) {
+      if (!tryCollect(true)) {
+        const hail = closestPaved(player.position.x, player.position.z, island);
+        if (hail) {
+          const lane = carriagewayAt(hail.road, hail.proj, player);
+          const d = Math.hypot(mesh.position.x - lane.x, mesh.position.z - lane.z);
+          if (d > 4) driveTo(lane.x, lane.z);
+          else {
+            mode = "waiting";
+            tryCollect(true);
+          }
+        } else {
           mode = "waiting";
-          setStatus("Taxi waiting on paved. Walk to the road..");
         }
-      } else if (!tryCollect()) {
-        mode = "waiting";
-        setStatus("Taxi waiting on paved. Walk to the road..");
       }
     }
 
     if (mode === "waiting") {
-      if (!tryCollect() && road) {
-        const proj = projectOnPolyline(road.points, player.position.x, player.position.z);
-        if (proj.dist <= NEAR_PAVED) {
-          const d = Math.hypot(mesh.position.x - proj.x, mesh.position.z - proj.z);
+      if (!tryCollect(true) && road) {
+        const hail = closestPaved(player.position.x, player.position.z, island);
+        if (hail && hail.proj.dist <= NEAR_PAVED) {
+          const lane = carriagewayAt(hail.road, hail.proj, player);
+          const d = Math.hypot(mesh.position.x - lane.x, mesh.position.z - lane.z);
           if (d > 4) {
-            driveTo(proj.x, proj.z);
+            driveTo(lane.x, lane.z);
             mode = "coming";
           }
         }

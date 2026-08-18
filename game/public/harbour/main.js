@@ -795,7 +795,16 @@ function makeTerrain(spec) {
     const dx = (x - spec.cx) / spec.rx;
     const dz = (z - spec.cz) / spec.rz;
     const t = Math.hypot(dx, dz);
-    const c = paintShoreColor(h, t, grass, sand, rock);
+    let grade = 0;
+    if (spec.id === "south") {
+      const g = distToSouthGrade(x, z);
+      if (g < 160) grade = Math.max(0, 1 - g / 160);
+    } else {
+      const portD = Math.hypot(x - spec.port.x, z - spec.port.z);
+      if (portD < 140) grade = Math.max(0, 1 - portD / 140) * 0.55;
+    }
+    const verge = (Math.abs(Math.sin(x * 0.031 + z * 0.027)) > 0.62) || (Math.abs(Math.cos(x * 0.019 - z * 0.041)) > 0.78);
+    const c = paintShoreColor(h, t, grass, sand, rock, { grade, verge });
     colors.push(c.r, c.g, c.b);
   }
   geo.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
