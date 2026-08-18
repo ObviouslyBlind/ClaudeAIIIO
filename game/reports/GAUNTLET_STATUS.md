@@ -1,17 +1,16 @@
 # Gauntlet status
 
-Piece in play: **play HUD — harbour is the screen**.
+Piece just shipped: **play HUD — harbour is the screen**.
 
-Bar the critic inspects on the live page (phone width 390 and laptop 1280):
+Blind critic on live `http://127.0.0.1:8787/`: **PASS** (HUD + quay water chop).
 
-1. The canvas fills the viewport. The document does not scroll.
-2. Always-on chrome is corners only: cash top-left, **Lots / View / You** top-right, four rail icons, one-row dock. No five overlay chips, no Leaderboard row, no hint paragraph over the sky.
-3. Lots still toggles $ bars. View still holds World / Foot / Logistics / Minerals.
-4. Quay water has a slight chop (not a frozen sheet).
-5. PAPER / SIMULATED labels stay. No WASD. Left-click still does not exit the taxi.
+Bar that passed:
 
-Last shipped on `main`: taxi peel / auto-board / grass underfoot.
+1. Canvas fills the viewport. Document does not scroll.
+2. Always-on chrome is corners only: cash, Lots / View / You, four rail icons, one-row dock.
+3. Lots toggles parcel outlines / $ bars.
+4. Port sea patch has visible chop.
 
-Open visual gap after this piece: Quayward Loop L-corners / Strand T hairlines. Do not island-wide-union.
+Next queued: none. Open visual gap: Quayward Loop L-corners / Strand T hairlines. Do not island-wide-union.
 
 Politics frozen. Operator is the brake.
