@@ -44,6 +44,7 @@ import {
   withdrawWarehouse,
   ensurePlay,
   isKnownSku,
+  sellShiftBurst,
 } from "./firstLoop.ts";
 import { footTrafficSnapshot } from "./footTraffic.ts";
 import { completePackShift } from "./shiftBonus.ts";
@@ -309,7 +310,10 @@ const server = createServer(async (req, res) => {
       return;
     }
     const result = completePackShift(visitor, body || {});
-    json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
+    const standId = typeof body?.standId === "string" ? body.standId : "";
+    const burst =
+      result.ok && standId ? sellShiftBurst(visitor, land, standId, result.hits) : { sold: 0, earned: 0 };
+    json(res, result.ok ? 200 : 400, { ...result, sold: burst.sold, earned: burst.earned, play: playPayload() });
     return;
   }
 

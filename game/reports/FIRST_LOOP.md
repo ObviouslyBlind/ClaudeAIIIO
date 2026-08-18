@@ -17,12 +17,13 @@ Caribbean fruit-style stalls. Starter kit id stays `hotdog_cart` so old saves st
 
 Same card for a placed cart, a shop, and a mine.
 
-- Tabs at the top: **Stock** · **Run** · **Stats**. No left-right scroll.
-- **Hire** at the bottom. One button. An AI vendor appears and runs the site (auto-stock from the warehouse on carts/shops; mines extract).
-- Sales: about **10 per 3 minutes** on a 10/10 site (~18 ticks at 1 Hz). Mini-games speed the next sales. Hired AI still sells if you skip.
+- Tabs: **Stock** · **Run** · **Upgrades** · **Stats**.
+- **Hire** lives on **Run** only. One vendor. They keep selling if you skip the game.
+- **Upgrades** is fridge / storage for $200. You can buy it before you hire.
+- Stock loads from **On you** (what you took from a crate) or the **Warehouse**.
+- Fruit slice is a 24s shift. Finish it and that site sells **5–10** at once. Hired staff still sell over time if you skip.
 - Sticker hint: **$6.00**. Tax 20%. A 10/10 quiet street is about **$16/min** PAPER after tax.
 - Desirability 0–10: staffed 2.5, stocked 2.5, upgraded 3, foot traffic up to 2. Crowding on the same street caps earnings (1 rival → 7.5, 2+ → **5**).
-- Fridge / upgrade: $200, doubles storage.
 
 ## Play
 
@@ -33,16 +34,16 @@ Same card for a placed cart, a shop, and a mine.
 
 ## UI
 - Corners stay: cash top-left, viewers top-right, Inv/Wh/Mkt/Staff on the left, travel dock at the bottom
-- Left **Carts** is a directory: unplaced kits (Place) and placed carts (Open). Ops live on **that site**.
+- Left **Carts** is a directory: kits to place, stock on you, carts on the kerb. Ops live on **that site**.
 - Click a placed cart, or your shop / mine, for the site menu.
-- Market: each Buy has the drop location sitting over it (your lot name, or South warehouse). Click Buy → how many and where. Market stays open.
-- Deliver to the property: crate is already on the kerb. 60s to take it, else it goes to the warehouse. Taking the crate is how goods enter pockets.
+- Market lists name, price, Buy. Where it goes is chosen on the Pay card, not on the catalog.
+- Pay to the kerb: a large green-lit package appears. Tap it → **Take all** or **Close**. 60s then warehouse.
 
 ## Loop
 1. Buy a lot from a nearby $ bar.
-2. Market → Fruit cart → Buy → Warehouse (or your lot) → Pay.
-3. Place from Carts. Tap **that** cart.
-4. Stock · Hire (one button) · optional Fridge · play Fruit slice on Run.
+2. Market → Fruit cart → Buy → Pay (warehouse or this lot).
+3. If the kerb: tap the green package → Take all. Place from Carts. Tap **that** cart.
+4. Stock · Run (Hire and Fruit slice) · Upgrades (Fridge) · Stats.
 5. Stats shows desirability, people searching the street, and PAPER / min.
 6. Sales tax 20% goes to the island bank.
 

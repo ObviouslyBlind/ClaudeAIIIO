@@ -97,19 +97,57 @@ export function makeCrate() {
   g.userData.label = "delivery crate";
   g.userData.layer = "logistics";
   g.userData.mode = "PAPER";
-  const wood = box(0.9, 0.55, 0.7, WOOD);
-  wood.position.y = 0.28;
+
+  const kraft = 0xc4a574;
+  const strap = 0x5a3a22;
+  const tape = 0xd4b07a;
+  const wood = box(1.55, 1.05, 1.2, kraft);
+  wood.position.y = 0.54;
   wood.userData.part = "crate";
-  const lid = box(0.92, 0.06, 0.72, 0x8a6238);
-  lid.position.y = 0.58;
+  const lid = box(1.58, 0.1, 1.24, 0xb08958);
+  lid.position.y = 1.1;
   lid.userData.part = "lid";
+  const band = box(1.62, 0.12, 0.16, strap);
+  band.position.y = 0.7;
+  band.userData.part = "strap";
+  const band2 = box(0.16, 0.12, 1.28, strap);
+  band2.position.y = 0.7;
+  band2.userData.part = "strap";
+  const seal = box(0.55, 0.04, 0.18, tape);
+  seal.position.set(0, 1.16, 0);
+  seal.userData.part = "tape";
+
+  const glowMat = new THREE.MeshBasicMaterial({
+    color: 0x5fe3a0,
+    transparent: true,
+    opacity: 0.28,
+    depthWrite: false,
+  });
+  const ring = new THREE.Mesh(new THREE.CylinderGeometry(1.35, 1.35, 0.06, 20), glowMat);
+  ring.position.y = 0.04;
+  ring.userData.part = "glow";
+  ring.userData.pulse = true;
+  const shaft = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.22, 0.55, 2.4, 10),
+    new THREE.MeshBasicMaterial({
+      color: 0x5fe3a0,
+      transparent: true,
+      opacity: 0.16,
+      depthWrite: false,
+    }),
+  );
+  shaft.position.y = 1.3;
+  shaft.userData.part = "glow";
+  shaft.userData.pulse = true;
+
   const pick = new THREE.Mesh(
-    new THREE.CylinderGeometry(1.7, 1.7, 1.5, 8),
+    new THREE.CylinderGeometry(2.2, 2.2, 2.4, 8),
     new THREE.MeshBasicMaterial({ visible: false }),
   );
-  pick.position.y = 0.7;
+  pick.position.y = 1.1;
   pick.userData.part = "pick";
-  g.add(wood, lid, pick);
+  g.add(wood, lid, band, band2, seal, ring, shaft, pick);
+  g.userData.glow = [ring, shaft];
   return g;
 }
 

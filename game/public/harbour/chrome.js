@@ -42,6 +42,7 @@ export function mountChrome(opts) {
   const buyAsk = document.getElementById("buy-ask");
   const standVeil = document.getElementById("stand-veil");
   const standMenu = document.getElementById("stand-menu");
+  const crateAsk = document.getElementById("crate-ask");
 
   let play = null;
   let openPanel = null;
@@ -155,17 +156,13 @@ export function mountChrome(opts) {
   }
 
   function skuBuyRow(s) {
-    const loc = destLabel();
     return `
       <article class="sku-buy">
         <div class="sku-buy-copy">
           <strong class="sku-buy-name">${s.label}</strong>
           <span class="sku-buy-price">${money(s.paperPrice)}</span>
         </div>
-        <div class="buy-slot">
-          <p class="buy-loc" title="${loc}">${loc}</p>
-          <button type="button" class="go" data-order="${s.id}">Buy</button>
-        </div>
+        <button type="button" class="go" data-order="${s.id}">Buy</button>
       </article>`;
   }
 
@@ -179,7 +176,7 @@ export function mountChrome(opts) {
     const stock = catalog.filter((s) => s.aisle === "stock" || s.role === "stock");
     body.innerHTML = `
       ${title("Market")}
-      <p>Buy a fruit cart, watermelon cart, or fish and chips. Click Buy — you choose how many and where it goes.</p>
+      <p>Buy a fruit cart, watermelon cart, or fish and chips. Click Buy for how many and where it goes.</p>
       <h3 class="sheet-kicker">Street carts</h3>
       ${kits.map(skuBuyRow).join("")}
       <h3 class="sheet-kicker">Stock packs</h3>
@@ -200,6 +197,41 @@ export function mountChrome(opts) {
     orderSku = null;
     if (orderAsk) orderAsk.hidden = true;
     if (orderVeil) orderVeil.hidden = true;
+  }
+
+  function hideCrateAsk() {
+    if (crateAsk) crateAsk.hidden = true;
+  }
+
+  function paintCrateAsk(extras) {
+    if (!crateAsk) return;
+    if (!extras || !extras.crate) {
+      crateAsk.hidden = true;
+      return;
+    }
+    closePanels();
+    hideOrderAsk();
+    if (buyAsk) buyAsk.hidden = true;
+    if (landCard) landCard.hidden = true;
+    crateAsk.hidden = false;
+    crateAsk.innerHTML = `
+      <h2>Package</h2>
+      <p class="whisper">On the kerb. Take all, or close and come back. 60s then warehouse.</p>
+      <div class="land-row">
+        <button type="button" class="take-all" id="crate-take">Take all</button>
+        <button type="button" class="take-all" id="crate-close">Close</button>
+      </div>
+    `;
+    const take = crateAsk.querySelector("#crate-take");
+    const close = crateAsk.querySelector("#crate-close");
+    if (take && extras.onTake) take.addEventListener("click", extras.onTake);
+    if (close) {
+      close.addEventListener("click", () => {
+        crateAsk.hidden = true;
+        if (typeof extras.onClose === "function") extras.onClose();
+      });
+    }
+    take?.focus();
   }
 
   function catalogSku(id) {
@@ -266,13 +298,17 @@ export function mountChrome(opts) {
     }
     playPaperBuy();
     await refreshPlay(data);
-    if (openPanel === "market") paintMarket();
     const delivery = data && data.delivery;
-    if (delivery && delivery.dest === "road" && typeof opts.onOrder === "function") opts.onOrder(delivery);
+    if (delivery && delivery.dest === "road") {
+      closePanels();
+      if (typeof opts.onOrder === "function") opts.onOrder(delivery);
+    } else if (openPanel === "market") {
+      paintMarket();
+    }
     if (opts.setStatus) {
       opts.setStatus(
         marketDest === "road"
-          ? "Paid. Crate on the kerb — take it. 60s then warehouse."
+          ? "Paid. Green package on the kerb — tap it."
           : "Paid. In the South warehouse.",
       );
     }
@@ -399,7 +435,7 @@ export function mountChrome(opts) {
         if (opts.setStatus) {
           opts.setStatus(
             ok
-              ? `Pack bonus ${money(data.bonus)} · PAPER · site already ran`
+              ? `Shift sold ${data.sold || 0} · ${money(data.earned || 0)} PAPER`
               : "Pack: " + ((data && data.reason) || "skipped"),
           );
         }
@@ -735,6 +771,8 @@ export function mountChrome(opts) {
     hideBuyAsk() {
       if (buyAsk) buyAsk.hidden = true;
     },
+    hideCrateAsk,
+    paintCrateAsk,
     hideOrderAsk,
     paintBuyAsk,
     paintLand(plot, extras) {

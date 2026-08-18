@@ -6,7 +6,7 @@
 export const PACK_NOTE =
   "Client-side cart pack. The stall already ran. PAPER bonus only. SIMULATED.";
 export const PACK_BONUS_PER_HIT = 0.5;
-export const PACK_MAX_HITS = 8;
+export const PACK_MAX_HITS = 24;
 export const PACK_COOLDOWN_MS = 60_000;
 
 export type PackHolder = {

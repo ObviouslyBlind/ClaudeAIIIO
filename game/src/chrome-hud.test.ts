@@ -48,6 +48,8 @@ describe("harbour chrome HUD", () => {
     expect(html).toContain('id="stand-menu"');
     expect(siteMenu).toContain('data-stock="inventory"');
     expect(html).toContain('id="buy-ask"');
+    expect(html).toContain('id="crate-ask"');
+    expect(html).toContain('id="pack-hint"');
     expect(html).toContain('id="order-ask"');
     expect(html).toContain('id="order-veil"');
     expect(html).toContain('id="lot-tags"');
@@ -64,7 +66,8 @@ describe("harbour chrome HUD", () => {
     expect(css).toContain(".chrome-tr");
     expect(css).toContain(".chrome-left");
     expect(css).toContain("pos-inv");
-    expect(css).toContain(".buy-slot");
+    expect(css).toContain(".sku-buy");
+    expect(css).toContain("#crate-ask");
     expect(css).toContain(".buy-loc");
     expect(css).toMatch(/max-height:\s*min\(62vh/);
     expect(css).toContain("overflow-x: hidden");
@@ -102,6 +105,7 @@ describe("harbour chrome HUD", () => {
     expect(siteMenu).toContain("data-site-tab=");
     expect(siteMenu).toContain('id: "stock"');
     expect(siteMenu).toContain('id: "run"');
+    expect(siteMenu).toContain('id: "upgrades"');
     expect(siteMenu).toContain('id: "stats"');
     expect(chrome).not.toContain("data-hire-person");
     expect(chrome).toContain("place-cancel");
@@ -109,9 +113,10 @@ describe("harbour chrome HUD", () => {
     expect(siteMenu).toContain("stock-ticks");
     expect(siteMenu).toContain('type="range"');
     expect(chrome).toContain("Warehouse");
-    expect(chrome).toContain('class="buy-slot"');
+    expect(chrome).toContain("paintCrateAsk");
     expect(chrome).toContain("buy-loc");
-    expect(siteMenu).toContain("Pockets");
+    expect(siteMenu).toContain("On you");
+    expect(siteMenu).not.toContain("Pockets");
     expect(chrome).not.toContain("Stock cart");
     expect(chrome).not.toContain("data-pin");
     expect(chrome).not.toContain("Run it myself");
@@ -119,7 +124,8 @@ describe("harbour chrome HUD", () => {
 
   it("keeps Carts as a directory; hire, train, stock, sticker, fridge live on that cart", () => {
     expect(chrome).toContain("formatCartsBody");
-    expect(carts).toContain("Pockets");
+    expect(carts).toContain("On you");
+    expect(carts).not.toContain("Pockets");
     expect(chrome).toContain("Twelve goods");
     expect(chrome).toContain("/api/buy");
     expect(chrome).toContain("/api/shift/pack");
@@ -130,7 +136,8 @@ describe("harbour chrome HUD", () => {
     expect(chrome).toContain("hideOrderAsk");
     expect(chrome).toContain("data-open-stand");
     expect(siteMenu).toContain("Fruit slice");
-    expect(siteMenu).toContain("Fridge · $200");
+    expect(siteMenu).toContain("Fridge");
+    expect(siteMenu).toContain("data-upgrade");
     expect(siteMenu).toContain('id="sticker-price" type="number"');
     expect(siteMenu).toContain("id=\"hire-site\"");
     expect(chrome).not.toContain("openPlayMenu");
@@ -142,7 +149,7 @@ describe("harbour chrome HUD", () => {
     expect(carts).toContain("data-open-stand");
     expect(carts).not.toContain("data-pack-start");
     expect(carts).not.toContain("data-stock");
-    expect(pack).toContain("PACK_SECONDS");
+    expect(pack).toContain("PACK_SECONDS = 24");
     expect(pack).toContain("pack-good");
     expect(pack).toContain("mango");
     const body = formatCartsBody({
@@ -187,10 +194,45 @@ describe("harbour chrome HUD", () => {
       { todayPrice: 6, inventory: [], warehouse: { items: [] } },
       "stock",
     );
-    expect(menu).toContain("Hire");
-    expect(menu).toContain("id=\"hire-site\"");
+    expect(menu).not.toContain("id=\"hire-site\"");
+    expect(menu).toContain("On you");
     expect(menu).not.toContain("Pat K.");
     expect(menu).toContain('data-site-tab="run"');
+    expect(menu).toContain('data-site-tab="upgrades"');
+    const run = formatSiteMenu(
+      {
+        id: "stand-1",
+        label: "Fruit cart",
+        siteClass: "cart",
+        hired: false,
+        hotdogs: 0,
+        storageCap: 20,
+        stickerPrice: 6,
+        games: ["Fruit slice"],
+        kind: "fruit",
+      },
+      { todayPrice: 6, inventory: [], warehouse: { items: [] } },
+      "run",
+    );
+    expect(run).toContain("Hire");
+    expect(run).toContain("id=\"hire-site\"");
+    const upgrades = formatSiteMenu(
+      {
+        id: "stand-1",
+        label: "Fruit cart",
+        siteClass: "cart",
+        hired: false,
+        upgraded: false,
+        hotdogs: 0,
+        storageCap: 20,
+        stickerPrice: 6,
+      },
+      { todayPrice: 6, inventory: [], warehouse: { items: [] } },
+      "upgrades",
+    );
+    expect(upgrades).toContain("Fridge");
+    expect(upgrades).toContain("data-upgrade");
+    expect(upgrades).not.toContain("id=\"hire-site\"");
     const stats = formatSiteMenu(
       {
         id: "site-1",
@@ -216,6 +258,6 @@ describe("harbour chrome HUD", () => {
     );
     expect(stats).toContain("14 Harbour Rd shop");
     expect(stats).toContain("Searching this street");
-    expect(stats).toContain("Vendor on");
+    expect(stats).not.toContain("id=\"hire-site\"");
   });
 });

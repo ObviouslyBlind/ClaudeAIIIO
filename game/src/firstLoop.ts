@@ -1,6 +1,6 @@
 /**
  * South-island first loop: lease land, order a street cart + matching stock,
- * warehouse or pockets, place, then hire / train / stock / sticker / fridge
+ * warehouse or the kerb, place, then hire / stock / sticker / fridge
  * on that cart. Cash is $. One shared island warehouse on the dock.
  */
 
@@ -29,6 +29,8 @@ export const HOTDOG_PACK_PRICE = 3;
 export const HOTDOG_PACK_QTY = 20;
 export const INCOME_WINDOW = 60;
 export const BOOST_PER_HIT = 1;
+export const SHIFT_BURST_MIN = 5;
+export const SHIFT_BURST_MAX = 10;
 
 /** Caribbean street carts. Starter kit id stays hotdog_cart so old saves still place. */
 export type CartKindId = "fruit" | "watermelon" | "fish_chips";
@@ -110,7 +112,7 @@ export const MARKET_AISLES: { id: MarketAisle; label: string; note: string }[] =
   {
     id: "street_carts",
     label: "Street carts",
-    note: "Fruit, watermelon, or fish and chips. Buy to pockets or the warehouse — not onto a stall.",
+    note: "Fruit, watermelon, or fish and chips. Buy to the warehouse or the kerb — not onto a stall.",
   },
   {
     id: "stock",
@@ -217,7 +219,7 @@ export function standNeeds(stand: Stand, today = TODAY_PRICE): CartNeed[] {
   }
   if (Number(stand.hotdogs) < 1) {
     const food = cartKindForStand(stand).stockLabel.toLowerCase();
-    needs.push({ id: "stock", label: `Load ${food} from pockets or the warehouse.` });
+    needs.push({ id: "stock", label: `Load ${food} from what you are carrying, or the warehouse.` });
   }
   if (!stand.upgraded) {
     needs.push({
@@ -550,13 +552,51 @@ export function applyShiftBoost(play: PlayState, siteId: string, hits: number): 
   return true;
 }
 
+function burstCount(hits: number): number {
+  if (hits < 1) return 0;
+  return Math.min(SHIFT_BURST_MAX, SHIFT_BURST_MIN + Math.floor((hits - 1) / 3));
+}
+
+function sellOnce(play: PlayState, sticker: number): number {
+  const tax = roundMoney(sticker * SALES_TAX);
+  const net = roundMoney(sticker - tax);
+  play.gameBank = roundMoney(play.gameBank + tax);
+  return net;
+}
+
+/** After a finished mini-game: sell 5–10 from stock in one go. Hire not required. */
+export function sellShiftBurst(
+  visitor: Visitor,
+  land: LandBoard,
+  siteId: string,
+  hits: number,
+): { sold: number; earned: number } {
+  const play = ensurePlay(visitor);
+  syncWorkSites(play, land);
+  const found = findStandOrSite(play, siteId);
+  if (!found) return { sold: 0, earned: 0 };
+  const want = burstCount(hits);
+  if (want < 1) return { sold: 0, earned: 0 };
+  let have = found.kind === "stand" ? found.row.hotdogs : found.row.stock;
+  const n = Math.min(want, Math.floor(have));
+  if (n < 1) return { sold: 0, earned: 0 };
+  let earned = 0;
+  for (let i = 0; i < n; i++) earned = roundMoney(earned + sellOnce(play, found.row.stickerPrice));
+  if (found.kind === "stand") found.row.hotdogs = roundMoney(found.row.hotdogs - n);
+  else found.row.stock = roundMoney(found.row.stock - n);
+  visitor.cash = roundMoney(visitor.cash + earned);
+  play.salesRing.push(earned);
+  if (play.salesRing.length > INCOME_WINDOW) play.salesRing.shift();
+  return { sold: n, earned };
+}
+
 function siteNeeds(site: WorkSite, today = TODAY_PRICE): CartNeed[] {
   const needs: CartNeed[] = [];
   if (!site.hired) {
     needs.push({ id: "hire", label: "Hire a vendor. This site does not run without staff." });
   }
   if (site.siteClass === "shop" && Number(site.stock) < 1) {
-    needs.push({ id: "stock", label: "Load stock from pockets or the warehouse." });
+    needs.push({ id: "stock", label: "Load stock from what you are carrying, or the warehouse." });
   }
   if (!site.upgraded) {
     needs.push({ id: "fridge", label: "A $200 upgrade doubles this site's storage." });
@@ -992,14 +1032,6 @@ export function tickHotdogSales(visitor: Visitor, land: LandBoard): number {
   syncWorkSites(play, land);
   let earned = 0;
 
-  function sellOnce(sticker: number): number {
-    const gross = sticker;
-    const tax = roundMoney(gross * SALES_TAX);
-    const net = roundMoney(gross - tax);
-    play.gameBank = roundMoney(play.gameBank + tax);
-    return net;
-  }
-
   for (const stand of play.stands) {
     autoStockStand(play, stand);
     if (stand.hotdogs < 1 || !stand.hired) continue;
@@ -1011,7 +1043,7 @@ export function tickHotdogSales(visitor: Visitor, land: LandBoard): number {
       stand.sellAcc -= need;
       stand.hotdogs = roundMoney(stand.hotdogs - 1);
       if ((stand.boostLeft || 0) > 0) stand.boostLeft -= 1;
-      earned = roundMoney(earned + sellOnce(stand.stickerPrice));
+      earned = roundMoney(earned + sellOnce(play, stand.stickerPrice));
     }
   }
 
@@ -1033,7 +1065,7 @@ export function tickHotdogSales(visitor: Visitor, land: LandBoard): number {
       site.sellAcc -= need;
       site.stock = roundMoney(site.stock - 1);
       if ((site.boostLeft || 0) > 0) site.boostLeft -= 1;
-      earned = roundMoney(earned + sellOnce(site.stickerPrice));
+      earned = roundMoney(earned + sellOnce(play, site.stickerPrice));
     }
   }
 

@@ -49,6 +49,7 @@ html, body {
 .float-panel,
 #land-card,
 #buy-ask,
+#crate-ask,
 #order-veil,
 #order-ask,
 #stand-veil,
@@ -484,35 +485,9 @@ nav.dock.travel-dock {
   color: var(--muted);
   letter-spacing: 0.01em;
 }
-.buy-slot {
-  flex: 0 0 auto;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 4px;
-  min-width: 88px;
-  max-width: 120px;
-}
-.float-panel .buy-loc,
-.buy-slot .buy-loc,
-#order-ask .buy-loc {
-  margin: 0;
-  max-width: none;
-  width: 100%;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  text-align: right;
-  color: var(--brass-hi);
-  line-height: 1.15;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.buy-slot .go {
-  min-width: 0;
-  width: 100%;
+.sku-buy .go {
+  align-self: end;
+  min-width: 72px;
 }
 #order-veil {
   position: absolute;
@@ -569,11 +544,16 @@ nav.dock.travel-dock {
   flex-direction: column;
   gap: 8px;
 }
-.order-pay .buy-loc.is-ask {
+.order-pay .buy-loc.is-ask,
+#order-ask .buy-loc {
   max-width: none;
   width: 100%;
   margin: 0 0 2px;
   text-align: center;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   color: var(--brass-hi);
 }
 .order-pay .go,
@@ -744,6 +724,33 @@ nav.dock.travel-dock {
 #buy-ask .land-row .take-all { margin-top: 0; }
 #buy-ask-no { background: #2c3c40; color: #e8e4d8; }
 
+#crate-ask {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  transform: translate(-50%, -50%);
+  width: min(300px, calc(100vw - 28px));
+  padding: 16px 16px 14px;
+  background: linear-gradient(180deg, #1a2e32 0%, var(--hull) 100%);
+  border: 1px solid var(--green);
+  border-radius: 16px;
+  z-index: 16;
+  pointer-events: auto;
+  box-shadow: 0 0 28px rgba(95, 227, 160, 0.28), 0 18px 40px rgba(0, 0, 0, 0.55), var(--inset);
+}
+#crate-ask[hidden] { display: none !important; }
+#crate-ask h2 {
+  margin: 0 0 6px;
+  font-family: "Big Shoulders Display", "Arial Narrow", sans-serif;
+  font-size: 22px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--green);
+}
+#crate-ask .land-row { display: flex; gap: 8px; margin-top: 12px; }
+#crate-ask .land-row .take-all { margin-top: 0; flex: 1; }
+#crate-close { background: #2c3c40; color: #e8e4d8; }
+
 #land-card {
   position: absolute;
   left: 68px;
@@ -791,16 +798,18 @@ nav.dock.travel-dock {
 }
 .site-tabs {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 6px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
   margin: 8px 0 10px;
 }
 .site-tab {
   min-height: 36px;
+  padding: 0 4px;
   border: 1px solid var(--line);
   border-radius: 10px;
   background: #152226;
   color: var(--ink);
+  font-size: 12px;
   font-weight: 700;
   cursor: pointer;
 }
@@ -865,7 +874,7 @@ nav.dock.travel-dock {
   border-radius: 12px;
   box-shadow: var(--shadow), var(--inset);
 }
-#land-card[hidden], #stand-menu[hidden], #stand-veil[hidden], .float-panel[hidden], #foot-legend[hidden], #pack-shift[hidden], #menu-stack[hidden] { display: none !important; }
+#land-card[hidden], #stand-menu[hidden], #stand-veil[hidden], #crate-ask[hidden], .float-panel[hidden], #foot-legend[hidden], #pack-shift[hidden], #menu-stack[hidden] { display: none !important; }
 #land-card h2, #stand-menu h2 {
   margin: 0;
   font-family: "Big Shoulders Display", "Arial Narrow", sans-serif;
@@ -1163,8 +1172,8 @@ nav.dock.travel-dock {
   top: 46%;
   transform: translate(-50%, -50%);
   z-index: 30;
-  width: min(320px, calc(100vw - 28px));
-  padding: 16px 18px 18px;
+  width: min(360px, calc(100vw - 24px));
+  padding: 16px 16px 18px;
   background: linear-gradient(180deg, #1a2e32 0%, var(--hull) 100%);
   border: 1px solid var(--brass-hi);
   border-radius: 16px;
@@ -1173,13 +1182,14 @@ nav.dock.travel-dock {
   pointer-events: auto;
 }
 .pack-badge {
-  margin: 0 0 8px;
+  margin: 0 0 4px;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--btn);
 }
+#pack-hint { margin: 0 0 8px; }
 #pack-clock {
   margin: 0;
   font-family: "Big Shoulders Display", "Arial Narrow", sans-serif;
@@ -1191,37 +1201,61 @@ nav.dock.travel-dock {
 #pack-slots,
 .pack-arena {
   position: relative;
-  min-height: 180px;
-  height: 180px;
-  margin: 12px 0;
+  min-height: 240px;
+  height: 240px;
+  margin: 10px 0 8px;
   overflow: hidden;
-  background: #0e1c20;
+  background:
+    linear-gradient(180deg, rgba(95, 227, 160, 0.08), transparent 28%),
+    #0e1c20;
   border: 1px solid var(--line);
   border-radius: 12px;
 }
 .pack-good {
-  min-height: 48px;
-  min-width: 92px;
-  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  min-width: 108px;
+  padding: 0 12px 0 8px;
   border: 0;
   border-radius: 999px;
-  background: linear-gradient(180deg, #e2c04a, #c45c12);
   color: #1a140c;
   font-weight: 800;
   text-transform: lowercase;
   cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+}
+.pack-good i {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+  box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.12);
+}
+.pack-mango { background: linear-gradient(180deg, #f0c04a, #c45c12); }
+.pack-pineapple { background: linear-gradient(180deg, #f4e07a, #d4a017); }
+.pack-papaya { background: linear-gradient(180deg, #f08a4a, #c45c12); }
+.pack-banana { background: linear-gradient(180deg, #f7e56a, #e2c04a); }
+.pack-watermelon { background: linear-gradient(180deg, #7fe38a, #2f8f4e); color: #0b1a10; }
+.pack-fish { background: linear-gradient(180deg, #9fd4e8, #2a6b8a); color: #0b1a10; }
+.pack-chips { background: linear-gradient(180deg, #f0d5a4, #d4a017); }
+.pack-good.is-sliced {
+  opacity: 0;
+  transform: scale(0.7) rotate(-18deg);
+  transition: transform 0.12s ease-out, opacity 0.12s ease-out;
 }
 .pack-fall {
   position: absolute;
   top: -8px;
-  animation: pack-drop 1.35s linear forwards;
+  animation: pack-drop 2.1s linear forwards;
 }
 @keyframes pack-drop {
   from { transform: translateY(0); }
-  to { transform: translateY(190px); }
+  to { transform: translateY(250px); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .pack-fall { animation: none; top: 64px; }
+  .pack-fall { animation: none; top: 88px; }
 }
 #pack-hits {
   margin: 0 0 10px;

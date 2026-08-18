@@ -434,7 +434,7 @@ function aimPointer(ev) {
 }
 
 const HUD_BLOCK =
-  "nav, a, #taxi-map, #ferry-ticket, #catalog-picker, .float-panel, #land-card, #buy-ask, #order-veil, #order-ask, #stand-veil, #stand-menu, #place-hint, #menu-stack, #pack-shift";
+  "nav, a, #taxi-map, #ferry-ticket, #catalog-picker, .float-panel, #land-card, #buy-ask, #crate-ask, #order-veil, #order-ask, #stand-veil, #stand-menu, #place-hint, #menu-stack, #pack-shift";
 
 function parcelLabel(p) {
   const kind = p.band === "field" ? "field" : p.band === "shore" ? "shore land" : "street land";
@@ -565,19 +565,21 @@ function syncStandMesh(stand) {
 
 function syncCrateMesh(delivery) {
   if (!delivery || crateMeshes.has(delivery.id)) return;
-  const plot = map.plots.find((p) => p.id === delivery.plotId);
-  if (!plot) return;
+  const drop = delivery.drop;
+  const plot = map && map.plots ? map.plots.find((p) => p.id === delivery.plotId) : null;
+  const x = drop && Number.isFinite(drop.x) ? drop.x : plot ? plot.x + 1.4 : NaN;
+  const z = drop && Number.isFinite(drop.z) ? drop.z : plot ? plot.z + 1.1 : NaN;
+  if (!Number.isFinite(x) || !Number.isFinite(z)) return;
+  const island = (plot && plot.island) || delivery.island || "south";
   const mesh = makeCrate();
-  const x = delivery.drop && Number.isFinite(delivery.drop.x) ? delivery.drop.x : plot.x + 1.4;
-  const z = delivery.drop && Number.isFinite(delivery.drop.z) ? delivery.drop.z : plot.z + 1.1;
-  mesh.position.set(x, heightAt(specOf(plot.island), x, z), z);
+  mesh.position.set(x, heightAt(specOf(island), x, z), z);
   mesh.name = `crate:${delivery.id}`;
   mesh.userData.deliveryId = delivery.id;
-  mesh.userData.plotId = plot.id;
+  mesh.userData.plotId = plot ? plot.id : "";
   mesh.userData.kind = "crate";
   mesh.userData.label = "delivery crate";
   mesh.userData.layer = "logistics";
-  mesh.userData.roadName = delivery.drop && delivery.drop.roadName;
+  mesh.userData.roadName = drop && drop.roadName;
   worldAdd(mesh);
   crateMeshes.set(delivery.id, mesh);
 }
@@ -590,8 +592,24 @@ function dropCrate(deliveryId) {
   }
 }
 
+function pulseCrateGlow() {
+  const t = performance.now() / 1000;
+  const wave = 0.5 + 0.5 * Math.sin(t * 3.2);
+  for (const mesh of crateMeshes.values()) {
+    const glows = mesh.userData && mesh.userData.glow;
+    if (!Array.isArray(glows)) continue;
+    for (const part of glows) {
+      if (!part || !part.material) continue;
+      part.material.opacity = 0.12 + wave * 0.22;
+      const s = 1 + wave * 0.08;
+      part.scale.set(s, 1, s);
+    }
+  }
+}
+
 function hideCrateCard() {
   lastInspectKey = "";
+  if (chromeHud && chromeHud.hideCrateAsk) chromeHud.hideCrateAsk();
   if (chromeHud && chromeHud.paintLand) chromeHud.paintLand(null);
 }
 
@@ -608,12 +626,15 @@ function pruneCrates(play) {
 function showCrateCard(deliveryId) {
   if (!deliveryId || takenCrates.has(deliveryId)) return false;
   lastInspectKey = "crate:" + deliveryId;
-  if (!chromeHud || !chromeHud.paintLand) return false;
-  chromeHud.paintLand(
-    { id: "roadside", owner: "visitor", price: 0 },
-    { crate: { id: deliveryId }, roadside: true, onTake: () => takeCrate(deliveryId) },
-  );
-  setStatus("Crate on the kerb. Take all..");
+  if (!chromeHud || !chromeHud.paintCrateAsk) return false;
+  chromeHud.paintCrateAsk({
+    crate: { id: deliveryId },
+    onTake: () => takeCrate(deliveryId),
+    onClose: () => {
+      lastInspectKey = "";
+    },
+  });
+  setStatus("Package on the kerb. Take all or close.");
   return true;
 }
 
@@ -1427,6 +1448,11 @@ function onPointer(ev) {
       return;
     }
   }
+  if (crateHit) {
+    const crate = objectWithKind(crateHit.object, "crate");
+    const id = crate && crate.userData.deliveryId;
+    if (id && showCrateCard(id)) return;
+  }
   const tagPick =
     viewer === "lots" &&
     parcelMap &&
@@ -1474,11 +1500,6 @@ function onPointer(ev) {
       showLandCard(p);
       return;
     }
-  }
-  if (crateHit && (viewer === "logistics" || viewer === "world")) {
-    const crate = objectWithKind(crateHit.object, "crate");
-    const id = crate && crate.userData.deliveryId;
-    if (id && showCrateCard(id)) return;
   }
   if (padHit && viewer === "logistics") {
     const pad = objectWithKind(padHit.object, "logistics-pad");
@@ -1648,6 +1669,7 @@ function tick(dt) {
   if (taxi) taxi.tick(dt);
   if (traffic) traffic.tick(dt);
   if (deliveries) deliveries.tick(dt);
+  pulseCrateGlow();
   if (econHud) econHud.tick(dt);
   if (walking) {
     const dx = walkTarget.x - player.position.x;
@@ -2003,9 +2025,10 @@ async function boot() {
     },
     onOrder(delivery) {
       if (!delivery) return;
+      if (chromeHud && chromeHud.closePanels) chromeHud.closePanels();
       if (delivery.status === "arrived") {
         syncCrateMesh(delivery);
-        setStatus("Crate on the kerb. Take it — 60s then warehouse.");
+        setStatus("Green package on the kerb. Tap it — Take all or Close.");
         return;
       }
       void ensureDeliveries().then(() => {

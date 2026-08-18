@@ -32,6 +32,7 @@ import {
   tickWarehouseRent,
   upgradeStand,
   withdrawWarehouse,
+  sellShiftBurst,
 } from "./firstLoop.ts";
 
 function leaseCheapSouth() {
@@ -382,5 +383,40 @@ describe("South first loop", () => {
     expect(shop!.id).toBe(`site-${plot!.id}`);
     expect(hireStand(visitor, shop!.id).ok).toBe(true);
     expect(playSnapshot(visitor, land).sites.find((s) => s.id === shop!.id)!.staffName).toBe("Vendor");
+  });
+
+  it("lets you buy the fridge before anyone is hired", () => {
+    const { land, visitor, plot } = leaseCheapSouth();
+    const order = orderMarket(visitor, land, { plotId: plot.id, skus: ["hotdog_cart"] });
+    expect(order.ok).toBe(true);
+    if (!order.ok) return;
+    takeAll(visitor, order.delivery.id);
+    const placed = placeStand(visitor, land, plot.id);
+    expect(placed.ok).toBe(true);
+    if (!placed.ok) return;
+    expect(placed.stand.hired).toBe(false);
+    expect(upgradeStand(visitor, placed.stand.id).ok).toBe(true);
+    expect(placed.stand.upgraded).toBe(true);
+    expect(placed.stand.storageCap).toBe(40);
+  });
+
+  it("sells 5 to 10 in one go after a finished shift, without hire", () => {
+    const { land, visitor, plot } = leaseCheapSouth();
+    const order = orderMarket(visitor, land, { plotId: plot.id, skus: ["hotdog_cart", "hotdogs"] });
+    expect(order.ok).toBe(true);
+    if (!order.ok) return;
+    takeAll(visitor, order.delivery.id);
+    const placed = placeStand(visitor, land, plot.id);
+    expect(placed.ok).toBe(true);
+    if (!placed.ok) return;
+    expect(stockStand(visitor, placed.stand.id).ok).toBe(true);
+    const cash0 = visitor.cash;
+    const miss = sellShiftBurst(visitor, land, placed.stand.id, 0);
+    expect(miss.sold).toBe(0);
+    const burst = sellShiftBurst(visitor, land, placed.stand.id, 8);
+    expect(burst.sold).toBeGreaterThanOrEqual(5);
+    expect(burst.sold).toBeLessThanOrEqual(10);
+    expect(placed.stand.hotdogs).toBe(20 - burst.sold);
+    expect(visitor.cash).toBeCloseTo(cash0 + burst.sold * HOTDOG_SALE_PRICE * (1 - SALES_TAX), 8);
   });
 });

@@ -1,6 +1,7 @@
 /**
- * Site card for carts, shops, and mines. Tabs at the top, Hire at the bottom.
- * No left-right scroll. PAPER / SIMULATED.
+ * Site card for carts, shops, and mines.
+ * Tabs: Stock · Run · Upgrades · Stats. Hire lives on Run.
+ * PAPER / SIMULATED.
  */
 
 function money(n) {
@@ -20,6 +21,7 @@ function esc(s) {
 const TABS = [
   { id: "stock", label: "Stock" },
   { id: "run", label: "Run" },
+  { id: "upgrades", label: "Upgrades" },
   { id: "stats", label: "Stats" },
 ];
 
@@ -68,14 +70,13 @@ function paintStock(site, play) {
   const maxQty = Math.max(maxFromInv, maxFromWh);
   const vs = sticker < todayN - 0.01 ? "is-low" : sticker > todayN + 0.01 ? "is-high" : "is-today";
   const mine = site.siteClass === "mine";
-  const fridgeLabel = site.siteClass === "cart" ? "Fridge · $200" : "Upgrade · $200";
   const loaders = mine
-    ? `<p class="whisper">Hired staff extract. Play a mini-game on Run to speed the next sales.</p>`
+    ? `<p class="whisper">Hired staff extract. A Run shift sells a handful at once.</p>`
     : `
       <div class="source-row">
         <button type="button" class="source src-pocket" data-stock="inventory" ${maxFromInv ? "" : "disabled"}>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8h10l1.2 12H5.8L7 8z"/><path d="M9 8V6.4a3 3 0 0 1 6 0V8"/></svg>
-          <strong>${invQty}</strong><span>Pockets</span>
+          <strong>${invQty}</strong><span>On you</span>
         </button>
         <button type="button" class="source src-wh" data-stock="warehouse" ${maxFromWh ? "" : "disabled"}>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10.5 12 4l8 6.5V20H4z"/><path d="M4 10.5h16M12 10.5V20"/></svg>
@@ -85,7 +86,7 @@ function paintStock(site, play) {
       ${
         maxQty
           ? `<div class="slider-row"><input id="stock-qty" class="qty-slider" type="range" min="1" max="${maxQty}" value="${maxQty}" /><span data-qty-out>${maxQty}</span></div>`
-          : `<p class="whisper">${have ? "Storage is holding this site." : "Buy a stock pack in Market, then load it here."}</p>`
+          : `<p class="whisper">${have ? "This site is holding stock." : "Buy a pack in Market, take the crate, then load it here."}</p>`
       }`;
   return `
     <div class="stock-ticks" title="Stock">${stockTicks(have, cap)}</div>
@@ -96,19 +97,19 @@ function paintStock(site, play) {
       <input id="sticker-price" type="number" min="0.01" max="1000" step="0.5" value="${sticker}" />
       <span class="today-price ${vs}">${today} is today's price</span>
     </div>
-    ${
-      site.hired && !site.upgraded
-        ? `<button type="button" class="go fridge" data-upgrade="${esc(site.id)}">${fridgeLabel}</button>`
-        : ""
-    }
   `;
 }
 
 function paintRun(site) {
   const names = Array.isArray(site.games) && site.games.length ? site.games : ["Fruit slice"];
   const goods = gamesForSite(site);
+  const hired = site.hired
+    ? `<p class="hired-pill">${esc(site.staffName || "Vendor")} on · they sell while you are away</p>`
+    : `<button type="button" class="go hire-site" id="hire-site" data-hire-site="${esc(site.id)}">Hire</button>
+       <p class="whisper">One vendor. They keep selling if you skip the game.</p>`;
   return `
-    <p class="whisper">Mini-games live on this site. Hired staff still sell if you skip. More plays, faster next sales. PAPER bonus only.</p>
+    ${hired}
+    <p class="whisper">Play a full shift. Tap falling fruit. Finish and this site sells a handful at once (5–10).</p>
     ${names
       .map(
         (name) => `
@@ -119,6 +120,27 @@ function paintRun(site) {
       )
       .join("")}
     <p class="whisper">Slice ${esc(goods.slice(0, 3).join(", "))}${goods.length > 3 ? "…" : ""}.</p>
+  `;
+}
+
+function paintUpgrades(site) {
+  const fridgeLabel = site.siteClass === "cart" ? "Fridge" : "Storage";
+  const cap = Number(site.storageCap || 20);
+  if (site.upgraded) {
+    return `
+      <p class="whisper">${esc(fridgeLabel)} is on. Storage ${cap}.</p>
+      <p class="hired-pill">Bought · PAPER · SIMULATED</p>
+    `;
+  }
+  return `
+    <p class="whisper">${esc(fridgeLabel)} doubles storage. You can buy this before you hire anyone.</p>
+    <div class="sku-buy">
+      <div class="sku-buy-copy">
+        <strong class="sku-buy-name">${esc(fridgeLabel)}</strong>
+        <span class="sku-buy-price">$200.00</span>
+      </div>
+      <button type="button" class="go" data-upgrade="${esc(site.id)}">Buy</button>
+    </div>
   `;
 }
 
@@ -155,11 +177,13 @@ export function formatSiteMenu(site, play, tab) {
   const title = site.label || (site.siteClass === "shop" ? "Shop" : site.siteClass === "mine" ? "Mine" : "Cart");
   const standNeeds = Array.isArray(site.needs) ? site.needs : [];
   const body =
-    current === "run" ? paintRun(site) : current === "stats" ? paintStats(site) : paintStock(site, play);
-  const hired = site.hired
-    ? `<p class="hired-pill">${esc(site.staffName || "Vendor")} on</p>`
-    : `<button type="button" class="go hire-site" id="hire-site" data-hire-site="${esc(site.id)}">Hire</button>
-       <p class="whisper">One hire. A vendor appears and keeps this site running.</p>`;
+    current === "run"
+      ? paintRun(site)
+      : current === "stats"
+        ? paintStats(site)
+        : current === "upgrades"
+          ? paintUpgrades(site)
+          : paintStock(site, play);
   return `
     <div class="site-card">
       <div class="stand-head">
@@ -174,7 +198,6 @@ export function formatSiteMenu(site, play, tab) {
         ).join("")}
       </div>
       <div class="site-body">${body}</div>
-      <div class="site-foot">${hired}</div>
     </div>
   `;
 }

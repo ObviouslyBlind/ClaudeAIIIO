@@ -1,5 +1,5 @@
 /**
- * Left-rail Carts directory. Place kits here. Hire, train, stock, sticker,
+ * Left-rail Carts directory. Place kits here. Hire, stock, sticker,
  * and fridge live on that cart's own click menu.
  */
 
@@ -32,7 +32,7 @@ function plotNameFor(play, stand) {
 }
 
 function kitQty(rows, kind) {
-  return Number((rows || []).find((r) => r.kind === kind)?.qty) || 0;
+  return Number((rows || []).find((r) => r.kind === kind)?.qty || 0);
 }
 
 export function formatCartsBody(play) {
@@ -49,7 +49,7 @@ export function formatCartsBody(play) {
   const needsHtml = needs.length
     ? needs.map((n) => `<p class="cart-need">${n.label}</p>`).join("")
     : stands.length
-      ? `<p class="cart-need is-ok">Staffed, stocked, sticker at today. PAPER.</p>`
+      ? `<p class="cart-need is-ok">On the kerb. Open a cart to stock, hire, or upgrade.</p>`
       : "";
 
   const pocketKits = kinds
@@ -59,7 +59,7 @@ export function formatCartsBody(play) {
       return `
         <div class="inv-row">
           <span>${kindLabel(play, id)} × ${qty}</span>
-          <button type="button" data-place="${id}">Place</button>
+          <button type="button" class="go" data-place="${id}">Place</button>
         </div>`;
     })
     .join("");
@@ -69,7 +69,7 @@ export function formatCartsBody(play) {
     ? stockRows
         .map(
           (r) =>
-            `<div class="inv-row"><span>${kindLabel(play, r.kind)} × ${r.qty}</span><span>pockets</span></div>`,
+            `<div class="inv-row"><span>${kindLabel(play, r.kind)} × ${r.qty}</span><span>on you</span></div>`,
         )
         .join("")
     : "";
@@ -78,11 +78,11 @@ export function formatCartsBody(play) {
     .map((id) => {
       const qty = kitQty(wh.items, id);
       if (qty < 1) return "";
-      const inPockets = kitQty(rows, id) > 0;
+      const carrying = kitQty(rows, id) > 0;
       return `
         <div class="inv-row">
           <span>${kindLabel(play, id)} in warehouse × ${qty}</span>
-          ${inPockets ? "" : `<button type="button" data-place="${id}">Place</button>`}
+          ${carrying ? "" : `<button type="button" class="go" data-place="${id}">Place</button>`}
         </div>`;
     })
     .join("");
@@ -101,21 +101,21 @@ export function formatCartsBody(play) {
             <p class="whisper">${where}</p>
             ${standNeeds.map((n) => `<p class="cart-need">${n.label}</p>`).join("")}
             <div class="inv-row">
-              <span>This cart's menu</span>
+              <span>Open this cart</span>
               <button type="button" class="go" data-open-stand="${s.id}">Open</button>
             </div>
           </article>`;
         })
         .join("")
-    : `<p>Place a cart on your YOURS lot or the verge, then tap that cart. Hire, train, stock, sticker, and fridge live there. ${money(today)} is today's price.</p>`;
+    : `<p>Place a cart on your YOURS lot or the verge, then tap that cart. ${money(today)} is today's price.</p>`;
 
   return `
     <h2>Carts</h2>
     <p class="menu-note">PAPER · SIMULATED. Directory only. Each placed cart has its own menu.</p>
     ${needsHtml}
-    <h3 class="sheet-kicker">Kit</h3>
+    <h3 class="sheet-kicker">To place</h3>
     ${kitHtml}
-    ${stockHtml ? `<h3 class="sheet-kicker">Pockets</h3>${stockHtml}` : ""}
+    ${stockHtml ? `<h3 class="sheet-kicker">On you</h3>${stockHtml}` : ""}
     <h3 class="sheet-kicker">On the kerb</h3>
     ${standsHtml}
   `;
