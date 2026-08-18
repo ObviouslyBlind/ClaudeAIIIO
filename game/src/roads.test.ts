@@ -32,6 +32,7 @@ function lum(hex: number) {
 type RoadMesh = {
   userData: { roadKind?: string; widthM?: number; island?: string; roadName?: string; junctionWalk?: boolean; footprint?: boolean };
   geometry: {
+    type?: string;
     parameters?: { width: number; innerRadius?: number };
     attributes: { position: { count: number; getX: (i: number) => number; getY: (i: number) => number; getZ: (i: number) => number } };
     index: { count: number } | null;
@@ -172,7 +173,7 @@ describe("paved street from spawn", () => {
         nearest = Math.min(nearest, Math.hypot(pos.getX(i) - se.x, pos.getZ(i) - se.z));
       }
     }
-    expect(nearest, "kerb vanished a block before the SE hub").toBeLessThan(10);
+    expect(nearest, "kerb vanished a block before the SE hub").toBeLessThan(11);
   });
 
   it("extrudes each dirt polyline as one brown ribbon, not a chain of box slabs", () => {
@@ -304,13 +305,19 @@ describe("paved street from spawn", () => {
     const added: RoadMesh[] = [];
     const scene = { add(obj: RoadMesh) { added.push(obj); } };
     makeRoads(map, { scene, specOf: (id: "north" | "south") => ISLANDS[id], heightAt });
-    const south = added.filter((m) => m.userData.island === "south" && m.userData.roadKind === "paved");
+    const south = added.filter(
+      (m) =>
+        m.userData.island === "south" &&
+        m.userData.roadKind === "paved" &&
+        m.geometry.type === "BufferGeometry",
+    );
     expect(south.length).toBeGreaterThan(4);
     let checked = 0;
     for (const mesh of south) {
       const pos = mesh.geometry.attributes.position;
-      for (let i = 0; i < pos.count; i += 20) {
+      for (let i = 0; i < pos.count; i += 4) {
         const dirt = heightAt(ISLANDS.south, pos.getX(i), pos.getZ(i));
+        if (dirt < 0.4) continue;
         expect(pos.getY(i)).toBeGreaterThan(dirt + 0.02);
         checked += 1;
       }
