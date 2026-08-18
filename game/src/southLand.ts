@@ -577,44 +577,22 @@ function buildSouthGraph(): RoadGraph {
   g.edge({ name: "Quayward Loop", cls: "street", from: corners[2]!, to: corners[3]! });
   g.edge({ name: "Quayward Loop", cls: "street", from: corners[3]!, to: corners[0]! });
 
-  // South Strand T-joins the block at the SW corner. Starting it mid-Quayward Rd
-  // used to cut the west side of the Loop with no shared node — two ribbons
-  // through each other, which is what "roads going through roads" was.
-  const strandStart = corners[3]!;
+  // South Strand continues the west side of the block due south (90°), then
+  // turns 90° east and 90° south into Saltwind. No smashed diagonals.
+  const sw = corners[3]!;
+  const nPalmJ = g.node("s-strand-palm", sw.x, sw.z + 96, "junction");
+  const nStrandKink = g.node("s-strand-east", sw.x, saltwind.z - 140, "junction");
+  const nAppr = g.node("s-strand-appr", saltwind.x, saltwind.z - 140, "junction");
   const nSaltwind = g.node("s-saltwind", saltwind.x, saltwind.z, "junction");
-  const strandPath = sampleSpline(
-    [
-      { x: strandStart.x, z: strandStart.z },
-      { x: -2210, z: 8240 },
-      { x: -2130, z: 9180 },
-      { x: saltwind.x, z: saltwind.z },
-    ],
-    6,
-  );
-  const strandRun = runWithJunctions(
-    g,
-    "South Strand",
-    "avenue",
-    strandStart,
-    nSaltwind,
-    strandPath,
-    [0.26, 0.62],
-    "s-strand",
-    true,
-  );
+  g.edge({ name: "South Strand", cls: "avenue", from: sw, to: nPalmJ });
+  g.edge({ name: "South Strand", cls: "avenue", from: nPalmJ, to: nStrandKink });
+  g.edge({ name: "South Strand", cls: "avenue", from: nStrandKink, to: nAppr });
+  g.edge({ name: "South Strand", cls: "avenue", from: nAppr, to: nSaltwind });
 
-  // Palm Arc peels off the Strand toward the sand.
-  if (strandRun.nodes[0]) {
-    const palmEnd = g.node("s-palm-end", -1470, 8700, "terminus");
-    g.edge({
-      name: "Palm Arc",
-      cls: "street",
-      from: strandRun.nodes[0],
-      to: palmEnd,
-      via: [{ x: -1760, z: 8420 }],
-      smooth: true,
-    });
-  }
+  const nPalmTurn = g.node("s-palm-turn", nPalmJ.x + 400, nPalmJ.z, "junction");
+  const palmEnd = g.node("s-palm-end", nPalmTurn.x + 220, nPalmTurn.z + 220, "terminus");
+  g.edge({ name: "Palm Arc", cls: "street", from: nPalmJ, to: nPalmTurn });
+  g.edge({ name: "Palm Arc", cls: "street", from: nPalmTurn, to: palmEnd });
 
   // Channel Sands leaves the highway east of Harbour Circus, not the ring.
   const nChannel = hwyHarbourCane.nodes[0];
@@ -634,8 +612,8 @@ function buildSouthGraph(): RoadGraph {
   }
 
   // Saltwind High St crosses the town green from the Strand.
-  const nHighEast = g.node("s-high-east", saltwind.x + 280, saltwind.z + 120, "terminus");
-  const highPath = linePoints({ x: saltwind.x, z: saltwind.z }, { x: saltwind.x + 280, z: saltwind.z + 120 }, 5);
+  const nHighEast = g.node("s-high-east", saltwind.x + 280, saltwind.z, "terminus");
+  const highPath = linePoints({ x: saltwind.x, z: saltwind.z }, { x: saltwind.x + 280, z: saltwind.z }, 5);
   const highRun = runWithJunctions(
     g,
     "Saltwind High St",

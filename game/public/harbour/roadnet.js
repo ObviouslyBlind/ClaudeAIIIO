@@ -274,8 +274,7 @@ export function junctionPad(graph, node) {
   }
 
   const widest = Math.max(...paved.map((a) => a.width));
-  const sameRun = !!(through && through[0].edge.name === through[1].edge.name);
-  const collinear = throughDot < -0.72 && sameRun;
+  const collinear = throughDot < -0.72;
   if (paved.length === 2 && collinear) return null;
 
   const corner = paved.length === 2 || !collinear;

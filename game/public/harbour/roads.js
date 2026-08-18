@@ -371,43 +371,85 @@ function addJunctionPlate(scene, spec, heightAt, pad) {
   scene.add(mesh);
 }
 
-function worldOffset(pad, lx, lz) {
-  const c = Math.cos(pad.yaw || 0);
-  const s = Math.sin(pad.yaw || 0);
-  return { x: pad.x + lx * c + lz * s, z: pad.z - lx * s + lz * c };
+function intersectLines(p, d, q, e) {
+  const det = d.x * e.z - d.z * e.x;
+  if (Math.abs(det) < 1e-8) return null;
+  const t = ((q.x - p.x) * e.z - (q.z - p.z) * e.x) / det;
+  return { x: p.x + d.x * t, z: p.z + d.z * t };
 }
 
-/** Sidewalk around a corner plate so the walks turn with the L instead of hashing through it. */
-function drawWalkFrame(scene, spec, heightAt, pad) {
-  const walk = pad.walkM;
-  if (!walk) return;
-  const y = heightAt(spec, pad.x, pad.z) + 0.16;
-  const mid = pad.side / 2 + walk / 2;
-  const len = pad.side + walk;
-  const strips = [
-    { lx: 0, lz: mid, w: len, d: walk },
-    { lx: 0, lz: -mid, w: len, d: walk },
-    { lx: mid, lz: 0, w: walk, d: len },
-    { lx: -mid, lz: 0, w: walk, d: len },
-  ];
-  for (const s of strips) {
-    const at = worldOffset(pad, s.lx, s.lz);
-    const mesh = new THREE.Mesh(
-      new THREE.PlaneGeometry(s.w, s.d),
-      new THREE.MeshLambertMaterial({ color: SIDEWALK }),
+function perpInto(dir, toward) {
+  const r = { x: dir.z, z: -dir.x };
+  if (r.x * toward.x + r.z * toward.z >= 0) return r;
+  return { x: -r.x, z: -r.z };
+}
+
+function walkOffsetM(cls) {
+  const s = roadClassSpec(cls);
+  if (!s.sidewalkM) return 0;
+  return s.carriageM / 2 + SHOULDER_PAD_M / 2 + s.sidewalkM / 2;
+}
+
+/**
+ * Mitered sidewalks in each wedge between arms. A square frame of overlapping
+ * planes was the stepped grey hash; this follows the kerb at 15/30/45/90.
+ */
+function drawJunctionWalks(scene, spec, heightAt, graph, node, pad) {
+  const arms = [];
+  for (const e of graph.edges) {
+    if (e.a !== node.id && e.b !== node.id) continue;
+    if (!e.points || e.points.length < 2) continue;
+    const s = roadClassSpec(e.cls);
+    if (s.dirt || !s.sidewalkM) continue;
+    const pts = e.points;
+    const fromA = e.a === node.id;
+    const a = fromA ? pts[0] : pts[pts.length - 1];
+    const b = fromA ? pts[1] : pts[pts.length - 2];
+    const dx = b.x - a.x;
+    const dz = b.z - a.z;
+    const len = Math.hypot(dx, dz) || 1;
+    arms.push({
+      dir: { x: dx / len, z: dz / len },
+      offset: walkOffsetM(e.cls),
+      walk: s.sidewalkM,
+    });
+  }
+  if (arms.length < 2) return;
+  arms.sort((p, q) => Math.atan2(p.dir.x, p.dir.z) - Math.atan2(q.dir.x, q.dir.z));
+  const along = pad.side / 2 + 0.4;
+  for (let i = 0; i < arms.length; i++) {
+    const a = arms[i];
+    const b = arms[(i + 1) % arms.length];
+    const walk = Math.min(a.walk, b.walk);
+    const pa = perpInto(a.dir, b.dir);
+    const pb = perpInto(b.dir, a.dir);
+    const oa = { x: node.x + pa.x * a.offset, z: node.z + pa.z * a.offset };
+    const ob = { x: node.x + pb.x * b.offset, z: node.z + pb.z * b.offset };
+    const dot = a.dir.x * b.dir.x + a.dir.z * b.dir.z;
+    let pts;
+    if (dot < -0.72) {
+      pts = [
+        { x: oa.x + a.dir.x * along, z: oa.z + a.dir.z * along },
+        { x: oa.x - a.dir.x * along, z: oa.z - a.dir.z * along },
+      ];
+    } else {
+      const mid = intersectLines(oa, a.dir, ob, b.dir);
+      if (!mid) continue;
+      pts = [
+        { x: oa.x + a.dir.x * along, z: oa.z + a.dir.z * along },
+        mid,
+        { x: ob.x + b.dir.x * along, z: ob.z + b.dir.z * along },
+      ];
+    }
+    drawRibbon(
+      scene,
+      spec,
+      { island: node.island, name: (node.name || "junction") + " walk", points: pts },
+      heightAt,
+      walk,
+      SIDEWALK,
+      "sidewalk",
     );
-    mesh.rotation.order = "YXZ";
-    mesh.rotation.set(-Math.PI / 2, pad.yaw || 0, 0);
-    mesh.position.set(at.x, y, at.z);
-    mesh.castShadow = false;
-    mesh.receiveShadow = true;
-    mesh.userData.kind = "road";
-    mesh.userData.roadKind = "sidewalk";
-    mesh.userData.island = pad.island;
-    mesh.userData.roadName = (pad.label || "junction") + " walk";
-    mesh.userData.widthM = walk;
-    mesh.userData.mode = "PAPER";
-    scene.add(mesh);
   }
 }
 
@@ -425,7 +467,7 @@ function drawJunctions(scene, map, specOf, heightAt) {
     for (const node of graph.nodes) {
       const spec = junctionPad(graph, node);
       if (!spec) continue;
-      pads.push({
+      const pad = {
         island: node.island,
         x: node.x,
         z: node.z,
@@ -434,7 +476,9 @@ function drawJunctions(scene, map, specOf, heightAt) {
         kind: spec.kind,
         walkM: spec.walkM,
         label: node.name || "junction",
-      });
+      };
+      addJunctionPlate(scene, specOf(pad.island), heightAt, pad);
+      drawJunctionWalks(scene, specOf(node.island), heightAt, graph, node, spec);
     }
   }
   // Legacy roads (North) still describe a junction with `joins`.
@@ -453,7 +497,6 @@ function drawJunctions(scene, map, specOf, heightAt) {
 
   for (const pad of pads) {
     addJunctionPlate(scene, specOf(pad.island), heightAt, pad);
-    if (pad.kind === "corner") drawWalkFrame(scene, specOf(pad.island), heightAt, pad);
   }
 }
 

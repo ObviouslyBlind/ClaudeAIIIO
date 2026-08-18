@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createLandBoard } from "./land.ts";
-import { SOUTH_PORT, SOUTH_TOWNS } from "./southGeom.ts";
+import { SOUTH_PORT, SOUTH_TOWNS, ROAD_TURN_DEG } from "./southGeom.ts";
 import { carriagewayWidthM, roadClassSpec } from "../public/harbour/roadclass.js";
 import { drivableEdges, projectOnEdge, routeOnGraph, junctionPad, trimPolylineForPads } from "../public/harbour/roadnet.js";
 
@@ -154,21 +154,49 @@ describe("road graph", () => {
     expect(hits).toEqual([]);
   });
 
-  it("stops block-corner ribbons at the plate, so they meet as an L not a plus", () => {
+  it("keeps Quayward SW as a 90° T: Strand continues south, the south loop is the stem", () => {
     const graph = createLandBoard().graph;
     const sw = graph.nodes.find((n) => n.id === "s-quay-sw");
     expect(sw).toBeTruthy();
     const pad = junctionPad(graph, sw);
-    expect(pad?.kind).toBe("corner");
-    expect(pad!.side).toBeGreaterThan(6.6);
+    expect(pad?.kind).toBe("tee");
     const arms = graph.edges.filter((e) => e.cls !== "track" && (e.a === sw!.id || e.b === sw!.id));
-    expect(arms.length).toBeGreaterThanOrEqual(3);
-    for (const edge of arms) {
-      const trimmed = trimPolylineForPads(edge.points, graph, edge);
-      const orig = edge.a === sw!.id ? edge.points[0]! : edge.points[edge.points.length - 1]!;
-      const end = edge.a === sw!.id ? trimmed[0]! : trimmed[trimmed.length - 1]!;
-      expect(Math.hypot(orig.x - sw!.x, orig.z - sw!.z)).toBeLessThan(0.01);
-      expect(Math.hypot(end.x - sw!.x, end.z - sw!.z)).toBeGreaterThan(2);
+    expect(arms.length).toBe(3);
+    const strand = arms.find((e) => e.name === "South Strand")!;
+    const far = strand.a === sw!.id ? strand.points[1]! : strand.points[strand.points.length - 2]!;
+    const dx = far.x - sw!.x;
+    const dz = far.z - sw!.z;
+    const len = Math.hypot(dx, dz) || 1;
+    expect(dz / len).toBeGreaterThan(0.98);
+    expect(Math.abs(dx / len)).toBeLessThan(0.1);
+    const loopEast = arms.find((e) => {
+      if (e.name !== "Quayward Loop") return false;
+      const p = e.a === sw!.id ? e.points[1]! : e.points[e.points.length - 2]!;
+      return p.x > sw!.x + 10;
+    })!;
+    const trimmed = trimPolylineForPads(loopEast.points, graph, loopEast);
+    const orig = loopEast.a === sw!.id ? loopEast.points[0]! : loopEast.points[loopEast.points.length - 1]!;
+    const end = loopEast.a === sw!.id ? trimmed[0]! : trimmed[trimmed.length - 1]!;
+    expect(Math.hypot(orig.x - sw!.x, orig.z - sw!.z)).toBeLessThan(0.01);
+    expect(Math.hypot(end.x - sw!.x, end.z - sw!.z)).toBeGreaterThan(2);
+
+    const dirs = arms.map((e) => {
+      const p = e.a === sw!.id ? e.points[1]! : e.points[e.points.length - 2]!;
+      const x = p.x - sw!.x;
+      const z = p.z - sw!.z;
+      const n = Math.hypot(x, z) || 1;
+      return { x: x / n, z: z / n };
+    });
+    const legal = [...ROAD_TURN_DEG, 180];
+    for (let i = 0; i < dirs.length; i++) {
+      for (let j = i + 1; j < dirs.length; j++) {
+        const dot = Math.max(-1, Math.min(1, dirs[i]!.x * dirs[j]!.x + dirs[i]!.z * dirs[j]!.z));
+        const deg = (Math.acos(dot) * 180) / Math.PI;
+        expect(
+          legal.some((d) => Math.abs(deg - d) < 4),
+          `SW arm angle ${deg.toFixed(1)}° is not 15/30/45/90/180`,
+        ).toBe(true);
+      }
     }
   });
 });
