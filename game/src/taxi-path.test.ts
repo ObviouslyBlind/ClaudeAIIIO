@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createLandBoard } from "./land.ts";
-import { pathAlongPolyline, projectOnPolyline } from "../public/harbour/taxi.js";
+import { SOUTH_PORT, SOUTH_TOWNS } from "./southGeom.ts";
+import { pathAlongPolyline, projectOnPolyline, routeAcrossPaved } from "../public/harbour/taxi.js";
 
 describe("taxi paved path", () => {
   it("projects onto paved polylines and never follows dirt points", () => {
@@ -24,5 +25,28 @@ describe("taxi paved path", () => {
     const off = { x: dirt.points[0].x, z: dirt.points[0].z };
     const dest = projectOnPolyline(paved.points, off.x, off.z);
     expect(dest.dist).toBeGreaterThan(6.5);
+  });
+
+  it("keeps a South hail on paved: no hop through dirt", () => {
+    const board = createLandBoard();
+    const cane = SOUTH_TOWNS.find((t) => t.id === "canebrake")!;
+    const route = routeAcrossPaved(board.roads, "south", SOUTH_PORT.x + 10, SOUTH_PORT.z, cane.x, cane.z);
+    expect(route).toBeTruthy();
+    expect(route!.points.length).toBeGreaterThan(8);
+    const paved = board.roads.filter((r) => r.kind === "paved" && r.island === "south");
+    const dirt = board.roads.filter((r) => r.kind === "dirt" && r.island === "south");
+    const nearPaved = (x: number, z: number) => Math.min(...paved.map((r) => projectOnPolyline(r.points, x, z).dist));
+    for (let i = 0; i < route!.points.length - 1; i++) {
+      const a = route!.points[i]!;
+      const b = route!.points[i + 1]!;
+      const mx = (a.x + b.x) / 2;
+      const mz = (a.z + b.z) / 2;
+      expect(nearPaved(a.x, a.z)).toBeLessThan(8);
+      expect(nearPaved(mx, mz)).toBeLessThan(12);
+      if (dirt.length) {
+        const dDirt = Math.min(...dirt.map((r) => projectOnPolyline(r.points, mx, mz).dist));
+        expect(nearPaved(mx, mz)).toBeLessThanOrEqual(dDirt);
+      }
+    }
   });
 });

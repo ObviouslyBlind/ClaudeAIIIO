@@ -32,12 +32,12 @@ describe("South land (no buildings)", () => {
 
   it("runs a 4-lane highway from the west quay toward the east coast, around the volcano", () => {
     const board = createLandBoard();
-    const hwy = board.roads.find((r) => r.island === "south" && r.lanes === 4);
-    expect(hwy).toBeTruthy();
-    expect(hwy!.name).toBe("Island Hwy");
-    const xs = hwy!.points.map((p) => p.x);
+    const hwy = board.roads.filter((r) => r.island === "south" && r.lanes === 4);
+    expect(hwy.length).toBeGreaterThanOrEqual(4);
+    expect(hwy.every((r) => r.name === "Island Hwy")).toBe(true);
+    const xs = hwy.flatMap((r) => r.points.map((p) => p.x));
     expect(Math.max(...xs) - Math.min(...xs)).toBeGreaterThan(4000);
-    expect(hwy!.points.every((p) => volcanoDist(p.x, p.z) > 400)).toBe(true);
+    expect(hwy.every((r) => r.points.every((p) => volcanoDist(p.x, p.z) > 400))).toBe(true);
     expect(board.roads.filter((r) => r.island === "south" && r.roundabout).length).toBe(4);
     expect(board.roads.some((r) => r.name === "Channel Sands")).toBe(true);
     expect(board.roads.some((r) => r.name === "Palm Arc")).toBe(true);
@@ -129,16 +129,39 @@ describe("South land (no buildings)", () => {
     const names = nearCircus.map((r) => r.name).sort();
     expect(names).toEqual(["Quayward Rd"]);
 
+    const hwys = board.roads.filter((r) => r.name === "Island Hwy");
     const channel = board.roads.find((r) => r.name === "Channel Sands")!;
     const palm = board.roads.find((r) => r.name === "Palm Arc")!;
-    const hwy = board.roads.find((r) => r.name === "Island Hwy")!;
     const strand = board.roads.find((r) => r.name === "South Strand")!;
     const quay = board.roads.find((r) => r.name === "Quayward Rd")!;
     expect(Math.hypot(channel.points[0]!.x - harbour.x, channel.points[0]!.z - harbour.z)).toBeGreaterThan(80);
     expect(Math.hypot(palm.points[0]!.x - harbour.x, palm.points[0]!.z - harbour.z)).toBeGreaterThan(80);
     expect(Math.hypot(strand.points[0]!.x - harbour.x, strand.points[0]!.z - harbour.z)).toBeGreaterThan(40);
-    expect(distToPolyline(hwy.points, channel.points[0]!.x, channel.points[0]!.z)).toBeLessThan(22);
+    expect(Math.min(...hwys.map((h) => distToPolyline(h.points, channel.points[0]!.x, channel.points[0]!.z)))).toBeLessThan(22);
     expect(distToPolyline(quay.points, strand.points[0]!.x, strand.points[0]!.z)).toBeLessThan(12);
     expect(distToPolyline(strand.points, palm.points[0]!.x, palm.points[0]!.z)).toBeLessThan(12);
+    expect(board.roads.filter((r) => r.island === "south" && r.kind === "dirt" && /Path$/.test(r.name || "")).length).toBe(0);
+  });
+
+  it("keeps dirt as field stubs: tracks do not cut across paved tarmac", () => {
+    const board = createLandBoard();
+    const paved = board.roads.filter((r) => r.island === "south" && r.kind === "paved");
+    const dirt = board.roads.filter((r) => r.island === "south" && r.kind === "dirt");
+    expect(dirt.length).toBeGreaterThan(0);
+    for (const d of dirt) {
+      let acc = 0;
+      for (let i = 0; i < d.points.length - 1; i++) {
+        const a = d.points[i]!;
+        const b = d.points[i + 1]!;
+        const seg = Math.hypot(b.x - a.x, b.z - a.z);
+        const along = acc + seg * 0.5;
+        acc += seg;
+        if (along < 18) continue;
+        const mx = (a.x + b.x) / 2;
+        const mz = (a.z + b.z) / 2;
+        const nearPaved = Math.min(...paved.map((p) => distToPolyline(p.points, mx, mz)));
+        expect(nearPaved).toBeGreaterThan(4);
+      }
+    }
   });
 });
