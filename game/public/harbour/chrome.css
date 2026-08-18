@@ -327,7 +327,7 @@ nav.dock.travel-dock {
   font-weight: 500;
   color: var(--muted);
 }
-.float-panel.pos-inv { left: 62px; top: 76px; }
+.float-panel.pos-inv { left: 62px; top: 76px; width: min(340px, calc(100vw - 24px)); max-height: min(72vh, 640px); }
 .float-panel.pos-warehouse { left: 62px; top: 128px; }
 .float-panel.pos-market { left: 62px; top: 180px; }
 .float-panel.pos-staff { left: 62px; top: 232px; }
@@ -366,6 +366,26 @@ nav.dock.travel-dock {
   font-size: 12px;
   color: var(--muted);
 }
+
+.cart-need {
+  margin: 0 0 6px;
+  padding: 8px 10px;
+  border-left: 3px solid var(--btn);
+  background: rgba(8, 28, 32, 0.45);
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--ink);
+}
+.cart-need.is-ok {
+  border-color: var(--green);
+  color: var(--muted);
+}
+.cart-stand {
+  margin: 8px 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+#panel-inventory .source-row { margin: 8px 0; }
 
 .dest-row {
   display: flex;
@@ -999,8 +1019,4 @@ nav.dock.travel-dock {
   background: transparent;
   color: var(--ink);
   font-weight: 600;
-}
-.travel-dock #btn-menu {
-  background: linear-gradient(180deg, #7ee0b0, #3cb87a);
-  color: #062016;
 }

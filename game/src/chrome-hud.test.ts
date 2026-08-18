@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { formatCartsBody } from "../public/harbour/carts-hud.js";
 
 const html = readFileSync(new URL("../public/harbour/index.html", import.meta.url), "utf8");
 const chrome = readFileSync(new URL("../public/harbour/chrome.js", import.meta.url), "utf8");
@@ -7,15 +8,15 @@ const css = readFileSync(new URL("../public/harbour/chrome.css", import.meta.url
 const pageCss = readFileSync(new URL("../public/harbour/style.css", import.meta.url), "utf8");
 const fonts = readFileSync(new URL("../public/harbour/chrome-fonts.css", import.meta.url), "utf8");
 const pack = readFileSync(new URL("../public/harbour/pack.js", import.meta.url), "utf8");
-const menus = readFileSync(new URL("../public/harbour/menu-stack.js", import.meta.url), "utf8");
-const kernelMenus = readFileSync(new URL("./kernel/menus.ts", import.meta.url), "utf8");
+const carts = readFileSync(new URL("../public/harbour/carts-hud.js", import.meta.url), "utf8");
 
 describe("harbour chrome HUD", () => {
-  it("keeps walking chrome in the corners and dock, with play systems in the menu stack", () => {
+  it("keeps launchers on the left rail, not a Menu on the travel dock", () => {
     expect(html).toContain('class="game-name"');
     expect(html).toContain("Two Harbors");
     expect(html).toContain('class="chrome-tl"');
     expect(html).toContain('class="chrome-tr"');
+    expect(html).toContain('class="chrome-left"');
     expect(html).toContain('id="viewers"');
     expect(html).toContain('data-overlay="lots"');
     expect(html).toContain('data-overlay="foot"');
@@ -27,22 +28,15 @@ describe("harbour chrome HUD", () => {
     expect(chips).toContain('data-overlay="lots"');
     expect(chips).toContain('data-overlay="foot"');
     expect(chips).not.toContain("Leaderboard");
-    const tr = html.slice(html.indexOf('class="chrome-tr"'), html.indexOf('id="land-card"'));
+    const tr = html.slice(html.indexOf('class="chrome-tr"'), html.indexOf('class="chrome-left"'));
     expect(tr).toContain('id="panel-account"');
     expect(tr).toContain('id="foot-legend"');
-    expect(tr).not.toContain('id="panel-view"');
-    expect(css).toContain(".chrome-tr .float-panel");
-    expect(css).toContain("flex-wrap: nowrap");
-    expect(html).not.toContain('data-panel="inventory"');
-    expect(html).not.toContain('data-panel="warehouse"');
-    expect(html).not.toContain('data-panel="market"');
-    expect(html).not.toContain('data-panel="employees"');
-    expect(html).not.toContain('class="chrome-left"');
-    expect(html).not.toContain('id="cart-line"');
-    expect(html).not.toContain('id="btn-pack"');
-    expect(html).toContain('id="btn-menu"');
-    expect(html).toContain('id="menu-stack"');
-    expect(html).toContain('id="menu-body"');
+    expect(html).toContain('data-panel="inventory"');
+    expect(html).toContain('data-panel="warehouse"');
+    expect(html).toContain('data-panel="market"');
+    expect(html).toContain('data-panel="employees"');
+    expect(html).toContain('aria-label="Carts"');
+    expect(html).toContain('id="panel-inventory"');
     expect(html).toContain('id="place-hint"');
     expect(html).toContain('id="place-cancel"');
     expect(html).toContain('id="taxi-map-exit"');
@@ -55,13 +49,18 @@ describe("harbour chrome HUD", () => {
     expect(html).toContain('id="lot-tags"');
     expect(html).toContain('id="storage-fee"');
     expect(html).toContain('id="pack-shift"');
+    expect(html).not.toContain('id="btn-menu"');
+    expect(html).not.toContain('id="btn-pack"');
+    expect(html).not.toContain('id="cart-line"');
     expect(html).not.toContain("harbour-sheet");
     expect(html).not.toContain("btn-harbour");
     expect(html).not.toContain("first loop");
     expect(html).not.toContain("Tutorials");
     expect(css).toContain(".chrome-tl");
     expect(css).toContain(".chrome-tr");
+    expect(css).toContain(".chrome-left");
     expect(css).toContain("pos-inv");
+    expect(css).toContain(".cart-need");
     expect(css).toMatch(/max-height:\s*min\(62vh/);
     expect(css).toContain("overflow: hidden");
     expect(css).toContain("flex-wrap: nowrap");
@@ -104,31 +103,35 @@ describe("harbour chrome HUD", () => {
     expect(chrome).not.toContain("Run it myself");
   });
 
-  it("buys kit and goods from one market sheet inside the menu stack", () => {
+  it("opens the carts submenu from the left rail with hire, stock, sticker, fridge, pack", () => {
+    expect(chrome).toContain("formatCartsBody");
     expect(chrome).toContain("Stock cart");
     expect(chrome).toContain("Twelve goods");
     expect(chrome).toContain("/api/buy");
     expect(chrome).toContain("/api/shift/pack");
     expect(chrome).toContain("dest: marketDest === \"cart\" ? \"cart\" : \"warehouse\"");
-    expect(chrome).toContain("openPlayMenu");
-    expect(chrome).toContain("harbourMenus");
-    expect(chrome).toContain('data-menu="market"');
-    expect(chrome).toContain('data-menu="inventory"');
-    expect(chrome).toContain('data-menu="pack"');
-    expect(chrome).toContain("data-pack-start");
+    expect(chrome).not.toContain("openPlayMenu");
     expect(chrome).not.toContain("← Marketplace");
     expect(chrome).not.toContain("data-aisle");
     expect(chrome).not.toContain("first loop");
-    expect(html).toContain('id="btn-menu"');
-    expect(html).not.toContain('id="btn-pack"');
-    expect(html).not.toContain('id="cart-line"');
+    expect(carts).toContain("Carts do not sell without staff");
+    expect(carts).toContain("today's price");
+    expect(carts).toContain("Fridge · $200");
+    expect(carts).toContain("data-pack-start");
+    expect(carts).toContain('type="number"');
     expect(pack).toContain("PACK_SECONDS");
     expect(pack).toContain("pack-good");
-    expect(menus).toContain("play:");
-    expect(menus).toContain("setRender");
-    expect(kernelMenus).toContain('"play"');
-    expect(kernelMenus).toContain('"market"');
-    expect(kernelMenus).toContain('"warehouse"');
-    expect(kernelMenus).toContain('"pack"');
+    const body = formatCartsBody({
+      todayPrice: 5,
+      cartNeeds: [{ id: "hire", label: "Hire a vendor. Carts do not sell without staff." }],
+      inventory: [{ kind: "hotdog_cart", qty: 1 }],
+      cart: [],
+      stands: [],
+      warehouse: { items: [] },
+      hireRoster: [{ id: "pat", name: "Pat K.", suggest: "A $200 fridge would hold more stock through the weekend." }],
+    });
+    expect(body).toMatch(/Hire a vendor/);
+    expect(body).toMatch(/\$5\.00 is today's price/);
+    expect(body).toMatch(/data-place/);
   });
 });

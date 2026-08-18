@@ -15,6 +15,7 @@ import {
   TODAY_PRICE,
   WAREHOUSE_FEE_PER_DAY,
   WAREHOUSE_RENT_TICKS,
+  cartLoopNeeds,
   hireStand,
   incomePerMinute,
   markArrived,
@@ -23,6 +24,7 @@ import {
   playSnapshot,
   recallStaleDeliveries,
   setStandPrice,
+  standNeeds,
   stockStand,
   takeAll,
   tickHotdogSales,
@@ -273,5 +275,26 @@ describe("South first loop", () => {
     expect(upgradeStand(visitor, placed.stand.id).ok).toBe(true);
     expect(placed.stand.storageCap).toBe(40);
     expect(visitor.cash).toBeCloseTo(cash0 + 8 * (1 - SALES_TAX) - STORAGE_UPGRADE_COST, 8);
+  });
+
+  it("lists what a cart still wants: buy, place, hire, stock, fridge, sticker", () => {
+    const { land, visitor, plot } = leaseCheapSouth();
+    expect(cartLoopNeeds(visitor.play).map((n) => n.id)).toEqual(["buy"]);
+    const order = orderMarket(visitor, land, { skus: ["hotdog_cart", "hotdogs"], dest: "cart" });
+    expect(order.ok).toBe(true);
+    expect(cartLoopNeeds(visitor.play).map((n) => n.id)).toEqual(["place"]);
+    const placed = placeStand(visitor, land, plot.id);
+    expect(placed.ok).toBe(true);
+    if (!placed.ok) return;
+    expect(standNeeds(placed.stand).map((n) => n.id)).toEqual(["hire", "stock", "fridge"]);
+    expect(hireStand(visitor, placed.stand.id, "pat").ok).toBe(true);
+    expect(stockStand(visitor, placed.stand.id, 0, "inventory").ok).toBe(true);
+    expect(setStandPrice(visitor, placed.stand.id, 8).ok).toBe(true);
+    expect(standNeeds(placed.stand).map((n) => n.id)).toEqual(["fridge", "sticker"]);
+    expect(standNeeds(placed.stand).some((n) => n.label.includes("today's price"))).toBe(true);
+    expect(upgradeStand(visitor, placed.stand.id).ok).toBe(true);
+    expect(setStandPrice(visitor, placed.stand.id, TODAY_PRICE).ok).toBe(true);
+    expect(standNeeds(placed.stand)).toEqual([]);
+    expect(playSnapshot(visitor, land).cartNeeds).toEqual([]);
   });
 });

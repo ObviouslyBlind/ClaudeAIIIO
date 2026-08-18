@@ -69,6 +69,28 @@
         <div id="panel-account" class="float-panel pos-tr" hidden><div id="acct-body"></div></div>
         <div id="foot-legend" hidden></div>
       </div>
+      <div class="chrome-left">
+        <button type="button" class="rail-btn" data-panel="inventory" aria-label="Carts">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8h10l1.2 12H5.8L7 8z"/><path d="M9 8V6.4a3 3 0 0 1 6 0V8"/></svg>
+          <span>Carts</span>
+        </button>
+        <button type="button" class="rail-btn" data-panel="warehouse" aria-label="Warehouse">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10.5 12 4l8 6.5V20H4z"/><path d="M4 10.5h16M12 10.5V20"/></svg>
+          <span>Wh</span>
+        </button>
+        <button type="button" class="rail-btn" data-panel="market" aria-label="Market">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11h16"/><path d="M5 11 12 5l7 6"/><path d="M6 11v8M18 11v8M8 16h8"/></svg>
+          <span>Mkt</span>
+        </button>
+        <button type="button" class="rail-btn" data-panel="employees" aria-label="Staff">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3"/><path d="M6 20c0-3.4 2.7-6 6-6s6 2.6 6 6"/></svg>
+          <span>Staff</span>
+        </button>
+      </div>
+      <div id="panel-inventory" class="float-panel pos-inv" hidden><div id="inv-body"></div></div>
+      <div id="panel-warehouse" class="float-panel pos-warehouse" hidden><div id="warehouse-body"></div></div>
+      <div id="panel-market" class="float-panel pos-market" hidden><div id="market-body"></div></div>
+      <div id="panel-employees" class="float-panel pos-staff" hidden><div id="staff-body"></div></div>
       <div id="land-card" hidden></div>
       <div id="buy-ask" hidden></div>
       <div id="stand-veil" hidden></div>
@@ -117,7 +139,6 @@
       <button type="button" id="btn-fire" hidden>Fire</button>
       <button type="button" id="btn-enter" hidden>Enter</button>
       <button type="button" id="btn-exit" hidden>Exit taxi</button>
-      <button type="button" id="btn-menu">Menu</button>
       <button type="button" id="btn-ferry" disabled>Ferry</button>
       <button type="button" id="btn-taxi">Taxi</button>
       <button type="button" id="btn-minerals" hidden>Minerals</button>

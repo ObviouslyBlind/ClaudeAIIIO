@@ -8,8 +8,7 @@ import { buyAskModel } from "./buy-ask.js";
 import { playPaperBuy } from "./paper-sfx.js";
 import { toggleViewer, footLevel } from "./overlays.js";
 import { mountPackShift } from "./pack.js";
-import { harbourMenus, mountMenuStack } from "./menu-stack.js";
-import { formatMineralsBody } from "./minerals-hud.js";
+import { formatCartsBody } from "./carts-hud.js";
 
 export const POLL_MS = 1000;
 
@@ -48,9 +47,7 @@ export function mountChrome(opts) {
   let overlay = "world";
   let placing = false;
   let marketDest = "cart";
-  let mineralsSnap = null;
   const packShift = mountPackShift();
-  const menus = harbourMenus() || mountMenuStack();
 
   function setPlaceHint(text, show) {
     const hint = document.getElementById("place-hint");
@@ -95,7 +92,6 @@ export function mountChrome(opts) {
       return;
     }
     closePanels();
-    if (menus) menus.close();
     if (standMenu) standMenu.hidden = true;
     if (standVeil) standVeil.hidden = true;
     openPanel = id;
@@ -109,7 +105,7 @@ export function mountChrome(opts) {
       btn.classList.add("is-on");
       if (btn.hasAttribute("aria-expanded")) btn.setAttribute("aria-expanded", "true");
     }
-    paintAccount();
+    paintPanels();
   }
 
   function title(text) {
@@ -136,43 +132,8 @@ export function mountChrome(opts) {
     }
   }
 
-  function menuBody() {
-    return document.getElementById("menu-body");
-  }
-
-  function frameTitle(id) {
-    return (
-      {
-        play: "Menu",
-        inventory: "Cart",
-        market: "Market",
-        warehouse: "Warehouse",
-        staff: "Staff",
-        pack: "Pack",
-        minerals: "Minerals",
-      }[id] || id
-    );
-  }
-
-  function paintDirectory(body) {
-    if (!body) return;
-    const cartN = ((play && play.cart) || []).reduce((n, r) => n + (Number(r.qty) || 0), 0);
-    const kitN = ((play && play.inventory) || []).reduce((n, r) => n + (Number(r.qty) || 0), 0);
-    const held = cartN + kitN;
-    body.innerHTML = `
-      <p class="menu-note">PAPER · SIMULATED. The camera is for walking. Cart, market, warehouse, staff, pack, and minerals live in this menu.</p>
-      <div class="menu-dir">
-        <button type="button" data-menu="inventory">Cart · ${held ? held + " held" : "empty"}</button>
-        <button type="button" data-menu="market">Market · kit and twelve goods</button>
-        <button type="button" data-menu="warehouse">Warehouse</button>
-        <button type="button" data-menu="staff">Staff</button>
-        <button type="button" data-menu="pack">Pack shift · PAPER bonus</button>
-        <button type="button" data-menu="minerals">Minerals</button>
-      </div>
-    `;
-  }
-
-  function paintMarket(body) {
+  function paintMarket() {
+    const body = document.getElementById("market-body");
     if (!body || !play) return;
     const catalog = play.catalog || [];
     const fee = play.warehouse ? money(play.warehouse.feePerDay) : "$5.00";
@@ -186,7 +147,7 @@ export function mountChrome(opts) {
         <button type="button" class="dest ${destCart ? "is-on" : ""}" data-dest="cart">Stock cart</button>
         <button type="button" class="dest ${marketDest === "warehouse" ? "is-on" : ""}" data-dest="warehouse">Warehouse</button>
       </div>
-      <p class="whisper">${destCart ? "Goes in your cart / pockets. Place from Cart." : "South warehouse " + fee + "/day."}</p>
+      <p class="whisper">${destCart ? "Goes in your cart / pockets. Place from Carts." : "South warehouse " + fee + "/day."}</p>
       ${catalog
         .map(
           (s) => `
@@ -226,48 +187,10 @@ export function mountChrome(opts) {
       .join("");
   }
 
-  function kindLabel(kind) {
-    return kind === "hotdog_cart" ? "Street cart" : "Stock";
-  }
-
-  function paintInv(body) {
+  function paintInv() {
+    const body = document.getElementById("inv-body");
     if (!body || !play) return;
-    const rows = play.inventory || [];
-    const cart = (play.cart || []).filter((r) => r && r.goodId && Number(r.qty) > 0);
-    const whCart = ((play.warehouse && play.warehouse.items) || []).some((r) => r.kind === "hotdog_cart" && r.qty > 0);
-    const canPlace = rows.some((r) => r.kind === "hotdog_cart") || whCart;
-    const kitHtml = rows.length
-      ? rows
-          .map(
-            (r) => `
-        <div class="inv-row">
-          <span>${kindLabel(r.kind)} × ${r.qty}</span>
-          ${
-            r.kind === "hotdog_cart"
-              ? `<button type="button" data-place="1">Place in world</button>`
-              : ""
-          }
-        </div>`,
-          )
-          .join("")
-      : "<p>No kit in pockets. Warehouse holds the rest.</p>";
-    const goodsHtml = cart.length
-      ? cart
-          .map((r) => `<div class="inv-row"><span>${String(r.goodId).replace("_", " ")} × ${r.qty}</span><span>PAPER</span></div>`)
-          .join("")
-      : "<p>Goods cart empty. Buy from Market.</p>";
-    body.innerHTML = `
-      ${title("Cart")}
-      <h3 class="sheet-kicker">Goods cart</h3>
-      ${goodsHtml}
-      <h3 class="sheet-kicker">Kit</h3>
-      ${kitHtml}
-      ${
-        !rows.some((r) => r.kind === "hotdog_cart") && canPlace
-          ? `<div class="inv-row"><span>Cart in warehouse</span><button type="button" data-place="1">Place in world</button></div>`
-          : ""
-      }
-    `;
+    body.innerHTML = formatCartsBody(play);
   }
 
   function beginPlace() {
@@ -276,7 +199,6 @@ export function mountChrome(opts) {
     if (buyAsk) buyAsk.hidden = true;
     setOverlay("lots");
     closePanels();
-    if (menus) menus.close();
     setPlaceHint("Tap the green YOURS lot, or the verge by the road.", true);
     if (opts.setStatus) {
       opts.setStatus("Tap your lot or the verge out to the main road to place the cart.");
@@ -289,7 +211,8 @@ export function mountChrome(opts) {
     return (lease && lease.name) || "your lot";
   }
 
-  function paintStaff(body) {
+  function paintStaff() {
+    const body = document.getElementById("staff-body");
     if (!body || !play) return;
     const stands = play.stands || [];
     body.innerHTML = `
@@ -302,23 +225,11 @@ export function mountChrome(opts) {
                 if (s.hired) {
                   return `<div class="stand-row"><span>${s.staffName || "Vendor"}</span><strong>${where}</strong></div>`;
                 }
-                return `<div class="stand-row"><span>${where}</span><strong>Tap the cart</strong></div>`;
+                return `<div class="stand-row"><span>${where}</span><strong>Hire from Carts</strong></div>`;
               })
               .join("")
-          : "<p>Place a cart, then tap it to hire.</p>"
+          : "<p>Place a cart, then hire from the Carts submenu. Carts do not sell without staff.</p>"
       }
-    `;
-  }
-
-  function paintBoard() {
-    const body = document.getElementById("board-body");
-    if (!body || !play) return;
-    body.innerHTML = `
-      ${title("Leaderboard")}
-      <p>South island street carts.</p>
-      <div class="stand-row"><span>You</span><strong>${money(play.cash)}</strong></div>
-      <div class="stand-row"><span>Mill St cart (NPC)</span><strong>$412.40</strong></div>
-      <div class="stand-row"><span>Harbour Rd cart (NPC)</span><strong>$188.10</strong></div>
     `;
   }
 
@@ -332,29 +243,25 @@ export function mountChrome(opts) {
       <div class="stand-row"><span>Balance</span><strong>${money(play.cash)}</strong></div>
       <div class="stand-row"><span>Income</span><strong>${money(play.incomePerMinute)}/min</strong></div>
       <div class="stand-row"><span>Island bank</span><strong>${money(play.gameBank)}</strong></div>
-      <h3 class="sheet-kicker">South street carts</h3>
-      <div class="stand-row"><span>You</span><strong>${money(play.cash)}</strong></div>
-      <div class="stand-row"><span>Mill St cart (NPC)</span><strong>$412.40</strong></div>
-      <div class="stand-row"><span>Harbour Rd cart (NPC)</span><strong>$188.10</strong></div>
     `;
   }
 
-  function paintWarehouse(body) {
+  function paintWarehouse() {
+    const body = document.getElementById("warehouse-body");
     if (!body || !play) return;
     const wh = play.warehouse || { items: [], feePerDay: 5, island: "south" };
     const items = wh.items || [];
     const island = wh.island === "north" ? "North" : "South";
-    const occupied = items.length > 0 || wh.occupied;
     body.innerHTML = `
       ${title("Warehouse")}
-      <p class="whisper">${island} dock · shared · ${money(wh.feePerDay)}/day while occupied${occupied ? " · fee on" : ""}</p>
+      <p class="whisper">${island} dock · shared · ${money(wh.feePerDay)}/day while occupied</p>
       ${
         items.length
           ? items
               .map(
                 (r) => `
         <div class="inv-row">
-          <span>${kindLabel(r.kind)} × ${r.qty}</span>
+          <span>${r.kind === "hotdog_cart" ? "Street cart" : "Stock"} × ${r.qty}</span>
           <button type="button" data-withdraw="${r.kind}">Bring to me</button>
         </div>`,
               )
@@ -362,43 +269,6 @@ export function mountChrome(opts) {
           : "<p>Nothing stored. Market can send kit here.</p>"
       }
     `;
-  }
-
-  function paintPack(body) {
-    if (!body) return;
-    body.innerHTML = `
-      ${title("Pack")}
-      <p class="menu-note">Client-side cart pack. The stall already ran. PAPER bonus only. Skip or miss never cuts output.</p>
-      <p>Tap goods for 8 seconds. Cap 8 hits · $0.50 each · 60s cooldown.</p>
-      <div class="inv-row">
-        <span>Pack shift</span>
-        <button type="button" class="go" data-pack-start="1">Start pack</button>
-      </div>
-    `;
-  }
-
-  function paintMinerals(body) {
-    if (!body) return;
-    body.innerHTML = formatMineralsBody(mineralsSnap);
-    if (!mineralsSnap) {
-      readJson("/api/minerals").then(({ ok, data }) => {
-        if (!ok) return;
-        mineralsSnap = data;
-        if (menus && menus.top().id === "minerals") paintMinerals(menuBody());
-      });
-    }
-  }
-
-  function paintFrame(id) {
-    const body = menuBody();
-    if (!body) return;
-    if (id === "play" || id === "root") paintDirectory(body);
-    else if (id === "market") paintMarket(body);
-    else if (id === "inventory") paintInv(body);
-    else if (id === "warehouse") paintWarehouse(body);
-    else if (id === "staff") paintStaff(body);
-    else if (id === "pack") paintPack(body);
-    else if (id === "minerals") paintMinerals(body);
   }
 
   function startPack() {
@@ -411,7 +281,7 @@ export function mountChrome(opts) {
         });
         if (data && data.play) play = data.play;
         paintTop();
-        if (menus && menus.isOpen()) paintFrame(menus.top().id);
+        if (openPanel === "inventory") paintInv();
         if (opts.setStatus) {
           opts.setStatus(
             ok
@@ -423,44 +293,33 @@ export function mountChrome(opts) {
     });
   }
 
-  function openPlayMenu() {
-    closePanels();
-    if (!menus) return;
-    if (menus.isOpen()) {
-      menus.close();
-      return;
-    }
-    menus.open({ id: "play", title: "Menu" });
+  function paintPanels() {
+    paintMarket();
+    paintInv();
+    paintWarehouse();
+    paintStaff();
+    paintAccount();
   }
 
-  function openFrame(id) {
-    if (!menus) return;
-    if (menus.top().id === "root") menus.open({ id: "play", title: "Menu" });
-    if (id && id !== "play" && menus.top().id !== id) {
-      menus.open({ id, title: frameTitle(id) });
-    } else {
-      menus.paint();
-    }
+  async function refreshPlay(data) {
+    if (data && data.play) play = data.play;
+    paintTop();
+    paintPanels();
   }
 
-  function bindMenuBody() {
-    const body = menuBody();
-    if (!body || body.dataset.bound) return;
-    body.dataset.bound = "1";
-    body.addEventListener("click", async (ev) => {
+  function bindChromeActions() {
+    if (root.dataset.cartBound) return;
+    root.dataset.cartBound = "1";
+    root.addEventListener("click", async (ev) => {
       const hit = ev.target && ev.target.closest
         ? ev.target.closest(
-            "[data-menu], [data-dest], [data-order], [data-buy], [data-place], [data-withdraw], [data-pack-start]",
+            "[data-dest], [data-order], [data-buy], [data-place], [data-withdraw], [data-pack-start], [data-stock], [data-hire-person], [data-upgrade]",
           )
         : null;
-      if (!hit) return;
-      if (hit.hasAttribute("data-menu")) {
-        openFrame(hit.getAttribute("data-menu"));
-        return;
-      }
+      if (!hit || (standMenu && standMenu.contains(hit))) return;
       if (hit.hasAttribute("data-dest")) {
         marketDest = hit.getAttribute("data-dest") || "cart";
-        paintMarket(body);
+        paintMarket();
         return;
       }
       if (hit.hasAttribute("data-order")) {
@@ -478,14 +337,10 @@ export function mountChrome(opts) {
           return;
         }
         playPaperBuy();
-        play = data.play;
-        paintTop();
-        paintMarket(body);
+        await refreshPlay(data);
         if (opts.setStatus) {
           opts.setStatus(
-            marketDest === "cart"
-              ? "On the cart. Open Cart to place it, or Pack for a shift bonus."
-              : "In the South warehouse.",
+            marketDest === "cart" ? "On the cart. Open Carts to place it." : "In the South warehouse.",
           );
         }
         return;
@@ -510,7 +365,8 @@ export function mountChrome(opts) {
           play.cart = data.snapshot.visitor.cart || [];
         }
         paintTop();
-        paintMarket(body);
+        paintMarket();
+        paintInv();
         if (opts.setStatus) opts.setStatus("In the cart · PAPER · SIMULATED");
         return;
       }
@@ -524,21 +380,58 @@ export function mountChrome(opts) {
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ kind: hit.getAttribute("data-withdraw") }),
         });
-        if (data && data.play) play = data.play;
-        paintTop();
-        paintWarehouse(body);
+        await refreshPlay(data);
         return;
       }
       if (hit.hasAttribute("data-pack-start")) {
         startPack();
+        return;
+      }
+      if (hit.hasAttribute("data-stock")) {
+        const standId = hit.getAttribute("data-stand");
+        const { ok, data } = await readJson("/api/stand/stock", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ standId, from: hit.getAttribute("data-stock") }),
+        });
+        await refreshPlay(data);
+        if (opts.setStatus) {
+          opts.setStatus(ok ? "Stock in the cart." : "Could not stock: " + ((data && data.reason) || "fail"));
+        }
+        return;
+      }
+      if (hit.hasAttribute("data-hire-person")) {
+        const { ok, data } = await readJson("/api/stand/hire", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            standId: hit.getAttribute("data-hire-stand"),
+            personId: hit.getAttribute("data-hire-person"),
+          }),
+        });
+        await refreshPlay(data);
+        if (ok && opts.onHired) opts.onHired(hit.getAttribute("data-hire-stand"));
+        return;
+      }
+      if (hit.hasAttribute("data-upgrade")) {
+        const { data } = await readJson("/api/stand/upgrade", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ standId: hit.getAttribute("data-upgrade") }),
+        });
+        await refreshPlay(data);
       }
     });
-  }
-
-  function paintPanels() {
-    paintAccount();
-    paintBoard();
-    if (menus && menus.isOpen()) paintFrame(menus.top().id);
+    root.addEventListener("change", async (ev) => {
+      const hit = ev.target && ev.target.closest ? ev.target.closest("[data-sticker]") : null;
+      if (!hit) return;
+      const { data } = await readJson("/api/stand/price", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ standId: hit.getAttribute("data-sticker"), price: Number(hit.value) }),
+      });
+      await refreshPlay(data);
+    });
   }
 
   root.querySelectorAll("[data-panel]").forEach((btn) => {
@@ -556,14 +449,14 @@ export function mountChrome(opts) {
       play = data;
       paintTop();
       paintFootLegend();
-      if (root.querySelector(".float-panel.is-open")) paintAccount();
-      if (menus && menus.isOpen()) paintFrame(menus.top().id);
+      if (root.querySelector(".float-panel.is-open")) paintPanels();
       if (opts.onPlay) opts.onPlay(play);
     }
   }
 
   poll();
   const timer = setInterval(poll, POLL_MS);
+
   function paintBuyAsk(plot, extras) {
     if (!buyAsk) return;
     const model = buyAskModel(plot);
@@ -611,14 +504,7 @@ export function mountChrome(opts) {
       standVeil.hidden = true;
     });
   }
-  const menuBtn = document.getElementById("btn-menu");
-  if (menuBtn) {
-    menuBtn.addEventListener("click", openPlayMenu);
-  }
-  if (menus && typeof menus.setRender === "function") {
-    menus.setRender((top) => paintFrame(top.id));
-  }
-  bindMenuBody();
+  bindChromeActions();
 
   setOverlay("world");
 
@@ -700,7 +586,6 @@ export function mountChrome(opts) {
         return;
       }
       closePanels();
-      if (menus) menus.close();
       standMenu.hidden = false;
       if (standVeil) standVeil.hidden = false;
       const todayN = Number(play && play.todayPrice != null ? play.todayPrice : 5);

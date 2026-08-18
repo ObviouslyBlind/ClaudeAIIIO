@@ -106,6 +106,51 @@ export const HIRE_ROSTER: { id: string; name: string; role: string; suggest: str
   },
 ];
 
+export type CartNeedId = "buy" | "place" | "hire" | "stock" | "fridge" | "sticker";
+
+export type CartNeed = {
+  id: CartNeedId;
+  label: string;
+};
+
+/** What a placed street cart still wants before it earns. */
+export function standNeeds(stand: Stand, today = TODAY_PRICE): CartNeed[] {
+  const needs: CartNeed[] = [];
+  if (!stand.hired) {
+    needs.push({ id: "hire", label: "Hire a vendor. Carts do not sell without staff." });
+  }
+  if (Number(stand.hotdogs) < 1) {
+    needs.push({ id: "stock", label: "Load hotdogs from pockets or the warehouse." });
+  }
+  if (!stand.upgraded) {
+    needs.push({
+      id: "fridge",
+      label: "A $200 fridge would hold more stock through the weekend.",
+    });
+  }
+  if (Math.abs(Number(stand.stickerPrice) - today) > 0.01) {
+    needs.push({
+      id: "sticker",
+      label: `Set a sticker. $${today.toFixed(2)} is today's price.`,
+    });
+  }
+  return needs;
+}
+
+/** First-loop cart jobs, in order: buy → place → hire / stock / fridge / sticker. */
+export function cartLoopNeeds(play: PlayState, today = TODAY_PRICE): CartNeed[] {
+  const kit =
+    play.inventory.some((row) => row.kind === "hotdog_cart" && row.qty > 0) ||
+    play.warehouse.items.some((row) => row.kind === "hotdog_cart" && row.qty > 0);
+  if (!play.stands.length && !kit) {
+    return [{ id: "buy", label: "Buy a street cart in Market." }];
+  }
+  if (!play.stands.length) {
+    return [{ id: "place", label: "Place the cart on your YOURS lot or the verge by the road." }];
+  }
+  return play.stands.flatMap((stand) => standNeeds(stand, today));
+}
+
 export type Warehouse = {
   island: IslandId;
   feePerDay: number;
@@ -627,8 +672,9 @@ export function playSnapshot(visitor: Visitor, land: LandBoard) {
     catalog: MARKET_CATALOG,
     inventory: play.inventory.map((row) => ({ ...row })),
     hireRoster: HIRE_ROSTER.map((p) => ({ ...p })),
+    cartNeeds: cartLoopNeeds(play),
     deliveries: play.deliveries.map((d) => ({ ...d, items: d.items.map((i) => ({ ...i })) })),
-    stands: play.stands.map((s) => ({ ...s })),
+    stands: play.stands.map((s) => ({ ...s, needs: standNeeds(s) })),
     leases: land.plots.filter((p) => p.owner === "visitor" && p.island === "south").map((p) => ({
       id: p.id,
       name: p.name,
