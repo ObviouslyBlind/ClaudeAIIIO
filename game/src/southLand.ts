@@ -35,8 +35,8 @@ type HeightFn = (spec: IslandSpec, x: number, z: number) => number;
 
 const STREET_CLEAR = 11;
 /** Circulatory ring. Spurs start outside this, never at the circus centre. */
-const RAB_R = 22;
-const RAB_GAP = RAB_R + 6;
+const RAB_R = 32;
+const RAB_GAP = RAB_R + 8;
 
 function hash(n: number): number {
   const x = Math.sin(n * 12.9898) * 43758.5453;
@@ -446,18 +446,23 @@ export function buildSouthLand(spec: IslandSpec, heightAt: HeightFn): SouthBuilt
   const ashPass = SOUTH_TOWNS[3]!;
   const eastHaven = SOUTH_TOWNS[4]!;
 
-  // Harbour Circus: highway + two radials. Beach roads fork later — they do
-  // not share the ring with Quayward / Strand (that was the overlapping star).
-  roads.push(paved("Quayward Rd", trimNearPoint(leaveRing(harbour, [quayward]), quayward, 20), harbour, {}, 0));
-  const strandPts = sampleSpline(
-    leaveRing(harbour, [
+  // Harbour Circus: highway + Quayward only. Strand forks off Quayward so the
+  // circus is a 3-exit ring, not a star of beach roads through one point.
+  const quayPts = trimNearPoint(leaveRing(harbour, [quayward]), quayward, 20);
+  roads.push(paved("Quayward Rd", quayPts, harbour, {}, 0));
+  const quayRoad = roads.find((r) => r.name === "Quayward Rd")!;
+  const strandDest = sampleSpline(
+    [
       { x: -2220, z: 8120 },
       { x: -2140, z: 9180 },
       { x: saltwind.x, z: saltwind.z },
-    ]),
+    ],
     6,
   );
-  roads.push(paved("South Strand", trimNearPoint(strandPts, saltwind, 18), harbour, {}, 0));
+  const strandAlong = Math.min(90, polylineLen(quayRoad.points) * 0.42);
+  const strandFork = forkFromTrunk(quayRoad.points, strandAlong, strandDest, 7.2);
+  if (!strandFork) throw new Error("south land: South Strand must Y-fork off Quayward Rd");
+  roads.push(paved("South Strand", trimNearPoint(strandFork.pts, saltwind, 18), harbour, {}, 0));
 
   const hwyAlongHarbour = distAlongNearest(highwayPts, harbour);
   const channelDest = sampleSpline(
