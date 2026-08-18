@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { HIGHWAY_LANE_OFFSET_M, offsetPolyline } from "./roads.js";
 
 /** Metres. On the carriageway (paved width 6.2). */
 const ON_PAVED = 6.5;
@@ -74,6 +75,25 @@ export function pathAlongPolyline(points, fromX, fromZ, toX, toZ) {
   }
   path.push({ x: to.x, z: to.z });
   return compactPath(path);
+}
+
+/** Dual carriageway: sit in a black lane, not on the stone median. */
+export function carriagewayPath(points, road) {
+  if (!points || points.length < 2 || !road || road.lanes !== 4) return points || [];
+  return offsetPolyline(points, HIGHWAY_LANE_OFFSET_M);
+}
+
+function carriagewayAt(road, proj) {
+  const p = { x: proj.x, z: proj.z };
+  if (!road || road.lanes !== 4 || !road.points || road.points.length < 2) return p;
+  const a = road.points[proj.i];
+  const b = road.points[Math.min(proj.i + 1, road.points.length - 1)];
+  const dx = b.x - a.x;
+  const dz = b.z - a.z;
+  const len = Math.hypot(dx, dz) || 1;
+  const rx = dz / len;
+  const rz = -dx / len;
+  return { x: p.x + rx * HIGHWAY_LANE_OFFSET_M, z: p.z + rz * HIGHWAY_LANE_OFFSET_M };
 }
 
 /**
@@ -188,7 +208,10 @@ export function routeAcrossPaved(roads, islandId, fromX, fromZ, toX, toZ) {
   if (!from || !to) return null;
 
   if (from.road === to.road) {
-    const pts = pathAlongPolyline(from.road.points, from.proj.x, from.proj.z, to.proj.x, to.proj.z);
+    const pts = carriagewayPath(
+      pathAlongPolyline(from.road.points, from.proj.x, from.proj.z, to.proj.x, to.proj.z),
+      from.road,
+    );
     return { points: pts, road: to.road };
   }
 
@@ -240,10 +263,12 @@ export function routeAcrossPaved(roads, islandId, fromX, fromZ, toX, toZ) {
       c === chain.length - 1
         ? { x: to.proj.x, z: to.proj.z }
         : via[chain[c + 1]].onThis;
-    pushLeg(pathAlongPolyline(road.points, entry.x, entry.z, exit.x, exit.z));
+    pushLeg(carriagewayPath(pathAlongPolyline(road.points, entry.x, entry.z, exit.x, exit.z), road));
     if (c < chain.length - 1) {
       const hop = via[chain[c + 1]].onThat;
-      pushLeg([{ x: hop.x, z: hop.z }]);
+      const nextRoad = paved[chain[c + 1]];
+      const hopLane = carriagewayAt(nextRoad, projectOnPolyline(nextRoad.points, hop.x, hop.z));
+      pushLeg([hopLane]);
       entry = hop;
     }
   }
@@ -783,7 +808,8 @@ export function createTaxi({
     const { proj } = hit;
     const a = road.points[proj.i];
     const b = road.points[Math.min(proj.i + 1, road.points.length - 1)];
-    place(proj.x, proj.z, Math.atan2(b.x - a.x, b.z - a.z));
+    const lane = carriagewayAt(road, proj);
+    place(lane.x, lane.z, Math.atan2(b.x - a.x, b.z - a.z));
     mesh.visible = true;
     return true;
   }

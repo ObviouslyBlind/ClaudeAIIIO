@@ -217,7 +217,7 @@ function drawPaved(scene, spec, road, heightAt, paved) {
   drawRibbon(scene, spec, { ...road, points: pts }, heightAt, width, ASPHALT, "paved");
 }
 
-function offsetPolyline(points, dist) {
+export function offsetPolyline(points, dist) {
   const out = [];
   for (let i = 0; i < points.length; i++) {
     let dx;
