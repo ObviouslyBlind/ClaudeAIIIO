@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { ROAD_CLASSES, carriagewayWidthM, roadClassSpec } from "./roadclass.js";
-import { junctionRadiusM } from "./roadnet.js";
+import { junctionPad, trimPolylineForPads } from "./roadnet.js";
 
 /** Grit shoulder under the tarmac edge, so a road has a rim instead of a cut edge. */
 export const SHOULDER = 0x6f6a5e;
@@ -188,8 +188,15 @@ function hasSidewalk(road) {
  */
 const SHOULDER_PAD_M = 2.2;
 
-function drawPaved(scene, spec, road, heightAt) {
-  const pts = ribbonStations(road.points);
+function drawablePoints(road, graph) {
+  let pts = ribbonStations(road.points);
+  const edge = graph && road.edgeId ? graph.edges.find((e) => e.id === road.edgeId) : null;
+  if (edge) pts = ribbonStations(trimPolylineForPads(pts, graph, edge));
+  return pts;
+}
+
+function drawPaved(scene, spec, road, heightAt, graph) {
+  const pts = drawablePoints(road, graph);
   if (pts.length < 2) return;
   const cls = classOf(road);
   const width = roadClassSpec(cls).carriageM;
@@ -232,11 +239,11 @@ function omitNearCentres(pts, centres, gap = 20) {
   return pts.filter((p) => centres.every((c) => Math.hypot(p.x - c.x, p.z - c.z) >= gap));
 }
 
-function drawSidewalks(scene, spec, road, heightAt, centres) {
+function drawSidewalks(scene, spec, road, heightAt, centres, graph) {
   if (!hasSidewalk(road)) return;
   const cls = classOf(road);
   const walk = roadClassSpec(cls).sidewalkM;
-  const pts = omitNearCentres(ribbonStations(road.points), centres, 30);
+  const pts = omitNearCentres(drawablePoints(road, graph), centres, 30);
   if (pts.length < 2) return;
   const offset = roadClassSpec(cls).carriageM / 2 + SHOULDER_PAD_M / 2 + walk / 2;
   drawRibbon(scene, spec, { ...road, points: offsetPolyline(pts, -offset) }, heightAt, walk, SIDEWALK, "sidewalk");
@@ -244,13 +251,13 @@ function drawSidewalks(scene, spec, road, heightAt, centres) {
 }
 
 /** 2+2 lanes with a stone median. Widths come from the class table. */
-function drawHighway(scene, spec, road, heightAt) {
+function drawHighway(scene, spec, road, heightAt, graph) {
   const cls = classOf(road);
   const s = roadClassSpec(cls);
   // Graph edges already stop on the circus kerb. Omitting the last stations
   // was a leftover from when the spline ran through the island — it left a
   // sand gap between the dual ribbons and the ring.
-  const pts = ribbonStations(road.points);
+  const pts = drawablePoints(road, graph);
   if (pts.length < 2) return;
   const lane = s.medianM / 2 + s.carriageM / 2;
 
@@ -293,21 +300,67 @@ function drawHighway(scene, spec, road, heightAt) {
   );
 }
 
+function addJunctionPlate(scene, spec, heightAt, pad) {
+  const y = heightAt(spec, pad.x, pad.z);
+  const grit = new THREE.Mesh(
+    new THREE.PlaneGeometry(pad.side + SHOULDER_PAD_M, pad.side + SHOULDER_PAD_M),
+    new THREE.MeshLambertMaterial({ color: SHOULDER }),
+  );
+  grit.rotation.order = "YXZ";
+  grit.rotation.set(-Math.PI / 2, pad.yaw || 0, 0);
+  grit.position.set(pad.x, y + 0.14, pad.z);
+  grit.castShadow = false;
+  grit.receiveShadow = true;
+  grit.userData.kind = "road";
+  grit.userData.roadKind = "shoulder";
+  grit.userData.island = pad.island;
+  grit.userData.roadName = pad.label;
+  grit.userData.mode = "PAPER";
+  scene.add(grit);
+
+  const mesh = new THREE.Mesh(
+    pad.round
+      ? new THREE.CircleGeometry(pad.side / 2, 20)
+      : new THREE.PlaneGeometry(pad.side, pad.side),
+    new THREE.MeshLambertMaterial({ color: ASPHALT }),
+  );
+  mesh.rotation.order = "YXZ";
+  mesh.rotation.set(-Math.PI / 2, pad.yaw || 0, 0);
+  mesh.position.set(pad.x, y + 0.175, pad.z);
+  mesh.castShadow = false;
+  mesh.receiveShadow = true;
+  mesh.userData.kind = "road";
+  mesh.userData.roadKind = "junction";
+  mesh.userData.island = pad.island;
+  mesh.userData.roadName = pad.label;
+  mesh.userData.label = pad.label;
+  mesh.userData.widthM = pad.side;
+  mesh.userData.mode = "PAPER";
+  scene.add(mesh);
+}
+
 /**
  * A slab of tarmac where roads actually meet.
  *
  * Junctions used to be made by deleting the minor road near the major one,
- * which left stubs ending in the sand. A pad sized to the widest arm covers
- * the mitre seams instead, so a T reads as a T.
+ * which left stubs ending in the sand. Corners are a square plate the ribbons
+ * stop at, so two streets meet as an L, not a plus through each other.
  */
 function drawJunctions(scene, map, specOf, heightAt) {
   const graph = map.graph;
   const pads = [];
   if (graph && graph.nodes) {
     for (const node of graph.nodes) {
-      if (node.kind !== "junction") continue;
-      const r = junctionRadiusM(graph, node);
-      if (r > 0) pads.push({ island: node.island, x: node.x, z: node.z, r, label: node.name || "junction" });
+      const spec = junctionPad(graph, node);
+      if (!spec) continue;
+      pads.push({
+        island: node.island,
+        x: node.x,
+        z: node.z,
+        side: spec.side,
+        yaw: spec.yaw,
+        label: node.name || "junction",
+      });
     }
   }
   // Legacy roads (North) still describe a junction with `joins`.
@@ -317,30 +370,15 @@ function drawJunctions(scene, map, specOf, heightAt) {
       island: road.island,
       x: road.joins.x,
       z: road.joins.z,
-      r: PAVED_WIDTH_M / 2 + 1.2,
+      side: PAVED_WIDTH_M + 2.4,
+      yaw: 0,
+      round: true,
       label: road.name || "junction",
     });
   }
 
   for (const pad of pads) {
-    const spec = specOf(pad.island);
-    const y = heightAt(spec, pad.x, pad.z);
-    const mesh = new THREE.Mesh(
-      new THREE.CircleGeometry(pad.r, 20),
-      new THREE.MeshLambertMaterial({ color: ASPHALT }),
-    );
-    mesh.rotation.x = -Math.PI / 2;
-    mesh.position.set(pad.x, y + 0.175, pad.z);
-    mesh.castShadow = false;
-    mesh.receiveShadow = true;
-    mesh.userData.kind = "road";
-    mesh.userData.roadKind = "junction";
-    mesh.userData.island = pad.island;
-    mesh.userData.roadName = pad.label;
-    mesh.userData.label = pad.label;
-    mesh.userData.widthM = pad.r * 2;
-    mesh.userData.mode = "PAPER";
-    scene.add(mesh);
+    addJunctionPlate(scene, specOf(pad.island), heightAt, pad);
   }
 }
 
@@ -558,12 +596,12 @@ export function makeRoads(map, helpers) {
   for (const road of map.roads) {
     const spec = specOf(road.island);
     if (road.kind === "paved" && road.lanes === 4) {
-      drawHighway(scene, spec, road, heightAt);
+      drawHighway(scene, spec, road, heightAt, map.graph);
     } else if (road.kind === "paved" && road.roundabout) {
       drawRoundabout(scene, spec, road, heightAt, map.graph);
     } else if (road.kind === "paved") {
-      drawPaved(scene, spec, road, heightAt);
-      drawSidewalks(scene, spec, road, heightAt, centres);
+      drawPaved(scene, spec, road, heightAt, map.graph);
+      drawSidewalks(scene, spec, road, heightAt, centres, map.graph);
     } else {
       drawDirt(scene, spec, road, heightAt);
     }

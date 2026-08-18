@@ -232,12 +232,114 @@ export function routeOnGraph(graph, islandId, fromX, fromZ, toX, toZ) {
   return points.length >= 2 ? { points, edge: to.edge, road: to.edge } : null;
 }
 
+/** Outward unit from a node along one of its edges. */
+function armDir(node, edge) {
+  const pts = edge.points;
+  const fromA = edge.a === node.id;
+  const a = fromA ? pts[0] : pts[pts.length - 1];
+  const b = fromA ? pts[1] : pts[pts.length - 2];
+  const dx = b.x - a.x;
+  const dz = b.z - a.z;
+  const len = Math.hypot(dx, dz) || 1;
+  return { x: dx / len, z: dz / len };
+}
+
+/**
+ * How a junction is drawn. A 90° corner is a square plate the ribbons stop at,
+ * so they meet as an L instead of two strips crossing as a plus. A T trims the
+ * stem only — the through road keeps running. Collinear 2-arm splits are a
+ * continuation, not a corner, so they get no plate.
+ */
+export function junctionPad(graph, node) {
+  if (!graph || !node || node.kind !== "junction") return null;
+  const paved = [];
+  for (const e of graph.edges) {
+    if (e.a !== node.id && e.b !== node.id) continue;
+    if (!e.points || e.points.length < 2) continue;
+    if (roadClassSpec(e.cls).dirt) continue;
+    paved.push({ edge: e, dir: armDir(node, e), width: carriagewayWidthM(e.cls) });
+  }
+  if (paved.length < 2) return null;
+
+  let throughDot = 1;
+  let through = null;
+  for (let i = 0; i < paved.length; i++) {
+    for (let j = i + 1; j < paved.length; j++) {
+      const dot = paved[i].dir.x * paved[j].dir.x + paved[i].dir.z * paved[j].dir.z;
+      if (dot < throughDot) {
+        throughDot = dot;
+        through = [paved[i], paved[j]];
+      }
+    }
+  }
+
+  const widest = Math.max(...paved.map((a) => a.width));
+  const sameRun = !!(through && through[0].edge.name === through[1].edge.name);
+  const collinear = throughDot < -0.72 && sameRun;
+  if (paved.length === 2 && collinear) return null;
+
+  const corner = paved.length === 2 || !collinear;
+  const side = corner ? Math.max(widest + 2.4, widest * Math.SQRT2 + 0.4) : widest + 2.4;
+  const throughEdgeIds = collinear && through ? [through[0].edge.id, through[1].edge.id] : [];
+  const trim = {};
+  for (const a of paved) {
+    if (throughEdgeIds.includes(a.edge.id)) {
+      trim[a.edge.id] = 0;
+      continue;
+    }
+    const other = Math.max(...paved.filter((o) => o.edge.id !== a.edge.id).map((o) => o.width));
+    trim[a.edge.id] = Math.max(0, other / 2 - 0.2);
+  }
+
+  return {
+    kind: corner ? "corner" : "tee",
+    side,
+    yaw: Math.atan2(paved[0].dir.x, paved[0].dir.z),
+    throughEdgeIds,
+    trim,
+  };
+}
+
 /** Widest tarmac meeting a node — the junction pad has to cover all of it. */
 export function junctionRadiusM(graph, node) {
+  const pad = junctionPad(graph, node);
+  if (pad) return pad.side / 2;
   let widest = 0;
   for (const e of graph.edges) {
     if (e.a !== node.id && e.b !== node.id) continue;
     widest = Math.max(widest, carriagewayWidthM(e.cls));
   }
   return widest ? widest / 2 + 1.2 : 0;
+}
+
+function cutEndAt(pts, node, trimM, head) {
+  if (trimM <= 0.5 || pts.length < 3) return pts;
+  const seq = head ? pts.slice() : pts.slice().reverse();
+  let i = 0;
+  while (i < seq.length && Math.hypot(seq[i].x - node.x, seq[i].z - node.z) < trimM) i += 1;
+  if (i <= 0 || i >= seq.length) return pts;
+  const inside = seq[i - 1];
+  const outside = seq[i];
+  const d0 = Math.hypot(inside.x - node.x, inside.z - node.z);
+  const d1 = Math.hypot(outside.x - node.x, outside.z - node.z);
+  const t = (trimM - d0) / (d1 - d0 || 1);
+  const cut = { x: inside.x + (outside.x - inside.x) * t, z: inside.z + (outside.z - inside.z) * t };
+  const next = [cut].concat(seq.slice(i));
+  return head ? next : next.reverse();
+}
+
+/**
+ * Draw-only: stop a ribbon at the junction plate. The graph still ends on the
+ * node, so the taxi and the lots keep the real join.
+ */
+export function trimPolylineForPads(pts, graph, edge) {
+  if (!graph || !edge || !pts || pts.length < 3) return pts;
+  let out = pts;
+  const a = nodeById(graph, edge.a);
+  const b = nodeById(graph, edge.b);
+  const padA = junctionPad(graph, a);
+  const padB = junctionPad(graph, b);
+  if (padA && a) out = cutEndAt(out, a, padA.trim[edge.id] || 0, true);
+  if (padB && b) out = cutEndAt(out, b, padB.trim[edge.id] || 0, false);
+  return out.length >= 2 ? out : pts;
 }

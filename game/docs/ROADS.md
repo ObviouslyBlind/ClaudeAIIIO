@@ -37,7 +37,8 @@ Each step is big enough to see from 30 m up.
 ## Drawing
 
 - Every paved edge gets a **grit shoulder** 2.2 m wider than its tarmac, so a road has a rim instead of a cut edge on bare sand.
-- Every junction node gets a **tarmac pad** sized to its widest arm. That covers the mitre seams — a T reads as a T.
+- Every junction that is actually a corner gets a **square tarmac plate**. Ribbons stop at the plate, so two streets meet as an L — they do not keep going and draw a plus through each other.
+- A T trims the stem only; the through road keeps running. Collinear splits are not corners.
 - Circuses are an asphalt annulus reaching the node's kerb radius, plus a stone island.
 - Highway ribbons run **to the kerb**. The graph already stops there; do not omit the last stations near a circus (that leftover from the old through-island spline left sand between the dual carriageway and the ring).
 - Each circus arm gets a short tarmac disc at the kerb so the dual ribbons (offset off the centreline) actually read as meeting the ring.

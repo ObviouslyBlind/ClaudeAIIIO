@@ -18,6 +18,7 @@ import {
   spawnLookAtOffset,
 } from "../public/harbour/roads.js";
 import { ROAD_CLASSES, carriagewayWidthM, roadWidthM } from "../public/harbour/roadclass.js";
+import { junctionPad } from "../public/harbour/roadnet.js";
 import { SOUTH_RAB } from "./southGeom.ts";
 
 function lum(hex: number) {
@@ -145,13 +146,13 @@ describe("paved street from spawn", () => {
     const pads = added.filter((m) => m.userData.roadKind === "junction");
     const junctions = map.graph.nodes.filter((n) => n.kind === "junction");
     expect(junctions.length).toBeGreaterThan(8);
-    expect(pads.length).toBeGreaterThanOrEqual(junctions.length);
     for (const node of junctions) {
-      const arms = map.graph.edges.filter((e) => e.a === node.id || e.b === node.id);
-      const widest = Math.max(...arms.map((e) => carriagewayWidthM(e.cls)));
-      const pad = pads.find(
-        (m) => Math.abs((m.userData.widthM ?? 0) - (widest + 2.4)) < 0.01,
-      );
+      const spec = junctionPad(map.graph, node);
+      if (!spec) continue;
+      const pad = pads.find((m) => {
+        const p = (m as { position?: { x: number; z: number } }).position;
+        return !!p && Math.hypot(p.x - node.x, p.z - node.z) < 0.5 && (m.userData.widthM ?? 0) >= spec.side - 0.01;
+      });
       expect(pad, `junction ${node.id} pad too small for its arms`).toBeTruthy();
     }
   });
