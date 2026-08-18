@@ -15,7 +15,7 @@ import { makeWater, tickHarbourWater } from "./water.js";
 import { makeSky } from "./sky.js";
 import { CAM, LOOK } from "./first-frame.js";
 import { dressPlayer } from "./player.js";
-import { makeHotdogCart, makeCrate, makeVendor } from "./cart.js";
+import { makeStreetCart, makeCrate, makeVendor } from "./cart.js";
 import { playPaperBuy } from "./paper-sfx.js";
 import { createWalkPath } from "./walk-path.js";
 import { mountChrome } from "./chrome.js";
@@ -489,10 +489,11 @@ function standOn(plotId) {
 }
 
 async function placeCartOn(plot, x, z) {
+  const kitId = chromeHud && chromeHud.getPlaceKit ? chromeHud.getPlaceKit() : "";
   const res = await fetch("/api/inventory/place", {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ plotId: (plot && plot.id) || "", x, z }),
+    body: JSON.stringify({ plotId: (plot && plot.id) || "", x, z, kitId: kitId || undefined }),
   });
   const data = await res.json();
   if (!res.ok) {
@@ -546,13 +547,14 @@ function syncStandMesh(stand) {
   const x = Number.isFinite(stand.x) ? stand.x : plot ? plot.x : 0;
   const z = Number.isFinite(stand.z) ? stand.z : plot ? plot.z : 0;
   if (!mesh) {
-    mesh = makeHotdogCart();
+    mesh = makeStreetCart(stand.kind || "roast_corn");
     mesh.userData.standId = stand.id;
     mesh.userData.plotId = stand.plotId;
-    mesh.userData.kind = "hotdog-cart";
-    mesh.userData.label = "hotdog cart";
+    mesh.userData.kind = "street-cart";
+    mesh.userData.cartKind = stand.kind || "roast_corn";
+    mesh.userData.label = stand.label || "street cart";
     mesh.userData.layer = "world";
-    mesh.name = `hotdog-cart:${stand.id}`;
+    mesh.name = `street-cart:${stand.id}`;
     worldAdd(mesh);
     standMeshes.set(stand.id, mesh);
   }
@@ -640,7 +642,7 @@ async function takeCrate(deliveryId) {
 function objectWithStand(obj) {
   let o = obj;
   while (o) {
-    if (o.userData && (o.userData.kind === "hotdog-cart" || o.userData.standId)) return o;
+    if (o.userData && (o.userData.kind === "street-cart" || o.userData.kind === "hotdog-cart" || o.userData.standId)) return o;
     o = o.parent;
   }
   return null;

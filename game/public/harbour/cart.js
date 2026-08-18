@@ -1,16 +1,22 @@
 import * as THREE from "three";
 
 /**
- * Placeable hotdog cart — the starting street stall, not a handheld wagon.
+ * Placeable South street cart — kerb stall, not a handheld wagon.
  * Door-scale: counter ~1.1 m, umbrella ~2.15 m against the 1.7 m player.
+ * Looks follow the four PLAN food goods, not a US hotdog wagon.
  */
 
-const RED = 0xb42318;
 const CREAM = 0xf4ead8;
 const STEEL = 0x8a9096;
 const WOOD = 0x6a4a2a;
 const WHEEL = 0x1c1c20;
-const MUSTARD = 0xe2c04a;
+
+const CART_LOOK = {
+  roast_corn: { body: 0xc45c12, umbrella: 0xe2c04a, label: "roast corn cart" },
+  potato_roti: { body: 0x8a5a12, umbrella: 0xd4a017, label: "potato roti cart" },
+  callaloo: { body: 0x1f5c3a, umbrella: 0x3d8b57, label: "callaloo cart" },
+  stew_peas: { body: 0x7a2410, umbrella: 0xc45c2a, label: "stew peas cart" },
+};
 
 function box(w, h, d, color) {
   const mesh = new THREE.Mesh(
@@ -23,16 +29,19 @@ function box(w, h, d, color) {
 }
 
 export const HOTDOG_CART_MESH_COUNT = 11;
+export const STREET_CART_MESH_COUNT = HOTDOG_CART_MESH_COUNT;
 
-export function makeHotdogCart() {
+export function makeStreetCart(kind) {
+  const look = CART_LOOK[kind] || CART_LOOK.roast_corn;
   const g = new THREE.Group();
-  g.name = "hotdog-cart";
+  g.name = "street-cart";
   g.userData.mode = "PAPER";
-  g.userData.kind = "hotdog-cart";
-  g.userData.label = "hotdog cart";
+  g.userData.kind = "street-cart";
+  g.userData.cartKind = kind || "roast_corn";
+  g.userData.label = look.label;
   g.userData.layer = "world";
 
-  const body = box(1.35, 0.72, 0.78, RED);
+  const body = box(1.35, 0.72, 0.78, look.body);
   body.position.y = 0.86;
   body.userData.part = "body";
 
@@ -44,7 +53,7 @@ export function makeHotdogCart() {
   pole.position.y = 1.72;
   pole.userData.part = "pole";
 
-  const umbrella = box(1.7, 0.08, 1.7, MUSTARD);
+  const umbrella = box(1.7, 0.08, 1.7, look.umbrella);
   umbrella.position.y = 2.18;
   umbrella.userData.part = "umbrella";
 
@@ -75,6 +84,11 @@ export function makeHotdogCart() {
 
   g.add(body, counter, pole, umbrella, wheelL, wheelR, wheelL2, wheelR2, handle, bin, sign);
   return g;
+}
+
+/** Starter cart. Same mesh as roast corn. */
+export function makeHotdogCart() {
+  return makeStreetCart("roast_corn");
 }
 
 export function makeCrate() {

@@ -1,6 +1,6 @@
 /**
- * Left-rail Carts submenu. First loop: buy → place → hire → stock → sticker → fridge.
- * Pack is a client-side shift bonus. PAPER / SIMULATED.
+ * Left-rail Carts directory. Place kits here. Hire, train, stock, sticker,
+ * and fridge live on that cart's own click menu.
  */
 
 function money(n) {
@@ -9,8 +9,21 @@ function money(n) {
   return "$" + v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-function kindLabel(kind) {
-  return kind === "hotdog_cart" ? "Street cart" : "Stock";
+function catalogRow(play, kind) {
+  return ((play && play.catalog) || []).find((s) => s.id === kind);
+}
+
+function isKit(play, kind) {
+  const row = catalogRow(play, kind);
+  if (row) return row.aisle === "street_carts" || row.role === "kit";
+  return String(kind).endsWith("_cart") || kind === "hotdog_cart";
+}
+
+function kindLabel(play, kind) {
+  const row = catalogRow(play, kind);
+  if (row) return row.label;
+  if (isKit(play, kind)) return "Street cart";
+  return "Stock";
 }
 
 function plotNameFor(play, stand) {
@@ -18,14 +31,8 @@ function plotNameFor(play, stand) {
   return (lease && lease.name) || "your lot";
 }
 
-function ticksHtml(have, cap) {
-  const tickN = 20;
-  const filled = Math.round((have / Math.max(cap, 1)) * tickN);
-  const ticks = Array.from(
-    { length: tickN },
-    (_, i) => `<i class="${i < filled ? "on" : ""}"></i>`,
-  ).join("");
-  return `<div class="stock-ticks" title="Stock">${ticks}</div><p class="stock-read">${have}<small>/${cap}</small></p>`;
+function kitQty(rows, kind) {
+  return Number((rows || []).find((r) => r.kind === kind)?.qty) || 0;
 }
 
 export function formatCartsBody(play) {
@@ -33,111 +40,82 @@ export function formatCartsBody(play) {
   const today = Number(play.todayPrice != null ? play.todayPrice : 5);
   const needs = Array.isArray(play.cartNeeds) ? play.cartNeeds : [];
   const rows = play.inventory || [];
-  const cart = (play.cart || []).filter((r) => r && r.goodId && Number(r.qty) > 0);
   const stands = play.stands || [];
-  const roster = play.hireRoster || [];
+  const catalog = play.catalog || [];
   const wh = play.warehouse || { items: [] };
-  const whCart = (wh.items || []).some((r) => r.kind === "hotdog_cart" && r.qty > 0);
-  const canPlace = rows.some((r) => r.kind === "hotdog_cart") || whCart;
-  const invQty = rows.find((r) => r.kind === "hotdogs")?.qty || 0;
-  const whQty = (wh.items || []).find((r) => r.kind === "hotdogs")?.qty || 0;
+  const kitIds = catalog.filter((s) => s.aisle === "street_carts" || s.role === "kit").map((s) => s.id);
+  const kinds = kitIds.length ? kitIds : ["hotdog_cart"];
 
   const needsHtml = needs.length
     ? needs.map((n) => `<p class="cart-need">${n.label}</p>`).join("")
-    : `<p class="cart-need is-ok">Staffed, stocked, sticker at today. PAPER.</p>`;
+    : stands.length
+      ? `<p class="cart-need is-ok">Staffed, stocked, sticker at today. PAPER.</p>`
+      : "";
 
-  const kitHtml = rows.length
-    ? rows
-        .map(
-          (r) => `
+  const pocketKits = kinds
+    .map((id) => {
+      const qty = kitQty(rows, id);
+      if (qty < 1) return "";
+      return `
         <div class="inv-row">
-          <span>${kindLabel(r.kind)} × ${r.qty}</span>
-          ${r.kind === "hotdog_cart" ? `<button type="button" data-place="1">Place</button>` : ""}
-        </div>`,
-        )
-        .join("")
-    : "<p>No kit in pockets.</p>";
+          <span>${kindLabel(play, id)} × ${qty}</span>
+          <button type="button" data-place="${id}">Place</button>
+        </div>`;
+    })
+    .join("");
 
-  const goodsHtml = cart.length
-    ? cart
+  const stockRows = rows.filter((r) => !isKit(play, r.kind) && r.qty > 0);
+  const stockHtml = stockRows.length
+    ? stockRows
         .map(
           (r) =>
-            `<div class="inv-row"><span>${String(r.goodId).replace("_", " ")} × ${r.qty}</span><span>PAPER</span></div>`,
+            `<div class="inv-row"><span>${kindLabel(play, r.kind)} × ${r.qty}</span><span>pockets</span></div>`,
         )
         .join("")
     : "";
 
-  const placeRow =
-    !rows.some((r) => r.kind === "hotdog_cart") && canPlace
-      ? `<div class="inv-row"><span>Cart in warehouse</span><button type="button" data-place="1">Place</button></div>`
-      : "";
+  const whKits = kinds
+    .map((id) => {
+      const qty = kitQty(wh.items, id);
+      if (qty < 1) return "";
+      const inPockets = kitQty(rows, id) > 0;
+      return `
+        <div class="inv-row">
+          <span>${kindLabel(play, id)} in warehouse × ${qty}</span>
+          ${inPockets ? "" : `<button type="button" data-place="${id}">Place</button>`}
+        </div>`;
+    })
+    .join("");
+
+  const kitHtml = pocketKits || whKits ? `${pocketKits}${whKits}` : "<p>No cart kit yet. Buy one in Market.</p>";
 
   const standsHtml = stands.length
     ? stands
         .map((s) => {
           const where = plotNameFor(play, s);
-          const have = Number(s.hotdogs) || 0;
-          const cap = Number(s.storageCap || 20);
-          const room = Math.max(0, cap - have);
-          const sticker = Number(s.stickerPrice != null ? s.stickerPrice : today);
+          const name = s.label || "Street cart";
           const standNeeds = Array.isArray(s.needs) ? s.needs : [];
-          const maxFromInv = Math.min(invQty, room);
-          const maxFromWh = Math.min(whQty, room);
           return `
           <article class="cart-stand" data-stand="${s.id}">
-            <h3 class="sheet-kicker">${where}</h3>
+            <h3 class="sheet-kicker">${name}</h3>
+            <p class="whisper">${where}</p>
             ${standNeeds.map((n) => `<p class="cart-need">${n.label}</p>`).join("")}
-            ${ticksHtml(have, cap)}
-            <div class="source-row">
-              <button type="button" class="source src-pocket" data-stock="inventory" data-stand="${s.id}" ${maxFromInv ? "" : "disabled"}>
-                <strong>${invQty}</strong><span>Pockets</span>
-              </button>
-              <button type="button" class="source src-wh" data-stock="warehouse" data-stand="${s.id}" ${maxFromWh ? "" : "disabled"}>
-                <strong>${whQty}</strong><span>Warehouse</span>
-              </button>
-            </div>
-            <p class="sticker-label">Sticker</p>
-            <div class="sticker-row">
-              <input type="number" min="1" max="12" step="0.5" value="${sticker}" data-sticker="${s.id}" />
-              <span class="today-price">${money(today)} is today's price</span>
-            </div>
-            ${
-              s.hired
-                ? `<p class="hired-pill">${s.staffName || "Vendor"} on</p>`
-                : `<div class="hire-row">${roster
-                    .map(
-                      (p) =>
-                        `<button type="button" class="hire-chip" data-hire-stand="${s.id}" data-hire-person="${p.id}">${p.name}</button>`,
-                    )
-                    .join("")}</div>
-                   <p class="whisper">${(roster[0] && roster[0].suggest) || "Hire someone. Carts do not sell without staff."}</p>`
-            }
-            ${
-              s.hired && !s.upgraded
-                ? `<button type="button" class="go fridge" data-upgrade="${s.id}">Fridge · $200</button>`
-                : ""
-            }
             <div class="inv-row">
-              <span>Pack shift · PAPER bonus</span>
-              <button type="button" class="go" data-pack-start="1">Pack</button>
+              <span>This cart's menu</span>
+              <button type="button" class="go" data-open-stand="${s.id}">Open</button>
             </div>
           </article>`;
         })
         .join("")
-    : `<p>Place a cart, then hire, stock, and set a sticker. ${money(today)} is today's price.</p>
-       <div class="inv-row">
-         <span>Pack shift · PAPER bonus</span>
-         <button type="button" class="go" data-pack-start="1">Pack</button>
-       </div>`;
+    : `<p>Place a cart on your YOURS lot or the verge, then tap that cart. Hire, train, stock, sticker, and fridge live there. ${money(today)} is today's price.</p>`;
 
   return `
     <h2>Carts</h2>
-    <p class="menu-note">PAPER · SIMULATED. Hire, stock, sticker, fridge. Carts do not sell without staff.</p>
+    <p class="menu-note">PAPER · SIMULATED. Directory only. Each placed cart has its own menu.</p>
     ${needsHtml}
     <h3 class="sheet-kicker">Kit</h3>
     ${kitHtml}
-    ${placeRow}
-    ${goodsHtml ? `<h3 class="sheet-kicker">Goods cart</h3>${goodsHtml}` : ""}
+    ${stockHtml ? `<h3 class="sheet-kicker">Pockets</h3>${stockHtml}` : ""}
     <h3 class="sheet-kicker">On the kerb</h3>
     ${standsHtml}
   `;

@@ -1,7 +1,7 @@
 /**
- * South-island first loop: lease land, order a street cart + stock,
- * warehouse or roadside van, place, hire, earn.
- * Cash is $. One shared island warehouse on the dock.
+ * South-island first loop: lease land, order a street cart + matching stock,
+ * warehouse or pockets, place, then hire / train / stock / sticker / fridge
+ * on that cart. Cash is $. One shared island warehouse on the dock.
  */
 
 import { findParcelAt, getPlot, ISLANDS, type IslandId, type LandBoard, type Parcel } from "./land.ts";
@@ -31,7 +31,72 @@ export const SELL_TICKS: Record<TrafficBand, number> = {
 };
 export const INCOME_WINDOW = 60;
 
-export type InvKind = "hotdog_cart" | "hotdogs";
+/** South street carts — one per PLAN food good. Kit ids stay stable for the starter. */
+export type CookGood = "corn" | "potato" | "lettuce" | "beans";
+export type CartKindId = "roast_corn" | "potato_roti" | "callaloo" | "stew_peas";
+export type InvKind =
+  | "hotdog_cart"
+  | "hotdogs"
+  | "roti_cart"
+  | "roti"
+  | "callaloo_cart"
+  | "callaloo"
+  | "peas_cart"
+  | "peas";
+
+export type CartKind = {
+  id: CartKindId;
+  kitId: InvKind;
+  stockId: InvKind;
+  cookGood: CookGood;
+  label: string;
+  kitLabel: string;
+  stockLabel: string;
+  note: string;
+};
+
+export const CART_KINDS: CartKind[] = [
+  {
+    id: "roast_corn",
+    kitId: "hotdog_cart",
+    stockId: "hotdogs",
+    cookGood: "corn",
+    label: "Roast corn",
+    kitLabel: "Roast corn cart",
+    stockLabel: "Roast corn",
+    note: "Street roast corn. South food chain: corn.",
+  },
+  {
+    id: "potato_roti",
+    kitId: "roti_cart",
+    stockId: "roti",
+    cookGood: "potato",
+    label: "Potato roti",
+    kitLabel: "Potato roti cart",
+    stockLabel: "Potato roti",
+    note: "Griddle roti stuffed with potato. South food chain: potato.",
+  },
+  {
+    id: "callaloo",
+    kitId: "callaloo_cart",
+    stockId: "callaloo",
+    cookGood: "lettuce",
+    label: "Callaloo",
+    kitLabel: "Callaloo cart",
+    stockLabel: "Callaloo",
+    note: "Leafy pot on the kerb. South food chain: lettuce.",
+  },
+  {
+    id: "stew_peas",
+    kitId: "peas_cart",
+    stockId: "peas",
+    cookGood: "beans",
+    label: "Stew peas",
+    kitLabel: "Stew peas cart",
+    stockLabel: "Stew peas",
+    note: "Peas and beans in a pot. South food chain: beans.",
+  },
+];
 
 export type InvItem = {
   kind: InvKind;
@@ -51,35 +116,87 @@ export type CatalogSku = {
   qty: number;
   note: string;
   zone: ZoneId;
+  cartKind: CartKindId;
+  cookGood: CookGood;
+  role: "kit" | "stock";
 };
 
 export const MARKET_AISLES: { id: MarketAisle; label: string; note: string }[] = [
-  { id: "street_carts", label: "Street carts", note: "Commercial kerb stalls. Pick one, then where it drops." },
-  { id: "stock", label: "Stock", note: "Food for a cart you already own. Same delivery pick." },
+  {
+    id: "street_carts",
+    label: "Street carts",
+    note: "Pick one South cart. Buy to pockets or the warehouse — not onto a stall.",
+  },
+  {
+    id: "stock",
+    label: "Stock",
+    note: "Food packs for a cart you already placed. Load them from that cart's menu.",
+  },
 ];
 
-export const MARKET_CATALOG: CatalogSku[] = [
+export const MARKET_CATALOG: CatalogSku[] = CART_KINDS.flatMap((cart) => [
   {
-    id: "hotdog_cart",
-    aisle: "street_carts",
+    id: cart.kitId,
+    aisle: "street_carts" as const,
     aisleLabel: "Street carts",
-    label: "Hotdog cart",
+    label: cart.kitLabel,
     paperPrice: CART_PAPER_PRICE,
     qty: 1,
-    note: "Starting street cart. Lands in the island warehouse unless you send the van.",
-    zone: "commercial",
+    note: cart.note,
+    zone: "commercial" as const,
+    cartKind: cart.id,
+    cookGood: cart.cookGood,
+    role: "kit" as const,
   },
   {
-    id: "hotdogs",
-    aisle: "stock",
+    id: cart.stockId,
+    aisle: "stock" as const,
     aisleLabel: "Stock",
-    label: `Hotdogs (×${HOTDOG_PACK_QTY})`,
+    label: `${cart.stockLabel} (×${HOTDOG_PACK_QTY})`,
     paperPrice: HOTDOG_PACK_PRICE,
     qty: HOTDOG_PACK_QTY,
-    note: "Stock for the cart. Today's price sits next to your sticker.",
-    zone: "commercial",
+    note: `Stock for the ${cart.label} cart. Load it after the cart is on the kerb.`,
+    zone: "commercial" as const,
+    cartKind: cart.id,
+    cookGood: cart.cookGood,
+    role: "stock" as const,
   },
-];
+]);
+
+export function cartKindById(id: string | undefined): CartKind | undefined {
+  return CART_KINDS.find((row) => row.id === id);
+}
+
+export function cartKindByKit(kitId: string | undefined): CartKind | undefined {
+  return CART_KINDS.find((row) => row.kitId === kitId);
+}
+
+export function cartKindForStand(stand: Pick<Stand, "kind">): CartKind {
+  return cartKindById(stand.kind) ?? CART_KINDS[0]!;
+}
+
+export function isCartKit(kind: string): boolean {
+  return CART_KINDS.some((row) => row.kitId === kind);
+}
+
+export function isKnownSku(id: string): id is InvKind {
+  return MARKET_CATALOG.some((row) => row.id === id);
+}
+
+export function skuLabel(kind: string): string {
+  const row = MARKET_CATALOG.find((s) => s.id === kind);
+  if (row) return row.label;
+  const cart = cartKindByKit(kind);
+  return cart ? cart.kitLabel : kind;
+}
+
+function hasKit(play: PlayState): boolean {
+  return CART_KINDS.some(
+    (cart) =>
+      play.inventory.some((row) => row.kind === cart.kitId && row.qty > 0) ||
+      play.warehouse.items.some((row) => row.kind === cart.kitId && row.qty > 0),
+  );
+}
 
 /** Metres from your lot toward the paved road where a cart may sit. */
 export const PLACE_CORRIDOR_M = 22;
@@ -120,7 +237,8 @@ export function standNeeds(stand: Stand, today = TODAY_PRICE): CartNeed[] {
     needs.push({ id: "hire", label: "Hire a vendor. Carts do not sell without staff." });
   }
   if (Number(stand.hotdogs) < 1) {
-    needs.push({ id: "stock", label: "Load hotdogs from pockets or the warehouse." });
+    const food = cartKindForStand(stand).stockLabel.toLowerCase();
+    needs.push({ id: "stock", label: `Load ${food} from pockets or the warehouse.` });
   }
   if (!stand.upgraded) {
     needs.push({
@@ -139,10 +257,7 @@ export function standNeeds(stand: Stand, today = TODAY_PRICE): CartNeed[] {
 
 /** First-loop cart jobs, in order: buy → place → hire / stock / fridge / sticker. */
 export function cartLoopNeeds(play: PlayState, today = TODAY_PRICE): CartNeed[] {
-  const kit =
-    play.inventory.some((row) => row.kind === "hotdog_cart" && row.qty > 0) ||
-    play.warehouse.items.some((row) => row.kind === "hotdog_cart" && row.qty > 0);
-  if (!play.stands.length && !kit) {
+  if (!play.stands.length && !hasKit(play)) {
     return [{ id: "buy", label: "Buy a street cart in Market." }];
   }
   if (!play.stands.length) {
@@ -177,6 +292,7 @@ export type Stand = {
   island: IslandId;
   x: number;
   z: number;
+  kind: CartKindId;
   hotdogs: number;
   hired: boolean;
   staffId: string | null;
@@ -230,6 +346,7 @@ export function ensurePlay(visitor: Visitor): PlayState {
   }
   if (!Number.isFinite(play.gameBank)) play.gameBank = 0;
   for (const stand of play.stands) {
+    if (!stand.kind) stand.kind = "roast_corn";
     if (!Number.isFinite(stand.stickerPrice)) stand.stickerPrice = TODAY_PRICE;
     if (!Number.isFinite(stand.storageCap)) stand.storageCap = CART_STORAGE;
     if (stand.upgraded == null) stand.upgraded = false;
@@ -279,6 +396,14 @@ function warehouseQty(play: PlayState, kind: InvKind): number {
   return play.warehouse.items.find((row) => row.kind === kind)?.qty ?? 0;
 }
 
+function takeKit(play: PlayState, kitId?: string): CartKind | null {
+  const wanted = kitId ? CART_KINDS.filter((row) => row.kitId === kitId) : CART_KINDS;
+  for (const cart of wanted) {
+    if (takeInv(play, cart.kitId, 1) || takeWarehouse(play, cart.kitId, 1)) return cart;
+  }
+  return null;
+}
+
 export type LoopFail = { ok: false; reason: string; mode: "PAPER"; provenance: "SIMULATED"; note: string };
 export type LoopOk<T> = T & { ok: true; mode: "PAPER"; provenance: "SIMULATED"; note: string };
 
@@ -326,7 +451,7 @@ export function orderMarket(
   const items: InvItem[] = [];
   let paid = 0;
   for (const id of wanted) {
-    if (id !== "hotdog_cart" && id !== "hotdogs") return fail("unknown_sku");
+    if (!isKnownSku(id)) return fail("unknown_sku");
     const row = sku(id)!;
     paid = roundMoney(paid + row.paperPrice);
     items.push({ kind: row.id, qty: row.qty, mode: "PAPER", provenance: "SIMULATED" });
@@ -494,15 +619,14 @@ export function placeStand(
   visitor: Visitor,
   land: LandBoard,
   plotId: string,
-  pose?: { x?: number; z?: number },
+  pose?: { x?: number; z?: number; kitId?: string },
 ): LoopOk<{ stand: Stand }> | LoopFail {
   const play = ensurePlay(visitor);
   const plot = plotForPlace(land, plotId, pose?.x, pose?.z);
   if (!plot) return fail("not_yours");
   if (play.stands.some((s) => s.plotId === plot.id)) return fail("already_placed");
-  if (!takeInv(play, "hotdog_cart", 1) && !takeWarehouse(play, "hotdog_cart", 1)) {
-    return fail("no_cart");
-  }
+  const cart = takeKit(play, pose?.kitId);
+  if (!cart) return fail("no_cart");
   const x = Number.isFinite(pose?.x) ? (pose!.x as number) : plot.x;
   const z = Number.isFinite(pose?.z) ? (pose!.z as number) : plot.z;
   const stand: Stand = {
@@ -511,6 +635,7 @@ export function placeStand(
     island: "south",
     x,
     z,
+    kind: cart.id,
     hotdogs: 0,
     hired: false,
     staffId: null,
@@ -536,17 +661,18 @@ export function stockStand(
   const play = ensurePlay(visitor);
   const stand = play.stands.find((s) => s.id === standId);
   if (!stand) return fail("no_stand");
-  let fromInv = play.inventory.find((r) => r.kind === "hotdogs")?.qty ?? 0;
-  let fromWh = warehouseQty(play, "hotdogs");
+  const stockId = cartKindForStand(stand).stockId;
+  let fromInv = play.inventory.find((r) => r.kind === stockId)?.qty ?? 0;
+  let fromWh = warehouseQty(play, stockId);
   if (from === "inventory") fromWh = 0;
   else if (from === "warehouse") fromInv = 0;
   const room = Math.max(0, stand.storageCap - stand.hotdogs);
   const want = qty > 0 ? Math.min(qty, fromInv + fromWh, room) : Math.min(fromInv + fromWh, room);
-  if (want <= 0) return fail(room <= 0 ? "full" : "no_hotdogs");
+  if (want <= 0) return fail(room <= 0 ? "full" : "no_stock");
   const takeInvN = Math.min(fromInv, want);
   const takeWhN = want - takeInvN;
-  if (takeInvN && !takeInv(play, "hotdogs", takeInvN)) return fail("no_hotdogs");
-  if (takeWhN && !takeWarehouse(play, "hotdogs", takeWhN)) return fail("no_hotdogs");
+  if (takeInvN && !takeInv(play, stockId, takeInvN)) return fail("no_stock");
+  if (takeWhN && !takeWarehouse(play, stockId, takeWhN)) return fail("no_stock");
   stand.hotdogs = roundMoney(stand.hotdogs + want);
   return ok({ stand });
 }
@@ -670,11 +796,22 @@ export function playSnapshot(visitor: Visitor, land: LandBoard) {
     playersOnline: 1,
     aisles: MARKET_AISLES,
     catalog: MARKET_CATALOG,
+    cartKinds: CART_KINDS.map((row) => ({ ...row })),
     inventory: play.inventory.map((row) => ({ ...row })),
     hireRoster: HIRE_ROSTER.map((p) => ({ ...p })),
     cartNeeds: cartLoopNeeds(play),
     deliveries: play.deliveries.map((d) => ({ ...d, items: d.items.map((i) => ({ ...i })) })),
-    stands: play.stands.map((s) => ({ ...s, needs: standNeeds(s) })),
+    stands: play.stands.map((s) => {
+      const cart = cartKindForStand(s);
+      return {
+        ...s,
+        kind: cart.id,
+        label: cart.label,
+        stockId: cart.stockId,
+        cookGood: cart.cookGood,
+        needs: standNeeds(s),
+      };
+    }),
     leases: land.plots.filter((p) => p.owner === "visitor" && p.island === "south").map((p) => ({
       id: p.id,
       name: p.name,

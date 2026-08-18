@@ -42,6 +42,8 @@ import {
   takeAll,
   upgradeStand,
   withdrawWarehouse,
+  ensurePlay,
+  isKnownSku,
 } from "./firstLoop.ts";
 import { footTrafficSnapshot } from "./footTraffic.ts";
 import { completePackShift } from "./shiftBonus.ts";
@@ -254,6 +256,7 @@ const server = createServer(async (req, res) => {
     const result = placeStand(visitor, land, String(body?.plotId ?? ""), {
       x: Number(body?.x),
       z: Number(body?.z),
+      kitId: body?.kitId ? String(body.kitId) : undefined,
     });
     json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
     return;
@@ -294,6 +297,16 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "POST" && url.pathname === "/api/shift/pack") {
     const body = await readJsonBody(req);
+    if (!ensurePlay(visitor).stands.length) {
+      json(res, 400, {
+        ok: false,
+        reason: "no_stand",
+        mode: "PAPER",
+        provenance: "SIMULATED",
+        play: playPayload(),
+      });
+      return;
+    }
     const result = completePackShift(visitor, body || {});
     json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
     return;
@@ -301,7 +314,11 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "POST" && url.pathname === "/api/warehouse/withdraw") {
     const body = await readJsonBody(req);
-    const kind = String(body?.kind ?? "") as "hotdog_cart" | "hotdogs";
+    const kind = String(body?.kind ?? "");
+    if (!isKnownSku(kind)) {
+      json(res, 400, { ok: false, reason: "unknown_sku", play: playPayload() });
+      return;
+    }
     const result = withdrawWarehouse(visitor, kind, Number(body?.qty ?? 0));
     json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
     return;

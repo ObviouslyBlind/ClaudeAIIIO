@@ -4,11 +4,13 @@ import { createVisitor } from "./sim.ts";
 import { BAND_LEVEL, footTrafficSnapshot, plotTrafficBand, roadTrafficBand } from "./footTraffic.ts";
 import { roadsideDrop } from "./roadside.ts";
 import {
+  CART_KINDS,
   CART_PAPER_PRICE,
   DELIVERY_WAIT_MS,
   HIRE_ROSTER,
   HOTDOG_PACK_PRICE,
   HOTDOG_SALE_PRICE,
+  MARKET_CATALOG,
   PLACE_CORRIDOR_M,
   SALES_TAX,
   STORAGE_UPGRADE_COST,
@@ -296,5 +298,42 @@ describe("South first loop", () => {
     expect(setStandPrice(visitor, placed.stand.id, TODAY_PRICE).ok).toBe(true);
     expect(standNeeds(placed.stand)).toEqual([]);
     expect(playSnapshot(visitor, land).cartNeeds).toEqual([]);
+  });
+
+  it("refuses to stock a cart that has not been placed", () => {
+    const { land, visitor } = leaseCheapSouth();
+    expect(stockStand(visitor, "stand-missing").reason).toBe("no_stand");
+    const buy = orderMarket(visitor, land, { skus: ["hotdogs"], dest: "cart" });
+    expect(buy.ok).toBe(true);
+    expect(visitor.play.stands).toHaveLength(0);
+    expect(stockStand(visitor, "").reason).toBe("no_stand");
+  });
+
+  it("lists four South street carts for the four food goods, and stocks only that cart's pack", () => {
+    const { land, visitor, plot } = leaseCheapSouth();
+    expect(CART_KINDS.map((c) => c.cookGood)).toEqual(["corn", "potato", "lettuce", "beans"]);
+    expect(MARKET_CATALOG.filter((s) => s.role === "kit").map((s) => s.label)).toEqual([
+      "Roast corn cart",
+      "Potato roti cart",
+      "Callaloo cart",
+      "Stew peas cart",
+    ]);
+    const kit = orderMarket(visitor, land, { skus: ["roti_cart", "hotdogs"], dest: "cart" });
+    expect(kit.ok).toBe(true);
+    const placed = placeStand(visitor, land, plot.id, { kitId: "roti_cart" });
+    expect(placed.ok).toBe(true);
+    if (!placed.ok) return;
+    expect(placed.stand.kind).toBe("potato_roti");
+    expect(stockStand(visitor, placed.stand.id, 0, "inventory").ok).toBe(false);
+    expect(stockStand(visitor, placed.stand.id, 0, "inventory").reason).toBe("no_stock");
+    expect(visitor.play.inventory.find((i) => i.kind === "hotdogs")?.qty).toBe(20);
+    expect(orderMarket(visitor, land, { skus: ["roti"], dest: "cart" }).ok).toBe(true);
+    expect(stockStand(visitor, placed.stand.id, 0, "inventory").ok).toBe(true);
+    expect(placed.stand.hotdogs).toBe(20);
+    expect(visitor.play.inventory.find((i) => i.kind === "roti")).toBeUndefined();
+    expect(visitor.play.inventory.find((i) => i.kind === "hotdogs")?.qty).toBe(20);
+    const snap = playSnapshot(visitor, land);
+    expect(snap.stands[0]!.label).toBe("Potato roti");
+    expect(snap.stands[0]!.cookGood).toBe("potato");
   });
 });

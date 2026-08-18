@@ -39,6 +39,7 @@ export function mountPackShift() {
   let timer = 0;
   let running = false;
   let onDone = null;
+  let goods = PACK_GOODS;
 
   function paintHits() {
     if (hitsEl) hitsEl.textContent = hits + " packed · PAPER";
@@ -46,7 +47,8 @@ export function mountPackShift() {
 
   function flash() {
     slots.innerHTML = "";
-    const id = PACK_GOODS[Math.floor(Math.random() * PACK_GOODS.length)] || "corn";
+    const pool = goods.length ? goods : PACK_GOODS;
+    const id = pool[Math.floor(Math.random() * pool.length)] || "corn";
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "pack-good";
@@ -75,6 +77,7 @@ export function mountPackShift() {
     left = PACK_SECONDS;
     running = true;
     onDone = opts && opts.onDone;
+    goods = opts && Array.isArray(opts.goods) && opts.goods.length ? opts.goods : PACK_GOODS;
     root.hidden = false;
     paintHits();
     if (clock) clock.textContent = left.toFixed(1);
