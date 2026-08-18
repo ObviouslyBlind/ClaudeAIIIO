@@ -15,7 +15,7 @@ describe("street cart (kerb stall, not a handheld wagon)", () => {
   it("builds a counter-height stall with an umbrella under ~2.2 m", () => {
     const cart = makeHotdogCart();
     expect(cart.userData.kind).toBe("street-cart");
-    expect(cart.userData.cartKind).toBe("roast_corn");
+    expect(cart.userData.cartKind).toBe("fruit");
     expect(meshCount(cart)).toBe(HOTDOG_CART_MESH_COUNT);
     let maxY = 0;
     cart.traverse((obj) => {

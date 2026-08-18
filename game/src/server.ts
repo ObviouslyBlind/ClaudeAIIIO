@@ -297,7 +297,8 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "POST" && url.pathname === "/api/shift/pack") {
     const body = await readJsonBody(req);
-    if (!ensurePlay(visitor).stands.length) {
+    const play = ensurePlay(visitor);
+    if (!play.stands.length && !(play.workSites && play.workSites.length)) {
       json(res, 400, {
         ok: false,
         reason: "no_stand",

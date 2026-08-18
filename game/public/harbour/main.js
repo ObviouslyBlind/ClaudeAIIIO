@@ -19,6 +19,7 @@ import { makeStreetCart, makeCrate, makeVendor } from "./cart.js";
 import { playPaperBuy } from "./paper-sfx.js";
 import { createWalkPath } from "./walk-path.js";
 import { mountChrome } from "./chrome.js";
+import { siteClassForUse } from "./site-menu.js";
 import { createOverlays } from "./overlays.js";
 import { mountEconHud } from "./hud-econ.js";
 import { mountPresenceHud } from "./presence-hud.js";
@@ -547,11 +548,11 @@ function syncStandMesh(stand) {
   const x = Number.isFinite(stand.x) ? stand.x : plot ? plot.x : 0;
   const z = Number.isFinite(stand.z) ? stand.z : plot ? plot.z : 0;
   if (!mesh) {
-    mesh = makeStreetCart(stand.kind || "roast_corn");
+    mesh = makeStreetCart(stand.kind || "fruit");
     mesh.userData.standId = stand.id;
     mesh.userData.plotId = stand.plotId;
     mesh.userData.kind = "street-cart";
-    mesh.userData.cartKind = stand.kind || "roast_corn";
+    mesh.userData.cartKind = stand.kind || "fruit";
     mesh.userData.label = stand.label || "street cart";
     mesh.userData.layer = "world";
     mesh.name = `street-cart:${stand.id}`;
@@ -650,7 +651,11 @@ function objectWithStand(obj) {
 
 function openStandMenu(standId) {
   const play = chromeHud && chromeHud.getPlay && chromeHud.getPlay();
-  const stand = play && (play.stands || []).find((s) => s.id === standId);
+  const stand =
+    play &&
+    (((play.sites || []).find((s) => s.id === standId)) ||
+      ((play.stands || []).find((s) => s.id === standId)) ||
+      ((play.workSites || []).find((s) => s.id === standId)));
   if (!stand || !chromeHud) return;
   chromeHud.paintStandMenu(stand, null, () => {
     const mesh = standMeshes.get(standId);
@@ -1489,6 +1494,10 @@ function onPointer(ev) {
     const p =
       (b && b.userData.plotId && map.plots.find((x) => x.id === b.userData.plotId)) ||
       findParcelAt(buildingHit.point.x, buildingHit.point.z);
+    if (p && p.owner === "visitor" && siteClassForUse(p.use)) {
+      openStandMenu("site-" + p.id);
+      return;
+    }
     if (p && canEnter(p) && nearParcel(p)) {
       enterPlot(p);
       return;

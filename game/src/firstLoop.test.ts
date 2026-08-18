@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { createLandBoard, leasePlot } from "./land.ts";
+import { createLandBoard, developPlot, leasePlot } from "./land.ts";
 import { createVisitor } from "./sim.ts";
-import { BAND_LEVEL, footTrafficSnapshot, plotTrafficBand, roadTrafficBand } from "./footTraffic.ts";
+import { BAND_LEVEL, footTrafficSnapshot, roadTrafficBand } from "./footTraffic.ts";
 import { roadsideDrop } from "./roadside.ts";
 import {
   CART_KINDS,
@@ -115,16 +115,17 @@ describe("South first loop", () => {
     expect(stockStand(visitor, placed.stand.id).ok).toBe(true);
     expect(placed.stand.hotdogs).toBe(20);
     expect(hireStand(visitor, placed.stand.id, "pat").ok).toBe(true);
-    expect(placed.stand.staffName).toBe("Pat K.");
+    expect(placed.stand.staffName).toBe("Vendor");
     expect(placed.stand.stickerPrice).toBe(TODAY_PRICE);
 
     const cash0 = visitor.cash;
-    const band = plotTrafficBand(land, plot);
-    const ticks = band === "green" ? 8 : band === "yellow" ? 16 : 32;
+    expect(upgradeStand(visitor, placed.stand.id).ok).toBe(true);
+    const snap0 = playSnapshot(visitor, land);
+    const ticks = snap0.stands[0]!.sellTicks;
     for (let i = 0; i < ticks; i++) tickHotdogSales(visitor, land);
     const net = HOTDOG_SALE_PRICE * (1 - SALES_TAX);
-    expect(visitor.cash).toBeCloseTo(cash0 + net, 8);
-    expect(visitor.play.gameBank).toBeCloseTo(HOTDOG_SALE_PRICE * SALES_TAX, 8);
+    expect(visitor.cash).toBeCloseTo(cash0 - STORAGE_UPGRADE_COST + net, 8);
+    expect(visitor.play.gameBank).toBeCloseTo(HOTDOG_SALE_PRICE * SALES_TAX + STORAGE_UPGRADE_COST, 8);
     expect(placed.stand.hotdogs).toBe(19);
     expect(incomePerMinute(visitor.play)).toBeGreaterThan(0);
 
@@ -132,12 +133,16 @@ describe("South first loop", () => {
     expect(snap.island).toBe("south");
     expect(snap.stands).toHaveLength(1);
     expect(snap.hireRoster).toEqual(HIRE_ROSTER);
+    expect(snap.hireRoster).toHaveLength(1);
+    expect(snap.hireRoster[0]!.name).toBe("Vendor");
     expect(snap.todayPrice).toBe(TODAY_PRICE);
     expect(snap.salesTax).toBe(SALES_TAX);
     expect(snap.leaseOptions.length).toBeGreaterThan(0);
     expect(snap.leases).toHaveLength(1);
     expect(snap.aisles.some((a) => a.id === "street_carts")).toBe(true);
     expect(placed.stand.x).toBeDefined();
+    expect(snap.stands[0]!.siteClass).toBe("cart");
+    expect(snap.stands[0]!.desirability).toBeGreaterThan(0);
   });
 
   it("lets you place the cart on the verge out toward the main road", () => {
@@ -182,6 +187,7 @@ describe("South first loop", () => {
     for (let i = 0; i < 40; i++) tickHotdogSales(visitor, land);
     expect(visitor.cash).toBe(cash0);
     expect(hireStand(visitor, placed.stand.id, "rui").ok).toBe(true);
+    expect(placed.stand.staffName).toBe("Vendor");
     for (let i = 0; i < 40; i++) tickHotdogSales(visitor, land);
     expect(visitor.cash).toBeGreaterThan(cash0);
   });
@@ -270,8 +276,7 @@ describe("South first loop", () => {
     hireStand(visitor, placed.stand.id, "sam");
     expect(setStandPrice(visitor, placed.stand.id, 8).ok).toBe(true);
     const cash0 = visitor.cash;
-    const band = plotTrafficBand(land, plot);
-    const ticks = band === "green" ? 8 : band === "yellow" ? 16 : 32;
+    const ticks = playSnapshot(visitor, land).stands[0]!.sellTicks;
     for (let i = 0; i < ticks; i++) tickHotdogSales(visitor, land);
     expect(visitor.cash).toBeCloseTo(cash0 + 8 * (1 - SALES_TAX), 8);
     expect(upgradeStand(visitor, placed.stand.id).ok).toBe(true);
@@ -309,31 +314,48 @@ describe("South first loop", () => {
     expect(stockStand(visitor, "").reason).toBe("no_stand");
   });
 
-  it("lists four South street carts for the four food goods, and stocks only that cart's pack", () => {
+  it("lists fruit, watermelon, and fish-and-chips carts, and stocks only that cart's pack", () => {
     const { land, visitor, plot } = leaseCheapSouth();
-    expect(CART_KINDS.map((c) => c.cookGood)).toEqual(["corn", "potato", "lettuce", "beans"]);
+    expect(CART_KINDS.map((c) => c.id)).toEqual(["fruit", "watermelon", "fish_chips"]);
     expect(MARKET_CATALOG.filter((s) => s.role === "kit").map((s) => s.label)).toEqual([
-      "Roast corn cart",
-      "Potato roti cart",
-      "Callaloo cart",
-      "Stew peas cart",
+      "Fruit cart",
+      "Watermelon cart",
+      "Fish and chips cart",
     ]);
-    const kit = orderMarket(visitor, land, { skus: ["roti_cart", "hotdogs"], dest: "cart" });
+    const kit = orderMarket(visitor, land, { skus: ["melon_cart", "hotdogs"], dest: "cart" });
     expect(kit.ok).toBe(true);
-    const placed = placeStand(visitor, land, plot.id, { kitId: "roti_cart" });
+    const placed = placeStand(visitor, land, plot.id, { kitId: "melon_cart" });
     expect(placed.ok).toBe(true);
     if (!placed.ok) return;
-    expect(placed.stand.kind).toBe("potato_roti");
+    expect(placed.stand.kind).toBe("watermelon");
     expect(stockStand(visitor, placed.stand.id, 0, "inventory").ok).toBe(false);
     expect(stockStand(visitor, placed.stand.id, 0, "inventory").reason).toBe("no_stock");
     expect(visitor.play.inventory.find((i) => i.kind === "hotdogs")?.qty).toBe(20);
-    expect(orderMarket(visitor, land, { skus: ["roti"], dest: "cart" }).ok).toBe(true);
+    expect(orderMarket(visitor, land, { skus: ["melon"], dest: "cart" }).ok).toBe(true);
     expect(stockStand(visitor, placed.stand.id, 0, "inventory").ok).toBe(true);
     expect(placed.stand.hotdogs).toBe(20);
-    expect(visitor.play.inventory.find((i) => i.kind === "roti")).toBeUndefined();
+    expect(visitor.play.inventory.find((i) => i.kind === "melon")).toBeUndefined();
     expect(visitor.play.inventory.find((i) => i.kind === "hotdogs")?.qty).toBe(20);
     const snap = playSnapshot(visitor, land);
-    expect(snap.stands[0]!.label).toBe("Potato roti");
-    expect(snap.stands[0]!.cookGood).toBe("potato");
+    expect(snap.stands[0]!.label).toBe("Watermelon cart");
+    expect(snap.stands[0]!.stockId).toBe("melon");
+    expect(snap.stands[0]!.games).toContain("Melon slice");
+  });
+
+  it("uses the same site card for a shop and a mine", () => {
+    const land = createLandBoard();
+    const visitor = createVisitor(20_000);
+    const plot = land.plots.find(
+      (p) => p.island === "south" && !p.owner && p.band === "street" && p.class === "by_right" && p.zone === "commercial",
+    );
+    expect(plot).toBeTruthy();
+    expect(leasePlot(land, visitor, plot!.id).ok).toBe(true);
+    expect(developPlot(land, visitor, plot!.id, "shop").ok).toBe(true);
+    const snap = playSnapshot(visitor, land);
+    const shop = snap.sites.find((s) => s.siteClass === "shop");
+    expect(shop).toBeTruthy();
+    expect(shop!.id).toBe(`site-${plot!.id}`);
+    expect(hireStand(visitor, shop!.id).ok).toBe(true);
+    expect(playSnapshot(visitor, land).sites.find((s) => s.id === shop!.id)!.staffName).toBe("Vendor");
   });
 });

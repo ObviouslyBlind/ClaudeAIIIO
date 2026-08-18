@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { formatCartsBody } from "../public/harbour/carts-hud.js";
+import { formatSiteMenu } from "../public/harbour/site-menu.js";
 
 const html = readFileSync(new URL("../public/harbour/index.html", import.meta.url), "utf8");
 const chrome = readFileSync(new URL("../public/harbour/chrome.js", import.meta.url), "utf8");
@@ -9,6 +10,7 @@ const pageCss = readFileSync(new URL("../public/harbour/style.css", import.meta.
 const fonts = readFileSync(new URL("../public/harbour/chrome-fonts.css", import.meta.url), "utf8");
 const pack = readFileSync(new URL("../public/harbour/pack.js", import.meta.url), "utf8");
 const carts = readFileSync(new URL("../public/harbour/carts-hud.js", import.meta.url), "utf8");
+const siteMenu = readFileSync(new URL("../public/harbour/site-menu.js", import.meta.url), "utf8");
 
 describe("harbour chrome HUD", () => {
   it("keeps launchers on the left rail, not a Menu on the travel dock", () => {
@@ -44,7 +46,7 @@ describe("harbour chrome HUD", () => {
     expect(html).toContain('id="chrome"');
     expect(html).toContain('id="stand-veil"');
     expect(html).toContain('id="stand-menu"');
-    expect(chrome).toContain('data-stock="inventory"');
+    expect(siteMenu).toContain('data-stock="inventory"');
     expect(html).toContain('id="buy-ask"');
     expect(html).toContain('id="lot-tags"');
     expect(html).toContain('id="storage-fee"');
@@ -62,7 +64,7 @@ describe("harbour chrome HUD", () => {
     expect(css).toContain("pos-inv");
     expect(css).toContain(".cart-need");
     expect(css).toMatch(/max-height:\s*min\(62vh/);
-    expect(css).toContain("overflow: hidden");
+    expect(css).toContain("overflow-x: hidden");
     expect(css).toContain("flex-wrap: nowrap");
     expect(pageCss).toContain("100dvh");
     expect(pageCss).toContain("overscroll-behavior: none");
@@ -92,12 +94,17 @@ describe("harbour chrome HUD", () => {
     expect(chrome).toContain("extras.onTake()");
     expect(chrome).toContain("data-place");
     expect(chrome).toContain("data-stock");
-    expect(chrome).toContain('data-stock="warehouse"');
-    expect(chrome).toContain("data-hire-person");
+    expect(siteMenu).toContain('data-stock="warehouse"');
+    expect(siteMenu).toContain("data-hire-site");
+    expect(siteMenu).toContain("data-site-tab=");
+    expect(siteMenu).toContain('id: "stock"');
+    expect(siteMenu).toContain('id: "run"');
+    expect(siteMenu).toContain('id: "stats"');
+    expect(chrome).not.toContain("data-hire-person");
     expect(chrome).toContain("place-cancel");
-    expect(chrome).toContain("today-price");
-    expect(chrome).toContain("stock-ticks");
-    expect(chrome).toContain('type="range"');
+    expect(siteMenu).toContain("today-price");
+    expect(siteMenu).toContain("stock-ticks");
+    expect(siteMenu).toContain('type="range"');
     expect(chrome).toContain("Warehouse");
     expect(chrome).toContain(">Pockets<");
     expect(chrome).not.toContain("Stock cart");
@@ -114,9 +121,10 @@ describe("harbour chrome HUD", () => {
     expect(chrome).toContain('let marketDest = "warehouse"');
     expect(chrome).toContain("dest: marketDest === \"cart\" ? \"cart\" : \"warehouse\"");
     expect(chrome).toContain("data-open-stand");
-    expect(chrome).toContain("Train / pack");
-    expect(chrome).toContain("Fridge · $200");
-    expect(chrome).toContain('id="sticker-price" type="number"');
+    expect(siteMenu).toContain("Fruit slice");
+    expect(siteMenu).toContain("Fridge · $200");
+    expect(siteMenu).toContain('id="sticker-price" type="number"');
+    expect(siteMenu).toContain("id=\"hire-site\"");
     expect(chrome).not.toContain("openPlayMenu");
     expect(chrome).not.toContain("← Marketplace");
     expect(chrome).not.toContain("data-aisle");
@@ -128,29 +136,78 @@ describe("harbour chrome HUD", () => {
     expect(carts).not.toContain("data-stock");
     expect(pack).toContain("PACK_SECONDS");
     expect(pack).toContain("pack-good");
+    expect(pack).toContain("mango");
     const body = formatCartsBody({
-      todayPrice: 5,
+      todayPrice: 6,
       cartNeeds: [{ id: "place", label: "Place the cart on your YOURS lot or the verge by the road." }],
-      catalog: [{ id: "hotdog_cart", aisle: "street_carts", role: "kit", label: "Roast corn cart" }],
+      catalog: [{ id: "hotdog_cart", aisle: "street_carts", role: "kit", label: "Fruit cart" }],
       inventory: [{ kind: "hotdog_cart", qty: 1 }],
       cart: [],
       stands: [],
       warehouse: { items: [] },
-      hireRoster: [{ id: "pat", name: "Pat K.", suggest: "A $200 fridge would hold more stock through the weekend." }],
+      hireRoster: [{ id: "ai", name: "Vendor", suggest: "Hire. They stock from the warehouse and keep this site running." }],
     });
     expect(body).toMatch(/Place the cart/);
     expect(body).toMatch(/data-place="hotdog_cart"/);
     expect(body).not.toMatch(/data-stock/);
     const placed = formatCartsBody({
-      todayPrice: 5,
-      catalog: [{ id: "hotdog_cart", aisle: "street_carts", role: "kit", label: "Roast corn cart" }],
+      todayPrice: 6,
+      catalog: [{ id: "hotdog_cart", aisle: "street_carts", role: "kit", label: "Fruit cart" }],
       inventory: [],
-      stands: [{ id: "stand-1", plotId: "p1", label: "Roast corn", needs: [{ id: "hire", label: "Hire a vendor. Carts do not sell without staff." }] }],
+      stands: [{ id: "stand-1", plotId: "p1", label: "Fruit cart", needs: [{ id: "hire", label: "Hire a vendor. Carts do not sell without staff." }] }],
       leases: [{ id: "p1", name: "Quay lot" }],
       warehouse: { items: [] },
     });
-    expect(placed).toMatch(/Roast corn/);
+    expect(placed).toMatch(/Fruit cart/);
     expect(placed).toMatch(/data-open-stand="stand-1"/);
     expect(placed).not.toMatch(/data-hire-person/);
+    const menu = formatSiteMenu(
+      {
+        id: "stand-1",
+        label: "Fruit cart",
+        siteClass: "cart",
+        hired: false,
+        hotdogs: 0,
+        storageCap: 20,
+        stickerPrice: 6,
+        games: ["Fruit slice"],
+        kind: "fruit",
+        parts: [{ id: "staff", label: "Staffed", points: 0 }],
+        desirability: 0,
+        searching: 4,
+      },
+      { todayPrice: 6, inventory: [], warehouse: { items: [] } },
+      "stock",
+    );
+    expect(menu).toContain("Hire");
+    expect(menu).toContain("id=\"hire-site\"");
+    expect(menu).not.toContain("Pat K.");
+    expect(menu).toContain('data-site-tab="run"');
+    const stats = formatSiteMenu(
+      {
+        id: "site-1",
+        label: "14 Harbour Rd shop",
+        siteClass: "shop",
+        hired: true,
+        staffName: "Vendor",
+        stock: 4,
+        hotdogs: 4,
+        storageCap: 20,
+        stickerPrice: 6,
+        desirability: 5,
+        cap: 5,
+        searching: 3,
+        rivalsOnStreet: 2,
+        sellTicks: 36,
+        perMinute: 8,
+        parts: [{ id: "upgrade", label: "Upgraded", points: 3 }],
+        games: ["Till run"],
+      },
+      { todayPrice: 6, inventory: [], warehouse: { items: [] } },
+      "stats",
+    );
+    expect(stats).toContain("14 Harbour Rd shop");
+    expect(stats).toContain("Searching this street");
+    expect(stats).toContain("Vendor on");
   });
 });

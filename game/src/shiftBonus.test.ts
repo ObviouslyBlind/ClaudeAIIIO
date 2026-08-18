@@ -39,4 +39,14 @@ describe("PAPER cart pack shift bonus", () => {
     expect(completePackShift(visitor, { hits: "nope" }).ok).toBe(false);
     expect(visitor.cash).toBe(40);
   });
+
+  it("applies a sales boost on the named site without changing output if skipped", () => {
+    const visitor = {
+      cash: 10,
+      play: { stands: [{ id: "stand-1", boostLeft: 0 }], workSites: [] },
+    };
+    const paid = completePackShift(visitor, { hits: 4, nowMs: 1_000, standId: "stand-1" });
+    expect(paid.ok).toBe(true);
+    expect(visitor.play.stands[0]!.boostLeft).toBe(4);
+  });
 });

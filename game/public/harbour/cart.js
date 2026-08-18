@@ -3,7 +3,7 @@ import * as THREE from "three";
 /**
  * Placeable South street cart — kerb stall, not a handheld wagon.
  * Door-scale: counter ~1.1 m, umbrella ~2.15 m against the 1.7 m player.
- * Looks follow the four PLAN food goods, not a US hotdog wagon.
+ * Caribbean fruit / melon / fish-and-chips looks.
  */
 
 const CREAM = 0xf4ead8;
@@ -12,10 +12,9 @@ const WOOD = 0x6a4a2a;
 const WHEEL = 0x1c1c20;
 
 const CART_LOOK = {
-  roast_corn: { body: 0xc45c12, umbrella: 0xe2c04a, label: "roast corn cart" },
-  potato_roti: { body: 0x8a5a12, umbrella: 0xd4a017, label: "potato roti cart" },
-  callaloo: { body: 0x1f5c3a, umbrella: 0x3d8b57, label: "callaloo cart" },
-  stew_peas: { body: 0x7a2410, umbrella: 0xc45c2a, label: "stew peas cart" },
+  fruit: { body: 0xc45c12, umbrella: 0x2f8f4e, label: "fruit cart" },
+  watermelon: { body: 0x1f6b3a, umbrella: 0xe25b6a, label: "watermelon cart" },
+  fish_chips: { body: 0xd4a017, umbrella: 0x2a6b8a, label: "fish and chips cart" },
 };
 
 function box(w, h, d, color) {
@@ -32,12 +31,12 @@ export const HOTDOG_CART_MESH_COUNT = 11;
 export const STREET_CART_MESH_COUNT = HOTDOG_CART_MESH_COUNT;
 
 export function makeStreetCart(kind) {
-  const look = CART_LOOK[kind] || CART_LOOK.roast_corn;
+  const look = CART_LOOK[kind] || CART_LOOK.fruit;
   const g = new THREE.Group();
   g.name = "street-cart";
   g.userData.mode = "PAPER";
   g.userData.kind = "street-cart";
-  g.userData.cartKind = kind || "roast_corn";
+  g.userData.cartKind = kind || "fruit";
   g.userData.label = look.label;
   g.userData.layer = "world";
 
@@ -86,9 +85,9 @@ export function makeStreetCart(kind) {
   return g;
 }
 
-/** Starter cart. Same mesh as roast corn. */
+/** Starter cart. Same mesh as fruit. */
 export function makeHotdogCart() {
-  return makeStreetCart("roast_corn");
+  return makeStreetCart("fruit");
 }
 
 export function makeCrate() {

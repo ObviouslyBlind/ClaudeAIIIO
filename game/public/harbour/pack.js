@@ -1,24 +1,10 @@
 /**
- * Cart pack shift. Client-only timing. The sim already sold; POST only
- * asks for a PAPER bonus. Skip or miss never cuts stall output.
+ * Site mini-game. Client-only timing. The sim already sold; POST only
+ * asks for a PAPER bonus and a sales boost. Skip or miss never cuts output.
  */
 
-const PACK_GOODS = [
-  "corn",
-  "potato",
-  "lettuce",
-  "beans",
-  "ore",
-  "lumber",
-  "planks",
-  "nails",
-  "iron bars",
-  "tools",
-  "concrete",
-  "fuel",
-];
-
 export const PACK_SECONDS = 8;
+export const FRUIT_SLICE = ["mango", "pineapple", "papaya", "banana", "watermelon"];
 
 function el(id) {
   return document.getElementById(id);
@@ -30,6 +16,7 @@ export function mountPackShift() {
   const clock = el("pack-clock");
   const hitsEl = el("pack-hits");
   const closeBtn = el("pack-close");
+  const badge = root && root.querySelector(".pack-badge");
   if (!root || !slots) {
     return { open() {}, close() {} };
   }
@@ -37,36 +24,44 @@ export function mountPackShift() {
   let hits = 0;
   let left = PACK_SECONDS;
   let timer = 0;
+  let falling = 0;
   let running = false;
   let onDone = null;
-  let goods = PACK_GOODS;
+  let goods = FRUIT_SLICE;
 
   function paintHits() {
-    if (hitsEl) hitsEl.textContent = hits + " packed · PAPER";
+    if (hitsEl) hitsEl.textContent = hits + " sliced · PAPER";
   }
 
-  function flash() {
-    slots.innerHTML = "";
-    const pool = goods.length ? goods : PACK_GOODS;
-    const id = pool[Math.floor(Math.random() * pool.length)] || "corn";
+  function spawn() {
+    if (!running) return;
+    const pool = goods.length ? goods : FRUIT_SLICE;
+    const id = pool[Math.floor(Math.random() * pool.length)] || "mango";
     const btn = document.createElement("button");
     btn.type = "button";
-    btn.className = "pack-good";
-    btn.textContent = id.replace("_", " ");
+    btn.className = "pack-good pack-fall";
+    btn.textContent = id;
+    btn.style.left = 8 + Math.random() * 72 + "%";
     btn.addEventListener("click", () => {
       if (!running) return;
       hits += 1;
       paintHits();
-      flash();
+      btn.remove();
     });
     slots.appendChild(btn);
+    window.setTimeout(() => {
+      if (btn.parentNode) btn.remove();
+    }, 1400);
   }
 
   function finish(submit) {
     running = false;
     if (timer) clearInterval(timer);
+    if (falling) clearInterval(falling);
     timer = 0;
+    falling = 0;
     root.hidden = true;
+    slots.innerHTML = "";
     const done = onDone;
     onDone = null;
     if (submit && done) done(hits);
@@ -77,12 +72,16 @@ export function mountPackShift() {
     left = PACK_SECONDS;
     running = true;
     onDone = opts && opts.onDone;
-    goods = opts && Array.isArray(opts.goods) && opts.goods.length ? opts.goods : PACK_GOODS;
+    goods = opts && Array.isArray(opts.goods) && opts.goods.length ? opts.goods : FRUIT_SLICE;
+    if (badge) badge.textContent = ((opts && opts.title) || "Fruit slice") + " · PAPER";
     root.hidden = false;
+    slots.innerHTML = "";
     paintHits();
     if (clock) clock.textContent = left.toFixed(1);
-    flash();
+    spawn();
     if (timer) clearInterval(timer);
+    if (falling) clearInterval(falling);
+    falling = setInterval(spawn, 520);
     timer = setInterval(() => {
       left -= 0.1;
       if (clock) clock.textContent = Math.max(0, left).toFixed(1);

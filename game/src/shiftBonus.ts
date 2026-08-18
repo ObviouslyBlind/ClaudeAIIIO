@@ -12,6 +12,10 @@ export const PACK_COOLDOWN_MS = 60_000;
 export type PackHolder = {
   cash: number;
   lastPackAtMs?: number;
+  play?: {
+    stands: { id: string; boostLeft?: number }[];
+    workSites?: { id: string; boostLeft?: number }[];
+  };
 };
 
 export type PackOk = {
@@ -44,11 +48,12 @@ function fail(reason: string): PackFail {
 
 /**
  * Pay a capped PAPER bonus for a finished pack shift. Hits are clamped.
- * Cooldown is 60s. Never trusted as production.
+ * Cooldown is 60s. Never trusted as production. Optional standId speeds
+ * the next sales on that site; hired AI still sells if the player skips.
  */
 export function completePackShift(
   visitor: PackHolder,
-  body: { hits?: unknown; nowMs?: unknown } = {},
+  body: { hits?: unknown; nowMs?: unknown; standId?: unknown } = {},
 ): PackResult {
   const now = Number(body.nowMs);
   const at = Number.isFinite(now) ? now : Date.now();
@@ -60,6 +65,13 @@ export function completePackShift(
   const bonus = roundMoney(hits * PACK_BONUS_PER_HIT);
   visitor.cash = roundMoney(Number(visitor.cash) + bonus);
   visitor.lastPackAtMs = at;
+  const standId = typeof body.standId === "string" ? body.standId : "";
+  if (standId && visitor.play) {
+    const row =
+      visitor.play.stands.find((s) => s.id === standId) ||
+      (visitor.play.workSites || []).find((s) => s.id === standId);
+    if (row) row.boostLeft = Math.min(40, (Number(row.boostLeft) || 0) + hits);
+  }
   return {
     ok: true,
     hits,

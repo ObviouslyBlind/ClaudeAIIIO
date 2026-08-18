@@ -1,21 +1,28 @@
 # South first loop
 
-- Spawn: South west quay. Cash is $.
-- Land: stone quay wrapping to sand, Island Hwy (2+2, stone median) through the island, 5 empty town centres, volcano no-go. No buildings on South this pass.
-- North is the industrial capital. South is cheaper coastal / market-town land.
+- Spawn: South west quay. Cash is $. PAPER / SIMULATED.
+- Land: stone quay wrapping to sand, Island Hwy (2+2, stone median) through the island, 5 empty town centres, volcano no-go.
 
 ## Street carts
 
-PLAN South food is corn, potato, lettuce, beans. Four kerb carts, one each. No extra mineral good.
+Caribbean fruit-style stalls. Starter kit id stays `hotdog_cart` so old saves still place.
 
-| Cart | Cooks | Kit in Market | Stock pack |
+| Cart | Kit in Market | Stock pack | Mini-game |
 |---|---|---|---|
-| Roast corn | corn | Roast corn cart | Roast corn ×20 |
-| Potato roti | potato | Potato roti cart | Potato roti ×20 |
-| Callaloo | lettuce | Callaloo cart | Callaloo ×20 |
-| Stew peas | beans | Stew peas cart | Stew peas ×20 |
+| Fruit cart | Fruit cart | Fruit ×20 | Fruit slice |
+| Watermelon cart | Watermelon cart | Watermelon ×20 | Melon slice |
+| Fish and chips | Fish and chips cart | Fish and chips ×20 | Fry run |
 
-Juice, cane, and fish wait until there is a matching good.
+## Site menu (cart, shop, mine)
+
+Same card for a placed cart, a shop, and a mine.
+
+- Tabs at the top: **Stock** · **Run** · **Stats**. No left-right scroll.
+- **Hire** at the bottom. One button. An AI vendor appears and runs the site (auto-stock from the warehouse on carts/shops; mines extract).
+- Sales: about **10 per 3 minutes** on a 10/10 site (~18 ticks at 1 Hz). Mini-games speed the next sales. Hired AI still sells if you skip.
+- Sticker hint: **$6.00**. Tax 20%. A 10/10 quiet street is about **$16/min** PAPER after tax.
+- Desirability 0–10: staffed 2.5, stocked 2.5, upgraded 3, foot traffic up to 2. Crowding on the same street caps earnings (1 rival → 7.5, 2+ → **5**).
+- Fridge / upgrade: $200, doubles storage.
 
 ## Play
 
@@ -26,19 +33,17 @@ Juice, cane, and fish wait until there is a matching good.
 
 ## UI
 - Corners stay: cash top-left, viewers top-right, Inv/Wh/Mkt/Staff on the left, travel dock at the bottom
-- Chrome look: dusk-ferry brass plates, destination-board wordmark, compact submenus (not a giant ledger)
-- Click a launcher → **one compact submenu** next to it. Back drills in (Market → aisle → buy). Click again to close.
-- Left **Carts** is a directory: unplaced kits (Place) and placed carts (Open). Hire, train, stock, sticker, fridge live on **that cart**.
-- Click a placed cart in the world for its own menu.
-- Cart sticker: type a price. Next to it: **$5.00 is today's price**
+- Left **Carts** is a directory: unplaced kits (Place) and placed carts (Open). Ops live on **that site**.
+- Click a placed cart, or your shop / mine, for the site menu.
 - Market default: **Warehouse**. Or **Pockets**. Buying never stocks a stall that is not on the kerb.
 
 ## Loop
 1. Buy a lot from a nearby $ bar.
-2. Market → pick one street cart → **Warehouse** → Buy.
-3. Warehouse holds it. Place from Carts (pulls from the dock warehouse).
-4. Tap **that** cart: hire someone (carts do not sell without staff), train/pack a shift, load that cart's stock pack, type a sticker, fridge $200.
-5. Sales tax 20% goes to the island bank.
+2. Market → Fruit cart → **Warehouse** → Buy.
+3. Place from Carts. Tap **that** cart.
+4. Stock · Hire (one button) · optional Fridge · play Fruit slice on Run.
+5. Stats shows desirability, people searching the street, and PAPER / min.
+6. Sales tax 20% goes to the island bank.
 
 ## Next map pass (not this slice)
-North harbour sidewalks / kit pieces. Buildings stay a later slice.
+North harbour sidewalks / kit pieces.

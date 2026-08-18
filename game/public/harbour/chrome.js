@@ -9,6 +9,7 @@ import { playPaperBuy } from "./paper-sfx.js";
 import { toggleViewer, footLevel } from "./overlays.js";
 import { mountPackShift } from "./pack.js";
 import { formatCartsBody } from "./carts-hud.js";
+import { formatSiteMenu, gamesForSite } from "./site-menu.js";
 
 export const POLL_MS = 1000;
 
@@ -49,6 +50,8 @@ export function mountChrome(opts) {
   let placingKit = "";
   let marketDest = "warehouse";
   const packShift = mountPackShift();
+  let siteTab = "stock";
+  let openSiteId = null;
 
   function setPlaceHint(text, show) {
     const hint = document.getElementById("place-hint");
@@ -145,7 +148,7 @@ export function mountChrome(opts) {
     const stock = catalog.filter((s) => s.aisle === "stock" || s.role === "stock");
     body.innerHTML = `
       ${title("Market")}
-      <p>Buy a South street cart, or its food pack. That is not stocking a stall — place the cart first, then load it from that cart.</p>
+      <p>Buy a fruit cart, watermelon cart, or fish and chips. That is not stocking a stall — place the cart first, then load it from that cart.</p>
       <div class="dest-row">
         <button type="button" class="dest ${destPockets ? "is-on" : ""}" data-dest="cart">Pockets</button>
         <button type="button" class="dest ${marketDest === "warehouse" ? "is-on" : ""}" data-dest="warehouse">Warehouse</button>
@@ -233,17 +236,17 @@ export function mountChrome(opts) {
     body.innerHTML = `
       ${title("Staff")}
       ${
-        stands.length
-          ? stands
+        stands.length || (play.workSites || []).length
+          ? [...stands, ...(play.workSites || [])]
               .map((s) => {
                 const where = plotNameFor(s);
                 if (s.hired) {
                   return `<div class="stand-row"><span>${s.staffName || "Vendor"}</span><strong>${where}</strong></div>`;
                 }
-                return `<div class="stand-row"><span>${s.label || "Cart"} · ${where}</span><button type="button" class="go" data-open-stand="${s.id}">Hire on cart</button></div>`;
+                return `<div class="stand-row"><span>${s.label || "Site"} · ${where}</span><button type="button" class="go" data-open-stand="${s.id}">Open</button></div>`;
               })
               .join("")
-          : "<p>Place a cart, then hire from that cart. Carts do not sell without staff.</p>"
+          : "<p>Place a cart or tap your shop or mine. Hire from that site. Sites do not run without staff.</p>"
       }
     `;
   }
@@ -286,22 +289,25 @@ export function mountChrome(opts) {
     `;
   }
 
-  function startPack(goods) {
+  function startPack(goods, standId, title) {
     packShift.open({
       goods,
+      title,
       async onDone(hits) {
         const { ok, data } = await readJson("/api/shift/pack", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ hits }),
+          body: JSON.stringify({ hits, standId: standId || undefined }),
         });
         if (data && data.play) play = data.play;
         paintTop();
         if (openPanel === "inventory") paintInv();
+        const fresh = findSite(standId);
+        if (fresh) paintStandMenu(fresh);
         if (opts.setStatus) {
           opts.setStatus(
             ok
-              ? `Pack bonus ${money(data.bonus)} · PAPER · stall already ran`
+              ? `Pack bonus ${money(data.bonus)} · PAPER · site already ran`
               : "Pack: " + ((data && data.reason) || "skipped"),
           );
         }
@@ -309,103 +315,54 @@ export function mountChrome(opts) {
     });
   }
 
+  function findSite(id) {
+    if (!play || !id) return null;
+    return (
+      ((play.sites || []).find((s) => s.id === id)) ||
+      ((play.stands || []).find((s) => s.id === id)) ||
+      ((play.workSites || []).find((s) => s.id === id)) ||
+      null
+    );
+  }
+
   function paintStandMenu(stand, onStock, onHire) {
     if (!standMenu) return;
     if (!stand) {
       standMenu.hidden = true;
       if (standVeil) standVeil.hidden = true;
+      openSiteId = null;
       return;
     }
     closePanels();
+    openSiteId = stand.id;
     standMenu.hidden = false;
     if (standVeil) standVeil.hidden = false;
-    const todayN = Number(play && play.todayPrice != null ? play.todayPrice : 5);
-    const today = money(todayN);
-    const sticker = Number(stand.stickerPrice != null ? stand.stickerPrice : 5);
-    const cap = Number(stand.storageCap || 20);
-    const have = Number(stand.hotdogs) || 0;
-    const tickN = 20;
-    const filled = Math.round((have / Math.max(cap, 1)) * tickN);
-    const ticks = Array.from(
-      { length: tickN },
-      (_, i) => `<i class="${i < filled ? "on" : ""}"></i>`,
-    ).join("");
-    const stockId = stand.stockId || "hotdogs";
-    const food = stand.label || "Street cart";
-    const invQty = ((play && play.inventory) || []).find((r) => r.kind === stockId)?.qty || 0;
-    const whQty = ((play && play.warehouse && play.warehouse.items) || []).find((r) => r.kind === stockId)?.qty || 0;
-    const room = Math.max(0, cap - have);
-    const maxFromInv = Math.min(invQty, room);
-    const maxFromWh = Math.min(whQty, room);
-    const maxQty = Math.max(maxFromInv, maxFromWh);
-    const vs =
-      sticker < todayN - 0.01 ? "is-low" : sticker > todayN + 0.01 ? "is-high" : "is-today";
-    const roster = (play && play.hireRoster) || [];
-    const standNeeds = Array.isArray(stand.needs) ? stand.needs : [];
-    standMenu.innerHTML = `
-      <div class="stand-head">
-        <h2>${food}</h2>
-        <button type="button" class="stand-x" id="stand-close">Close</button>
-      </div>
-      ${standNeeds.map((n) => `<p class="cart-need">${n.label}</p>`).join("")}
-      <div class="stock-ticks" title="Stock">${ticks}</div>
-      <p class="stock-read">${have}<small>/${cap}</small></p>
-      <div class="source-row">
-        <button type="button" class="source src-pocket" data-stock="inventory" ${maxFromInv ? "" : "disabled"}>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8h10l1.2 12H5.8L7 8z"/><path d="M9 8V6.4a3 3 0 0 1 6 0V8"/></svg>
-          <strong>${invQty}</strong><span>Pockets</span>
-        </button>
-        <button type="button" class="source src-wh" data-stock="warehouse" ${maxFromWh ? "" : "disabled"}>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10.5 12 4l8 6.5V20H4z"/><path d="M4 10.5h16M12 10.5V20"/></svg>
-          <strong>${whQty}</strong><span>Warehouse</span>
-        </button>
-      </div>
-      ${
-        maxQty
-          ? `<div class="slider-row"><input id="stock-qty" class="qty-slider" type="range" min="1" max="${maxQty}" value="${maxQty}" /><span data-qty-out>${maxQty}</span></div>`
-          : `<p class="whisper">${have ? "Fridge holds this cart's food." : "Buy this cart's stock pack in Market, then load it here."}</p>`
-      }
-      <p class="sticker-label">Sticker</p>
-      <div class="sticker-row">
-        <input id="sticker-price" type="number" min="0.01" max="1000" step="0.5" value="${sticker}" />
-        <span class="today-price ${vs}">${today} is today's price</span>
-      </div>
-      ${
-        stand.hired
-          ? `<p class="hired-pill">${stand.staffName || "Vendor"} on</p>`
-          : `<div class="hire-row">${roster
-              .map(
-                (p) =>
-                  `<button type="button" class="hire-chip" data-hire-stand="${stand.id}" data-hire-person="${p.id}">${p.name}</button>`,
-              )
-              .join("")}</div>
-             <p class="whisper">${(roster[0] && roster[0].suggest) || "Hire someone. Carts do not sell without staff."}</p>`
-      }
-      <div class="inv-row">
-        <span>Train / pack shift · PAPER bonus</span>
-        <button type="button" class="go" data-pack-start="1">Pack</button>
-      </div>
-      ${
-        stand.hired && !stand.upgraded
-          ? `<button type="button" class="go fridge" data-upgrade="${stand.id}">Fridge · $200</button>`
-          : ""
-      }
-    `;
+    const live = findSite(stand.id) || stand;
+    standMenu.innerHTML = formatSiteMenu(live, play, siteTab);
     function closeStand() {
       standMenu.hidden = true;
       if (standVeil) standVeil.hidden = true;
+      openSiteId = null;
     }
     standMenu.querySelector("#stand-close")?.addEventListener("click", closeStand);
+    standMenu.querySelectorAll("[data-site-tab]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        siteTab = btn.getAttribute("data-site-tab") || "stock";
+        paintStandMenu(live, onStock, onHire);
+      });
+    });
     const priceEl = standMenu.querySelector("#sticker-price");
     if (priceEl) {
       priceEl.addEventListener("change", async () => {
         const { data } = await readJson("/api/stand/price", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ standId: stand.id, price: Number(priceEl.value) }),
+          body: JSON.stringify({ standId: live.id, price: Number(priceEl.value) }),
         });
         if (data && data.play) play = data.play;
         paintTop();
+        const fresh = findSite(live.id);
+        if (fresh) paintStandMenu(fresh, onStock, onHire);
       });
     }
     const qtyEl = standMenu.querySelector("#stock-qty");
@@ -421,38 +378,36 @@ export function mountChrome(opts) {
       const { ok, data } = await readJson("/api/stand/stock", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ standId: stand.id, qty, from }),
+        body: JSON.stringify({ standId: live.id, qty, from }),
       });
       if (data && data.play) play = data.play;
       paintTop();
-      const fresh = ((play && play.stands) || []).find((s) => s.id === stand.id);
+      const fresh = findSite(live.id);
       paintStandMenu(fresh, onStock, onHire);
       if (opts.setStatus) {
-        opts.setStatus(ok ? "Stock in the cart." : "Could not stock: " + ((data && data.reason) || "fail"));
+        opts.setStatus(ok ? "Stock on this site." : "Could not stock: " + ((data && data.reason) || "fail"));
       }
       if (ok && typeof onStock === "function") onStock();
-      if (ok && opts.onStocked) opts.onStocked(stand.id);
+      if (ok && opts.onStocked) opts.onStocked(live.id);
     }
     standMenu.querySelectorAll("[data-stock]").forEach((btn) => {
       btn.addEventListener("click", () => stockFrom(btn.getAttribute("data-stock")));
     });
-    standMenu.querySelectorAll("[data-hire-person]").forEach((btn) => {
-      btn.addEventListener("click", async () => {
+    const hireBtn = standMenu.querySelector("#hire-site");
+    if (hireBtn) {
+      hireBtn.addEventListener("click", async () => {
         const { ok, data } = await readJson("/api/stand/hire", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({
-            standId: btn.getAttribute("data-hire-stand"),
-            personId: btn.getAttribute("data-hire-person"),
-          }),
+          body: JSON.stringify({ standId: hireBtn.getAttribute("data-hire-site") }),
         });
         if (data && data.play) play = data.play;
         paintTop();
-        const fresh = ((play && play.stands) || []).find((s) => s.id === stand.id);
+        const fresh = findSite(live.id);
         paintStandMenu(fresh, onStock, onHire);
         if (ok && typeof onHire === "function") onHire();
       });
-    });
+    }
     standMenu.querySelectorAll("[data-upgrade]").forEach((btn) => {
       btn.addEventListener("click", async () => {
         const { data } = await readJson("/api/stand/upgrade", {
@@ -462,12 +417,12 @@ export function mountChrome(opts) {
         });
         if (data && data.play) play = data.play;
         paintTop();
-        const fresh = ((play && play.stands) || []).find((s) => s.id === stand.id);
+        const fresh = findSite(live.id);
         paintStandMenu(fresh, onStock, onHire);
       });
     });
     standMenu.querySelector("[data-pack-start]")?.addEventListener("click", () => {
-      startPack(stand.cookGood ? [stand.cookGood] : undefined);
+      startPack(gamesForSite(live), live.id, (live.games && live.games[0]) || "Fruit slice");
     });
   }
 
@@ -555,7 +510,7 @@ export function mountChrome(opts) {
         return;
       }
       if (hit.hasAttribute("data-open-stand")) {
-        const stand = ((play && play.stands) || []).find((s) => s.id === hit.getAttribute("data-open-stand"));
+        const stand = findSite(hit.getAttribute("data-open-stand"));
         paintStandMenu(stand);
         return;
       }
@@ -598,6 +553,14 @@ export function mountChrome(opts) {
       paintFootLegend();
       if (root.querySelector(".float-panel.is-open")) paintPanels();
       if (opts.onPlay) opts.onPlay(play);
+      if (openSiteId && standMenu && !standMenu.hidden) {
+        const ae = document.activeElement;
+        const typing = ae && standMenu.contains(ae) && (ae.tagName === "INPUT" || ae.tagName === "TEXTAREA");
+        if (!typing) {
+          const fresh = findSite(openSiteId);
+          if (fresh) paintStandMenu(fresh);
+        }
+      }
     }
   }
 
@@ -650,6 +613,7 @@ export function mountChrome(opts) {
     standVeil.addEventListener("click", () => {
       standMenu.hidden = true;
       standVeil.hidden = true;
+      openSiteId = null;
     });
   }
   bindChromeActions();
@@ -732,6 +696,7 @@ export function mountChrome(opts) {
     hideStandMenu() {
       if (standMenu) standMenu.hidden = true;
       if (standVeil) standVeil.hidden = true;
+      openSiteId = null;
     },
   };
 }
