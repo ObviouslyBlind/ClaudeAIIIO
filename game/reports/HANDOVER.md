@@ -76,7 +76,8 @@ Audit: `cd game && npx tsx scripts/audit-roads.ts`
 | Taxi / circus | `game/public/harbour/taxi.js`, `game/public/harbour/roadnet.js` |
 | Terrain paint | `game/public/harbour/shore.js`, `game/public/harbour/main.js` `makeTerrain` |
 | Tests | `game/src/roadGraph.test.ts`, `game/src/taxi-wait.test.ts`, `game/src/shore.test.ts` |
-| Status | this file, `game/reports/GAUNTLET_STATUS.md` |
+| Status | this file, `game/reports/GAUNTLET_STATUS.md`, `game/reports/ISLAND_PLAY.md` |
+| Skills | `game/SKILLS.md`, `.cursor/skills/two-harbors-director/` |
 
 South coords: Harbour Circus `{-2080, 7440}`; Quayward loop ≈ `{-1960, 7620}`; +Z is inland/south.
 
