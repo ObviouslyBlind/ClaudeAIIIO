@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { ROAD_CLASSES, carriagewayWidthM, roadClassSpec } from "./roadclass.js";
 import { junctionPad, trimPolylineForPads, pointInJunctionPad } from "./roadnet.js";
 import { addQuadXZ, junctionKerbQuads } from "./roadjoin.js";
+import { buildIslandFootprints, isNetworkRoad } from "./roadfoot.js";
 
 /** Grit shoulder under the tarmac edge, so a road has a rim instead of a cut edge. */
 export const SHOULDER = 0x6f6a5e;
@@ -653,26 +654,118 @@ function drawNorthPortCurbs(scene, map, specOf, heightAt) {
   if (root.children.length) scene.add(root);
 }
 
+function addMultiPolygonMesh(scene, mp, y, color, userData) {
+  if (!mp || !mp.length) return 0;
+  let n = 0;
+  for (const poly of mp) {
+    const outer = poly[0];
+    if (!outer || outer.length < 4) continue;
+    const shape = new THREE.Shape();
+    shape.moveTo(outer[0][0], outer[0][1]);
+    for (let i = 1; i < outer.length - 1; i++) shape.lineTo(outer[i][0], outer[i][1]);
+    for (let h = 1; h < poly.length; h++) {
+      const holePts = poly[h];
+      if (!holePts || holePts.length < 4) continue;
+      const hole = new THREE.Path();
+      hole.moveTo(holePts[0][0], holePts[0][1]);
+      for (let i = 1; i < holePts.length - 1; i++) hole.lineTo(holePts[i][0], holePts[i][1]);
+      shape.holes.push(hole);
+    }
+    const g = new THREE.ShapeGeometry(shape);
+    const pos = g.attributes.position;
+    const flat = new Float32Array(pos.count * 3);
+    for (let i = 0; i < pos.count; i++) {
+      flat[i * 3] = pos.getX(i);
+      flat[i * 3 + 1] = y;
+      flat[i * 3 + 2] = pos.getY(i);
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute("position", new THREE.BufferAttribute(flat, 3));
+    if (g.index) geo.setIndex(Array.from(g.index.array));
+    geo.computeVertexNormals();
+    const mesh = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ color }));
+    mesh.castShadow = false;
+    mesh.receiveShadow = true;
+    mesh.userData = { kind: "road", mode: "PAPER", ...userData };
+    mesh.name = `road:${userData.island}:${userData.roadName}`;
+    scene.add(mesh);
+    n += 1;
+  }
+  return n;
+}
+
+function drawNetworkFootprints(scene, map, specOf, heightAt) {
+  for (const island of ["north", "south"]) {
+    const roads = (map.roads || []).filter((r) => r.island === island && isNetworkRoad(r));
+    if (!roads.length) continue;
+    const spec = specOf(island);
+    const y = heightAt(spec, roads[0].points[0].x, roads[0].points[0].z);
+    const foot = buildIslandFootprints(roads);
+    addMultiPolygonMesh(scene, foot.sidewalk, y + 0.08, SIDEWALK, {
+      island,
+      roadKind: "sidewalk",
+      roadName: island + " walks",
+      label: island + " walks",
+      widthM: 2.0,
+      footprint: true,
+    });
+    addMultiPolygonMesh(scene, foot.shoulder, y + 0.11, SHOULDER, {
+      island,
+      roadKind: "shoulder",
+      roadName: island + " streets",
+      label: island + " streets",
+      footprint: true,
+    });
+    addMultiPolygonMesh(scene, foot.tarmac, y + 0.15, ASPHALT, {
+      island,
+      roadKind: "paved",
+      roadName: island + " streets",
+      label: island + " streets",
+      footprint: true,
+    });
+  }
+}
+
+/** Legacy North roads that still describe a join with `joins`, not the graph. */
+function drawLegacyJoins(scene, map, specOf, heightAt) {
+  for (const road of map.roads || []) {
+    if (road.cls || road.roundabout || !road.joins) continue;
+    addJunctionPlate(scene, specOf(road.island), heightAt, {
+      island: road.island,
+      x: road.joins.x,
+      z: road.joins.z,
+      side: PAVED_WIDTH_M + 2.4,
+      yaw: 0,
+      round: true,
+      label: road.name || "junction",
+    });
+  }
+}
+
 /**
- * Draw `/api/map` roads. Paved = asphalt street. Dirt = thin packed earth on fields only.
+ * Draw `/api/map` roads.
+ *
+ * Local paved streets are one unioned footprint per island (tarmac + grit +
+ * sidewalk). Highway duals, circuses and dirt stay as ribbons/rings.
  */
 export function makeRoads(map, helpers) {
   const { scene, specOf, heightAt } = helpers;
-  const centres = rabCentres(map);
   for (const road of map.roads) {
     const spec = specOf(road.island);
     if (road.kind === "paved" && road.lanes === 4) {
       drawHighway(scene, spec, road, heightAt, map.graph);
     } else if (road.kind === "paved" && road.roundabout) {
       drawRoundabout(scene, spec, road, heightAt, map.graph);
+    } else if (road.kind === "paved" && isNetworkRoad(road)) {
+      continue;
     } else if (road.kind === "paved") {
       drawPaved(scene, spec, road, heightAt, map.graph);
-      drawSidewalks(scene, spec, road, heightAt, centres, map.graph);
     } else {
       drawDirt(scene, spec, road, heightAt);
     }
   }
-  drawJunctions(scene, map, specOf, heightAt);
+  drawNetworkFootprints(scene, map, specOf, heightAt);
+  drawLegacyJoins(scene, map, specOf, heightAt);
   drawCircusApproaches(scene, map, specOf, heightAt);
   drawNorthPortCurbs(scene, map, specOf, heightAt);
 }
