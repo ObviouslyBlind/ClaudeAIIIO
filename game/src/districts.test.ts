@@ -24,7 +24,8 @@ describe("House constituencies", () => {
     expect(ISLANDS.north.cz).toBe(-9000);
     expect(ISLANDS.south.cz).toBe(9000);
     expect(ISLANDS.north.port).toEqual({ x: 0, z: -6950 });
-    expect(ISLANDS.south.port).toEqual({ x: 0, z: 6950 });
+    expect(ISLANDS.south.port.x).toBeLessThan(-1500);
+    expect(ISLANDS.south.port.z).toBeGreaterThan(7000);
     for (const d of districts) {
       expect(d.ring.length).toBeGreaterThanOrEqual(6);
       expect(d.ring.every((p) => Number.isFinite(p[0]) && Number.isFinite(p[1]))).toBe(true);

@@ -1,6 +1,8 @@
 # South first loop
 
-Spawn: South port. Cash is $.
+- Spawn: South west quay. Cash is $.
+- Land: stone quay wrapping to sand, Island Hwy (2+2, stone median) through the island, 5 empty town centres, volcano no-go. No buildings on South this pass.
+- North is the industrial capital. South is cheaper coastal / market-town land.
 
 ## Play
 
@@ -23,4 +25,4 @@ Spawn: South port. Cash is $.
 4. Set your sticker. Sales tax 20% goes to the island bank.
 
 ## Next map pass (not this slice)
-Flatten harbour towns, sidewalks, beach vendor plots, volcano as a no-go landmark.
+North harbour sidewalks / kit pieces. Buildings stay a later slice.

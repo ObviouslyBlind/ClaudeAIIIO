@@ -5,7 +5,7 @@
  * (`/?g=ferry31`–`ferry33` FAIL: body teal #0e4a55, status still Loading).
  *
  * CAM / LOOK match spawnCameraOffset("south") + spawnLookAtOffset("south")
- * at the south port pad. BERTH_Z stays in sync with ferry.js HOME_Z.
+ * at the south port pad, looking east along Island Hwy.
  */
 import * as THREE from "three";
 
@@ -14,9 +14,9 @@ export const BERTH_Z = -6835;
 export const FOG_NEAR_M = 6000;
 export const FOG_FAR_M = 42000;
 export const CAMERA_FAR_M = 52000;
-/** South quay camera, looking inland along the tarmac. */
-export const CAM = { x: 20, y: 26, z: 6918 };
-export const LOOK = { x: 0, y: 7, z: 7078 };
+/** South quay camera, looking inland along Island Hwy (+X). */
+export const CAM = { x: -2334, y: 26, z: 7288 };
+export const LOOK = { x: -2110, y: 6, z: 7284 };
 
 export function paintFirstFrame(canvas) {
   if (!canvas) throw new Error("no canvas");

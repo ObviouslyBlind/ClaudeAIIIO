@@ -74,24 +74,32 @@ export function propSeeds(spec, { heightAt, plots, roads, stops }) {
   const bushes = [];
   let guard = 0;
   while (bushes.length < BUSHES_PER_ISLAND && guard++ < BUSHES_PER_ISLAND * 30) {
-    const x = spec.port.x + (rng() - 0.5) * 1500;
-    const z = spec.port.z + inland * (30 + rng() * 2600);
+    const x =
+      spec.id === "south" ? spec.cx + (rng() - 0.5) * spec.rx * 1.55 : spec.port.x + (rng() - 0.5) * 1500;
+    const z =
+      spec.id === "south"
+        ? spec.cz + (rng() - 0.5) * spec.rz * 1.55
+        : spec.port.z + inland * (30 + rng() * 2600);
     if (!propSpotOk(x, z, ctx)) continue;
     bushes.push({ x, z, s: 0.7 + rng() * 0.9 });
   }
   const rocks = [];
   guard = 0;
   while (rocks.length < ROCKS_PER_ISLAND && guard++ < ROCKS_PER_ISLAND * 30) {
-    const x = spec.port.x + (rng() - 0.5) * 1900;
-    const z = spec.port.z + inland * (20 + rng() * 3000);
+    const x =
+      spec.id === "south" ? spec.cx + (rng() - 0.5) * spec.rx * 1.55 : spec.port.x + (rng() - 0.5) * 1900;
+    const z =
+      spec.id === "south"
+        ? spec.cz + (rng() - 0.5) * spec.rz * 1.55
+        : spec.port.z + inland * (20 + rng() * 3000);
     if (!propSpotOk(x, z, ctx)) continue;
     rocks.push({ x, z, s: 0.5 + rng() * 1.1 });
   }
   const barrels = [];
   guard = 0;
   while (barrels.length < BARRELS_PER_PORT && guard++ < BARRELS_PER_PORT * 40) {
-    const x = spec.port.x + (rng() - 0.5) * 60;
-    const z = spec.port.z + inland * (6 + rng() * 26);
+    const x = spec.id === "south" ? spec.port.x + 8 + (rng() - 0.5) * 36 : spec.port.x + (rng() - 0.5) * 60;
+    const z = spec.id === "south" ? spec.port.z + 6 + (rng() - 0.5) * 16 : spec.port.z + inland * (6 + rng() * 26);
     const h = heightAt(spec, x, z);
     if (h < 0.5) continue;
     barrels.push({ x, z, s: 0.8 + rng() * 0.4 });

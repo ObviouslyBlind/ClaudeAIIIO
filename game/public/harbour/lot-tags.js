@@ -12,6 +12,7 @@ export const TAG_RADIUS_LOTS_M = 240;
 
 export function tagKindFor(plot) {
   if (!plot) return "none";
+  if (plot.class === "reserved") return "none";
   if (plot.owner === "visitor") return "yours";
   if (plot.owner) return "taken";
   return "buy";
