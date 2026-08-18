@@ -36,9 +36,10 @@ Each step is big enough to see from 30 m up.
 
 ## Drawing
 
-- Local paved streets are **one unioned footprint** per island (Clipper/Martinez buffer-union). Tarmac, grit and sidewalk are boolean rings, not overlapping ribbons. See `docs/ROAD_MESH.md`.
-- Highway dual ribbons and circus rings stay as they are.
-- Graph + taxi are unchanged. Ends still land on nodes.
+- Local paved **runs** are ribbons. A **join** is a small union of the 2–4 arm-end rectangles (a hub). That is a T or an L. It is not the whole island boolean-unioned into a splat. See `docs/ROAD_MESH.md`.
+- Offset sidewalks are clipped out of the hub. The hub itself draws the walk as a wider union under the tarmac, so the outer kerb is one piece.
+- Quayward Loop is a **rectangle**. Quayward Rd hits the north edge at **45°** from Harbour Circus.
+- Circuses are an asphalt annulus reaching the node's kerb radius, plus a stone island.
 - Highway ribbons run **to the kerb**. The graph already stops there; do not omit the last stations near a circus (that leftover from the old through-island spline left sand between the dual carriageway and the ring).
 - Each circus arm gets a short tarmac disc at the kerb so the dual ribbons (offset off the centreline) actually read as meeting the ring.
 

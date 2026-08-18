@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { ROAD_CLASSES, carriagewayWidthM, roadClassSpec } from "./roadclass.js";
 import { junctionPad, trimPolylineForPads, pointInJunctionPad } from "./roadnet.js";
 import { addQuadXZ, junctionKerbQuads } from "./roadjoin.js";
-import { buildIslandFootprints, isNetworkRoad } from "./roadfoot.js";
+import { buildHubFootprint } from "./roadfoot.js";
 
 /** Grit shoulder under the tarmac edge, so a road has a rim instead of a cut edge. */
 export const SHOULDER = 0x6f6a5e;
@@ -694,34 +694,31 @@ function addMultiPolygonMesh(scene, mp, y, color, userData) {
   return n;
 }
 
-function drawNetworkFootprints(scene, map, specOf, heightAt) {
-  for (const island of ["north", "south"]) {
-    const roads = (map.roads || []).filter((r) => r.island === island && isNetworkRoad(r));
-    if (!roads.length) continue;
-    const spec = specOf(island);
-    const y = heightAt(spec, roads[0].points[0].x, roads[0].points[0].z);
-    const foot = buildIslandFootprints(roads);
+function drawHubs(scene, map, specOf, heightAt) {
+  const graph = map.graph;
+  if (!graph || !graph.nodes) return;
+  for (const node of graph.nodes) {
+    const pad = junctionPad(graph, node);
+    if (!pad) continue;
+    const spec = specOf(node.island);
+    const y = heightAt(spec, node.x, node.z);
+    const foot = buildHubFootprint(graph, node, pad);
+    const base = { island: node.island, footprint: true, label: node.name || "junction" };
     addMultiPolygonMesh(scene, foot.sidewalk, y + 0.08, SIDEWALK, {
-      island,
+      ...base,
       roadKind: "sidewalk",
-      roadName: island + " walks",
-      label: island + " walks",
-      widthM: 2.0,
-      footprint: true,
+      roadName: (node.name || "junction") + " walk",
+      widthM: pad.walkM || 2,
     });
     addMultiPolygonMesh(scene, foot.shoulder, y + 0.11, SHOULDER, {
-      island,
+      ...base,
       roadKind: "shoulder",
-      roadName: island + " streets",
-      label: island + " streets",
-      footprint: true,
+      roadName: (node.name || "junction") + " hub",
     });
     addMultiPolygonMesh(scene, foot.tarmac, y + 0.15, ASPHALT, {
-      island,
-      roadKind: "paved",
-      roadName: island + " streets",
-      label: island + " streets",
-      footprint: true,
+      ...base,
+      roadKind: "junction",
+      roadName: (node.name || "junction") + " hub",
     });
   }
 }
@@ -743,28 +740,26 @@ function drawLegacyJoins(scene, map, specOf, heightAt) {
 }
 
 /**
- * Draw `/api/map` roads.
- *
- * Local paved streets are one unioned footprint per island (tarmac + grit +
- * sidewalk). Highway duals, circuses and dirt stay as ribbons/rings.
+ * Draw `/api/map` roads. Runs are ribbons. Joins are a small unioned hub,
+ * not the whole island boolean-unioned into a splat.
  */
 export function makeRoads(map, helpers) {
   const { scene, specOf, heightAt } = helpers;
+  const centres = rabCentres(map);
   for (const road of map.roads) {
     const spec = specOf(road.island);
     if (road.kind === "paved" && road.lanes === 4) {
       drawHighway(scene, spec, road, heightAt, map.graph);
     } else if (road.kind === "paved" && road.roundabout) {
       drawRoundabout(scene, spec, road, heightAt, map.graph);
-    } else if (road.kind === "paved" && isNetworkRoad(road)) {
-      continue;
     } else if (road.kind === "paved") {
       drawPaved(scene, spec, road, heightAt, map.graph);
+      drawSidewalks(scene, spec, road, heightAt, centres, map.graph);
     } else {
       drawDirt(scene, spec, road, heightAt);
     }
   }
-  drawNetworkFootprints(scene, map, specOf, heightAt);
+  drawHubs(scene, map, specOf, heightAt);
   drawLegacyJoins(scene, map, specOf, heightAt);
   drawCircusApproaches(scene, map, specOf, heightAt);
   drawNorthPortCurbs(scene, map, specOf, heightAt);
