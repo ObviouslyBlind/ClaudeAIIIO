@@ -127,25 +127,18 @@ describe("South land (no buildings)", () => {
         r.points.some((p) => Math.hypot(p.x - harbour.x, p.z - harbour.z) < 40),
     );
     const names = nearCircus.map((r) => r.name).sort();
-    expect(names).toEqual(["Quayward Rd", "South Strand"]);
-    const headings = nearCircus.map((r) => {
-      const p = r.points.reduce(
-        (best, q) => (Math.hypot(q.x - harbour.x, q.z - harbour.z) < best.d ? { d: Math.hypot(q.x - harbour.x, q.z - harbour.z), p: q } : best),
-        { d: Infinity, p: r.points[0]! },
-      ).p;
-      return Math.atan2(p.z - harbour.z, p.x - harbour.x);
-    });
-    let gap = Math.abs(headings[0]! - headings[1]!);
-    if (gap > Math.PI) gap = Math.PI * 2 - gap;
-    expect(gap).toBeGreaterThan((35 * Math.PI) / 180);
+    expect(names).toEqual(["Quayward Rd"]);
 
     const channel = board.roads.find((r) => r.name === "Channel Sands")!;
     const palm = board.roads.find((r) => r.name === "Palm Arc")!;
     const hwy = board.roads.find((r) => r.name === "Island Hwy")!;
     const strand = board.roads.find((r) => r.name === "South Strand")!;
+    const quay = board.roads.find((r) => r.name === "Quayward Rd")!;
     expect(Math.hypot(channel.points[0]!.x - harbour.x, channel.points[0]!.z - harbour.z)).toBeGreaterThan(80);
     expect(Math.hypot(palm.points[0]!.x - harbour.x, palm.points[0]!.z - harbour.z)).toBeGreaterThan(80);
+    expect(Math.hypot(strand.points[0]!.x - harbour.x, strand.points[0]!.z - harbour.z)).toBeGreaterThan(40);
     expect(distToPolyline(hwy.points, channel.points[0]!.x, channel.points[0]!.z)).toBeLessThan(22);
+    expect(distToPolyline(quay.points, strand.points[0]!.x, strand.points[0]!.z)).toBeLessThan(12);
     expect(distToPolyline(strand.points, palm.points[0]!.x, palm.points[0]!.z)).toBeLessThan(12);
   });
 });

@@ -151,11 +151,11 @@ function drawRibbon(scene, spec, road, heightAt, widthM, color, roadKind, matOpt
 export const HIGHWAY_LANE_OFFSET_M = 8;
 export const HIGHWAY_MEDIAN_M = 8;
 /** Dual-carriageway stations inside this radius of a circus are omitted. */
-export const HIGHWAY_RAB_OMIT_M = 34;
+export const HIGHWAY_RAB_OMIT_M = 46;
 /** Skip ribbon faces across a gap this wide — must be < 2 × omit so the highway cannot chord the island. */
-export const HIGHWAY_RAB_SKIP_M = 40;
+export const HIGHWAY_RAB_SKIP_M = 50;
 /** Stone disc inside the circulatory ring. */
-export const RAB_ISLAND_R_M = 16.6;
+export const RAB_ISLAND_R_M = 24;
 
 function distToPoly(pts, x, z) {
   let best = Infinity;
