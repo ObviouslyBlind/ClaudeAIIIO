@@ -74,6 +74,7 @@ function roadMid(road) {
 
 function bandForRoad(road, specOf) {
   if (road.band) return road.band;
+  if (road.kind === "dirt") return road.name ? "yellow" : "red";
   if (road.kind && road.kind !== "paved") return "red";
   const spec = specOf(road.island);
   if (!spec) return "red";
@@ -192,7 +193,9 @@ function footRoads(play, map) {
   if (play && play.traffic && play.traffic.roads && play.traffic.roads.length) {
     return play.traffic.roads;
   }
-  return ((map && map.roads) || []).filter((r) => r.kind === "paved" && r.points && r.points.length >= 2);
+  return ((map && map.roads) || []).filter(
+    (r) => r.points && r.points.length >= 2 && (r.kind === "paved" || (r.kind === "dirt" && r.name)),
+  );
 }
 
 export function createOverlays({ scene, heightAt, specOf, getMap }) {

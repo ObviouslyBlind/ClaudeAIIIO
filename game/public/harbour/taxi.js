@@ -100,7 +100,7 @@ export function pavedDestFromMapClick(roads, islandId, spec, sx, sy, w, h) {
   const world = mapPxToWorld(islandMapBounds(spec), sx, sy, w, h);
   let best = null;
   for (const r of roads) {
-    if (r.kind !== "paved" || r.island !== islandId || !r.points || r.points.length < 2) continue;
+    if (r.kind !== "paved" || r.roundabout || r.island !== islandId || !r.points || r.points.length < 2) continue;
     const proj = projectOnPolyline(r.points, world.x, world.z);
     if (!best || proj.dist < best.proj.dist) best = { road: r, proj };
   }
@@ -127,7 +127,7 @@ export function stopFromMapClick(stops, spec, sx, sy, w, h, pickPx = 26) {
  */
 export function routeAcrossPaved(roads, islandId, fromX, fromZ, toX, toZ) {
   const paved = (roads || []).filter(
-    (r) => r.kind === "paved" && r.island === islandId && r.points && r.points.length >= 2,
+    (r) => r.kind === "paved" && !r.roundabout && r.island === islandId && r.points && r.points.length >= 2,
   );
   if (!paved.length) return null;
   const trunk = paved.find((r) => !r.joins) || paved[0];

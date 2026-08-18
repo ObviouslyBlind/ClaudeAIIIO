@@ -8,6 +8,9 @@ describe("walk surface", () => {
     expect(canWalk(n.port.x, n.port.z, ISLANDS, heightAt)).toBe(true);
     expect(canWalk(0, 0, ISLANDS, heightAt)).toBe(false);
     expect(canWalk(n.hill.x, n.hill.z, ISLANDS, heightAt)).toBe(true);
+    const s = ISLANDS.south;
+    expect(canWalk(s.port.x, s.port.z, ISLANDS, heightAt)).toBe(true);
+    expect(canWalk(s.hill.x, s.hill.z, ISLANDS, heightAt)).toBe(false);
   });
 
   it("treats the channel midpoint as water, below the beach threshold", () => {

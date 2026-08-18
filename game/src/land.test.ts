@@ -38,7 +38,8 @@ describe("harbour land board", () => {
     const plots = buildPlots();
     expect(plots.length).toBeGreaterThan(40);
     expect(plots.every((p) => p.ring.length >= 4)).toBe(true);
-    expect(plots.every((p) => p.area > 180)).toBe(true);
+    expect(plots.filter((p) => p.island === "north").every((p) => p.area > 180)).toBe(true);
+    expect(plots.filter((p) => p.island === "south").every((p) => p.area > 100)).toBe(true);
     expect(plots.some((p) => p.band === "field")).toBe(true);
     expect(plots.some((p) => p.band === "street")).toBe(true);
     const sample = plots[0];
@@ -198,7 +199,9 @@ describe("harbour land board", () => {
   });
   it("names every lot as a house number on the street it fronts", () => {
     const board = createLandBoard();
-    expect(board.plots.every((p) => /^\d+ .+$/.test(p.name))).toBe(true);
+    const numbered = board.plots.filter((p) => p.class !== "reserved");
+    expect(numbered.every((p) => /^\d+ .+$/.test(p.name))).toBe(true);
+    expect(board.plots.filter((p) => p.class === "reserved").every((p) => /Green$/.test(p.name))).toBe(true);
     expect(board.plots.some((p) => p.street === "Harbour Rd")).toBe(true);
     expect(board.plots.some((p) => p.street === "Mill St")).toBe(true);
     const mill = board.plots.filter((p) => p.street === "Mill St");

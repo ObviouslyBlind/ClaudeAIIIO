@@ -34,7 +34,9 @@ import {
 function leaseCheapSouth() {
   const land = createLandBoard();
   const visitor = createVisitor(1_000);
-  const plot = land.plots.find((p) => p.island === "south" && !p.owner && p.band === "street" && p.price < 400);
+  const plot = land.plots.find(
+    (p) => p.island === "south" && !p.owner && p.band === "street" && p.class === "by_right" && p.price < 400,
+  );
   expect(plot).toBeTruthy();
   const leased = leasePlot(land, visitor, plot!.id);
   expect(leased.ok).toBe(true);
@@ -54,7 +56,7 @@ describe("PAPER foot traffic", () => {
     const south = snap.roads.filter((r) => r.island === "south");
     expect(south.length).toBeGreaterThan(3);
     expect(south.some((r) => r.band === "green")).toBe(true);
-    const dirt = land.roads.find((r) => r.kind === "dirt");
+    const dirt = land.roads.find((r) => r.kind === "dirt" && r.island === "north" && !r.name);
     expect(dirt).toBeTruthy();
     expect(roadTrafficBand(dirt!)).toBe("red");
   });

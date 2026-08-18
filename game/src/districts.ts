@@ -1,4 +1,5 @@
 import {
+  heightAt,
   ISLANDS,
   pointInRing,
   type IslandId,
@@ -26,9 +27,17 @@ type Seed = {
 /** +za is toward the channel. Port sits near za 2050. */
 function seedsFor(island: IslandId): Seed[] {
   const hill = island === "north" ? -1 : 1;
+  const harbourX = island === "north" ? 0 : -2280;
+  const harbourZa = island === "north" ? 2050 : 1720;
   return [
-    { slug: "harbour", nameN: "Palmetto Harbour", nameS: "Coral Harbour", x: 0, za: 2050 },
-    { slug: "mill-town", nameN: "Mill Town", nameS: "Mill Town", x: 70 * hill, za: 1120 },
+    { slug: "harbour", nameN: "Palmetto Harbour", nameS: "Coral Harbour", x: harbourX, za: harbourZa },
+    {
+      slug: "mill-town",
+      nameN: "Mill Town",
+      nameS: "Canebrake",
+      x: island === "north" ? 70 * hill : -900,
+      za: island === "north" ? 1120 : 320,
+    },
     { slug: "west-quay", nameN: "West Quay", nameS: "West Quay", x: -1580, za: 1900 },
     { slug: "east-quay", nameN: "East Quay", nameS: "East Quay", x: 1580, za: 1900 },
     { slug: "west-farm", nameN: "West Farm Belt", nameS: "West Farm Belt", x: -2280, za: 280 },
@@ -148,9 +157,32 @@ export function buildDistricts(): District[] {
   return DISTRICTS;
 }
 
-/** Smallest containing ring wins where constituencies overlap. */
+/** Smallest containing ring wins where constituencies overlap.
+ *  16-ray cells leave hairline gaps — snap those land pixels to the nearest ring. */
 export function districtAt(x: number, z: number): District | undefined {
   const hits = DISTRICTS.filter((d) => pointInRing(x, z, d.ring));
-  if (!hits.length) return undefined;
-  return hits.reduce((a, b) => (ringArea(a.ring) <= ringArea(b.ring) ? a : b));
+  if (hits.length) return hits.reduce((a, b) => (ringArea(a.ring) <= ringArea(b.ring) ? a : b));
+  const n = ISLANDS.north;
+  const s = ISLANDS.south;
+  const spec = Math.hypot(x - n.cx, z - n.cz) <= Math.hypot(x - s.cx, z - s.cz) ? n : s;
+  if (heightAt(spec, x, z) < 0.4) return undefined;
+  let best: District | undefined;
+  let bestD = Infinity;
+  for (const d of DISTRICTS) {
+    if (d.island !== spec.id) continue;
+    let cx = 0;
+    let cz = 0;
+    for (const p of d.ring) {
+      cx += p[0];
+      cz += p[1];
+    }
+    cx /= d.ring.length;
+    cz /= d.ring.length;
+    const dist = Math.hypot(x - cx, z - cz);
+    if (dist < bestD) {
+      best = d;
+      bestD = dist;
+    }
+  }
+  return best;
 }

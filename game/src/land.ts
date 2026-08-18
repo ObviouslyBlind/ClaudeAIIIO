@@ -9,6 +9,8 @@ import { bboxOverlap, ringBBox, ringsOverlap } from "./kernel/plots.ts";
 import { seedDeposits, type MineralId } from "./kernel/minerals.ts";
 import { zoneForBand, zoneUnlocked, type ZoneId } from "./zones.ts";
 import type { Visitor } from "./sim.ts";
+import { distToHighway, SOUTH_HIGHWAY_NODES, SOUTH_PORT, SOUTH_VOLCANO } from "./southGeom.ts";
+import { buildSouthLand, southTaxiStops } from "./southLand.ts";
 
 export { BUILDING_CATALOG, DEVELOP_COST };
 export type { LandUseId };
@@ -64,6 +66,10 @@ export type Road = {
   joins?: { x: number; z: number };
   /** Street name, shown on the taxi map. */
   name?: string;
+  /** 4 = dual carriageway + stone median (South Island Hwy). */
+  lanes?: 2 | 4;
+  /** Visual ring only. Taxi / cars skip these. */
+  roundabout?: boolean;
 };
 
 export type LandBoard = {
@@ -96,8 +102,8 @@ export const ISLANDS: Record<IslandId, IslandSpec> = {
     rx: 4000,
     rz: 2200,
     peak: 110,
-    port: { x: 0, z: 6950 },
-    hill: { x: 900, z: 10200 },
+    port: { ...SOUTH_PORT },
+    hill: { ...SOUTH_VOLCANO },
   },
 };
 
@@ -119,6 +125,7 @@ function hash(n: number): number {
 }
 
 export function roadNodes(spec: IslandSpec): { x: number; z: number }[] {
+  if (spec.id === "south") return SOUTH_HIGHWAY_NODES.map((p) => ({ x: p.x, z: p.z }));
   const s = inlandSign(spec);
   const p = spec.port;
   return [
@@ -209,6 +216,7 @@ export function sideStreets(spec: IslandSpec): Road[] {
 export type TaxiStop = { id: string; name: string; x: number; z: number };
 
 export function taxiStops(spec: IslandSpec): TaxiStop[] {
+  if (spec.id === "south") return southTaxiStops();
   const stops: TaxiStop[] = [];
   const port = roadPoint(spec, 0.015);
   stops.push({ id: `${spec.id}-port`, name: `${spec.name} Port`, x: port.x, z: port.z });
@@ -341,6 +349,14 @@ export function standingOnParcel(
 }
 
 function publicQuay(spec: IslandSpec, x: number, z: number): boolean {
+  if (spec.id === "south") {
+    const along = (z - spec.port.z) * -1;
+    const across = Math.abs(x - spec.port.x);
+    const east = x - spec.port.x;
+    if (across < 36 && along > -18 && along < 16) return true;
+    if (east > 18 && east < 280 && along > -24 && along < 8) return true;
+    return false;
+  }
   const along = (z - spec.port.z) * (spec.id === "north" ? 1 : -1);
   const across = Math.abs(x - spec.port.x);
   return across < 22 && along > -18 && along < 16;
@@ -593,6 +609,7 @@ function shoreLots(spec: IslandSpec): Parcel[] {
 
 function seedNpcLots(plots: Parcel[]): void {
   for (const spec of Object.values(ISLANDS)) {
+    if (spec.id === "south") continue;
     const ranked = plots
       .filter((p) => p.island === spec.id && p.class === "by_right" && !p.owner)
       .map((p) => ({ p, d: Math.hypot(p.x - spec.port.x, p.z - spec.port.z) }))
@@ -615,6 +632,7 @@ const NPC_TOWN_MIN_PORT_M = 260;
 
 function seedNpcTown(plots: Parcel[]): void {
   for (const spec of Object.values(ISLANDS)) {
+    if (spec.id === "south") continue;
     const candidates = plots
       .filter(
         (p) =>
@@ -648,28 +666,31 @@ function seedNpcTown(plots: Parcel[]): void {
 }
 
 export function createLandBoard(): LandBoard {
-  const plots: Parcel[] = [];
-  const dirt: Road[] = [];
-  for (const spec of Object.values(ISLANDS)) {
-    const built = lotsAlongRoad(spec);
-    plots.push(...built.lots, ...shoreLots(spec));
-    dirt.push(...built.dirt);
-  }
+  const north = ISLANDS.north;
+  const south = ISLANDS.south;
+  const built = lotsAlongRoad(north);
+  const plots: Parcel[] = [...built.lots, ...shoreLots(north)];
+  const southBuilt = buildSouthLand(south, heightAt);
+  plots.push(...southBuilt.plots);
   seedNpcLots(plots);
   seedNpcTown(plots);
   seedDeposits(plots);
-  // Spine first per island: taxi and traffic treat roads[0] as the trunk.
-  const roads = Object.values(ISLANDS).flatMap((spec) => [
+  if (!plots.some((p) => p.deposit === "ore")) {
+    const field = plots.find((p) => p.island === "south" && p.band === "field") || plots.find((p) => p.band === "field");
+    if (field) field.deposit = "ore";
+  }
+  const roads: Road[] = [
     {
-      island: spec.id,
+      island: north.id,
       kind: "paved" as const,
-      nodes: roadNodes(spec),
-      points: pavedPolyline(spec),
+      nodes: roadNodes(north),
+      points: pavedPolyline(north),
       name: "Harbour Rd",
     },
-    ...sideStreets(spec),
-    ...dirt.filter((d) => d.island === spec.id),
-  ]);
+    ...sideStreets(north),
+    ...built.dirt,
+    ...southBuilt.roads,
+  ];
   return { plots, roads };
 }
 
@@ -774,7 +795,13 @@ export function heightAt(spec: IslandSpec, x: number, z: number): number {
   const toward = spec.id === "north" ? 1 : -1;
   const along = (z - spec.port.z) * toward;
   const across = Math.abs(x - spec.port.x);
-  if (across < 22 && along > -16 && along < 14) return 1.12;
+  if (spec.id === "south") {
+    const east = x - spec.port.x;
+    if (across < 36 && along > -18 && along < 16) return 1.18;
+    if (east > 18 && east < 280 && along > -24 && along < 8) return 1.16;
+  } else if (across < 22 && along > -16 && along < 14) {
+    return 1.12;
+  }
   // Harbour cove: the pier slot widens seaward and meets the open sea, so the
   // port reads as a coastal harbour, not a carved pond behind a beach spit.
   if (along >= 14) {
@@ -787,16 +814,39 @@ export function heightAt(spec: IslandSpec, x: number, z: number): number {
   const portD = Math.hypot(x - spec.port.x, z - spec.port.z);
   const hillD = Math.hypot(x - spec.hill.x, z - spec.hill.z);
   let h = (1 - t) * (1 - t) * spec.peak * 0.35;
-  h += spec.peak * 0.7 * Math.max(0, 1 - hillD / 900) ** 2;
+  if (spec.id === "south") {
+    if (hillD < 72) h = 0.08;
+    else {
+      const cone = Math.max(0, 1 - hillD / 780);
+      h += 210 * cone ** 1.55;
+      if (hillD < 125) h = Math.max(h, 92 + (125 - hillD) * 0.45);
+    }
+    const hw = distToHighway(x, z);
+    if (hw < 22) {
+      const u = hw / 22;
+      const grade = 1.35 + hw * 0.012;
+      h = h * u + grade * (1 - u);
+      h = Math.max(h, 1.2);
+    }
+  } else {
+    h += spec.peak * 0.7 * Math.max(0, 1 - hillD / 900) ** 2;
+  }
   if (portD < 160) {
     const flatten = 1.15 + portD * 0.002;
     h = Math.min(Math.max(h, 1.05), flatten);
   }
-  if (t > 0.8) {
-    const beach = (t - 0.8) / 0.2;
-    h = h * (1 - beach) + 0.35 * beach;
+  const beachStart = spec.id === "south" ? 0.68 : 0.8;
+  if (t > beachStart) {
+    const beach = (t - beachStart) / (1 - beachStart);
+    h = h * (1 - beach) + 0.32 * beach;
   }
   return h;
+}
+
+/** Metres from the port pad the body stands on. South looks east along Island Hwy. */
+export function spawnPad(spec: IslandSpec): { x: number; z: number } {
+  if (spec.id === "south") return { x: spec.port.x + 10, z: spec.port.z };
+  return { x: spec.port.x, z: spec.port.z - 8 };
 }
 
 export function landSnapshot(board: LandBoard, visitor: Visitor) {

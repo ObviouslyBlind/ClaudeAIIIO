@@ -193,7 +193,7 @@ export function createTraffic({ scene, getMap, specOf, heightAt }) {
     const map = getMap();
     if (!map) return [];
     return map.roads.filter(
-      (r) => r.kind === "paved" && r.island === islandId && r.points && r.points.length >= 2,
+      (r) => r.kind === "paved" && !r.roundabout && r.island === islandId && r.points && r.points.length >= 2,
     );
   }
 

@@ -8,6 +8,8 @@ export const DIRT_WIDTH_M = 2.6;
 export const ASPHALT = 0x141414;
 /** Packed earth — same kraft family as crates, not grey pavement. */
 export const DIRT = 0x8a6238;
+/** Same stone as house plinth / window sills — original palette, not a new hex. */
+export const STONE = 0x9a8a72;
 /** Dusty lift so field tracks do not crush to paved black under Lambert. */
 const DIRT_DUST = 0x9a6a40;
 
@@ -26,12 +28,12 @@ export const CAMERA_FAR_M = 52000;
  * look-at `z: +90`) dumped `/` into the unread basin cubes.
  */
 export function spawnCameraOffset(islandId) {
-  return islandId === "north" ? { x: 20, y: 24, z: 40 } : { x: 20, y: 24, z: -40 };
+  return islandId === "north" ? { x: 20, y: 24, z: 40 } : { x: -64, y: 24, z: 8 };
 }
 
-/** Metres from the player. Inland along the spine, not out to sea. */
+/** Metres from the player. North looks inland along Harbour Rd. South looks east along Island Hwy. */
 export function spawnLookAtOffset(islandId) {
-  return islandId === "north" ? { x: 0, y: 5, z: -120 } : { x: 0, y: 5, z: 120 };
+  return islandId === "north" ? { x: 0, y: 5, z: -120 } : { x: 160, y: 4, z: 4 };
 }
 
 /** Drop near-duplicates so the ribbon does not fold on itself. */
@@ -143,6 +145,66 @@ function drawPaved(scene, spec, road, heightAt) {
   drawRibbon(scene, spec, road, heightAt, PAVED_WIDTH_M, ASPHALT, "paved");
 }
 
+function offsetPolyline(points, dist) {
+  const out = [];
+  for (let i = 0; i < points.length; i++) {
+    let dx;
+    let dz;
+    if (i === 0) {
+      dx = points[1].x - points[0].x;
+      dz = points[1].z - points[0].z;
+    } else if (i === points.length - 1) {
+      dx = points[i].x - points[i - 1].x;
+      dz = points[i].z - points[i - 1].z;
+    } else {
+      dx = points[i + 1].x - points[i - 1].x;
+      dz = points[i + 1].z - points[i - 1].z;
+    }
+    const len = Math.hypot(dx, dz) || 1;
+    const rx = dz / len;
+    const rz = -dx / len;
+    out.push({ x: points[i].x + rx * dist, z: points[i].z + rz * dist });
+  }
+  return out;
+}
+
+/** 2+2 lanes, stone median. Each carriageway is still a 7.2 m ribbon. */
+function drawHighway(scene, spec, road, heightAt) {
+  const pts = ribbonStations(road.points);
+  if (pts.length < 2) return;
+  const lane = 4.8;
+  drawRibbon(scene, spec, { ...road, points: offsetPolyline(pts, -lane) }, heightAt, PAVED_WIDTH_M, ASPHALT, "paved");
+  drawRibbon(scene, spec, { ...road, points: offsetPolyline(pts, lane) }, heightAt, PAVED_WIDTH_M, ASPHALT, "paved");
+  drawRibbon(scene, spec, { ...road, name: (road.name || "Island Hwy") + " median" }, heightAt, 2.4, STONE, "median");
+}
+
+function drawRoundaboutIsland(scene, spec, road, heightAt) {
+  const pts = road.points || [];
+  if (pts.length < 8) return;
+  let x = 0;
+  let z = 0;
+  for (const p of pts) {
+    x += p.x;
+    z += p.z;
+  }
+  x /= pts.length;
+  z /= pts.length;
+  const y = heightAt(spec, x, z);
+  const disc = new THREE.Mesh(
+    new THREE.CylinderGeometry(12.4, 12.4, 0.28, 20),
+    new THREE.MeshLambertMaterial({ color: STONE }),
+  );
+  disc.position.set(x, y + 0.16, z);
+  disc.castShadow = false;
+  disc.receiveShadow = true;
+  disc.userData.kind = "road";
+  disc.userData.roadKind = "island";
+  disc.userData.island = road.island;
+  disc.userData.label = (road.name || "Roundabout") + " island";
+  disc.userData.mode = "PAPER";
+  scene.add(disc);
+}
+
 function drawDirt(scene, spec, road, heightAt) {
   drawRibbon(scene, spec, road, heightAt, DIRT_WIDTH_M, DIRT, "dirt", {
     emissive: DIRT_DUST,
@@ -150,8 +212,6 @@ function drawDirt(scene, spec, road, heightAt) {
   });
 }
 
-/** Same stone as house plinth / window sills — original palette, not a new hex. */
-const STONE = 0x9a8a72;
 /** Metres from paved centreline onto the grass lip. Past half-width, off the carriageway. */
 const CURB_SETBACK_M = PAVED_WIDTH_M / 2 + 0.28;
 /** A few stations on the north port stretch (street-props pack the first 280 m). */
@@ -266,8 +326,14 @@ export function makeRoads(map, helpers) {
   const { scene, specOf, heightAt } = helpers;
   for (const road of map.roads) {
     const spec = specOf(road.island);
-    if (road.kind === "paved") drawPaved(scene, spec, road, heightAt);
-    else drawDirt(scene, spec, road, heightAt);
+    if (road.kind === "paved" && road.lanes === 4) {
+      drawHighway(scene, spec, road, heightAt);
+    } else if (road.kind === "paved") {
+      drawPaved(scene, spec, road, heightAt);
+      if (road.roundabout) drawRoundaboutIsland(scene, spec, road, heightAt);
+    } else {
+      drawDirt(scene, spec, road, heightAt);
+    }
   }
   drawNorthPortCurbs(scene, map, specOf, heightAt);
 }

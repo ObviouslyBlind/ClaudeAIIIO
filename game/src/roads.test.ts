@@ -22,7 +22,7 @@ function lum(hex: number) {
 }
 
 type RoadMesh = {
-  userData: { roadKind?: string; widthM?: number };
+  userData: { roadKind?: string; widthM?: number; island?: string; roadName?: string };
   geometry: {
     parameters?: { width: number };
     attributes: { position: { count: number; getX: (i: number) => number; getZ: (i: number) => number } };
@@ -50,8 +50,9 @@ describe("paved street from spawn", () => {
     );
     const pavedRoads = map.roads.filter((r) => r.kind === "paved");
     const dirtRoads = map.roads.filter((r) => r.kind === "dirt");
+    const extraCarriages = pavedRoads.filter((r) => r.lanes === 4).length;
 
-    expect(paved.length).toBe(pavedRoads.length);
+    expect(paved.length).toBe(pavedRoads.length + extraCarriages);
     expect(extras.length).toBe(0);
     expect(dirt.length).toBe(dirtRoads.length);
     expect(dirt.length).toBeGreaterThan(4);
@@ -125,13 +126,14 @@ describe("paved street from spawn", () => {
 
     const paved = added.filter((m) => m.userData.roadKind === "paved");
     const pavedRoads = map.roads.filter((r) => r.kind === "paved");
-    expect(paved.length).toBe(pavedRoads.length);
-    // One spine plus its side streets, per island. Still one mesh per road.
+    const northRoads = pavedRoads.filter((r) => r.island === "north");
+    const northMeshes = paved.filter((m) => m.userData.island === "north");
+    expect(northMeshes.length).toBe(northRoads.length);
     expect(paved.length).toBeGreaterThanOrEqual(4);
 
-    for (let i = 0; i < paved.length; i++) {
-      const mesh = paved[i];
-      const pts = pavedRoads[i].points;
+    for (let i = 0; i < northRoads.length; i++) {
+      const mesh = northMeshes[i];
+      const pts = northRoads[i].points;
       const pos = mesh.geometry.attributes.position;
       expect(pos.count).toBeGreaterThan(8);
       expect(mesh.geometry.index?.count ?? 0).toBeGreaterThan(24);
@@ -160,6 +162,13 @@ describe("paved street from spawn", () => {
       expect(startDist).toBeLessThan(PAVED_WIDTH_M);
       expect(endDist).toBeLessThan(PAVED_WIDTH_M);
     }
+
+    const hwy = pavedRoads.find((r) => r.lanes === 4);
+    expect(hwy).toBeTruthy();
+    const hwyMeshes = paved.filter((m) => m.userData.roadName === "Island Hwy");
+    expect(hwyMeshes.length).toBe(2);
+    expect(added.some((m) => m.userData.roadKind === "median")).toBe(true);
+    expect(added.some((m) => m.userData.roadKind === "island")).toBe(true);
   });
 
   it("places the spawn camera on the quay looking inland along the tarmac", () => {
@@ -173,9 +182,9 @@ describe("paved street from spawn", () => {
     expect(s.y).toBe(n.y);
     expect(Math.abs(n.x)).toBeLessThan(40);
     expect(n.z).toBeGreaterThan(0);
-    expect(s.z).toBeLessThan(0);
+    expect(s.x).toBeLessThan(0);
+    expect(sl.x).toBeGreaterThan(40);
     expect(nl.z).toBeLessThan(-40);
-    expect(sl.z).toBeGreaterThan(40);
 
     const farM = ISLANDS.south.port.z - ISLANDS.north.port.z;
     const fogged = (farM - FOG_NEAR_M) / (FOG_FAR_M - FOG_NEAR_M);
@@ -188,10 +197,9 @@ describe("paved street from spawn", () => {
       const spec = ISLANDS[id];
       const o = spawnCameraOffset(id);
       const l = spawnLookAtOffset(id);
-      const px = spec.port.x;
-      const pz = spec.port.z + (id === "north" ? -8 : 8);
+      const px = spec.port.x + (id === "south" ? 10 : 0);
+      const pz = spec.port.z + (id === "north" ? -8 : 0);
       const py = heightAt(spec, px, pz) + 1.15;
-      const inland = id === "north" ? -1 : 1;
       const cam = new THREE.PerspectiveCamera(55, 16 / 9, 0.4, CAMERA_FAR_M);
       cam.position.set(px + o.x, py + o.y, pz + o.z);
       cam.lookAt(px + l.x, py + l.y, pz + l.z);
@@ -201,7 +209,8 @@ describe("paved street from spawn", () => {
       const inFrame = (v: THREE.Vector3) => Math.abs(v.x) < 0.95 && Math.abs(v.y) < 0.95 && v.z < 1;
 
       const player = ndc(px, py, pz);
-      const spine = ndc(px, py + 2, pz + inland * 80);
+      const spine =
+        id === "north" ? ndc(px, py + 2, pz - 80) : ndc(px + 80, py + 2, pz);
       expect(inFrame(player)).toBe(true);
       expect(inFrame(spine)).toBe(true);
     }

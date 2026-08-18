@@ -32,6 +32,7 @@ function roadMid(road: Road): { x: number; z: number } {
 }
 
 export function roadTrafficBand(road: Road): TrafficBand {
+  if (road.kind === "dirt") return road.name ? "yellow" : "red";
   if (road.kind !== "paved") return "red";
   const spec = ISLANDS[road.island as IslandId];
   if (!spec) return "red";
@@ -46,7 +47,9 @@ export function roadTrafficBand(road: Road): TrafficBand {
 export function plotTrafficBand(board: LandBoard, plot: Parcel): TrafficBand {
   let best: { dist: number; band: TrafficBand } | null = null;
   for (const road of board.roads) {
-    if (road.island !== plot.island || road.kind !== "paved" || road.points.length < 2) continue;
+    if (road.island !== plot.island || road.points.length < 2) continue;
+    if (road.kind !== "paved" && !(road.kind === "dirt" && road.name)) continue;
+    if (road.roundabout) continue;
     for (const p of road.points) {
       const dist = Math.hypot(p.x - plot.x, p.z - plot.z);
       if (!best || dist < best.dist) best = { dist, band: roadTrafficBand(road) };
@@ -61,7 +64,7 @@ export function footTrafficSnapshot(board: LandBoard) {
     provenance: "SIMULATED" as const,
     note: TRAFFIC_NOTE,
     roads: board.roads
-      .filter((r) => r.kind === "paved" && r.points.length >= 2)
+      .filter((r) => r.points.length >= 2 && (r.kind === "paved" || (r.kind === "dirt" && r.name)))
       .map((r) => ({
         island: r.island,
         name: r.name || (r.joins ? "Side street" : "Harbour Rd"),

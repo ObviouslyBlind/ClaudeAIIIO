@@ -195,7 +195,35 @@ function specOf(id) {
   return map.islands[id];
 }
 
-/** Keep in sync with game/src/land.ts heightAt */
+/** Keep in sync with game/src/land.ts heightAt and game/src/southGeom.ts */
+const SOUTH_HIGHWAY_NODES = [
+  { x: -2280, z: 7280 },
+  { x: -2080, z: 7440 },
+  { x: -1520, z: 7560 },
+  { x: -980, z: 7680 },
+  { x: -240, z: 7840 },
+  { x: 480, z: 7960 },
+  { x: 1320, z: 7860 },
+  { x: 1920, z: 7780 },
+  { x: 2480, z: 7980 },
+  { x: 2920, z: 7860 },
+];
+
+function distToSouthHighway(x, z) {
+  let best = Infinity;
+  for (let i = 0; i < SOUTH_HIGHWAY_NODES.length - 1; i++) {
+    const a = SOUTH_HIGHWAY_NODES[i];
+    const b = SOUTH_HIGHWAY_NODES[i + 1];
+    const vx = b.x - a.x;
+    const vz = b.z - a.z;
+    const len2 = vx * vx + vz * vz || 1;
+    let t = ((x - a.x) * vx + (z - a.z) * vz) / len2;
+    t = Math.max(0, Math.min(1, t));
+    best = Math.min(best, Math.hypot(x - (a.x + vx * t), z - (a.z + vz * t)));
+  }
+  return best;
+}
+
 function heightAt(spec, x, z) {
   const dx = (x - spec.cx) / spec.rx;
   const dz = (z - spec.cz) / spec.rz;
@@ -205,9 +233,13 @@ function heightAt(spec, x, z) {
   const toward = spec.id === "north" ? 1 : -1;
   const along = (z - spec.port.z) * toward;
   const across = Math.abs(x - spec.port.x);
-  // Apron only. A 90 m seaward pad put the timber pier on sand.
-  if (across < 22 && along > -16 && along < 14) return 1.12;
-  // Harbour cove: pier slot widens seaward into the open sea (see land.ts).
+  if (spec.id === "south") {
+    const east = x - spec.port.x;
+    if (across < 36 && along > -18 && along < 16) return 1.18;
+    if (east > 18 && east < 280 && along > -24 && along < 8) return 1.16;
+  } else if (across < 22 && along > -16 && along < 14) {
+    return 1.12;
+  }
   if (along >= 14) {
     const reach = along - 14;
     const mouth = 8 + reach * 0.55;
@@ -218,14 +250,31 @@ function heightAt(spec, x, z) {
   const portD = Math.hypot(x - spec.port.x, z - spec.port.z);
   const hillD = Math.hypot(x - spec.hill.x, z - spec.hill.z);
   let h = (1 - t) * (1 - t) * spec.peak * 0.35;
-  h += spec.peak * 0.7 * Math.max(0, 1 - hillD / 900) ** 2;
+  if (spec.id === "south") {
+    if (hillD < 72) h = 0.08;
+    else {
+      const cone = Math.max(0, 1 - hillD / 780);
+      h += 210 * cone ** 1.55;
+      if (hillD < 125) h = Math.max(h, 92 + (125 - hillD) * 0.45);
+    }
+    const hw = distToSouthHighway(x, z);
+    if (hw < 22) {
+      const u = hw / 22;
+      const grade = 1.35 + hw * 0.012;
+      h = h * u + grade * (1 - u);
+      h = Math.max(h, 1.2);
+    }
+  } else {
+    h += spec.peak * 0.7 * Math.max(0, 1 - hillD / 900) ** 2;
+  }
   if (portD < 160) {
     const flatten = 1.15 + portD * 0.002;
     h = Math.min(Math.max(h, 1.05), flatten);
   }
-  if (t > 0.8) {
-    const beach = (t - 0.8) / 0.2;
-    h = h * (1 - beach) + 0.35 * beach;
+  const beachStart = spec.id === "south" ? 0.68 : 0.8;
+  if (t > beachStart) {
+    const beach = (t - beachStart) / (1 - beachStart);
+    h = h * (1 - beach) + 0.32 * beach;
   }
   return h;
 }
@@ -718,7 +767,53 @@ function worldAdd(obj) {
   else scene.add(obj);
 }
 
+const QUAY_STONE = 0x9a8a72;
+const QUAY_DARK = 0x7a6e5a;
+const QUAY_CAP = 0xb0a48c;
+
+/** Stone L-quay wrapping east into sand. No shed, no timber pier. */
+function makeSouthQuay(spec) {
+  const { x, z } = spec.port;
+  const y = heightAt(spec, x, z);
+  const toward = -1;
+  const deck = box(54, 0.55, 14, QUAY_STONE, x + 8, y + 0.28, z + 2);
+  deck.userData.kind = "port";
+  ports.push(deck);
+  const face = box(54, 1.4, 1.1, QUAY_DARK, x + 8, y - 0.2, z + toward * 6.4, false);
+  face.userData.kind = "port";
+  const wrap1 = box(36, 0.5, 12, QUAY_STONE, x + 48, y + 0.26, z + 6);
+  wrap1.userData.kind = "port";
+  ports.push(wrap1);
+  const wrap2 = box(28, 0.42, 10, QUAY_CAP, x + 88, y + 0.22, z + 10);
+  wrap2.userData.kind = "port";
+  ports.push(wrap2);
+  const wrap3 = box(22, 0.32, 8, QUAY_CAP, x + 124, y + 0.18, z + 14, false);
+  wrap3.userData.kind = "port";
+  const finger = box(6.4, 0.45, 16, QUAY_STONE, x, y + 0.22, z + toward * 18);
+  finger.userData.kind = "port";
+  ports.push(finger);
+  for (let i = 0; i < 5; i++) {
+    const pz = z + toward * (12 + i * 3.2);
+    box(0.4, 2.2, 0.4, QUAY_DARK, x - 2.8, y - 0.6, pz, false);
+    box(0.4, 2.2, 0.4, QUAY_DARK, x + 2.8, y - 0.6, pz, false);
+  }
+  for (let i = 0; i < 8; i++) {
+    const bx = x - 16 + i * 7.2;
+    const bollard = box(0.42, 0.7, 0.42, QUAY_DARK, bx, y + 0.72, z + toward * 5.2, false);
+    bollard.userData.kind = "port";
+    box(0.55, 0.12, 0.55, 0x3d2a1c, bx, y + 1.1, z + toward * 5.2, false);
+  }
+  for (let i = 0; i < 5; i++) {
+    const bx = x + 40 + i * 8;
+    box(0.38, 0.62, 0.38, QUAY_DARK, bx, y + 0.62, z + 1.5, false);
+  }
+}
+
 function makePort(spec) {
+  if (spec.id === "south") {
+    makeSouthQuay(spec);
+    return;
+  }
   const toward = spec.id === "north" ? 1 : -1;
   const { x, z } = spec.port;
   const y = heightAt(spec, x, z);
@@ -784,11 +879,17 @@ function makePalms(spec) {
   for (let i = 0; i < 8; i++) {
     const t = 0.12 + i * 0.08;
     const side = i % 2 ? 1 : -1;
-    const x = spec.port.x + side * (16 + (i % 3) * 3);
-    const z = spec.port.z + (spec.id === "north" ? -1 : 1) * (40 + i * 28);
+    let x;
+    let z;
+    if (spec.id === "south") {
+      x = spec.port.x + 40 + i * 22;
+      z = spec.port.z + 18 + side * 8;
+    } else {
+      x = spec.port.x + side * (16 + (i % 3) * 3);
+      z = spec.port.z + (spec.id === "north" ? -1 : 1) * (40 + i * 28);
+    }
     const y = heightAt(spec, x, z);
     if (y < 0.4) continue;
-    // Verge trees only. A palm through a leased house reads as a glitch.
     if (map && map.plots.some((p) => pointInRing(x, z, p.ring))) continue;
     palmAt(x, z, y, side * 0.1);
   }
@@ -966,8 +1067,8 @@ function spawnAt(id) {
   void ensureIsland(id);
   islandId = id;
   const spec = specOf(id);
-  const x = spec.port.x;
-  const z = spec.port.z + (id === "north" ? -8 : 8);
+  const x = spec.port.x + (id === "south" ? 10 : 0);
+  const z = spec.port.z + (id === "north" ? -8 : 0);
   player.position.set(x, heightAt(spec, x, z) + 1.15, z);
   walking = false;
   if (walkPath) walkPath.hide();

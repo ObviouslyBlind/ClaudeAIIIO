@@ -46,6 +46,7 @@ export function fillColorFor(plot, selectedId) {
 
 /** Vacant land shows its PAPER price. Your land says so. NPC land stays quiet. */
 export function labelTextFor(plot) {
+  if (plot.class === "reserved") return null;
   if (plot.owner === "visitor") return "YOURS";
   if (plot.owner) return null;
   return "$" + Number(plot.price).toLocaleString("en-US", { maximumFractionDigits: 0 });
