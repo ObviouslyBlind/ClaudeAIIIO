@@ -143,12 +143,12 @@ describe("South land (no buildings)", () => {
     const channel = board.roads.find((r) => r.name === "Channel Sands")!;
     const palm = board.roads.find((r) => r.name === "Palm Arc")!;
     const strand = board.roads.find((r) => r.name === "South Strand")!;
-    const quay = board.roads.find((r) => r.name === "Quayward Rd")!;
     expect(Math.hypot(channel.points[0]!.x - harbour.x, channel.points[0]!.z - harbour.z)).toBeGreaterThan(80);
     expect(Math.hypot(palm.points[0]!.x - harbour.x, palm.points[0]!.z - harbour.z)).toBeGreaterThan(80);
     expect(Math.hypot(strand.points[0]!.x - harbour.x, strand.points[0]!.z - harbour.z)).toBeGreaterThan(40);
     expect(Math.min(...hwys.map((h) => distToPolyline(h.points, channel.points[0]!.x, channel.points[0]!.z)))).toBeLessThan(22);
-    expect(distToPolyline(quay.points, strand.points[0]!.x, strand.points[0]!.z)).toBeLessThan(12);
+    const loop = board.roads.filter((r) => r.name === "Quayward Loop");
+    expect(Math.min(...loop.map((r) => distToPolyline(r.points, strand.points[0]!.x, strand.points[0]!.z)))).toBeLessThan(1);
     expect(distToPolyline(strand.points, palm.points[0]!.x, palm.points[0]!.z)).toBeLessThan(12);
     expect(board.roads.filter((r) => r.island === "south" && r.kind === "dirt" && /Path$/.test(r.name || "")).length).toBe(0);
   });

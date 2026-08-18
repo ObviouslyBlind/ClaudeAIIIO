@@ -560,17 +560,7 @@ function buildSouthGraph(): RoadGraph {
 
   // Harbour Circus keeps three exits: the two highway spans and Quayward Rd.
   const nQuayward = g.node("s-quayward", quayward.x, quayward.z - 58, "junction");
-  const quaywardPath = linePoints({ x: harbour.x, z: harbour.z }, { x: quayward.x, z: quayward.z - 58 }, 6);
-  const quaywardRun = runWithJunctions(
-    g,
-    "Quayward Rd",
-    "avenue",
-    nHarbour,
-    nQuayward,
-    quaywardPath,
-    [0.55],
-    "s-quayward-rd",
-  );
+  g.edge({ name: "Quayward Rd", cls: "avenue", from: nHarbour, to: nQuayward });
 
   // A block of streets round the green, not a hash of ribbons through it.
   const hx = 74;
@@ -587,8 +577,10 @@ function buildSouthGraph(): RoadGraph {
   g.edge({ name: "Quayward Loop", cls: "street", from: corners[2]!, to: corners[3]! });
   g.edge({ name: "Quayward Loop", cls: "street", from: corners[3]!, to: corners[0]! });
 
-  // South Strand leaves Quayward Rd at a real T and runs the coast to Saltwind.
-  const strandStart = quaywardRun.nodes[0] ?? nQuayward;
+  // South Strand T-joins the block at the SW corner. Starting it mid-Quayward Rd
+  // used to cut the west side of the Loop with no shared node — two ribbons
+  // through each other, which is what "roads going through roads" was.
+  const strandStart = corners[3]!;
   const nSaltwind = g.node("s-saltwind", saltwind.x, saltwind.z, "junction");
   const strandPath = sampleSpline(
     [

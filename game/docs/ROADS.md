@@ -39,6 +39,8 @@ Each step is big enough to see from 30 m up.
 - Every paved edge gets a **grit shoulder** 2.2 m wider than its tarmac, so a road has a rim instead of a cut edge on bare sand.
 - Every junction node gets a **tarmac pad** sized to its widest arm. That covers the mitre seams — a T reads as a T.
 - Circuses are an asphalt annulus reaching the node's kerb radius, plus a stone island.
+- Highway ribbons run **to the kerb**. The graph already stops there; do not omit the last stations near a circus (that leftover from the old through-island spline left sand between the dual carriageway and the ring).
+- Each circus arm gets a short tarmac disc at the kerb so the dual ribbons (offset off the centreline) actually read as meeting the ring.
 
 ## Routing
 
@@ -52,4 +54,4 @@ A track that wanders back within 7 m of tarmac is dropped at build time.
 cd game && npm test
 ```
 
-`src/roadGraph.test.ts` holds the invariants: endpoints land on nodes, every paved node is reachable from the quay, the hierarchy exists, and a route to every town stays on tarmac and off dirt.
+`src/roadGraph.test.ts` holds the invariants: endpoints land on nodes, every paved node is reachable from the quay, the hierarchy exists, a route to every town stays on tarmac and off dirt, and paved centrelines never cross unless they share a node.

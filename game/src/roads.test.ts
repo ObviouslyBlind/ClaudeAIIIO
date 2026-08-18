@@ -12,7 +12,6 @@ import {
   LOCAL_WIDTH_M,
   HIGHWAY_LANE_OFFSET_M,
   HIGHWAY_MEDIAN_M,
-  HIGHWAY_RAB_OMIT_M,
   HIGHWAY_RAB_SKIP_M,
   makeRoads,
   spawnCameraOffset,
@@ -256,21 +255,29 @@ describe("paved street from spawn", () => {
       expect(LOCAL_WIDTH_M).toBeLessThan(PAVED_WIDTH_M);
     }
 
-    expect(HIGHWAY_RAB_SKIP_M).toBeLessThan(HIGHWAY_RAB_OMIT_M * 2);
+    expect(HIGHWAY_RAB_SKIP_M).toBeGreaterThan(30);
+    expect(HIGHWAY_RAB_SKIP_M).toBeLessThan(80);
     expect(HIGHWAY_MEDIAN_M).toBeGreaterThan(5);
     expect(HIGHWAY_LANE_OFFSET_M).toBeGreaterThan(PAVED_WIDTH_M / 2);
     const harbour = SOUTH_RAB.harbour;
+    let nearestHwy = Infinity;
     for (const mesh of hwyMeshes) {
       const pos = mesh.geometry.attributes.position;
       for (let i = 0; i < pos.count; i++) {
         const d = Math.hypot(pos.getX(i) - harbour.x, pos.getZ(i) - harbour.z);
         expect(d).toBeGreaterThan(20);
+        nearestHwy = Math.min(nearestHwy, d);
       }
     }
+    // Graph ends on the kerb (~34 m). Drawing must actually reach it — not
+    // omit the last stations and leave sand between the dual ribbons and the ring.
+    expect(nearestHwy).toBeLessThan(38);
     const circus = added.find((m) => m.userData.roadName === "Harbour Circus");
     expect(circus).toBeTruthy();
     expect(circus!.geometry.parameters).toBeTruthy();
     expect(circus!.geometry.parameters!.innerRadius).toBeGreaterThan(10);
+    const circusArms = added.filter((m) => m.userData.roadName === "Harbour Circus arm");
+    expect(circusArms.length).toBeGreaterThanOrEqual(3);
   });
 
   it("places the spawn camera on the quay looking inland along the tarmac", () => {
