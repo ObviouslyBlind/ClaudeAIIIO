@@ -1,15 +1,12 @@
 # Gauntlet status
 
-Piece in play: **South land — grade, quay, sidewalks, lots, taxi wait**.
+Piece in play: **South roads — hierarchy and clean T-junctions**.
 
 Bar: live `http://localhost:8787/`
-- West quay is a tall seawall parapet (critic: visible height, bollards)
-- Harbour / highway grade is flat underfoot
-- Sidewalks on ordinary streets (hard to read from far camera)
-- Roundabouts: spurs meet the ring
-- Lots on both sides + hamlets + dirt fields (turn **Lots** chip on)
-- Taxi hail: 5–30 s, bottom-right `Taxi in 0:12`, then the cab comes (critic: PASS)
-
-Critic round 2: **PASS** (taxi chip + quay height). Remaining gap: sidewalks and two-sided lots are easier to miss unless you stay near the port and turn Lots on.
+- Island Hwy reads as 2+2 with a median (not the same strip as a side street)
+- Forks and hamlets are **T-stubs** that stop at the kerb — ribbons do not stack through each other
+- Quayward is a block loop, not a hash
+- Locals are narrower; sidewalks stay on arterials
+- Taxi chip and seawall from last pass stay
 
 Politics frozen. Operator is the brake. Do not merge unless asked.

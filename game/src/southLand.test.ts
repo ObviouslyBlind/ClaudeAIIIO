@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createLandBoard, heightAt, ISLANDS } from "./land.ts";
-import { SOUTH_PORT, SOUTH_TOWNS, SOUTH_VOLCANO, volcanoDist } from "./southGeom.ts";
+import { SOUTH_PORT, SOUTH_TOWNS, SOUTH_VOLCANO, volcanoDist, distToPolyline } from "./southGeom.ts";
 import { canWalk } from "./walk.ts";
 
 describe("South land (no buildings)", () => {
@@ -94,5 +94,20 @@ describe("South land (no buildings)", () => {
     const fields = south.filter((p) => p.band === "field");
     expect(fields.length).toBeGreaterThan(20);
     expect(fields.some((p) => p.area > 2000)).toBe(true);
+  });
+
+  it("keeps a road hierarchy: dual highway, T-forks that meet the kerb, not stacked ribbons", () => {
+    const board = createLandBoard();
+    expect(board.roads.some((r) => r.name === "Haven Chord")).toBe(false);
+    expect(board.roads.some((r) => r.name === "Quayward Loop")).toBe(true);
+    const mill = board.roads.find((r) => r.name === "Mill Fork")!;
+    const cane = board.roads.find((r) => r.name === "Canebrake Rd")!;
+    const town = SOUTH_TOWNS.find((t) => t.id === "canebrake")!;
+    expect(mill).toBeTruthy();
+    expect(Math.hypot(mill.points[0]!.x - town.x, mill.points[0]!.z - town.z)).toBeGreaterThan(20);
+    expect(distToPolyline(cane.points, mill.points[0]!.x, mill.points[0]!.z)).toBeGreaterThan(5);
+    const row = board.roads.find((r) => r.island === "south" && r.name?.includes("Cane Row"));
+    expect(row).toBeTruthy();
+    expect(distToPolyline(cane.points, row!.points[0]!.x, row!.points[0]!.z)).toBeGreaterThan(5);
   });
 });

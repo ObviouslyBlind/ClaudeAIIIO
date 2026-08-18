@@ -9,6 +9,7 @@ import {
   FOG_FAR_M,
   FOG_NEAR_M,
   PAVED_WIDTH_M,
+  LOCAL_WIDTH_M,
   makeRoads,
   spawnCameraOffset,
   spawnLookAtOffset,
@@ -172,6 +173,12 @@ describe("paved street from spawn", () => {
     expect(hwyMeshes.length).toBe(2);
     expect(added.some((m) => m.userData.roadKind === "median")).toBe(true);
     expect(added.some((m) => m.userData.roadKind === "island")).toBe(true);
+
+    const rowMesh = paved.find((m) => String(m.userData.roadName || "").includes("Row"));
+    if (rowMesh) {
+      expect(ribbonWidthM(rowMesh)).toBeCloseTo(LOCAL_WIDTH_M, 1);
+      expect(LOCAL_WIDTH_M).toBeLessThan(PAVED_WIDTH_M);
+    }
   });
 
   it("places the spawn camera on the quay looking inland along the tarmac", () => {
