@@ -520,7 +520,7 @@ async function takeCrate(deliveryId) {
   }
   hideCrateCard();
   if (chromeHud) chromeHud.refresh();
-  setStatus("In your inventory. Open Inv → Place in world. PAPER.");
+  setStatus("In your inventory. Open Inv → Place in world.");
 }
 
 function objectWithStand(obj) {
@@ -549,23 +549,14 @@ function openStandMenu(standId) {
       chromeHud.hideStandMenu();
       setStatus(
         res.ok
-          ? "Hotdogs in the cart. PAPER · SIMULATED."
-          : "Could not stock: " + (data.reason || "fail") + " · PAPER",
+          ? "Stock in the cart."
+          : "Could not stock: " + (data.reason || "fail"),
       );
     },
     async () => {
       chromeHud.hideStandMenu();
       if (chromeHud.open) chromeHud.open("employees");
-      setStatus("Staff: pick who works this cart. PAPER.");
-    },
-    async () => {
-      await fetch("/api/stand/attend", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ standId }),
-      });
-      chromeHud.refresh();
-      setStatus("You're running the cart. Stay nearby. PAPER.");
+      setStatus("Staff: pick who works this cart.");
     },
   );
 }

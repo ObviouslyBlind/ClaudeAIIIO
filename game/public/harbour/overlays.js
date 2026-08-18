@@ -15,7 +15,7 @@ export const VIEWERS = {
   world: {
     id: "world",
     label: "World",
-    hint: "Walk. Land does not steal taps. PAPER.",
+    hint: "Walk. Land does not steal taps.",
   },
   lots: {
     id: "lots",
@@ -25,17 +25,17 @@ export const VIEWERS = {
   foot: {
     id: "foot",
     label: "Foot traffic",
-    hint: "Foot traffic: High / Moderate / Low on each named road. PAPER.",
+    hint: "Foot traffic: High / Moderate / Low on each named road.",
   },
   logistics: {
     id: "logistics",
     label: "Logistics",
-    hint: "Tap the roadside crate. Vans drop on the kerb. PAPER.",
+    hint: "Tap the roadside crate. Vans drop on the kerb.",
   },
   minerals: {
     id: "minerals",
     label: "Minerals",
-    hint: "Minerals: ore catalog is in. Overlay paint comes next. PAPER.",
+    hint: "Minerals: ore catalog is in. Overlay paint comes next.",
   },
 };
 
