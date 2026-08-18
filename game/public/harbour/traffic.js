@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { HIGHWAY_LANE_OFFSET_M } from "./roads.js";
 
 const CAR_COUNT = 6;
 const SPEED = 9;
@@ -207,9 +208,10 @@ export function createTraffic({ scene, getMap, specOf, heightAt }) {
     if (!road) return;
     const p = pointAlongPolyline(road.points, car.along);
     const spec = specOf(car.islandId);
-    // Lane: right-hand offset relative to travel direction.
-    const rx = Math.cos(p.yaw) * LANE_OFFSET_M * car.dir;
-    const rz = -Math.sin(p.yaw) * LANE_OFFSET_M * car.dir;
+    // Dual carriageway uses the black lane offset, not the 1.7 m median strip.
+    const off = road.lanes === 4 ? HIGHWAY_LANE_OFFSET_M : LANE_OFFSET_M;
+    const rx = Math.cos(p.yaw) * off * car.dir;
+    const rz = -Math.sin(p.yaw) * off * car.dir;
     const x = p.x + rx;
     const z = p.z + rz;
     const y = heightAt(spec, x, z);
