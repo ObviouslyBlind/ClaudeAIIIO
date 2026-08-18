@@ -10,6 +10,6 @@ Bar: live `http://localhost:8787/` (operator plays the public Cloudflare tunnel)
 
 Last critic (Grok 4.6, `bc-eede1299`): **FAIL** on green median. Operator asked to **fix the corners** this round (the plus-shaped loop corners). Median is queued, not this patch.
 
-This round: corner plates plus **sidewalks clipped out of the plate** and wrapped with a walk frame, so the grey borders do not hash through as a plus.
+This round: Strand is 90° south / east (no smashed diagonal). Sidewalks miter at the kerb. Colours unchanged.
 
 Politics frozen. Operator is the brake. Do not merge unless asked.

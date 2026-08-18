@@ -89,6 +89,39 @@ export function distToPolyline(pts: XZ[], x: number, z: number): number {
   return best;
 }
 
+/** Turns allowed at a paved join. Everything else looks like a smashed diagonal. */
+export const ROAD_TURN_DEG = [15, 30, 45, 90] as const;
+
+export function dirFromTo(a: XZ, b: XZ): XZ {
+  const dx = b.x - a.x;
+  const dz = b.z - a.z;
+  const len = Math.hypot(dx, dz) || 1;
+  return { x: dx / len, z: dz / len };
+}
+
+export function headingAlong(from: XZ, dir: XZ, m: number): XZ {
+  return { x: from.x + dir.x * m, z: from.z + dir.z * m };
+}
+
+/** Snap `want` to from ± 15/30/45/90°. */
+export function snapTurn(from: XZ, want: XZ): XZ {
+  const base = Math.atan2(from.x, from.z);
+  const wantA = Math.atan2(want.x, want.z);
+  let bestA = wantA;
+  let best = Infinity;
+  for (const sign of [-1, 1] as const) {
+    for (const deg of ROAD_TURN_DEG) {
+      const a = base + (sign * deg * Math.PI) / 180;
+      const d = Math.abs(Math.atan2(Math.sin(wantA - a), Math.cos(wantA - a)));
+      if (d < best) {
+        best = d;
+        bestA = a;
+      }
+    }
+  }
+  return { x: Math.sin(bestA), z: Math.cos(bestA) };
+}
+
 let _hwySpline: XZ[] | null = null;
 export function southHighwaySpline(): XZ[] {
   if (!_hwySpline) _hwySpline = sampleSpline(SOUTH_HIGHWAY_NODES, 8);

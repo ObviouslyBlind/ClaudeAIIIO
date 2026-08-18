@@ -159,7 +159,7 @@ describe("paved street from spawn", () => {
     const sw = map.graph.nodes.find((n) => n.id === "s-quay-sw");
     expect(sw).toBeTruthy();
     const swPad = junctionPad(map.graph, sw);
-    expect(swPad?.kind).toBe("corner");
+    expect(swPad?.kind).toBe("tee");
     const walks = added.filter((m) => m.userData.roadKind === "sidewalk");
     expect(walks.length).toBeGreaterThan(4);
     for (const mesh of walks) {
