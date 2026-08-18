@@ -11,6 +11,7 @@ Spawn: South port. Cash is $.
 
 ## UI
 - Corners stay: cash top-left, viewers top-right, Inv/Wh/Mkt/Staff on the left, travel dock at the bottom
+- Chrome look: dusk-ferry brass plates, destination-board wordmark, compact submenus (not a giant ledger)
 - Click a launcher → **one compact submenu** next to it. Back drills in (Market → aisle → buy). Click again to close.
 - Cart sticker: type a price. Next to it: **$5.00 is today's price**
 - Market default: **Store in warehouse**. Or **Deliver to me**
