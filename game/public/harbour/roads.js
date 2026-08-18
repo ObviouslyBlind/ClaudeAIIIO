@@ -29,16 +29,16 @@ export const CAMERA_FAR_M = 52000;
  * Spawn camera, metres from the player.
  *
  * Playtest view: camera sits on the quay (slightly seaward of the visitor)
- * and looks INLAND along the tarmac. Seaward critic framing (`z: -40` /
- * look-at `z: +90`) dumped `/` into the unread basin cubes.
+ * and looks INLAND along the tarmac. South is offset north of Island Hwy
+ * so the dual carriageway reads; it still looks toward Harbour Circus.
  */
 export function spawnCameraOffset(islandId) {
-  return islandId === "north" ? { x: 20, y: 24, z: 40 } : { x: -64, y: 24, z: 8 };
+  return islandId === "north" ? { x: 20, y: 24, z: 40 } : { x: -40, y: 32, z: -55 };
 }
 
 /** Metres from the player. North looks inland along Harbour Rd. South looks east along Island Hwy. */
 export function spawnLookAtOffset(islandId) {
-  return islandId === "north" ? { x: 0, y: 5, z: -120 } : { x: 160, y: 4, z: 4 };
+  return islandId === "north" ? { x: 0, y: 5, z: -120 } : { x: 200, y: 2, z: 80 };
 }
 
 /** Drop near-duplicates so the ribbon does not fold on itself. */

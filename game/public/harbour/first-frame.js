@@ -14,9 +14,9 @@ export const BERTH_Z = -6835;
 export const FOG_NEAR_M = 6000;
 export const FOG_FAR_M = 42000;
 export const CAMERA_FAR_M = 52000;
-/** South quay camera, looking inland along Island Hwy (+X). */
-export const CAM = { x: -2334, y: 26, z: 7288 };
-export const LOOK = { x: -2110, y: 6, z: 7284 };
+/** South quay camera, offset north of Island Hwy so 2+2 reads; look toward Harbour Circus. */
+export const CAM = { x: -2310, y: 34, z: 7225 };
+export const LOOK = { x: -2070, y: 4, z: 7360 };
 
 export function paintFirstFrame(canvas) {
   if (!canvas) throw new Error("no canvas");
