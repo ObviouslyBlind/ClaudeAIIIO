@@ -10,6 +10,8 @@ import {
   FOG_NEAR_M,
   PAVED_WIDTH_M,
   LOCAL_WIDTH_M,
+  HIGHWAY_LANE_OFFSET_M,
+  HIGHWAY_MEDIAN_M,
   HIGHWAY_RAB_OMIT_M,
   HIGHWAY_RAB_SKIP_M,
   makeRoads,
@@ -28,7 +30,7 @@ function lum(hex: number) {
 type RoadMesh = {
   userData: { roadKind?: string; widthM?: number; island?: string; roadName?: string };
   geometry: {
-    parameters?: { width: number };
+    parameters?: { width: number; innerRadius?: number };
     attributes: { position: { count: number; getX: (i: number) => number; getZ: (i: number) => number } };
     index: { count: number } | null;
   };
@@ -184,6 +186,8 @@ describe("paved street from spawn", () => {
     }
 
     expect(HIGHWAY_RAB_SKIP_M).toBeLessThan(HIGHWAY_RAB_OMIT_M * 2);
+    expect(HIGHWAY_MEDIAN_M).toBeGreaterThan(5);
+    expect(HIGHWAY_LANE_OFFSET_M).toBeGreaterThan(PAVED_WIDTH_M / 2);
     const harbour = SOUTH_RAB.harbour;
     for (const mesh of hwyMeshes) {
       const pos = mesh.geometry.attributes.position;
@@ -192,6 +196,10 @@ describe("paved street from spawn", () => {
         expect(d).toBeGreaterThan(20);
       }
     }
+    const circus = added.find((m) => m.userData.roadName === "Harbour Circus");
+    expect(circus).toBeTruthy();
+    expect(circus!.geometry.parameters).toBeTruthy();
+    expect(circus!.geometry.parameters!.innerRadius).toBeGreaterThan(10);
   });
 
   it("places the spawn camera on the quay looking inland along the tarmac", () => {

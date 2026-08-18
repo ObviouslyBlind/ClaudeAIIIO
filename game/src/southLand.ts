@@ -468,7 +468,7 @@ export function buildSouthLand(spec: IslandSpec, heightAt: HeightFn): SouthBuilt
     ],
     6,
   );
-  const channelFork = forkFromTrunk(highwayPts, hwyAlongHarbour + 300, channelDest, 14);
+  const channelFork = forkFromTrunk(highwayPts, hwyAlongHarbour + 300, channelDest, 16);
   if (!channelFork) throw new Error("south land: Channel Sands must Y-fork off Island Hwy");
   roads.push(paved("Channel Sands", channelFork.pts, harbour, {}, 0));
 
@@ -585,7 +585,7 @@ export function buildSouthLand(spec: IslandSpec, heightAt: HeightFn): SouthBuilt
   addHamletsAlong(roads, roads.find((r) => r.name === "South Strand")!.points, harbour, "Strand", 67, 7.2, {
     avoid: circuses,
   });
-  addHamletsAlong(roads, highwayPts, harbour, "Hwy", 79, 14, { avoid: circuses });
+  addHamletsAlong(roads, highwayPts, harbour, "Hwy", 79, 16, { avoid: circuses });
   addHamletsAlong(roads, passSpur, ash, "Ash", 88, 7.2, { fromM: 70, avoid: circuses });
 
   const clear: ClearRoad[] = roads.map((r) => ({
