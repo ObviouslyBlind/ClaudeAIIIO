@@ -434,7 +434,7 @@ function aimPointer(ev) {
 }
 
 const HUD_BLOCK =
-  "nav, a, #taxi-map, #ferry-ticket, #catalog-picker, .float-panel, #land-card, #buy-ask, #stand-veil, #stand-menu, #place-hint, #menu-stack, #pack-shift";
+  "nav, a, #taxi-map, #ferry-ticket, #catalog-picker, .float-panel, #land-card, #buy-ask, #order-veil, #order-ask, #stand-veil, #stand-menu, #place-hint, #menu-stack, #pack-shift";
 
 function parcelLabel(p) {
   const kind = p.band === "field" ? "field" : p.band === "shore" ? "shore land" : "street land";
@@ -1954,6 +1954,8 @@ async function boot() {
   });
   chromeHud = mountChrome({
     setStatus,
+    getPose: () => ({ x: player.position.x, z: player.position.z }),
+    getPlotId: () => selected || "",
     lease,
     onCloseLand: closeLandCard,
     onLeased(snapshot) {
@@ -2000,6 +2002,12 @@ async function boot() {
       for (const s of play.stands || []) syncStandMesh(s);
     },
     onOrder(delivery) {
+      if (!delivery) return;
+      if (delivery.status === "arrived") {
+        syncCrateMesh(delivery);
+        setStatus("Crate on the kerb. Take it — 60s then warehouse.");
+        return;
+      }
       void ensureDeliveries().then(() => {
         const plot = map.plots.find((p) => p.id === delivery.plotId);
         if (plot) deliveries.start(delivery, plot);

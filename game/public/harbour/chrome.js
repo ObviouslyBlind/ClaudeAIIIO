@@ -52,6 +52,10 @@ export function mountChrome(opts) {
   const packShift = mountPackShift();
   let siteTab = "stock";
   let openSiteId = null;
+  let orderSku = null;
+  let orderQty = 1;
+  const orderAsk = document.getElementById("order-ask");
+  const orderVeil = document.getElementById("order-veil");
 
   function setPlaceHint(text, show) {
     const hint = document.getElementById("place-hint");
@@ -136,44 +140,50 @@ export function mountChrome(opts) {
     }
   }
 
+  function propertyName() {
+    const leases = (play && play.leases) || [];
+    const plotId = typeof opts.getPlotId === "function" ? opts.getPlotId() : "";
+    const hit = plotId ? leases.find((l) => l.id === plotId) : null;
+    if (hit) return hit.name || "Your lot";
+    if (leases.length) return leases[0].name || "Your lot";
+    return "Your kerb";
+  }
+
+  function destLabel() {
+    if (marketDest === "road") return propertyName();
+    return "South warehouse";
+  }
+
+  function skuBuyRow(s) {
+    const loc = destLabel();
+    return `
+      <article class="sku-buy">
+        <div class="sku-buy-copy">
+          <strong class="sku-buy-name">${s.label}</strong>
+          <span class="sku-buy-price">${money(s.paperPrice)}</span>
+        </div>
+        <div class="buy-slot">
+          <p class="buy-loc" title="${loc}">${loc}</p>
+          <button type="button" class="go" data-order="${s.id}">Buy</button>
+        </div>
+      </article>`;
+  }
+
   function paintMarket() {
     const body = document.getElementById("market-body");
     if (!body || !play) return;
     const catalog = play.catalog || [];
-    const fee = play.warehouse ? money(play.warehouse.feePerDay) : "$5.00";
     const prices = play.lastPricesSouth || {};
     const goods = play.goods || Object.keys(prices);
-    const destPockets = marketDest === "cart";
     const kits = catalog.filter((s) => s.aisle === "street_carts" || s.role === "kit");
     const stock = catalog.filter((s) => s.aisle === "stock" || s.role === "stock");
     body.innerHTML = `
       ${title("Market")}
-      <p>Buy a fruit cart, watermelon cart, or fish and chips. That is not stocking a stall — place the cart first, then load it from that cart.</p>
-      <div class="dest-row">
-        <button type="button" class="dest ${destPockets ? "is-on" : ""}" data-dest="cart">Pockets</button>
-        <button type="button" class="dest ${marketDest === "warehouse" ? "is-on" : ""}" data-dest="warehouse">Warehouse</button>
-      </div>
-      <p class="whisper">${destPockets ? "Goes in pockets. Place from Carts, then tap that cart to stock it." : "South warehouse " + fee + "/day. Default."}</p>
+      <p>Buy a fruit cart, watermelon cart, or fish and chips. Click Buy — you choose how many and where it goes.</p>
       <h3 class="sheet-kicker">Street carts</h3>
-      ${kits
-        .map(
-          (s) => `
-        <div class="inv-row">
-          <span>${s.label} · ${money(s.paperPrice)}</span>
-          <button type="button" class="go" data-order="${s.id}">Buy</button>
-        </div>`,
-        )
-        .join("")}
+      ${kits.map(skuBuyRow).join("")}
       <h3 class="sheet-kicker">Stock packs</h3>
-      ${stock
-        .map(
-          (s) => `
-        <div class="inv-row">
-          <span>${s.label} · ${money(s.paperPrice)}</span>
-          <button type="button" class="go" data-order="${s.id}">Buy</button>
-        </div>`,
-        )
-        .join("")}
+      ${stock.map(skuBuyRow).join("")}
       <h3 class="sheet-kicker">Twelve goods · South last price</h3>
       ${goods
         .map((id) => {
@@ -184,6 +194,88 @@ export function mountChrome(opts) {
         })
         .join("")}
     `;
+  }
+
+  function hideOrderAsk() {
+    orderSku = null;
+    if (orderAsk) orderAsk.hidden = true;
+    if (orderVeil) orderVeil.hidden = true;
+  }
+
+  function catalogSku(id) {
+    return ((play && play.catalog) || []).find((s) => s.id === id);
+  }
+
+  function paintOrderAsk() {
+    if (!orderAsk || !orderSku || !play) return;
+    const row = catalogSku(orderSku);
+    if (!row) {
+      hideOrderAsk();
+      return;
+    }
+    const unit = Number(row.paperPrice) || 0;
+    const total = unit * orderQty;
+    const loc = destLabel();
+    const waitS = Math.round(Number(play.deliveryWaitMs || 60000) / 1000);
+    orderAsk.hidden = false;
+    if (orderVeil) orderVeil.hidden = false;
+    orderAsk.innerHTML = `
+      <h2>Buy ${row.label}</h2>
+      <p class="order-unit">${money(unit)} each · PAPER · SIMULATED</p>
+      <p class="sticker-label">How many</p>
+      <div class="order-qty">
+        <button type="button" class="ghost" data-order-qty="-1" ${orderQty <= 1 ? "disabled" : ""}>−</button>
+        <strong>${orderQty}</strong>
+        <button type="button" class="ghost" data-order-qty="1" ${orderQty >= 10 ? "disabled" : ""}>+</button>
+      </div>
+      <p class="sticker-label">Where</p>
+      <div class="dest-row">
+        <button type="button" class="dest ${marketDest === "road" ? "is-on" : ""}" data-order-dest="road">${propertyName()}</button>
+        <button type="button" class="dest ${marketDest === "warehouse" ? "is-on" : ""}" data-order-dest="warehouse">Warehouse</button>
+      </div>
+      <div class="order-pay">
+        <p class="buy-loc is-ask">${loc}${marketDest === "road" ? " · " + waitS + "s on the kerb" : ""}</p>
+        <button type="button" class="go" id="order-pay">Pay ${money(total)}</button>
+        <button type="button" class="ghost" id="order-cancel">Cancel</button>
+      </div>
+    `;
+    orderAsk.querySelector("#order-pay")?.focus();
+  }
+
+  async function submitOrder() {
+    if (!orderSku) return;
+    const pose = typeof opts.getPose === "function" ? opts.getPose() : {};
+    const plotId = typeof opts.getPlotId === "function" ? opts.getPlotId() : "";
+    const { ok, data } = await readJson("/api/market/order", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        skus: [orderSku],
+        island: "south",
+        dest: marketDest === "road" ? "road" : "warehouse",
+        qty: orderQty,
+        x: pose && pose.x,
+        z: pose && pose.z,
+        plotId: marketDest === "road" ? plotId || undefined : undefined,
+      }),
+    });
+    hideOrderAsk();
+    if (!ok) {
+      if (opts.setStatus) opts.setStatus("Order failed: " + (data && data.reason));
+      return;
+    }
+    playPaperBuy();
+    await refreshPlay(data);
+    if (openPanel === "market") paintMarket();
+    const delivery = data && data.delivery;
+    if (delivery && delivery.dest === "road" && typeof opts.onOrder === "function") opts.onOrder(delivery);
+    if (opts.setStatus) {
+      opts.setStatus(
+        marketDest === "road"
+          ? "Paid. Crate on the kerb — take it. 60s then warehouse."
+          : "Paid. In the South warehouse.",
+      );
+    }
   }
 
   function paintFootLegend() {
@@ -446,38 +538,38 @@ export function mountChrome(opts) {
     root.addEventListener("click", async (ev) => {
       const hit = ev.target && ev.target.closest
         ? ev.target.closest(
-            "[data-dest], [data-order], [data-buy], [data-place], [data-withdraw], [data-open-stand]",
+            "[data-dest], [data-order], [data-buy], [data-place], [data-withdraw], [data-open-stand], [data-order-qty], [data-order-dest], #order-pay, #order-cancel",
           )
         : null;
       if (!hit || (standMenu && standMenu.contains(hit))) return;
+      if (hit.hasAttribute("data-order-qty")) {
+        orderQty = Math.max(1, Math.min(10, orderQty + Number(hit.getAttribute("data-order-qty") || 0)));
+        paintOrderAsk();
+        return;
+      }
+      if (hit.hasAttribute("data-order-dest")) {
+        marketDest = hit.getAttribute("data-order-dest") === "road" ? "road" : "warehouse";
+        paintOrderAsk();
+        paintMarket();
+        return;
+      }
+      if (hit.id === "order-cancel") {
+        hideOrderAsk();
+        return;
+      }
+      if (hit.id === "order-pay") {
+        await submitOrder();
+        return;
+      }
       if (hit.hasAttribute("data-dest")) {
-        marketDest = hit.getAttribute("data-dest") || "warehouse";
+        marketDest = hit.getAttribute("data-dest") === "road" ? "road" : "warehouse";
         paintMarket();
         return;
       }
       if (hit.hasAttribute("data-order")) {
-        const { ok, data } = await readJson("/api/market/order", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({
-            skus: [hit.getAttribute("data-order")],
-            island: "south",
-            dest: marketDest === "cart" ? "cart" : "warehouse",
-          }),
-        });
-        if (!ok) {
-          if (opts.setStatus) opts.setStatus("Order failed: " + (data && data.reason));
-          return;
-        }
-        playPaperBuy();
-        await refreshPlay(data);
-        if (opts.setStatus) {
-          opts.setStatus(
-            marketDest === "cart"
-              ? "In pockets. Place the cart, then tap it to stock."
-              : "In the South warehouse.",
-          );
-        }
+        orderSku = hit.getAttribute("data-order");
+        orderQty = 1;
+        paintOrderAsk();
         return;
       }
       if (hit.hasAttribute("data-buy")) {
@@ -609,6 +701,9 @@ export function mountChrome(opts) {
       if (opts.setStatus) opts.setStatus("Place cancelled.");
     });
   }
+  if (orderVeil) {
+    orderVeil.addEventListener("click", hideOrderAsk);
+  }
   if (standVeil) {
     standVeil.addEventListener("click", () => {
       standMenu.hidden = true;
@@ -640,6 +735,7 @@ export function mountChrome(opts) {
     hideBuyAsk() {
       if (buyAsk) buyAsk.hidden = true;
     },
+    hideOrderAsk,
     paintBuyAsk,
     paintLand(plot, extras) {
       if (!landCard) return;

@@ -20,7 +20,6 @@ import {
   cartLoopNeeds,
   hireStand,
   incomePerMinute,
-  markArrived,
   orderMarket,
   placeStand,
   playSnapshot,
@@ -86,11 +85,10 @@ describe("South first loop", () => {
     if (!order.ok) return;
     expect(order.paid).toBe(CART_PAPER_PRICE + HOTDOG_PACK_PRICE);
     expect(visitor.cash).toBe(before - order.paid);
-    expect(order.delivery.status).toBe("en_route");
+    expect(order.delivery.status).toBe("arrived");
     expect(order.delivery.drop).toBeTruthy();
     expect(order.delivery.drop?.roadName).toBeTruthy();
     expect(order.delivery.drop!.x !== plot.x || order.delivery.drop!.z !== plot.z).toBe(true);
-    expect(markArrived(visitor, order.delivery.id).ok).toBe(true);
     const taken = takeAll(visitor, order.delivery.id);
     expect(taken.ok).toBe(true);
     if (!taken.ok) return;
@@ -160,7 +158,7 @@ describe("South first loop", () => {
     expect(Math.hypot(placed.stand.x - plot.x, placed.stand.z - plot.z)).toBeLessThan(PLACE_CORRIDOR_M + 1);
   });
 
-  it("refuses a commercial cart on a residential lot", () => {
+  it("lets a kerb crate drop by a residential lot, but will not place a cart there", () => {
     const land = createLandBoard();
     const visitor = createVisitor(20_000);
     const home = land.plots
@@ -170,9 +168,14 @@ describe("South first loop", () => {
     const leased = leasePlot(land, visitor, home!.id);
     expect(leased.ok).toBe(true);
     const order = orderMarket(visitor, land, { plotId: home!.id, skus: ["hotdog_cart"] });
-    expect(order.ok).toBe(false);
-    if (order.ok) return;
-    expect(order.reason).toBe("zone_mismatch");
+    expect(order.ok).toBe(true);
+    if (!order.ok) return;
+    expect(order.delivery.status).toBe("arrived");
+    expect(takeAll(visitor, order.delivery.id).ok).toBe(true);
+    const placed = placeStand(visitor, land, home!.id);
+    expect(placed.ok).toBe(false);
+    if (placed.ok) return;
+    expect(placed.reason).toBe("zone_mismatch");
   });
 
   it("does not sell until someone is hired, even if you stand there", () => {
@@ -220,16 +223,38 @@ describe("South first loop", () => {
     expect(visitor.play.inventory.find((i) => i.kind === "hotdogs")?.qty).toBe(20);
   });
 
-  it("returns a missed roadside crate to the warehouse after 3 minutes", () => {
+  it("returns a missed roadside crate to the warehouse after 60 seconds", () => {
     const { land, visitor, plot } = leaseCheapSouth();
     const order = orderMarket(visitor, land, { plotId: plot.id, skus: ["hotdogs"], dest: "road" });
     expect(order.ok).toBe(true);
     if (!order.ok) return;
-    markArrived(visitor, order.delivery.id);
+    expect(order.delivery.status).toBe("arrived");
+    expect(DELIVERY_WAIT_MS).toBe(60_000);
     visitor.play.deliveries[0]!.arrivedAtMs = 1;
     expect(recallStaleDeliveries(visitor, 1 + DELIVERY_WAIT_MS)).toBe(1);
     expect(visitor.play.deliveries).toHaveLength(0);
     expect(visitor.play.warehouse.items.find((i) => i.kind === "hotdogs")?.qty).toBe(20);
+  });
+
+  it("multiplies pack price and qty, and drops at the player without a plotId", () => {
+    const { land, visitor, plot } = leaseCheapSouth();
+    const before = visitor.cash;
+    const packs = orderMarket(visitor, land, { skus: ["hotdogs"], dest: "warehouse", qty: 3 });
+    expect(packs.ok).toBe(true);
+    if (!packs.ok) return;
+    expect(packs.paid).toBe(HOTDOG_PACK_PRICE * 3);
+    expect(visitor.cash).toBe(before - packs.paid);
+    expect(visitor.play.warehouse.items.find((i) => i.kind === "hotdogs")?.qty).toBe(60);
+    const kerb = orderMarket(visitor, land, {
+      skus: ["hotdog_cart"],
+      dest: "road",
+      x: plot.x,
+      z: plot.z,
+    });
+    expect(kerb.ok).toBe(true);
+    if (!kerb.ok) return;
+    expect(kerb.delivery.status).toBe("arrived");
+    expect(kerb.delivery.drop).toBeTruthy();
   });
 
   it("stocks a stand from the warehouse without taking pockets", () => {

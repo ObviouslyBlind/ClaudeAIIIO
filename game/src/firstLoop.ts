@@ -19,7 +19,9 @@ export const TODAY_PRICE = HOTDOG_SALE_PRICE;
 export const SALES_TAX = 0.2;
 export const WAREHOUSE_FEE_PER_DAY = 5;
 export const WAREHOUSE_RENT_TICKS = 3600;
-export const DELIVERY_WAIT_MS = 180_000;
+/** Seconds the kerb crate waits before it goes to the warehouse. */
+export const DELIVERY_WAIT_MS = 60_000;
+export const ORDER_MAX_QTY = 10;
 export const STORAGE_UPGRADE_COST = 200;
 export const CART_STORAGE = 20;
 export const CART_PAPER_PRICE = 85;
@@ -601,14 +603,30 @@ export function southVisitorPlot(land: LandBoard, plotId: string): Parcel | null
   return plot;
 }
 
+function nearestVisitorPlot(land: LandBoard, x?: number, z?: number): Parcel | null {
+  const owned = land.plots.filter((p) => p.island === "south" && p.owner === "visitor");
+  if (!owned.length) return null;
+  if (!Number.isFinite(x) || !Number.isFinite(z)) return owned[0]!;
+  let best = owned[0]!;
+  let bestD = Infinity;
+  for (const p of owned) {
+    const d = Math.hypot(p.x - (x as number), p.z - (z as number));
+    if (d < bestD) {
+      bestD = d;
+      best = p;
+    }
+  }
+  return best;
+}
+
 /**
  * Buy catalog lines. Default dest is the shared island warehouse.
- * dest=road still sends a van to a leased South plot.
+ * dest=road drops a crate on the verge by you. 60s to take it.
  */
 export function orderMarket(
   visitor: Visitor,
   land: LandBoard,
-  body: { plotId?: unknown; skus?: unknown; island?: unknown; dest?: unknown },
+  body: { plotId?: unknown; skus?: unknown; island?: unknown; dest?: unknown; qty?: unknown; x?: unknown; z?: unknown },
 ): LoopOk<{ delivery: Delivery; paid: number; stored?: boolean }> | LoopFail {
   const play = ensurePlay(visitor);
   const island = String(body.island ?? "south");
@@ -627,24 +645,32 @@ export function orderMarket(
             : "warehouse";
   const wanted = Array.isArray(body.skus) ? body.skus.map((id) => String(id)) : [];
   if (!wanted.length) return fail("empty_order");
+  const packs = Math.max(1, Math.min(ORDER_MAX_QTY, Math.floor(Number(body.qty) || 1)));
 
   const items: InvItem[] = [];
   let paid = 0;
   for (const id of wanted) {
     if (!isKnownSku(id)) return fail("unknown_sku");
     const row = sku(id)!;
-    paid = roundMoney(paid + row.paperPrice);
-    items.push({ kind: row.id, qty: row.qty, mode: "PAPER", provenance: "SIMULATED" });
+    paid = roundMoney(paid + row.paperPrice * packs);
+    items.push({
+      kind: row.id,
+      qty: roundMoney(row.qty * packs),
+      mode: "PAPER",
+      provenance: "SIMULATED",
+    });
   }
 
+  const dropX = Number(body.x);
+  const dropZ = Number(body.z);
   let plot: Parcel | null = null;
   if (dest === "road") {
-    plot = southVisitorPlot(land, String(body.plotId ?? ""));
-    if (!plot) return fail("not_yours");
-    for (const item of items) {
-      const row = sku(item.kind)!;
-      const fit = skuFitsPlot(row.zone, plot.zone);
-      if (!fit.ok) return fail(fit.reason);
+    const named = body.plotId != null && String(body.plotId) !== "" ? String(body.plotId) : "";
+    if (named) {
+      plot = southVisitorPlot(land, named);
+      if (!plot) return fail("not_yours");
+    } else {
+      plot = nearestVisitorPlot(land, dropX, dropZ);
     }
   }
 
@@ -685,14 +711,22 @@ export function orderMarket(
     return ok({ delivery, paid, stored: true as const });
   }
 
+  const atX = Number.isFinite(dropX) ? dropX : plot ? plot.x : ISLANDS.south.port.x;
+  const atZ = Number.isFinite(dropZ) ? dropZ : plot ? plot.z : ISLANDS.south.port.z;
+  const drop = roadsideDrop(land.roads, "south", atX, atZ);
+  if (!drop) {
+    visitor.cash = roundMoney(visitor.cash + paid);
+    return fail("no_road");
+  }
+  const now = Date.now();
   const delivery: Delivery = {
     id: `del-${play.nextId++}`,
     island: "south",
-    plotId: plot!.id,
+    plotId: plot?.id ?? "road",
     items,
-    status: "en_route",
-    drop: roadsideDrop(land.roads, "south", plot!.x, plot!.z),
-    arrivedAtMs: null,
+    status: "arrived",
+    drop,
+    arrivedAtMs: now,
     dest: "road",
     mode: "PAPER",
     provenance: "SIMULATED",
@@ -805,6 +839,16 @@ export function placeStand(
   const plot = plotForPlace(land, plotId, pose?.x, pose?.z);
   if (!plot) return fail("not_yours");
   if (play.stands.some((s) => s.plotId === plot.id)) return fail("already_placed");
+  const wanted = pose?.kitId ? CART_KINDS.filter((row) => row.kitId === pose.kitId) : CART_KINDS;
+  const peek = wanted.find(
+    (cart) => (play.inventory.find((r) => r.kind === cart.kitId)?.qty ?? 0) >= 1 || warehouseQty(play, cart.kitId) >= 1,
+  );
+  if (!peek) return fail("no_cart");
+  const kitSku = sku(peek.kitId);
+  if (kitSku) {
+    const fit = skuFitsPlot(kitSku.zone, plot.zone);
+    if (!fit.ok) return fail(fit.reason);
+  }
   const cart = takeKit(play, pose?.kitId);
   if (!cart) return fail("no_cart");
   const x = Number.isFinite(pose?.x) ? (pose!.x as number) : plot.x;
@@ -1063,6 +1107,7 @@ export function playSnapshot(visitor: Visitor, land: LandBoard) {
     cash: visitor.cash,
     incomePerMinute: incomePerMinute(play),
     todayPrice: TODAY_PRICE,
+    deliveryWaitMs: DELIVERY_WAIT_MS,
     salesTax: SALES_TAX,
     gameBank: play.gameBank,
     warehouse: {

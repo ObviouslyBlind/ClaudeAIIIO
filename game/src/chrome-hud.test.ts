@@ -48,6 +48,8 @@ describe("harbour chrome HUD", () => {
     expect(html).toContain('id="stand-menu"');
     expect(siteMenu).toContain('data-stock="inventory"');
     expect(html).toContain('id="buy-ask"');
+    expect(html).toContain('id="order-ask"');
+    expect(html).toContain('id="order-veil"');
     expect(html).toContain('id="lot-tags"');
     expect(html).toContain('id="storage-fee"');
     expect(html).toContain('id="pack-shift"');
@@ -62,7 +64,8 @@ describe("harbour chrome HUD", () => {
     expect(css).toContain(".chrome-tr");
     expect(css).toContain(".chrome-left");
     expect(css).toContain("pos-inv");
-    expect(css).toContain(".cart-need");
+    expect(css).toContain(".buy-slot");
+    expect(css).toContain(".buy-loc");
     expect(css).toMatch(/max-height:\s*min\(62vh/);
     expect(css).toContain("overflow-x: hidden");
     expect(css).toContain("flex-wrap: nowrap");
@@ -106,7 +109,9 @@ describe("harbour chrome HUD", () => {
     expect(siteMenu).toContain("stock-ticks");
     expect(siteMenu).toContain('type="range"');
     expect(chrome).toContain("Warehouse");
-    expect(chrome).toContain(">Pockets<");
+    expect(chrome).toContain('class="buy-slot"');
+    expect(chrome).toContain("buy-loc");
+    expect(siteMenu).toContain("Pockets");
     expect(chrome).not.toContain("Stock cart");
     expect(chrome).not.toContain("data-pin");
     expect(chrome).not.toContain("Run it myself");
@@ -114,12 +119,15 @@ describe("harbour chrome HUD", () => {
 
   it("keeps Carts as a directory; hire, train, stock, sticker, fridge live on that cart", () => {
     expect(chrome).toContain("formatCartsBody");
-    expect(chrome).toContain("Pockets");
+    expect(carts).toContain("Pockets");
     expect(chrome).toContain("Twelve goods");
     expect(chrome).toContain("/api/buy");
     expect(chrome).toContain("/api/shift/pack");
     expect(chrome).toContain('let marketDest = "warehouse"');
-    expect(chrome).toContain("dest: marketDest === \"cart\" ? \"cart\" : \"warehouse\"");
+    expect(chrome).toContain("dest: marketDest === \"road\" ? \"road\" : \"warehouse\"");
+    expect(chrome).toContain("data-order-dest");
+    expect(chrome).toContain("getPose");
+    expect(chrome).toContain("hideOrderAsk");
     expect(chrome).toContain("data-open-stand");
     expect(siteMenu).toContain("Fruit slice");
     expect(siteMenu).toContain("Fridge · $200");

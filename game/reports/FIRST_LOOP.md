@@ -35,11 +35,12 @@ Same card for a placed cart, a shop, and a mine.
 - Corners stay: cash top-left, viewers top-right, Inv/Wh/Mkt/Staff on the left, travel dock at the bottom
 - Left **Carts** is a directory: unplaced kits (Place) and placed carts (Open). Ops live on **that site**.
 - Click a placed cart, or your shop / mine, for the site menu.
-- Market default: **Warehouse**. Or **Pockets**. Buying never stocks a stall that is not on the kerb.
+- Market: each Buy has the drop location sitting over it (your lot name, or South warehouse). Click Buy → how many and where. Market stays open.
+- Deliver to the property: crate is already on the kerb. 60s to take it, else it goes to the warehouse. Taking the crate is how goods enter pockets.
 
 ## Loop
 1. Buy a lot from a nearby $ bar.
-2. Market → Fruit cart → **Warehouse** → Buy.
+2. Market → Fruit cart → Buy → Warehouse (or your lot) → Pay.
 3. Place from Carts. Tap **that** cart.
 4. Stock · Hire (one button) · optional Fridge · play Fruit slice on Run.
 5. Stats shows desirability, people searching the street, and PAPER / min.
