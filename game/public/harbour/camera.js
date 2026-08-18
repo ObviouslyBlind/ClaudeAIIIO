@@ -15,6 +15,12 @@ export const LMB = 0;
 export const ZOOM_MIN_M = 9;
 export const ZOOM_MAX_M = 650;
 
+/** Near plane grows with zoom so a 52 km far clip does not eat the water. */
+export function cameraNearForRadius(radius) {
+  const r = Number(radius) || ZOOM_MIN_M;
+  return Math.max(0.4, Math.min(r * 0.012, r * 0.22));
+}
+
 /** Exponential wheel zoom, clamped. Positive deltaY zooms out. */
 export function zoomRadius(radius, deltaY) {
   const next = radius * Math.exp((deltaY || 0) * 0.0011);
@@ -118,20 +124,30 @@ export function handleOrbitPointer(state, ev) {
  * Follow the player. Until the user orbits, keep the spawn framing.
  * After orbit, keep the chosen spherical offset (Roblox-style).
  */
+function applyZoomNear(camera, radius) {
+  const near = cameraNearForRadius(radius);
+  if (!camera || Math.abs(camera.near - near) < 0.02) return;
+  camera.near = near;
+  camera.updateProjectionMatrix();
+}
+
 export function tickCamera(camera, player, state, islandId, dt, tmp) {
   const follow = 1 - Math.pow(0.001, dt);
   if (!state.orbited) {
     const o = spawnCameraOffset(islandId);
+    applyZoomNear(camera, Math.hypot(o.x, o.y, o.z));
     tmp.set(player.x + o.x, player.y + o.y, player.z + o.z);
     camera.position.lerp(tmp, follow);
     const l = spawnLookAtOffset(islandId);
     camera.lookAt(player.x + l.x, player.y + l.y, player.z + l.z);
     return;
   }
+  applyZoomNear(camera, state.radius);
   const o = sphericalToCartesian(state);
   tmp.set(player.x + o.x, player.y + o.y, player.z + o.z);
   if (state.dragging) camera.position.copy(tmp);
   else camera.position.lerp(tmp, follow);
+  if (camera.position.y < player.y + 1.6) camera.position.y = player.y + 1.6;
   camera.lookAt(player.x, player.y + LOOK_Y, player.z);
 }
 

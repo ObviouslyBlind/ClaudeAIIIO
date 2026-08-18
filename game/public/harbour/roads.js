@@ -97,13 +97,17 @@ function drawRibbon(scene, spec, road, heightAt, widthM, color, roadKind, matOpt
       const sz = pts[i].z - pts[i - 1].z;
       const sl = Math.hypot(sx, sz) || 1;
       const dot = rx * (sz / sl) + rz * (-sx / sl);
-      if (dot > 0.25) scale = Math.min(half / dot, half * 3);
+      if (dot > 0.25) scale = Math.min(half / dot, half * 1.7);
     }
-    const y = heightAt(spec, pts[i].x, pts[i].z) + (roadKind === "sidewalk" ? 0.12 : 0.1) + yLift;
     const lx = pts[i].x - rx * scale;
     const lz = pts[i].z - rz * scale;
     const qx = pts[i].x + rx * scale;
     const qz = pts[i].z + rz * scale;
+    const lift = (roadKind === "sidewalk" ? 0.18 : 0.16) + yLift;
+    const yC = heightAt(spec, pts[i].x, pts[i].z);
+    const yL = heightAt(spec, lx, lz);
+    const yR = heightAt(spec, qx, qz);
+    const y = Math.max(yC, yL, yR) + lift;
     const yT = y + thick / 2;
     const yB = y - thick / 2;
     const o = i * 12;
@@ -140,9 +144,19 @@ function drawRibbon(scene, spec, road, heightAt, widthM, color, roadKind, matOpt
   geo.setIndex(indices);
   geo.computeVertexNormals();
 
-  const m = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ color, ...matOpts }));
+  const m = new THREE.Mesh(
+    geo,
+    new THREE.MeshLambertMaterial({
+      color,
+      polygonOffset: true,
+      polygonOffsetFactor: -2,
+      polygonOffsetUnits: -2,
+      ...matOpts,
+    }),
+  );
   m.castShadow = false;
   m.receiveShadow = true;
+  m.renderOrder = 2;
   const roadName = road.name || (roadKind === "paved" ? "Harbour Rd" : "dirt track");
   m.name = `road:${road.island}:${roadName}`;
   m.userData.kind = "road";
@@ -211,7 +225,7 @@ function drawablePoints(road, graph) {
   let pts = ribbonStations(road.points);
   const edge = graph && road.edgeId ? graph.edges.find((e) => e.id === road.edgeId) : null;
   if (edge) pts = ribbonStations(trimPolylineForPads(pts, graph, edge));
-  return pts;
+  return densifyPts(pts, 6);
 }
 
 function drawPaved(scene, spec, road, heightAt, graph) {
@@ -560,7 +574,7 @@ function drawRoundabout(scene, spec, road, heightAt, graph) {
 }
 
 function drawDirt(scene, spec, road, heightAt) {
-  drawRibbon(scene, spec, road, heightAt, DIRT_WIDTH_M, DIRT, "dirt", {
+  drawRibbon(scene, spec, { ...road, points: densifyPts(ribbonStations(road.points), 6) }, heightAt, DIRT_WIDTH_M, DIRT, "dirt", {
     emissive: DIRT_DUST,
     emissiveIntensity: 0.24,
   });

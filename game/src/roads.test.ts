@@ -33,7 +33,7 @@ type RoadMesh = {
   userData: { roadKind?: string; widthM?: number; island?: string; roadName?: string; junctionWalk?: boolean; footprint?: boolean };
   geometry: {
     parameters?: { width: number; innerRadius?: number };
-    attributes: { position: { count: number; getX: (i: number) => number; getZ: (i: number) => number } };
+    attributes: { position: { count: number; getX: (i: number) => number; getY: (i: number) => number; getZ: (i: number) => number } };
     index: { count: number } | null;
   };
   material: { color: { getHex: () => number } };
@@ -297,6 +297,25 @@ describe("paved street from spawn", () => {
     expect(circus!.geometry.parameters!.innerRadius).toBeGreaterThan(10);
     const circusArms = added.filter((m) => m.userData.roadName === "Harbour Circus arm");
     expect(circusArms.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it("keeps south tarmac above the dirt instead of through it", () => {
+    const map = createLandBoard();
+    const added: RoadMesh[] = [];
+    const scene = { add(obj: RoadMesh) { added.push(obj); } };
+    makeRoads(map, { scene, specOf: (id: "north" | "south") => ISLANDS[id], heightAt });
+    const south = added.filter((m) => m.userData.island === "south" && m.userData.roadKind === "paved");
+    expect(south.length).toBeGreaterThan(4);
+    let checked = 0;
+    for (const mesh of south) {
+      const pos = mesh.geometry.attributes.position;
+      for (let i = 0; i < pos.count; i += 20) {
+        const dirt = heightAt(ISLANDS.south, pos.getX(i), pos.getZ(i));
+        expect(pos.getY(i)).toBeGreaterThan(dirt + 0.02);
+        checked += 1;
+      }
+    }
+    expect(checked).toBeGreaterThan(20);
   });
 
   it("places the spawn camera on the quay looking inland along the tarmac", () => {

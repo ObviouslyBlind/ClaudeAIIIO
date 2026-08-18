@@ -62,18 +62,21 @@
       <div class="chrome-tr">
         <div class="chrome-row" id="viewers">
           <button type="button" class="chip" data-overlay="lots">Lots</button>
-          <button type="button" class="chip" data-panel="view">View</button>
-          <button type="button" class="chip" data-panel="account">You</button>
+          <button type="button" class="chip" data-panel="view" aria-expanded="false" aria-controls="panel-view">View</button>
+          <button type="button" class="chip" data-panel="account" aria-expanded="false" aria-controls="panel-account">You</button>
         </div>
         <p class="viewer-hint" id="viewer-hint">World: left-click walks. Lots chip shows outlines and $ bars.</p>
-      </div>
-      <div id="panel-view" class="float-panel pos-tr" hidden>
-        <h2>View</h2>
-        <button type="button" class="aisle-btn" data-overlay="world"><strong>World</strong><span>Walk. Land does not steal taps.</span></button>
-        <button type="button" class="aisle-btn" data-overlay="foot"><strong>Foot traffic</strong><span>High / Moderate / Low on named roads.</span></button>
-        <button type="button" class="aisle-btn" data-overlay="logistics"><strong>Logistics</strong><span>Tap the roadside crate.</span></button>
-        <button type="button" class="aisle-btn" data-overlay="minerals"><strong>Minerals</strong><span>Ore catalog. Overlay paint next.</span></button>
-        <button type="button" class="aisle-btn" data-panel="leaderboard"><strong>Leaderboard</strong><span>PAPER ranks.</span></button>
+        <div id="panel-view" class="float-panel pos-tr" hidden>
+          <h2>View</h2>
+          <button type="button" class="aisle-btn" data-overlay="world"><strong>World</strong><span>Walk. Land does not steal taps.</span></button>
+          <button type="button" class="aisle-btn" data-overlay="foot"><strong>Foot traffic</strong><span>High / Moderate / Low on named roads.</span></button>
+          <button type="button" class="aisle-btn" data-overlay="logistics"><strong>Logistics</strong><span>Tap the roadside crate.</span></button>
+          <button type="button" class="aisle-btn" data-overlay="minerals"><strong>Minerals</strong><span>Ore catalog. Overlay paint next.</span></button>
+          <button type="button" class="aisle-btn" data-panel="leaderboard"><strong>Leaderboard</strong><span>PAPER ranks.</span></button>
+        </div>
+        <div id="panel-leaderboard" class="float-panel pos-tr" hidden><div id="board-body"></div></div>
+        <div id="panel-account" class="float-panel pos-tr" hidden><div id="acct-body"></div></div>
+        <div id="foot-legend" hidden></div>
       </div>
       <div class="chrome-left">
         <button type="button" class="rail-btn" data-panel="inventory" aria-label="Inventory">
@@ -97,8 +100,6 @@
       <div id="panel-warehouse" class="float-panel pos-warehouse" hidden><div id="warehouse-body"></div></div>
       <div id="panel-market" class="float-panel pos-market" hidden><div id="market-body"></div></div>
       <div id="panel-employees" class="float-panel pos-staff" hidden><div id="staff-body"></div></div>
-      <div id="panel-leaderboard" class="float-panel pos-tr" hidden><div id="board-body"></div></div>
-      <div id="panel-account" class="float-panel pos-tr" hidden><div id="acct-body"></div></div>
       <div id="land-card" hidden></div>
       <div id="buy-ask" hidden></div>
       <div id="stand-veil" hidden></div>
@@ -107,7 +108,6 @@
         <span id="place-hint-text">Tap your YOURS lot or the verge by the road to place the cart.</span>
         <button type="button" id="place-cancel">Cancel</button>
       </p>
-      <div id="foot-legend" hidden></div>
     </div>
     <p id="taxi-eta" class="taxi-eta" hidden aria-live="polite"></p>
 

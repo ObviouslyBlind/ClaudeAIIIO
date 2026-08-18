@@ -81,7 +81,10 @@ export function mountChrome(opts) {
       p.classList.remove("is-open");
       p.hidden = true;
     });
-    root.querySelectorAll(".rail-btn, .chrome-tr .chip[data-panel]").forEach((b) => b.classList.remove("is-on"));
+    root.querySelectorAll(".rail-btn, .chrome-tr .chip[data-panel]").forEach((b) => {
+      b.classList.remove("is-on");
+      if (b.hasAttribute("aria-expanded")) b.setAttribute("aria-expanded", "false");
+    });
   }
 
   function open(id) {
@@ -99,7 +102,10 @@ export function mountChrome(opts) {
       panel.classList.add("is-open");
     }
     const btn = root.querySelector(`[data-panel="${id}"]`);
-    if (btn) btn.classList.add("is-on");
+    if (btn) {
+      btn.classList.add("is-on");
+      if (btn.hasAttribute("aria-expanded")) btn.setAttribute("aria-expanded", "true");
+    }
     paintPanels();
   }
 

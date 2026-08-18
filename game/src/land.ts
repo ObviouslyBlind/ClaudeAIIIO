@@ -11,10 +11,15 @@ import { zoneForBand, zoneUnlocked, type ZoneId } from "./zones.ts";
 import type { Visitor } from "./sim.ts";
 import {
   distToSouthGrade,
+  SOUTH_GRADE_BLEND_M,
+  SOUTH_GRADE_FLAT_M,
   SOUTH_GRADE_Y,
   SOUTH_HIGHWAY_NODES,
   SOUTH_PORT,
   SOUTH_VOLCANO,
+  SOUTH_WEST_APRON_X,
+  SOUTH_WEST_BLEND_M,
+  SOUTH_WEST_FLAT_M,
 } from "./southGeom.ts";
 import { buildSouthLand, southTaxiStops } from "./southLand.ts";
 import type { RoadGraph } from "./roadGraph.ts";
@@ -812,8 +817,8 @@ export function heightAt(spec: IslandSpec, x: number, z: number): number {
   const across = Math.abs(x - spec.port.x);
   if (spec.id === "south") {
     const east = x - spec.port.x;
-    if (across < 36 && along > -18 && along < 16) return SOUTH_GRADE_Y;
-    if (east > 18 && east < 280 && along > -24 && along < 8) return SOUTH_GRADE_Y;
+    if (across < 48 && along > -24 && along < 28) return SOUTH_GRADE_Y;
+    if (east > 18 && east < 420 && along > -28 && along < 14) return SOUTH_GRADE_Y;
   } else if (across < 22 && along > -16 && along < 14) {
     return 1.12;
   }
@@ -838,9 +843,12 @@ export function heightAt(spec: IslandSpec, x: number, z: number): number {
     }
     const g = distToSouthGrade(x, z);
     if (hillD >= 72) {
-      if (g < 90) h = SOUTH_GRADE_Y;
-      else if (g < 240) {
-        const u = (g - 90) / 150;
+      const westBelt = x < SOUTH_WEST_APRON_X && z > 6900 && z < 10600;
+      const flatM = westBelt ? SOUTH_WEST_FLAT_M : SOUTH_GRADE_FLAT_M;
+      const blendM = westBelt ? SOUTH_WEST_BLEND_M : SOUTH_GRADE_BLEND_M;
+      if (g < flatM || portD < 560) h = SOUTH_GRADE_Y;
+      else if (g < blendM) {
+        const u = (g - flatM) / (blendM - flatM);
         h = SOUTH_GRADE_Y * (1 - u) + h * u;
       }
     }
@@ -853,7 +861,7 @@ export function heightAt(spec: IslandSpec, x: number, z: number): number {
   }
   const beachStart = spec.id === "south" ? 0.68 : 0.8;
   const skipBeach =
-    spec.id === "south" && (distToSouthGrade(x, z) < 100 || portD < 200);
+    spec.id === "south" && (distToSouthGrade(x, z) < 280 || portD < 400);
   if (t > beachStart && !skipBeach) {
     const beach = (t - beachStart) / (1 - beachStart);
     h = h * (1 - beach) + 0.32 * beach;

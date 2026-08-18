@@ -197,6 +197,11 @@ function specOf(id) {
 
 /** Keep in sync with game/src/land.ts heightAt and game/src/southGeom.ts */
 const SOUTH_GRADE_Y = 1.28;
+const SOUTH_GRADE_FLAT_M = 280;
+const SOUTH_GRADE_BLEND_M = 560;
+const SOUTH_WEST_FLAT_M = 360;
+const SOUTH_WEST_BLEND_M = 740;
+const SOUTH_WEST_APRON_X = 900;
 const SOUTH_HIGHWAY_NODES = [
   { x: -2280, z: 7280 },
   { x: -2080, z: 7440 },
@@ -291,8 +296,8 @@ function heightAt(spec, x, z) {
   const across = Math.abs(x - spec.port.x);
   if (spec.id === "south") {
     const east = x - spec.port.x;
-    if (across < 36 && along > -18 && along < 16) return SOUTH_GRADE_Y;
-    if (east > 18 && east < 280 && along > -24 && along < 8) return SOUTH_GRADE_Y;
+    if (across < 48 && along > -24 && along < 28) return SOUTH_GRADE_Y;
+    if (east > 18 && east < 420 && along > -28 && along < 14) return SOUTH_GRADE_Y;
   } else if (across < 22 && along > -16 && along < 14) {
     return 1.12;
   }
@@ -315,9 +320,12 @@ function heightAt(spec, x, z) {
     }
     const g = distToSouthGrade(x, z);
     if (hillD >= 72) {
-      if (g < 90) h = SOUTH_GRADE_Y;
-      else if (g < 240) {
-        const u = (g - 90) / 150;
+      const westBelt = x < SOUTH_WEST_APRON_X && z > 6900 && z < 10600;
+      const flatM = westBelt ? SOUTH_WEST_FLAT_M : SOUTH_GRADE_FLAT_M;
+      const blendM = westBelt ? SOUTH_WEST_BLEND_M : SOUTH_GRADE_BLEND_M;
+      if (g < flatM || portD < 560) h = SOUTH_GRADE_Y;
+      else if (g < blendM) {
+        const u = (g - flatM) / (blendM - flatM);
         h = SOUTH_GRADE_Y * (1 - u) + h * u;
       }
     }
@@ -329,7 +337,7 @@ function heightAt(spec, x, z) {
     h = Math.min(Math.max(h, 1.05), flatten);
   }
   const beachStart = spec.id === "south" ? 0.68 : 0.8;
-  const skipBeach = spec.id === "south" && (distToSouthGrade(x, z) < 100 || portD < 200);
+  const skipBeach = spec.id === "south" && (distToSouthGrade(x, z) < 280 || portD < 400);
   if (t > beachStart && !skipBeach) {
     const beach = (t - beachStart) / (1 - beachStart);
     h = h * (1 - beach) + 0.32 * beach;
@@ -777,8 +785,8 @@ function makeTerrain(spec) {
   // Dense enough to carry the cove and the port apron. 96x64 cells were 90 m
   // wide: the carved pier slot dragged whole cells underwater and the harbour
   // rendered as an inland lake.
-  const segsX = spec.id === "south" ? 280 : 224;
-  const segsZ = spec.id === "south" ? 180 : 144;
+  const segsX = spec.id === "south" ? 320 : 224;
+  const segsZ = spec.id === "south" ? 210 : 144;
   const geo = new THREE.PlaneGeometry(spec.rx * 2.15, spec.rz * 2.15, segsX, segsZ);
   geo.rotateX(-Math.PI / 2);
   const pos = geo.attributes.position;

@@ -21,6 +21,14 @@ export const SOUTH_MIN_LOT_M2 = 90;
 export const SOUTH_MAX_LOT_M2 = 12000;
 /** Harbour / street grade. Keep in sync with heightAt. */
 export const SOUTH_GRADE_Y = 1.28;
+/** Metres from highway / towns that stay table-flat. Keep in sync with main.js heightAt. */
+export const SOUTH_GRADE_FLAT_M = 280;
+/** Blend from flat grade out to the volcano / island dome. */
+export const SOUTH_GRADE_BLEND_M = 560;
+/** Wider apron on the west towns (spawn, Quayward, Canebrake, Saltwind). */
+export const SOUTH_WEST_FLAT_M = 360;
+export const SOUTH_WEST_BLEND_M = 740;
+export const SOUTH_WEST_APRON_X = 900;
 
 /** Spawn on the quay, a few metres inland along the highway (+X). */
 export function southSpawnPad(): XZ {

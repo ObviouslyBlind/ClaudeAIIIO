@@ -15,5 +15,11 @@ describe("harbour water", () => {
     tickHarbourWater(live, 1.7);
     const z1 = basin.geometry.attributes.position.getZ(0);
     expect(z1).not.toBe(z0);
+    const ocean = scene.userData.oceanWater;
+    expect(ocean.position.y).toBeLessThan(0);
+    expect(ocean.geometry.parameters.widthSegments).toBeGreaterThan(8);
+    const southSea = live[3];
+    expect(southSea.position.z).toBeLessThan(7280 - 400);
+    expect(Math.abs(southSea.position.x + 2280)).toBeLessThan(1);
   });
 });

@@ -92,16 +92,17 @@ function channelStrip() {
   return mesh;
 }
 
-function harbourSea(cx, cz) {
-  const geo = new THREE.PlaneGeometry(2800, 2800, 40, 40);
-  ripple(geo, 0.22, cx, cz);
+function harbourSea(cx, cz, seawardZ) {
+  const geo = new THREE.PlaneGeometry(2400, 1800, 24, 18);
+  ripple(geo, 0.07, cx, cz + seawardZ);
   const mesh = addWaterMesh(
     geo,
     new THREE.MeshLambertMaterial({ color: WATER_COLOR }),
-    0.04,
+    0.02,
   );
   mesh.position.x = cx;
-  mesh.position.z = cz;
+  mesh.position.z = cz + seawardZ;
+  mesh.userData.chop = 0.06;
   return mesh;
 }
 
@@ -111,8 +112,8 @@ function stashRest(mesh) {
 }
 
 /**
- * Cheap harbour chop. Far ocean stays a 4-vert quad. Near each port a 2.8 km
- * patch (plus the quay basin) moves. Local +Z is world height after rotation.
+ * Cheap harbour chop. Far ocean is a tessellated quad below the basins.
+ * Live patches stay on the water, not over the town dirt.
  */
 export function tickHarbourWater(meshes, t) {
   if (!meshes || !meshes.length) return;
@@ -126,10 +127,11 @@ export function tickHarbourWater(meshes, t) {
       const x = rest[i * 3];
       const y = rest[i * 3 + 1];
       const z0 = rest[i * 3 + 2];
+      const amp = Number(mesh.userData.chop) || 0.12;
       arr[i * 3 + 2] =
         z0 +
-        0.45 * Math.sin(x * 0.11 + time * 1.35) +
-        0.28 * Math.sin(y * 0.09 - time * 1.05);
+        amp * Math.sin(x * 0.11 + time * 1.35) +
+        amp * 0.55 * Math.sin(y * 0.09 - time * 1.05);
     }
     pos.needsUpdate = true;
     mesh.geometry.computeVertexNormals();
@@ -138,10 +140,11 @@ export function tickHarbourWater(meshes, t) {
 
 export function makeWater(scene) {
   const water = addWaterMesh(
-    new THREE.PlaneGeometry(80000, 80000),
+    new THREE.PlaneGeometry(80000, 80000, 24, 24),
     new THREE.MeshLambertMaterial({ color: WATER_COLOR }),
-    0,
+    -0.35,
   );
+  water.renderOrder = -2;
   scene.add(water);
   const live = [];
   function addLive(mesh) {
@@ -150,11 +153,15 @@ export function makeWater(scene) {
     scene.add(mesh);
     return mesh;
   }
-  addLive(channelStrip());
-  addLive(harbourBasin(-6835));
-  addLive(harbourBasin(6835));
-  addLive(harbourSea(-2280, 7280));
-  addLive(harbourSea(0, -6950));
+  const channel = addLive(channelStrip());
+  channel.userData.chop = 0.08;
+  const northBasin = addLive(harbourBasin(-6835));
+  const southBasin = addLive(harbourBasin(6835));
+  northBasin.userData.chop = 0.14;
+  southBasin.userData.chop = 0.14;
+  addLive(harbourSea(-2280, 7280, -1200));
+  addLive(harbourSea(0, -6950, 1200));
   scene.userData.harbourWater = live;
+  scene.userData.oceanWater = water;
   return water;
 }

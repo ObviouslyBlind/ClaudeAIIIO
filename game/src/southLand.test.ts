@@ -73,6 +73,12 @@ describe("South land (no buildings)", () => {
     expect(Math.abs(yHwy - 1.28)).toBeLessThan(0.08);
     expect(Math.abs(yRab - 1.28)).toBeLessThan(0.08);
     expect(Math.abs(yHwy - yPort)).toBeLessThan(0.08);
+    const quay = SOUTH_TOWNS[0]!;
+    const yTown = heightAt(s, quay.x, quay.z);
+    const yLot = heightAt(s, quay.x + 120, quay.z - 80);
+    expect(Math.abs(yTown - 1.28)).toBeLessThan(0.08);
+    expect(Math.abs(yLot - 1.28)).toBeLessThan(0.08);
+    expect(heightAt(s, SOUTH_VOLCANO.x + 200, SOUTH_VOLCANO.z)).toBeGreaterThan(20);
   });
 
   it("puts street lots on both sides and seeds hamlets so long roads are not a void", () => {

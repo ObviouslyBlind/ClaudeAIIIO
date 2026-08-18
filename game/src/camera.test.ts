@@ -1,12 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { spawnCameraOffset } from "../public/harbour/roads.js";
 import {
+  cameraNearForRadius,
   cartesianToSpherical,
   createOrbitState,
   handleOrbitPointer,
   LMB,
   RMB,
   sphericalToCartesian,
+  ZOOM_MAX_M,
+  ZOOM_MIN_M,
 } from "../public/harbour/camera.js";
 
 describe("RMB-hold orbit camera", () => {
@@ -105,5 +108,11 @@ describe("RMB-hold orbit camera", () => {
     expect(moved.yaw).toBe(start.yaw);
     expect(moved.orbited).toBe(false);
     expect(moved.dragging).toBe(false);
+  });
+
+  it("widens the near clip as you zoom out so water does not punch through", () => {
+    expect(cameraNearForRadius(ZOOM_MIN_M)).toBeCloseTo(0.4, 5);
+    expect(cameraNearForRadius(ZOOM_MAX_M)).toBeGreaterThan(4);
+    expect(cameraNearForRadius(ZOOM_MAX_M)).toBeLessThan(ZOOM_MAX_M * 0.2);
   });
 });
