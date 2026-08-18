@@ -44,7 +44,10 @@ describe("foot-traffic viewer (PAPER)", () => {
     });
     overlays.setMode("lots", {}, land);
     const lines = overlays.group.children.filter((c) => c.userData.kind === "lot-outline");
-    expect(lines.length).toBeGreaterThan(8);
-    expect(lines.every((l) => l.userData.plotId && l.userData.zone)).toBe(true);
+    expect(lines.length).toBe(1);
+    expect(lines[0].userData.plotCount).toBeGreaterThan(8);
+    expect(lines[0].geometry.getAttribute("position").count).toBeGreaterThan(64);
+    overlays.setMode("world", {}, land);
+    expect(overlays.group.children.filter((c) => c.userData.kind === "lot-outline").length).toBe(0);
   });
 });
