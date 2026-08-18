@@ -173,7 +173,7 @@ describe("paved street from spawn", () => {
         nearest = Math.min(nearest, Math.hypot(pos.getX(i) - se.x, pos.getZ(i) - se.z));
       }
     }
-    expect(nearest, "kerb vanished a block before the SE hub").toBeLessThan(11);
+    expect(nearest, "kerb vanished a block before the SE hub").toBeLessThan(9);
   });
 
   it("extrudes each dirt polyline as one brown ribbon, not a chain of box slabs", () => {

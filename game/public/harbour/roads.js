@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { ROAD_CLASSES, carriagewayWidthM, roadClassSpec } from "./roadclass.js";
 import { junctionPad, trimPolylineForPads, pointInJunctionPad } from "./roadnet.js";
 import { addQuadXZ, junctionKerbQuads } from "./roadjoin.js";
-import { buildHubFootprint } from "./roadfoot.js";
+import { buildHubFootprint, clipPolylineToOutside, multiContains } from "./roadfoot.js";
 
 /** Grit shoulder under the tarmac edge, so a road has a rim instead of a cut edge. */
 export const SHOULDER = 0x6f6a5e;
@@ -283,6 +283,25 @@ function omitInsidePads(pts, graph, extra) {
   });
 }
 
+function collectHubs(graph) {
+  const hubs = [];
+  if (!graph || !graph.nodes) return hubs;
+  for (const node of graph.nodes) {
+    const pad = junctionPad(graph, node);
+    if (!pad) continue;
+    hubs.push({ node, pad, foot: buildHubFootprint(graph, node, pad) });
+  }
+  return hubs;
+}
+
+function insideHubWalk(hubs, x, z) {
+  for (const h of hubs) {
+    if (h.foot.sidewalk && h.foot.sidewalk.length && multiContains(h.foot.sidewalk, x, z)) return true;
+    if (h.foot.tarmac && multiContains(h.foot.tarmac, x, z)) return true;
+  }
+  return false;
+}
+
 function splitRuns(pts, maxGap) {
   const runs = [];
   let run = [];
@@ -298,7 +317,7 @@ function splitRuns(pts, maxGap) {
   return runs;
 }
 
-function drawSidewalks(scene, spec, road, heightAt, centres, graph) {
+function drawSidewalks(scene, spec, road, heightAt, centres, graph, hubs) {
   if (!hasSidewalk(road)) return;
   const cls = classOf(road);
   const walk = roadClassSpec(cls).sidewalkM;
@@ -306,12 +325,14 @@ function drawSidewalks(scene, spec, road, heightAt, centres, graph) {
   if (pts.length < 2) return;
   const offset = roadClassSpec(cls).carriageM / 2 + SHOULDER_PAD_M / 2 + walk / 2;
   // Offset walks would otherwise keep going and hash through the junction
-  // as a grey plus. Clip them to the plate; the hub walk fills the join.
-  // Graph stations are ~26 m apart — without densify the last kept point is
-  // a block away and the kerb vanishes before every T/L.
+  // as a grey plus. Cut them on the hub polygon so the kerb meets the join.
   for (const side of [-1, 1]) {
-    const clipped = omitInsidePads(offsetPolyline(pts, offset * side), graph, walk + 0.8);
-    for (const run of splitRuns(clipped, 10)) {
+    const offsetPts = offsetPolyline(pts, offset * side);
+    const pieces = hubs && hubs.length
+      ? clipPolylineToOutside(offsetPts, (x, z) => insideHubWalk(hubs, x, z))
+      : splitRuns(omitInsidePads(offsetPts, graph, walk + 0.8), 10);
+    for (const run of pieces) {
+      if (!run || run.length < 2) continue;
       drawRibbon(scene, spec, { ...road, points: run }, heightAt, walk, SIDEWALK, "sidewalk");
     }
   }
@@ -716,9 +737,18 @@ function addMultiPolygonMesh(scene, mp, y, color, userData) {
     geo.setAttribute("position", new THREE.BufferAttribute(flat, 3));
     if (g.index) geo.setIndex(Array.from(g.index.array));
     geo.computeVertexNormals();
-    const mesh = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ color }));
+    const mesh = new THREE.Mesh(
+      geo,
+      new THREE.MeshLambertMaterial({
+        color,
+        polygonOffset: true,
+        polygonOffsetFactor: -3,
+        polygonOffsetUnits: -3,
+      }),
+    );
     mesh.castShadow = false;
     mesh.receiveShadow = true;
+    mesh.renderOrder = 3;
     mesh.userData = { kind: "road", mode: "PAPER", ...userData };
     mesh.name = `road:${userData.island}:${userData.roadName}`;
     scene.add(mesh);
@@ -727,15 +757,12 @@ function addMultiPolygonMesh(scene, mp, y, color, userData) {
   return n;
 }
 
-function drawHubs(scene, map, specOf, heightAt) {
-  const graph = map.graph;
-  if (!graph || !graph.nodes) return;
-  for (const node of graph.nodes) {
-    const pad = junctionPad(graph, node);
-    if (!pad) continue;
+function drawHubs(scene, map, specOf, heightAt, hubs) {
+  const list = hubs || collectHubs(map.graph);
+  for (const rec of list) {
+    const { node, pad, foot } = rec;
     const spec = specOf(node.island);
     const y = heightAt(spec, node.x, node.z);
-    const foot = buildHubFootprint(graph, node, pad);
     const base = { island: node.island, footprint: true, label: node.name || "junction" };
     addMultiPolygonMesh(scene, foot.sidewalk, y + 0.08, SIDEWALK, {
       ...base,
@@ -779,6 +806,7 @@ function drawLegacyJoins(scene, map, specOf, heightAt) {
 export function makeRoads(map, helpers) {
   const { scene, specOf, heightAt } = helpers;
   const centres = rabCentres(map);
+  const hubs = collectHubs(map.graph);
   for (const road of map.roads) {
     const spec = specOf(road.island);
     if (road.kind === "paved" && road.lanes === 4) {
@@ -787,12 +815,12 @@ export function makeRoads(map, helpers) {
       drawRoundabout(scene, spec, road, heightAt, map.graph);
     } else if (road.kind === "paved") {
       drawPaved(scene, spec, road, heightAt, map.graph);
-      drawSidewalks(scene, spec, road, heightAt, centres, map.graph);
+      drawSidewalks(scene, spec, road, heightAt, centres, map.graph, hubs);
     } else {
       drawDirt(scene, spec, road, heightAt);
     }
   }
-  drawHubs(scene, map, specOf, heightAt);
+  drawHubs(scene, map, specOf, heightAt, hubs);
   drawLegacyJoins(scene, map, specOf, heightAt);
   drawCircusApproaches(scene, map, specOf, heightAt);
   drawNorthPortCurbs(scene, map, specOf, heightAt);

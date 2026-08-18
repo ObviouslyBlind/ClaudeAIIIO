@@ -6,7 +6,7 @@
  * Ribbons still draw the runs. Hubs only exist at joins.
  */
 import polygonClipping from "./vendor/polygon-clipping.js";
-import { roadClassSpec } from "./roadclass.js";
+import { carriagewayWidthM, roadClassSpec } from "./roadclass.js";
 
 /** Keep in sync with SHOULDER_PAD_M in roads.js. */
 export const FOOT_SHOULDER_M = 2.2;
@@ -46,19 +46,19 @@ function armDir(node, edge) {
   return { x: dx / len, z: dz / len };
 }
 
-/** Square-capped rectangle. Ends stick out by `half` so a 90° outer corner is square. */
+/** Square-capped at the junction end only. The far end must not eat a block of kerb. */
 export function segmentRing(a, b, half) {
   const dx = b.x - a.x;
   const dz = b.z - a.z;
   const len = Math.hypot(dx, dz) || 1;
-  const tx = (dx / len) * half;
-  const tz = (dz / len) * half;
-  const rx = (dz / len) * half;
-  const rz = (-dx / len) * half;
-  const ax = a.x - tx;
-  const az = a.z - tz;
-  const bx = b.x + tx;
-  const bz = b.z + tz;
+  const tx = dx / len;
+  const tz = dz / len;
+  const rx = tz * half;
+  const rz = -tx * half;
+  const ax = a.x - tx * half;
+  const az = a.z - tz * half;
+  const bx = b.x + tx * 0.2;
+  const bz = b.z + tz * 0.2;
   return closeRing([
     [snap(ax + rx), snap(az + rz)],
     [snap(ax - rx), snap(az - rz)],
@@ -106,7 +106,60 @@ export function multiContains(mp, x, z) {
 }
 
 /**
+ * Keep the parts of a polyline that sit outside `insideFn`.
+ * Crossing segments are cut on the boundary so a kerb meets the hub
+ * instead of stopping a densify-step short (the grey hairline).
+ */
+export function clipPolylineToOutside(pts, insideFn) {
+  if (!pts || pts.length < 2 || !insideFn) return pts || [];
+  const runs = [];
+  let run = [];
+  for (let i = 0; i < pts.length; i++) {
+    const p = pts[i];
+    const inn = insideFn(p.x, p.z);
+    if (inn) {
+      if (run.length) {
+        const cut = boundaryPoint(run[run.length - 1], p, insideFn);
+        if (cut) run.push(cut);
+        if (run.length >= 2) runs.push(run);
+        run = [];
+      }
+    } else {
+      if (!run.length && i > 0 && insideFn(pts[i - 1].x, pts[i - 1].z)) {
+        const cut = boundaryPoint(pts[i - 1], p, insideFn);
+        if (cut) run.push(cut);
+      }
+      run.push(p);
+    }
+  }
+  if (run.length >= 2) runs.push(run);
+  return runs;
+}
+
+function boundaryPoint(insidePt, outsidePt, insideFn) {
+  let a = insidePt;
+  let b = outsidePt;
+  if (!insideFn(a.x, a.z) && insideFn(b.x, b.z)) {
+    a = outsidePt;
+    b = insidePt;
+  }
+  if (!insideFn(a.x, a.z)) return { x: b.x, z: b.z };
+  let cut = { x: b.x, z: b.z };
+  for (let k = 0; k < 12; k++) {
+    const t = 0.5;
+    const p = { x: a.x + (b.x - a.x) * t, z: a.z + (b.z - a.z) * t };
+    if (insideFn(p.x, p.z)) a = p;
+    else {
+      cut = p;
+      b = p;
+    }
+  }
+  return cut;
+}
+
+/**
  * Union of the arm-end rectangles at one node. 2–4 rects. Not the island.
+ * Dual highway arms use the full carriageway (both lanes + median), not one lane.
  */
 export function buildHubFootprint(graph, node, pad) {
   const tarmac = [];
@@ -122,12 +175,11 @@ export function buildHubFootprint(graph, node, pad) {
     const dir = armDir(node, e);
     const far = { x: node.x + dir.x * along, z: node.z + dir.z * along };
     const origin = { x: node.x, z: node.z };
-    tarmac.push([segmentRing(origin, far, spec.carriageM / 2)]);
-    grit.push([segmentRing(origin, far, spec.carriageM / 2 + FOOT_SHOULDER_M / 2)]);
+    const half = carriagewayWidthM(e.cls) / 2;
+    tarmac.push([segmentRing(origin, far, half)]);
+    grit.push([segmentRing(origin, far, half + FOOT_SHOULDER_M / 2)]);
     if (spec.sidewalkM > 0) {
-      walk.push([
-        segmentRing(origin, far, spec.carriageM / 2 + FOOT_SHOULDER_M / 2 + spec.sidewalkM),
-      ]);
+      walk.push([segmentRing(origin, far, half + FOOT_SHOULDER_M / 2 + spec.sidewalkM)]);
     }
   }
   return {
