@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ndcToLayer, pickTagPlots, tagKindFor, tagLabelFor } from "../public/harbour/lot-tags.js";
+import { ndcToLayer, pickTagPlots, TAG_RADIUS_LOTS_M, tagKindFor, tagLabelFor } from "../public/harbour/lot-tags.js";
 
 describe("lot tags (PAPER)", () => {
   it("labels vacant as the $ bar, yours, and taken", () => {
@@ -21,6 +21,17 @@ describe("lot tags (PAPER)", () => {
     const picked = pickTagPlots(plots, { x: 0, z: 0 }, "world", 8);
     expect(picked[0].plot.id).toBe("near-buy");
     expect(picked.some((x) => x.plot.id === "near-taken")).toBe(true);
+  });
+
+  it("keeps Lots $ bars nearby, not the whole island", () => {
+    expect(TAG_RADIUS_LOTS_M).toBeLessThanOrEqual(280);
+    const plots = [
+      { id: "far-buy", owner: null, price: 40, x: 800, z: 0 },
+      { id: "near-buy", owner: null, price: 40, x: 20, z: 0 },
+    ];
+    const picked = pickTagPlots(plots, { x: 0, z: 0 }, "lots", 8);
+    expect(picked.some((x) => x.plot.id === "near-buy")).toBe(true);
+    expect(picked.some((x) => x.plot.id === "far-buy")).toBe(false);
   });
 
   it("maps NDC onto the canvas box", () => {

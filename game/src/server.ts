@@ -262,7 +262,7 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "POST" && url.pathname === "/api/stand/hire") {
     const body = await readJsonBody(req);
-    const result = hireStand(visitor, String(body?.standId ?? ""));
+    const result = hireStand(visitor, String(body?.standId ?? ""), body?.personId ? String(body.personId) : undefined);
     json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
     return;
   }

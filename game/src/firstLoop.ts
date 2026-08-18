@@ -77,6 +77,13 @@ export const MARKET_CATALOG: CatalogSku[] = [
 /** Metres from your lot toward the paved road where a cart may sit. */
 export const PLACE_CORRIDOR_M = 22;
 
+/** PAPER people you can put on a cart. Not live hires. */
+export const HIRE_ROSTER: { id: string; name: string; role: string }[] = [
+  { id: "pat", name: "Pat K.", role: "Cart vendor" },
+  { id: "rui", name: "Rui M.", role: "Cart vendor" },
+  { id: "sam", name: "Sam D.", role: "Cart vendor" },
+];
+
 export type Delivery = {
   id: string;
   island: IslandId;
@@ -96,6 +103,8 @@ export type Stand = {
   z: number;
   hotdogs: number;
   hired: boolean;
+  staffId: string | null;
+  staffName: string | null;
   attending: boolean;
   sellAcc: number;
   mode: "PAPER";
@@ -275,6 +284,8 @@ export function placeStand(
     z,
     hotdogs: 0,
     hired: false,
+    staffId: null,
+    staffName: null,
     attending: false,
     sellAcc: 0,
     mode: "PAPER",
@@ -299,12 +310,22 @@ export function stockStand(
   return ok({ stand });
 }
 
-export function hireStand(visitor: Visitor, standId: string): LoopOk<{ stand: Stand }> | LoopFail {
+export function hireStand(
+  visitor: Visitor,
+  standId: string,
+  personId?: string,
+): LoopOk<{ stand: Stand }> | LoopFail {
   const play = ensurePlay(visitor);
   const stand = play.stands.find((s) => s.id === standId);
   if (!stand) return fail("no_stand");
   if (stand.hired) return fail("already_hired");
+  const person = personId
+    ? HIRE_ROSTER.find((p) => p.id === personId)
+    : HIRE_ROSTER[0];
+  if (!person) return fail("no_person");
   stand.hired = true;
+  stand.staffId = person.id;
+  stand.staffName = person.name;
   return ok({ stand });
 }
 
@@ -363,6 +384,7 @@ export function playSnapshot(visitor: Visitor, land: LandBoard) {
     aisles: MARKET_AISLES,
     catalog: MARKET_CATALOG,
     inventory: play.inventory.map((row) => ({ ...row })),
+    hireRoster: HIRE_ROSTER.map((p) => ({ ...p })),
     deliveries: play.deliveries.map((d) => ({ ...d, items: d.items.map((i) => ({ ...i })) })),
     stands: play.stands.map((s) => ({ ...s })),
     leases: land.plots.filter((p) => p.owner === "visitor" && p.island === "south").map((p) => ({

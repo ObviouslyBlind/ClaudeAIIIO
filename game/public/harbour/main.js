@@ -382,21 +382,39 @@ async function placeCartOn(plot, x, z) {
   });
   const data = await res.json();
   if (!res.ok) {
-    setStatus("Could not place: " + (data.reason || "fail") + " · PAPER");
-    const hint = document.getElementById("place-hint");
-    if (hint) {
-      hint.hidden = false;
-      hint.textContent =
-        data.reason === "not_yours"
-          ? "Tap the green YOURS lot, or the verge out to the road."
-          : "Could not place: " + (data.reason || "fail") + " · PAPER";
+    const reason = data.reason || "fail";
+    if (reason === "already_placed" || reason === "no_cart") {
+      if (chromeHud) chromeHud.clearPlacing();
+      if (chromeHud && chromeHud.setOverlay) chromeHud.setOverlay("world");
+      setStatus(
+        reason === "already_placed"
+          ? "Cart is already on that lot. Tap the cart to stock it. PAPER."
+          : "No cart in inventory. PAPER.",
+      );
+      const play = chromeHud && chromeHud.getPlay && chromeHud.getPlay();
+      const stands = (play && play.stands) || [];
+      const stand = stands.find((s) => plot && s.plotId === plot.id) || stands[0];
+      if (stand && reason === "already_placed") openStandMenu(stand.id);
+      return;
     }
+    setStatus("Could not place: " + reason + " · PAPER");
+    const line = document.getElementById("place-hint-text");
+    if (line) {
+      line.textContent =
+        reason === "not_yours"
+          ? "Tap the green YOURS lot, or the verge out to the road."
+          : "Could not place: " + reason + " · PAPER";
+    }
+    const hint = document.getElementById("place-hint");
+    if (hint) hint.hidden = false;
     return;
   }
   if (chromeHud) chromeHud.clearPlacing();
+  if (chromeHud && chromeHud.setOverlay) chromeHud.setOverlay("world");
   syncStandMesh(data.stand);
   if (chromeHud) chromeHud.refresh();
-  setStatus("Cart placed. Stock hotdogs, then hire. PAPER.");
+  setStatus("Cart placed. Inv → Stock cart, or tap the cart. PAPER.");
+  if (data.stand) openStandMenu(data.stand.id);
 }
 
 function attachVendor(cart) {
@@ -521,27 +539,24 @@ function openStandMenu(standId) {
   chromeHud.paintStandMenu(
     stand,
     async () => {
-      await fetch("/api/stand/stock", {
+      const res = await fetch("/api/stand/stock", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ standId }),
       });
+      const data = await res.json().catch(() => ({}));
       chromeHud.refresh();
       chromeHud.hideStandMenu();
-      setStatus("Hotdogs in the cart. PAPER · SIMULATED.");
+      setStatus(
+        res.ok
+          ? "Hotdogs in the cart. PAPER · SIMULATED."
+          : "Could not stock: " + (data.reason || "fail") + " · PAPER",
+      );
     },
     async () => {
-      await fetch("/api/stand/hire", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ standId }),
-      });
-      chromeHud.refresh();
       chromeHud.hideStandMenu();
-      const playNow = chromeHud.getPlay && chromeHud.getPlay();
-      const hired = playNow && (playNow.stands || []).find((s) => s.id === standId);
-      if (hired) syncStandMesh({ ...hired, hired: true });
-      setStatus("Hired. A vendor stands by the cart. PAPER.");
+      if (chromeHud.open) chromeHud.open("employees");
+      setStatus("Staff: pick who works this cart. PAPER.");
     },
     async () => {
       await fetch("/api/stand/attend", {
@@ -614,6 +629,7 @@ function refreshHud() {
   cashEl.textContent = "Cash $" + money(map.visitor.cash);
   if (staffHud) staffHud.sync();
   const inside = interior && interior.isInside();
+  const riding = taxi && typeof taxi.riding === "function" && taxi.riding();
   if (inside) {
     placeEl.textContent = interior.currentFloor() === "upstairs" ? "Upstairs" : "Downstairs";
     plotLineEl.textContent = "Inside · PAPER · SIMULATED";
@@ -626,11 +642,16 @@ function refreshHud() {
     if (btnExit) {
       btnExit.disabled = false;
       btnExit.hidden = false;
+      btnExit.textContent = "Exit";
     }
     return;
   }
   placeEl.textContent = specOf(islandId).name;
-  if (btnExit) btnExit.hidden = true;
+  if (btnExit) {
+    btnExit.hidden = !riding;
+    btnExit.disabled = !riding;
+    btnExit.textContent = "Exit taxi";
+  }
   const pSel = selected ? map.plots.find((x) => x.id === selected) : null;
   if (btnEnter) {
     const show = Boolean(pSel && canEnter(pSel));
@@ -1225,6 +1246,13 @@ function onPointer(ev) {
     void placeCartOn(tapped, tapPt?.x, tapPt?.z);
     return;
   }
+  if (standHit) {
+    const standObj = objectWithStand(standHit.object);
+    if (standObj) {
+      openStandMenu(standObj.userData.standId);
+      return;
+    }
+  }
   const tagPick =
     viewer === "lots" &&
     parcelMap &&
@@ -1285,11 +1313,6 @@ function onPointer(ev) {
   }
   if (vanHit && viewer === "logistics") {
     setStatus("Van on the paved road. Crate drops on the kerb. PAPER.");
-    return;
-  }
-  if (standHit && viewer === "world") {
-    const standObj = objectWithStand(standHit.object);
-    if (standObj) openStandMenu(standObj.userData.standId);
     return;
   }
   if (buildingHit && viewer === "world") {
@@ -1583,6 +1606,9 @@ async function ensureTaxi() {
     },
     setStatus,
     button: btnTaxi,
+    onRide() {
+      refreshHud();
+    },
   });
   return taxi;
 }
@@ -1717,8 +1743,6 @@ async function boot() {
   makePort(specOf("south"));
   makePalms(specOf("south"));
   harbourGroup = wrapHarbourWorld(scene, { keep: [player, sun.target] });
-  await makeParcels(nearSouthSpawn);
-  await idle(48);
   parcelMap = mountParcelMap({
     worldAdd,
     specOf,
@@ -1738,6 +1762,8 @@ async function boot() {
     },
   });
   ground.push(...parcelMap.buildIsland("south"));
+  await idle(48);
+  await makeParcels(nearSouthSpawn);
   overlays = createOverlays({
     scene: harbourGroup || scene,
     heightAt,
@@ -1761,6 +1787,13 @@ async function boot() {
       }
       if (chromeHud) chromeHud.refresh();
     },
+    onHired(standId) {
+      const playNow = chromeHud && chromeHud.getPlay && chromeHud.getPlay();
+      const hired = playNow && (playNow.stands || []).find((s) => s.id === standId);
+      if (hired) syncStandMesh({ ...hired, hired: true });
+      setStatus("Hired. They stand by the cart. PAPER.");
+    },
+    onStocked() {},
     onOverlay(id) {
       const play = chromeHud && typeof chromeHud.getPlay === "function" ? chromeHud.getPlay() : null;
       if (overlays) overlays.setMode(id, play, map);
@@ -1848,7 +1881,18 @@ if (btnEnter) {
     if (p) enterPlot(p);
   });
 }
-if (btnExit) btnExit.addEventListener("click", leaveInterior);
+if (btnExit) {
+  btnExit.addEventListener("click", () => {
+    if (interior && interior.isInside()) {
+      leaveInterior();
+      return;
+    }
+    if (taxi && typeof taxi.hopOut === "function" && taxi.riding && taxi.riding()) {
+      taxi.hopOut();
+      setStatus("Out of the taxi. PAPER.");
+    }
+  });
+}
 btnFerry.addEventListener("click", ferry);
 window.addEventListener("resize", onResize);
 scene.add(sun.target);

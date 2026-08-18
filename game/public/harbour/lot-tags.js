@@ -5,9 +5,10 @@
 
 import * as THREE from "three";
 
-export const TAG_POOL = 80;
-export const TAG_RADIUS_M = 420;
-export const TAG_RADIUS_LOTS_M = 1100;
+export const TAG_POOL = 28;
+export const TAG_RADIUS_M = 180;
+/** Nearby streets only. Whole-island tags made the $ bars unreadable. */
+export const TAG_RADIUS_LOTS_M = 240;
 
 export function tagKindFor(plot) {
   if (!plot) return "none";
@@ -72,6 +73,7 @@ export function mountLotTags({ canvas, camera, heightAt, specOf, getPlots, onBuy
   const tmp = new THREE.Vector3();
   let clock = 0;
   let placingMode = false;
+  let shownCache = [];
 
   function buttonAt(i) {
     if (buttons[i]) return buttons[i];
@@ -105,6 +107,8 @@ export function mountLotTags({ canvas, camera, heightAt, specOf, getPlots, onBuy
   function tick(playerPos, dt = 0.016, overlay = "world", placing = false) {
     placingMode = Boolean(placing);
     if (overlay !== "lots") {
+      shownCache = [];
+      clock = 0;
       root.hidden = true;
       for (const btn of buttons) {
         if (btn) btn.hidden = true;
@@ -113,17 +117,18 @@ export function mountLotTags({ canvas, camera, heightAt, specOf, getPlots, onBuy
     }
     root.hidden = false;
     clock -= dt;
-    if (clock > 0) return;
-    clock = overlay === "lots" ? 0.12 : 0.28;
+    if (clock <= 0) {
+      clock = 0.2;
+      shownCache = pickTagPlots(getPlots(), playerPos, overlay, TAG_POOL).filter((slot) =>
+        placingMode ? slot.kind === "yours" : true,
+      );
+    }
     if (!camera || !canvas) return;
     const rect = canvas.getBoundingClientRect();
     if (rect.width < 8 || rect.height < 8) return;
-    const shown = pickTagPlots(getPlots(), playerPos, overlay, TAG_POOL).filter((slot) =>
-      placingMode ? slot.kind === "yours" : true,
-    );
     for (let i = 0; i < TAG_POOL; i++) {
       const btn = buttonAt(i);
-      const slot = shown[i];
+      const slot = shownCache[i];
       if (!slot) {
         btn.hidden = true;
         btn.dataset.plotId = "";
