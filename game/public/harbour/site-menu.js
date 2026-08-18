@@ -60,6 +60,13 @@ function ownedUpgrades(site) {
   return list;
 }
 
+function stickerTone(sticker, today) {
+  const d = Math.abs(Number(sticker) - Number(today));
+  if (d < 0.01) return "is-today";
+  if (d <= 1.5) return "is-near";
+  return "is-far";
+}
+
 function stockBand(have, cap) {
   const r = have / Math.max(cap, 1);
   if (r <= 0.25) return "is-low";
@@ -78,10 +85,15 @@ function paintStock(site, play) {
   const room = Math.max(0, cap - have);
   const maxFromInv = Math.min(invQty, room);
   const maxFromWh = Math.min(whQty, room);
-  const vs = Math.abs(sticker - todayN) < 0.01 ? "is-today" : sticker < todayN ? "is-low" : "is-high";
+  const vs = stickerTone(sticker, todayN);
   const min = 1;
   const max = 11;
-  const mark = ((todayN - min) / (max - min)) * 100;
+  const span = max - min;
+  const mark = ((todayN - min) / span) * 100;
+  const zoneLo = Math.max(min, todayN - 1.5);
+  const zoneHi = Math.min(max, todayN + 1.5);
+  const zoneLeft = ((zoneLo - min) / span) * 100;
+  const zoneWidth = ((zoneHi - zoneLo) / span) * 100;
   const mine = site.siteClass === "mine";
   const hired = Boolean(site.hired);
   const loaders =
@@ -102,6 +114,7 @@ function paintStock(site, play) {
     <div class="sticker-slide">
       <span class="sticker-read ${vs}" data-sticker-out>${money(sticker)}</span>
       <div class="sticker-track">
+        <i class="sticker-zone" style="left:${zoneLeft}%;width:${zoneWidth}%"></i>
         <i class="sticker-mark" style="left:${mark}%"></i>
         <input id="sticker-price" type="range" min="${min}" max="${max}" step="0.5" value="${sticker}" />
       </div>

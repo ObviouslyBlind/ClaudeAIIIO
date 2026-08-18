@@ -9,7 +9,7 @@ import {
   spawnLookAtOffset,
 } from "./roads.js";
 import { canEnter, objectWithKind, wrapHarbourWorld } from "./harbour-world.js";
-import { createPlayCamera } from "./camera.js";
+import { createPlayCamera, PLAY_FOV } from "./camera.js";
 import { createFerryTicket } from "./ferry-ticket.js";
 import { makeWater, tickHarbourWater } from "./water.js";
 import { makeSky } from "./sky.js";
@@ -103,7 +103,7 @@ makeSky(scene);
 
 const camera =
   (first && first.camera) ||
-  new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.4, CAMERA_FAR_M);
+  new THREE.PerspectiveCamera(PLAY_FOV, window.innerWidth / window.innerHeight, 0.4, CAMERA_FAR_M);
 
 scene.add(new THREE.HemisphereLight(0xb8e4ff, 0xc4a574, 1.15));
 const sun = new THREE.DirectionalLight(0xfff1d0, 2.1);
@@ -540,9 +540,14 @@ function attachVendor(cart) {
   cart.add(vendor);
 }
 
-function detachVendor(cart) {
-  const vendor = cart && cart.getObjectByName("vendor");
-  if (vendor) cart.remove(vendor);
+function tickVendors(t) {
+  for (const mesh of standMeshes.values()) {
+    const vendor = mesh.getObjectByName("vendor");
+    if (!vendor) continue;
+    vendor.position.x = 1.05 + Math.sin(t * 1.7) * 0.22;
+    vendor.position.z = 0.15 + Math.cos(t * 1.1) * 0.12;
+    vendor.rotation.y = Math.sin(t * 0.9) * 0.55;
+  }
 }
 
 function syncStandMesh(stand) {
@@ -1676,6 +1681,7 @@ function tick(dt) {
   if (traffic) traffic.tick(dt);
   if (deliveries) deliveries.tick(dt);
   pulseCrateGlow();
+  tickVendors(clock.elapsedTime);
   if (econHud) econHud.tick(dt);
   if (walking) {
     const dx = walkTarget.x - player.position.x;

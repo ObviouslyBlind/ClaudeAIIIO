@@ -486,8 +486,8 @@ export function mountChrome(opts) {
         if (!priceOut) return;
         priceOut.textContent = money(v);
         priceOut.classList.toggle("is-today", Math.abs(v - todayN) < 0.01);
-        priceOut.classList.toggle("is-low", v < todayN - 0.01);
-        priceOut.classList.toggle("is-high", v > todayN + 0.01);
+        priceOut.classList.toggle("is-near", Math.abs(v - todayN) > 0.01 && Math.abs(v - todayN) <= 1.5);
+        priceOut.classList.toggle("is-far", Math.abs(v - todayN) > 1.5);
       };
       priceEl.addEventListener("input", paintRead);
       priceEl.addEventListener("change", async () => {

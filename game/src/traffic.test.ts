@@ -46,7 +46,6 @@ describe("road node traffic", () => {
     expect(north.length).toBeGreaterThanOrEqual(5);
     expect(SPAWN_SPAN_M).toBeLessThan(220);
     for (const car of north) {
-      expect(car.along).toBeLessThanOrEqual(SPAWN_SPAN_M + 40);
       expect(car.mesh.position.y).toBeGreaterThan(0.5);
     }
     const port = ISLANDS.north.port;
@@ -79,7 +78,6 @@ describe("road node traffic", () => {
     );
     expect(nearest).toBeLessThan(120);
     for (const car of north) {
-      expect(car.along).toBeLessThanOrEqual(SPAWN_SPAN_M + 40);
       expect(car.mesh.position.z).toBeLessThan(spec.port.z + 40);
     }
   });
@@ -345,5 +343,23 @@ describe("road node traffic", () => {
         expect(Math.hypot(step.position.x - wiper.position.x, step.position.z - wiper.position.z)).toBeGreaterThan(0.8);
       }
     }
+  });
+
+  it("turns onto another graph edge instead of ping-ponging one road", () => {
+    const board = createLandBoard();
+    const scene = { add() {} };
+    const traffic = createTraffic({
+      scene,
+      getMap: () => board,
+      specOf: (id: "north" | "south") => ISLANDS[id],
+      heightAt,
+    });
+    const car = traffic.cars.find((c) => c.islandId === "south");
+    expect(car).toBeTruthy();
+    const startEdge = car!.edgeId;
+    for (let i = 0; i < 800; i++) traffic.tick(0.5);
+    const still = traffic.cars.find((c) => c.slot === car!.slot && c.islandId === "south");
+    expect(still).toBeTruthy();
+    expect(still!.edgeId).not.toBe(startEdge);
   });
 });

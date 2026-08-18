@@ -331,10 +331,10 @@ describe("paved street from spawn", () => {
     const nl = spawnLookAtOffset("north");
     const sl = spawnLookAtOffset("south");
 
-    expect(n.y).toBeGreaterThan(18);
-    expect(n.y).toBeLessThan(40);
+    expect(n.y).toBeGreaterThan(8);
+    expect(n.y).toBeLessThan(22);
     expect(s.y).toBeGreaterThanOrEqual(n.y);
-    expect(s.y).toBeLessThan(40);
+    expect(s.y).toBeLessThan(22);
     expect(Math.abs(n.x)).toBeLessThan(40);
     expect(n.z).toBeGreaterThan(0);
     expect(s.x).toBeLessThan(0);
@@ -357,7 +357,7 @@ describe("paved street from spawn", () => {
       const px = spec.port.x + (id === "south" ? 10 : 0);
       const pz = spec.port.z + (id === "north" ? -8 : 0);
       const py = heightAt(spec, px, pz) + 1.15;
-      const cam = new THREE.PerspectiveCamera(55, 16 / 9, 0.4, CAMERA_FAR_M);
+      const cam = new THREE.PerspectiveCamera(48, 16 / 9, 0.4, CAMERA_FAR_M);
       cam.position.set(px + o.x, py + o.y, pz + o.z);
       cam.lookAt(px + l.x, py + l.y, pz + l.z);
       cam.updateMatrixWorld();
@@ -378,7 +378,7 @@ describe("paved street from spawn", () => {
     const px = north.port.x;
     const pz = north.port.z - 8;
     const py = heightAt(north, px, pz) + 1.15;
-    const cam = new THREE.PerspectiveCamera(55, 16 / 9, 0.4, CAMERA_FAR_M);
+    const cam = new THREE.PerspectiveCamera(48, 16 / 9, 0.4, CAMERA_FAR_M);
     cam.position.set(px + o.x, py + o.y, pz + o.z);
     cam.lookAt(px + l.x, py + l.y, pz + l.z);
     cam.updateMatrixWorld();

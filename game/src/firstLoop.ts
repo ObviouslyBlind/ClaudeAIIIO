@@ -26,6 +26,8 @@ export const STORAGE_UPGRADE_COST = 200;
 export const HIRE_COST = 30;
 export const STICKER_MIN = 1;
 export const STICKER_MAX = 11;
+/** |sticker − today| within this is yellow. Exact match is green. Further is red. */
+export const STICKER_YELLOW = 1.5;
 export const CART_STORAGE = 20;
 export const CART_PAPER_PRICE = 85;
 export const HOTDOG_PACK_PRICE = 3;
@@ -521,19 +523,58 @@ function ownedUpgrades(row: { upgraded?: boolean; upgrades?: string[] }): string
   return list;
 }
 
-function autoStockStand(play: PlayState, stand: Stand): void {
-  if (!stand.hired) return;
-  const stockId = cartKindForStand(stand).stockId;
-  const room = Math.max(0, stand.storageCap - stand.hotdogs);
-  if (room <= 0) return;
-  const have = warehouseQty(play, stockId);
-  const n = Math.min(have, room);
-  if (n > 0 && takeWarehouse(play, stockId, n)) stand.hotdogs = roundMoney(stand.hotdogs + n);
+export function stickerBand(price: number, today = TODAY_PRICE): "green" | "yellow" | "red" {
+  const d = Math.abs(Number(price) - today);
+  if (!Number.isFinite(d) || d < 0.01) return "green";
+  if (d <= STICKER_YELLOW) return "yellow";
+  return "red";
 }
 
-function autoStockWork(play: PlayState, site: WorkSite): void {
+function stickerSellMul(band: "green" | "yellow" | "red"): number {
+  if (band === "green") return 1;
+  if (band === "yellow") return 1.6;
+  return 2.8;
+}
+
+function buyPackInto(
+  visitor: Visitor,
+  play: PlayState,
+  stockId: InvKind,
+  room: number,
+): number {
+  if (room < 1) return 0;
+  const sku = MARKET_CATALOG.find((row) => row.id === stockId);
+  if (!sku || visitor.cash < sku.paperPrice) return 0;
+  const n = Math.min(sku.qty, room);
+  visitor.cash = roundMoney(visitor.cash - sku.paperPrice);
+  play.gameBank = roundMoney(play.gameBank + sku.paperPrice);
+  return n;
+}
+
+function autoStockStand(play: PlayState, stand: Stand, visitor?: Visitor): void {
+  if (!stand.hired) return;
+  const stockId = cartKindForStand(stand).stockId;
+  let room = Math.max(0, stand.storageCap - stand.hotdogs);
+  if (room <= 0) return;
+  const fromWh = Math.min(warehouseQty(play, stockId), room);
+  if (fromWh > 0 && takeWarehouse(play, stockId, fromWh)) {
+    stand.hotdogs = roundMoney(stand.hotdogs + fromWh);
+    room -= fromWh;
+  }
+  const fromInv = Math.min(play.inventory.find((r) => r.kind === stockId)?.qty ?? 0, room);
+  if (fromInv > 0 && takeInv(play, stockId, fromInv)) {
+    stand.hotdogs = roundMoney(stand.hotdogs + fromInv);
+    room -= fromInv;
+  }
+  if (visitor && stand.hotdogs < 1) {
+    const bought = buyPackInto(visitor, play, stockId, Math.max(room, 1));
+    if (bought > 0) stand.hotdogs = roundMoney(stand.hotdogs + bought);
+  }
+}
+
+function autoStockWork(play: PlayState, site: WorkSite, visitor?: Visitor): void {
   if (!site.hired) return;
-  const room = Math.max(0, site.storageCap - site.stock);
+  let room = Math.max(0, site.storageCap - site.stock);
   if (room <= 0) return;
   if (site.siteClass === "mine") {
     site.stock = roundMoney(site.stock + Math.min(room, 1));
@@ -545,13 +586,24 @@ function autoStockWork(play: PlayState, site: WorkSite): void {
   for (const cart of tryList) {
     if (seen.has(cart.stockId)) continue;
     seen.add(cart.stockId);
-    const have = warehouseQty(play, cart.stockId);
-    const n = Math.min(have, room);
-    if (n > 0 && takeWarehouse(play, cart.stockId, n)) {
-      site.stock = roundMoney(site.stock + n);
+    const fromWh = Math.min(warehouseQty(play, cart.stockId), room);
+    if (fromWh > 0 && takeWarehouse(play, cart.stockId, fromWh)) {
+      site.stock = roundMoney(site.stock + fromWh);
       site.stockId = cart.stockId;
-      return;
+      room -= fromWh;
+      if (room <= 0) return;
     }
+    const fromInv = Math.min(play.inventory.find((r) => r.kind === cart.stockId)?.qty ?? 0, room);
+    if (fromInv > 0 && takeInv(play, cart.stockId, fromInv)) {
+      site.stock = roundMoney(site.stock + fromInv);
+      site.stockId = cart.stockId;
+      room -= fromInv;
+      if (room <= 0) return;
+    }
+  }
+  if (visitor && site.stock < 1 && site.stockId) {
+    const bought = buyPackInto(visitor, play, site.stockId, Math.max(room, 1));
+    if (bought > 0) site.stock = roundMoney(site.stock + bought);
   }
 }
 
@@ -611,6 +663,10 @@ function siteNeeds(site: WorkSite, today = TODAY_PRICE): CartNeed[] {
     needs.push({ id: "sticker", label: `Sticker $${today.toFixed(2)}` });
   }
   return needs;
+}
+
+function sellTicksAt(sticker: number, scored: SiteScore): number {
+  return Math.max(6, Math.round(scored.sellTicks * stickerSellMul(stickerBand(sticker))));
 }
 
 function perMinuteAt(sticker: number, sellTicks: number): number {
@@ -981,8 +1037,8 @@ export function hireStand(
   found.row.hired = true;
   found.row.staffId = person.id;
   found.row.staffName = person.name;
-  if (found.kind === "stand") autoStockStand(play, found.row);
-  else autoStockWork(play, found.row);
+  if (found.kind === "stand") autoStockStand(play, found.row, visitor);
+  else autoStockWork(play, found.row, visitor);
   if (found.kind === "stand") return ok({ stand: found.row });
   return ok({ site: found.row });
 }
@@ -1042,8 +1098,8 @@ export function upgradeStand(
     found.row.storageCap = CART_STORAGE * 2;
   }
   if (found.row.hired) {
-    if (found.kind === "stand") autoStockStand(play, found.row);
-    else autoStockWork(play, found.row);
+    if (found.kind === "stand") autoStockStand(play, found.row, visitor);
+    else autoStockWork(play, found.row, visitor);
   }
   if (found.kind === "stand") return ok({ stand: found.row });
   return ok({ site: found.row });
@@ -1074,12 +1130,12 @@ export function tickHotdogSales(visitor: Visitor, land: LandBoard): number {
   let earned = 0;
 
   for (const stand of play.stands) {
-    autoStockStand(play, stand);
+    autoStockStand(play, stand, visitor);
     if (stand.hotdogs < 1 || !stand.hired) continue;
     if (!getPlot(land, stand.plotId)) continue;
     stand.sellAcc += 1;
     while (stand.hotdogs >= 1) {
-      const need = scoreForStand(stand, land, play).sellTicks;
+      const need = sellTicksAt(stand.stickerPrice, scoreForStand(stand, land, play));
       if (stand.sellAcc < need) break;
       stand.sellAcc -= need;
       stand.hotdogs = roundMoney(stand.hotdogs - 1);
@@ -1089,19 +1145,22 @@ export function tickHotdogSales(visitor: Visitor, land: LandBoard): number {
   }
 
   for (const site of play.workSites) {
-    autoStockWork(play, site);
+    autoStockWork(play, site, visitor);
     if (site.stock < 1 || !site.hired) continue;
     if (!getPlot(land, site.plotId)) continue;
     site.sellAcc += 1;
     while (site.stock >= 1) {
-      const need = scoreWork(land, play, {
-        id: site.id,
-        plotId: site.plotId,
-        hired: site.hired,
-        stock: site.stock,
-        upgraded: site.upgraded,
-        boostLeft: site.boostLeft || 0,
-      }).sellTicks;
+      const need = sellTicksAt(
+        site.stickerPrice,
+        scoreWork(land, play, {
+          id: site.id,
+          plotId: site.plotId,
+          hired: site.hired,
+          stock: site.stock,
+          upgraded: site.upgraded,
+          boostLeft: site.boostLeft || 0,
+        }),
+      );
       if (site.sellAcc < need) break;
       site.sellAcc -= need;
       site.stock = roundMoney(site.stock - 1);
@@ -1138,12 +1197,12 @@ export function playSnapshot(visitor: Visitor, land: LandBoard) {
       siteClass: "cart" as const,
       needs: standNeeds(s),
       desirability: scored.score,
-      sellTicks: scored.sellTicks,
+      sellTicks: sellTicksAt(s.stickerPrice, scored),
       parts: scored.parts,
       searching: scored.searching,
       cap: scored.cap,
       rivalsOnStreet: scored.rivalsOnStreet,
-      perMinute: perMinuteAt(s.stickerPrice, scored.sellTicks),
+      perMinute: perMinuteAt(s.stickerPrice, sellTicksAt(s.stickerPrice, scored)),
       boostLeft: s.boostLeft || 0,
     };
   });
@@ -1163,12 +1222,12 @@ export function playSnapshot(visitor: Visitor, land: LandBoard) {
       siteClass: s.siteClass,
       needs: siteNeeds(s),
       desirability: scored.score,
-      sellTicks: scored.sellTicks,
+      sellTicks: sellTicksAt(s.stickerPrice, scored),
       parts: scored.parts,
       searching: scored.searching,
       cap: scored.cap,
       rivalsOnStreet: scored.rivalsOnStreet,
-      perMinute: perMinuteAt(s.stickerPrice, scored.sellTicks),
+      perMinute: perMinuteAt(s.stickerPrice, sellTicksAt(s.stickerPrice, scored)),
       boostLeft: s.boostLeft || 0,
     };
   });

@@ -132,7 +132,7 @@ describe("traffic (PAPER)", () => {
     expect(moved).toBeLessThan(car.speed * 0.5 + 0.01);
   });
 
-  it("turns around at road ends instead of wrap-teleporting", () => {
+  it("picks the next graph edge at a junction instead of wrap-teleporting", () => {
     const board = createLandBoard();
     const scene = { add() {} };
     const traffic = createTraffic({
@@ -142,11 +142,12 @@ describe("traffic (PAPER)", () => {
       heightAt,
     });
     const car = traffic.cars.find((c) => c.islandId === "north")!;
+    const edge0 = car.edgeId;
     car.along = 5;
     car.dir = -1;
     traffic.tick(1);
-    expect(car.dir).toBe(1);
     expect(car.along).toBeGreaterThanOrEqual(4);
+    expect(car.dir === 1 || car.edgeId !== edge0).toBe(true);
     expect(LANE_OFFSET_M).toBeGreaterThan(1);
   });
 

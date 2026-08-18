@@ -11,8 +11,9 @@ export const PITCH_MAX = 1.45;
 export const LOOK_Y = 1.1;
 export const RMB = 2;
 export const LMB = 0;
-/** Wheel zoom, metres from the player. High enough to read the whole town. */
-export const ZOOM_MIN_M = 9;
+export const PLAY_FOV = 48;
+/** Wheel zoom, metres from the player. Close enough to read a person. */
+export const ZOOM_MIN_M = 6;
 export const ZOOM_MAX_M = 650;
 
 /** Near plane grows with zoom so a 52 km far clip does not eat the water. */

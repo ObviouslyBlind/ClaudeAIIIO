@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { HIGHWAY_LANE_OFFSET_M } from "./roads.js";
 import { laneOffsetM } from "./roadclass.js";
+import { drivableEdges, edgeLength, projectOnEdge } from "./roadnet.js";
 
 const CAR_COUNT = 6;
 const SPEED = 9;
@@ -183,35 +184,43 @@ export const COLORS = [0xc45c3a, 0x4a6e8a, 0x6a8f44, 0xe8d7b8, 0x2a7a72, 0x6e2e2
 export const LANE_OFFSET_M = 1.7;
 
 /**
- * PAPER NPC cars that drive the paved network. Each car owns a road, drives
- * it at its own speed, keeps a lane, and turns around at the road end.
- * No player-following: earlier code teleported cars to cluster ahead of the
- * player every frame, which read as jittering toy cars stalking you.
+ * PAPER NPC cars that drive the paved graph. At a junction they pick the next
+ * edge — they do not ping-pong on one road. No player-following.
  */
 export function createTraffic({ scene, getMap, specOf, heightAt }) {
   const cars = [];
 
-  function pavedRoads(islandId) {
+  function graphOf() {
     const map = getMap();
-    if (!map) return [];
-    return map.roads.filter(
-      (r) => r.kind === "paved" && !r.roundabout && r.island === islandId && r.points && r.points.length >= 2,
-    );
+    return map && map.graph ? map.graph : null;
   }
 
-  function roadOf(car) {
-    const roads = pavedRoads(car.islandId);
-    return roads[Math.min(car.roadIdx, roads.length - 1)] || null;
+  function edgesOf(islandId) {
+    const graph = graphOf();
+    const fromGraph = graph ? drivableEdges(graph, islandId) : [];
+    if (fromGraph.length) return fromGraph;
+    const map = getMap();
+    return ((map && map.roads) || [])
+      .filter((r) => r.kind === "paved" && !r.roundabout && r.island === islandId && r.points && r.points.length >= 2)
+      .map((r, i) => ({
+        ...r,
+        id: r.id || `${islandId}-road-${i}`,
+        a: `${islandId}-a-${i}`,
+        b: `${islandId}-b-${i}`,
+      }));
+  }
+
+  function edgeOf(car) {
+    return edgesOf(car.islandId).find((e) => e.id === car.edgeId) || null;
   }
 
   function place(car) {
-    const road = roadOf(car);
-    if (!road) return;
-    const p = pointAlongPolyline(road.points, car.along);
+    const edge = edgeOf(car);
+    if (!edge || !edge.points) return;
+    const p = pointAlongPolyline(edge.points, car.along);
     const spec = specOf(car.islandId);
-    // Dual carriageway uses the black lane offset, not the median strip.
-    const graphOff = road.cls ? laneOffsetM(road.cls) : 0;
-    const off = graphOff || (road.lanes === 4 ? HIGHWAY_LANE_OFFSET_M : LANE_OFFSET_M);
+    const graphOff = edge.cls ? laneOffsetM(edge.cls) : 0;
+    const off = graphOff || (edge.lanes === 4 ? HIGHWAY_LANE_OFFSET_M : LANE_OFFSET_M);
     const rx = Math.cos(p.yaw) * off * car.dir;
     const rz = -Math.sin(p.yaw) * off * car.dir;
     const x = p.x + rx;
@@ -221,25 +230,52 @@ export function createTraffic({ scene, getMap, specOf, heightAt }) {
     car.mesh.rotation.y = car.dir > 0 ? p.yaw : p.yaw + Math.PI;
   }
 
+  function pickNext(car, atB) {
+    const edge = edgeOf(car);
+    if (!edge) return;
+    const nodeId = atB ? edge.b : edge.a;
+    if (!nodeId) {
+      car.dir *= -1;
+      return;
+    }
+    const choices = edgesOf(car.islandId).filter(
+      (e) => e.id !== edge.id && (e.a === nodeId || e.b === nodeId),
+    );
+    if (!choices.length) {
+      car.dir *= -1;
+      return;
+    }
+    const next = choices[Math.floor(Math.random() * choices.length)];
+    car.edgeId = next.id;
+    if (next.a === nodeId) {
+      car.along = 4;
+      car.dir = 1;
+    } else {
+      car.along = Math.max(4, edgeLength(next) - 4);
+      car.dir = -1;
+    }
+  }
+
   function spawnIsland(islandId) {
-    const roads = pavedRoads(islandId);
-    if (!roads.length) return;
-    const trunk = roads[0];
-    const span = Math.min(SPAWN_SPAN_M, polylineLength(trunk.points) * 0.25);
+    const spec = specOf(islandId);
+    const edges = edgesOf(islandId);
+    if (!edges.length) return;
+    const port = spec.port;
+    const ranked = edges
+      .map((e) => ({ e, p: projectOnEdge(e, port.x, port.z) }))
+      .sort((a, b) => a.p.dist - b.p.dist);
+    const near = ranked.slice(0, Math.min(4, ranked.length));
     for (let i = 0; i < CAR_COUNT; i++) {
-      // Two cars take side streets; the rest work the trunk near the port.
-      const roadIdx = i >= CAR_COUNT - 2 && roads.length > 1 ? 1 + (i % (roads.length - 1)) : 0;
-      const road = roads[roadIdx];
-      const total = polylineLength(road.points);
+      const pick = i < CAR_COUNT - 2 ? near[0] : near[Math.min(1 + (i % Math.max(1, near.length - 1)), near.length - 1)];
+      const total = edgeLength(pick.e);
+      const span = Math.min(SPAWN_SPAN_M, total * 0.35);
+      const along = Math.max(8, Math.min(total - 8, pick.p.along + 12 + (i / Math.max(1, CAR_COUNT - 1)) * span));
       const mesh = makeCar(COLORS[i % COLORS.length]);
-      const along =
-        roadIdx === 0
-          ? 40 + (i / Math.max(1, CAR_COUNT - 1)) * span
-          : Math.min(total * 0.4, 30 + i * 12);
       const car = {
         mesh,
         islandId,
-        roadIdx,
+        edgeId: pick.e.id,
+        roadIdx: pick.e.id === near[0].e.id ? 0 : 1,
         along,
         dir: i % 2 === 0 ? 1 : -1,
         speed: SPEED * (0.8 + (i % 4) * 0.12),
@@ -257,17 +293,16 @@ export function createTraffic({ scene, getMap, specOf, heightAt }) {
 
   function tick(dt) {
     for (const car of cars) {
-      const road = roadOf(car);
-      if (!road) continue;
-      const total = polylineLength(road.points);
+      const edge = edgeOf(car);
+      if (!edge) continue;
+      const total = edgeLength(edge);
       car.along += car.speed * car.dir * dt;
-      // Turn around near the ends instead of wrap-teleporting to the start.
       if (car.along >= total - 4) {
         car.along = total - 4;
-        car.dir = -1;
+        pickNext(car, true);
       } else if (car.along <= 4) {
         car.along = 4;
-        car.dir = 1;
+        pickNext(car, false);
       }
       place(car);
     }

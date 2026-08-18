@@ -110,6 +110,7 @@ describe("harbour chrome HUD", () => {
     expect(chrome).not.toContain("data-hire-person");
     expect(chrome).toContain("place-cancel");
     expect(siteMenu).toContain("sticker-mark");
+    expect(siteMenu).toContain("sticker-zone");
     expect(siteMenu).toContain("stock-num");
     expect(siteMenu).toContain('type="range"');
     expect(chrome).toContain("Warehouse");
@@ -318,9 +319,42 @@ describe("harbour chrome HUD", () => {
     );
     expect(stock).toContain("stock-num is-low");
     expect(stock).toContain("4");
+    expect(stock).toContain("is-today");
+    expect(stock).toContain("sticker-zone");
     expect(stock).not.toContain("id=\"hire-site\"");
+    const near = formatSiteMenu(
+      {
+        id: "stand-1",
+        label: "Fruit cart",
+        siteClass: "cart",
+        hired: false,
+        hotdogs: 20,
+        storageCap: 20,
+        stickerPrice: 7,
+      },
+      { todayPrice: 6, inventory: [], warehouse: { items: [] } },
+      "stock",
+    );
+    expect(near).toContain("is-near");
+    expect(near).not.toContain("is-far");
+    const far = formatSiteMenu(
+      {
+        id: "stand-1",
+        label: "Fruit cart",
+        siteClass: "cart",
+        hired: false,
+        hotdogs: 20,
+        storageCap: 20,
+        stickerPrice: 11,
+      },
+      { todayPrice: 6, inventory: [], warehouse: { items: [] } },
+      "stock",
+    );
+    expect(far).toContain("is-far");
     expect(css).toContain(".stock-num.is-low");
     expect(css).toContain(".sticker-mark");
+    expect(css).toContain(".sticker-read.is-near");
+    expect(css).toContain(".sticker-read.is-far");
     expect(css).toContain(".upg-tick");
   });
 });

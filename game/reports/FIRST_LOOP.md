@@ -19,7 +19,7 @@ Same card for a placed cart, a shop, and a mine.
 
 - Tabs: **Stock** · **Run** · **Upgrades** · **Stats**.
 - **Stock** is a number, red / yellow / green for low / mid / full. Hired vendor fills remaining room from the warehouse (including after Fridge).
-- **Sticker** is a $1–$11 slider, middle $6. Green pip is today's dictated price; readout is green when you match it.
+- **Sticker** is a $1–$11 slider, middle $6. Green on today’s price, yellow within $1.50, red further. The green pip moves with the dictated price. Off-green sales are slower.
 - **Run**: **Hire $30.00** from cash, or **Vendor + Fire**. Play only while unhired.
 - **Upgrades** are ticks then the next buy: Fridge ✓ → Sign → Awning. Fridge $200, doubles cap, no hire required.
 - Stats: Street, Rivals, Sales, **$ / min**.

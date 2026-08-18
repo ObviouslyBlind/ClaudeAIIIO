@@ -40,12 +40,12 @@ export const CAMERA_FAR_M = 52000;
  * so the dual carriageway reads; it still looks toward Harbour Circus.
  */
 export function spawnCameraOffset(islandId) {
-  return islandId === "north" ? { x: 20, y: 24, z: 40 } : { x: -40, y: 32, z: -55 };
+  return islandId === "north" ? { x: 16, y: 14, z: 26 } : { x: -22, y: 14, z: -28 };
 }
 
 /** Metres from the player. North looks inland along Harbour Rd. South looks east along Island Hwy. */
 export function spawnLookAtOffset(islandId) {
-  return islandId === "north" ? { x: 0, y: 5, z: -120 } : { x: 200, y: 2, z: 80 };
+  return islandId === "north" ? { x: 0, y: 3, z: -70 } : { x: 48, y: 2, z: 42 };
 }
 
 /** Drop near-duplicates so the ribbon does not fold on itself. */

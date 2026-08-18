@@ -146,7 +146,7 @@ describe("shoreline read", () => {
     const px = spec.port.x;
     const pz = spec.port.z - 8;
     const py = heightAt(spec, px, pz) + 1.15;
-    const cam = new THREE.PerspectiveCamera(55, 16 / 9, 0.4, CAMERA_FAR_M);
+    const cam = new THREE.PerspectiveCamera(48, 16 / 9, 0.4, CAMERA_FAR_M);
     cam.position.set(px + o.x, py + o.y, pz + o.z);
     cam.lookAt(px + l.x, py + l.y, pz + l.z);
     cam.updateMatrixWorld();

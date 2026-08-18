@@ -29,6 +29,7 @@ import {
   recallStaleDeliveries,
   setStandPrice,
   standNeeds,
+  stickerBand,
   stockStand,
   takeAll,
   tickHotdogSales,
@@ -327,7 +328,7 @@ describe("South first loop", () => {
     if (!placed.ok) return;
     expect(standNeeds(placed.stand).map((n) => n.id)).toEqual(["hire", "stock", "fridge"]);
     expect(hireStand(visitor, placed.stand.id, "pat").ok).toBe(true);
-    expect(stockStand(visitor, placed.stand.id, 0, "inventory").ok).toBe(true);
+    expect(placed.stand.hotdogs).toBe(20);
     expect(setStandPrice(visitor, placed.stand.id, 8).ok).toBe(true);
     expect(standNeeds(placed.stand).map((n) => n.id)).toEqual(["fridge", "sticker"]);
     expect(standNeeds(placed.stand).some((n) => n.label.includes("Sticker $"))).toBe(true);
@@ -471,5 +472,25 @@ describe("South first loop", () => {
     expect(burst.sold).toBeLessThanOrEqual(10);
     expect(placed.stand.hotdogs).toBe(20 - burst.sold);
     expect(visitor.cash).toBeCloseTo(cash0 + burst.sold * HOTDOG_SALE_PRICE * (1 - SALES_TAX), 8);
+  });
+
+  it("reads sticker green on today, yellow nearby, red far", () => {
+    expect(stickerBand(TODAY_PRICE)).toBe("green");
+    expect(stickerBand(TODAY_PRICE + 1)).toBe("yellow");
+    expect(stickerBand(TODAY_PRICE + 3)).toBe("red");
+  });
+
+  it("lets a hired vendor buy a pack when the warehouse and pockets are empty", () => {
+    const { land, visitor, plot } = leaseCheapSouth();
+    const kit = orderMarket(visitor, land, { skus: ["hotdog_cart"], dest: "cart" });
+    expect(kit.ok).toBe(true);
+    const placed = placeStand(visitor, land, plot.id);
+    expect(placed.ok).toBe(true);
+    if (!placed.ok) return;
+    expect(placed.stand.hotdogs).toBe(0);
+    const cash0 = visitor.cash;
+    expect(hireStand(visitor, placed.stand.id).ok).toBe(true);
+    expect(placed.stand.hotdogs).toBe(20);
+    expect(visitor.cash).toBeCloseTo(cash0 - HIRE_COST - HOTDOG_PACK_PRICE, 8);
   });
 });
