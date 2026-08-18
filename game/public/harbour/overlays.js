@@ -6,7 +6,7 @@ import * as THREE from "three";
  *
  *   world      — walk. Buildings / stands. Land does not steal the click.
  *   lots       — boundary outlines. Click a $ tag or the lot dirt to buy.
- *   foot       — green / yellow / red ribbons on each named paved road.
+ *   foot       — High / Moderate / Low ribbons on each named paved road.
  *   logistics  — vans and roadside crates. Tap the crate.
  *   minerals   — ore catalog exists; overlay paint is next.
  */
@@ -25,7 +25,7 @@ export const VIEWERS = {
   foot: {
     id: "foot",
     label: "Foot traffic",
-    hint: "Roads: green sells fastest, then yellow, then red. PAPER.",
+    hint: "Foot traffic: High / Moderate / Low on each named road. PAPER.",
   },
   logistics: {
     id: "logistics",
@@ -51,6 +51,17 @@ const BAND_COLOR = {
   yellow: 0xe2c04a,
   red: 0xc45a3a,
 };
+
+/** What the player reads. Red is Low, not danger. */
+export const BAND_LEVEL = {
+  green: "High",
+  yellow: "Moderate",
+  red: "Low",
+};
+
+export function footLevel(band) {
+  return BAND_LEVEL[band] || "Low";
+}
 
 const GREEN_PORT_M = 420;
 const YELLOW_PORT_M = 1100;
@@ -136,13 +147,15 @@ function bandRibbon(spec, road, heightAt, color) {
   mesh.renderOrder = 8;
   const name = road.name || "Harbour Rd";
   const band = road.band || "yellow";
+  const level = footLevel(band);
   mesh.name = `foot-road:${road.island}:${name}`;
   mesh.userData.kind = "foot-road";
-  mesh.userData.label = `${name} · ${band}`;
+  mesh.userData.label = `${name} · ${level}`;
   mesh.userData.layer = "foot";
   mesh.userData.island = road.island;
   mesh.userData.roadName = name;
   mesh.userData.band = band;
+  mesh.userData.level = level;
   mesh.userData.mode = "PAPER";
   return mesh;
 }
@@ -215,7 +228,7 @@ export function createOverlays({ scene, heightAt, specOf, getMap }) {
       const mid = roadMid(road);
       const name = road.name || "Harbour Rd";
       const spr = roadLabelSprite(
-        `${name} · ${band.toUpperCase()}`,
+        `${name} · ${footLevel(band)}`,
         mid.x,
         heightAt(spec, mid.x, mid.z),
         mid.z,

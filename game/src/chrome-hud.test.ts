@@ -13,6 +13,7 @@ describe("harbour chrome HUD", () => {
     expect(html).toContain('id="viewers"');
     expect(html).toContain('id="viewer-hint"');
     expect(html).toContain('id="foot-legend"');
+    expect(html).toContain('id="place-hint"');
     expect(html).toContain('data-panel="inventory"');
     expect(html).toContain('data-panel="market"');
     expect(html).toContain('data-panel="employees"');
@@ -38,6 +39,9 @@ describe("harbour chrome HUD", () => {
     expect(chrome).toContain('id="land-close"');
     expect(chrome).toContain("onCloseLand");
     expect(chrome).toContain("PAPER");
+    expect(chrome).toContain("landCard.hidden = true");
+    expect(chrome).toContain("extras.onTake()");
+    expect(chrome).toContain("data-place");
   });
 
   it("walks the marketplace aisle → sku → deliver, and chirps on buy", () => {

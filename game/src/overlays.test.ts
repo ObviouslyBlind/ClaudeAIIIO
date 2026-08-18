@@ -1,12 +1,21 @@
 import { describe, expect, it } from "vitest";
 import * as THREE from "three";
 import { createLandBoard, ISLANDS } from "./land.ts";
-import { footTrafficSnapshot } from "./footTraffic.ts";
-import { VIEWERS, createOverlays, toggleViewer } from "../public/harbour/overlays.js";
+import { BAND_LEVEL, footTrafficSnapshot } from "./footTraffic.ts";
+import { VIEWERS, createOverlays, footLevel, toggleViewer } from "../public/harbour/overlays.js";
 
 describe("foot-traffic viewer (PAPER)", () => {
   it("exposes the four top-right viewers", () => {
     expect(Object.keys(VIEWERS)).toEqual(["world", "lots", "foot", "logistics", "minerals"]);
+  });
+
+  it("names red Low, yellow Moderate, green High — not danger", () => {
+    expect(BAND_LEVEL.red).toBe("Low");
+    expect(BAND_LEVEL.yellow).toBe("Moderate");
+    expect(BAND_LEVEL.green).toBe("High");
+    expect(footLevel("red")).toBe("Low");
+    expect(footLevel("yellow")).toBe("Moderate");
+    expect(footLevel("green")).toBe("High");
   });
 
   it("toggles Lots off back to World so outlines can hide", () => {
@@ -29,7 +38,10 @@ describe("foot-traffic viewer (PAPER)", () => {
     const ribbons = overlays.group.children.filter((c) => c.userData.kind === "foot-road");
     expect(ribbons.length).toBeGreaterThan(3);
     expect(ribbons.some((r) => r.userData.band === "green")).toBe(true);
+    expect(ribbons.some((r) => r.userData.level === "High")).toBe(true);
     expect(ribbons.every((r) => r.userData.roadName && r.userData.label)).toBe(true);
+    expect(ribbons.every((r) => /High|Moderate|Low/.test(r.userData.label))).toBe(true);
+    expect(ribbons.every((r) => !/\bGREEN\b|\bYELLOW\b|\bRED\b/.test(r.userData.label))).toBe(true);
     expect(ribbons[0].material.depthTest).toBe(false);
   });
 

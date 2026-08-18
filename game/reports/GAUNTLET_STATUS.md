@@ -1,7 +1,9 @@
 # Gauntlet status
 
-Paused. Fable 5 harbour loop is the bar (walk, lease, develop, taxi, ferry).
+Piece in play: **harbour first loop bugs** (Take all closes crate card, Place cart on YOURS, foot traffic reads High / Moderate / Low).
 
-Politics frozen. No pixel-critic swarm. Operator is the brake.
+Bar: live `http://localhost:8787/` — Take all hides Roadside crate; Inv → Place in world → tap YOURS / PLACE tag plants the cart; Foot traffic legend says Low not RED.
+
+Politics frozen. Operator is the brake.
 
 See `FABLE5_NOTES.md`.

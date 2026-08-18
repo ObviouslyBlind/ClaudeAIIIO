@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createLandBoard, leasePlot } from "./land.ts";
 import { createVisitor } from "./sim.ts";
-import { footTrafficSnapshot, plotTrafficBand, roadTrafficBand } from "./footTraffic.ts";
+import { BAND_LEVEL, footTrafficSnapshot, plotTrafficBand, roadTrafficBand } from "./footTraffic.ts";
 import { roadsideDrop } from "./roadside.ts";
 import {
   CART_PAPER_PRICE,
@@ -31,6 +31,10 @@ function leaseCheapSouth() {
 }
 
 describe("PAPER foot traffic", () => {
+  it("reads red as Low, yellow as Moderate, green as High", () => {
+    expect(BAND_LEVEL).toEqual({ green: "High", yellow: "Moderate", red: "Low" });
+  });
+
   it("paints paved roads green near the port and cooler inland", () => {
     const land = createLandBoard();
     const snap = footTrafficSnapshot(land);

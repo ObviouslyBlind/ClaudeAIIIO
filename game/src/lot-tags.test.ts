@@ -7,6 +7,7 @@ describe("lot tags (PAPER)", () => {
     expect(tagLabelFor({ owner: null, price: 80 })).toBe("$80");
     expect(tagKindFor({ owner: "visitor" })).toBe("yours");
     expect(tagLabelFor({ owner: "visitor" })).toBe("YOURS");
+    expect(tagLabelFor({ owner: "visitor" }, true)).toBe("PLACE");
     expect(tagKindFor({ owner: "npc" })).toBe("taken");
     expect(tagLabelFor({ owner: "npc" })).toBe("TAKEN");
   });

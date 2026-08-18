@@ -6,7 +6,7 @@
 import { plotDisplayName } from "./parcel-map.js";
 import { buyAskModel } from "./buy-ask.js";
 import { playPaperBuy } from "./paper-sfx.js";
-import { toggleViewer } from "./overlays.js";
+import { toggleViewer, footLevel } from "./overlays.js";
 
 export const POLL_MS = 1000;
 
@@ -49,7 +49,7 @@ export function mountChrome(opts) {
   const HINTS = {
     world: "World: left-click walks. Lots chip shows lot outlines and $ bars.",
     lots: "Lots on. Click Lots again to hide. Click a $ bar — you will be asked if you want to buy.",
-    foot: "Foot traffic: green / yellow / red on each named road.",
+    foot: "Foot traffic: High (green) / Moderate (yellow) / Low (red) on each named road.",
     logistics: "Logistics: tap the crate. The van waits until you take it.",
     minerals: "Minerals: ore catalog is in. Overlay paint comes next.",
   };
@@ -228,7 +228,7 @@ export function mountChrome(opts) {
       roads
         .map(
           (r) =>
-            `<div class="sku-row"><span><span class="band-dot ${r.band}"></span>${r.name || "Harbour Rd"}</span><strong>${(r.band || "").toUpperCase()}</strong></div>`,
+            `<div class="sku-row"><span><span class="band-dot ${r.band}"></span>${r.name || "Harbour Rd"}</span><strong>${footLevel(r.band)}</strong></div>`,
         )
         .join("");
   }
@@ -262,8 +262,15 @@ export function mountChrome(opts) {
     if (placeBtn) {
       placeBtn.addEventListener("click", () => {
         placing = true;
+        if (landCard) landCard.hidden = true;
+        if (buyAsk) buyAsk.hidden = true;
         setOverlay("lots");
         closePanels();
+        const hint = document.getElementById("place-hint");
+        if (hint) {
+          hint.hidden = false;
+          hint.textContent = "Tap the green YOURS lot, or the verge by the road.";
+        }
         if (opts.setStatus) {
           opts.setStatus("Tap your lot or the verge out to the main road to place the cart.");
         }
@@ -404,6 +411,8 @@ export function mountChrome(opts) {
     isPlacing: () => placing,
     clearPlacing() {
       placing = false;
+      const hint = document.getElementById("place-hint");
+      if (hint) hint.hidden = true;
       if (opts.onPlaceMode) opts.onPlaceMode(false);
     },
     getPlay: () => play,
@@ -438,7 +447,7 @@ export function mountChrome(opts) {
         <h2>${title}</h2>
         ${price}
         ${note}
-        ${band ? `<p><span class="band-dot ${band}"></span>Foot traffic ${band}</p>` : ""}
+        ${band ? `<p><span class="band-dot ${band}"></span>Foot traffic ${footLevel(band)}</p>` : ""}
         ${
           roadside
             ? ""
@@ -457,7 +466,14 @@ export function mountChrome(opts) {
         });
       }
       const takeBtn = landCard.querySelector("#land-take");
-      if (takeBtn && extras.onTake) takeBtn.addEventListener("click", extras.onTake);
+      if (takeBtn && extras.onTake) {
+        takeBtn.addEventListener("click", (ev) => {
+          ev.preventDefault();
+          ev.stopPropagation();
+          landCard.hidden = true;
+          extras.onTake();
+        });
+      }
     },
     paintStandMenu(stand, onStock, onHire, onRun) {
       if (!standMenu) return;
