@@ -63,7 +63,7 @@ describe("paved street from spawn", () => {
     expect(extras.length).toBe(0);
     const walks = added.filter((m) => m.userData.roadKind === "sidewalk");
     expect(walks.length).toBeGreaterThan(4);
-    expect(walks.every((m) => ribbonWidthM(m) < PAVED_WIDTH_M)).toBe(true);
+    expect(walks.every((m) => (m.userData.widthM ?? ribbonWidthM(m)) < PAVED_WIDTH_M)).toBe(true);
     expect(dirt.length).toBe(dirtRoads.length);
     expect(dirt.length).toBeGreaterThan(4);
 
@@ -154,6 +154,20 @@ describe("paved street from spawn", () => {
         return !!p && Math.hypot(p.x - node.x, p.z - node.z) < 0.5 && (m.userData.widthM ?? 0) >= spec.side - 0.01;
       });
       expect(pad, `junction ${node.id} pad too small for its arms`).toBeTruthy();
+    }
+
+    const sw = map.graph.nodes.find((n) => n.id === "s-quay-sw");
+    expect(sw).toBeTruthy();
+    const swPad = junctionPad(map.graph, sw);
+    expect(swPad?.kind).toBe("corner");
+    const walks = added.filter((m) => m.userData.roadKind === "sidewalk");
+    expect(walks.length).toBeGreaterThan(4);
+    for (const mesh of walks) {
+      const pos = mesh.geometry.attributes.position;
+      for (let i = 0; i < pos.count; i++) {
+        const d = Math.hypot(pos.getX(i) - sw!.x, pos.getZ(i) - sw!.z);
+        expect(d, "sidewalk hashed through the Quayward corner").toBeGreaterThan(swPad!.side / 2 - 0.8);
+      }
     }
   });
 

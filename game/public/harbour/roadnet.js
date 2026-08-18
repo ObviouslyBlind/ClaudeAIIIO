@@ -297,7 +297,21 @@ export function junctionPad(graph, node) {
     yaw: Math.atan2(paved[0].dir.x, paved[0].dir.z),
     throughEdgeIds,
     trim,
+    walkM: Math.max(0, ...paved.map((a) => roadClassSpec(a.edge.cls).sidewalkM || 0)),
   };
+}
+
+/** Local-space test: is (x,z) inside the junction plate, plus an optional skirt. */
+export function pointInJunctionPad(node, pad, x, z, extra = 0) {
+  if (!node || !pad) return false;
+  const dx = x - node.x;
+  const dz = z - node.z;
+  const c = Math.cos(pad.yaw || 0);
+  const s = Math.sin(pad.yaw || 0);
+  const lx = dx * c + dz * s;
+  const lz = -dx * s + dz * c;
+  const h = pad.side / 2 + extra;
+  return Math.abs(lx) <= h && Math.abs(lz) <= h;
 }
 
 /** Widest tarmac meeting a node — the junction pad has to cover all of it. */

@@ -10,6 +10,6 @@ Bar: live `http://localhost:8787/` (operator plays the public Cloudflare tunnel)
 
 Last critic (Grok 4.6, `bc-eede1299`): **FAIL** on green median. Operator asked to **fix the corners** this round (the plus-shaped loop corners). Median is queued, not this patch.
 
-This round: corner junctions are a square plate; draw trims ribbons to the plate (graph still ends on the node). Do not reintroduce `trimYielding`.
+This round: corner plates plus **sidewalks clipped out of the plate** and wrapped with a walk frame, so the grey borders do not hash through as a plus.
 
 Politics frozen. Operator is the brake. Do not merge unless asked.
