@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { ROAD_CLASSES, carriagewayWidthM, roadClassSpec } from "./roadclass.js";
 import { junctionPad, trimPolylineForPads, pointInJunctionPad } from "./roadnet.js";
+import { addQuadXZ, junctionKerbQuads } from "./roadjoin.js";
 
 /** Grit shoulder under the tarmac edge, so a road has a rim instead of a cut edge. */
 export const SHOULDER = 0x6f6a5e;
@@ -273,7 +274,7 @@ function drawSidewalks(scene, spec, road, heightAt, centres, graph) {
   if (pts.length < 2) return;
   const offset = roadClassSpec(cls).carriageM / 2 + SHOULDER_PAD_M / 2 + walk / 2;
   // Offset walks would otherwise keep going and hash through the junction
-  // as a grey plus. Clip them to the plate, then the corner frame wraps.
+  // as a grey plus. Clip them to the plate; L-shaped kerb quads fill the join.
   for (const side of [-1, 1]) {
     const clipped = omitInsidePads(offsetPolyline(pts, offset * side), graph, walk + 0.4);
     for (const run of splitRuns(clipped, 10)) {
@@ -371,85 +372,32 @@ function addJunctionPlate(scene, spec, heightAt, pad) {
   scene.add(mesh);
 }
 
-function intersectLines(p, d, q, e) {
-  const det = d.x * e.z - d.z * e.x;
-  if (Math.abs(det) < 1e-8) return null;
-  const t = ((q.x - p.x) * e.z - (q.z - p.z) * e.x) / det;
-  return { x: p.x + d.x * t, z: p.z + d.z * t };
-}
-
-function perpInto(dir, toward) {
-  const r = { x: dir.z, z: -dir.x };
-  if (r.x * toward.x + r.z * toward.z >= 0) return r;
-  return { x: -r.x, z: -r.z };
-}
-
-function walkOffsetM(cls) {
-  const s = roadClassSpec(cls);
-  if (!s.sidewalkM) return 0;
-  return s.carriageM / 2 + SHOULDER_PAD_M / 2 + s.sidewalkM / 2;
-}
-
 /**
- * Mitered sidewalks in each wedge between arms. A square frame of overlapping
- * planes was the stepped grey hash; this follows the kerb at 15/30/45/90.
+ * L-shaped kerb fills in each wedge. A 3-point ribbon through a 90° / 270°
+ * corner stair-steps; two quads stay square on the outer kerb.
  */
 function drawJunctionWalks(scene, spec, heightAt, graph, node, pad) {
-  const arms = [];
-  for (const e of graph.edges) {
-    if (e.a !== node.id && e.b !== node.id) continue;
-    if (!e.points || e.points.length < 2) continue;
-    const s = roadClassSpec(e.cls);
-    if (s.dirt || !s.sidewalkM) continue;
-    const pts = e.points;
-    const fromA = e.a === node.id;
-    const a = fromA ? pts[0] : pts[pts.length - 1];
-    const b = fromA ? pts[1] : pts[pts.length - 2];
-    const dx = b.x - a.x;
-    const dz = b.z - a.z;
-    const len = Math.hypot(dx, dz) || 1;
-    arms.push({
-      dir: { x: dx / len, z: dz / len },
-      offset: walkOffsetM(e.cls),
-      walk: s.sidewalkM,
+  const y = heightAt(spec, node.x, node.z);
+  const { walks, tarmac } = junctionKerbQuads(graph, node, pad);
+  const base = {
+    island: node.island,
+    roadName: (node.name || "junction") + " walk",
+    label: (node.name || "junction") + " walk",
+    junctionWalk: true,
+  };
+  for (const q of tarmac) {
+    addQuadXZ(THREE, scene, q.a, q.b, q.c, q.d, y + 0.17, ASPHALT, {
+      ...base,
+      roadKind: "junction-fill",
+      roadName: (node.name || "junction") + " fill",
     });
   }
-  if (arms.length < 2) return;
-  arms.sort((p, q) => Math.atan2(p.dir.x, p.dir.z) - Math.atan2(q.dir.x, q.dir.z));
-  const along = pad.side / 2 + 0.4;
-  for (let i = 0; i < arms.length; i++) {
-    const a = arms[i];
-    const b = arms[(i + 1) % arms.length];
-    const walk = Math.min(a.walk, b.walk);
-    const pa = perpInto(a.dir, b.dir);
-    const pb = perpInto(b.dir, a.dir);
-    const oa = { x: node.x + pa.x * a.offset, z: node.z + pa.z * a.offset };
-    const ob = { x: node.x + pb.x * b.offset, z: node.z + pb.z * b.offset };
-    const dot = a.dir.x * b.dir.x + a.dir.z * b.dir.z;
-    let pts;
-    if (dot < -0.72) {
-      pts = [
-        { x: oa.x + a.dir.x * along, z: oa.z + a.dir.z * along },
-        { x: oa.x - a.dir.x * along, z: oa.z - a.dir.z * along },
-      ];
-    } else {
-      const mid = intersectLines(oa, a.dir, ob, b.dir);
-      if (!mid) continue;
-      pts = [
-        { x: oa.x + a.dir.x * along, z: oa.z + a.dir.z * along },
-        mid,
-        { x: ob.x + b.dir.x * along, z: ob.z + b.dir.z * along },
-      ];
-    }
-    drawRibbon(
-      scene,
-      spec,
-      { island: node.island, name: (node.name || "junction") + " walk", points: pts },
-      heightAt,
-      walk,
-      SIDEWALK,
-      "sidewalk",
-    );
+  for (const q of walks) {
+    addQuadXZ(THREE, scene, q.a, q.b, q.c, q.d, y + 0.185, SIDEWALK, {
+      ...base,
+      roadKind: "sidewalk",
+      widthM: q.widthM,
+    });
   }
 }
 
@@ -458,7 +406,7 @@ function drawJunctionWalks(scene, spec, heightAt, graph, node, pad) {
  *
  * Junctions used to be made by deleting the minor road near the major one,
  * which left stubs ending in the sand. Corners are a square plate the ribbons
- * stop at, so two streets meet as an L, not a plus through each other.
+ * stop at, plus L-shaped kerb quads, so two streets meet as an L.
  */
 function drawJunctions(scene, map, specOf, heightAt) {
   const graph = map.graph;

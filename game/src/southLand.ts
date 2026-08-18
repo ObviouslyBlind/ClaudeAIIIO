@@ -559,15 +559,17 @@ function buildSouthGraph(): RoadGraph {
   const eastHaven = SOUTH_TOWNS[4]!;
 
   // Harbour Circus keeps three exits: the two highway spans and Quayward Rd.
-  const nQuayward = g.node("s-quayward", quayward.x, quayward.z - 58, "junction");
-  g.edge({ name: "Quayward Rd", cls: "avenue", from: nHarbour, to: nQuayward });
-
-  // A block of streets round the green, not a hash of ribbons through it.
+  // The loop is a true rectangle. Quayward Rd hits the north edge at 45° so
+  // the two north arms are due east-west — not a ~5° smashed diagonal.
   const hx = 74;
   const hz = 52;
+  const northZ = quayward.z - hz;
+  const nQuayward = g.node("s-quayward", harbour.x + (northZ - harbour.z), northZ, "junction");
+  g.edge({ name: "Quayward Rd", cls: "avenue", from: nHarbour, to: nQuayward });
+
   const corners: RoadNode[] = [
-    g.node("s-quay-nw", quayward.x - hx, quayward.z - hz, "junction"),
-    g.node("s-quay-ne", quayward.x + hx, quayward.z - hz, "junction"),
+    g.node("s-quay-nw", quayward.x - hx, northZ, "junction"),
+    g.node("s-quay-ne", quayward.x + hx, northZ, "junction"),
     g.node("s-quay-se", quayward.x + hx, quayward.z + hz, "junction"),
     g.node("s-quay-sw", quayward.x - hx, quayward.z + hz, "junction"),
   ];

@@ -29,7 +29,7 @@ function lum(hex: number) {
 }
 
 type RoadMesh = {
-  userData: { roadKind?: string; widthM?: number; island?: string; roadName?: string };
+  userData: { roadKind?: string; widthM?: number; island?: string; roadName?: string; junctionWalk?: boolean };
   geometry: {
     parameters?: { width: number; innerRadius?: number };
     attributes: { position: { count: number; getX: (i: number) => number; getZ: (i: number) => number } };
@@ -162,11 +162,19 @@ describe("paved street from spawn", () => {
     expect(swPad?.kind).toBe("tee");
     const walks = added.filter((m) => m.userData.roadKind === "sidewalk");
     expect(walks.length).toBeGreaterThan(4);
+    const kerbs = walks.filter((m) => m.userData.junctionWalk);
+    expect(kerbs.length, "SW needs L-shaped kerb fills, not a 3-point ribbon").toBeGreaterThan(2);
     for (const mesh of walks) {
       const pos = mesh.geometry.attributes.position;
+      const isKerb = Boolean(mesh.userData.junctionWalk);
       for (let i = 0; i < pos.count; i++) {
         const d = Math.hypot(pos.getX(i) - sw!.x, pos.getZ(i) - sw!.z);
-        expect(d, "sidewalk hashed through the Quayward corner").toBeGreaterThan(swPad!.side / 2 - 0.8);
+        if (isKerb) {
+          // L-bands sit on the kerb. They must not cover the tarmac heart.
+          expect(d, "kerb walked across the Quayward tarmac").toBeGreaterThan(3.2);
+        } else {
+          expect(d, "sidewalk hashed through the Quayward corner").toBeGreaterThan(swPad!.side / 2 - 0.8);
+        }
       }
     }
   });
