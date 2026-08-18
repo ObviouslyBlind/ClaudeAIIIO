@@ -5,29 +5,28 @@ const html = readFileSync(new URL("../public/harbour/index.html", import.meta.ur
 const chrome = readFileSync(new URL("../public/harbour/chrome.js", import.meta.url), "utf8");
 
 describe("harbour chrome HUD", () => {
-  it("ships the corner chrome, not a handheld-cart sheet as the main UI", () => {
+  it("ships one dusk-glass ledger, not a stack of floating panels", () => {
     expect(html).toContain('class="game-name"');
     expect(html).toContain("Two Harbors");
+    expect(html).toContain('id="harbour-sheet"');
+    expect(html).toContain('id="btn-harbour"');
+    expect(html).toContain('data-chapter="market"');
+    expect(html).toContain('data-chapter="warehouse"');
+    expect(html).toContain('data-chapter="carts"');
+    expect(html).toContain('data-chapter="map"');
     expect(html).toContain('data-overlay="lots"');
     expect(html).toContain('data-overlay="foot"');
     expect(html).toContain('id="viewers"');
-    expect(html).toContain('id="viewer-hint"');
-    expect(html).toContain('id="foot-legend"');
     expect(html).toContain('id="place-hint"');
     expect(html).toContain('id="place-cancel"');
     expect(html).toContain('id="taxi-map-exit"');
     expect(html).toContain("Keep riding");
-    expect(html).toContain('data-panel="inventory"');
-    expect(html).toContain('data-panel="warehouse"');
-    expect(html).toContain('data-panel="market"');
-    expect(html).toContain('data-panel="employees"');
     expect(html).toContain('id="chrome"');
     expect(html).toContain('id="buy-ask"');
     expect(html).toContain('id="lot-tags"');
     expect(html).toContain('id="storage-fee"');
-    expect(html).toContain("Click again to hide");
     expect(html).not.toContain("first loop");
-    expect(html).not.toContain('data-panel="tutorials"');
+    expect(html).not.toContain("float-panel");
     expect(html).not.toContain("Tutorials");
     expect(html).not.toContain("script-coach");
   });
@@ -50,15 +49,14 @@ describe("harbour chrome HUD", () => {
     expect(chrome).toContain("place-cancel");
     expect(chrome).toContain("today-price");
     expect(chrome).toContain("Store in warehouse");
-    expect(chrome).toContain("data-pin");
+    expect(chrome).not.toContain("data-pin");
     expect(chrome).not.toContain("Run it myself");
   });
 
-  it("walks the marketplace aisle → sku → deliver, and chirps on buy", () => {
+  it("walks the marketplace aisle → sku → warehouse or van, and chirps on buy", () => {
     expect(chrome).toContain("data-aisle");
     expect(chrome).toContain("Deliver to");
     expect(chrome).toContain("playPaperBuy");
-    expect(chrome).toContain("data-aisle");
     expect(chrome).toContain("marketplace");
     expect(chrome).not.toContain("first loop");
   });
