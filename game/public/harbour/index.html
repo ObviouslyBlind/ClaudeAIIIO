@@ -79,7 +79,10 @@
       <div id="land-card" hidden></div>
       <div id="buy-ask" hidden></div>
       <div id="stand-menu" hidden></div>
-      <p id="place-hint" hidden>Tap your YOURS lot or the verge by the road to place the cart.</p>
+      <p id="place-hint" hidden>
+        <span id="place-hint-text">Tap your YOURS lot or the verge by the road to place the cart.</span>
+        <button type="button" id="place-cancel">Cancel</button>
+      </p>
       <div id="foot-legend" hidden></div>
     </div>
 
@@ -87,7 +90,8 @@
       <p class="taxi-map-badge">PAPER · SIMULATED</p>
       <p class="taxi-map-hint">Tap a rough point. Ride stays on paved. Dirt forbidden.</p>
       <canvas id="taxi-map-canvas" width="320" height="220"></canvas>
-      <button type="button" id="taxi-map-close">Close</button>
+      <button type="button" id="taxi-map-exit">Exit taxi</button>
+      <button type="button" id="taxi-map-close">Close map</button>
     </div>
     <div id="catalog-picker" hidden>
       <p class="catalog-badge">PAPER · SIMULATED</p>
@@ -111,7 +115,7 @@
       <button type="button" id="btn-hire" hidden title="PAPER · SIMULATED">Hire</button>
       <button type="button" id="btn-fire" hidden title="PAPER · SIMULATED">Fire</button>
       <button type="button" id="btn-enter" hidden>Enter</button>
-      <button type="button" id="btn-exit" hidden>Exit</button>
+      <button type="button" id="btn-exit" hidden>Exit taxi</button>
       <button type="button" id="btn-ferry" disabled>Ferry</button>
       <button type="button" id="btn-taxi" title="PAPER · SIMULATED">Taxi</button>
       <button type="button" id="btn-minerals" hidden title="PAPER · SIMULATED">Minerals</button>

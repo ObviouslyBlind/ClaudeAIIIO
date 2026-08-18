@@ -5,6 +5,7 @@ import { BAND_LEVEL, footTrafficSnapshot, plotTrafficBand, roadTrafficBand } fro
 import { roadsideDrop } from "./roadside.ts";
 import {
   CART_PAPER_PRICE,
+  HIRE_ROSTER,
   HOTDOG_PACK_PRICE,
   HOTDOG_SALE_PRICE,
   PLACE_CORRIDOR_M,
@@ -97,7 +98,8 @@ describe("South first loop", () => {
     expect(visitor.play.inventory.find((i) => i.kind === "hotdog_cart")).toBeUndefined();
     expect(stockStand(visitor, placed.stand.id).ok).toBe(true);
     expect(placed.stand.hotdogs).toBe(20);
-    expect(hireStand(visitor, placed.stand.id).ok).toBe(true);
+    expect(hireStand(visitor, placed.stand.id, "pat").ok).toBe(true);
+    expect(placed.stand.staffName).toBe("Pat K.");
 
     const cash0 = visitor.cash;
     const band = plotTrafficBand(land, plot);
@@ -110,6 +112,7 @@ describe("South first loop", () => {
     const snap = playSnapshot(visitor, land);
     expect(snap.island).toBe("south");
     expect(snap.stands).toHaveLength(1);
+    expect(snap.hireRoster).toEqual(HIRE_ROSTER);
     expect(snap.mode).toBe("PAPER");
     expect(snap.leaseOptions.length).toBeGreaterThan(0);
     expect(snap.leases).toHaveLength(1);

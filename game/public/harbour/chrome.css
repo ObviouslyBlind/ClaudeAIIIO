@@ -305,6 +305,20 @@ nav.dock.travel-dock {
   color: var(--ink);
   font-weight: 700;
   font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+#place-hint button {
+  pointer-events: auto;
+  min-height: 40px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 8px;
+  background: #2c3c40;
+  color: #e8e4d8;
+  font-weight: 700;
 }
 #place-hint[hidden] { display: none !important; }
 
@@ -361,6 +375,8 @@ nav.dock.travel-dock {
   margin-top: 8px;
 }
 #land-card .land-row .take-all { margin-top: 0; }
+.hire-block p { margin: 0 0 8px; font-size: 13px; color: var(--muted); }
+.hire-block .take-all { margin-top: 6px; font-size: 13px; }
 #land-close {
   background: #2c3c40;
   color: #e8e4d8;

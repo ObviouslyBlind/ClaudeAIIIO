@@ -714,6 +714,8 @@ describe("taxi roof lamp", () => {
       button: { addEventListener() {} },
     });
     expect(taxi.mesh.visible).toBe(true);
+    expect(typeof taxi.riding).toBe("function");
+    expect(taxi.riding()).toBe(false);
     const paved = board.roads.find((r) => r.kind === "paved" && r.island === "north")!;
     expect(projectOnPolyline(paved.points, taxi.mesh.position.x, taxi.mesh.position.z).dist).toBeLessThan(
       0.6,

@@ -46,9 +46,16 @@ export function mountChrome(opts) {
   let marketAisle = null;
   let marketSku = null;
 
+  function setPlaceHint(text, show) {
+    const hint = document.getElementById("place-hint");
+    const line = document.getElementById("place-hint-text");
+    if (line && text) line.textContent = text;
+    if (hint) hint.hidden = !show;
+  }
+
   const HINTS = {
     world: "World: left-click walks. Lots chip shows lot outlines and $ bars.",
-    lots: "Lots on. Click Lots again to hide. Click a $ bar — you will be asked if you want to buy.",
+    lots: "Lots on. Nearby $ bars only — walk to see more. Click Lots again to hide. Click a $ bar to buy.",
     foot: "Foot traffic: High (green) / Moderate (yellow) / Low (red) on each named road.",
     logistics: "Logistics: tap the crate. The van waits until you take it.",
     minerals: "Minerals: ore catalog is in. Overlay paint comes next.",
@@ -250,7 +257,9 @@ export function mountChrome(opts) {
           ${
             r.kind === "hotdog_cart"
               ? `<button type="button" data-place="1">Place in world</button>`
-              : ""
+              : r.kind === "hotdogs" && (play.stands || []).length
+                ? `<button type="button" data-stock="1">Stock cart</button>`
+                : ""
           }
         </div>`,
               )
@@ -266,50 +275,83 @@ export function mountChrome(opts) {
         if (buyAsk) buyAsk.hidden = true;
         setOverlay("lots");
         closePanels();
-        const hint = document.getElementById("place-hint");
-        if (hint) {
-          hint.hidden = false;
-          hint.textContent = "Tap the green YOURS lot, or the verge by the road.";
-        }
+        setPlaceHint("Tap the green YOURS lot, or the verge by the road.", true);
         if (opts.setStatus) {
           opts.setStatus("Tap your lot or the verge out to the main road to place the cart.");
         }
         if (opts.onPlaceMode) opts.onPlaceMode(true);
       });
     }
+    const stockBtn = body.querySelector("[data-stock]");
+    if (stockBtn) {
+      stockBtn.addEventListener("click", async () => {
+        const stand = (play.stands || [])[0];
+        if (!stand) return;
+        const { ok, data } = await readJson("/api/stand/stock", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ standId: stand.id }),
+        });
+        if (data && data.play) play = data.play;
+        paintTop();
+        paintPanels();
+        if (opts.setStatus) {
+          opts.setStatus(
+            ok ? "Hotdogs in the cart. PAPER." : "Could not stock: " + ((data && data.reason) || "fail") + " · PAPER",
+          );
+        }
+        if (opts.onStocked && ok) opts.onStocked(stand.id);
+      });
+    }
+  }
+
+  function plotNameFor(stand) {
+    const lease = ((play && play.leases) || []).find((l) => l.id === stand.plotId);
+    return (lease && lease.name) || "your lot";
   }
 
   function paintStaff() {
     const body = document.getElementById("staff-body");
     if (!body || !play) return;
     const stands = play.stands || [];
+    const roster = play.hireRoster || [];
     body.innerHTML = `
       <p class="float-kicker">PAPER · SIMULATED</p>
       <h2>Employees</h2>
       ${
         stands.length
           ? stands
-              .map(
-                (s) => `
-        <div class="stand-row">
-          <span>Hotdog cart · ${s.hotdogs} dogs${s.hired ? " · hired" : ""}</span>
-          ${s.hired ? "" : `<button type="button" data-hire="${s.id}">Hire</button>`}
-        </div>`,
-              )
+              .map((s) => {
+                const where = plotNameFor(s);
+                if (s.hired) {
+                  return `<div class="stand-row"><span>${s.staffName || "Vendor"} · ${where}</span><strong>hired</strong></div>`;
+                }
+                const people = roster
+                  .map(
+                    (p) =>
+                      `<button type="button" class="take-all" data-hire-stand="${s.id}" data-hire-person="${p.id}">${p.name} · ${p.role} at ${where}</button>`,
+                  )
+                  .join("");
+                return `<div class="hire-block"><p>Hire someone to run the cart at ${where}.</p>${people}</div>`;
+              })
               .join("")
-          : "<p>Place a cart first, then hire from here.</p>"
+          : "<p>Place a cart first, then hire a person onto that lot.</p>"
       }
     `;
-    body.querySelectorAll("[data-hire]").forEach((btn) => {
+    body.querySelectorAll("[data-hire-person]").forEach((btn) => {
       btn.addEventListener("click", async () => {
-        const { data } = await readJson("/api/stand/hire", {
+        const { ok, data } = await readJson("/api/stand/hire", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ standId: btn.getAttribute("data-hire") }),
+          body: JSON.stringify({
+            standId: btn.getAttribute("data-hire-stand"),
+            personId: btn.getAttribute("data-hire-person"),
+          }),
         });
         if (data && data.play) play = data.play;
         paintTop();
         paintPanels();
+        if (opts.onHired && ok) opts.onHired(btn.getAttribute("data-hire-stand"));
       });
     });
   }
@@ -401,6 +443,17 @@ export function mountChrome(opts) {
     }
   }
 
+  const placeCancel = document.getElementById("place-cancel");
+  if (placeCancel) {
+    placeCancel.addEventListener("click", () => {
+      placing = false;
+      setPlaceHint("", false);
+      setOverlay("world");
+      if (opts.onPlaceMode) opts.onPlaceMode(false);
+      if (opts.setStatus) opts.setStatus("Place cancelled. PAPER.");
+    });
+  }
+
   setOverlay("world");
 
   return {
@@ -411,8 +464,7 @@ export function mountChrome(opts) {
     isPlacing: () => placing,
     clearPlacing() {
       placing = false;
-      const hint = document.getElementById("place-hint");
-      if (hint) hint.hidden = true;
+      setPlaceHint("", false);
       if (opts.onPlaceMode) opts.onPlaceMode(false);
     },
     getPlay: () => play,

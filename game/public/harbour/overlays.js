@@ -20,7 +20,7 @@ export const VIEWERS = {
   lots: {
     id: "lots",
     label: "Lots",
-    hint: "Lots on. Click Lots again to hide. Click a $ bar to be asked if you want to buy.",
+    hint: "Lots on. Nearby $ bars. Walk to see more. Click Lots again to hide.",
   },
   foot: {
     id: "foot",

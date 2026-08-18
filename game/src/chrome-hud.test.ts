@@ -14,6 +14,8 @@ describe("harbour chrome HUD", () => {
     expect(html).toContain('id="viewer-hint"');
     expect(html).toContain('id="foot-legend"');
     expect(html).toContain('id="place-hint"');
+    expect(html).toContain('id="place-cancel"');
+    expect(html).toContain('id="taxi-map-exit"');
     expect(html).toContain('data-panel="inventory"');
     expect(html).toContain('data-panel="market"');
     expect(html).toContain('data-panel="employees"');
@@ -42,6 +44,9 @@ describe("harbour chrome HUD", () => {
     expect(chrome).toContain("landCard.hidden = true");
     expect(chrome).toContain("extras.onTake()");
     expect(chrome).toContain("data-place");
+    expect(chrome).toContain("data-stock");
+    expect(chrome).toContain("data-hire-person");
+    expect(chrome).toContain("place-cancel");
   });
 
   it("walks the marketplace aisle → sku → deliver, and chirps on buy", () => {

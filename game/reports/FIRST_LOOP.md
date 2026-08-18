@@ -22,11 +22,11 @@ Windows: `play.cmd` or `play-laptop.cmd`. From `game/`: `npm run play` / `npm ru
 - Market is a marketplace: section → item → deliver-to → Buy (chirp)
 
 ## Loop
-1. **Lots** overlay. Click a **$ title** or the lot dirt. That buys it.
+1. **Lots** overlay. Nearby **$ bars**. Click a **$ bar** or the lot dirt. That asks to buy.
 2. Open **Market** → Street carts → Hotdog cart → pick your lot → **Buy**. Hear the chirp.
-3. Van drives paved roads, stops on the kerb, **stays** until you take the crate.
-4. Inventory → Place in world. Tap the green YOURS lot (or the PLACE tag) or the verge out to the main road. Take all closes the crate card.
-5. Right-click the cart: stock hotdogs, hire. A vendor stands by the cart.
+3. Van drives paved roads, stops on the kerb, **stays** until you take the crate. **Take all** closes the card.
+4. Inventory → Place in world. Tap the green YOURS lot (or PLACE). Cancel gets you out. Already-placed does not trap you.
+5. Tap the cart or Inv → **Stock cart**. Staff → pick a person for that lot. Taxi: **Exit taxi** on the dock or the map.
 
 ## Zoning (baked in)
 - Street lots = **commercial** (on)

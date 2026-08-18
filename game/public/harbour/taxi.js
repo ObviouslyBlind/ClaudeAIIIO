@@ -598,6 +598,7 @@ export function createTaxi({
   setWalking,
   setStatus,
   button,
+  onRide,
 }) {
   const mesh = makeTaxiMesh();
   mesh.visible = false;
@@ -606,6 +607,7 @@ export function createTaxi({
   const overlayEl = typeof document !== "undefined" ? document.getElementById("taxi-map") : null;
   const overlayCanvas = typeof document !== "undefined" ? document.getElementById("taxi-map-canvas") : null;
   const overlayClose = typeof document !== "undefined" ? document.getElementById("taxi-map-close") : null;
+  const overlayExit = typeof document !== "undefined" ? document.getElementById("taxi-map-exit") : null;
 
   /** idle | coming | waiting | boarded | hauling */
   let mode = "idle";
@@ -791,8 +793,13 @@ export function createTaxi({
     waitStartedAtMs = null;
     attachPlayer();
     openOverlay();
+    setRide(true);
     setStatus("Taxi collected you. Tap the map to ride. PAPER · SIMULATED.");
     return true;
+  }
+
+  function setRide(next) {
+    if (typeof onRide === "function") onRide(next);
   }
 
   function hopOut() {
@@ -807,6 +814,7 @@ export function createTaxi({
       const spec = specOf(island);
       player.position.y = heightAt(spec, player.position.x, player.position.z) + 1.15;
     }
+    setRide(false);
   }
 
   function dismissUnboarded() {
@@ -957,7 +965,8 @@ export function createTaxi({
 
     if (mode === "hauling" && pathDone()) {
       mode = "boarded";
-      setStatus("Taxi stopped. Tap the map. PAPER · SIMULATED.");
+      setRide(true);
+      setStatus("Taxi stopped. Tap Exit taxi or pick another stop. PAPER · SIMULATED.");
       openOverlay();
     }
 
@@ -978,10 +987,24 @@ export function createTaxi({
   }
   if (overlayClose) {
     overlayClose.addEventListener("click", () => {
+      closeOverlay();
+      setStatus("Map closed. Exit taxi is on the dock. PAPER.");
+    });
+  }
+  if (overlayExit) {
+    overlayExit.addEventListener("click", () => {
       hopOut();
       setStatus("Out of the taxi. PAPER.");
     });
   }
 
-  return { mesh, call, handleTap, hopOut, tick, mapOpen: () => overlayOpen };
+  return {
+    mesh,
+    call,
+    handleTap,
+    hopOut,
+    tick,
+    mapOpen: () => overlayOpen,
+    riding: () => mode === "boarded" || mode === "hauling",
+  };
 }
