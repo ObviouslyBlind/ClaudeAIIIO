@@ -15,7 +15,7 @@ come to the player later, the player does not blink across the map).
 - Wheel zoom to map height (RMB orbit unchanged, tap-to-walk unchanged).
 - Harbour cove opens to the sea (no inland “lake”); terrain 224×144. `heightAt` lives in
   both `src/land.ts` and `public/harbour/main.js` — keep them in sync.
-- Dead gauntlet dressing purged (~19k lines). Notes: `reports/FABLE5_NOTES.md`.
+- Dead gauntlet dressing purged (~19k lines). Live status: `reports/HANDOVER.md`.
 - **Road network:** 4 named side streets per island (Market / Mill / Chapel / Weir St).
   Lots front their street. Fields sit on dirt lanes past street ends. Taxi is point-based
   (named stops). Traffic owns a road, uses a lane offset, turns around at ends.

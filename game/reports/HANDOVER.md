@@ -4,6 +4,8 @@ PAPER / SIMULATED harbour MMO shard. One visitor on this process. No wallet. Pol
 
 Live product is `game/`. Spec: `game/PLAN.md`. Root `CLAUDE.md` is Two Harbors. Skills: `two-harbors-sim`, `-net`, `-map`, `-client`, `-gauntlet`.
 
+Git history on `main` is Two Harbors only. Do not restore `dashboard/`, `polymarket_timer_bot/`, or a SENTINEL GitHub Pages site.
+
 ## Play
 
 Operator plays from **cursor.com/agents** in a browser. Do not tell them to use localhost.
