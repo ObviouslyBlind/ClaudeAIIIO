@@ -11,6 +11,7 @@ import { mountPackShift } from "./pack.js";
 import { formatCartsBody } from "./carts-hud.js";
 import { formatSiteMenu, gamesForSite } from "./site-menu.js";
 import { compactCash, fullCash } from "./cash-chip.js";
+import { formatCashLedger } from "./cash-ledger.js";
 
 export const POLL_MS = 1000;
 
@@ -41,9 +42,8 @@ export function mountChrome(opts) {
   if (!root) return { stop() {}, refresh() {} };
 
   const cashEl = document.getElementById("balance");
-  const cashFullEl = document.getElementById("balance-full");
   const cashPlate = cashEl && cashEl.closest ? cashEl.closest(".cash-plate") : null;
-  const incomeEl = document.getElementById("income");
+  const cashDock = document.getElementById("cash-dock");
   const onlineEl = document.getElementById("online");
   const landCard = document.getElementById("land-card");
   const buyAsk = document.getElementById("buy-ask");
@@ -154,14 +154,13 @@ export function mountChrome(opts) {
   function paintTop() {
     if (!play) return;
     if (cashEl) cashEl.textContent = compactCash(play.cash);
-    if (cashFullEl) cashFullEl.textContent = fullCash(play.cash);
-    if (incomeEl) {
-      const n = Number(play.incomePerMinute) || 0;
-      incomeEl.textContent = (n >= 0 ? "+" : "") + fullCash(n) + "/min";
-      incomeEl.classList.toggle("is-zero", n <= 0);
-    }
+    const ledger = document.getElementById("cash-ledger");
+    if (ledger) ledger.innerHTML = formatCashLedger(play);
     if (cashPlate) {
-      cashPlate.setAttribute("aria-label", "PAPER " + fullCash(play.cash));
+      cashPlate.setAttribute(
+        "aria-label",
+        "PAPER " + fullCash(play.cash) + ". Holdings and income.",
+      );
     }
     if (onlineEl) {
       onlineEl.textContent = (play.playersOnline || 1) + " online";
@@ -881,6 +880,29 @@ export function mountChrome(opts) {
       if (opts.setStatus) opts.setStatus("Place cancelled.");
     });
   }
+  function bindCashDock() {
+    if (!cashDock || !cashPlate) return;
+    function setOpen(on) {
+      cashDock.classList.toggle("is-open", on);
+      cashPlate.setAttribute("aria-expanded", on ? "true" : "false");
+    }
+    cashPlate.addEventListener("click", (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      setOpen(!cashDock.classList.contains("is-open"));
+    });
+    cashPlate.addEventListener("keydown", (ev) => {
+      if (ev.key !== "Enter" && ev.key !== " ") return;
+      ev.preventDefault();
+      setOpen(!cashDock.classList.contains("is-open"));
+    });
+    document.addEventListener("pointerdown", (ev) => {
+      if (!cashDock.classList.contains("is-open")) return;
+      if (cashDock.contains(ev.target)) return;
+      setOpen(false);
+    });
+  }
+
   if (orderVeil) {
     orderVeil.addEventListener("click", hideOrderAsk);
   }
@@ -889,6 +911,7 @@ export function mountChrome(opts) {
       dismissStandMenu();
     });
   }
+  bindCashDock();
   bindChromeActions();
 
   setOverlay("world");

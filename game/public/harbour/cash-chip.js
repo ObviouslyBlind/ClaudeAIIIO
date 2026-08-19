@@ -1,6 +1,6 @@
 /**
- * Compact PAPER cash on the Account chip.
- * Exact cents stay behind hover / focus.
+ * Compact PAPER cash on the chip.
+ * Exact cents, holdings, and $/min live in the cash ledger.
  */
 
 function trimDec(n) {

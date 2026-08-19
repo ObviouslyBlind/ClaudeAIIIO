@@ -107,6 +107,8 @@ describe("South first loop", () => {
     expect(visitor.cash).toBeLessThan(HIRE_COST);
     const snap = playSnapshot(visitor, land);
     expect(snap.leases.some((row) => row.id === pad.id)).toBe(true);
+    expect(snap.leases.find((row) => row.id === pad.id)!.island).toBe("south");
+    expect(snap.leases.find((row) => row.id === pad.id)!.class).toBe("cart_pad");
     expect(snap.leaseOptions.some((row) => row.price === 750)).toBe(true);
   });
 

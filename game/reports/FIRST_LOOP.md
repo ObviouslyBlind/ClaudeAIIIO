@@ -34,7 +34,8 @@ Same card for a placed cart, a shop, and a mine.
 ```
 
 ## UI
-- Corners stay: cash top-left, viewers top-right, Inv/Wh/Mkt/Staff on the left, travel dock at the bottom
+- Corners stay: cash top-right, viewers with it, Inv/Wh/Mkt/Staff on the left, travel dock at the bottom
+- Hover (or tap) the cash chip for holdings, where they sit, last-minute sales, and running $/min.
 - Left **Carts** is a directory: kits to place, stock on you, carts on the kerb. Ops live on **that site**.
 - Click a placed cart, or your shop / mine, for the site menu.
 - Market lists name, price, Buy. Where it goes is chosen on the Pay card, not on the catalog.
