@@ -170,14 +170,14 @@ export function formatMarketplace(play, opts = {}) {
         <span class="visually-hidden">Search the marketplace</span>
         <input id="market-search" class="mp-search" type="search" placeholder="Search carts, stock, aisles" value="${esc(query)}" autocomplete="off" enterkeyhint="search" />
       </label>
-      <div class="isle-row" role="tablist" aria-label="Island">
-        <button type="button" class="isle${island === "south" ? " is-on" : ""}" data-island="south">South</button>
-        <button type="button" class="isle is-locked" data-island="north" disabled aria-disabled="true" aria-label="North, closed until you ferry">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="11" width="12" height="9" rx="1"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
-          North
-        </button>
+      <div class="isle-row" role="group" aria-label="Island">
+        <button type="button" class="isle is-on" data-island="south">South · here</button>
+        <p class="isle-shut">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 11V8a4 4 0 0 1 8 0v3"/><rect x="6" y="11" width="12" height="10" rx="2"/></svg>
+          North closed
+        </p>
       </div>
-      <p class="mp-isle-note">North is shut until you ferry. Nothing to buy there yet.</p>
+      <p class="mp-isle-note">You buy on the island you stand on. Ferry first.</p>
     </div>
     <div class="mp-aisles" role="tablist" aria-label="Aisle">${aisles}</div>
     <div class="mp-scroll">${list}</div>

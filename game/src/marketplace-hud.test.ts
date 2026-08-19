@@ -36,12 +36,11 @@ describe("2Isles Marketplace sheet", () => {
     expect(html).toContain('data-aisle="plant"');
     expect(html).toContain('data-aisle="farming"');
     expect(html).toContain('id="market-search"');
-    expect(html).toContain(">South<");
-    expect(html).toContain("North");
-    expect(html).toContain("disabled");
-    expect(html).toContain("is-locked");
-    expect(html).toContain("closed until you ferry");
-    expect(html).toContain("North is shut until you ferry");
+    expect(html).toContain("South · here");
+    expect(html).toContain("North closed");
+    expect(html).toContain("isle-shut");
+    expect(html).not.toContain('data-island="north"');
+    expect(html).toContain("Ferry first");
     expect(html).not.toMatch(/PAPER/i);
     expect(html).not.toMatch(/outfitter/i);
     expect(html).not.toMatch(/\bbooks?\b/i);
