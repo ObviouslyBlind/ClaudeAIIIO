@@ -356,24 +356,35 @@ describe("paved street from spawn", () => {
     expect(nearestQuay).toBeGreaterThan(radii.inner - 0.6);
   });
 
-  it("stops lane paint at the hub plate instead of running through the join", () => {
+  it("keeps stem paint off the through heart, and lets the through carriageway stay painted", () => {
     const map = createLandBoard();
     const added: RoadMesh[] = [];
     const scene = { add(obj: RoadMesh) { added.push(obj); } };
     makeRoads(map, { scene, specOf: (id: "north" | "south") => ISLANDS[id], heightAt });
-    const paint = added.filter((m) => m.userData.roadKind === "paint");
-    expect(paint.length).toBeGreaterThan(8);
-    for (const id of ["s-quay-sw", "s-hwy-hc-j1"]) {
-      const n = map.graph.nodes.find((x) => x.id === id)!;
-      let nearest = Infinity;
-      for (const mesh of paint) {
-        const pos = mesh.geometry.attributes.position;
-        for (let i = 0; i < pos.count; i++) {
-          nearest = Math.min(nearest, Math.hypot(pos.getX(i) - n.x, pos.getZ(i) - n.z));
-        }
+    const stemPaint = added.filter(
+      (m) => m.userData.roadKind === "paint" && /Channel Sands|South Strand/.test(String(m.userData.roadName || "")),
+    );
+    expect(stemPaint.length).toBeGreaterThan(0);
+    const hwyT = map.graph.nodes.find((x) => x.id === "s-hwy-hc-j1")!;
+    let sandsNear = Infinity;
+    for (const mesh of stemPaint.filter((m) => /Channel Sands/.test(String(m.userData.roadName || "")))) {
+      const pos = mesh.geometry.attributes.position;
+      for (let i = 0; i < pos.count; i++) {
+        sandsNear = Math.min(sandsNear, Math.hypot(pos.getX(i) - hwyT.x, pos.getZ(i) - hwyT.z));
       }
-      expect(nearest, `${id} paint through hub`).toBeGreaterThan(3.2);
     }
+    expect(sandsNear, "Channel Sands paint on the dual heart").toBeGreaterThan(6);
+    const hwyPaint = added.filter(
+      (m) => m.userData.roadKind === "paint" && String(m.userData.roadName || "").startsWith("Island Hwy"),
+    );
+    let hwyNear = Infinity;
+    for (const mesh of hwyPaint) {
+      const pos = mesh.geometry.attributes.position;
+      for (let i = 0; i < pos.count; i++) {
+        hwyNear = Math.min(hwyNear, Math.hypot(pos.getX(i) - hwyT.x, pos.getZ(i) - hwyT.z));
+      }
+    }
+    expect(hwyNear, "through dual paint was cut by the T plate").toBeLessThan(6);
   });
 
   it("keeps south tarmac above the dirt instead of through it", () => {

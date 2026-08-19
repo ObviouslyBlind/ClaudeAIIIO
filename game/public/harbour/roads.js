@@ -96,7 +96,7 @@ function drawRibbon(scene, spec, road, heightAt, widthM, color, roadKind, matOpt
   if (pts.length < 2) return;
 
   const half = widthM / 2;
-  const thick = 0.14;
+  const thick = RIBBON_HALF_THICK_M * 2;
   const n = pts.length;
   const positions = new Float32Array(n * 12);
   const indices = [];
@@ -132,7 +132,7 @@ function drawRibbon(scene, spec, road, heightAt, widthM, color, roadKind, matOpt
     const lz = pts[i].z - rz * scale;
     const qx = pts[i].x + rx * scale;
     const qz = pts[i].z + rz * scale;
-    const lift = (roadKind === "sidewalk" ? 0.18 : 0.16) + yLift;
+    const lift = (roadKind === "sidewalk" ? 0.18 : RIBBON_LIFT_M) + yLift;
     const yC = heightAt(spec, pts[i].x, pts[i].z);
     const yL = heightAt(spec, lx, lz);
     const yR = heightAt(spec, qx, qz);
@@ -227,6 +227,10 @@ function hasSidewalk(road) {
  * Carriageway plus a metre of grit each side. The band is what stops the
  * tarmac reading as black tape laid on bare sand.
  */
+const RIBBON_LIFT_M = 0.16;
+/** Ribbon prism half-thickness. Flat join meshes sit on the ribbon top. */
+const RIBBON_HALF_THICK_M = 0.07;
+const TARMAC_TOP_M = RIBBON_LIFT_M + RIBBON_HALF_THICK_M;
 const SHOULDER_PAD_M = 2.2;
 
 function densifyPts(pts, step) {
@@ -258,8 +262,8 @@ function drawPaved(scene, spec, road, heightAt, graph, hubs, circuses) {
   if (pts.length < 2) return;
   const cls = classOf(road);
   const width = roadClassSpec(cls).carriageM;
-  const runs = clipRuns(pts, hubs, circuses);
-  const paintRuns = clipRuns(pts, hubs, circuses, 0);
+  const runs = clipRuns(pts, hubs, circuses, 1.6, road.edgeId);
+  const paintRuns = clipRuns(pts, hubs, paintCircuses(circuses), 0, road.edgeId);
   drawClippedRuns(scene, spec, road, heightAt, runs, width + SHOULDER_PAD_M, SHOULDER, "shoulder", {}, -0.03, Infinity, hubs, circuses);
   drawClippedRuns(scene, spec, road, heightAt, runs, width, ASPHALT, "paved", {}, 0, Infinity, hubs, circuses);
   drawLanePaint(scene, spec, road, heightAt, paintRuns, width, false, 1);
@@ -299,19 +303,22 @@ function omitInsidePads(pts, graph, extra) {
   });
 }
 
-function insideJoin(joins, x, z) {
+function insideJoin(joins, x, z, edgeId) {
   if (!joins) return false;
   for (const j of joins) {
+    // Through / dual arms have trim 0. Cutting them is what made a T
+    // read as two tapes plus a black plate.
+    if (edgeId && j.pad && j.pad.trim && j.pad.trim[edgeId] === 0) continue;
     const clip = (j.foot && (j.foot.clip || j.foot.tarmac)) || null;
     if (clip && multiContains(clip, x, z)) return true;
   }
   return false;
 }
 
-function clipToJoins(pts, joins, overlapM = 1.6) {
+function clipToJoins(pts, joins, overlapM = 1.6, edgeId) {
   if (!pts || pts.length < 2) return [];
   if (!joins || !joins.length) return [pts];
-  const runs = clipPolylineToOutside(pts, (x, z) => insideJoin(joins, x, z));
+  const runs = clipPolylineToOutside(pts, (x, z) => insideJoin(joins, x, z, edgeId));
   const extra = overlapM;
   return runs.map((run) => {
     if (!run || run.length < 2) return run;
@@ -321,7 +328,7 @@ function clipToJoins(pts, joins, overlapM = 1.6) {
       const a = head ? out[1] : out[out.length - 2];
       const len = Math.hypot(b.x - a.x, b.z - a.z) || 1;
       const p = { x: b.x + ((b.x - a.x) / len) * extra, z: b.z + ((b.z - a.z) / len) * extra };
-      if (extra > 0 && insideJoin(joins, p.x, p.z)) {
+      if (extra > 0 && insideJoin(joins, p.x, p.z, edgeId)) {
         out = head ? [p].concat(out.slice(1)) : out.slice(0, -1).concat([p]);
       }
     }
@@ -332,9 +339,10 @@ function clipToJoins(pts, joins, overlapM = 1.6) {
 /**
  * PathPhalt/Curva: T/L is a filled hub polygon; a circus is a circle.
  * Offset duals must hit the ring face, not a 12 m arm box in the grass.
+ * Through arms are not hub-clipped.
  */
-function clipRuns(pts, hubs, circuses, overlapM = 1.6) {
-  const afterHubs = clipToJoins(pts, hubs, overlapM);
+function clipRuns(pts, hubs, circuses, overlapM = 1.6, edgeId) {
+  const afterHubs = clipToJoins(pts, hubs, overlapM, edgeId);
   if (!circuses || !circuses.length) return afterHubs;
   const out = [];
   for (const run of afterHubs) {
@@ -342,6 +350,13 @@ function clipRuns(pts, hubs, circuses, overlapM = 1.6) {
     out.push(...clipPolylineOutsideCircuses(run, circuses));
   }
   return out.filter((r) => r && r.length >= 2);
+}
+
+function paintCircuses(circuses) {
+  return (circuses || []).map((c) => ({
+    ...c,
+    clip: (c.outer || c.clip || 0) + 2.4,
+  }));
 }
 
 function collectHubs(graph) {
@@ -406,7 +421,6 @@ function splitJoinEnd(pts, head, stubM) {
 
 function joinCutterAt(p, hubs, circuses, roadKind) {
   if (!p) return null;
-  void hubs;
   for (const c of circuses || []) {
     const face = c.clip || c.outer;
     if (!(face > 0)) continue;
@@ -414,6 +428,14 @@ function joinCutterAt(p, hubs, circuses, roadKind) {
     if (Math.abs(d - face) > 10) continue;
     const r = roadKind === "shoulder" ? (c.outer || face) + FOOT_SHOULDER_M : face;
     return [[circleRing(c.x, c.z, r, 48)]];
+  }
+  for (const h of hubs || []) {
+    const n = h.node;
+    if (!n) continue;
+    const reach = ((h.pad && h.pad.side) || 22) / 2 + 8;
+    if (Math.hypot(p.x - n.x, p.z - n.z) > reach) continue;
+    if (roadKind === "shoulder") return h.foot.outerClip || h.foot.clip || null;
+    return h.foot.clip || h.foot.tarmac || null;
   }
   return null;
 }
@@ -425,14 +447,14 @@ function drawBittenStub(scene, spec, road, heightAt, stub, cutter, widthM, color
     return;
   }
   const mid = stub[Math.floor(stub.length / 2)] || stub[0];
-  const lift = (roadKind === "sidewalk" ? 0.18 : 0.16) + (yLift || 0);
+  const lift = (roadKind === "sidewalk" ? 0.18 : TARMAC_TOP_M) + (yLift || 0);
   addMultiPolygonMesh(scene, bitten, heightAt(spec, mid.x, mid.z) + lift, color, {
     island: road.island,
     roadKind,
     roadName: road.name || "road",
     widthM,
     mode: "PAPER",
-  });
+  }, 2);
 }
 
 /**
@@ -559,7 +581,7 @@ function drawSidewalks(scene, spec, road, heightAt, graph, hubs, circuses) {
   for (const side of [-1, 1]) {
     const offsetPts = offsetPolyline(pts, offset * side);
     const pieces = hasJoins
-      ? clipRuns(offsetPts, hubs, circuses, 0)
+      ? clipRuns(offsetPts, hubs, circuses, 0, road.edgeId)
       : splitRuns(omitInsidePads(offsetPts, graph, walk + 0.8), 10);
     drawClippedRuns(scene, spec, road, heightAt, pieces, walk, SIDEWALK, "sidewalk", {}, 0, Infinity, hubs, circuses);
   }
@@ -576,14 +598,14 @@ function drawHighway(scene, spec, road, heightAt, graph, hubs, circuses) {
   if (pts.length < 2) return;
   const lane = s.medianM / 2 + s.carriageM / 2;
   const name = road.name || "Island Hwy";
-  const lip = clipRuns(pts, hubs, circuses);
+  const lip = clipRuns(pts, hubs, circuses, 1.6, road.edgeId);
   // Per-lane grit. A 26 m shoulder ribbon is a square chord at the circus
   // and a stacked box at every T.
   drawClippedRuns(scene, spec, { ...road, name: name + " median" }, heightAt, lip, s.medianM, ASPHALT, "median", {}, 0, Infinity, hubs, circuses);
   for (const side of [-1, 1]) {
     const offsetPts = offsetPolyline(pts, lane * side);
-    const laneRuns = clipRuns(offsetPts, hubs, circuses);
-    const paintRuns = clipRuns(offsetPts, hubs, circuses, 0);
+    const laneRuns = clipRuns(offsetPts, hubs, circuses, 1.6, road.edgeId);
+    const paintRuns = clipRuns(offsetPts, hubs, paintCircuses(circuses), 0, road.edgeId);
     drawClippedRuns(
       scene,
       spec,
@@ -776,10 +798,10 @@ function drawCircusJoins(scene, map, specOf, heightAt, joins) {
       roadMaterial(ASPHALT, "paved"),
     );
     ring.rotation.x = -Math.PI / 2;
-    ring.position.set(node.x, y + 0.2, node.z);
+    ring.position.set(node.x, y + TARMAC_TOP_M, node.z);
     ring.castShadow = false;
     ring.receiveShadow = true;
-    ring.renderOrder = 3;
+    ring.renderOrder = 2;
     ring.userData = { kind: "road", mode: "PAPER", ...base, roadKind: "paved", roadName: name };
     ring.name = `road:${node.island}:${name}`;
     scene.add(ring);
@@ -914,7 +936,7 @@ function drawNorthPortCurbs(scene, map, specOf, heightAt) {
   if (root.children.length) scene.add(root);
 }
 
-function addMultiPolygonMesh(scene, mp, y, color, userData) {
+function addMultiPolygonMesh(scene, mp, y, color, userData, renderOrder = 3) {
   if (!mp || !mp.length) return 0;
   let n = 0;
   for (const poly of mp) {
@@ -952,7 +974,7 @@ function addMultiPolygonMesh(scene, mp, y, color, userData) {
     );
     mesh.castShadow = false;
     mesh.receiveShadow = true;
-    mesh.renderOrder = 3;
+    mesh.renderOrder = renderOrder;
     mesh.userData = { kind: "road", mode: "PAPER", ...userData };
     mesh.name = `road:${userData.island}:${userData.roadName}`;
     scene.add(mesh);
@@ -973,17 +995,17 @@ function drawHubs(scene, map, specOf, heightAt, hubs) {
       roadKind: "sidewalk",
       roadName: (node.name || "junction") + " walk",
       widthM: pad.walkM || 2,
-    });
+    }, 1);
     addMultiPolygonMesh(scene, foot.shoulder, y + 0.13, SHOULDER, {
       ...base,
       roadKind: "shoulder",
       roadName: (node.name || "junction") + " hub",
-    });
-    addMultiPolygonMesh(scene, foot.tarmac, y + 0.2, ASPHALT, {
+    }, 1);
+    addMultiPolygonMesh(scene, foot.tarmac, y + TARMAC_TOP_M, ASPHALT, {
       ...base,
       roadKind: "junction",
       roadName: (node.name || "junction") + " hub",
-    });
+    }, 1);
   }
 }
 
