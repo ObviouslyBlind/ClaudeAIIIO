@@ -18,6 +18,7 @@ import {
   spawnLookAtOffset,
 } from "../public/harbour/roads.js";
 import { ROAD_CLASSES, carriagewayWidthM, roadWidthM } from "../public/harbour/roadclass.js";
+import { circusMeshRadii } from "../public/harbour/roadclip.js";
 import { junctionPad } from "../public/harbour/roadnet.js";
 import { buildHubFootprint, multiContains } from "../public/harbour/roadfoot.js";
 import { SOUTH_RAB } from "./southGeom.ts";
@@ -280,24 +281,39 @@ describe("paved street from spawn", () => {
     expect(HIGHWAY_MEDIAN_M).toBeGreaterThan(5);
     expect(HIGHWAY_LANE_OFFSET_M).toBeGreaterThan(PAVED_WIDTH_M / 2);
     const harbour = SOUTH_RAB.harbour;
+    const radii = circusMeshRadii(34);
     let nearestHwy = Infinity;
     for (const mesh of hwyMeshes) {
       const pos = mesh.geometry.attributes.position;
       for (let i = 0; i < pos.count; i++) {
         const d = Math.hypot(pos.getX(i) - harbour.x, pos.getZ(i) - harbour.z);
-        expect(d).toBeGreaterThan(20);
+        expect(d, "dual chorded the stone island").toBeGreaterThan(radii.inner - 0.6);
         nearestHwy = Math.min(nearestHwy, d);
       }
     }
-    // Graph ends on the kerb (~34 m). Drawing must actually reach it — not
-    // omit the last stations and leave sand between the dual ribbons and the ring.
-    expect(nearestHwy).toBeLessThan(38);
+    // Offset ribbons clip on the outer ring. The node mesh is the join —
+    // not arm discs, and not a 9 m sand gap beside the kerb.
+    expect(nearestHwy).toBeLessThan(radii.clip + 1.6);
+    expect(nearestHwy).toBeGreaterThan(radii.inner);
     const circus = added.find((m) => m.userData.roadName === "Harbour Circus");
     expect(circus).toBeTruthy();
     expect(circus!.geometry.parameters).toBeTruthy();
-    expect(circus!.geometry.parameters!.innerRadius).toBeGreaterThan(10);
-    const circusArms = added.filter((m) => m.userData.roadName === "Harbour Circus arm");
-    expect(circusArms.length).toBeGreaterThanOrEqual(3);
+    expect(circus!.geometry.parameters!.innerRadius).toBeCloseTo(radii.inner, 1);
+    expect(added.some((m) => String(m.userData.roadName || "").endsWith(" arm"))).toBe(false);
+
+    const quay = added.filter(
+      (m) => m.userData.roadKind === "paved" && m.userData.roadName === "Quayward Rd",
+    );
+    expect(quay.length).toBeGreaterThan(0);
+    let nearestQuay = Infinity;
+    for (const mesh of quay) {
+      const pos = mesh.geometry.attributes.position;
+      for (let i = 0; i < pos.count; i++) {
+        nearestQuay = Math.min(nearestQuay, Math.hypot(pos.getX(i) - harbour.x, pos.getZ(i) - harbour.z));
+      }
+    }
+    expect(nearestQuay, "Quayward Rd missed Harbour Circus").toBeLessThan(radii.clip + 2);
+    expect(nearestQuay).toBeGreaterThan(radii.inner - 0.6);
   });
 
   it("keeps south tarmac above the dirt instead of through it", () => {

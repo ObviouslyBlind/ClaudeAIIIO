@@ -3,6 +3,11 @@ import { ROAD_CLASSES, carriagewayWidthM, roadClassSpec } from "./roadclass.js";
 import { junctionPad, trimPolylineForPads, pointInJunctionPad } from "./roadnet.js";
 import { addQuadXZ, junctionKerbQuads } from "./roadjoin.js";
 import { buildHubFootprint, clipPolylineToOutside, multiContains } from "./roadfoot.js";
+import {
+  circusMeshRadii,
+  circusesFromGraph,
+  clipPolylineOutsideCircuses,
+} from "./roadclip.js";
 
 /** Grit shoulder under the tarmac edge, so a road has a rim instead of a cut edge. */
 export const SHOULDER = 0x6f6a5e;
@@ -171,9 +176,12 @@ function drawRibbon(scene, spec, road, heightAt, widthM, color, roadKind, matOpt
 
 export const HIGHWAY_LANE_OFFSET_M = 8;
 export const HIGHWAY_MEDIAN_M = 8;
-/** Skip ribbon faces across a gap this wide so a broken span cannot chord a circus island. */
+/**
+ * Safety: skip ribbon faces across a gap this wide. Circus joins are no
+ * longer this skip — they are a circle clip in roadclip.js.
+ */
 export const HIGHWAY_RAB_SKIP_M = 40;
-/** Stone disc inside the circulatory ring. */
+/** Stone disc inside the circulatory ring. Fallback when a node has no radius. */
 export const RAB_ISLAND_R_M = 24;
 
 function isLocalStreet(road) {
@@ -228,14 +236,14 @@ function drawablePoints(road, graph) {
   return densifyPts(pts, 6);
 }
 
-function drawPaved(scene, spec, road, heightAt, graph) {
+function drawPaved(scene, spec, road, heightAt, graph, circuses) {
   const pts = drawablePoints(road, graph);
   if (pts.length < 2) return;
   const cls = classOf(road);
   const width = roadClassSpec(cls).carriageM;
-  const shaped = { ...road, points: pts };
-  drawRibbon(scene, spec, shaped, heightAt, width + SHOULDER_PAD_M, SHOULDER, "shoulder", {}, Infinity, -0.03);
-  drawRibbon(scene, spec, shaped, heightAt, width, ASPHALT, "paved");
+  const runs = clipPolylineOutsideCircuses(pts, circuses);
+  drawClippedRuns(scene, spec, road, heightAt, runs, width + SHOULDER_PAD_M, SHOULDER, "shoulder", {}, -0.03);
+  drawClippedRuns(scene, spec, road, heightAt, runs, width, ASPHALT, "paved");
 }
 
 export function offsetPolyline(points, dist) {
@@ -259,17 +267,6 @@ export function offsetPolyline(points, dist) {
     out.push({ x: points[i].x + rx * dist, z: points[i].z + rz * dist });
   }
   return out;
-}
-
-function rabCentres(map) {
-  return (map.roads || [])
-    .filter((r) => r.roundabout)
-    .map((r) => r.joins || { x: r.points[0].x, z: r.points[0].z });
-}
-
-function omitNearCentres(pts, centres, gap = 20) {
-  if (!centres.length) return pts;
-  return pts.filter((p) => centres.every((c) => Math.hypot(p.x - c.x, p.z - c.z) >= gap));
 }
 
 function omitInsidePads(pts, graph, extra) {
@@ -318,73 +315,87 @@ function splitRuns(pts, maxGap) {
   return runs;
 }
 
-function drawSidewalks(scene, spec, road, heightAt, centres, graph, hubs) {
+function drawClippedRuns(scene, spec, road, heightAt, runs, widthM, color, roadKind, matOpts, yLift) {
+  for (const run of runs) {
+    if (!run || run.length < 2) continue;
+    drawRibbon(scene, spec, { ...road, points: run }, heightAt, widthM, color, roadKind, matOpts || {}, Infinity, yLift || 0);
+  }
+}
+
+function drawSidewalks(scene, spec, road, heightAt, graph, hubs, circuses) {
   if (!hasSidewalk(road)) return;
   const cls = classOf(road);
   const walk = roadClassSpec(cls).sidewalkM;
-  const pts = omitNearCentres(densifyPts(drawablePoints(road, graph), 4), centres, 30);
+  const pts = densifyPts(drawablePoints(road, graph), 4);
   if (pts.length < 2) return;
   const offset = roadClassSpec(cls).carriageM / 2 + SHOULDER_PAD_M / 2 + walk / 2;
   // Offset walks would otherwise keep going and hash through the junction
   // as a grey plus. Cut them on the hub polygon so the kerb meets the join.
+  // Circuses are a circle clip, not "delete the last 30 m".
   for (const side of [-1, 1]) {
     const offsetPts = offsetPolyline(pts, offset * side);
-    const pieces = hubs && hubs.length
-      ? clipPolylineToOutside(offsetPts, (x, z) => insideHubWalk(hubs, x, z))
-      : splitRuns(omitInsidePads(offsetPts, graph, walk + 0.8), 10);
-    for (const run of pieces) {
-      if (!run || run.length < 2) continue;
-      drawRibbon(scene, spec, { ...road, points: run }, heightAt, walk, SIDEWALK, "sidewalk");
+    let pieces = clipPolylineOutsideCircuses(offsetPts, circuses);
+    if (hubs && hubs.length) {
+      const next = [];
+      for (const ch of pieces) {
+        next.push(...clipPolylineToOutside(ch, (x, z) => insideHubWalk(hubs, x, z)));
+      }
+      pieces = next;
+    } else {
+      const next = [];
+      for (const ch of pieces) next.push(...splitRuns(omitInsidePads(ch, graph, walk + 0.8), 10));
+      pieces = next;
     }
+    drawClippedRuns(scene, spec, road, heightAt, pieces, walk, SIDEWALK, "sidewalk");
   }
 }
 
 /** 2+2 lanes with a stone median. Widths come from the class table. */
-function drawHighway(scene, spec, road, heightAt, graph) {
+function drawHighway(scene, spec, road, heightAt, graph, circuses) {
   const cls = classOf(road);
   const s = roadClassSpec(cls);
-  // Graph edges already stop on the circus kerb. Omitting the last stations
-  // was a leftover from when the spline ran through the island — it left a
-  // sand gap between the dual ribbons and the ring.
   const pts = drawablePoints(road, graph);
   if (pts.length < 2) return;
   const lane = s.medianM / 2 + s.carriageM / 2;
-
-  drawRibbon(
+  const name = road.name || "Island Hwy";
+  // Clip each ribbon on the circus *outer* circle so a dual lane lands on
+  // the ring. Offsetting after a centreline clip would miss again (the
+  // 9 m lateral gap the arm discs used to hide).
+  const centre = clipPolylineOutsideCircuses(pts, circuses);
+  drawClippedRuns(
     scene,
     spec,
-    { ...road, name: (road.name || "Island Hwy") + " shoulder", points: pts },
+    { ...road, name: name + " shoulder" },
     heightAt,
+    centre,
     carriagewayWidthM(cls) + SHOULDER_PAD_M,
     SHOULDER,
     "shoulder",
     {},
-    HIGHWAY_RAB_SKIP_M,
     -0.03,
   );
   for (const side of [-1, 1]) {
-    drawRibbon(
+    drawClippedRuns(
       scene,
       spec,
-      { ...road, points: offsetPolyline(pts, lane * side) },
+      road,
       heightAt,
+      clipPolylineOutsideCircuses(offsetPolyline(pts, lane * side), circuses),
       s.carriageM,
       ASPHALT,
       "paved",
-      {},
-      HIGHWAY_RAB_SKIP_M,
     );
   }
-  drawRibbon(
+  drawClippedRuns(
     scene,
     spec,
-    { ...road, name: (road.name || "Island Hwy") + " median", points: pts },
+    { ...road, name: name + " median" },
     heightAt,
+    centre,
     s.medianM,
     STONE,
     "median",
     {},
-    HIGHWAY_RAB_SKIP_M,
     0.02,
   );
 }
@@ -504,44 +515,6 @@ function drawJunctions(scene, map, specOf, heightAt) {
   }
 }
 
-/**
- * A short asphalt disc on each circus arm, at the kerb where the edge stops.
- * Dual ribbons sit 9 m off the centreline; without this pad they can look as
- * if they miss the ring even when the graph is exact.
- */
-function drawCircusApproaches(scene, map, specOf, heightAt) {
-  const graph = map.graph;
-  if (!graph || !graph.nodes) return;
-  for (const node of graph.nodes) {
-    if (node.kind !== "circus" || !node.radius) continue;
-    const spec = specOf(node.island);
-    const y = heightAt(spec, node.x, node.z);
-    for (const edge of graph.edges) {
-      if (edge.a !== node.id && edge.b !== node.id) continue;
-      const pts = edge.points;
-      if (!pts || pts.length < 2) continue;
-      const p = edge.a === node.id ? pts[0] : pts[pts.length - 1];
-      const r = Math.min(9, carriagewayWidthM(edge.cls) / 2 + 1.5);
-      const mesh = new THREE.Mesh(
-        new THREE.CircleGeometry(r, 18),
-        new THREE.MeshLambertMaterial({ color: ASPHALT }),
-      );
-      mesh.rotation.x = -Math.PI / 2;
-      mesh.position.set(p.x, y + 0.14, p.z);
-      mesh.castShadow = false;
-      mesh.receiveShadow = true;
-      mesh.userData.kind = "road";
-      mesh.userData.roadKind = "junction";
-      mesh.userData.island = node.island;
-      mesh.userData.roadName = (node.name || "Circus") + " arm";
-      mesh.userData.label = mesh.userData.roadName;
-      mesh.userData.widthM = r * 2;
-      mesh.userData.mode = "PAPER";
-      scene.add(mesh);
-    }
-  }
-}
-
 function rabCenter(road) {
   const pts = road.points || [];
   let x = 0;
@@ -559,12 +532,12 @@ function drawRoundabout(scene, spec, road, heightAt, graph) {
   if (pts.length < 8) return;
   const { x, z } = rabCenter(road);
   const y = heightAt(spec, x, z);
-  // Edges stop on the node's kerb radius, so the ring has to reach it.
   const node = graph && road.nodeId ? graph.nodes.find((n) => n.id === road.nodeId) : null;
-  const outer = node && node.radius ? node.radius + 3.2 : RAB_ISLAND_R_M + PAVED_WIDTH_M + 1.8;
-  const inner = Math.max(6, outer - (PAVED_WIDTH_M + 5));
+  const radii = circusMeshRadii(node && node.radius);
+  const outer = radii.outer;
+  const inner = radii.inner;
   const ring = new THREE.Mesh(
-    new THREE.RingGeometry(inner, outer, 32),
+    new THREE.RingGeometry(inner, outer, 48),
     new THREE.MeshLambertMaterial({ color: ASPHALT }),
   );
   ring.rotation.x = -Math.PI / 2;
@@ -806,23 +779,22 @@ function drawLegacyJoins(scene, map, specOf, heightAt) {
  */
 export function makeRoads(map, helpers) {
   const { scene, specOf, heightAt } = helpers;
-  const centres = rabCentres(map);
   const hubs = collectHubs(map.graph);
+  const circuses = circusesFromGraph(map.graph);
   for (const road of map.roads) {
     const spec = specOf(road.island);
     if (road.kind === "paved" && road.lanes === 4) {
-      drawHighway(scene, spec, road, heightAt, map.graph);
+      drawHighway(scene, spec, road, heightAt, map.graph, circuses);
     } else if (road.kind === "paved" && road.roundabout) {
       drawRoundabout(scene, spec, road, heightAt, map.graph);
     } else if (road.kind === "paved") {
-      drawPaved(scene, spec, road, heightAt, map.graph);
-      drawSidewalks(scene, spec, road, heightAt, centres, map.graph, hubs);
+      drawPaved(scene, spec, road, heightAt, map.graph, circuses);
+      drawSidewalks(scene, spec, road, heightAt, map.graph, hubs, circuses);
     } else {
       drawDirt(scene, spec, road, heightAt);
     }
   }
   drawHubs(scene, map, specOf, heightAt, hubs);
   drawLegacyJoins(scene, map, specOf, heightAt);
-  drawCircusApproaches(scene, map, specOf, heightAt);
   drawNorthPortCurbs(scene, map, specOf, heightAt);
 }
