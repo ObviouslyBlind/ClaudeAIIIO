@@ -123,7 +123,8 @@ describe("harbour chrome HUD", () => {
     expect(css).toContain(".mp-fold");
     expect(css).toContain(".mp-cart-btn");
     expect(css).toContain(".mp-add");
-    expect(css).toContain(".mp-nav");
+    expect(css).toContain(".mp-aisles");
+    expect(css).toContain("flex-wrap: wrap");
     expect(css).toContain("overscroll-behavior: contain");
     expect(css).toContain(".isle-shut[data-tip]::after");
     expect(css).toContain("#sheet-veil");

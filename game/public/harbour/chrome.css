@@ -1070,8 +1070,9 @@ nav.dock.travel-dock {
 }
 .mp-nav {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
   padding: 0 10px 8px;
   flex: 0 0 auto;
   overflow: visible;
@@ -1154,13 +1155,11 @@ nav.dock.travel-dock {
 }
 .mp-aisles {
   display: flex;
+  flex-wrap: wrap;
   gap: 5px;
   padding: 0;
-  flex: 1;
-  min-width: 0;
-  overflow-x: auto;
-  overflow-y: hidden;
-  scrollbar-width: none;
+  width: 100%;
+  overflow: visible;
 }
 .mp-aisles::-webkit-scrollbar { display: none; }
 .mp-aisle {
