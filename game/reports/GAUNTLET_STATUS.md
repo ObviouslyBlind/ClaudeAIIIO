@@ -22,8 +22,8 @@ Bar the critic inspects on live `http://127.0.0.1:8787/`. One verdict for the wh
 
 Do **not** grade Market Pay “How many / Where” as the sticker. That card is qty + dest.
 
-Last critic (bc-3cacd5cd): **FAIL** — one Buy $32 click, cash still $1000, card “44 ISLAND HWY / YOURS”. onNearLease/paintParcel likely threw before lease().
+Last critic (bc-3c66cfcb): **FAIL** — Buy $32, card “44 ISLAND HWY / YOURS / Close”, cash stayed $1,000. Lease UI painted YOURS without stamping cash.
 
-Fix in this round: POST /api/lease first, then paint the ask.
+Fix in this round: apply the lease `play` payload to the HUD immediately so cash drops to $968 on that click.
 
 Politics frozen. Operator is the brake.
