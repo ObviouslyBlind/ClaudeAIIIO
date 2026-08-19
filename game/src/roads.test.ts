@@ -38,7 +38,7 @@ type RoadMesh = {
   userData: { roadKind?: string; widthM?: number; island?: string; roadName?: string; junctionWalk?: boolean; footprint?: boolean };
   geometry: {
     type?: string;
-    parameters?: { width: number; innerRadius?: number };
+    parameters?: { width: number; innerRadius?: number; outerRadius?: number };
     attributes: { position: { count: number; getX: (i: number) => number; getY: (i: number) => number; getZ: (i: number) => number } };
     index: { count: number } | null;
   };
@@ -70,7 +70,7 @@ describe("paved street from spawn", () => {
     // Circuses are one node mesh, not a RingGeometry plus stacked dual tapes.
     expect(paved.filter((m) => m.userData.footprint && /Circus$/.test(String(m.userData.roadName || ""))).length).toBe(circuses);
     expect(paved.length).toBeGreaterThanOrEqual(pavedRoads.length - circuses + extraCarriages);
-    expect(paved.length).toBeLessThan(pavedRoads.length + extraCarriages + circuses + 24);
+    expect(paved.length).toBeLessThan(pavedRoads.length + extraCarriages + circuses * 5 + 16);
     expect(extras.length).toBe(0);
     const walks = added.filter((m) => m.userData.roadKind === "sidewalk");
     expect(walks.length).toBeGreaterThan(4);
@@ -316,8 +316,9 @@ describe("paved street from spawn", () => {
       (m) => m.userData.roadName === "Harbour Circus" && m.userData.footprint,
     );
     expect(circus).toBeTruthy();
-    expect(circus!.geometry.parameters).toBeUndefined();
-    expect(added.some((m) => String(m.userData.roadName || "").endsWith(" arm"))).toBe(false);
+    expect(circus!.geometry.parameters?.innerRadius).toBeCloseTo(radii.inner, 0);
+    expect(circus!.geometry.parameters?.outerRadius).toBeCloseTo(radii.outer, 0);
+    expect(added.filter((m) => m.userData.roadName === "Harbour Circus arm").length).toBe(3);
 
     const quay = added.filter(
       (m) => m.userData.roadKind === "paved" && m.userData.roadName === "Quayward Rd",

@@ -10,6 +10,6 @@ The 26 m mitered slab was the live failure: it ate the verge (props on tarmac), 
 | R7 | Live spawn: one black highway bed | **FAIL** — 26 m slab looked like disconnected blobs |
 | R8 | Emissive black tarmac | shipped; did not fix the slab |
 | R9 | Restore dual 8 m lanes; black median fill; 12 m circus arms | builder shipped |
-| R10 | Live spawn + zoomed Harbour Circus | queued after restart |
+| R10 | Circus drawn as RingGeometry + arm boxes, not earcut union | builder shipped |
 
-Queued: live critic on a fresh `http://localhost:8787/` load. Operator is the brake.
+Queued: live critic on a **fresh** load (tab stamp after restart). Operator is the brake.

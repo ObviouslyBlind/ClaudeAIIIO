@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { ROAD_CLASSES, carriagewayWidthM, roadClassSpec } from "./roadclass.js";
 import { junctionPad, trimPolylineForPads, pointInJunctionPad } from "./roadnet.js";
 import { addQuadXZ, junctionKerbQuads } from "./roadjoin.js";
-import { buildHubFootprint, buildCircusFootprint, clipPolylineToOutside, multiContains } from "./roadfoot.js";
+import { buildHubFootprint, buildCircusFootprint, clipPolylineToOutside, multiContains, segmentRing, CIRCUS_ARM_STUB_M, FOOT_SHOULDER_M } from "./roadfoot.js";
 
 /** Grit shoulder under the tarmac edge, so a road has a rim instead of a cut edge. */
 export const SHOULDER = 0x6f6a5e;
@@ -541,24 +541,77 @@ function drawJunctions(scene, map, specOf, heightAt) {
   }
 }
 
+function circusArmDir(node, edge) {
+  const pts = edge.points;
+  const fromA = edge.a === node.id;
+  const a = fromA ? pts[0] : pts[pts.length - 1];
+  const b = fromA ? pts[1] : pts[pts.length - 2];
+  const dx = b.x - a.x;
+  const dz = b.z - a.z;
+  const len = Math.hypot(dx, dz) || 1;
+  return { x: dx / len, z: dz / len };
+}
+
 function drawCircusJoins(scene, map, specOf, heightAt, joins) {
+  const graph = map.graph;
   for (const rec of joins || []) {
     const { node, foot } = rec;
     if (!foot) continue;
     const spec = specOf(node.island);
     const y = heightAt(spec, node.x, node.z);
-    const base = { island: node.island, footprint: true, label: node.name || "Circus" };
-    addMultiPolygonMesh(scene, foot.shoulder, y + 0.13, SHOULDER, {
-      ...base,
-      roadKind: "shoulder",
-      roadName: (node.name || "Circus") + " hub",
-    });
-    addMultiPolygonMesh(scene, foot.tarmac, y + 0.2, ASPHALT, {
-      ...base,
-      roadKind: "paved",
-      roadName: node.name || "Circus",
-    });
     const inner = foot.inner || 24;
+    const outer = foot.outer || 42;
+    const base = { island: node.island, footprint: true, label: node.name || "Circus" };
+    const name = node.name || "Circus";
+
+    // Ring + arm boxes. A Clipper union through ShapeGeometry dropped the arms
+    // (earcut on a holed keyhole), so the live circus was a disc in the grass.
+    const grit = new THREE.Mesh(
+      new THREE.RingGeometry(inner, outer + FOOT_SHOULDER_M, 48),
+      new THREE.MeshLambertMaterial({ color: SHOULDER }),
+    );
+    grit.rotation.x = -Math.PI / 2;
+    grit.position.set(node.x, y + 0.13, node.z);
+    grit.castShadow = false;
+    grit.receiveShadow = true;
+    grit.userData = { kind: "road", mode: "PAPER", ...base, roadKind: "shoulder", roadName: name + " hub" };
+    scene.add(grit);
+
+    const ring = new THREE.Mesh(
+      new THREE.RingGeometry(inner, outer, 48),
+      roadMaterial(ASPHALT, "paved"),
+    );
+    ring.rotation.x = -Math.PI / 2;
+    ring.position.set(node.x, y + 0.2, node.z);
+    ring.castShadow = false;
+    ring.receiveShadow = true;
+    ring.renderOrder = 3;
+    ring.userData = { kind: "road", mode: "PAPER", ...base, roadKind: "paved", roadName: name };
+    ring.name = `road:${node.island}:${name}`;
+    scene.add(ring);
+
+    for (const e of graph.edges || []) {
+      if (e.a !== node.id && e.b !== node.id) continue;
+      if (!e.points || e.points.length < 2) continue;
+      const cls = e.cls || "street";
+      if (roadClassSpec(cls).dirt) continue;
+      const dir = circusArmDir(node, e);
+      const half = carriagewayWidthM(cls) / 2;
+      const along = outer + CIRCUS_ARM_STUB_M;
+      const far = { x: node.x + dir.x * along, z: node.z + dir.z * along };
+      const origin = { x: node.x + dir.x * (inner + 0.5), z: node.z + dir.z * (inner + 0.5) };
+      addMultiPolygonMesh(scene, [[segmentRing(origin, far, half + FOOT_SHOULDER_M / 2)]], y + 0.13, SHOULDER, {
+        ...base,
+        roadKind: "shoulder",
+        roadName: name + " hub",
+      });
+      addMultiPolygonMesh(scene, [[segmentRing(origin, far, half)]], y + 0.2, ASPHALT, {
+        ...base,
+        roadKind: "paved",
+        roadName: name + " arm",
+      });
+    }
+
     const disc = new THREE.Mesh(
       new THREE.CylinderGeometry(Math.max(4, inner - 0.25), Math.max(4, inner - 0.25), 0.36, 24),
       new THREE.MeshLambertMaterial({ color: STONE }),
