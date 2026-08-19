@@ -12,7 +12,7 @@ import { formatCartsBody } from "./carts-hud.js";
 import { formatSiteMenu, gamesForSite } from "./site-menu.js";
 import { compactCash, fullCash } from "./cash-chip.js";
 import { formatCashLedger } from "./cash-ledger.js";
-import { formatMarketplace } from "./marketplace.js";
+import { formatMarketplace, addBasketLine, removeBasketLine } from "./marketplace.js";
 import { formatHireSheet } from "./hire-sheet.js";
 
 export const POLL_MS = 1000;
@@ -64,6 +64,9 @@ export function mountChrome(opts) {
   let marketAisle = "street";
   let marketIsland = "south";
   let marketQuery = "";
+  let marketView = "shop";
+  let marketBasket = [];
+  let marketFolds = { carts: false, stock: false, goods: false };
   let hirePick = "";
   const packShift = mountPackShift();
   let siteTab = "stock";
@@ -227,6 +230,10 @@ export function mountChrome(opts) {
       aisle: marketAisle,
       island: marketIsland,
       query: marketQuery,
+      cash: play.cash,
+      basket: marketBasket,
+      view: marketView,
+      folds: marketFolds,
     });
     const next = document.getElementById("market-search");
     if (next && keep) {
@@ -345,6 +352,7 @@ export function mountChrome(opts) {
       return;
     }
     playPaperBuy();
+    marketBasket = removeBasketLine(marketBasket, orderSku, "order");
     await refreshPlay(data);
     const delivery = data && data.delivery;
     if (delivery && delivery.dest === "road") {
@@ -360,6 +368,75 @@ export function mountChrome(opts) {
           : "Paid. In the South warehouse.",
       );
     }
+  }
+
+  async function submitBasket() {
+    if (!marketBasket.length) return;
+    const pose = typeof opts.getPose === "function" ? opts.getPose() : {};
+    const selectedId = typeof opts.getPlotId === "function" ? opts.getPlotId() : "";
+    const leases = (play && play.leases) || [];
+    const ownedId = leases.some((l) => l.id === selectedId)
+      ? selectedId
+      : (leases[0] && leases[0].id) || "";
+    const skus = [];
+    for (const row of marketBasket.filter((r) => r.via !== "good")) {
+      const q = Math.max(1, Math.min(10, Number(row.qty) || 1));
+      for (let i = 0; i < q; i++) skus.push(row.sku);
+    }
+    let last = null;
+    if (skus.length) {
+      const { ok, data } = await readJson("/api/market/order", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          skus,
+          island: "south",
+          dest: marketDest === "road" ? "road" : "warehouse",
+          qty: 1,
+          x: pose && pose.x,
+          z: pose && pose.z,
+          plotId: marketDest === "road" ? ownedId || undefined : undefined,
+        }),
+      });
+      if (!ok) {
+        if (opts.setStatus) opts.setStatus("Order failed: " + (data && data.reason));
+        return;
+      }
+      last = data;
+      playPaperBuy();
+      await refreshPlay(data);
+    }
+    for (const row of marketBasket.filter((r) => r.via === "good")) {
+      const q = Math.max(1, Math.min(10, Number(row.qty) || 1));
+      for (let i = 0; i < q; i++) {
+        const { ok, data } = await readJson("/api/buy", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ island: "south", goodId: row.sku, qty: 1 }),
+        });
+        if (!ok) {
+          if (opts.setStatus) opts.setStatus("Buy failed: " + (data && data.reason));
+          return;
+        }
+        playPaperBuy();
+        if (data && data.snapshot && data.snapshot.visitor) {
+          playGen += 1;
+          play.cash = data.snapshot.visitor.cash;
+          play.cart = data.snapshot.visitor.cart || [];
+        }
+      }
+    }
+    marketBasket = [];
+    marketView = "shop";
+    const delivery = last && last.delivery;
+    if (delivery && delivery.dest === "road") {
+      closePanels();
+      if (typeof opts.onOrder === "function") opts.onOrder(delivery);
+    } else {
+      paintTop();
+      paintMarket();
+    }
+    if (opts.setStatus) opts.setStatus("Paid from the market cart.");
   }
 
   function paintFootLegend() {
@@ -645,7 +722,7 @@ export function mountChrome(opts) {
     root.addEventListener("click", async (ev) => {
       const hit = ev.target && ev.target.closest
         ? ev.target.closest(
-            "[data-dest], [data-order], [data-buy], [data-place], [data-withdraw], [data-open-stand], [data-order-qty], [data-order-dest], [data-aisle], [data-island], [data-sheet-close], [data-hire-pick], [data-hire-back], [data-sheet-hire], #order-pay, #order-cancel",
+            "[data-dest], [data-order], [data-buy], [data-place], [data-withdraw], [data-open-stand], [data-order-qty], [data-order-dest], [data-aisle], [data-island], [data-sheet-close], [data-hire-pick], [data-hire-back], [data-sheet-hire], [data-add-cart], [data-market-cart], [data-basket-remove], [data-basket-buy], [data-basket-pay], #order-pay, #order-cancel",
           )
         : null;
       if (!hit || (standMenu && standMenu.contains(hit))) return;
@@ -655,7 +732,70 @@ export function mountChrome(opts) {
       }
       if (hit.hasAttribute("data-aisle")) {
         marketAisle = hit.getAttribute("data-aisle") || "street";
+        marketView = "shop";
         paintMarket();
+        return;
+      }
+      if (hit.hasAttribute("data-market-cart")) {
+        marketView = marketView === "basket" ? "shop" : "basket";
+        paintMarket();
+        return;
+      }
+      if (hit.hasAttribute("data-add-cart")) {
+        marketBasket = addBasketLine(
+          marketBasket,
+          hit.getAttribute("data-add-cart"),
+          hit.getAttribute("data-via") || "order",
+        );
+        paintMarket();
+        if (opts.setStatus) opts.setStatus("In the market cart.");
+        return;
+      }
+      if (hit.hasAttribute("data-basket-remove")) {
+        marketBasket = removeBasketLine(
+          marketBasket,
+          hit.getAttribute("data-basket-remove"),
+          hit.getAttribute("data-via") || "order",
+        );
+        paintMarket();
+        return;
+      }
+      if (hit.hasAttribute("data-basket-buy")) {
+        const sku = hit.getAttribute("data-basket-buy");
+        const via = hit.getAttribute("data-via") || "order";
+        const line = marketBasket.find((r) => r.sku === sku && r.via === via);
+        if (via === "good") {
+          const qty = Math.max(1, Number(line && line.qty) || 1);
+          for (let i = 0; i < qty; i++) {
+            const { ok, data } = await readJson("/api/buy", {
+              method: "POST",
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify({ island: "south", goodId: sku, qty: 1 }),
+            });
+            if (!ok) {
+              if (opts.setStatus) opts.setStatus("Buy failed: " + (data && data.reason));
+              return;
+            }
+            playPaperBuy();
+            if (data && data.snapshot && data.snapshot.visitor) {
+              playGen += 1;
+              play.cash = data.snapshot.visitor.cash;
+              play.cart = data.snapshot.visitor.cart || [];
+            }
+          }
+          marketBasket = removeBasketLine(marketBasket, sku, "good");
+          paintTop();
+          paintMarket();
+          if (opts.setStatus) opts.setStatus("In the cart.");
+          return;
+        }
+        orderSku = sku;
+        orderQty = Math.max(1, Math.min(10, Number(line && line.qty) || 1));
+        paintOrderAsk();
+        return;
+      }
+      if (hit.hasAttribute("data-basket-pay")) {
+        await submitBasket();
         return;
       }
       if (hit.hasAttribute("data-island")) {
@@ -766,6 +906,12 @@ export function mountChrome(opts) {
         return;
       }
     });
+    root.addEventListener("toggle", (ev) => {
+      const fold = ev.target;
+      if (!fold || fold.getAttribute == null || !fold.hasAttribute("data-fold")) return;
+      const id = fold.getAttribute("data-fold");
+      if (id) marketFolds[id] = fold.open;
+    }, true);
     root.addEventListener("input", (ev) => {
       const hit = ev.target && ev.target.closest ? ev.target.closest("#market-search") : null;
       if (!hit) return;

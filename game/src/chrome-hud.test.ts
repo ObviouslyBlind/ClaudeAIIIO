@@ -70,7 +70,8 @@ describe("harbour chrome HUD", () => {
     expect(html).toContain('aria-label="Carts"');
     expect(html).toContain('data-tip="Carts"');
     expect(html).toContain('data-tip="Warehouse"');
-    expect(html).toContain('data-tip="Market"');
+    expect(html).toContain('data-tip="Marketplace"');
+    expect(html).toContain('aria-label="Marketplace"');
     expect(html).toContain('aria-label="Hire"');
     expect(html).toContain('data-tip="Hire"');
     expect(html).toContain('data-tip="Go to Port to use Ferry"');
@@ -119,8 +120,8 @@ describe("harbour chrome HUD", () => {
     expect(css).toContain(".sku-buy");
     expect(css).toContain(".sheet-center");
     expect(css).toContain(".mp-search");
-    expect(css).toContain(".isle-shut");
-    expect(css).toContain(".isle-stack");
+    expect(css).toContain(".mp-fold");
+    expect(css).toContain(".mp-cart-btn");
     expect(css).toContain("#sheet-veil");
     expect(css).toContain("#crate-ask");
     expect(css).toContain(".buy-loc");

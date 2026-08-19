@@ -21,9 +21,11 @@ The difference is **what kind of business you put down**, not a different game m
 
 Center sheet. Wordmark: **2Isles Marketplace**. Search at the top.
 
-**South** and **North**. You only buy on the island you are standing on. The other island is grey until you ferry. North is grey for now — there is nothing to buy there yet.
+**South island** and **North island**. You only buy on the island you are standing on. North island is shut until you ferry.
 
-Left rail **Market** opens this sheet. It does not stay a skinny panel of “Buy 1.”
+Left rail **Marketplace** opens this sheet.
+
+Street subsections (Carts, Stock, South island goods) sit in fold menus so the sheet does not scroll forever. Buy opens the pay sheet. Add goes in the marketplace cart next to Close. Cash on the sheet is dollars and cents.
 
 ---
 
@@ -34,14 +36,14 @@ These are **catalogs of kit**. They are not separate sims.
 | Aisle | What it is | Examples |
 |---|---|---|
 | **Street** | Carts you drop on a pad | Fry, fruit, veg, coffee, meat, bakery |
-| **Shop fit** | What goes *inside* a shop | Shelves, till, fridge, counter, backstock |
-| **Hospitality** | What goes *inside* a house or hotel | Beds, kitchen, lobby, rooms |
-| **Plant** | Machines that sit and run | Crushers, belts, static excavator, packing line |
+| **Shopfit** | What goes *inside* a shop | Shelves, till, fridge, counter, backstock |
 | **Farming** | Crop + orchard kit | Trees, irrigation, crates, tractor, packing shed |
+| **Hospitality** | What goes *inside* a house or hotel | Beds, kitchen, lobby, rooms |
+| **Machinery** | Machines that sit and run | Crushers, belts, static excavator, packing line |
 
 **Street** is live (carts you already know). The other aisles start empty / coming soon until that loop exists. We do not fake a quarry you cannot place.
 
-There is **no Yard aisle**. Aggregates is not a hardware-store shelf of random lumber. It is a **business type** you place, then kit out from Plant (and a bit of Fleet on the business itself).
+There is **no Yard aisle**. Aggregates is a **business type** you place, then kit out from Machinery.
 
 Trucks and vans are **not** a mall you wander for fun. You buy them as kit, then they **belong to a business at a location**. You see them when you open that business — parked, assigned, or on a job.
 

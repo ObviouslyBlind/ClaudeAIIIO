@@ -712,6 +712,68 @@ nav.dock.travel-dock {
   padding: 11px 0 9px;
   border-top: 1px solid var(--line);
 }
+.sku-buy-blurb {
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--muted);
+}
+.sku-buy-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 0 0 auto;
+}
+.sku-buy-actions .go,
+.sku-buy-actions .ghost {
+  min-width: 64px;
+  min-height: 28px;
+  padding: 0 8px;
+  font-size: 11px;
+}
+.mp-fold {
+  margin: 0 0 8px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #0c181c;
+}
+.mp-fold summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 10px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--btn);
+}
+.mp-fold summary::-webkit-details-marker { display: none; }
+.mp-fold[open] summary {
+  border-bottom: 1px solid var(--line);
+}
+.mp-fold .sku-buy:first-of-type { border-top: 0; }
+.mp-fold .sku-buy {
+  margin: 0 12px;
+}
+.mp-fold .sku-buy:last-of-type {
+  margin-bottom: 4px;
+}
+.mp-basket-pay {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 12px 0 0;
+}
+.mp-basket-sum {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--ink);
+}
+.mp-basket-pay .go {
+  width: 100%;
+  min-height: 40px;
+}
 .sku-buy-copy {
   min-width: 0;
   display: flex;
@@ -860,10 +922,68 @@ nav.dock.travel-dock {
 }
 .mp-head {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding: 16px 16px 8px;
+  gap: 10px;
+  padding: 14px 14px 8px;
+}
+.mp-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+.float-panel p.mp-cash,
+.mp-cash {
+  margin: 0;
+  font-family: "Big Shoulders Display", "Arial Narrow", sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.mp-cart-btn {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #132428;
+  color: var(--ink);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+.mp-cart-btn svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+.mp-cart-btn.is-on,
+.mp-cart-btn:hover {
+  border-color: var(--brass-hi);
+  color: var(--brass-hi);
+}
+.mp-cart-n {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--green);
+  color: #0b1a10;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 16px;
+  text-align: center;
 }
 .float-panel h2.mp-word,
 .mp-word {
@@ -924,22 +1044,22 @@ nav.dock.travel-dock {
 .mp-search::placeholder {
   color: #8aa8a0;
 }
-.isle-stack {
+.isle-row {
   display: flex;
-  flex-direction: column;
   gap: 6px;
+  align-items: stretch;
 }
 .isle {
-  width: 100%;
-  min-height: 40px;
-  padding: 0 14px;
+  flex: 0 0 auto;
+  min-height: 26px;
+  padding: 0 9px;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: 999px;
   background: #132428;
   color: var(--ink);
-  font-size: 13px;
+  font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   cursor: pointer;
   display: inline-flex;
@@ -953,22 +1073,24 @@ nav.dock.travel-dock {
 }
 .float-panel p.isle-shut,
 .isle-shut {
-  display: block;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   margin: 0;
-  min-height: 0;
-  padding: 8px 12px;
+  min-height: 26px;
+  padding: 0 9px;
   border: 1px dashed #6a8078;
-  border-radius: 8px;
+  border-radius: 999px;
   background: #070d0f;
-  color: #9bb4ac;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  text-transform: none;
+  color: #7a9088;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   pointer-events: none;
   user-select: none;
-  line-height: 1.35;
-  text-align: center;
+  line-height: 1;
 }
 .float-panel p.mp-isle-note,
 .mp-isle-note {
