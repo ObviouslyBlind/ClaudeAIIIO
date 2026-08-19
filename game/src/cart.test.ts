@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import * as THREE from "three";
 import {
   HOTDOG_CART_MESH_COUNT,
+  VENDOR_LOCAL,
   detachVendor,
   dressCart,
   makeCrate,
@@ -84,5 +85,11 @@ describe("street cart (kerb stall, not a handheld wagon)", () => {
     });
     expect(maxY).toBeGreaterThan(1.5);
     expect(maxY).toBeLessThan(2.2);
+  });
+
+  it("stands the hired vendor on the serving apron, in front of the counter", () => {
+    expect(VENDOR_LOCAL.z).toBeGreaterThan(0.7);
+    expect(VENDOR_LOCAL.x).toBeGreaterThan(0.4);
+    expect(VENDOR_LOCAL.x).toBeLessThan(1);
   });
 });

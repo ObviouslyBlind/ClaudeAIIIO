@@ -24,7 +24,7 @@ import {
   WALK_BEACH_M,
   WALK_SPEED_MPS,
 } from "./walk-plan.js";
-import { makeStreetCart, makeCrate, makeVendor, detachVendor, findVendor } from "./cart.js";
+import { makeStreetCart, makeCrate, makeVendor, detachVendor, findVendor, VENDOR_LOCAL } from "./cart.js";
 import { playPaperBuy } from "./paper-sfx.js";
 import { createWalkPath } from "./walk-path.js";
 import { mountChrome } from "./chrome.js";
@@ -598,7 +598,7 @@ function attachVendor(cart) {
   if (!cart || findVendor(cart)) return;
   const playNow = chromeHud && chromeHud.getPlay && chromeHud.getPlay();
   const vendor = makeVendor(playNow && playNow.look);
-  vendor.position.set(1.05, 0, 0.15);
+  vendor.position.set(VENDOR_LOCAL.x, VENDOR_LOCAL.y, VENDOR_LOCAL.z);
   cart.add(vendor);
 }
 
@@ -618,8 +618,8 @@ function tickVendors(t) {
   for (const mesh of standMeshes.values()) {
     const vendor = findVendor(mesh);
     if (!vendor) continue;
-    vendor.position.x = 1.05 + Math.sin(t * 1.7) * 0.22;
-    vendor.position.z = 0.15 + Math.cos(t * 1.1) * 0.12;
+    vendor.position.x = VENDOR_LOCAL.x + Math.sin(t * 1.7) * 0.08;
+    vendor.position.z = VENDOR_LOCAL.z + Math.cos(t * 1.1) * 0.06;
     vendor.rotation.y = Math.sin(t * 0.9) * 0.55;
   }
 }

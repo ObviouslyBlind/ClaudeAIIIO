@@ -31,6 +31,9 @@ function box(w, h, d, color) {
 export const HOTDOG_CART_MESH_COUNT = 11;
 export const STREET_CART_MESH_COUNT = HOTDOG_CART_MESH_COUNT;
 
+/** Serving apron, toward the stall camera (+X/+Z), not tucked behind the body. */
+export const VENDOR_LOCAL = { x: 0.62, y: 0, z: 0.92 };
+
 export function makeStreetCart(kind) {
   const look = CART_LOOK[kind] || CART_LOOK.fruit;
   const g = new THREE.Group();
