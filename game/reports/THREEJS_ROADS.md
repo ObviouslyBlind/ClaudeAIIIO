@@ -64,7 +64,7 @@ PathPhalt / Curva / medieval-settlement, mapped onto our graph:
 
 | Piece | Draw |
 |---|---|
-| Run (street, avenue, dual lane) | Ribbon (`drawRibbon`). Dual = two 8 m lanes + black asphalt median fill. Never a 26 m mitered slab. |
+| Run (street, avenue, dual lane) | Ribbon (`drawRibbon`) plus PathPhalt cream/kraft **lane paint**. Dual = two 8 m lanes + black asphalt median fill + dashes. Never a 26 m mitered slab. |
 | T / L | Union of 2–4 arm rectangles. Ribbons **cut on that polygon**. Hub mesh is the join. |
 | Circus | `RingGeometry` is the node surface. Duals **circle-cut onto the outer face** so offset lanes hit the ring, not 9 m of sand beside the kerb. Short lip caps at each arm — not 12 m black rectangles in the grass. Stone island in the hole. **Do not** `ShapeGeometry` a holed Clipper keyhole. |
 | Legal turns | 15 / 30 / 45 / 90° (`ROAD_TURN_DEG`). Treat as kit cases, not a continuous CS2 compiler. |

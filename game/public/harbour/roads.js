@@ -5,8 +5,8 @@ import { addQuadXZ, junctionKerbQuads } from "./roadjoin.js";
 import { buildHubFootprint, buildCircusFootprint, clipPolylineToOutside, multiContains, segmentRing, CIRCUS_ARM_STUB_M, CIRCUS_ARM_TUCK_M, FOOT_SHOULDER_M } from "./roadfoot.js";
 import { circusesFromGraph, clipPolylineOutsideCircuses } from "./roadclip.js";
 
-/** Grit shoulder under the tarmac edge, so a road has a rim instead of a cut edge. */
-export const SHOULDER = 0x6f6a5e;
+/** Dark grit under the tarmac edge. Pale 0x6f6a5e read as a sand gap from spawn. */
+export const SHOULDER = 0x3f3c36;
 
 /** Metres. A black tarmac ribbon, not a kerbed highway kit. */
 export const PAVED_WIDTH_M = 7.2;
@@ -27,16 +27,24 @@ export const MEDIAN = 0x1a1a18;
 export const SIDEWALK = 0xb0a48c;
 /** Drawn median width. Class medianM is the driving gap; this is the paint. */
 export const MEDIAN_STRIPE_M = 1.8;
+/** PathPhalt markings. Paper cream / kraft gold, not a kerb kit. */
+export const PAINT = 0xe8e2d4;
+export const PAINT_YELLOW = 0xc9a227;
+export const PAINT_WIDTH_M = 0.24;
+export const PAINT_DASH_M = 4.2;
+export const PAINT_GAP_M = 4.8;
 
 /** Tan hemisphere fill washes Lambert 0x141414 toward sand. Keep tarmac black. */
 function roadMaterial(color, roadKind, extra = {}) {
   const keepBlack = roadKind === "paved" || roadKind === "junction" || roadKind === "median";
+  const paint = roadKind === "paint";
   return new THREE.MeshLambertMaterial({
     color,
     ...(keepBlack ? { emissive: color, emissiveIntensity: 0.42 } : {}),
+    ...(paint ? { emissive: color, emissiveIntensity: 0.62 } : {}),
     polygonOffset: true,
-    polygonOffsetFactor: -2,
-    polygonOffsetUnits: -2,
+    polygonOffsetFactor: paint ? -4 : -2,
+    polygonOffsetUnits: paint ? -4 : -2,
     ...extra,
   });
 }
@@ -168,7 +176,7 @@ function drawRibbon(scene, spec, road, heightAt, widthM, color, roadKind, matOpt
   const m = new THREE.Mesh(geo, roadMaterial(color, roadKind, matOpts));
   m.castShadow = false;
   m.receiveShadow = true;
-  m.renderOrder = 2;
+  m.renderOrder = roadKind === "paint" ? 4 : 2;
   const roadName = road.name || (roadKind === "paved" ? "Harbour Rd" : "dirt track");
   m.name = `road:${road.island}:${roadName}`;
   m.userData.kind = "road";
@@ -251,6 +259,7 @@ function drawPaved(scene, spec, road, heightAt, graph, hubs, circuses) {
   const runs = clipRuns(pts, hubs, circuses);
   drawClippedRuns(scene, spec, road, heightAt, runs, width + SHOULDER_PAD_M, SHOULDER, "shoulder", {}, -0.03);
   drawClippedRuns(scene, spec, road, heightAt, runs, width, ASPHALT, "paved");
+  drawLanePaint(scene, spec, road, heightAt, runs, width, false, 1);
 }
 
 export function offsetPolyline(points, dist) {
@@ -368,10 +377,75 @@ function splitRuns(pts, maxGap) {
   return runs;
 }
 
-function drawClippedRuns(scene, spec, road, heightAt, runs, widthM, color, roadKind, matOpts, yLift) {
+function drawClippedRuns(scene, spec, road, heightAt, runs, widthM, color, roadKind, matOpts, yLift, skipGap) {
   for (const run of runs) {
     if (!run || run.length < 2) continue;
-    drawRibbon(scene, spec, { ...road, points: run }, heightAt, widthM, color, roadKind, matOpts || {}, Infinity, yLift || 0);
+    drawRibbon(scene, spec, { ...road, points: run }, heightAt, widthM, color, roadKind, matOpts || {}, skipGap == null ? Infinity : skipGap, yLift || 0);
+  }
+}
+
+function polylineLen(pts) {
+  let n = 0;
+  for (let i = 0; i < pts.length - 1; i++) n += Math.hypot(pts[i + 1].x - pts[i].x, pts[i + 1].z - pts[i].z);
+  return n;
+}
+
+function sliceAlong(pts, from, to) {
+  const out = [];
+  const step = 1.1;
+  for (let d = from; d < to - 0.2; d += step) {
+    const p = pointAlong(pts, d);
+    if (p) out.push({ x: p.x, z: p.z });
+  }
+  const end = pointAlong(pts, to);
+  if (end) out.push({ x: end.x, z: end.z });
+  return ribbonStations(out);
+}
+
+/** One mesh: dashes concatenated, faces across the gap skipped. */
+function dashStations(pts) {
+  const total = polylineLen(pts);
+  const out = [];
+  for (let d = 0.8; d < total; d += PAINT_DASH_M + PAINT_GAP_M) {
+    const slice = sliceAlong(pts, d, Math.min(total, d + PAINT_DASH_M));
+    if (slice.length >= 2) for (const p of slice) out.push(p);
+  }
+  return out;
+}
+
+/**
+ * PathPhalt markings on a carriage: cream dashes down the middle, cream
+ * outer edge, kraft-gold median/inner edge on a dual.
+ */
+function drawLanePaint(scene, spec, road, heightAt, runs, carriageM, dual, side) {
+  const inset = carriageM / 2 - PAINT_WIDTH_M * 0.7;
+  const sign = side < 0 ? -1 : 1;
+  const name = (road.name || "road") + " paint";
+  for (const run of runs) {
+    if (!run || run.length < 2) continue;
+    const dashes = dashStations(run);
+    if (dashes.length >= 2) {
+      drawRibbon(scene, spec, { ...road, name, points: dashes }, heightAt, PAINT_WIDTH_M, PAINT, "paint", {}, 2.2, 0.05);
+    }
+    const outer = offsetPolyline(run, inset * sign);
+    const inner = offsetPolyline(run, -inset * sign);
+    if (outer.length >= 2) {
+      drawRibbon(scene, spec, { ...road, name, points: outer }, heightAt, PAINT_WIDTH_M, PAINT, "paint", {}, Infinity, 0.05);
+    }
+    if (inner.length >= 2) {
+      drawRibbon(
+        scene,
+        spec,
+        { ...road, name, points: inner },
+        heightAt,
+        PAINT_WIDTH_M,
+        dual ? PAINT_YELLOW : PAINT,
+        "paint",
+        {},
+        Infinity,
+        0.05,
+      );
+    }
   }
 }
 
@@ -418,16 +492,18 @@ function drawHighway(scene, spec, road, heightAt, graph, hubs, circuses) {
   );
   drawClippedRuns(scene, spec, { ...road, name: name + " median" }, heightAt, lip, s.medianM, ASPHALT, "median");
   for (const side of [-1, 1]) {
+    const laneRuns = clipRuns(offsetPolyline(pts, lane * side), hubs, circuses);
     drawClippedRuns(
       scene,
       spec,
       road,
       heightAt,
-      clipRuns(offsetPolyline(pts, lane * side), hubs, circuses),
+      laneRuns,
       s.carriageM,
       ASPHALT,
       "paved",
     );
+    drawLanePaint(scene, spec, road, heightAt, laneRuns, s.carriageM, true, side);
   }
   drawClippedRuns(
     scene,

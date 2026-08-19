@@ -15,6 +15,9 @@ import {
   HIGHWAY_RAB_SKIP_M,
   MEDIAN,
   MEDIAN_STRIPE_M,
+  PAINT,
+  PAINT_WIDTH_M,
+  PAINT_YELLOW,
   STONE,
   makeRoads,
   spawnCameraOffset,
@@ -71,6 +74,13 @@ describe("paved street from spawn", () => {
     expect(paved.length).toBeGreaterThanOrEqual(pavedRoads.length - circuses + extraCarriages);
     expect(paved.length).toBeLessThan(pavedRoads.length + extraCarriages + circuses * 5 + 16);
     expect(extras.length).toBe(0);
+    const paint = added.filter((m) => m.userData.roadKind === "paint");
+    expect(paint.length).toBeGreaterThan(8);
+    expect(paint.every((m) => (m.userData.widthM ?? ribbonWidthM(m)) < 0.5)).toBe(true);
+    expect(paint.some((m) => m.material.color.getHex() === PAINT)).toBe(true);
+    expect(paint.some((m) => m.material.color.getHex() === PAINT_YELLOW)).toBe(true);
+    expect(lum(PAINT)).toBeGreaterThan(lum(ASPHALT));
+    expect(PAINT_WIDTH_M).toBeLessThan(0.4);
     const walks = added.filter((m) => m.userData.roadKind === "sidewalk");
     expect(walks.length).toBeGreaterThan(4);
     expect(walks.every((m) => (m.userData.widthM ?? ribbonWidthM(m)) < PAVED_WIDTH_M)).toBe(true);

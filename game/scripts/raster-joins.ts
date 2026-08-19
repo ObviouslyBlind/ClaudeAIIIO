@@ -204,7 +204,7 @@ console.log("clip contains centre", multiContains(foot.clip, node.x, node.z), "t
 const duals = added.filter((m) => m.userData.roadKind === "paved" && m.userData.roadName === "Island Hwy");
 console.log("Island Hwy paved meshes", duals.length, "tris", duals.map(triCount).join(","));
 
-const kinds = new Set(["paved", "junction", "median", "shoulder", "island", "sidewalk"]);
+const kinds = new Set(["paved", "junction", "median", "shoulder", "island", "sidewalk", "paint"]);
 const harbour = SOUTH_RAB.harbour;
 const rgbCircus = rasterWindow(added, harbour.x, harbour.z, 90, 360, kinds);
 writePng("/tmp/road-raster/harbour-circus.png", 360, 360, rgbCircus);
