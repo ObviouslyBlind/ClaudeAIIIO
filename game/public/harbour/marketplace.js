@@ -170,14 +170,10 @@ export function formatMarketplace(play, opts = {}) {
         <span class="visually-hidden">Search the marketplace</span>
         <input id="market-search" class="mp-search" type="search" placeholder="Search carts, stock, aisles" value="${esc(query)}" autocomplete="off" enterkeyhint="search" />
       </label>
-      <div class="isle-row" role="group" aria-label="Island">
-        <button type="button" class="isle is-on" data-island="south">South · here</button>
-        <p class="isle-shut">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 11V8a4 4 0 0 1 8 0v3"/><rect x="6" y="11" width="12" height="10" rx="2"/></svg>
-          North closed
-        </p>
+      <div class="isle-stack">
+        <button type="button" class="isle is-on" data-island="south">South · you are here</button>
+        <p class="isle-shut">North is closed until you ferry.</p>
       </div>
-      <p class="mp-isle-note">You buy on the island you stand on. Ferry first.</p>
     </div>
     <div class="mp-aisles" role="tablist" aria-label="Aisle">${aisles}</div>
     <div class="mp-scroll">${list}</div>

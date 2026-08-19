@@ -924,14 +924,13 @@ nav.dock.travel-dock {
 .mp-search::placeholder {
   color: #8aa8a0;
 }
-.isle-row {
+.isle-stack {
   display: flex;
-  gap: 8px;
-  align-items: stretch;
+  flex-direction: column;
+  gap: 6px;
 }
 .isle {
-  flex: 0 1 auto;
-  min-width: 42%;
+  width: 100%;
   min-height: 40px;
   padding: 0 14px;
   border: 1px solid var(--line);
@@ -946,7 +945,6 @@ nav.dock.travel-dock {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
 }
 .isle.is-on {
   border-color: var(--btn);
@@ -955,37 +953,22 @@ nav.dock.travel-dock {
 }
 .float-panel p.isle-shut,
 .isle-shut {
-  flex: 1 1 auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+  display: block;
   margin: 0;
-  min-height: 40px;
-  padding: 0 12px;
+  min-height: 0;
+  padding: 8px 12px;
   border: 1px dashed #6a8078;
   border-radius: 8px;
   background: #070d0f;
-  color: #7a9088;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  color: #9bb4ac;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-transform: none;
   pointer-events: none;
   user-select: none;
-  line-height: 1;
-}
-.isle-shut svg {
-  width: 14px;
-  height: 14px;
-  flex: 0 0 auto;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linejoin: round;
-}
-.isle-shut svg rect {
-  fill: none;
+  line-height: 1.35;
+  text-align: center;
 }
 .float-panel p.mp-isle-note,
 .mp-isle-note {

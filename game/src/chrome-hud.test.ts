@@ -120,7 +120,7 @@ describe("harbour chrome HUD", () => {
     expect(css).toContain(".sheet-center");
     expect(css).toContain(".mp-search");
     expect(css).toContain(".isle-shut");
-    expect(css).toContain("dashed");
+    expect(css).toContain(".isle-stack");
     expect(css).toContain("#sheet-veil");
     expect(css).toContain("#crate-ask");
     expect(css).toContain(".buy-loc");
