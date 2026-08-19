@@ -961,8 +961,14 @@ export function placeStand(
   }
   const cart = takeKit(play, pose?.kitId);
   if (!cart) return fail("no_cart");
-  const x = Number.isFinite(pose?.x) ? (pose!.x as number) : plot.x;
-  const z = Number.isFinite(pose?.z) ? (pose!.z as number) : plot.z;
+  const tapX = Number.isFinite(pose?.x) ? (pose!.x as number) : plot.x;
+  const tapZ = Number.isFinite(pose?.z) ? (pose!.z as number) : plot.z;
+  const drop = roadsideDrop(land.roads, "south", plot.x, plot.z);
+  const dPlot = Math.hypot(tapX - plot.x, tapZ - plot.z);
+  const dDrop = drop ? Math.hypot(tapX - drop.x, tapZ - drop.z) : Infinity;
+  const onVerge = dPlot <= PLACE_CORRIDOR_M || dDrop <= PLACE_CORRIDOR_M;
+  const x = onVerge ? tapX : drop ? drop.x : plot.x;
+  const z = onVerge ? tapZ : drop ? drop.z : plot.z;
   const stand: Stand = {
     id: `stand-${play.nextId++}`,
     plotId: plot.id,

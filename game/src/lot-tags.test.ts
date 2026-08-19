@@ -11,6 +11,8 @@ describe("lot tags (PAPER)", () => {
     expect(main).toContain("#near-lease");
     expect(main).toContain("focusStand");
     expect(main).toContain("onOpenStand");
+    expect(main).toContain("snapClose");
+    expect(main).toContain("taxi.hopOut");
   });
 
   it("labels vacant as the $ bar, yours, and taken", () => {

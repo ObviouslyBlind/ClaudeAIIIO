@@ -1,22 +1,14 @@
 # Gauntlet status
 
-Piece in play: **Fire despawns in 3D** (cash gate already passed).
-
-Source (operator, in order):
-
-1. Yellow/red is **price**. Gauntlet the system until it is honest.
-2. Fire despawns. Fruit clock is real. More upgrades that show Stats appeal. Per-cart maths (area, fruit slice / shift, sticker $ can slow sales). Simple player: walk, body colour, shirt, head. Delivery van works again.
-3. Gauntlet until all of that is fixed.
+Piece in play: **Fire despawns in 3D**.
 
 | # | Bar | Status |
 |---|---|---|
 | 1 | **Buy $32 → cash $968** | **PASS** |
-| 2 | **Price sticker** | Control exists. Track was thin. Thickened red–yellow–green–yellow–red. Default $6. |
-| 3 | **Fire despawns** | **FAIL** last critic: cart was ~400 m inland (52 Quayward Loop). Site card veiled the world. Nobody could see a 3D vendor. |
-| 4–8 | Fruit clock, upgrades, maths, walker, van | Not closed. |
+| 2 | **Price sticker** | Track exists. Needs a critic standing at the cart. |
+| 3 | **Fire despawns** | **FAIL**. Last critic was in a taxi at a roundabout. Spawn camera looks 28 m inland, so the stall at your feet is off-frame. A far tap also parked the cart ~100 m from the lot. |
+| 4–8 | Remaining | Open. |
 
-Fix in this round: opening a cart **stands you next to it**. Site card docks right with a light veil so the stall stays on camera. Fire still `detachVendor`. Vendor has a teal shirt + red hat.
-
-Next critic, fresh play: Buy $32 → place cart on the nearby YOURS lot → Hire → see the person at the stall → Fire → person gone.
+Fix this round: hop out of the taxi, snap a 9 m orbit that looks at you (cart in frame), clamp place taps to the lot verge.
 
 Politics frozen. Operator is the brake.

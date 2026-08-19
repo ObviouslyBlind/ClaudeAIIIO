@@ -3,6 +3,7 @@ import { spawnCameraOffset } from "../public/harbour/roads.js";
 import {
   cameraNearForRadius,
   cartesianToSpherical,
+  closeOrbitState,
   createOrbitState,
   handleOrbitPointer,
   LMB,
@@ -114,5 +115,14 @@ describe("RMB-hold orbit camera", () => {
     expect(cameraNearForRadius(ZOOM_MIN_M)).toBeCloseTo(0.4, 5);
     expect(cameraNearForRadius(ZOOM_MAX_M)).toBeGreaterThan(4);
     expect(cameraNearForRadius(ZOOM_MAX_M)).toBeLessThan(ZOOM_MAX_M * 0.2);
+  });
+
+  it("close orbit looks at the player from stall distance, not 28 m inland", () => {
+    const close = closeOrbitState("south");
+    expect(close.orbited).toBe(true);
+    expect(close.radius).toBe(9);
+    expect(close.radius).toBeLessThan(Math.hypot(-8, 5.2, -10));
+    const o = sphericalToCartesian(close);
+    expect(Math.hypot(o.x, o.y, o.z)).toBeCloseTo(9, 5);
   });
 });

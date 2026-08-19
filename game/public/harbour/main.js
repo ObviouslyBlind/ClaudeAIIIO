@@ -686,6 +686,7 @@ function objectWithStand(obj) {
 
 function focusStand(stand) {
   if (!stand) return;
+  if (taxi && typeof taxi.hopOut === "function") taxi.hopOut();
   const plot = map && map.plots.find((p) => p.id === stand.plotId);
   const x = Number.isFinite(Number(stand.x)) ? Number(stand.x) : plot ? plot.x : NaN;
   const z = Number.isFinite(Number(stand.z)) ? Number(stand.z) : plot ? plot.z : NaN;
@@ -696,7 +697,8 @@ function focusStand(stand) {
   walking = false;
   if (walkPath) walkPath.hide();
   player.position.set(px, heightAt(spec, px, pz) + 1.15, pz);
-  snapCamera();
+  if (playCam && typeof playCam.snapClose === "function") playCam.snapClose();
+  else snapCamera();
 }
 
 function openStandMenu(standId) {

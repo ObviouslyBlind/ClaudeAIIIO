@@ -206,6 +206,19 @@ describe("South first loop", () => {
     expect(Math.hypot(placed.stand.x - plot.x, placed.stand.z - plot.z)).toBeLessThan(PLACE_CORRIDOR_M + 1);
   });
 
+  it("snaps a far tap onto the lot verge instead of leaving the cart inland", () => {
+    const { land, visitor, plot } = leaseCheapSouth();
+    const order = orderMarket(visitor, land, { plotId: plot.id, skus: ["hotdog_cart"] });
+    expect(order.ok).toBe(true);
+    if (!order.ok) return;
+    takeAll(visitor, order.delivery.id);
+    const placed = placeStand(visitor, land, plot.id, { x: plot.x + 90, z: plot.z + 90 });
+    expect(placed.ok).toBe(true);
+    if (!placed.ok) return;
+    expect(placed.stand.plotId).toBe(plot.id);
+    expect(Math.hypot(placed.stand.x - plot.x, placed.stand.z - plot.z)).toBeLessThan(PLACE_CORRIDOR_M + 4);
+  });
+
   it("lets a kerb crate drop by a residential lot, but will not place a cart there", () => {
     const land = createLandBoard();
     const visitor = createVisitor(20_000);

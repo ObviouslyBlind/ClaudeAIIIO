@@ -22,6 +22,20 @@ export function cameraNearForRadius(radius) {
   return Math.max(0.4, Math.min(r * 0.012, r * 0.22));
 }
 
+/** Close framing so a cart and hired vendor fill the view. */
+export function closeOrbitState(islandId) {
+  const yaw = cartesianToSpherical(spawnCameraOffset(islandId)).yaw;
+  return {
+    yaw,
+    pitch: 0.55,
+    radius: 9,
+    dragging: false,
+    orbited: true,
+    lastX: 0,
+    lastY: 0,
+  };
+}
+
 /** Exponential wheel zoom, clamped. Positive deltaY zooms out. */
 export function zoomRadius(radius, deltaY) {
   const next = radius * Math.exp((deltaY || 0) * 0.0011);
@@ -219,6 +233,15 @@ export function createPlayCamera({ camera, canvas, getPlayer, getIslandId }) {
     camera.lookAt(p.x + l.x, p.y + l.y, p.z + l.z);
   }
 
+  function snapClose() {
+    state = closeOrbitState(getIslandId());
+    const p = getPlayer();
+    const o = sphericalToCartesian(state);
+    camera.position.set(p.x + o.x, p.y + o.y, p.z + o.z);
+    if (camera.position.y < p.y + 1.6) camera.position.y = p.y + 1.6;
+    camera.lookAt(p.x, p.y + LOOK_Y, p.z);
+  }
+
   function tick(dt) {
     tickCamera(camera, getPlayer(), state, getIslandId(), dt, tmp);
   }
@@ -226,6 +249,7 @@ export function createPlayCamera({ camera, canvas, getPlayer, getIslandId }) {
   return {
     tick,
     snap,
+    snapClose,
     getState: () => state,
   };
 }
