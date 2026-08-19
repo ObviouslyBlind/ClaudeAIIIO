@@ -152,7 +152,7 @@ export function mountLotTags({ canvas, camera, heightAt, specOf, getPlots, onBuy
       btn.hidden = false;
       btn.dataset.plotId = p.id;
       btn.dataset.kind = kind;
-      btn.className = "lot-tag is-" + kind;
+      btn.className = "lot-tag is-" + kind + (slot.d2 < 90 * 90 ? " is-near" : "");
       btn.textContent = text;
       btn.style.left = pos.x + "px";
       btn.style.top = pos.y + "px";

@@ -139,6 +139,18 @@ export function mountChrome(opts) {
       hiddenCash.textContent =
         "Cash $" + Number(play.cash).toLocaleString("en-US", { maximumFractionDigits: 0 });
     }
+    const near = document.getElementById("near-lease");
+    if (near) {
+      const leased = ((play.leases || []).length > 0);
+      const opt = leased ? null : ((play.leaseOptions || [])[0] || null);
+      near.hidden = !opt;
+      if (opt) {
+        near.dataset.plotId = opt.id;
+        near.textContent = "Buy " + money(opt.price).replace(/\.00$/, "");
+      } else {
+        near.dataset.plotId = "";
+      }
+    }
   }
 
   function propertyName() {
@@ -777,6 +789,16 @@ export function mountChrome(opts) {
     });
   }
   bindChromeActions();
+
+  const nearLease = document.getElementById("near-lease");
+  if (nearLease) {
+    nearLease.addEventListener("click", (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      const id = nearLease.dataset.plotId;
+      if (id && typeof opts.onNearLease === "function") opts.onNearLease(id);
+    });
+  }
 
   setOverlay("world");
 

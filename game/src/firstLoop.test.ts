@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createLandBoard, developPlot, leasePlot } from "./land.ts";
+import { createLandBoard, developPlot, ISLANDS, leasePlot } from "./land.ts";
 import { createVisitor } from "./sim.ts";
 import { BAND_LEVEL, footTrafficSnapshot, roadTrafficBand } from "./footTraffic.ts";
 import { roadsideDrop } from "./roadside.ts";
@@ -71,6 +71,16 @@ describe("PAPER foot traffic", () => {
 });
 
 describe("South first loop", () => {
+  it("offers a vacant street lot next to the south pad", () => {
+    const land = createLandBoard();
+    const visitor = createVisitor(1_000);
+    const snap = playSnapshot(visitor, land);
+    expect(snap.leaseOptions.length).toBeGreaterThan(0);
+    const near = snap.leaseOptions[0]!;
+    expect(Math.hypot(near.x - ISLANDS.south.port.x, near.z - ISLANDS.south.port.z)).toBeLessThan(80);
+    expect(leasePlot(land, visitor, near.id).ok).toBe(true);
+  });
+
   it("rejects orders that are not a leased South plot", () => {
     const { land, visitor } = leaseCheapSouth();
     const north = land.plots.find((p) => p.island === "north" && !p.owner)!;

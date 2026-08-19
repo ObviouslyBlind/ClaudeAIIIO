@@ -1311,6 +1311,8 @@ export function playSnapshot(visitor: Visitor, land: LandBoard) {
         zone: p.zone,
         price: p.price,
         band: plotTrafficBand(land, p),
+        x: p.x,
+        z: p.z,
       })),
   };
 }

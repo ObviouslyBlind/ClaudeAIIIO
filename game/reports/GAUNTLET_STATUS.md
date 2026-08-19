@@ -22,8 +22,8 @@ Bar the critic inspects on live `http://127.0.0.1:8787/`. One verdict for the wh
 
 Do **not** grade Market Pay “How many / Where” as the sticker. That card is qty + dest.
 
-Last critic (bc-b3ff9e7a): **FAIL** — saw green $23 but click walked the camera instead of opening Buy lot. pointerup on a $ tag was not in HUD_BLOCK.
+Last critic (bc-27a21abd): **FAIL** — could not see any $14–$32 tags. Vacant Quayward lots sit ~350 m inland of the south pad.
 
-Fix in this round: $ tags sit above the chrome and do not start a walk.
+Fix in this round: seed one vacant Island Hwy street lot within 80 m of the south pad, plus a top-right **Buy $** chip from `leaseOptions[0]` that opens “Do you want to buy this lot?”.
 
 Politics frozen. Operator is the brake.

@@ -434,7 +434,7 @@ function aimPointer(ev) {
 }
 
 const HUD_BLOCK =
-  "nav, a, #taxi-map, #ferry-ticket, #catalog-picker, .float-panel, #land-card, #buy-ask, #crate-ask, #order-veil, #order-ask, #stand-veil, #stand-menu, #place-hint, #menu-stack, #pack-shift, .lot-tag, #lot-tags";
+  "nav, a, #taxi-map, #ferry-ticket, #catalog-picker, .float-panel, #land-card, #buy-ask, #crate-ask, #order-veil, #order-ask, #stand-veil, #stand-menu, #place-hint, #menu-stack, #pack-shift, .lot-tag, #lot-tags, #near-lease";
 
 function parcelLabel(p) {
   const kind = p.band === "field" ? "field" : p.band === "shore" ? "shore land" : "street land";
@@ -1992,6 +1992,10 @@ async function boot() {
     getPose: () => ({ x: player.position.x, z: player.position.z }),
     getPlotId: () => selected || "",
     lease,
+    onNearLease(id) {
+      const p = map && id ? map.plots.find((x) => x.id === id) : null;
+      if (p) askToBuy(p);
+    },
     onCloseLand: closeLandCard,
     onLeased(snapshot) {
       landPinned = false;

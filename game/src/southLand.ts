@@ -336,6 +336,42 @@ function lotsAlong(
   }
 }
 
+/** One by-right commercial street lot within ~80 m of the south quay. */
+function seedPortStreetLot(
+  lots: Parcel[],
+  roads: Road[],
+  base: Omit<PushOpts, "street" | "band">,
+): void {
+  const hwy = roads.find(
+    (r) =>
+      r.name === "Island Hwy" &&
+      r.points.some((p) => Math.hypot(p.x - SOUTH_PORT.x, p.z - SOUTH_PORT.z) < 6),
+  );
+  if (!hwy) return;
+  const setback = clearanceFor(hwy) + 2;
+  const front = 16;
+  for (const dist of [56, 64, 72, 48, 80, 40]) {
+    const st = stationAt(hwy.points, dist);
+    if (!st) continue;
+    const sa = offsetBy(st.at, { x: -st.dir.x, z: -st.dir.z }, front / 2);
+    const sb = offsetBy(st.at, st.dir, front / 2);
+    for (const side of [-1, 1] as const) {
+      const perp = { x: st.perp.x * side, z: st.perp.z * side };
+      const ring = quad(sa, sb, perp, setback, 14, 0);
+      if (
+        pushParcel(lots, ring, {
+          ...base,
+          street: "Island Hwy",
+          band: "street",
+          zone: "commercial",
+        })
+      ) {
+        return;
+      }
+    }
+  }
+}
+
 function plazaAt(
   lots: Parcel[],
   c: XZ,
@@ -718,6 +754,10 @@ export function buildSouthLand(spec: IslandSpec, heightAt: HeightFn): SouthBuilt
   plazaAt(lots, saltwind, "Saltwind", base, 30, 16);
   plazaAt(lots, ashPass, "Ash Pass", base, 20, 20);
   plazaAt(lots, eastHaven, "East Haven", base, 24, 20);
+
+  // One cheap street stall next to the south pad. Quayward $ lots sit ~350 m
+  // inland; without this the spawn camera never sees a buyable $ tag.
+  seedPortStreetLot(lots, roads, base);
 
   const byName = (name: string) => roads.filter((r) => r.name === name && !r.roundabout);
   const streetOpts = {

@@ -81,6 +81,22 @@ describe("South land (no buildings)", () => {
     expect(heightAt(s, SOUTH_VOLCANO.x + 200, SOUTH_VOLCANO.z)).toBeGreaterThan(20);
   });
 
+  it("seeds one vacant street lot next to the south pad so spawn can lease", () => {
+    const board = createLandBoard();
+    const near = board.plots.filter(
+      (p) =>
+        p.island === "south" &&
+        p.band === "street" &&
+        p.class === "by_right" &&
+        !p.owner &&
+        Math.hypot(p.x - SOUTH_PORT.x, p.z - SOUTH_PORT.z) < 80,
+    );
+    expect(near.length).toBeGreaterThan(0);
+    expect(near[0]!.zone).toBe("commercial");
+    expect(near[0]!.price).toBeLessThan(400);
+    expect(near[0]!.street).toBe("Island Hwy");
+  });
+
   it("puts street lots on both sides and seeds hamlets so long roads are not a void", () => {
     const board = createLandBoard();
     const south = board.plots.filter((p) => p.island === "south");

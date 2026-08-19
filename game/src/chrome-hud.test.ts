@@ -20,6 +20,8 @@ describe("harbour chrome HUD", () => {
     expect(html).toContain('class="chrome-tr"');
     expect(html).toContain('class="chrome-left"');
     expect(html).toContain('id="viewers"');
+    expect(html).toContain('id="near-lease"');
+    expect(html).toContain("is-buy-lot");
     expect(html).toContain('data-overlay="lots"');
     expect(html).toContain('data-overlay="foot"');
     expect(html).not.toContain('data-panel="view"');
@@ -91,6 +93,9 @@ describe("harbour chrome HUD", () => {
     expect(chrome).toContain("buyAskModel");
     expect(chrome).toContain("toggleViewer");
     expect(chrome).toContain("paintBuyAsk");
+    expect(chrome).toContain("onNearLease");
+    expect(chrome).toContain('getElementById("near-lease")');
+    expect(css).toContain(".chip.is-buy-lot");
     expect(chrome).toContain('id="buy-ask-yes"');
     expect(chrome).toContain('id="buy-ask-no"');
     expect(chrome).toContain('id="land-lease"');
