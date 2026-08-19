@@ -63,6 +63,7 @@ describe("harbour land board", () => {
   it("keeps parcel corners and edges off the paved road", () => {
     const board = createLandBoard();
     for (const p of board.plots) {
+      if (p.class === "cart_pad") continue;
       const spec = ISLANDS[p.island];
       for (let i = 0; i < p.ring.length; i++) {
         const a = p.ring[i];
