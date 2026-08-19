@@ -10,6 +10,7 @@ import { toggleViewer, footLevel } from "./overlays.js";
 import { mountPackShift } from "./pack.js";
 import { formatCartsBody } from "./carts-hud.js";
 import { formatSiteMenu, gamesForSite } from "./site-menu.js";
+import { compactCash, fullCash } from "./cash-chip.js";
 
 export const POLL_MS = 1000;
 
@@ -40,6 +41,8 @@ export function mountChrome(opts) {
   if (!root) return { stop() {}, refresh() {} };
 
   const cashEl = document.getElementById("balance");
+  const cashFullEl = document.getElementById("balance-full");
+  const cashPlate = cashEl && cashEl.closest ? cashEl.closest(".cash-plate") : null;
   const incomeEl = document.getElementById("income");
   const onlineEl = document.getElementById("online");
   const landCard = document.getElementById("land-card");
@@ -150,11 +153,15 @@ export function mountChrome(opts) {
 
   function paintTop() {
     if (!play) return;
-    if (cashEl) cashEl.textContent = money(play.cash);
+    if (cashEl) cashEl.textContent = compactCash(play.cash);
+    if (cashFullEl) cashFullEl.textContent = fullCash(play.cash);
     if (incomeEl) {
       const n = Number(play.incomePerMinute) || 0;
-      incomeEl.textContent = (n >= 0 ? "+" : "") + money(n) + "/min";
+      incomeEl.textContent = (n >= 0 ? "+" : "") + fullCash(n) + "/min";
       incomeEl.classList.toggle("is-zero", n <= 0);
+    }
+    if (cashPlate) {
+      cashPlate.setAttribute("aria-label", "PAPER " + fullCash(play.cash));
     }
     if (onlineEl) {
       onlineEl.textContent = (play.playersOnline || 1) + " online";

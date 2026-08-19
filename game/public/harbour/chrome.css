@@ -102,20 +102,50 @@ html, body {
   text-transform: uppercase;
   color: var(--btn);
 }
+.chrome-acct {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  width: max-content;
+}
 .cash-plate {
   display: inline-flex;
-  align-items: baseline;
+  align-items: center;
   gap: 8px;
   margin: 0;
-  padding: 5px 10px 6px;
+  height: var(--view-size);
+  min-height: var(--view-size);
+  padding: 0 10px;
   background: linear-gradient(180deg, #162428 0%, var(--hull) 100%);
   border: 1px solid var(--line);
-  border-radius: var(--radius);
+  border-radius: 999px;
   box-shadow: var(--shadow), var(--inset);
+  white-space: nowrap;
+  cursor: default;
+  position: relative;
+  z-index: 12;
 }
-#balance {
+.cash-full {
+  display: none;
+  align-items: baseline;
+  gap: 8px;
+}
+.cash-plate:hover .cash-short,
+.cash-plate:focus .cash-short,
+.cash-plate:focus-visible .cash-short {
+  display: none;
+}
+.cash-plate:hover .cash-full,
+.cash-plate:focus .cash-full,
+.cash-plate:focus-visible .cash-full {
+  display: inline-flex;
+}
+#balance,
+#balance-full {
   margin: 0;
-  font-size: 18px;
+  font-size: 13px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;
@@ -138,7 +168,8 @@ html, body {
   flex-direction: column;
   align-items: flex-end;
   gap: 8px;
-  max-width: min(96vw, 360px);
+  max-width: none;
+  overflow: visible;
   z-index: 11;
 }
 .chrome-row {
@@ -1362,8 +1393,9 @@ nav.dock.travel-dock {
     width: 16px;
     height: 16px;
   }
-  .cash-plate { padding: 4px 8px 5px; }
-  #balance { font-size: 15px; }
+  .cash-plate { padding: 0 8px; }
+  #balance,
+  #balance-full { font-size: 12px; }
   #income { font-size: 11px; }
   .chrome-left { top: 50%; transform: translateY(-50%); }
   .rail-btn span { display: none; }

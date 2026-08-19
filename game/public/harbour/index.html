@@ -59,10 +59,18 @@
         <p class="whisper" id="storage-fee" hidden>South warehouse $5.00/day</p>
       </div>
       <div class="chrome-tr">
-        <button type="button" class="chip icon-chip" data-panel="account" aria-label="Account" data-tip="Account" aria-expanded="false" aria-controls="panel-account">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3"/><path d="M6 20c0-3.4 2.7-6 6-6s6 2.6 6 6"/></svg>
-        </button>
-        <p class="cash-plate" title="PAPER / SIMULATED"><span id="balance">$1,000.00</span> <span id="income" class="is-zero">+$0.00/min</span></p>
+        <div class="chrome-acct">
+          <button type="button" class="chip icon-chip" data-panel="account" aria-label="Account" data-tip="Account" aria-expanded="false" aria-controls="panel-account">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3"/><path d="M6 20c0-3.4 2.7-6 6-6s6 2.6 6 6"/></svg>
+          </button>
+          <p class="cash-plate" tabindex="0" title="PAPER / SIMULATED">
+            <span id="balance" class="cash-short">$1,000</span>
+            <span class="cash-full">
+              <span id="balance-full">$1,000.00</span>
+              <span id="income" class="is-zero">+$0.00/min</span>
+            </span>
+          </p>
+        </div>
         <div class="chrome-row" id="viewers">
           <button type="button" class="chip icon-chip" data-overlay="lots" aria-label="Lots" data-tip="Lots">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/></svg>

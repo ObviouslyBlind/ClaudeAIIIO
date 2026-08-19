@@ -41,6 +41,10 @@ describe("harbour chrome HUD", () => {
     expect(tl).not.toContain("cash-plate");
     const tr = html.slice(html.indexOf('class="chrome-tr"'), html.indexOf('class="chrome-left"'));
     expect(tr).toContain("cash-plate");
+    expect(tr).toContain("chrome-acct");
+    expect(tr).toContain('class="cash-short"');
+    expect(tr).toContain('class="cash-full"');
+    expect(tr).toContain('id="balance-full"');
     expect(tr).toContain('data-panel="account"');
     expect(tr).toContain('id="panel-account"');
     expect(tr).toContain('id="panel-minerals"');
@@ -121,7 +125,13 @@ describe("harbour chrome HUD", () => {
     expect(css).not.toContain("Figtree");
     expect(html).toContain("chrome-fonts.css");
     expect(fonts).toContain("data:font/woff2");
-    expect(html).toContain("cash-plate");
+    expect(css).toContain(".chrome-acct");
+    expect(css).toContain(".cash-full");
+    expect(css).toContain(".cash-plate:hover .cash-full");
+    expect(chrome).toContain("compactCash");
+    expect(html).toContain('id="balance"');
+    expect(html).toMatch(/id="balance"[^>]*>\$1,000</);
+    expect(html).toContain('id="balance-full"');
   });
 
   it("lease card and buy-ask ask before a lot is bought", () => {
