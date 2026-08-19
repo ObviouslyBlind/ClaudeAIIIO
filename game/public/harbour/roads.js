@@ -424,6 +424,7 @@ function splitJoinEnd(pts, head, stubM) {
 
 function joinCutterAt(p, hubs, circuses, roadKind) {
   if (!p) return null;
+  void hubs;
   for (const c of circuses || []) {
     const face = c.clip || c.outer;
     if (!(face > 0)) continue;
@@ -431,14 +432,6 @@ function joinCutterAt(p, hubs, circuses, roadKind) {
     if (Math.abs(d - face) > 10) continue;
     const r = roadKind === "shoulder" ? (c.outer || face) + FOOT_SHOULDER_M : face;
     return [[circleRing(c.x, c.z, r, 48)]];
-  }
-  for (const h of hubs || []) {
-    const n = h.node;
-    if (!n) continue;
-    const reach = ((h.pad && h.pad.side) || 22) / 2 + 8;
-    if (Math.hypot(p.x - n.x, p.z - n.z) > reach) continue;
-    if (roadKind === "shoulder") return h.foot.outerClip || h.foot.clip || null;
-    return h.foot.clip || h.foot.tarmac || null;
   }
   return null;
 }
@@ -971,8 +964,8 @@ function addMultiPolygonMesh(scene, mp, y, color, userData, renderOrder = 3) {
     const mesh = new THREE.Mesh(
       geo,
       roadMaterial(color, userData.roadKind, {
-        polygonOffsetFactor: -3,
-        polygonOffsetUnits: -3,
+        polygonOffsetFactor: userData.roadKind === "junction" ? 1 : -3,
+        polygonOffsetUnits: userData.roadKind === "junction" ? 1 : -3,
       }),
     );
     mesh.castShadow = false;
@@ -1037,6 +1030,7 @@ export function makeRoads(map, helpers) {
   const hubs = collectHubs(map.graph);
   const circusJoins = collectCircusJoins(map.graph);
   const circuses = circusesFromGraph(map.graph);
+  drawHubs(scene, map, specOf, heightAt, hubs);
   for (const road of map.roads) {
     const spec = specOf(road.island);
     if (road.kind === "paved" && road.roundabout) {
@@ -1052,7 +1046,6 @@ export function makeRoads(map, helpers) {
     }
   }
   drawCircusJoins(scene, map, specOf, heightAt, circusJoins);
-  drawHubs(scene, map, specOf, heightAt, hubs);
   drawLegacyJoins(scene, map, specOf, heightAt);
   drawNorthPortCurbs(scene, map, specOf, heightAt);
 }

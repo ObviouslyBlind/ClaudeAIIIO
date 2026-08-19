@@ -399,6 +399,12 @@ function cutEndAt(pts, node, trimM, head) {
  * Draw-only: stop a ribbon at the junction plate. The graph still ends on the
  * node, so the taxi and the lots keep the real join.
  */
+function padTrimM(pad, edgeId) {
+  if (!pad || !edgeId) return 0;
+  if (Array.isArray(pad.throughEdgeIds) && pad.throughEdgeIds.includes(edgeId)) return 0;
+  return pad.trim[edgeId] || 0;
+}
+
 export function trimPolylineForPads(pts, graph, edge) {
   if (!graph || !edge || !pts || pts.length < 2) return pts;
   let out = pts;
@@ -406,7 +412,7 @@ export function trimPolylineForPads(pts, graph, edge) {
   const b = nodeById(graph, edge.b);
   const padA = junctionPad(graph, a);
   const padB = junctionPad(graph, b);
-  if (padA && a) out = cutEndAt(out, a, padA.trim[edge.id] || 0, true);
-  if (padB && b) out = cutEndAt(out, b, padB.trim[edge.id] || 0, false);
+  if (padA && a) out = cutEndAt(out, a, padTrimM(padA, edge.id), true);
+  if (padB && b) out = cutEndAt(out, b, padTrimM(padB, edge.id), false);
   return out.length >= 2 ? out : pts;
 }

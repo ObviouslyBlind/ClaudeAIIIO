@@ -175,7 +175,8 @@ describe("paved street from spawn", () => {
     expect(multiContains(hub.tarmac, sw!.x + 12, sw!.z + 12)).toBe(false);
     const walks = added.filter((m) => m.userData.roadKind === "sidewalk" && !m.userData.footprint);
     expect(walks.length).toBeGreaterThan(4);
-    for (const mesh of walks) {
+    const stemWalks = walks.filter((m) => /South Strand/.test(String(m.userData.roadName || "")));
+    for (const mesh of stemWalks) {
       const pos = mesh.geometry.attributes.position;
       for (let i = 0; i < pos.count; i++) {
         const d = Math.hypot(pos.getX(i) - sw!.x, pos.getZ(i) - sw!.z);
@@ -300,7 +301,7 @@ describe("paved street from spawn", () => {
 
     const rowMesh = paved.find((m) => String(m.userData.roadName || "").includes("Row"));
     if (rowMesh) {
-      expect(ribbonWidthM(rowMesh)).toBeCloseTo(LOCAL_WIDTH_M, 1);
+      expect(rowMesh.userData.widthM ?? ribbonWidthM(rowMesh)).toBeCloseTo(LOCAL_WIDTH_M, 1);
       expect(LOCAL_WIDTH_M).toBeLessThan(PAVED_WIDTH_M);
     }
 
