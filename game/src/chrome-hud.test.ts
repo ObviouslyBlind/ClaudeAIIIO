@@ -16,7 +16,8 @@ const siteMenu = readFileSync(new URL("../public/harbour/site-menu.js", import.m
 describe("harbour chrome HUD", () => {
   it("keeps launchers on the left rail, not a Menu on the travel dock", () => {
     expect(html).toContain('class="game-name"');
-    expect(html).toContain("Two Harbors");
+    expect(html).toContain("2Isles");
+    expect(html).not.toContain("Two Harbors");
     expect(html).toContain('class="chrome-tl"');
     expect(html).toContain('class="chrome-tr"');
     expect(html).toContain('class="chrome-left"');

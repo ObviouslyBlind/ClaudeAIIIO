@@ -3,7 +3,7 @@ import { ASSET_NONCE, bustFontUrls, bustHarbourAssets, bustModuleImports } from 
 
 describe("harbour cache bust", () => {
   it("stamps script and stylesheet so a fresh load is enough", () => {
-    const html = `<title>Two Harbors — harbour</title>
+    const html = `<title>2Isles</title>
 <link rel="stylesheet" href="/harbour/style.css" />
 <link rel="preload" href="/harbour/fonts/red-hat-text.woff2" as="font" />
 <script type="module" src="/harbour/main.js?v=12"></script>`;
@@ -11,7 +11,7 @@ describe("harbour cache bust", () => {
     expect(out).toContain("/harbour/style.css?v=99");
     expect(out).toContain("/harbour/fonts/red-hat-text.woff2?v=99");
     expect(out).toContain("/harbour/main.js?v=99");
-    expect(out).toContain("harbour · 99");
+    expect(out).toContain("2Isles · 99");
     expect(out).not.toContain("v=12");
   });
 

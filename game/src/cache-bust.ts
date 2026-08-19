@@ -11,7 +11,7 @@ export function bustHarbourAssets(html: string, nonce = ASSET_NONCE): string {
     .replace(/href="(\/harbour\/[^"]+\.css)(?:\?v=\d+)?"/g, `href="$1?v=${nonce}"`)
     .replace(/href="(\/harbour\/fonts\/[^"]+\.woff2)(?:\?v=\d+)?"/g, `href="$1?v=${nonce}"`)
     .replace(/src="(\/harbour\/[^"]+\.js)(?:\?v=\d+)?"/g, `src="$1?v=${nonce}"`)
-    .replace(/<title>[^<]*<\/title>/, `<title>Two Harbors — harbour · ${nonce}</title>`);
+    .replace(/<title>[^<]*<\/title>/, `<title>2Isles · ${nonce}</title>`);
 }
 
 /** Stamp @font-face urls inside harbour CSS. */
