@@ -22,7 +22,6 @@ import {
   planWalk,
   PLAYER_SOLE_M,
   WALK_BEACH_M,
-  WALK_HOLD_MS,
   WALK_SPEED_MPS,
 } from "./walk-plan.js";
 import { makeStreetCart, makeCrate, makeVendor, detachVendor, findVendor } from "./cart.js";
@@ -161,7 +160,6 @@ let lotTags = null;
 let propsMod = null;
 let chromeHud = null;
 let walkPath = null;
-let walkHoldUntil = 0;
 let lastWalkDest = null;
 let walkNote = "";
 let walkNoteUntil = 0;
@@ -473,7 +471,6 @@ function paintWalkHud() {
   const hintEl = document.getElementById("viewer-hint");
   let line = "";
   if (walking) line = "Walking.";
-  else if (Date.now() < walkHoldUntil) line = "Here.";
   else if (Date.now() < walkNoteUntil) line = walkNote;
   if (walkEl) {
     walkEl.hidden = !line;
@@ -1343,7 +1340,7 @@ function canWalkHere(x, z) {
 
 function paintWalkPath() {
   if (!walkPath) return;
-  if (walkWaypoints.length) {
+  if (walking && walkWaypoints.length) {
     lastWalkDest = walkWaypoints[walkWaypoints.length - 1];
     if (typeof walkPath.showPath === "function") {
       walkPath.showPath(player.position, walkWaypoints, landHeight);
@@ -1358,12 +1355,6 @@ function paintWalkPath() {
     }
     return;
   }
-  if (lastWalkDest && Date.now() < walkHoldUntil) {
-    if (typeof walkPath.showDest === "function") {
-      walkPath.showDest(lastWalkDest.x, lastWalkDest.z, landHeight(lastWalkDest.x, lastWalkDest.z));
-    }
-    return;
-  }
   walkPath.hide();
 }
 
@@ -1372,9 +1363,20 @@ function stopWalking() {
   walkWaypoints = [];
   gaitDist = 0;
   lastWalkDest = null;
-  walkHoldUntil = 0;
   if (walkPath) walkPath.hide();
   paintWalkHud();
+}
+
+function arriveWalk() {
+  walking = false;
+  walkWaypoints = [];
+  gaitDist = 0;
+  lastWalkDest = null;
+  if (walkPath) walkPath.hide();
+  walkNote = "Here.";
+  walkNoteUntil = Date.now() + 1600;
+  paintWalkHud();
+  setStatus("Here.");
 }
 
 function goTo(x, z) {
@@ -1399,7 +1401,7 @@ function goTo(x, z) {
   lastWalkDest = dest;
   walking = true;
   gaitDist = 0;
-  walkHoldUntil = 0;
+  walkNoteUntil = 0;
   userLeftStall = true;
   stallFollow = false;
   islandId = nearestIsland(dest.x, dest.z);
@@ -1865,10 +1867,7 @@ function tick(dt) {
   if (econHud) econHud.tick(dt);
   if (walking && !(taxi && typeof taxi.riding === "function" && taxi.riding())) {
     if (!walkWaypoints.length) {
-      walking = false;
-      gaitDist = 0;
-      walkHoldUntil = Date.now() + WALK_HOLD_MS;
-      paintWalkPath();
+      arriveWalk();
     } else {
       const ox = player.position.x;
       const oz = player.position.z;
@@ -1882,11 +1881,7 @@ function tick(dt) {
         gaitDist += next.moved;
       }
       if (next.done) {
-        walking = false;
-        gaitDist = 0;
-        walkHoldUntil = Date.now() + WALK_HOLD_MS;
-        paintWalkPath();
-        setStatus("Here.");
+        arriveWalk();
       } else {
         paintWalkPath();
       }

@@ -13,7 +13,6 @@ import {
   snapToLand,
   STRIDE_M,
   WALK_BEACH_M,
-  WALK_HOLD_MS,
   WALK_RANGE_M,
   WALK_SPEED_MPS,
   walkableAlong,
@@ -49,14 +48,13 @@ describe("tap-to-walk planner (PAPER)", () => {
     expect(pathSrc).not.toMatch(/const GREEN = 0x3dcc6a/);
   });
 
-  it("dest disc sits above tarmac and stays five seconds after stop", () => {
-    expect(WALK_HOLD_MS).toBe(5000);
+  it("dest disc sits above tarmac and hides when the walker stops", () => {
     const main = readFileSync(new URL("../public/harbour/main.js", import.meta.url), "utf8");
-    expect(main).toContain("WALK_HOLD_MS");
-    expect(main).toContain("showDest");
+    expect(main).toContain("arriveWalk");
+    expect(main).not.toContain("WALK_HOLD_MS");
     expect(main).not.toContain("Date.now() + 2200");
+    expect(main).not.toContain("Date.now() + 5000");
     const pathSrc = readFileSync(new URL("../public/harbour/walk-path.js", import.meta.url), "utf8");
-    expect(pathSrc).toContain("showDest");
     const lift = Number((pathSrc.match(/export const DEST_LIFT_M = ([0-9.]+)/) || [])[1]);
     expect(lift).toBeGreaterThan(0.4);
   });
