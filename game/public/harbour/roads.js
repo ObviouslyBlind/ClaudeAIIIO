@@ -376,33 +376,46 @@ function drawSidewalks(scene, spec, road, heightAt, graph, joins) {
 }
 
 /**
- * Dual as one black bed plus a dark stripe. Two offset tapes with a pale
- * stone gap read as unconnected roads from the spawn camera.
+ * Two 8 m lanes plus a black median fill. A single 26 m mitered slab
+ * blew out on bends, ate the verge, and left circus arms as grass blobs.
  */
 function drawHighway(scene, spec, road, heightAt, graph, joins) {
   const cls = classOf(road);
+  const s = roadClassSpec(cls);
   const pts = drawablePoints(road, graph);
   if (pts.length < 2) return;
+  const lane = s.medianM / 2 + s.carriageM / 2;
   const name = road.name || "Island Hwy";
   const lip = clipToJoins(pts, joins);
-  const bed = carriagewayWidthM(cls);
   drawClippedRuns(
     scene,
     spec,
     { ...road, name: name + " shoulder" },
     heightAt,
     lip,
-    bed + SHOULDER_PAD_M,
+    carriagewayWidthM(cls) + SHOULDER_PAD_M,
     SHOULDER,
     "shoulder",
     {},
     -0.03,
   );
-  drawClippedRuns(scene, spec, road, heightAt, lip, bed, ASPHALT, "paved");
+  drawClippedRuns(scene, spec, { ...road, name: name + " median" }, heightAt, lip, s.medianM, ASPHALT, "median");
+  for (const side of [-1, 1]) {
+    drawClippedRuns(
+      scene,
+      spec,
+      road,
+      heightAt,
+      clipToJoins(offsetPolyline(pts, lane * side), joins),
+      s.carriageM,
+      ASPHALT,
+      "paved",
+    );
+  }
   drawClippedRuns(
     scene,
     spec,
-    { ...road, name: name + " median" },
+    { ...road, name: name + " stripe" },
     heightAt,
     lip,
     MEDIAN_STRIPE_M,

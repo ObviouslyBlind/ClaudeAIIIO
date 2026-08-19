@@ -11,8 +11,8 @@ import { circusMeshRadii } from "./roadclip.js";
 
 /** Keep in sync with SHOULDER_PAD_M in roads.js. */
 export const FOOT_SHOULDER_M = 2.2;
-/** Arm stubs past the circus outer ring. Long enough to read as a throat from spawn. */
-export const CIRCUS_ARM_STUB_M = 36;
+/** Arm stubs past the circus outer ring. Short: long stubs sat in the grass as extra black rectangles. */
+export const CIRCUS_ARM_STUB_M = 12;
 
 function clsOf(road) {
   if (road.cls) return road.cls;

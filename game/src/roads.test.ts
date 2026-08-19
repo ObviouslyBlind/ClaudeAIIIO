@@ -64,13 +64,13 @@ describe("paved street from spawn", () => {
     );
     const pavedRoads = map.roads.filter((r) => r.kind === "paved");
     const dirtRoads = map.roads.filter((r) => r.kind === "dirt");
+    const extraCarriages = pavedRoads.filter((r) => r.lanes === 4).length;
     const circuses = pavedRoads.filter((r) => r.roundabout).length;
 
     // Circuses are one node mesh, not a RingGeometry plus stacked dual tapes.
     expect(paved.filter((m) => m.userData.footprint && /Circus$/.test(String(m.userData.roadName || ""))).length).toBe(circuses);
-    // Duals are one black bed, not a second offset carriageway.
-    expect(paved.length).toBeGreaterThanOrEqual(pavedRoads.length - circuses);
-    expect(paved.length).toBeLessThan(pavedRoads.length + 48);
+    expect(paved.length).toBeGreaterThanOrEqual(pavedRoads.length - circuses + extraCarriages);
+    expect(paved.length).toBeLessThan(pavedRoads.length + extraCarriages + circuses + 24);
     expect(extras.length).toBe(0);
     const walks = added.filter((m) => m.userData.roadKind === "sidewalk");
     expect(walks.length).toBeGreaterThan(4);
@@ -127,9 +127,7 @@ describe("paved street from spawn", () => {
     expect(roadWidthM("avenue") - roadWidthM("street")).toBeGreaterThan(3);
     expect(roadWidthM("street") - roadWidthM("lane")).toBeGreaterThan(3);
 
-    // Highway draws the full bed so the dual reads as one road from spawn.
-    expect(highway).toBeCloseTo(carriagewayWidthM("highway"), 3);
-    expect(highway).toBeGreaterThan(avenue);
+    expect(highway).toBeCloseTo(ROAD_CLASSES.highway.carriageM, 3);
     expect(avenue).toBeCloseTo(ROAD_CLASSES.avenue.carriageM, 3);
     expect(street).toBeCloseTo(ROAD_CLASSES.street.carriageM, 3);
     expect(lane).toBeCloseTo(ROAD_CLASSES.lane.carriageM, 3);
@@ -273,14 +271,19 @@ describe("paved street from spawn", () => {
     const hwy = pavedRoads.find((r) => r.lanes === 4);
     expect(hwy).toBeTruthy();
     const hwyMeshes = paved.filter((m) => m.userData.roadName === "Island Hwy");
-    expect(hwyMeshes.length).toBeGreaterThanOrEqual(1);
-    expect(ribbonWidthM(hwyMeshes[0]!)).toBeCloseTo(carriagewayWidthM("highway"), 1);
+    expect(hwyMeshes.length).toBeGreaterThanOrEqual(2);
+    expect(hwyMeshes.length % 2).toBe(0);
+    expect(ribbonWidthM(hwyMeshes[0]!)).toBeCloseTo(ROAD_CLASSES.highway.carriageM, 1);
     const median = added.find((m) => m.userData.roadKind === "median");
     expect(median).toBeTruthy();
     expect(lum(median!.material.color.getHex())).toBeLessThan(0.12);
     expect(lum(MEDIAN)).toBeLessThan(lum(STONE));
     expect(MEDIAN_STRIPE_M).toBeLessThan(4);
-    expect(added.some((m) => m.userData.roadKind === "island")).toBe(true);
+    // Median fill is asphalt, not pale stone, so the dual does not read as a sand gap.
+    const medianFill = added.find((m) => m.userData.roadKind === "median" && String(m.userData.roadName || "").endsWith(" median"));
+    expect(medianFill).toBeTruthy();
+    expect(medianFill!.material.color.getHex()).toBe(ASPHALT);
+    expect(ribbonWidthM(medianFill!)).toBeCloseTo(ROAD_CLASSES.highway.medianM, 1);
 
     const rowMesh = paved.find((m) => String(m.userData.roadName || "").includes("Row"));
     if (rowMesh) {
@@ -307,7 +310,7 @@ describe("paved street from spawn", () => {
       }
     }
     // Ribbons stop on the node-mesh arm, not 9 m beside the kerb.
-    expect(nearestHwy).toBeLessThan(radii.outer + 50);
+    expect(nearestHwy).toBeLessThan(radii.outer + 24);
     expect(nearestHwy).toBeGreaterThan(radii.inner);
     const circus = added.find(
       (m) => m.userData.roadName === "Harbour Circus" && m.userData.footprint,
@@ -327,7 +330,7 @@ describe("paved street from spawn", () => {
         nearestQuay = Math.min(nearestQuay, Math.hypot(pos.getX(i) - harbour.x, pos.getZ(i) - harbour.z));
       }
     }
-    expect(nearestQuay, "Quayward Rd missed Harbour Circus").toBeLessThan(radii.outer + 50);
+    expect(nearestQuay, "Quayward Rd missed Harbour Circus").toBeLessThan(radii.outer + 24);
     expect(nearestQuay).toBeGreaterThan(radii.inner - 0.6);
   });
 
