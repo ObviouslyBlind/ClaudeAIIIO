@@ -583,7 +583,7 @@ async function placeCartOn(plot, x, z) {
   }
   if (chromeHud) chromeHud.clearPlacing();
   if (chromeHud && chromeHud.setOverlay) chromeHud.setOverlay("world");
-  syncStandMesh(data.stand);
+  syncStandMesh(data.stand, data.play && data.play.look);
   if (data.play && chromeHud && typeof chromeHud.applyPlay === "function") chromeHud.applyPlay(data.play);
   else if (chromeHud) chromeHud.refresh();
   setStatus("Cart placed. Tap it to stock.");
@@ -622,7 +622,12 @@ function tickVendors(t) {
   }
 }
 
-function syncStandMesh(stand) {
+function looksSame(a, b) {
+  if (!a || !b) return false;
+  return a.hair === b.hair && a.skin === b.skin && a.shirt === b.shirt && a.jacket === b.jacket && a.pants === b.pants;
+}
+
+function syncStandMesh(stand, look) {
   if (!stand) return;
   let mesh = standMeshes.get(stand.id);
   const plot = map && map.plots.find((p) => p.id === stand.plotId);
@@ -642,8 +647,13 @@ function syncStandMesh(stand) {
     standMeshes.set(stand.id, mesh);
   }
   mesh.position.set(x, heightAt(specOf(island), x, z), z);
-  if (stand.hired) attachVendor(mesh);
-  else detachVendor(mesh);
+  if (stand.hired) {
+    const v = findVendor(mesh);
+    if (!v || !looksSame(v.userData.look, look)) {
+      detachVendor(mesh);
+      attachVendor(mesh, look);
+    }
+  } else detachVendor(mesh);
 }
 
 function syncCrateMesh(delivery) {
@@ -788,6 +798,11 @@ function paintHoldingGlow(mode) {
   function glowMesh(mesh, on, hex) {
     if (!mesh) return;
     mesh.traverse((obj) => {
+      let p = obj;
+      while (p) {
+        if (p.name === "vendor" || (p.userData && p.userData.kind === "vendor")) return;
+        p = p.parent;
+      }
       const mats = obj.material ? [].concat(obj.material) : [];
       for (const m of mats) {
         if (!m || !m.emissive) continue;
@@ -2301,7 +2316,7 @@ async function boot() {
         ((playNow.stands || []).find((s) => s.id === standId) ||
           (playNow.sites || []).find((s) => s.id === standId));
       if (hired) {
-        syncStandMesh({ ...hired, hired: true });
+        syncStandMesh({ ...hired, hired: true }, playNow && playNow.look);
         focusStand(hired);
       }
       setStatus("Hired.");
@@ -2350,7 +2365,7 @@ async function boot() {
         }
         if (d.status === "arrived") syncCrateMesh(d);
       }
-      for (const s of play.stands || []) syncStandMesh(s);
+      for (const s of play.stands || []) syncStandMesh(s, play.look);
       paintHoldingGlow(viewerMode());
       if (!userLeftStall && (play.stands || [])[0]) followStall(play.stands[0]);
     },
