@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createLandBoard, heightAt, ISLANDS } from "./land.ts";
 import { SOUTH_PORT, SOUTH_RAB, SOUTH_TOWNS, SOUTH_VOLCANO, volcanoDist, distToPolyline } from "./southGeom.ts";
 import { canWalk } from "./walk.ts";
+import { carriagewayWidthM } from "./roadGraph.ts";
 
 describe("South land (no buildings)", () => {
   it("puts the South port on the west channel shore", () => {
@@ -129,6 +130,22 @@ describe("South land (no buildings)", () => {
     }
     expect(pads.some((p) => sideOf(p) > 0)).toBe(true);
     expect(pads.some((p) => sideOf(p) < 0)).toBe(true);
+    const half = carriagewayWidthM("highway") / 2;
+    for (const p of pads) {
+      const d = Math.min(...hwys.map((h) => distToPolyline(h.points, p.x, p.z)));
+      expect(d).toBeGreaterThan(half + 0.2);
+      expect(d).toBeLessThan(half + 6);
+    }
+    let packed = false;
+    for (let i = 0; i < pads.length && !packed; i++) {
+      for (let j = i + 1; j < pads.length; j++) {
+        if (Math.hypot(pads[i]!.x - pads[j]!.x, pads[i]!.z - pads[j]!.z) < 10) {
+          packed = true;
+          break;
+        }
+      }
+    }
+    expect(packed).toBe(true);
   });
 
   it("puts street lots on both sides and seeds hamlets so long roads are not a void", () => {

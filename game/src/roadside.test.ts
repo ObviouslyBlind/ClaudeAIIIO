@@ -23,7 +23,7 @@ describe("roadside drop (PAPER)", () => {
 
 describe("labelled kinds", () => {
   it("keeps viewer ids and mesh kinds stable for island redesign", () => {
-    expect(VIEWERS).toEqual(["world", "lots", "foot", "logistics", "minerals"]);
+    expect(VIEWERS).toEqual(["world", "lots", "yours", "foot", "logistics", "minerals"]);
     expect(KIND.crate).toBe("crate");
     expect(KIND.van).toBe("van");
     expect(KIND.parcelFill).toBe("parcel-fill");

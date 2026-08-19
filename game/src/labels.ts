@@ -4,7 +4,7 @@
  * PAPER / SIMULATED.
  */
 
-export const VIEWERS = ["world", "lots", "foot", "logistics", "minerals"] as const;
+export const VIEWERS = ["world", "lots", "yours", "foot", "logistics", "minerals"] as const;
 export type ViewerId = (typeof VIEWERS)[number];
 
 export const KIND = {

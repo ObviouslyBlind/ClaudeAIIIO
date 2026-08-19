@@ -35,7 +35,8 @@ export function tagLabelFor(plot, placing = false) {
 }
 
 export function pickTagPlots(plots, player, overlay, limit = TAG_POOL, placing = false) {
-  const radius = overlay === "lots" || placing ? TAG_RADIUS_LOTS_M : TAG_RADIUS_M;
+  const lotsOn = overlay === "lots" || overlay === "yours";
+  const radius = lotsOn || placing ? TAG_RADIUS_LOTS_M : TAG_RADIUS_M;
   const r2 = radius * radius;
   const out = [];
   for (const p of plots || []) {
@@ -45,6 +46,8 @@ export function pickTagPlots(plots, player, overlay, limit = TAG_POOL, placing =
       if (kind !== "yours") continue;
     } else if (overlay === "lots") {
       if (kind !== "buy") continue;
+    } else if (overlay === "yours") {
+      if (kind !== "yours") continue;
     } else {
       continue;
     }
@@ -114,7 +117,7 @@ export function mountLotTags({ canvas, camera, heightAt, specOf, getPlots, onBuy
 
   function tick(playerPos, dt = 0.016, overlay = "world", placing = false) {
     placingMode = Boolean(placing);
-    const showTags = overlay === "lots" || placingMode;
+    const showTags = overlay === "lots" || overlay === "yours" || placingMode;
     if (!showTags) {
       shownCache = [];
       clock = 0;

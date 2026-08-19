@@ -5,7 +5,8 @@ import * as THREE from "three";
  * PAPER / SIMULATED.
  *
  *   world      — walk. Buildings / stands. Land does not steal the click.
- *   lots       — boundary outlines. Click a $ tag or the lot dirt to buy.
+ *   lots       — vacant land to buy. $ bars. Your buildings stay lit.
+ *   yours      — only your lots and buildings.
  *   foot       — High / Moderate / Low ribbons on each named paved road.
  *   logistics  — vans and roadside crates. Tap the crate.
  *   minerals   — ore catalog exists; overlay paint is next.
@@ -19,8 +20,13 @@ export const VIEWERS = {
   },
   lots: {
     id: "lots",
-    label: "Lots",
-    hint: "Lots on. Outlines plus a few nearby $ bars. Click Lots again to hide.",
+    label: "Lots to buy",
+    hint: "Lots to buy. Vacant $ bars. Click Lots again for your lots.",
+  },
+  yours: {
+    id: "yours",
+    label: "Your lots",
+    hint: "Your lots and buildings. Click Lots again to hide.",
   },
   foot: {
     id: "foot",
@@ -39,11 +45,23 @@ export const VIEWERS = {
   },
 };
 
-/** Clicking an already-on viewer (Lots, Foot, …) hides it and returns to World. */
+/** Clicking an already-on viewer (Foot, …) hides it and returns to World. */
 export function toggleViewer(current, clicked) {
   if (!clicked) return "world";
+  if (clicked === "lots") return cycleLots(current);
   if (clicked === current && clicked !== "world") return "world";
   return clicked;
+}
+
+/** Lots chip: vacant → yours → off. */
+export function cycleLots(current) {
+  if (current === "lots") return "yours";
+  if (current === "yours") return "world";
+  return "lots";
+}
+
+export function isLotsViewer(id) {
+  return id === "lots" || id === "yours";
 }
 
 const BAND_COLOR = {
@@ -247,9 +265,14 @@ export function createOverlays({ scene, heightAt, specOf, getMap }) {
     high_residential: 0x666666,
   };
 
-  function drawLots(play, map) {
+  function drawLots(play, map, filter) {
     clear();
-    const plots = ((map && map.plots) || []).filter((p) => p.island === "south" && p.ring && p.ring.length >= 3);
+    const want = filter === "yours" ? "yours" : "buy";
+    const plots = ((map && map.plots) || []).filter((p) => {
+      if (p.island !== "south" || !p.ring || p.ring.length < 3) return false;
+      if (want === "yours") return p.owner === "visitor";
+      return !p.owner || p.owner === "visitor";
+    });
     const pos = [];
     const col = [];
     for (const plot of plots) {
@@ -323,14 +346,14 @@ export function createOverlays({ scene, heightAt, specOf, getMap }) {
       mode = next;
       const board = map || (getMap && getMap());
       if (mode === "foot") drawFoot(play, board);
-      else if (mode === "lots") drawLots(play, board);
+      else if (isLotsViewer(mode)) drawLots(play, board, mode);
       else if (mode === "logistics") drawLogistics(play);
       else clear();
     },
     refresh(play, map) {
       const board = map || (getMap && getMap());
       if (mode === "foot") drawFoot(play, board);
-      else if (mode === "lots") drawLots(play, board);
+      else if (isLotsViewer(mode)) drawLots(play, board, mode);
       else if (mode === "logistics") drawLogistics(play);
     },
     get mode() {

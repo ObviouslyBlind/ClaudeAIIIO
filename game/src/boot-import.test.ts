@@ -76,7 +76,7 @@ describe("harbour boot import graph", () => {
     expect(src).toContain("Exit taxi");
     expect(src).toContain("taxi.riding");
     expect(src).not.toContain('const hint = document.getElementById("viewer-hint")');
-    expect(src).toContain('viewer === "lots" && tapPt');
+    expect(src).toContain("isLotsViewer(viewer) && tapPt");
     expect(src).not.toContain('viewer === "world" || viewer === "lots"');
     expect(src).toContain("clickTargets()");
     expect(src).not.toContain("function inspectLandAt");

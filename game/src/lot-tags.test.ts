@@ -70,6 +70,18 @@ describe("lot tags (PAPER)", () => {
     expect(tagLabelFor(placing[0].plot, true)).toBe("PLACE");
   });
 
+  it("Your lots overlay shows YOURS tags, not vacant $ bars", () => {
+    const plots = [
+      { id: "yours", owner: "visitor", price: 32, x: 10, z: 0 },
+      { id: "buy", owner: null, price: 40, x: 20, z: 0 },
+    ];
+    const yours = pickTagPlots(plots, { x: 0, z: 0 }, "yours", 8, false);
+    expect(yours).toHaveLength(1);
+    expect(yours[0].plot.id).toBe("yours");
+    expect(yours[0].kind).toBe("yours");
+    expect(pickTagPlots(plots, { x: 0, z: 0 }, "world", 8, false)).toEqual([]);
+  });
+
   it("maps NDC onto the canvas box", () => {
     const pos = ndcToLayer({ x: 0, y: 0, z: 0.2 }, { left: 40, top: 10, width: 200, height: 100 });
     expect(pos).toEqual({ x: 140, y: 60 });

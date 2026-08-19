@@ -28,6 +28,7 @@ import {
 import {
   RoadGraphBuilder,
   graphToRoads,
+  carriagewayWidthM,
   roadWidthM,
   type RoadClass,
   type RoadGraph,
@@ -342,7 +343,7 @@ function lotsAlong(
   }
 }
 
-/** Tiny $750 cart pads on the Island Hwy verge. Not house lots. */
+/** Tiny $750 cart pads packed on the Island Hwy verge. Not house lots. */
 function nearCircus(x: number, z: number): boolean {
   for (const rab of Object.values(SOUTH_RAB)) {
     if (Math.hypot(x - rab.x, z - rab.z) < RAB_R + 24) return true;
@@ -356,14 +357,19 @@ function seedHighwayCartPads(
   base: Omit<PushOpts, "street" | "band">,
 ): void {
   const hwys = roads.filter((r) => r.name === "Island Hwy" && !r.roundabout && r.cls === "highway");
-  for (const road of hwys) {
-    const setback = clearanceFor(road) + 0.8;
-    const front = 6;
-    const depth = 5;
-    const step = 48;
+  // Packed bay at spawn, not a 5 km ribbon of $750 pads.
+  const spawnHwys = hwys.filter((r) =>
+    r.points.some((p) => Math.hypot(p.x - SOUTH_PORT.x, p.z - SOUTH_PORT.z) < 420),
+  );
+  const half = carriagewayWidthM("highway") / 2;
+  const setback = half + 0.55;
+  const front = 6.2;
+  const depth = 4.2;
+  const step = 6.8;
+  for (const road of spawnHwys.length ? spawnHwys : hwys) {
     const pts = road.points;
     const len = polylineLen(pts);
-    for (let dist = 56; dist < len - 36; dist += step) {
+    for (let dist = 24; dist < Math.min(len - 24, 24 + step * 12); dist += step) {
       const st = stationAt(pts, dist);
       if (!st) continue;
       if (publicQuay(st.at.x, st.at.z)) continue;
@@ -382,6 +388,7 @@ function seedHighwayCartPads(
           minArea: 18,
           price: CART_PAD_PRICE,
           idPrefix: "south-cart",
+          skipRoads: true,
         });
       }
     }

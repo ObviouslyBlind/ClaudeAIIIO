@@ -29,7 +29,7 @@ import { playPaperBuy } from "./paper-sfx.js";
 import { createWalkPath } from "./walk-path.js";
 import { mountChrome } from "./chrome.js";
 import { siteClassForUse } from "./site-menu.js";
-import { createOverlays } from "./overlays.js";
+import { createOverlays, isLotsViewer } from "./overlays.js";
 import { mountEconHud } from "./hud-econ.js";
 import { mountPresenceHud } from "./presence-hud.js";
 import { mountStaffHud } from "./staff-hud.js";
@@ -734,6 +734,69 @@ function objectWithStand(obj) {
     o = o.parent;
   }
   return null;
+}
+
+/** Tap the cart, its pad, or the dirt under it — not only the mesh. */
+const STAND_TAP_M = 7.5;
+function siteAtTap(tapPt) {
+  if (!tapPt) return null;
+  const play = chromeHud && chromeHud.getPlay && chromeHud.getPlay();
+  if (!play) return null;
+  const sites = [...((play.sites || [])), ...((play.stands || [])), ...((play.workSites || []))];
+  const seen = new Set();
+  let best = null;
+  let bestD = STAND_TAP_M;
+  for (const s of sites) {
+    if (!s || !s.id || seen.has(s.id)) continue;
+    seen.add(s.id);
+    const sx = Number(s.x);
+    const sz = Number(s.z);
+    if (!Number.isFinite(sx) || !Number.isFinite(sz)) continue;
+    const d = Math.hypot(sx - tapPt.x, sz - tapPt.z);
+    if (d < bestD) {
+      best = s;
+      bestD = d;
+    }
+  }
+  const p = findParcelAt(tapPt.x, tapPt.z);
+  if (p && p.ring && pointInRing(tapPt.x, tapPt.z, p.ring)) {
+    const onLot = sites.find((s) => s && s.plotId === p.id);
+    if (onLot) return onLot;
+  }
+  return best;
+}
+
+function paintHoldingGlow(mode) {
+  const lit = isLotsViewer(mode);
+  function glowMesh(mesh, on, hex) {
+    if (!mesh) return;
+    mesh.traverse((obj) => {
+      const mats = obj.material ? [].concat(obj.material) : [];
+      for (const m of mats) {
+        if (!m || !m.emissive) continue;
+        if (m.userData._baseEmiss == null) {
+          m.userData._baseEmiss = m.emissiveIntensity || 0;
+          m.userData._baseEmissHex = m.emissive.getHex ? m.emissive.getHex() : 0;
+        }
+        if (on) {
+          m.emissive.setHex(hex);
+          m.emissiveIntensity = 0.52;
+        } else {
+          m.emissive.setHex(m.userData._baseEmissHex || 0);
+          m.emissiveIntensity = m.userData._baseEmiss || 0;
+        }
+      }
+    });
+  }
+  for (const [plotId, mesh] of useMeshes) {
+    const p = map && map.plots.find((x) => x.id === plotId);
+    glowMesh(mesh, Boolean(lit && p && p.owner === "visitor"), 0x6ee39a);
+  }
+  for (const mesh of standMeshes.values()) {
+    const plotId = mesh.userData && mesh.userData.plotId;
+    const p = plotId && map && map.plots.find((x) => x.id === plotId);
+    glowMesh(mesh, Boolean(lit && (!p || p.owner === "visitor")), 0xf0c04a);
+  }
 }
 
 /** While true, tick copies a close stall pose every frame (spawn look-at cannot fight). */
@@ -1602,11 +1665,11 @@ function inspectNearbyLand() {
 
 function onPointer(ev) {
   if (ev.button != null && ev.button !== 0) return;
-  if (Date.now() - lastTap < 180) return;
-  lastTap = Date.now();
   if (taxi && typeof taxi.mapOpen === "function" && taxi.mapOpen()) return;
   const placing = Boolean(chromeHud && chromeHud.isPlacing && chromeHud.isPlacing());
   if (ev.target.closest && ev.target.closest(HUD_BLOCK) && !placing) return;
+  if (Date.now() - lastTap < 180) return;
+  lastTap = Date.now();
   if (placing && ev.target.closest && ev.target.closest(".lot-tag, [data-panel], [data-overlay], nav, #taxi-map, .float-panel, #buy-ask, #stand-veil, #stand-menu, #place-hint, #menu-stack, #pack-shift")) {
     return;
   }
@@ -1647,13 +1710,18 @@ function onPointer(ev) {
       return;
     }
   }
+  const nearSite = siteAtTap(tapPt);
+  if (nearSite) {
+    openStandMenu(nearSite.id, nearSite);
+    return;
+  }
   if (crateHit) {
     const crate = objectWithKind(crateHit.object, "crate");
     const id = crate && crate.userData.deliveryId;
     if (id && showCrateCard(id)) return;
   }
   const tagPick =
-    viewer === "lots" &&
+    isLotsViewer(viewer) &&
     parcelMap &&
     typeof parcelMap.pickLabel === "function"
       ? parcelMap.pickLabel(camera, ev.clientX, ev.clientY, window.innerWidth, window.innerHeight, canvas)
@@ -1665,7 +1733,7 @@ function onPointer(ev) {
       return;
     }
   }
-  if (labelHit && viewer === "lots") {
+  if (labelHit && isLotsViewer(viewer)) {
     const spr = objectWithKind(labelHit.object, "parcel-label");
     const id = spr && (spr.userData.plotId || (spr.userData.plot && spr.userData.plot.id));
     const p = id && map && map.plots.find((x) => x.id === id);
@@ -1689,15 +1757,17 @@ function onPointer(ev) {
     setStatus("Tap land you leased that has no building yet.");
     return;
   }
-  if (viewer === "lots" && tapPt) {
+  if (isLotsViewer(viewer) && tapPt) {
     const p = findParcelAt(tapPt.x, tapPt.z);
-    if (p && !p.owner && pointInRing(tapPt.x, tapPt.z, p.ring)) {
+    if (p && !p.owner && viewer === "lots" && pointInRing(tapPt.x, tapPt.z, p.ring)) {
       askToBuy(p);
       return;
     }
     if (p && p.owner && pointInRing(tapPt.x, tapPt.z, p.ring)) {
-      showLandCard(p);
-      return;
+      if (viewer !== "yours" || p.owner === "visitor") {
+        showLandCard(p);
+        return;
+      }
     }
   }
   if (padHit && viewer === "logistics") {
@@ -2253,6 +2323,7 @@ async function boot() {
     onOverlay(id) {
       const play = chromeHud && typeof chromeHud.getPlay === "function" ? chromeHud.getPlay() : null;
       if (overlays) overlays.setMode(id, play, map);
+      paintHoldingGlow(id);
     },
     onPlaceMode(on) {
       if (!on) return;
@@ -2273,6 +2344,7 @@ async function boot() {
         if (d.status === "arrived") syncCrateMesh(d);
       }
       for (const s of play.stands || []) syncStandMesh(s);
+      paintHoldingGlow(viewerMode());
       if (!userLeftStall && (play.stands || [])[0]) followStall(play.stands[0]);
     },
     onOrder(delivery) {

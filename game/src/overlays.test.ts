@@ -2,11 +2,13 @@ import { describe, expect, it } from "vitest";
 import * as THREE from "three";
 import { createLandBoard, ISLANDS } from "./land.ts";
 import { BAND_LEVEL, footTrafficSnapshot } from "./footTraffic.ts";
-import { VIEWERS, createOverlays, footLevel, toggleViewer } from "../public/harbour/overlays.js";
+import { VIEWERS, createOverlays, cycleLots, footLevel, isLotsViewer, toggleViewer } from "../public/harbour/overlays.js";
 
 describe("foot-traffic viewer (PAPER)", () => {
-  it("exposes the four top-right viewers", () => {
-    expect(Object.keys(VIEWERS)).toEqual(["world", "lots", "foot", "logistics", "minerals"]);
+  it("exposes viewers including Lots to buy and Your lots", () => {
+    expect(Object.keys(VIEWERS)).toEqual(["world", "lots", "yours", "foot", "logistics", "minerals"]);
+    expect(VIEWERS.lots.label).toBe("Lots to buy");
+    expect(VIEWERS.yours.label).toBe("Your lots");
     expect(VIEWERS.foot.label).toBe("Foot traffic");
     expect(VIEWERS.minerals.label).toBe("Minerals");
   });
@@ -20,10 +22,19 @@ describe("foot-traffic viewer (PAPER)", () => {
     expect(footLevel("green")).toBe("High");
   });
 
-  it("toggles Lots off back to World so outlines can hide", () => {
+  it("cycles Lots: vacant → yours → off", () => {
+    expect(cycleLots("world")).toBe("lots");
+    expect(cycleLots("lots")).toBe("yours");
+    expect(cycleLots("yours")).toBe("world");
+    expect(cycleLots("foot")).toBe("lots");
+    expect(isLotsViewer("lots")).toBe(true);
+    expect(isLotsViewer("yours")).toBe(true);
+    expect(isLotsViewer("world")).toBe(false);
     expect(toggleViewer("world", "lots")).toBe("lots");
-    expect(toggleViewer("lots", "lots")).toBe("world");
+    expect(toggleViewer("lots", "lots")).toBe("yours");
+    expect(toggleViewer("yours", "lots")).toBe("world");
     expect(toggleViewer("lots", "foot")).toBe("foot");
+    expect(toggleViewer("foot", "foot")).toBe("world");
     expect(toggleViewer("world", "world")).toBe("world");
   });
 
@@ -63,5 +74,24 @@ describe("foot-traffic viewer (PAPER)", () => {
     expect(lines[0].geometry.getAttribute("position").count).toBeGreaterThan(64);
     overlays.setMode("world", {}, land);
     expect(overlays.group.children.filter((c) => c.userData.kind === "lot-outline").length).toBe(0);
+  });
+
+  it("Your lots outlines only visitor parcels, not vacant buy dirt", () => {
+    const scene = new THREE.Scene();
+    const land = createLandBoard();
+    const south = land.plots.find((p) => p.island === "south" && p.ring && p.ring.length >= 3)!;
+    south.owner = "visitor";
+    const overlays = createOverlays({
+      scene,
+      heightAt: () => 1,
+      specOf: (id) => ISLANDS[id],
+      getMap: () => land,
+    });
+    overlays.setMode("lots", {}, land);
+    const buy = overlays.group.children.find((c) => c.userData.kind === "lot-outline");
+    expect(buy?.userData.plotCount).toBeGreaterThan(8);
+    overlays.setMode("yours", {}, land);
+    const yours = overlays.group.children.find((c) => c.userData.kind === "lot-outline");
+    expect(yours?.userData.plotCount).toBe(1);
   });
 });

@@ -6,7 +6,7 @@
 import { plotDisplayName } from "./parcel-map.js";
 import { buyAskModel } from "./buy-ask.js";
 import { playPaperBuy } from "./paper-sfx.js";
-import { toggleViewer, footLevel } from "./overlays.js";
+import { toggleViewer, isLotsViewer, footLevel } from "./overlays.js";
 import { mountPackShift } from "./pack.js";
 import { formatCartsBody } from "./carts-hud.js";
 import { formatSiteMenu, gamesForSite } from "./site-menu.js";
@@ -76,7 +76,8 @@ export function mountChrome(opts) {
 
   const HINTS = {
     world: "World: tap the dirt to walk. Green line is the path.",
-    lots: "Lots on. Outlines plus a few nearby $ bars. Click Lots again to hide.",
+    lots: "Lots to buy. Vacant $ bars. Click Lots again for your lots.",
+    yours: "Your lots and buildings. Click Lots again to hide.",
     foot: "Foot traffic: High (green) / Moderate (yellow) / Low (red) on each named road.",
     minerals: "Minerals are not in yet.",
   };
@@ -84,7 +85,15 @@ export function mountChrome(opts) {
   function setOverlay(id) {
     overlay = id;
     root.querySelectorAll("[data-overlay]").forEach((b) => {
-      b.classList.toggle("is-on", b.getAttribute("data-overlay") === id);
+      const key = b.getAttribute("data-overlay");
+      const on = key === "lots" ? isLotsViewer(id) : key === id;
+      b.classList.toggle("is-on", on);
+      if (key === "lots") {
+        b.classList.toggle("is-yours", id === "yours");
+        const label = id === "yours" ? "Your lots" : id === "lots" ? "Lots to buy" : "Lots";
+        b.setAttribute("aria-label", label);
+        b.setAttribute("data-tip", label);
+      }
     });
     const hint = document.getElementById("viewer-hint");
     if (hint) hint.textContent = HINTS[id] || HINTS.world;
@@ -380,7 +389,7 @@ export function mountChrome(opts) {
     placingKit = kitId || "";
     if (landCard) landCard.hidden = true;
     if (buyAsk) buyAsk.hidden = true;
-    setOverlay("lots");
+    setOverlay("yours");
     closePanels();
     setPlaceHint("Tap the green YOURS lot, or the verge by the road.", true);
     if (opts.setStatus) {
@@ -875,7 +884,7 @@ export function mountChrome(opts) {
       placing = false;
       placingKit = "";
       setPlaceHint("", false);
-      setOverlay("world");
+      setOverlay("lots");
       if (opts.onPlaceMode) opts.onPlaceMode(false);
       if (opts.setStatus) opts.setStatus("Place cancelled.");
     });
@@ -914,7 +923,7 @@ export function mountChrome(opts) {
   bindCashDock();
   bindChromeActions();
 
-  setOverlay("world");
+  setOverlay("lots");
 
   return {
     stop() {
