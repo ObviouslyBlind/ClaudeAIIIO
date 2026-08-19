@@ -23,7 +23,7 @@ import {
 } from "./southGeom.ts";
 import { buildSouthLand, southTaxiStops } from "./southLand.ts";
 import type { RoadGraph } from "./roadGraph.ts";
-import { inflateAsksAfterLease, plotAsk } from "./landPrice.ts";
+import { inflateAsksAfterLease, pinCartPadAsks, plotAsk } from "./landPrice.ts";
 import { CART_PAD_MAX, CART_PAD_PRICE } from "./economy.ts";
 
 export { BUILDING_CATALOG, DEVELOP_COST };
@@ -702,6 +702,7 @@ export function createLandBoard(): LandBoard {
     const field = plots.find((p) => p.island === "south" && p.band === "field") || plots.find((p) => p.band === "field");
     if (field) field.deposit = "ore";
   }
+  pinCartPadAsks(plots);
   const roads: Road[] = [
     {
       island: north.id,
@@ -794,6 +795,10 @@ export function leasePlot(
   if (isCartPad(plot) && visitorCartPadCount(board, owner) >= CART_PAD_MAX) {
     return { ok: false, reason: "pad_cap" };
   }
+  if (isCartPad(plot)) {
+    plot.price = CART_PAD_PRICE;
+    plot.seedPrice = CART_PAD_PRICE;
+  }
   if (visitor.cash < plot.price) return { ok: false, reason: "no_cash" };
   if (!isCartPad(plot) && visitor.cash - plot.price < DEVELOP_COST) {
     return { ok: false, reason: "need_develop_cash" };
@@ -801,6 +806,7 @@ export function leasePlot(
   visitor.cash = Math.round((visitor.cash - plot.price) * 10000) / 10000;
   plot.owner = owner;
   if (opts?.inflate !== false) inflateAsksAfterLease(board.plots, plot);
+  pinCartPadAsks(board.plots);
   return { ok: true, paid: plot.price, plot };
 }
 

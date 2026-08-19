@@ -47,6 +47,25 @@ describe("PAPER land asks and lease inflation", () => {
     expect(otherPad.price).toBe(750);
   });
 
+  it("keeps every cart pad at $750 after street lots inflate", () => {
+    const board = createLandBoard();
+    const pads = board.plots.filter((p) => p.class === "cart_pad");
+    expect(pads.length).toBeGreaterThan(2);
+    expect(pads.every((p) => p.price === 750 && p.seedPrice === 750)).toBe(true);
+    const street = board.plots.find(
+      (p) => p.island === "south" && p.band === "street" && p.class === "by_right" && !p.owner,
+    )!;
+    expect(leasePlot(board, createVisitor(80_000), street.id).ok).toBe(true);
+    const still = board.plots.filter((p) => p.class === "cart_pad");
+    expect(still.every((p) => p.price === 750)).toBe(true);
+    expect(still.every((p) => p.seedPrice === 750)).toBe(true);
+    still[0]!.price = 9_999;
+    still[0]!.seedPrice = 9_999;
+    inflateAsksAfterLease(board.plots, street);
+    expect(still[0]!.price).toBe(750);
+    expect(still[0]!.seedPrice).toBe(750);
+  });
+
   it("inflates remaining vacant asks when someone leases, with a seed cap", () => {
     const board = createLandBoard();
     const visitor = createVisitor(80_000);

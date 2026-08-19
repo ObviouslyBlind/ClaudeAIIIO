@@ -1,6 +1,7 @@
 /** In-memory PAPER shard snapshot. Not Postgres. PLAN C save blob. */
 
 import { DEVELOP_COST, createLandBoard, getPlot, leasePlot, type LandBoard } from "./land.ts";
+import { pinCartPadAsks } from "./landPrice.ts";
 import { isLandUse, type LandUseId } from "./buildings.ts";
 import {
   applyVisitorOrders,
@@ -92,6 +93,7 @@ function applyLandAsks(land: LandBoard, asks: { id: string; price: number }[]): 
     const price = byId.get(plot.id);
     if (price != null) plot.price = price;
   }
+  pinCartPadAsks(land.plots);
 }
 
 function visitorLeaseIds(land: LandBoard): string[] {

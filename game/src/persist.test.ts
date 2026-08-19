@@ -58,6 +58,24 @@ describe("PAPER shard persist step C", () => {
     ]);
   });
 
+  it("restores cart pads at $750 even if the blob stored an inflated ask", () => {
+    const world = createWorld();
+    const land = createLandBoard();
+    const visitor = createVisitor(1_000);
+    const pad = land.plots.find((p) => p.class === "cart_pad" && !p.owner)!;
+    const json = JSON.parse(JSON.stringify(serializeShard({ world, land, visitor })));
+    const row = json.landAsks.find((r: { id: string }) => r.id === pad.id);
+    expect(row).toBeTruthy();
+    row.price = 9_000;
+    const restored = restoreShard(json);
+    expect(restored.ok).toBe(true);
+    if (!restored.ok) return;
+    expect(getPlot(restored.land, pad.id)?.price).toBe(750);
+    expect(restored.land.plots.filter((p) => p.class === "cart_pad").every((p) => p.price === 750)).toBe(
+      true,
+    );
+  });
+
   it("fails cleanly when the blob is missing", () => {
     expect(() => restoreShard(undefined)).not.toThrow();
     expect(() => restoreShard(null)).not.toThrow();

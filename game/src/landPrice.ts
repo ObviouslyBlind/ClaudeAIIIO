@@ -4,6 +4,7 @@
  */
 
 import {
+  CART_PAD_PRICE,
   LAND_ASK_CAP_MUL,
   LAND_FLOOR,
   LAND_GLOBAL_BUMP,
@@ -63,17 +64,32 @@ function capAsk(plot: AskPlot, next: number): number {
   return Math.min(roundAsk(seed * LAND_ASK_CAP_MUL), roundAsk(next));
 }
 
+function isCartPadAsk(plot: AskPlot): boolean {
+  return plot.class === "cart_pad";
+}
+
+/** Cart pads are a fixed $750 ask. Inflation never moves them. */
+export function pinCartPadAsks(plots: AskPlot[]): void {
+  for (const p of plots) {
+    if (!isCartPadAsk(p)) continue;
+    p.price = CART_PAD_PRICE;
+    p.seedPrice = CART_PAD_PRICE;
+  }
+}
+
 /** Raise vacant asks after a lease. Restore passes inflate: false.
  *  Cart pads stay $750 and do not bump street / field asks. */
 export function inflateAsksAfterLease(plots: AskPlot[], bought: AskPlot): void {
-  if (bought.class === "cart_pad") return;
-  for (const other of plots) {
-    if (other.id === bought.id) continue;
-    if (other.owner) continue;
-    if (other.class === "cart_pad") continue;
-    const next = other.price * (1 + bumpFor(bought, other));
-    other.price = capAsk(other, next);
+  if (!isCartPadAsk(bought)) {
+    for (const other of plots) {
+      if (other.id === bought.id) continue;
+      if (other.owner) continue;
+      if (isCartPadAsk(other)) continue;
+      const next = other.price * (1 + bumpFor(bought, other));
+      other.price = capAsk(other, next);
+    }
   }
+  pinCartPadAsks(plots);
 }
 
 /** Mean vacant ask / seed. 1 at spawn. Stays finite under the cap. */
@@ -82,6 +98,7 @@ export function landAskIndex(plots: AskPlot[]): number {
   let den = 0;
   for (const p of plots) {
     if (p.owner) continue;
+    if (isCartPadAsk(p)) continue;
     const seed = p.seedPrice > 0 ? p.seedPrice : p.price;
     if (seed <= 0) continue;
     num += p.price / seed;
