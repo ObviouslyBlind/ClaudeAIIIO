@@ -701,12 +701,20 @@ export function mountChrome(opts) {
       );
       const paintRead = () => {
         const v = Number(priceEl.value);
-        if (!priceOut) return;
-        priceOut.textContent = money(v);
-        priceOut.classList.toggle("is-today", Math.abs(v - todayN) < 0.01);
-        priceOut.classList.toggle("is-near", Math.abs(v - todayN) > 0.01 && Math.abs(v - todayN) <= 1.5);
-        priceOut.classList.toggle("is-far", Math.abs(v - todayN) > 1.5);
+        const d = Math.abs(v - todayN);
+        const today = d < 0.01;
+        const near = !today && d <= 1.5;
+        const far = d > 1.5;
+        if (priceOut) {
+          priceOut.textContent = money(v);
+          priceOut.classList.toggle("is-today", today);
+          priceOut.classList.toggle("is-near", near);
+          priceOut.classList.toggle("is-far", far);
+        }
+        const slide = priceEl.closest(".sticker-slide");
+        if (slide) slide.setAttribute("data-tone", today ? "today" : near ? "near" : "far");
       };
+      paintRead();
       priceEl.addEventListener("input", paintRead);
       priceEl.addEventListener("change", async () => {
         await readJson("/api/stand/price", {

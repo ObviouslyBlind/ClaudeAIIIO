@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { formatCartsBody } from "../public/harbour/carts-hud.js";
-import { formatSiteMenu } from "../public/harbour/site-menu.js";
+import { formatSiteMenu, stickerTrackSegs } from "../public/harbour/site-menu.js";
 import { formatAccountSheet } from "../public/harbour/account-sheet.js";
 
 const html = readFileSync(new URL("../public/harbour/index.html", import.meta.url), "utf8");
@@ -201,8 +201,11 @@ describe("harbour chrome HUD", () => {
     expect(chrome).not.toContain("data-hire-person");
     expect(chrome).toContain("place-cancel");
     expect(siteMenu).toContain("sticker-mark");
-    expect(siteMenu).toContain("sticker-zone");
+    expect(siteMenu).toContain("sticker-seg");
     expect(siteMenu).toContain("sticker-band");
+    expect(siteMenu).toContain("stickerTrackSegs");
+    expect(siteMenu).not.toContain("sticker-zone");
+    expect(chrome).toContain('slide.setAttribute("data-tone"');
     expect(siteMenu).toContain("stock-num");
     expect(siteMenu).toContain('type="range"');
     expect(chrome).toContain("Warehouse");
@@ -415,6 +418,7 @@ describe("harbour chrome HUD", () => {
     expect(fryStock).toContain("data-fuel=\"inventory\"");
     expect(fryStock).toContain("is-today");
     expect(fryStock).toContain('max="16"');
+    expect(fryStock).toContain("flex:56.6667");
     const hiredRun = formatSiteMenu(
       {
         id: "stand-1",
@@ -536,8 +540,13 @@ describe("harbour chrome HUD", () => {
     expect(stock).toContain("4");
     expect(stock).toContain("Price");
     expect(stock).toContain("is-today");
-    expect(stock).toContain("sticker-zone");
+    expect(stock).toContain("sticker-seg is-red");
+    expect(stock).toContain("sticker-seg is-yellow");
+    expect(stock).toContain("sticker-seg is-green");
+    expect(stock).toContain('data-tone="today"');
     expect(stock).toContain("sticker-band");
+    expect(stock).toContain("flex:23.3333");
+    expect(stock).not.toContain("sticker-zone");
     expect(stock).not.toContain("id=\"hire-site\"");
     const near = formatSiteMenu(
       {
@@ -571,9 +580,35 @@ describe("harbour chrome HUD", () => {
     expect(css).toContain(".stock-num.is-low");
     expect(css).toContain(".sticker-mark");
     expect(css).toContain(".sticker-band");
+    expect(css).toContain(".sticker-seg.is-red");
+    expect(css).toContain(".sticker-seg.is-yellow");
+    expect(css).toContain(".sticker-seg.is-green");
     expect(css).toContain(".sticker-read.is-near");
     expect(css).toContain(".sticker-read.is-far");
+    expect(css).toContain("#c45a3a");
+    expect(css).not.toContain(".sticker-zone");
+    expect(css).not.toMatch(/#5fe3a0 50%/);
+    expect(css).not.toMatch(/#e25b6a 16%/);
+    expect(css).not.toContain("linear-gradient(\n    90deg,\n    #c42b3a");
+    expect(css).toContain("::-webkit-slider-runnable-track");
+    expect(css).toContain("::-moz-range-progress");
     expect(css).toContain(".upg-tick");
+    const fruitSegs = stickerTrackSegs(6);
+    const fruitGreen = fruitSegs.find((s) => s.tone === "green");
+    expect(fruitGreen).toBeTruthy();
+    expect(fruitGreen.left + fruitGreen.width / 2).toBeLessThan(50);
+    const frySegs = stickerTrackSegs(11);
+    const fryGreen = frySegs.find((s) => s.tone === "green");
+    expect(fryGreen).toBeTruthy();
+    expect(fryGreen.left + fryGreen.width / 2).toBeGreaterThan(50);
+    expect(fruitSegs.map((s) => s.tone).join("-")).toBe("red-yellow-green-yellow-red");
+    expect(frySegs.map((s) => s.tone).join("-")).toBe("red-yellow-green-yellow-red");
+    const yellowW = fruitSegs.filter((s) => s.tone === "yellow").reduce((a, s) => a + s.width, 0);
+    expect(yellowW).toBeCloseTo((2 / 15) * 100, 5);
+    const edgeLow = stickerTrackSegs(1);
+    expect(edgeLow[0].tone).toBe("green");
+    const edgeHigh = stickerTrackSegs(16);
+    expect(edgeHigh[edgeHigh.length - 1].tone).toBe("green");
   });
 
   it("paints Account as Google placeholder, #0002, look swatches, and red wipes", () => {

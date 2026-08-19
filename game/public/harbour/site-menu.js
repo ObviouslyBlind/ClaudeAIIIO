@@ -62,11 +62,50 @@ function ownedUpgrades(site) {
   return list;
 }
 
-function stickerTone(sticker, today) {
+export function stickerTone(sticker, today) {
   const d = Math.abs(Number(sticker) - Number(today));
   if (d < 0.01) return "is-today";
   if (d <= 1.5) return "is-near";
   return "is-far";
+}
+
+export function stickerToneAttr(cls) {
+  if (cls === "is-today") return "today";
+  if (cls === "is-near") return "near";
+  return "far";
+}
+
+/**
+ * Hard R-Y-G-Y-R slices for the sticker track.
+ * Green is one slider step around today, not the $1–$16 midpoint.
+ * Yellow is |Δ| ≤ 1.5 outside that step. Zero-width edge slices drop.
+ */
+export function stickerTrackSegs(today, min = 1, max = 16) {
+  const t = Number(today);
+  const lo = Number(min);
+  const hi = Number(max);
+  const span = hi - lo;
+  if (!(span > 0) || !Number.isFinite(t)) return [];
+  const cuts = [
+    { from: lo, to: t - 1.5, tone: "red" },
+    { from: t - 1.5, to: t - 0.5, tone: "yellow" },
+    { from: t - 0.5, to: t + 0.5, tone: "green" },
+    { from: t + 0.5, to: t + 1.5, tone: "yellow" },
+    { from: t + 1.5, to: hi, tone: "red" },
+  ];
+  const segs = [];
+  for (const c of cuts) {
+    const a = Math.max(lo, Math.min(hi, c.from));
+    const b = Math.max(lo, Math.min(hi, c.to));
+    const w = b - a;
+    if (w < 0.001) continue;
+    segs.push({
+      tone: c.tone,
+      left: ((a - lo) / span) * 100,
+      width: (w / span) * 100,
+    });
+  }
+  return segs;
 }
 
 function stockBand(have, cap) {
@@ -98,10 +137,8 @@ function paintStock(site, play) {
   const whGas = ((play && play.warehouse && play.warehouse.items) || []).find((r) => r.kind === "propane")?.qty || 0;
   const span = max - min;
   const mark = ((todayN - min) / span) * 100;
-  const zoneLo = Math.max(min, todayN - 1.5);
-  const zoneHi = Math.min(max, todayN + 1.5);
-  const zoneLeft = ((zoneLo - min) / span) * 100;
-  const zoneWidth = ((zoneHi - zoneLo) / span) * 100;
+  const segs = stickerTrackSegs(todayN, min, max);
+  const tone = stickerToneAttr(vs);
   const mine = site.siteClass === "mine";
   const hired = Boolean(site.hired);
   const loaders =
@@ -140,11 +177,15 @@ function paintStock(site, play) {
     ${loaders}
     ${propaneBlock}
     <p class="sticker-label">Price</p>
-    <div class="sticker-slide">
+    <div class="sticker-slide" data-tone="${tone}">
       <span class="sticker-read ${vs}" data-sticker-out>${money(sticker)}</span>
       <div class="sticker-track">
-        <i class="sticker-band" aria-hidden="true"></i>
-        <i class="sticker-zone" style="left:${zoneLeft}%;width:${zoneWidth}%"></i>
+        <i class="sticker-band" aria-hidden="true">${segs
+          .map(
+            (s) =>
+              `<i class="sticker-seg is-${s.tone}" style="flex:${s.width.toFixed(4)} 0 0"></i>`,
+          )
+          .join("")}</i>
         <i class="sticker-mark" style="left:${mark}%"></i>
         <input id="sticker-price" type="range" min="${min}" max="${max}" step="0.5" value="${sticker}" />
       </div>
