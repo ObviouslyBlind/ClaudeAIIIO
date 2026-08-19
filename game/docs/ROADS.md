@@ -36,12 +36,13 @@ Each step is big enough to see from 30 m up.
 
 ## Drawing
 
-- Local paved **runs** are ribbons. A **join** is a small union of the 2–4 arm-end rectangles (a hub). That is a T or an L. It is not the whole island boolean-unioned into a splat. See `docs/ROAD_MESH.md`.
-- Offset sidewalks are densified and clipped out of the hub. The hub itself draws the walk as a wider union under the tarmac, so the outer kerb is one piece. Stem ribbons overlap the through road by ~1.4 m so a grey hairline cannot show between two black rectangles.
+See `reports/THREEJS_ROADS.md` and `docs/ROAD_MESH.md`.
+
+- Local paved **runs** are ribbons. A **T/L** is a small union of the 2–4 arm-end rectangles (a hub). Ribbons cut on that polygon. Not the whole island boolean-unioned into a splat.
+- Offset sidewalks are densified and clipped out of the hub. Stem ribbons overlap the through road by ~1.6 m so a grey hairline cannot show between two black rectangles.
 - Quayward Loop is a **rectangle**. Quayward Rd hits the north edge at **45°** from Harbour Circus.
-- Circuses are an asphalt annulus reaching the node's kerb radius, plus a stone island.
-- Highway ribbons run **to the kerb**. The graph already stops there; do not omit the last stations near a circus (that leftover from the old through-island spline left sand between the dual carriageway and the ring).
-- Each circus arm gets a short tarmac disc at the kerb so the dual ribbons (offset off the centreline) actually read as meeting the ring.
+- A **circus** is a `RingGeometry` (the join surface) plus a stone island. Duals are **circle-cut onto the outer face** so offset lanes hit the ring, not 9 m of sand beside the kerb. Short lips cover the chord. Do not earcut a holed Clipper keyhole; do not draw 12 m black rectangles into the grass.
+- Dual carriageway: two 8 m lanes + black asphalt median fill. Never a 26 m mitered slab.
 
 ## Routing
 

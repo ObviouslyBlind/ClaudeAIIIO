@@ -70,6 +70,28 @@ describe("circus circle clip", () => {
     expect(near).toBeLessThan(outer);
   });
 
+  it("circle-cuts an offset dual onto the outer ring face for drawing", () => {
+    const map = createLandBoard();
+    const node = map.graph.nodes.find((n) => n.id === "s-rab-harbour")!;
+    const edge = map.graph.edges.find(
+      (e) => e.name === "Island Hwy" && e.cls === "highway" && (e.a === node.id || e.b === node.id) && (e.a === "s-port" || e.b === "s-port"),
+    )!;
+    const { clip, outer } = circusMeshRadii(node.radius);
+    const lane = laneOffsetM("highway");
+    const chains = clipPolylineOutsideCircuses(
+      offsetPolyline(edge.points, lane),
+      circusesFromGraph(map.graph).filter((c) => c.id === node.id),
+    );
+    expect(chains.length).toBe(1);
+    const ch = chains[0]!;
+    const d0 = Math.hypot(ch[0]!.x - node.x, ch[0]!.z - node.z);
+    const d1 = Math.hypot(ch[ch.length - 1]!.x - node.x, ch[ch.length - 1]!.z - node.z);
+    const near = Math.min(d0, d1);
+    expect(near).toBeCloseTo(clip, 0);
+    expect(near).toBeGreaterThan(outer - 2);
+    expect(near).toBeLessThan(outer + 1);
+  });
+
   it("clips every south circus in one pass without eating the whole highway", () => {
     const map = createLandBoard();
     const circuses = circusesFromGraph(map.graph);

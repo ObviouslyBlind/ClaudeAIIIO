@@ -2,7 +2,8 @@ import * as THREE from "three";
 import { ROAD_CLASSES, carriagewayWidthM, roadClassSpec } from "./roadclass.js";
 import { junctionPad, trimPolylineForPads, pointInJunctionPad } from "./roadnet.js";
 import { addQuadXZ, junctionKerbQuads } from "./roadjoin.js";
-import { buildHubFootprint, buildCircusFootprint, clipPolylineToOutside, multiContains, segmentRing, CIRCUS_ARM_STUB_M, FOOT_SHOULDER_M } from "./roadfoot.js";
+import { buildHubFootprint, buildCircusFootprint, clipPolylineToOutside, multiContains, segmentRing, CIRCUS_ARM_STUB_M, CIRCUS_ARM_TUCK_M, FOOT_SHOULDER_M } from "./roadfoot.js";
+import { circusesFromGraph, clipPolylineOutsideCircuses } from "./roadclip.js";
 
 /** Grit shoulder under the tarmac edge, so a road has a rim instead of a cut edge. */
 export const SHOULDER = 0x6f6a5e;
@@ -242,12 +243,12 @@ function drawablePoints(road, graph) {
   return densifyPts(pts, 6);
 }
 
-function drawPaved(scene, spec, road, heightAt, graph, joins) {
+function drawPaved(scene, spec, road, heightAt, graph, hubs, circuses) {
   const pts = drawablePoints(road, graph);
   if (pts.length < 2) return;
   const cls = classOf(road);
   const width = roadClassSpec(cls).carriageM;
-  const runs = clipToJoins(pts, joins);
+  const runs = clipRuns(pts, hubs, circuses);
   drawClippedRuns(scene, spec, road, heightAt, runs, width + SHOULDER_PAD_M, SHOULDER, "shoulder", {}, -0.03);
   drawClippedRuns(scene, spec, road, heightAt, runs, width, ASPHALT, "paved");
 }
@@ -316,6 +317,21 @@ function clipToJoins(pts, joins, overlapM = 1.6) {
   });
 }
 
+/**
+ * PathPhalt/Curva: T/L is a filled hub polygon; a circus is a circle.
+ * Offset duals must hit the ring face, not a 12 m arm box in the grass.
+ */
+function clipRuns(pts, hubs, circuses, overlapM = 1.6) {
+  const afterHubs = clipToJoins(pts, hubs, overlapM);
+  if (!circuses || !circuses.length) return afterHubs;
+  const out = [];
+  for (const run of afterHubs) {
+    if (!run || run.length < 2) continue;
+    out.push(...clipPolylineOutsideCircuses(run, circuses));
+  }
+  return out.filter((r) => r && r.length >= 2);
+}
+
 function collectHubs(graph) {
   const hubs = [];
   if (!graph || !graph.nodes) return hubs;
@@ -359,17 +375,18 @@ function drawClippedRuns(scene, spec, road, heightAt, runs, widthM, color, roadK
   }
 }
 
-function drawSidewalks(scene, spec, road, heightAt, graph, joins) {
+function drawSidewalks(scene, spec, road, heightAt, graph, hubs, circuses) {
   if (!hasSidewalk(road)) return;
   const cls = classOf(road);
   const walk = roadClassSpec(cls).sidewalkM;
   const pts = densifyPts(drawablePoints(road, graph), 4);
   if (pts.length < 2) return;
   const offset = roadClassSpec(cls).carriageM / 2 + SHOULDER_PAD_M / 2 + walk / 2;
+  const hasJoins = (hubs && hubs.length) || (circuses && circuses.length);
   for (const side of [-1, 1]) {
     const offsetPts = offsetPolyline(pts, offset * side);
-    const pieces = joins && joins.length
-      ? clipToJoins(offsetPts, joins, 0)
+    const pieces = hasJoins
+      ? clipRuns(offsetPts, hubs, circuses, 0)
       : splitRuns(omitInsidePads(offsetPts, graph, walk + 0.8), 10);
     drawClippedRuns(scene, spec, road, heightAt, pieces, walk, SIDEWALK, "sidewalk");
   }
@@ -379,14 +396,14 @@ function drawSidewalks(scene, spec, road, heightAt, graph, joins) {
  * Two 8 m lanes plus a black median fill. A single 26 m mitered slab
  * blew out on bends, ate the verge, and left circus arms as grass blobs.
  */
-function drawHighway(scene, spec, road, heightAt, graph, joins) {
+function drawHighway(scene, spec, road, heightAt, graph, hubs, circuses) {
   const cls = classOf(road);
   const s = roadClassSpec(cls);
   const pts = drawablePoints(road, graph);
   if (pts.length < 2) return;
   const lane = s.medianM / 2 + s.carriageM / 2;
   const name = road.name || "Island Hwy";
-  const lip = clipToJoins(pts, joins);
+  const lip = clipRuns(pts, hubs, circuses);
   drawClippedRuns(
     scene,
     spec,
@@ -406,7 +423,7 @@ function drawHighway(scene, spec, road, heightAt, graph, joins) {
       spec,
       road,
       heightAt,
-      clipToJoins(offsetPolyline(pts, lane * side), joins),
+      clipRuns(offsetPolyline(pts, lane * side), hubs, circuses),
       s.carriageM,
       ASPHALT,
       "paved",
@@ -564,8 +581,9 @@ function drawCircusJoins(scene, map, specOf, heightAt, joins) {
     const base = { island: node.island, footprint: true, label: node.name || "Circus" };
     const name = node.name || "Circus";
 
-    // Ring + arm boxes. A Clipper union through ShapeGeometry dropped the arms
-    // (earcut on a holed keyhole), so the live circus was a disc in the grass.
+    // Ring is the join (PathPhalt / Curva). Short lips cover the chord where
+    // a ribbon meets the circle. Do not draw 12 m boxes into the grass, and
+    // do not earcut a holed Clipper keyhole (that dropped the arms).
     const grit = new THREE.Mesh(
       new THREE.RingGeometry(inner, outer + FOOT_SHOULDER_M, 48),
       new THREE.MeshLambertMaterial({ color: SHOULDER }),
@@ -597,9 +615,14 @@ function drawCircusJoins(scene, map, specOf, heightAt, joins) {
       if (roadClassSpec(cls).dirt) continue;
       const dir = circusArmDir(node, e);
       const half = carriagewayWidthM(cls) / 2;
-      const along = outer + CIRCUS_ARM_STUB_M;
-      const far = { x: node.x + dir.x * along, z: node.z + dir.z * along };
-      const origin = { x: node.x + dir.x * (inner + 0.5), z: node.z + dir.z * (inner + 0.5) };
+      const origin = {
+        x: node.x + dir.x * (outer - CIRCUS_ARM_TUCK_M),
+        z: node.z + dir.z * (outer - CIRCUS_ARM_TUCK_M),
+      };
+      const far = {
+        x: node.x + dir.x * (outer + CIRCUS_ARM_STUB_M),
+        z: node.z + dir.z * (outer + CIRCUS_ARM_STUB_M),
+      };
       addMultiPolygonMesh(scene, [[segmentRing(origin, far, half + FOOT_SHOULDER_M / 2)]], y + 0.13, SHOULDER, {
         ...base,
         roadKind: "shoulder",
@@ -832,24 +855,24 @@ function drawLegacyJoins(scene, map, specOf, heightAt) {
 }
 
 /**
- * Draw `/api/map` roads. Runs are ribbons. Joins are a small unioned hub,
- * not the whole island boolean-unioned into a splat.
+ * Draw `/api/map` roads. Runs are ribbons. A T/L is a small unioned hub.
+ * A circus is a RingGeometry; duals circle-cut onto that face.
  */
 export function makeRoads(map, helpers) {
   const { scene, specOf, heightAt } = helpers;
   const hubs = collectHubs(map.graph);
   const circusJoins = collectCircusJoins(map.graph);
-  const joins = hubs.concat(circusJoins);
+  const circuses = circusesFromGraph(map.graph);
   for (const road of map.roads) {
     const spec = specOf(road.island);
     if (road.kind === "paved" && road.roundabout) {
       continue;
     }
     if (road.kind === "paved" && road.lanes === 4) {
-      drawHighway(scene, spec, road, heightAt, map.graph, joins);
+      drawHighway(scene, spec, road, heightAt, map.graph, hubs, circuses);
     } else if (road.kind === "paved") {
-      drawPaved(scene, spec, road, heightAt, map.graph, joins);
-      drawSidewalks(scene, spec, road, heightAt, map.graph, joins);
+      drawPaved(scene, spec, road, heightAt, map.graph, hubs, circuses);
+      drawSidewalks(scene, spec, road, heightAt, map.graph, hubs, circuses);
     } else {
       drawDirt(scene, spec, road, heightAt);
     }

@@ -11,8 +11,14 @@ import { circusMeshRadii } from "./roadclip.js";
 
 /** Keep in sync with SHOULDER_PAD_M in roads.js. */
 export const FOOT_SHOULDER_M = 2.2;
-/** Arm stubs past the circus outer ring. Short: long stubs sat in the grass as extra black rectangles. */
-export const CIRCUS_ARM_STUB_M = 12;
+/**
+ * Lip past the circus outer ring. PathPhalt/Curva: the ring is the join;
+ * this only covers the chord where a ribbon meets the circle. 12 m stubs
+ * sat in the grass as extra black rectangles.
+ */
+export const CIRCUS_ARM_STUB_M = 2.4;
+/** Overlap the ring so a 1-px sand seam cannot show at the lip. */
+export const CIRCUS_ARM_TUCK_M = 2;
 
 function clsOf(road) {
   if (road.cls) return road.cls;
@@ -221,8 +227,11 @@ function circleRing(cx, cz, r, steps = 40) {
 }
 
 /**
- * Circus node mesh: one annulus unioned with incoming arm rectangles.
- * Ribbons stop on `clip`. The ring owns the join — not stacked dual tapes.
+ * Circus clip + coverage tests.
+ *
+ * Drawn mesh is RingGeometry (roads.js), not this polygon earcut.
+ * `clip` is the **outer disc only** so offset duals hit the ring face.
+ * Tarmac keeps a holed ring plus short lips for coverage tests.
  */
 export function buildCircusFootprint(graph, node) {
   if (!graph || !node || !node.radius) {
@@ -231,7 +240,8 @@ export function buildCircusFootprint(graph, node) {
   const { outer, inner } = circusMeshRadii(node.radius);
   const cx = node.x;
   const cz = node.z;
-  const tarmac = [[circleRing(cx, cz, outer)]];
+  const disc = [[circleRing(cx, cz, outer)]];
+  const tarmac = [disc[0]];
   const grit = [[circleRing(cx, cz, outer + FOOT_SHOULDER_M)]];
   for (const e of graph.edges) {
     if (e.a !== node.id && e.b !== node.id) continue;
@@ -239,9 +249,8 @@ export function buildCircusFootprint(graph, node) {
     const spec = roadClassSpec(e.cls);
     if (spec.dirt) continue;
     const dir = armDir(node, e);
-    const along = outer + CIRCUS_ARM_STUB_M;
-    const far = { x: cx + dir.x * along, z: cz + dir.z * along };
-    const origin = { x: cx, z: cz };
+    const origin = { x: cx + dir.x * (outer - CIRCUS_ARM_TUCK_M), z: cz + dir.z * (outer - CIRCUS_ARM_TUCK_M) };
+    const far = { x: cx + dir.x * (outer + CIRCUS_ARM_STUB_M), z: cz + dir.z * (outer + CIRCUS_ARM_STUB_M) };
     const half = carriagewayWidthM(e.cls) / 2;
     tarmac.push([segmentRing(origin, far, half)]);
     grit.push([segmentRing(origin, far, half + FOOT_SHOULDER_M / 2)]);
@@ -253,7 +262,8 @@ export function buildCircusFootprint(graph, node) {
     tarmac: holed && holed.length ? holed : tar,
     shoulder: gritU.length ? diffGeoms(gritU, tar) : [],
     sidewalk: [],
-    clip: tar,
+    /** Ribbons stop on the outer circle, not on long arm boxes. */
+    clip: disc,
     inner,
     outer,
   };

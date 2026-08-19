@@ -1,47 +1,17 @@
 /**
- * How games actually draw roads — and what Two Harbors will do.
+ * How 2Isles draws roads. The Three.js research is `reports/THREEJS_ROADS.md`.
  *
- * The stacked black rectangles and broken grey kerbs are not a miter tweak.
- * They are what you get when each street is its own ribbon and junctions are
- * faked by overlapping more ribbons. Every serious road tool splits **graph**
- * (where the taxi drives) from **footprint** (one polygon per connected net).
- */
-
-/**
- * Field (representative sources, not a fake hundred):
+ * Runs are ribbons. A T/L is a filled hub (union of 2–4 rectangles). A circus
+ * is a RingGeometry; duals are circle-cut onto that face. That is PathPhalt /
+ * Curva / SeloSlav RoadJunctionBuilder — not Cities: Skylines, not OSM.
  *
- * 1. Graph + hub + truncated ribbons
- *    Cities: Skylines 1/2 net pipeline (edge mesh + node mesh, JoinedJunction,
- *    GeometrySystem). Godot Road Generator (CSG-along-path fails at joins;
- *    intersections are their own mesh). symbios-tensor roads_3d.rs: degree-3+
- *    hubs from intersecting kerb lines, ribbons stop at the hub.
- *    Paper: “Finding Junctions in Spline-based Road Generation” (diva2:1675311)
- *    — SAT + polygon clipping to cut a convex junction polygon.
+ * Island-wide Clipper union filled greens. Earcut of a holed circus keyhole
+ * dropped the arms. A 26 m mitered highway slab ate the verge. Do not do those.
  *
- * 2. Buffer the centreline, then boolean-union
- *    Clipper / Clipper2 (Angus Johnson): InflatePaths on open polylines,
- *    JoinType Square/Miter, then Union so overlapping buffers become one
- *    polygon. GIS “road corridor” / NetTopologySuite VariableBuffer.
- *    Martinez–Rueda–Feito 2009 boolean ops (polygon-clipping JS).
- *    Chen–McMains winding-number offset (DETC2005).
- *
- * 3. Shader cookie-cut (not for us)
- *    “Paving Procedural Roads with Pixel Shaders” (WSCG 2005) — implicit
- *    fat curves in the pixel shader. Smooth, expensive, wrong for a paper
- *    harbour on a phone.
- *
- * 4. Prefab kits
- *    Unreal City Sample / CS composition pieces. We do not ship a road kit.
- *
- * Chosen: **hub + truncated ribbons**. Each street is still a ribbon. At a join,
- * the last metres of each arm are buffered and unioned (2–4 rectangles). That
- * is a T or an L. Island-wide union was tried and filled greens / merged
- * nearby streets into a splat — do not do that.
- *
- * Draw rules that keep joins from looking like stacked rectangles:
- * - Trim the stem so it overlaps the through carriageway by ~1.4 m, not 0.2 m.
- * - Trim works on 2-point edges (node→node), not only 3+ station polylines.
- * - Offset sidewalks are densified to 4 m so they meet the hub instead of
- *   stopping a whole densify-step (26 m) short.
- * - Hub tarmac sits above ribbon sidewalks so leftover grey cannot hash on top.
+ * Draw rules:
+ * - Dual = two 8 m lanes + black asphalt median fill. Not pale stone. Not one slab.
+ * - Trim the stem so it overlaps the through carriageway by ~1.6 m.
+ * - Circus clip is the outer circle. Offset lanes hit the ring, not 9 m of sand.
+ * - Circus arm lips are ~2 m. 12 m stubs sat in the grass as extra black rectangles.
+ * - Legal turns: 15 / 30 / 45 / 90°. Kit cases, not a continuous CS2 compiler.
  */

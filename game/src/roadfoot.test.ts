@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createLandBoard } from "./land.ts";
 import { junctionPad } from "../public/harbour/roadnet.js";
-import { buildHubFootprint, buildCircusFootprint, clipPolylineToOutside, multiContains, segmentRing, unionGeoms } from "../public/harbour/roadfoot.js";
+import { buildHubFootprint, buildCircusFootprint, clipPolylineToOutside, multiContains, segmentRing, unionGeoms, CIRCUS_ARM_STUB_M } from "../public/harbour/roadfoot.js";
 import { circusMeshRadii } from "../public/harbour/roadclip.js";
 import { carriagewayWidthM } from "../public/harbour/roadclass.js";
 
@@ -144,5 +144,8 @@ describe("road hub footprints", () => {
     const qz = (qb.z - qa.z) / qLen;
     expect(multiContains(foot.tarmac, n.x + qx * outer, n.z + qz * outer)).toBe(true);
     expect(inner).toBeGreaterThan(10);
+    expect(CIRCUS_ARM_STUB_M).toBeLessThan(5);
+    expect(multiContains(foot.clip, n.x, n.z), "clip is the outer disc").toBe(true);
+    expect(multiContains(foot.clip, n.x + dx * (outer + 10), n.z + dz * (outer + 10)), "12 m grass stub").toBe(false);
   });
 });

@@ -22,9 +22,8 @@ import {
 } from "../public/harbour/roads.js";
 import { ROAD_CLASSES, carriagewayWidthM, roadWidthM } from "../public/harbour/roadclass.js";
 import { circusMeshRadii } from "../public/harbour/roadclip.js";
-import { buildCircusFootprint, multiContains } from "../public/harbour/roadfoot.js";
+import { buildCircusFootprint, buildHubFootprint, CIRCUS_ARM_STUB_M, multiContains } from "../public/harbour/roadfoot.js";
 import { junctionPad } from "../public/harbour/roadnet.js";
-import { buildHubFootprint, multiContains } from "../public/harbour/roadfoot.js";
 import { SOUTH_RAB } from "./southGeom.ts";
 
 function lum(hex: number) {
@@ -309,9 +308,10 @@ describe("paved street from spawn", () => {
         nearestHwy = Math.min(nearestHwy, d);
       }
     }
-    // Ribbons stop on the node-mesh arm, not 9 m beside the kerb.
-    expect(nearestHwy).toBeLessThan(radii.outer + 24);
-    expect(nearestHwy).toBeGreaterThan(radii.inner);
+    // Ribbons circle-cut onto the ring face (PathPhalt: road gives way).
+    expect(CIRCUS_ARM_STUB_M).toBeLessThan(5);
+    expect(nearestHwy).toBeLessThan(radii.outer + 3);
+    expect(nearestHwy).toBeGreaterThan(radii.outer - 4);
     const circus = added.find(
       (m) => m.userData.roadName === "Harbour Circus" && m.userData.footprint,
     );
@@ -319,6 +319,18 @@ describe("paved street from spawn", () => {
     expect(circus!.geometry.parameters?.innerRadius).toBeCloseTo(radii.inner, 0);
     expect(circus!.geometry.parameters?.outerRadius).toBeCloseTo(radii.outer, 0);
     expect(added.filter((m) => m.userData.roadName === "Harbour Circus arm").length).toBe(3);
+    for (const arm of added.filter((m) => m.userData.roadName === "Harbour Circus arm")) {
+      const pos = arm.geometry.attributes.position;
+      let maxAlong = 0;
+      for (let i = 0; i < pos.count; i++) {
+        const dx = pos.getX(i) - harbour.x;
+        const dz = pos.getZ(i) - harbour.z;
+        maxAlong = Math.max(maxAlong, Math.hypot(dx, dz));
+      }
+      // Lip, not a 12 m grass slab. Corners sit half a carriage off-axis.
+      expect(maxAlong).toBeLessThan(radii.outer + CIRCUS_ARM_STUB_M + 16);
+      expect(maxAlong).toBeLessThan(radii.outer + 20);
+    }
 
     const quay = added.filter(
       (m) => m.userData.roadKind === "paved" && m.userData.roadName === "Quayward Rd",
@@ -331,7 +343,7 @@ describe("paved street from spawn", () => {
         nearestQuay = Math.min(nearestQuay, Math.hypot(pos.getX(i) - harbour.x, pos.getZ(i) - harbour.z));
       }
     }
-    expect(nearestQuay, "Quayward Rd missed Harbour Circus").toBeLessThan(radii.outer + 24);
+    expect(nearestQuay, "Quayward Rd missed Harbour Circus").toBeLessThan(radii.outer + 3);
     expect(nearestQuay).toBeGreaterThan(radii.inner - 0.6);
   });
 
