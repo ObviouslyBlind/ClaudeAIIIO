@@ -11,6 +11,10 @@ function money(n) {
   return Number(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+function fmtIdx(n) {
+  return Number(n).toLocaleString("en-US", { minimumFractionDigits: 3, maximumFractionDigits: 3 });
+}
+
 function labelGood(g) {
   return String(g).replace(/_/g, " ");
 }
@@ -22,8 +26,8 @@ function setIsland(next) {
   }
   stallNoteEl.textContent =
     island === "south"
-      ? "South last prints. Buy 1 still fills at the North stall."
-      : "North last prints. Buy 1 is the North stall.";
+      ? "South last prints. Food and ore are cheaper here. Buy 1 fills at this island."
+      : "North last prints. Tools and concrete are cheaper here. Buy 1 fills at this island.";
   if (lastData) render(lastData);
 }
 
@@ -33,8 +37,10 @@ function render(data) {
   hudEl.innerHTML = [
     ["Tick", h.tick],
     ["Your cash", "$" + money(data.visitor.cash)],
-    ["NPC money", "$" + money(h.moneySupply)],
-    ["Price index", h.priceIndex],
+    ["Money supply", "$" + money(h.moneySupply)],
+    ["North index", fmtIdx(h.priceIndexNorth ?? h.priceIndex)],
+    ["South index", fmtIdx(h.priceIndexSouth ?? h.priceIndex)],
+    ["Ferry spread", fmtIdx(h.ferrySpread ?? 0)],
     ["Trades", h.tradeCount],
   ]
     .map(
@@ -60,7 +66,7 @@ function render(data) {
             <div class="px">$${money(herePx)} ${hereLabel} last</div>
             <div class="cmp">${otherLabel} $${money(otherPx)} · ferry $${money(spread)} · held ${held}</div>
           </div>
-          <button type="button" data-good="${g}" title="North stall" ${data.visitor.cash < northPx ? "disabled" : ""}>Buy 1</button>
+          <button type="button" data-good="${g}" title="${hereLabel} stall" ${data.visitor.cash < herePx ? "disabled" : ""}>Buy 1</button>
         </div>`;
     })
     .join("");
@@ -83,7 +89,7 @@ boardEl.addEventListener("click", async (ev) => {
   const res = await fetch("/api/buy", {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ good: btn.dataset.good, qty: 1 }),
+    body: JSON.stringify({ island, good: btn.dataset.good, qty: 1 }),
   });
   const body = await res.json();
   err = body.ok ? "" : "Could not buy: " + body.reason;

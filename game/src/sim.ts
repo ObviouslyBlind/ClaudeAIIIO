@@ -18,6 +18,7 @@ import { tickStaff, type StaffSlot } from "./staff.ts";
 import { tickUpkeep, type UpkeepLand } from "./upkeep.ts";
 import { createVisitorCart, type CartLine } from "./visitorCart.ts";
 import { createPlayState, tickPlay, type PlayState } from "./firstLoop.ts";
+import { islandAskMul, islandDemandMul, islandSupplyMul } from "./islandEconomy.ts";
 
 export {
   BOOK_ISLANDS,
@@ -53,6 +54,10 @@ export type World = {
   moneySupply: number;
   goodsProducedWindow: number;
   priceIndex: number;
+  priceIndexNorth: number;
+  priceIndexSouth: number;
+  /** Mean |North − South| / fair0. The ferry wedge you can see. */
+  ferrySpread: number;
   ledger: Ledger;
   tradeCount: number;
   /** Rolling 3600-tick produced qty for the HUD "24h" analog in tests. */
@@ -83,6 +88,9 @@ export function createWorld(seed = 1): World {
     moneySupply: 50_000,
     goodsProducedWindow: 0,
     priceIndex: 1,
+    priceIndexNorth: 1,
+    priceIndexSouth: 1,
+    ferrySpread: 0,
     ledger: { produced: 0, consumed: 0, faucet: 0, sink: 0 },
     tradeCount: 0,
     producedRing: [],
@@ -164,10 +172,15 @@ function npcQuote(world: World): void {
     for (const id of GOOD_IDS) {
       world.books[island][id] = emptyBook();
       const fair = world.fair[id];
-      const want = roundMoney(GOODS[id].consume * (0.9 + world.rng() * 0.2));
-      const sell = roundMoney(Math.min(world.npcStock[id] * 0.15, GOODS[id].produce * 2));
-      const askPx = roundMoney(fair * (0.97 + world.rng() * 0.06));
-      const bidPx = roundMoney(fair * (0.98 + world.rng() * 0.06));
+      const demandMul = islandDemandMul(island, id);
+      const supplyMul = islandSupplyMul(island, id);
+      const askMul = islandAskMul(island, id, world.statutes);
+      const want = roundMoney(GOODS[id].consume * demandMul * (0.9 + world.rng() * 0.2));
+      const sell = roundMoney(
+        Math.min(world.npcStock[id] * 0.15 * supplyMul, GOODS[id].produce * 2 * supplyMul),
+      );
+      const askPx = roundMoney(fair * askMul * (0.97 + world.rng() * 0.06));
+      const bidPx = roundMoney(fair * askMul * (0.98 + world.rng() * 0.06));
       const bidCost = roundMoney(bidPx * want);
       if (bidCost > 0 && world.npcCash >= bidCost) {
         world.npcCash = roundMoney(world.npcCash - bidCost);
@@ -197,17 +210,28 @@ function settleUnfilled(world: World): void {
   }
 }
 
-function refreshIndex(world: World): void {
+function basketIndex(prices: Record<GoodId, number>): number {
   let num = 0;
   let den = 0;
   for (const id of GOOD_IDS) {
     const w = INDEX_WEIGHTS[id];
-    num += w * (world.lastPrice[id] / GOODS[id].fair0);
+    num += w * (prices[id] / GOODS[id].fair0);
     den += w;
   }
-  world.priceIndex = roundMoney(num / den);
+  return roundMoney(num / den);
+}
+
+function refreshIndex(world: World, visitor?: Visitor): void {
+  world.priceIndexNorth = basketIndex(world.lastPrice);
+  world.priceIndexSouth = basketIndex(world.lastPriceSouth);
+  world.priceIndex = roundMoney((world.priceIndexNorth + world.priceIndexSouth) / 2);
+  let spread = 0;
+  for (const id of GOOD_IDS) {
+    spread += Math.abs(world.lastPrice[id] - world.lastPriceSouth[id]) / GOODS[id].fair0;
+  }
+  world.ferrySpread = roundMoney(spread / GOOD_IDS.length);
   world.arbSpread = arbSpreads(world.lastPrice, world.lastPriceSouth);
-  world.moneySupply = world.npcCash;
+  world.moneySupply = roundMoney(world.npcCash + (visitor?.cash ?? 0));
 }
 
 export function tick(world: World, visitor?: Visitor, land?: UpkeepLand): void {
@@ -218,7 +242,7 @@ export function tick(world: World, visitor?: Visitor, land?: UpkeepLand): void {
     for (const id of GOOD_IDS) match(world, island, id);
   }
   settleUnfilled(world);
-  refreshIndex(world);
+  refreshIndex(world, visitor);
   world.tick += 1;
   if (visitor) tickStaff(world, visitor);
   if (visitor && land) {
@@ -276,7 +300,7 @@ export function buyFromStall(
   world.npcCash = roundMoney(world.npcCash + paid);
   world.ledger.consumed += want;
   world.tradeCount += 1;
-  refreshIndex(world);
+  refreshIndex(world, visitor);
   return { ok: true, paid };
 }
 
@@ -285,6 +309,9 @@ export function hud(world: World, visitor?: Visitor): {
   moneySupply: number;
   goodsProducedWindow: number;
   priceIndex: number;
+  priceIndexNorth: number;
+  priceIndexSouth: number;
+  ferrySpread: number;
   tradeCount: number;
   faucet: number;
   sink: number;
@@ -295,6 +322,9 @@ export function hud(world: World, visitor?: Visitor): {
     moneySupply: world.moneySupply,
     goodsProducedWindow: roundMoney(world.goodsProducedWindow),
     priceIndex: world.priceIndex,
+    priceIndexNorth: world.priceIndexNorth,
+    priceIndexSouth: world.priceIndexSouth,
+    ferrySpread: world.ferrySpread,
     tradeCount: world.tradeCount,
     faucet: world.ledger.faucet,
     sink: world.ledger.sink,

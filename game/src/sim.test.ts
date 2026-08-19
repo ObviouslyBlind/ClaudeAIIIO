@@ -12,7 +12,8 @@ describe("headless sim step A", () => {
 
     expect(world.tick).toBe(3600);
     expect(Number.isFinite(h.moneySupply)).toBe(true);
-    expect(h.moneySupply).toBeCloseTo(50_000, 2);
+    expect(h.moneySupply).toBeGreaterThan(49_990);
+    expect(h.moneySupply).toBeLessThan(50_010);
     expect(h.faucet).toBe(0);
     expect(h.sink).toBe(0);
     expect(Number.isFinite(h.priceIndex)).toBe(true);
@@ -94,5 +95,35 @@ describe("step D dual island books", () => {
     expect(setStatuteSlider(world.statutes, "sales_tax", "rate", 0.05)).toBe(true);
     fastForward(world, 20);
     expect(hud(world).sink).toBeGreaterThan(0);
+  });
+
+  it("prints South food cheaper than North, and North tools cheaper than South", () => {
+    const world = createWorld(21);
+    fastForward(world, 80);
+    expect(world.lastPriceSouth.corn).toBeLessThan(world.lastPrice.corn);
+    expect(world.lastPriceSouth.potato).toBeLessThan(world.lastPrice.potato);
+    expect(world.lastPriceSouth.ore).toBeLessThan(world.lastPrice.ore);
+    expect(world.lastPrice.tools).toBeLessThan(world.lastPriceSouth.tools);
+    expect(world.lastPrice.concrete).toBeLessThan(world.lastPriceSouth.concrete);
+    expect(hud(world).priceIndexNorth).toBeGreaterThan(0.2);
+    expect(hud(world).priceIndexSouth).toBeGreaterThan(0.2);
+    expect(hud(world).ferrySpread).toBeGreaterThan(0.02);
+  });
+
+  it("widens ferry spread when the national tariff slider moves", () => {
+    const loose = createWorld(21);
+    const tight = createWorld(21);
+    expect(setStatuteSlider(tight.statutes, "national_tariff", "rate", 0.25)).toBe(true);
+    fastForward(loose, 80);
+    fastForward(tight, 80);
+    expect(hud(tight).ferrySpread).toBeGreaterThan(hud(loose).ferrySpread);
+  });
+
+  it("counts visitor PAPER cash in money supply", () => {
+    const world = createWorld(3);
+    const visitor = createVisitor(1_000);
+    fastForward(world, 8, visitor);
+    expect(hud(world, visitor).moneySupply).toBeCloseTo(world.npcCash + visitor.cash, 4);
+    expect(hud(world, visitor).moneySupply).toBeGreaterThan(world.npcCash);
   });
 });

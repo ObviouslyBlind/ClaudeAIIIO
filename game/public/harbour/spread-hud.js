@@ -27,12 +27,17 @@ function meanOf(map) {
 
 function northIndex(data) {
   const hud = data && data.hud ? data.hud : null;
+  const named = hud ? Number(hud.priceIndexNorth) : NaN;
+  if (Number.isFinite(named)) return named;
   const idx = hud ? Number(hud.priceIndex) : NaN;
   return Number.isFinite(idx) ? idx : null;
 }
 
-/** South basket ≈ North index × mean(South last / North last). */
+/** South basket from the sim, or North index × mean(South last / North last). */
 function southIndex(data) {
+  const hud = data && data.hud ? data.hud : null;
+  const named = hud ? Number(hud.priceIndexSouth) : NaN;
+  if (Number.isFinite(named)) return named;
   const nIdx = northIndex(data);
   const north = data && data.lastPrices;
   const south = data && data.lastPricesSouth;
@@ -54,10 +59,12 @@ export function formatSpreadLine(data) {
   const provenance = (data && data.provenance) || "SIMULATED";
   const n = northIndex(data);
   const s = southIndex(data);
+  const gap = data && data.hud ? Number(data.hud.ferrySpread) : NaN;
   if (n != null || s != null) {
     const nBit = n == null ? "0.00" : fmt(n);
     const sBit = s == null ? "0.00" : fmt(s);
-    return `${mode} · ${provenance} · Ferry spread · N ${nBit} · S ${sBit}`;
+    const delta = Number.isFinite(gap) ? ` · Δ ${fmt(gap)}` : "";
+    return `${mode} · ${provenance} · Ferry spread · N ${nBit} · S ${sBit}${delta}`;
   }
   const arb = meanOf(data && data.arbSpread);
   if (arb != null) {

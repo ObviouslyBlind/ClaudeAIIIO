@@ -19,6 +19,8 @@ export {
   createStatuteCatalog,
   salesTaxRate,
   ferryTicketCost,
+  nationalTariffRate,
+  portFeeAmount,
   type Statute,
 } from "./statutes.ts";
 export { simDay, nextGeneralDay, calendarHud } from "./calendar.ts";

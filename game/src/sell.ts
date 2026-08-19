@@ -133,7 +133,7 @@ export function sellAtIsland(
   debitHeld(visitor, intent.goodId, qty);
   world.npcStock[intent.goodId] = roundMoney((world.npcStock[intent.goodId] ?? 0) + qty);
   world.npcCash = roundMoney(world.npcCash - paid);
-  world.moneySupply = world.npcCash;
+  world.moneySupply = roundMoney(world.npcCash + visitor.cash);
   world.tradeCount += 1;
 
   return {

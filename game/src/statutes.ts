@@ -783,6 +783,20 @@ export function ferryTicketCost(catalog: Statute[], fallback = 15): number {
   return Number.isFinite(cost) && cost >= 0 ? cost : fallback;
 }
 
+export function nationalTariffRate(catalog: Statute[]): number {
+  const s = statuteById(catalog, "national_tariff");
+  if (!s || !s.enabled) return 0;
+  const rate = Number(s.sliders.rate) || 0;
+  return rate < 0 ? 0 : rate;
+}
+
+export function portFeeAmount(catalog: Statute[], fallback = 2): number {
+  const s = statuteById(catalog, "port_fee");
+  if (!s || !s.enabled) return fallback;
+  const fee = Number(s.sliders.fee);
+  return Number.isFinite(fee) && fee >= 0 ? fee : fallback;
+}
+
 export function setStatuteSlider(catalog: Statute[], id: string, key: string, value: number): boolean {
   const s = statuteById(catalog, id);
   if (!s) return false;

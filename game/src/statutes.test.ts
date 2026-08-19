@@ -3,6 +3,8 @@ import { createWorld, fastForward, hud } from "./sim.ts";
 import {
   createStatuteCatalog,
   ferryTicketCost,
+  nationalTariffRate,
+  portFeeAmount,
   salesTaxRate,
   setStatuteEnabled,
   setStatuteSlider,
@@ -74,5 +76,15 @@ describe("starter statute pack step B", () => {
     expect(ferryTicketCost(catalog)).toBe(15);
     expect(setStatuteEnabled(catalog, "ferry_ticket", false)).toBe(true);
     expect(ferryTicketCost(catalog)).toBe(15);
+  });
+
+  it("reads national tariff and port fee for the ferry wedge", () => {
+    const catalog = createStatuteCatalog();
+    expect(nationalTariffRate(catalog)).toBe(0);
+    expect(portFeeAmount(catalog)).toBe(2);
+    expect(setStatuteSlider(catalog, "national_tariff", "rate", 0.1)).toBe(true);
+    expect(nationalTariffRate(catalog)).toBeCloseTo(0.1);
+    expect(setStatuteEnabled(catalog, "national_tariff", false)).toBe(true);
+    expect(nationalTariffRate(catalog)).toBe(0);
   });
 });

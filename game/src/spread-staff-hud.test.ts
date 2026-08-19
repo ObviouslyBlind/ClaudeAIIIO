@@ -30,6 +30,13 @@ describe("harbour PAPER ferry-spread strip", () => {
     expect(line).toBe("PAPER · SIMULATED · Ferry spread · N 1.00 · S 1.10");
     expect(formatSpreadLine(null)).toBe("PAPER · SIMULATED · Ferry spread · N 0.00 · S 0.00");
     expect(formatSpreadLine(null).includes("—")).toBe(false);
+    expect(
+      formatSpreadLine({
+        mode: "PAPER",
+        provenance: "SIMULATED",
+        hud: { priceIndexNorth: 1.04, priceIndexSouth: 0.96, ferrySpread: 0.081 },
+      }),
+    ).toBe("PAPER · SIMULATED · Ferry spread · N 1.04 · S 0.96 · Δ 0.08");
   });
 
   it("does not clobber the first-frame spread line before snapshot returns", async () => {

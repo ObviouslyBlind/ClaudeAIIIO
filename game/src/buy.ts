@@ -95,7 +95,7 @@ export function buyAtIsland(
   visitor.stock[intent.goodId] = roundMoney((visitor.stock[intent.goodId] ?? 0) + qty);
   world.npcStock[intent.goodId] = roundMoney(world.npcStock[intent.goodId] - qty);
   world.npcCash = roundMoney(world.npcCash + paid);
-  world.moneySupply = world.npcCash;
+  world.moneySupply = roundMoney(world.npcCash + visitor.cash);
   world.ledger.consumed += qty;
   world.tradeCount += 1;
 
