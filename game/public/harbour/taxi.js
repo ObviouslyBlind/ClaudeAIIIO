@@ -12,21 +12,6 @@ const SPEED = 42;
 const TAXI_Y = 0.04;
 /** Hailed cab leaves if nobody boards. */
 export const TAXI_WAIT_MS = 60_000;
-/** Hail wait before the cab stages and drives in. */
-export const TAXI_ETA_MIN_MS = 5_000;
-export const TAXI_ETA_MAX_MS = 30_000;
-
-export function rollTaxiEtaMs(rng = Math.random) {
-  return TAXI_ETA_MIN_MS + Math.round(rng() * (TAXI_ETA_MAX_MS - TAXI_ETA_MIN_MS));
-}
-
-/** Bottom-right chip copy. No PAPER on the player-facing plate. */
-export function formatTaxiEta(remainMs) {
-  const s = Math.max(0, Math.ceil(remainMs / 1000));
-  const m = Math.floor(s / 60);
-  const r = s % 60;
-  return `Taxi in ${m}:${String(r).padStart(2, "0")}`;
-}
 
 /**
  * Closest point on a polyline in XZ. Used to stay on paved points only.
@@ -737,15 +722,13 @@ export function createTaxi({
   const overlayClose = typeof document !== "undefined" ? document.getElementById("taxi-map-close") : null;
   const overlayExit = typeof document !== "undefined" ? document.getElementById("taxi-map-exit") : null;
 
-  /** idle | called | coming | waiting | boarded | hauling */
+  /** idle | coming | waiting | boarded | hauling */
   let mode = "idle";
   let island = "north";
   let road = null;
   let path = [];
   let pi = 0;
   let waitStartedAtMs = null;
-  let calledAtMs = null;
-  let etaMs = 0;
   let overlayOpen = false;
 
   function emitEta(label) {
@@ -944,7 +927,6 @@ export function createTaxi({
     path = [];
     pi = 0;
     waitStartedAtMs = null;
-    calledAtMs = null;
     emitEta(null);
     closeOverlay();
     if (riding) {
@@ -960,7 +942,6 @@ export function createTaxi({
     pi = 0;
     road = null;
     waitStartedAtMs = null;
-    calledAtMs = null;
     emitEta(null);
     mesh.visible = false;
     closeOverlay();
@@ -1011,7 +992,6 @@ export function createTaxi({
     const hail = carriagewayAt(hit.road, hit.proj, player);
     driveTo(hail.x, hail.z);
     mode = "coming";
-    calledAtMs = null;
     waitStartedAtMs = nowFn();
     emitEta(null);
     setStatus("Taxi coming along the paved road..");
@@ -1031,18 +1011,12 @@ export function createTaxi({
       setStatus("Still in the taxi. Tap a stop, or Exit taxi..");
       return;
     }
-    if (mode === "called" || mode === "coming" || mode === "waiting") return;
+    if (mode === "coming" || mode === "waiting") return;
     road = hit.road;
-    etaMs = rollTaxiEtaMs(etaRng);
-    calledAtMs = nowFn();
-    waitStartedAtMs = null;
-    mesh.visible = false;
     path = [];
     pi = 0;
-    mode = "called";
-    emitEta(formatTaxiEta(etaMs));
-    setStatus(formatTaxiEta(etaMs));
     if (typeof onHail === "function") onHail();
+    dispatchComing();
   }
 
   /**
@@ -1096,12 +1070,6 @@ export function createTaxi({
   }
 
   function tick(dt, nowMs = nowFn()) {
-    if (mode === "called") {
-      const remain = etaMs - (nowMs - calledAtMs);
-      emitEta(formatTaxiEta(remain));
-      if (remain <= 0) dispatchComing();
-      return;
-    }
     if (taxiWaitExpired(mode, waitStartedAtMs, nowMs)) {
       dismissUnboarded();
       return;

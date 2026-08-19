@@ -2011,7 +2011,7 @@ async function ensureTaxi() {
     button: btnTaxi,
     onEta: (label) => etaChip.set(label),
     onHail() {
-      // Cab is not here yet. Keep the player's zoom / spawn look.
+      // Hail starts the cab. Keep the player's zoom / spawn look.
     },
     onRide(on) {
       refreshHud();

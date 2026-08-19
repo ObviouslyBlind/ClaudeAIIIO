@@ -3,32 +3,17 @@ import * as THREE from "three";
 import { createLandBoard, heightAt, ISLANDS } from "./land.ts";
 import {
   TAXI_WAIT_MS,
-  TAXI_ETA_MIN_MS,
-  TAXI_ETA_MAX_MS,
   createTaxi,
-  formatTaxiEta,
   makeTaxiMesh,
   pavedDestFromMapClick,
   projectOnPolyline,
-  rollTaxiEtaMs,
   taxiWaitExpired,
   worldToMapPx,
   islandMapBounds,
 } from "../public/harbour/taxi.js";
 
 describe("taxi hail wait", () => {
-  it("rolls 5–30s and prints Taxi in m:ss", () => {
-    expect(TAXI_ETA_MIN_MS).toBe(5_000);
-    expect(TAXI_ETA_MAX_MS).toBe(30_000);
-    expect(rollTaxiEtaMs(() => 0)).toBe(5_000);
-    expect(rollTaxiEtaMs(() => 1)).toBe(30_000);
-    expect(formatTaxiEta(5_000)).toBe("Taxi in 0:05");
-    expect(formatTaxiEta(12_001)).toBe("Taxi in 0:13");
-    expect(formatTaxiEta(30_000)).toBe("Taxi in 0:30");
-    expect(formatTaxiEta(0).toLowerCase()).not.toContain("paper");
-  });
-
-  it("stays called until the ETA, then the cab comes along paved", () => {
+  it("starts the cab along paved as soon as you hail, with no countdown", () => {
     const board = createLandBoard();
     const spec = ISLANDS.south;
     const player = {
@@ -53,14 +38,6 @@ describe("taxi hail wait", () => {
     });
     expect(taxi.mesh.visible).toBe(true);
     taxi.call();
-    expect(taxi.mode()).toBe("called");
-    expect(taxi.mesh.visible).toBe(false);
-    expect(labels[labels.length - 1]).toBe("Taxi in 0:05");
-    clock += 4_999;
-    taxi.tick(0.016, clock);
-    expect(taxi.mode()).toBe("called");
-    clock += 1;
-    taxi.tick(0.016, clock);
     expect(taxi.mode()).toBe("coming");
     expect(taxi.mesh.visible).toBe(true);
     expect(labels[labels.length - 1]).toBe(null);
@@ -88,7 +65,6 @@ describe("taxi hail wait", () => {
       now: () => clock,
     });
     taxi.call();
-    clock += 5_000;
     taxi.tick(0.016, clock);
     expect(taxi.mode()).toBe("coming");
     for (let i = 0; i < 400 && taxi.mode() !== "boarded"; i++) {
@@ -130,7 +106,6 @@ describe("taxi hail wait", () => {
     });
     taxi.call();
     expect(hail).toEqual([true]);
-    clock += 5_000;
     taxi.tick(0.016, clock);
     for (let i = 0; i < 400 && taxi.mode() !== "boarded"; i++) {
       clock += 50;
