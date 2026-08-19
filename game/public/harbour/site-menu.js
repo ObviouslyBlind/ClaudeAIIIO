@@ -180,13 +180,14 @@ function paintStock(site, play) {
     <p class="sticker-label">Price</p>
     <div class="sticker-slide" data-tone="${tone}">
       <span class="sticker-read ${vs}" data-sticker-out>${money(sticker)}</span>
+      <div class="sticker-band" aria-hidden="true">${segs
+        .map(
+          (s) =>
+            `<span class="sticker-seg is-${s.tone}" style="flex:${s.width.toFixed(4)} 0 0"></span>`,
+        )
+        .join("")}</div>
       <div class="sticker-track">
-        <div class="sticker-band" aria-hidden="true">${segs
-          .map(
-            (s) =>
-              `<span class="sticker-seg is-${s.tone}" style="flex:${s.width.toFixed(4)} 0 0"></span>`,
-          )
-          .join("")}</div>
+        <i class="sticker-rail" aria-hidden="true"></i>
         <i class="sticker-mark" style="left:${mark}%"></i>
         <i class="sticker-knob" data-sticker-knob style="left:${knob}%"></i>
         <input id="sticker-price" type="range" min="${min}" max="${max}" step="0.5" value="${sticker}" />

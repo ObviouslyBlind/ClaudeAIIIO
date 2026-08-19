@@ -204,6 +204,7 @@ describe("harbour chrome HUD", () => {
     expect(siteMenu).toContain("sticker-seg");
     expect(siteMenu).toContain("sticker-band");
     expect(siteMenu).toContain("sticker-knob");
+    expect(siteMenu).toContain("sticker-rail");
     expect(siteMenu).toContain("data-sticker-knob");
     expect(siteMenu).toContain("stickerTrackSegs");
     expect(siteMenu).not.toContain("sticker-zone");
@@ -595,6 +596,7 @@ describe("harbour chrome HUD", () => {
     expect(css).not.toMatch(/#e25b6a 16%/);
     expect(css).not.toContain("linear-gradient(\n    90deg,\n    #c42b3a");
     expect(css).toContain(".sticker-knob");
+    expect(css).toContain(".sticker-rail");
     expect(css).toContain("gap: 3px");
     expect(css).toContain("::-webkit-slider-runnable-track");
     expect(css).toContain("::-moz-range-progress");
