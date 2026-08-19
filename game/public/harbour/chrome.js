@@ -12,7 +12,13 @@ import { formatCartsBody } from "./carts-hud.js";
 import { formatSiteMenu, gamesForSite } from "./site-menu.js";
 import { compactCash, fullCash } from "./cash-chip.js";
 import { formatCashLedger } from "./cash-ledger.js";
-import { formatMarketplace, addBasketLine, removeBasketLine } from "./marketplace.js";
+import {
+  formatMarketplace,
+  marketplaceScrollHtml,
+  addBasketLine,
+  removeBasketLine,
+  basketCount,
+} from "./marketplace.js";
 import { formatHireSheet } from "./hire-sheet.js";
 
 export const POLL_MS = 1000;
@@ -219,14 +225,8 @@ export function mountChrome(opts) {
     return "South warehouse";
   }
 
-  function paintMarket() {
-    const body = document.getElementById("market-body");
-    if (!body || !play) return;
-    const search = document.getElementById("market-search");
-    const keep = search && document.activeElement === search;
-    const start = keep ? search.selectionStart : null;
-    const end = keep ? search.selectionEnd : null;
-    body.innerHTML = formatMarketplace(play, {
+  function marketOpts() {
+    return {
       aisle: marketAisle,
       island: marketIsland,
       query: marketQuery,
@@ -234,7 +234,57 @@ export function mountChrome(opts) {
       basket: marketBasket,
       view: marketView,
       folds: marketFolds,
+    };
+  }
+
+  function paintMarketCash() {
+    const cash = document.querySelector("#market-body .mp-cash");
+    if (cash) cash.textContent = money(play && play.cash);
+  }
+
+  function paintMarketCartBadge() {
+    const btn = document.querySelector("#market-body [data-market-cart]");
+    if (!btn) return;
+    const n = basketCount(marketBasket);
+    btn.classList.toggle("is-on", marketView === "basket");
+    const badge = btn.querySelector(".mp-cart-n");
+    if (n) {
+      btn.setAttribute("data-count", String(n));
+      if (badge) badge.textContent = String(n);
+      else btn.insertAdjacentHTML("beforeend", `<span class="mp-cart-n">${n}</span>`);
+    } else {
+      btn.removeAttribute("data-count");
+      if (badge) badge.remove();
+    }
+  }
+
+  function bodyAisleOn(id) {
+    document.querySelectorAll("#market-body [data-aisle]").forEach((btn) => {
+      btn.classList.toggle("is-on", btn.getAttribute("data-aisle") === id);
     });
+  }
+
+  function paintMarketList(keepY) {
+    const scroller = document.querySelector("#market-body .mp-scroll");
+    if (!scroller || !play) {
+      paintMarket();
+      return;
+    }
+    const y = keepY ? scroller.scrollTop : 0;
+    scroller.innerHTML = marketplaceScrollHtml(play, marketOpts());
+    scroller.scrollTop = y;
+  }
+
+  function paintMarket() {
+    const body = document.getElementById("market-body");
+    if (!body || !play) return;
+    const search = document.getElementById("market-search");
+    const keep = search && document.activeElement === search;
+    const start = keep ? search.selectionStart : null;
+    const end = keep ? search.selectionEnd : null;
+    const scroller = body.querySelector(".mp-scroll");
+    const y = scroller ? scroller.scrollTop : 0;
+    body.innerHTML = formatMarketplace(play, marketOpts());
     const next = document.getElementById("market-search");
     if (next && keep) {
       next.focus();
@@ -242,6 +292,8 @@ export function mountChrome(opts) {
         next.setSelectionRange(start, end);
       }
     }
+    const nextScroll = body.querySelector(".mp-scroll");
+    if (nextScroll) nextScroll.scrollTop = y;
   }
 
   function hideOrderAsk() {
@@ -733,12 +785,14 @@ export function mountChrome(opts) {
       if (hit.hasAttribute("data-aisle")) {
         marketAisle = hit.getAttribute("data-aisle") || "street";
         marketView = "shop";
-        paintMarket();
+        paintMarketList(false);
+        bodyAisleOn(marketAisle);
         return;
       }
       if (hit.hasAttribute("data-market-cart")) {
         marketView = marketView === "basket" ? "shop" : "basket";
-        paintMarket();
+        paintMarketCartBadge();
+        paintMarketList(false);
         return;
       }
       if (hit.hasAttribute("data-add-cart")) {
@@ -747,7 +801,7 @@ export function mountChrome(opts) {
           hit.getAttribute("data-add-cart"),
           hit.getAttribute("data-via") || "order",
         );
-        paintMarket();
+        paintMarketCartBadge();
         if (opts.setStatus) opts.setStatus("In the market cart.");
         return;
       }
@@ -757,7 +811,8 @@ export function mountChrome(opts) {
           hit.getAttribute("data-basket-remove"),
           hit.getAttribute("data-via") || "order",
         );
-        paintMarket();
+        paintMarketCartBadge();
+        paintMarketList(true);
         return;
       }
       if (hit.hasAttribute("data-basket-buy")) {
@@ -785,7 +840,9 @@ export function mountChrome(opts) {
           }
           marketBasket = removeBasketLine(marketBasket, sku, "good");
           paintTop();
-          paintMarket();
+          paintMarketCash();
+          paintMarketCartBadge();
+          paintMarketList(true);
           if (opts.setStatus) opts.setStatus("In the cart.");
           return;
         }
@@ -802,7 +859,6 @@ export function mountChrome(opts) {
         const isle = hit.getAttribute("data-island");
         if (isle === "north") return;
         marketIsland = "south";
-        paintMarket();
         return;
       }
       if (hit.hasAttribute("data-hire-pick")) {
@@ -838,7 +894,6 @@ export function mountChrome(opts) {
       if (hit.hasAttribute("data-order-dest")) {
         marketDest = hit.getAttribute("data-order-dest") === "road" ? "road" : "warehouse";
         paintOrderAsk();
-        paintMarket();
         return;
       }
       if (hit.id === "order-cancel") {
@@ -851,7 +906,6 @@ export function mountChrome(opts) {
       }
       if (hit.hasAttribute("data-dest")) {
         marketDest = hit.getAttribute("data-dest") === "road" ? "road" : "warehouse";
-        paintMarket();
         return;
       }
       if (hit.hasAttribute("data-order")) {
@@ -912,11 +966,13 @@ export function mountChrome(opts) {
       const id = fold.getAttribute("data-fold");
       if (id) marketFolds[id] = fold.open;
     }, true);
+    let marketSearchTimer = 0;
     root.addEventListener("input", (ev) => {
       const hit = ev.target && ev.target.closest ? ev.target.closest("#market-search") : null;
       if (!hit) return;
       marketQuery = hit.value || "";
-      paintMarket();
+      clearTimeout(marketSearchTimer);
+      marketSearchTimer = setTimeout(() => paintMarketList(false), 80);
     });
     root.addEventListener("change", async (ev) => {
       const hit = ev.target && ev.target.closest ? ev.target.closest("[data-sticker]") : null;
@@ -949,7 +1005,11 @@ export function mountChrome(opts) {
       paintFootLegend();
       const ae = document.activeElement;
       const typingMarket = ae && ae.id === "market-search";
-      if (root.querySelector(".float-panel.is-open") && !typingMarket) paintPanels();
+      if (openPanel === "market") {
+        paintMarketCash();
+      } else if (root.querySelector(".float-panel.is-open") && !typingMarket) {
+        paintPanels();
+      }
       if (opts.onPlay) opts.onPlay(play);
       if (openSiteId && standMenu && !standMenu.hidden) {
         const ae = document.activeElement;

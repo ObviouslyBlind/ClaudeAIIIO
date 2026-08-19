@@ -46,14 +46,14 @@ const play = {
 };
 
 describe("2Isles Marketplace sheet", () => {
-  it("lists Street kit in fold menus with Buy and Add", () => {
+  it("lists Street kit in fold menus with gold Add Cart", () => {
     const html = formatMarketplace(play, { aisle: "street", island: "south", query: "", cash: 1000, basket: [] });
     expect(html).toContain("2Isles Marketplace");
     expect(html).toContain("$1,000.00");
     expect(html).toContain("data-market-cart");
     expect(html).toContain("Fruit cart");
-    expect(html).toContain("data-order=\"hotdog_cart\"");
     expect(html).toContain('data-add-cart="hotdog_cart"');
+    expect(html).toContain(">Add Cart<");
     expect(html).toContain("Fruit stall");
     expect(html).toContain("Fruit pack");
     expect(html).toContain("<summary>Carts</summary>");
@@ -62,13 +62,15 @@ describe("2Isles Marketplace sheet", () => {
     expect(html).toContain("corn");
     expect(html).toContain("South island");
     expect(html).toContain("North island");
+    expect(html).toContain('data-tip="Closed until you ferry"');
     expect(html).toContain('data-aisle="shopfit"');
     expect(html).toContain('data-aisle="farming"');
     expect(html).toContain('data-aisle="hospitality"');
     expect(html).toContain('data-aisle="machinery"');
     expect(html).not.toContain('data-aisle="plant"');
     expect(html).toContain('id="market-search"');
-    expect(html).not.toContain('data-island="north"');
+    expect(html).not.toContain('data-order="hotdog_cart"');
+    expect(html).not.toMatch(/>Buy</);
     expect(html).not.toMatch(/PAPER/i);
     expect(html).not.toMatch(/outfitter/i);
     expect(html).not.toMatch(/\bbooks?\b/i);
@@ -100,6 +102,7 @@ describe("2Isles Marketplace sheet", () => {
     const html = formatMarketplace(play, { aisle: "street", island: "north", query: "" });
     expect(html).toContain("island you stand on");
     expect(html).not.toContain("data-order=");
+    expect(html).not.toContain("data-add-cart=");
   });
 
   it("basket view lists added kit and total", () => {

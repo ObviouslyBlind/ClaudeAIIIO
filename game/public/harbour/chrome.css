@@ -706,10 +706,10 @@ nav.dock.travel-dock {
 .float-panel p { margin: 0 0 8px; font-size: 13px; line-height: 1.4; color: var(--muted); }
 .sku-buy {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding: 11px 0 9px;
+  gap: 10px;
+  padding: 8px 0 7px;
   border-top: 1px solid var(--line);
 }
 .sku-buy-blurb {
@@ -720,16 +720,36 @@ nav.dock.travel-dock {
 }
 .sku-buy-actions {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
   flex: 0 0 auto;
 }
+.mp-add,
 .sku-buy-actions .go,
 .sku-buy-actions .ghost {
-  min-width: 64px;
+  min-width: 0;
   min-height: 28px;
-  padding: 0 8px;
+  height: 28px;
+  padding: 0 10px;
   font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.mp-add {
+  appearance: none;
+  -webkit-appearance: none;
+  background: linear-gradient(180deg, var(--brass-hi), var(--btn));
+  color: #1a140c;
+}
+.mp-add:hover,
+.mp-add:focus-visible {
+  filter: brightness(1.06);
 }
 .mp-fold {
   margin: 0 0 8px;
@@ -793,8 +813,8 @@ nav.dock.travel-dock {
   letter-spacing: 0.01em;
 }
 .sku-buy .go {
-  align-self: end;
-  min-width: 72px;
+  min-width: 0;
+  border-radius: 8px;
 }
 #order-veil {
   position: absolute;
@@ -924,8 +944,9 @@ nav.dock.travel-dock {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  padding: 14px 14px 8px;
+  gap: 8px;
+  padding: 8px 10px 6px;
+  flex: 0 0 auto;
 }
 .mp-head-actions {
   display: flex;
@@ -937,7 +958,7 @@ nav.dock.travel-dock {
 .mp-cash {
   margin: 0;
   font-family: "Big Shoulders Display", "Arial Narrow", sans-serif;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   letter-spacing: 0.02em;
   font-variant-numeric: tabular-nums;
@@ -946,8 +967,8 @@ nav.dock.travel-dock {
 }
 .mp-cart-btn {
   position: relative;
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   padding: 0;
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -998,9 +1019,9 @@ nav.dock.travel-dock {
 }
 .sheet-close {
   flex: 0 0 auto;
-  width: 36px;
-  height: 36px;
-  margin: -4px -4px 0 0;
+  width: 32px;
+  height: 32px;
+  margin: 0;
   padding: 0;
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -1023,26 +1044,45 @@ nav.dock.travel-dock {
   color: var(--brass-hi);
 }
 .mp-tools {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 0 16px 8px;
+  display: none;
 }
-.mp-search-wrap { display: block; }
+#panel-market .mp-search-wrap {
+  display: block;
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
 .mp-search {
   width: 100%;
-  min-height: 40px;
-  padding: 8px 12px;
+  min-height: 28px;
+  height: 28px;
+  padding: 0 8px;
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: 8px;
   background: #0c181c;
   color: var(--ink);
   font-family: inherit;
-  font-size: 15px;
+  font-size: 13px;
   caret-color: var(--btn);
 }
 .mp-search::placeholder {
   color: #8aa8a0;
+}
+.mp-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px 8px;
+  flex: 0 0 auto;
+  overflow: visible;
+  position: relative;
+  z-index: 2;
+}
+.mp-isles {
+  display: flex;
+  gap: 5px;
+  flex: 0 0 auto;
+  overflow: visible;
 }
 .isle-row {
   display: flex;
@@ -1051,7 +1091,7 @@ nav.dock.travel-dock {
 }
 .isle {
   flex: 0 0 auto;
-  min-height: 26px;
+  min-height: 24px;
   padding: 0 9px;
   border: 1px solid var(--line);
   border-radius: 999px;
@@ -1078,7 +1118,7 @@ nav.dock.travel-dock {
   align-items: center;
   justify-content: center;
   margin: 0;
-  min-height: 26px;
+  min-height: 24px;
   padding: 0 9px;
   border: 1px dashed #6a8078;
   border-radius: 999px;
@@ -1088,9 +1128,20 @@ nav.dock.travel-dock {
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  pointer-events: none;
+  pointer-events: auto;
   user-select: none;
   line-height: 1;
+  cursor: default;
+  font-family: inherit;
+}
+.isle-shut[data-tip]::after {
+  left: 0;
+  right: auto;
+  top: calc(100% + 6px);
+  bottom: auto;
+  transform: none;
+  z-index: 40;
+  white-space: nowrap;
 }
 .float-panel p.mp-isle-note,
 .mp-isle-note {
@@ -1103,21 +1154,24 @@ nav.dock.travel-dock {
 }
 .mp-aisles {
   display: flex;
-  gap: 6px;
-  padding: 0 16px 10px;
+  gap: 5px;
+  padding: 0;
+  flex: 1;
+  min-width: 0;
   overflow-x: auto;
+  overflow-y: hidden;
   scrollbar-width: none;
 }
 .mp-aisles::-webkit-scrollbar { display: none; }
 .mp-aisle {
   flex: 0 0 auto;
-  min-height: 34px;
-  padding: 0 12px;
+  min-height: 24px;
+  padding: 0 9px;
   border: 1px solid var(--line);
   border-radius: 999px;
   background: transparent;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -1133,8 +1187,13 @@ nav.dock.travel-dock {
   flex: 1;
   min-height: 0;
   overflow: auto;
-  padding: 0 16px 18px;
+  overscroll-behavior: contain;
+  overflow-anchor: none;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 10px 14px;
   scrollbar-color: var(--btn) transparent;
+  position: relative;
+  z-index: 1;
 }
 .mp-scroll::-webkit-scrollbar { width: 8px; }
 .mp-scroll::-webkit-scrollbar-thumb {

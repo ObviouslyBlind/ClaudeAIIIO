@@ -19,13 +19,11 @@ The difference is **what kind of business you put down**, not a different game m
 
 ## What you open
 
-Center sheet. Wordmark: **2Isles Marketplace**. Search at the top.
-
-**South island** and **North island**. You only buy on the island you are standing on. North island is shut until you ferry.
+Center sheet. Search sits in the top strip with cash, cart, and Close — not a second vanity block. **South island** and **North island** are compact chips; North island hover says it is closed until you ferry.
 
 Left rail **Marketplace** opens this sheet.
 
-Street subsections (Carts, Stock, South island goods) sit in fold menus so the sheet does not scroll forever. Buy opens the pay sheet. Add goes in the marketplace cart next to Close. Cash on the sheet is dollars and cents.
+Street subsections (Carts, Stock, South island goods) sit in fold menus so the sheet does not scroll forever. **Add Cart** (gold) puts the SKU in the bag next to Close. Pay from the cart. Cash on the sheet is dollars and cents.
 
 ---
 

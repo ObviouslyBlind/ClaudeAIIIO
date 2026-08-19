@@ -122,6 +122,10 @@ describe("harbour chrome HUD", () => {
     expect(css).toContain(".mp-search");
     expect(css).toContain(".mp-fold");
     expect(css).toContain(".mp-cart-btn");
+    expect(css).toContain(".mp-add");
+    expect(css).toContain(".mp-nav");
+    expect(css).toContain("overscroll-behavior: contain");
+    expect(css).toContain(".isle-shut[data-tip]::after");
     expect(css).toContain("#sheet-veil");
     expect(css).toContain("#crate-ask");
     expect(css).toContain(".buy-loc");
@@ -212,6 +216,9 @@ describe("harbour chrome HUD", () => {
     expect(carts).toContain("On you");
     expect(carts).not.toContain("Pockets");
     expect(chrome).toContain("formatMarketplace");
+    expect(chrome).toContain("marketplaceScrollHtml");
+    expect(chrome).toContain("paintMarketList");
+    expect(chrome).toContain('openPanel === "market"');
     expect(chrome).toContain("formatHireSheet");
     expect(chrome).toContain("/api/buy");
     expect(chrome).toContain("/api/shift/pack");

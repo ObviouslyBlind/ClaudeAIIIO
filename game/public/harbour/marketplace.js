@@ -90,8 +90,7 @@ function skuBuyRow(s) {
         <span class="sku-buy-price">${money(s.paperPrice)}</span>
       </div>
       <div class="sku-buy-actions">
-        <button type="button" class="go" data-order="${esc(s.id)}">Buy</button>
-        <button type="button" class="ghost" data-add-cart="${esc(s.id)}" data-via="order">Add</button>
+        <button type="button" class="mp-add" data-add-cart="${esc(s.id)}" data-via="order">Add Cart</button>
       </div>
     </article>`;
 }
@@ -108,8 +107,7 @@ function goodRow(id, prices) {
         <span class="sku-buy-price">${cost}</span>
       </div>
       <div class="sku-buy-actions">
-        <button type="button" class="go" data-buy="${esc(id)}">Buy</button>
-        <button type="button" class="ghost" data-add-cart="${esc(id)}" data-via="good">Add</button>
+        <button type="button" class="mp-add" data-add-cart="${esc(id)}" data-via="good">Add Cart</button>
       </div>
     </article>`;
 }
@@ -226,7 +224,7 @@ export function basketTotal(play, lines) {
 
 function basketBody(play, lines) {
   if (!lines || !lines.length) {
-    return `<p class="mp-empty">Nothing in the cart. Open Carts or Stock, then Add.</p>`;
+    return `<p class="mp-empty">Nothing in the cart. Open Carts or Stock, then Add Cart.</p>`;
   }
   const rows = lines
     .map((row) => {
@@ -257,9 +255,14 @@ function head(play, opts) {
   const cash = money(opts.cash != null ? opts.cash : play && play.cash);
   const n = basketCount(opts.basket);
   const cartOn = opts.view === "basket" ? " is-on" : "";
+  const query = opts.query || "";
   return `
     <header class="mp-head">
-      <h2 class="mp-word">2Isles Marketplace</h2>
+      <h2 class="mp-word visually-hidden">2Isles Marketplace</h2>
+      <label class="mp-search-wrap">
+        <span class="visually-hidden">Search the marketplace</span>
+        <input id="market-search" class="mp-search" type="search" placeholder="Search" value="${esc(query)}" autocomplete="off" enterkeyhint="search" />
+      </label>
       <div class="mp-head-actions">
         <p class="mp-cash" aria-label="Cash">${cash}</p>
         <button type="button" class="mp-cart-btn${cartOn}" data-market-cart aria-label="Marketplace cart"${
@@ -275,33 +278,32 @@ function head(play, opts) {
     </header>`;
 }
 
-export function formatMarketplace(play, opts = {}) {
+export function marketplaceScrollHtml(play, opts = {}) {
   const aisle = marketAisleById(opts.aisle);
   const island = opts.island === "north" ? "north" : "south";
   const query = opts.query || "";
   const view = opts.view === "basket" ? "basket" : "shop";
+  if (view === "basket") return basketBody(play || {}, opts.basket || []);
+  if (island === "north") return northBody();
+  if (aisle.live) return streetBody(play || {}, query, opts.folds || {});
+  return soonBody(aisle, query);
+}
+
+export function formatMarketplace(play, opts = {}) {
+  const aisle = marketAisleById(opts.aisle);
   const aisles = MARKET_SHEET_AISLES.map(
     (a) => `
       <button type="button" class="mp-aisle${a.id === aisle.id ? " is-on" : ""}" data-aisle="${a.id}">${esc(a.label)}</button>`,
   ).join("");
-  let list = "";
-  if (view === "basket") list = basketBody(play || {}, opts.basket || []);
-  else if (island === "north") list = northBody();
-  else if (aisle.live) list = streetBody(play || {}, query, opts.folds || {});
-  else list = soonBody(aisle, query);
   return `
     ${head(play || {}, opts)}
-    <div class="mp-tools">
-      <label class="mp-search-wrap">
-        <span class="visually-hidden">Search the marketplace</span>
-        <input id="market-search" class="mp-search" type="search" placeholder="Search carts, stock, aisles" value="${esc(query)}" autocomplete="off" enterkeyhint="search" />
-      </label>
-      <div class="isle-row" role="group" aria-label="Island">
+    <div class="mp-nav">
+      <div class="mp-isles" role="group" aria-label="Island">
         <button type="button" class="isle is-on" data-island="south">South island</button>
-        <p class="isle-shut">North island</p>
+        <button type="button" class="isle-shut" data-island="north" data-tip="Closed until you ferry" aria-label="North island. Closed until you ferry.">North island</button>
       </div>
+      <div class="mp-aisles" role="tablist" aria-label="Aisle">${aisles}</div>
     </div>
-    <div class="mp-aisles" role="tablist" aria-label="Aisle">${aisles}</div>
-    <div class="mp-scroll">${list}</div>
+    <div class="mp-scroll">${marketplaceScrollHtml(play || {}, opts)}</div>
   `;
 }
