@@ -308,7 +308,10 @@ function insideJoin(joins, x, z, edgeId) {
   for (const j of joins) {
     // Through / dual arms have trim 0. Cutting them is what made a T
     // read as two tapes plus a black plate.
-    if (edgeId && j.pad && j.pad.trim && j.pad.trim[edgeId] === 0) continue;
+    if (edgeId && j.pad) {
+      if (j.pad.trim && j.pad.trim[edgeId] === 0) continue;
+      if (Array.isArray(j.pad.throughEdgeIds) && j.pad.throughEdgeIds.includes(edgeId)) continue;
+    }
     const clip = (j.foot && (j.foot.clip || j.foot.tarmac)) || null;
     if (clip && multiContains(clip, x, z)) return true;
   }
