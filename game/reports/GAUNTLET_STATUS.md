@@ -22,8 +22,8 @@ Bar the critic inspects on live `http://127.0.0.1:8787/`. One verdict for the wh
 
 Do **not** grade Market Pay “How many / Where” as the sticker. That card is qty + dest.
 
-Last critic (bc-2cc757e4): **FAIL** — Buy $32 showed the lot card; cash $1000 → $915 (cart only). lease() returned because map was not ready so selected was never set.
+Last critic (bc-3cacd5cd): **FAIL** — one Buy $32 click, cash still $1000, card “44 ISLAND HWY / YOURS”. onNearLease/paintParcel likely threw before lease().
 
-Fix in this round: chip passes the plot id into lease(); askToBuy no longer requires map.
+Fix in this round: POST /api/lease first, then paint the ask.
 
 Politics frozen. Operator is the brake.

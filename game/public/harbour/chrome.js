@@ -804,8 +804,8 @@ export function mountChrome(opts) {
       const id = nearLease.dataset.plotId || (fromPlay && fromPlay.id) || "";
       if (!id) return;
       if (landCard) landCard.hidden = true;
-      if (typeof opts.onNearLease === "function") opts.onNearLease(id);
       if (opts.lease) opts.lease(id);
+      if (typeof opts.onNearLease === "function") opts.onNearLease(id);
     });
   }
 
