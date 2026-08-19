@@ -597,7 +597,9 @@ describe("harbour chrome HUD", () => {
     expect(css).not.toContain("linear-gradient(\n    90deg,\n    #c42b3a");
     expect(css).toContain(".sticker-knob");
     expect(css).toContain(".sticker-rail");
-    expect(css).toContain("gap: 3px");
+    expect(css).toContain("gap: 4px");
+    expect(css).toContain("min-width: 16px");
+    expect(css).toContain("@media (max-width: 480px)");
     expect(css).toContain("::-webkit-slider-runnable-track");
     expect(css).toContain("::-moz-range-progress");
     expect(css).toContain(".upg-tick");
