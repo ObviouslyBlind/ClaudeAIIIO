@@ -79,6 +79,11 @@ describe("South first loop", () => {
     const near = snap.leaseOptions[0]!;
     expect(Math.hypot(near.x - ISLANDS.south.port.x, near.z - ISLANDS.south.port.z)).toBeLessThan(80);
     expect(leasePlot(land, visitor, near.id).ok).toBe(true);
+    expect(visitor.cash).toBeCloseTo(1_000 - near.price, 8);
+    const after = playSnapshot(visitor, land);
+    expect(after.cash).toBeCloseTo(1_000 - near.price, 8);
+    expect(after.leases.some((row) => row.id === near.id)).toBe(true);
+    expect(after.leaseOptions.some((row) => row.id === near.id)).toBe(false);
   });
 
   it("sends a kerb van without a lease, and rejects a vacant plotId", () => {

@@ -1998,14 +1998,6 @@ async function boot() {
     getPose: () => ({ x: player.position.x, z: player.position.z }),
     getPlotId: () => selected || "",
     lease,
-    onNearLease(id) {
-      const fromMap = map && id ? map.plots.find((x) => x.id === id) : null;
-      const playNow = chromeHud && chromeHud.getPlay && chromeHud.getPlay();
-      const fromPlay = ((playNow && playNow.leaseOptions) || []).find((x) => x.id === id);
-      const base = fromMap || fromPlay;
-      if (!base) return;
-      askToBuy(fromPlay ? { ...base, owner: null } : base);
-    },
     onCloseLand: closeLandCard,
     onLeased(snapshot) {
       landPinned = false;

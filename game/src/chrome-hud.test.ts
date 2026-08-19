@@ -93,7 +93,6 @@ describe("harbour chrome HUD", () => {
     expect(chrome).toContain("buyAskModel");
     expect(chrome).toContain("toggleViewer");
     expect(chrome).toContain("paintBuyAsk");
-    expect(chrome).toContain("onNearLease");
     expect(chrome).toContain('getElementById("near-lease")');
     expect(css).toContain(".chip.is-buy-lot");
     expect(chrome).toContain('id="buy-ask-yes"');
@@ -140,9 +139,13 @@ describe("harbour chrome HUD", () => {
     expect(chrome).toContain("Yellow van from the port.");
     expect(chrome).toContain("if (buyAsk && !buyAsk.hidden) return;");
     expect(chrome).toContain("ownedId");
-    expect(chrome).toContain("if (typeof opts.onNearLease === \"function\") opts.onNearLease(id);");
+    expect(chrome).not.toContain("opts.onNearLease(id)");
     expect(chrome).toContain("applyPlay");
-    expect(chrome.indexOf("opts.lease(id)")).toBeLessThan(chrome.indexOf("opts.onNearLease(id)"));
+    expect(chrome).toContain("stampPlay");
+    expect(chrome).toContain("playGen");
+    expect(chrome).toContain("if (gen !== playGen) return");
+    expect(chrome).toContain("opts.lease(id)");
+    expect(chrome).toContain("nearLease.disabled = true");
     expect(chrome).toContain("order-label");
     expect(chrome).toContain("dest: marketDest === \"road\" ? \"road\" : \"warehouse\"");
     expect(chrome).toContain("data-order-dest");

@@ -45,6 +45,8 @@ export function mountChrome(opts) {
   const crateAsk = document.getElementById("crate-ask");
 
   let play = null;
+  /** Bumped on POST stamps so an in-flight GET /api/play cannot restore stale cash. */
+  let playGen = 0;
   let openPanel = null;
   let overlay = "world";
   let placing = false;
@@ -122,6 +124,14 @@ export function mountChrome(opts) {
     return `<h2>${text}</h2>`;
   }
 
+  function stampPlay(data) {
+    if (!data || data.mode !== "PAPER") return false;
+    playGen += 1;
+    play = data;
+    paintTop();
+    return true;
+  }
+
   function paintTop() {
     if (!play) return;
     if (cashEl) cashEl.textContent = money(play.cash);
@@ -145,6 +155,7 @@ export function mountChrome(opts) {
       const leased = ((play.leases || []).length > 0);
       const opt = leased ? null : ((play.leaseOptions || [])[0] || null);
       near.hidden = !opt;
+      near.disabled = false;
       if (opt) {
         near.dataset.plotId = opt.id;
         near.textContent = "Buy " + money(opt.price).replace(/\.00$/, "");
@@ -446,8 +457,7 @@ export function mountChrome(opts) {
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ hits, standId: standId || undefined }),
         });
-        if (data && data.play) play = data.play;
-        paintTop();
+        if (data && data.play) stampPlay(data.play);
         if (openPanel === "inventory") paintInv();
         const fresh = findSite(standId);
         if (fresh) paintStandMenu(fresh);
@@ -531,8 +541,7 @@ export function mountChrome(opts) {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ standId: live.id, qty, from }),
       });
-      if (data && data.play) play = data.play;
-      paintTop();
+      if (data && data.play) stampPlay(data.play);
       const fresh = findSite(live.id);
       paintStandMenu(fresh, onStock, onHire);
       if (opts.setStatus) {
@@ -552,8 +561,7 @@ export function mountChrome(opts) {
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ standId: hireBtn.getAttribute("data-hire-site") }),
         });
-        if (data && data.play) play = data.play;
-        paintTop();
+        if (data && data.play) stampPlay(data.play);
         const fresh = findSite(live.id);
         paintStandMenu(fresh, onStock, onHire);
         if (ok && typeof onHire === "function") onHire();
@@ -569,8 +577,7 @@ export function mountChrome(opts) {
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ standId: id }),
         });
-        if (data && data.play) play = data.play;
-        paintTop();
+        if (data && data.play) stampPlay(data.play);
         const fresh = findSite(live.id);
         paintStandMenu(fresh, onStock, onHire);
         if (ok && opts.onFired) opts.onFired(id);
@@ -586,8 +593,7 @@ export function mountChrome(opts) {
             upgradeId: btn.getAttribute("data-upgrade-id") || "fridge",
           }),
         });
-        if (data && data.play) play = data.play;
-        paintTop();
+        if (data && data.play) stampPlay(data.play);
         const fresh = findSite(live.id);
         paintStandMenu(fresh, onStock, onHire);
       });
@@ -609,8 +615,8 @@ export function mountChrome(opts) {
   }
 
   async function refreshPlay(data) {
-    if (data && data.play) play = data.play;
-    paintTop();
+    if (data && data.play) stampPlay(data.play);
+    else paintTop();
     paintPanels();
   }
 
@@ -670,6 +676,7 @@ export function mountChrome(opts) {
         }
         playPaperBuy();
         if (data && data.snapshot && data.snapshot.visitor) {
+          playGen += 1;
           play.cash = data.snapshot.visitor.cash;
           play.cart = data.snapshot.visitor.cart || [];
         }
@@ -720,7 +727,9 @@ export function mountChrome(opts) {
   });
 
   async function poll() {
+    const gen = playGen;
     const { data } = await readJson("/api/play");
+    if (gen !== playGen) return;
     if (data && data.mode === "PAPER") {
       play = data;
       paintTop();
@@ -803,9 +812,10 @@ export function mountChrome(opts) {
       const fromPlay = ((play && play.leaseOptions) || [])[0];
       const id = nearLease.dataset.plotId || (fromPlay && fromPlay.id) || "";
       if (!id) return;
+      nearLease.disabled = true;
       if (landCard) landCard.hidden = true;
+      if (buyAsk) buyAsk.hidden = true;
       if (opts.lease) opts.lease(id);
-      if (typeof opts.onNearLease === "function") opts.onNearLease(id);
     });
   }
 
@@ -817,9 +827,7 @@ export function mountChrome(opts) {
     },
     refresh: poll,
     applyPlay(data) {
-      if (!data || data.mode !== "PAPER") return;
-      play = data;
-      paintTop();
+      stampPlay(data);
     },
     isPlacing: () => placing,
     getPlaceKit: () => placingKit,
