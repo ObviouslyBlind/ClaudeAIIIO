@@ -155,14 +155,17 @@ function paintStock(site, play) {
 function paintRun(site, play) {
   const names = Array.isArray(site.games) && site.games.length ? site.games : ["Fruit slice"];
   const cost = Number(play && play.hireCost != null ? play.hireCost : 300);
+  const last = play && play.lastShiftLine ? `<p class="pack-result">${esc(play.lastShiftLine)}</p>` : "";
   if (site.hired) {
     return `
+      ${last}
       <div class="inv-row">
         <span>${esc(site.staffName || "Vendor")}</span>
         <button type="button" class="ghost" data-fire-site="${esc(site.id)}">Fire</button>
       </div>`;
   }
   return `
+    ${last}
     <button type="button" class="go hire-site" id="hire-site" data-hire-site="${esc(site.id)}">Hire ${money(cost)}</button>
     ${names
       .map(

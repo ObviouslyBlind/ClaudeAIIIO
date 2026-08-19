@@ -86,6 +86,7 @@ describe("harbour chrome HUD", () => {
     expect(html).toContain('id="sheet-veil"');
     expect(html).toContain('id="market-body"');
     expect(html).toContain('id="place-hint"');
+    expect(html).toContain('id="play-toast"');
     expect(html).toContain('id="place-cancel"');
     expect(html).toContain('id="taxi-map-exit"');
     expect(html).toContain("Keep riding");
@@ -285,6 +286,10 @@ describe("harbour chrome HUD", () => {
     expect(css).toContain(".look-swatch");
     expect(css).toContain(".acct-wipe");
     expect(css).toContain(".pack-good.is-mush");
+    expect(css).toContain("#play-toast");
+    expect(css).toContain(".pack-result");
+    expect(siteMenu).toContain("lastShiftLine");
+    expect(chrome).toContain("play.lastShiftLine");
     expect(siteMenu).toContain("const max = 16");
     expect(siteMenu).toContain("data-fuel");
     expect(siteMenu).toContain("Propane");
@@ -356,6 +361,19 @@ describe("harbour chrome HUD", () => {
     expect(run).toContain("Hire $300.00");
     expect(run).toContain("id=\"hire-site\"");
     expect(run).toContain("data-pack-start");
+    const soldRun = formatSiteMenu(
+      {
+        id: "stand-1",
+        label: "Fruit cart",
+        siteClass: "cart",
+        hired: false,
+        games: ["Fruit slice"],
+      },
+      { todayPrice: 6, lastShiftLine: "Sold 8 · $44.16", inventory: [], warehouse: { items: [] } },
+      "run",
+    );
+    expect(soldRun).toContain("pack-result");
+    expect(soldRun).toContain("Sold 8");
     const fryRun = formatSiteMenu(
       {
         id: "stand-fry",

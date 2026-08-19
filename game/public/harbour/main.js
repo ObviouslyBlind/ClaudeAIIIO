@@ -434,7 +434,13 @@ function findParcelAt(x, z) {
 }
 
 function setStatus(t) {
-  if (statusEl) statusEl.textContent = t;
+  const msg = String(t || "");
+  if (statusEl) statusEl.textContent = msg;
+  const toast = document.getElementById("play-toast");
+  if (!toast) return;
+  if (!msg || /^(South port|Loading|Cash loaded)/.test(msg)) return;
+  toast.textContent = msg;
+  toast.hidden = false;
 }
 
 function dismissLooseLandUi() {

@@ -628,13 +628,13 @@ export function mountChrome(opts) {
     }
     const stocked = packCanSell(site);
     if (!stocked.ok) {
-      if (opts.setStatus) {
-        opts.setStatus(
-          stocked.why === "no_propane"
-            ? "No propane — fuel the fry cart first."
-            : "No stock — load it from the warehouse first.",
-        );
-      }
+      const line =
+        stocked.why === "no_propane"
+          ? "No propane — fuel the fry cart first."
+          : "No stock — load it from the warehouse first.";
+      if (play) play.lastShiftLine = line;
+      if (site) paintStandMenu(site);
+      if (opts.setStatus) opts.setStatus(line);
       return;
     }
     packShift.open({
@@ -647,10 +647,12 @@ export function mountChrome(opts) {
           body: JSON.stringify({ hits, standId: standId || undefined }),
         });
         if (data && data.play) stampPlay(data.play);
+        const line = packLine(ok, data);
+        if (play) play.lastShiftLine = line;
         if (openPanel === "inventory") paintInv();
         const fresh = findSite(standId);
         if (fresh) paintStandMenu(fresh);
-        if (opts.setStatus) opts.setStatus(packLine(ok, data));
+        if (opts.setStatus) opts.setStatus(line);
       },
     });
   }
