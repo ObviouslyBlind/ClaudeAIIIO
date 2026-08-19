@@ -800,6 +800,10 @@ export function mountChrome(opts) {
     nearLease.addEventListener("click", (ev) => {
       ev.preventDefault();
       ev.stopPropagation();
+      if (buyAsk && !buyAsk.hidden && opts.lease) {
+        opts.lease();
+        return;
+      }
       const id = nearLease.dataset.plotId;
       if (id && typeof opts.onNearLease === "function") opts.onNearLease(id);
     });
@@ -833,7 +837,7 @@ export function mountChrome(opts) {
     paintBuyAsk,
     paintLand(plot, extras) {
       if (!landCard) return;
-      if (buyAsk) buyAsk.hidden = true;
+      if (buyAsk && !buyAsk.hidden) return;
       if (!plot) {
         landCard.hidden = true;
         return;

@@ -22,8 +22,8 @@ Bar the critic inspects on live `http://127.0.0.1:8787/`. One verdict for the wh
 
 Do **not** grade Market Pay “How many / Where” as the sticker. That card is qty + dest.
 
-Last critic (bc-c5b3e573): **FAIL** — clicked Buy $32 but paid before Yes, buy. Cart went to warehouse. No yellow van.
+Last critic (bc-80900351): **FAIL** — Buy $32 opened a land card (“44 ISLAND HWY / YOURS / Close”) with cash still $1000. Yes, buy never appeared. paintLand was hiding the buy-ask.
 
-Fix in this round: buy-ask blocks Market until Yes/No. Kerb Pay only sends an owned lot id, so an unowned $ tag cannot 404 the van into the warehouse.
+Fix in this round: an open buy-ask stays up. Second click on the Buy chip confirms the lease. Chip can ask from leaseOptions even if the map plot is missing.
 
 Politics frozen. Operator is the brake.
