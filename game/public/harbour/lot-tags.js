@@ -1,15 +1,18 @@
 /**
  * HTML $ bars over lots. Real buttons, not Three sprites.
  * Vacant: opens the buy-ask. Taken / yours: inspect only.
+ *
+ * World: no $ bars (Lots chip owns them; Buy $32 is the HUD chip).
+ * Lots: a few nearby vacant prices, not the whole highway.
+ * Placing: YOURS / PLACE only.
  */
 
 import * as THREE from "three";
 
-export const TAG_POOL = 28;
-/** Metres. Vacant Quayward $ lots sit ~350 m inland of the south pad. */
-export const TAG_RADIUS_M = 480;
-/** Nearby streets only. Whole-island tags made the $ bars unreadable. */
-export const TAG_RADIUS_LOTS_M = 520;
+export const TAG_POOL = 6;
+/** Metres. One stretch of street, not every Quayward $ lot. */
+export const TAG_RADIUS_M = 140;
+export const TAG_RADIUS_LOTS_M = 140;
 
 export function tagKindFor(plot) {
   if (!plot) return "none";
@@ -31,24 +34,27 @@ export function tagLabelFor(plot, placing = false) {
   return "";
 }
 
-export function pickTagPlots(plots, player, overlay, limit = TAG_POOL) {
-  const radius = overlay === "lots" ? TAG_RADIUS_LOTS_M : TAG_RADIUS_M;
+export function pickTagPlots(plots, player, overlay, limit = TAG_POOL, placing = false) {
+  const radius = overlay === "lots" || placing ? TAG_RADIUS_LOTS_M : TAG_RADIUS_M;
   const r2 = radius * radius;
   const out = [];
   for (const p of plots || []) {
     const kind = tagKindFor(p);
     if (kind === "none") continue;
+    if (placing) {
+      if (kind !== "yours") continue;
+    } else if (overlay === "lots") {
+      if (kind !== "buy") continue;
+    } else {
+      continue;
+    }
     const dx = p.x - player.x;
     const dz = p.z - player.z;
     const d2 = dx * dx + dz * dz;
     if (d2 > r2) continue;
     out.push({ plot: p, d2, kind });
   }
-  out.sort((a, b) => {
-    if (a.kind === "buy" && b.kind !== "buy") return -1;
-    if (b.kind === "buy" && a.kind !== "buy") return 1;
-    return a.d2 - b.d2;
-  });
+  out.sort((a, b) => a.d2 - b.d2);
   return out.slice(0, limit);
 }
 
@@ -108,7 +114,8 @@ export function mountLotTags({ canvas, camera, heightAt, specOf, getPlots, onBuy
 
   function tick(playerPos, dt = 0.016, overlay = "world", placing = false) {
     placingMode = Boolean(placing);
-    if (overlay !== "lots" && overlay !== "world") {
+    const showTags = overlay === "lots" || placingMode;
+    if (!showTags) {
       shownCache = [];
       clock = 0;
       root.hidden = true;
@@ -121,11 +128,7 @@ export function mountLotTags({ canvas, camera, heightAt, specOf, getPlots, onBuy
     clock -= dt;
     if (clock <= 0) {
       clock = 0.2;
-      shownCache = pickTagPlots(getPlots(), playerPos, overlay, TAG_POOL).filter((slot) => {
-        if (placingMode) return slot.kind === "yours";
-        if (overlay !== "lots") return slot.kind === "buy" || slot.kind === "yours";
-        return true;
-      });
+      shownCache = pickTagPlots(getPlots(), playerPos, overlay, TAG_POOL, placingMode);
     }
     if (!camera || !canvas) return;
     const rect = canvas.getBoundingClientRect();

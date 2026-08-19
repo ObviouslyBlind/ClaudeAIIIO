@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
-import { ndcToLayer, pickTagPlots, TAG_RADIUS_LOTS_M, tagKindFor, tagLabelFor } from "../public/harbour/lot-tags.js";
+import { ndcToLayer, pickTagPlots, TAG_POOL, TAG_RADIUS_LOTS_M, tagKindFor, tagLabelFor } from "../public/harbour/lot-tags.js";
 
 const main = readFileSync(new URL("../public/harbour/main.js", import.meta.url), "utf8");
 
@@ -35,14 +35,18 @@ describe("lot tags (PAPER)", () => {
       { id: "near-taken", owner: "npc", price: 40, x: 10, z: 0 },
       { id: "near-buy", owner: null, price: 40, x: 20, z: 0 },
     ];
-    const picked = pickTagPlots(plots, { x: 0, z: 0 }, "world", 8);
+    const world = pickTagPlots(plots, { x: 0, z: 0 }, "world", 8);
+    expect(world).toEqual([]);
+    const picked = pickTagPlots(plots, { x: 0, z: 0 }, "lots", 8);
     expect(picked[0].plot.id).toBe("near-buy");
-    expect(picked.some((x) => x.plot.id === "near-taken")).toBe(true);
+    expect(picked.some((x) => x.plot.id === "near-taken")).toBe(false);
+    expect(picked.some((x) => x.plot.id === "far-buy")).toBe(false);
   });
 
   it("keeps Lots $ bars nearby, not the whole island", () => {
-    expect(TAG_RADIUS_LOTS_M).toBeGreaterThanOrEqual(500);
-    expect(TAG_RADIUS_LOTS_M).toBeLessThanOrEqual(600);
+    expect(TAG_POOL).toBeLessThanOrEqual(8);
+    expect(TAG_RADIUS_LOTS_M).toBeGreaterThanOrEqual(100);
+    expect(TAG_RADIUS_LOTS_M).toBeLessThanOrEqual(180);
     const plots = [
       { id: "far-buy", owner: null, price: 40, x: 800, z: 0 },
       { id: "near-buy", owner: null, price: 40, x: 20, z: 0 },
@@ -50,6 +54,19 @@ describe("lot tags (PAPER)", () => {
     const picked = pickTagPlots(plots, { x: 0, z: 0 }, "lots", 8);
     expect(picked.some((x) => x.plot.id === "near-buy")).toBe(true);
     expect(picked.some((x) => x.plot.id === "far-buy")).toBe(false);
+  });
+
+  it("shows PLACE on your lot only while placing", () => {
+    const plots = [
+      { id: "yours", owner: "visitor", price: 32, x: 10, z: 0 },
+      { id: "buy", owner: null, price: 40, x: 20, z: 0 },
+    ];
+    const idle = pickTagPlots(plots, { x: 0, z: 0 }, "lots", 8, false);
+    expect(idle.every((x) => x.kind === "buy")).toBe(true);
+    const placing = pickTagPlots(plots, { x: 0, z: 0 }, "lots", 8, true);
+    expect(placing).toHaveLength(1);
+    expect(placing[0].plot.id).toBe("yours");
+    expect(tagLabelFor(placing[0].plot, true)).toBe("PLACE");
   });
 
   it("maps NDC onto the canvas box", () => {

@@ -73,7 +73,7 @@ export function mountChrome(opts) {
 
   const HINTS = {
     world: "World: left-click walks. Lots shows lot outlines and $ bars.",
-    lots: "Lots on. Nearby $ bars only — walk to see more. Click Lots again to hide. Click a $ bar to buy.",
+    lots: "Lots on. Outlines plus a few nearby $ bars. Click Lots again to hide.",
     foot: "Foot traffic: High (green) / Moderate (yellow) / Low (red) on each named road.",
   };
 
