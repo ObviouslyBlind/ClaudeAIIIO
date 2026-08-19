@@ -5,10 +5,13 @@ Piece in play: **2Isles Marketplace HUD**. Politics frozen.
 | Round | Bar | Result |
 |---|---|---|
 | W1 | Tap dirt → person walks | **PASS** |
-| M1 | Live Market: center **2Isles Marketplace** sheet (wordmark, search, South on / North locked, Street carts with Buy). Phone + desktop. No PAPER / books / outfitter. Shop fit honest empty. | **FAIL** — North looked like a live twin tab, not locked |
-| M1b | Same bar. North must read as shut (lock, dashed, ferry-later). | **FAIL** — still a twin tab |
-| M1c | North is not a tab. Plaque: North closed. South is the only island control. | **FAIL** — still read as a North tab; copy not visible |
-| M1d | South full-width live. Under it, sentence: North is closed until you ferry. | builder |
+| M1 | Center Marketplace, South live, North locked, Street Buy, phone + desktop | **FAIL** — North looked live |
+| M1b | North lock + dashed twin | **FAIL** — still a twin tab |
+| M1c | North plaque beside South | **FAIL** — still read as a North tab |
+| M1d | South full-width. Sentence: North is closed until you ferry. | **PASS** |
+| H1 | Hire center sheet. Empty state: Market → pad. Not a vendor dump. Phone + desktop. | **PASS** |
+| A1 | Phone 390: all five aisles (Street through Farming) reachable; none clipped as a mystery. | critic |
 
-Queued after pass: Hire sheet; phone aisle thumb reach.
+Ratchet: M1d North sentence, H1 empty Hire copy.
 
+The user is the brake.
