@@ -191,7 +191,6 @@ function rowHtml(row) {
 export function formatCashLedger(play) {
   const m = cashLedgerModel(play);
   const lastCls = m.lastMin > 0 ? "is-up" : m.lastMin < 0 ? "is-down" : "is-zero";
-  const runCls = m.runningMin > 0 ? "is-up" : "is-zero";
   const rows = [...m.holdings, ...m.stash];
   const taxPct = Math.round(m.tax * 100);
   let body;
@@ -216,14 +215,13 @@ export function formatCashLedger(play) {
     : "";
   const taxLine =
     taxPct > 0
-      ? `<p class="cash-ledger-note">Sticker $/min is after ${taxPct}% sales tax. PAPER / SIMULATED.</p>`
-      : `<p class="cash-ledger-note">PAPER / SIMULATED.</p>`;
+      ? `<p class="cash-ledger-note">Hired carts with stock list sticker $/min after ${taxPct}% tax. Unhired carts pay when you Play. PAPER / SIMULATED.</p>`
+      : `<p class="cash-ledger-note">Hired carts with stock list sticker $/min. Unhired carts pay when you Play. PAPER / SIMULATED.</p>`;
   return `
     <div class="cash-ledger-head">
       <p class="cash-ledger-cash" id="balance-full">${esc(fullCash(m.cash))}</p>
       <p class="cash-ledger-mark">PAPER / SIMULATED</p>
-      <p class="cash-ledger-rate ${lastCls}" id="income">${esc(signedCash(m.lastMin))}<span> last minute</span></p>
-      <p class="cash-ledger-rate ${runCls}">${esc(signedCash(m.runningMin))}<span> if hired and stocked</span></p>
+      <p class="cash-ledger-rate ${lastCls}" id="income">${esc(signedCash(m.lastMin))}<span> sold last minute</span></p>
     </div>
     ${body}
     ${feeLine}

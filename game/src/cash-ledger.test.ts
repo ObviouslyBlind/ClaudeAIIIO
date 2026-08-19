@@ -51,8 +51,8 @@ describe("cash hover ledger (PAPER)", () => {
     });
     expect(html).toContain("$1,000.00");
     expect(html).toContain("+$6.50");
-    expect(html).toContain("last minute");
-    expect(html).toContain("if hired and stocked");
+    expect(html).toContain("sold last minute");
+    expect(html).not.toContain("if hired and stocked");
     expect(html).toContain("Fruit cart");
     expect(html).toContain("12 Island Hwy");
     expect(html).toContain("South · Cart pad");
@@ -62,7 +62,7 @@ describe("cash hover ledger (PAPER)", () => {
     expect(html).toContain("Watermelon cart");
     expect(html).toContain("In pockets");
     expect(html).toContain("PAPER / SIMULATED");
-    expect(html).toContain("8% sales tax");
+    expect(html).toContain("8% tax");
     const model = cashLedgerModel({
       cash: 1000,
       incomePerMinute: 6.5,
