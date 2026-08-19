@@ -22,8 +22,8 @@ Bar the critic inspects on live `http://127.0.0.1:8787/`. One verdict for the wh
 
 Do **not** grade Market Pay “How many / Where” as the sticker. That card is qty + dest.
 
-Last critic (bc-80900351): **FAIL** — Buy $32 opened a land card (“44 ISLAND HWY / YOURS / Close”) with cash still $1000. Yes, buy never appeared. paintLand was hiding the buy-ask.
+Last critic (bc-d92450c7): **FAIL** — two Buy $32 clicks still showed land card YOURS / Close, cash $1000. Second click only leased if buy-ask was visible.
 
-Fix in this round: an open buy-ask stays up. Second click on the Buy chip confirms the lease. Chip can ask from leaseOptions even if the map plot is missing.
+Fix in this round: second click on the same chip always posts /api/lease once that plot is selected. Land card is closed first.
 
 Politics frozen. Operator is the brake.
