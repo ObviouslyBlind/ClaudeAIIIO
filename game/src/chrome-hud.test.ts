@@ -171,6 +171,7 @@ describe("harbour chrome HUD", () => {
     expect(main).toContain("function siteAtTap");
     expect(main).toContain("STAND_TAP_M");
     expect(main).toContain("function paintHoldingGlow");
+    expect(main).toContain('p.name === "vendor"');
     expect(main).toContain("isLotsViewer(viewer) && tapPt");
     expect(chrome).toContain("paintBuyAsk");
     expect(chrome).not.toContain("near-lease");
