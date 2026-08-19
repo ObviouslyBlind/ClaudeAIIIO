@@ -54,7 +54,7 @@ export function segmentCircleHits(a, b, cx, cz, r) {
   const s = Math.sqrt(Math.max(0, disc));
   const ts = [];
   for (const t of [(-B - s) / (2 * A), (-B + s) / (2 * A)]) {
-    if (t > 1e-5 && t < 1 - 1e-5) ts.push(t);
+    if (t >= -1e-8 && t <= 1 + 1e-8) ts.push(Math.max(0, Math.min(1, t)));
   }
   ts.sort((p, q) => p - q);
   return ts;
