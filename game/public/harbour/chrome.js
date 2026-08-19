@@ -12,6 +12,8 @@ import { formatCartsBody } from "./carts-hud.js";
 import { formatSiteMenu, gamesForSite } from "./site-menu.js";
 import { compactCash, fullCash } from "./cash-chip.js";
 import { formatCashLedger } from "./cash-ledger.js";
+import { formatMarketplace } from "./marketplace.js";
+import { formatHireSheet } from "./hire-sheet.js";
 
 export const POLL_MS = 1000;
 
@@ -59,6 +61,10 @@ export function mountChrome(opts) {
   let placing = false;
   let placingKit = "";
   let marketDest = "road";
+  let marketAisle = "street";
+  let marketIsland = "south";
+  let marketQuery = "";
+  let hirePick = "";
   const packShift = mountPackShift();
   let siteTab = "stock";
   let openSiteId = null;
@@ -66,6 +72,7 @@ export function mountChrome(opts) {
   let orderQty = 1;
   const orderAsk = document.getElementById("order-ask");
   const orderVeil = document.getElementById("order-veil");
+  const sheetVeil = document.getElementById("sheet-veil");
 
   function setPlaceHint(text, show) {
     const hint = document.getElementById("place-hint");
@@ -102,6 +109,12 @@ export function mountChrome(opts) {
     paintFootLegend();
   }
 
+  function syncSheetVeil() {
+    if (!sheetVeil) return;
+    const sheet = openPanel === "market" || openPanel === "employees";
+    sheetVeil.hidden = !sheet;
+  }
+
   function closePanels() {
     openPanel = null;
     root.querySelectorAll(".float-panel").forEach((p) => {
@@ -112,6 +125,7 @@ export function mountChrome(opts) {
       b.classList.remove("is-on");
       if (b.hasAttribute("aria-expanded")) b.setAttribute("aria-expanded", "false");
     });
+    syncSheetVeil();
   }
 
   function dismissStandMenu() {
@@ -145,6 +159,11 @@ export function mountChrome(opts) {
       if (btn.hasAttribute("aria-expanded")) btn.setAttribute("aria-expanded", "true");
     }
     paintPanels();
+    syncSheetVeil();
+    if (id === "market") {
+      const search = document.getElementById("market-search");
+      if (search) search.focus();
+    }
   }
 
   function title(text) {
@@ -197,42 +216,25 @@ export function mountChrome(opts) {
     return "South warehouse";
   }
 
-  function skuBuyRow(s) {
-    return `
-      <article class="sku-buy">
-        <div class="sku-buy-copy">
-          <strong class="sku-buy-name">${s.label}</strong>
-          <span class="sku-buy-price">${money(s.paperPrice)}</span>
-        </div>
-        <button type="button" class="go" data-order="${s.id}">Buy</button>
-      </article>`;
-  }
-
   function paintMarket() {
     const body = document.getElementById("market-body");
     if (!body || !play) return;
-    const catalog = play.catalog || [];
-    const prices = play.lastPricesSouth || {};
-    const goods = play.goods || Object.keys(prices);
-    const kits = catalog.filter((s) => s.aisle === "street_carts" || s.role === "kit");
-    const stock = catalog.filter((s) => s.aisle === "stock" || s.role === "stock");
-    body.innerHTML = `
-      ${title("Market")}
-      <p>Buy a fruit cart, watermelon cart, or fish and chips. Click Buy for how many and where it goes.</p>
-      <h3 class="sheet-kicker">Street carts</h3>
-      ${kits.map(skuBuyRow).join("")}
-      <h3 class="sheet-kicker">Stock packs</h3>
-      ${stock.map(skuBuyRow).join("")}
-      <h3 class="sheet-kicker">Twelve goods · South last price</h3>
-      ${goods
-        .map((id) => {
-          const px = Number(prices[id]);
-          const label = String(id).replace("_", " ");
-          const cost = Number.isFinite(px) ? money(px) : "—";
-          return `<div class="inv-row"><span>${label} · ${cost}</span><button type="button" class="go" data-buy="${id}">Buy 1</button></div>`;
-        })
-        .join("")}
-    `;
+    const search = document.getElementById("market-search");
+    const keep = search && document.activeElement === search;
+    const start = keep ? search.selectionStart : null;
+    const end = keep ? search.selectionEnd : null;
+    body.innerHTML = formatMarketplace(play, {
+      aisle: marketAisle,
+      island: marketIsland,
+      query: marketQuery,
+    });
+    const next = document.getElementById("market-search");
+    if (next && keep) {
+      next.focus();
+      if (start != null && end != null && typeof next.setSelectionRange === "function") {
+        next.setSelectionRange(start, end);
+      }
+    }
   }
 
   function hideOrderAsk() {
@@ -295,7 +297,7 @@ export function mountChrome(opts) {
     if (orderVeil) orderVeil.hidden = false;
     orderAsk.innerHTML = `
       <h2>Buy ${row.label}</h2>
-      <p class="order-unit">${money(unit)} each · PAPER · SIMULATED</p>
+      <p class="order-unit">${money(unit)} each</p>
       <p class="order-label">How many</p>
       <div class="order-qty">
         <button type="button" class="ghost" data-order-qty="-1" ${orderQty <= 1 ? "disabled" : ""}>−</button>
@@ -398,31 +400,12 @@ export function mountChrome(opts) {
     if (opts.onPlaceMode) opts.onPlaceMode(true);
   }
 
-  function plotNameFor(stand) {
-    const lease = ((play && play.leases) || []).find((l) => l.id === stand.plotId);
-    return (lease && lease.name) || "your lot";
-  }
-
   function paintStaff() {
     const body = document.getElementById("staff-body");
     if (!body || !play) return;
-    const stands = play.stands || [];
-    body.innerHTML = `
-      ${title("Staff")}
-      ${
-        stands.length || (play.workSites || []).length
-          ? [...stands, ...(play.workSites || [])]
-              .map((s) => {
-                const where = plotNameFor(s);
-                if (s.hired) {
-                  return `<div class="stand-row"><span>${s.staffName || "Vendor"}</span><strong>${where}</strong></div>`;
-                }
-                return `<div class="stand-row"><span>${s.label || "Site"} · ${where}</span><button type="button" class="go" data-open-stand="${s.id}">Open</button></div>`;
-              })
-              .join("")
-          : "<p>Open a site to hire.</p>"
-      }
-    `;
+    const sites = [...(play.stands || []), ...(play.workSites || [])];
+    if (hirePick && !sites.some((s) => s.id === hirePick)) hirePick = "";
+    body.innerHTML = formatHireSheet(play, { selectedId: hirePick });
   }
 
   function paintAccount() {
@@ -662,10 +645,51 @@ export function mountChrome(opts) {
     root.addEventListener("click", async (ev) => {
       const hit = ev.target && ev.target.closest
         ? ev.target.closest(
-            "[data-dest], [data-order], [data-buy], [data-place], [data-withdraw], [data-open-stand], [data-order-qty], [data-order-dest], #order-pay, #order-cancel",
+            "[data-dest], [data-order], [data-buy], [data-place], [data-withdraw], [data-open-stand], [data-order-qty], [data-order-dest], [data-aisle], [data-island], [data-sheet-close], [data-hire-pick], [data-hire-back], [data-sheet-hire], #order-pay, #order-cancel",
           )
         : null;
       if (!hit || (standMenu && standMenu.contains(hit))) return;
+      if (hit.hasAttribute("data-sheet-close")) {
+        closePanels();
+        return;
+      }
+      if (hit.hasAttribute("data-aisle")) {
+        marketAisle = hit.getAttribute("data-aisle") || "street";
+        paintMarket();
+        return;
+      }
+      if (hit.hasAttribute("data-island")) {
+        const isle = hit.getAttribute("data-island");
+        if (isle === "north") return;
+        marketIsland = "south";
+        paintMarket();
+        return;
+      }
+      if (hit.hasAttribute("data-hire-pick")) {
+        hirePick = hit.getAttribute("data-hire-pick") || "";
+        paintStaff();
+        return;
+      }
+      if (hit.hasAttribute("data-hire-back")) {
+        hirePick = "";
+        paintStaff();
+        return;
+      }
+      if (hit.hasAttribute("data-sheet-hire")) {
+        const standId = hit.getAttribute("data-sheet-hire");
+        const { ok, data } = await readJson("/api/stand/hire", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ standId }),
+        });
+        if (data && data.play) stampPlay(data.play);
+        paintStaff();
+        if (ok && opts.onHired) opts.onHired(standId);
+        if (opts.setStatus) {
+          opts.setStatus(ok ? "Hired on this site." : "Could not hire: " + ((data && data.reason) || "fail"));
+        }
+        return;
+      }
       if (hit.hasAttribute("data-order-qty")) {
         orderQty = Math.max(1, Math.min(10, orderQty + Number(hit.getAttribute("data-order-qty") || 0)));
         paintOrderAsk();
@@ -719,7 +743,7 @@ export function mountChrome(opts) {
         paintTop();
         paintMarket();
         paintInv();
-        if (opts.setStatus) opts.setStatus("In the cart · PAPER · SIMULATED");
+        if (opts.setStatus) opts.setStatus("In the cart.");
         return;
       }
       if (hit.hasAttribute("data-place")) {
@@ -741,6 +765,12 @@ export function mountChrome(opts) {
         await refreshPlay(data);
         return;
       }
+    });
+    root.addEventListener("input", (ev) => {
+      const hit = ev.target && ev.target.closest ? ev.target.closest("#market-search") : null;
+      if (!hit) return;
+      marketQuery = hit.value || "";
+      paintMarket();
     });
     root.addEventListener("change", async (ev) => {
       const hit = ev.target && ev.target.closest ? ev.target.closest("[data-sticker]") : null;
@@ -771,7 +801,9 @@ export function mountChrome(opts) {
       play = data;
       paintTop();
       paintFootLegend();
-      if (root.querySelector(".float-panel.is-open")) paintPanels();
+      const ae = document.activeElement;
+      const typingMarket = ae && ae.id === "market-search";
+      if (root.querySelector(".float-panel.is-open") && !typingMarket) paintPanels();
       if (opts.onPlay) opts.onPlay(play);
       if (openSiteId && standMenu && !standMenu.hidden) {
         const ae = document.activeElement;
@@ -920,6 +952,21 @@ export function mountChrome(opts) {
       dismissStandMenu();
     });
   }
+  if (sheetVeil) {
+    sheetVeil.addEventListener("click", () => {
+      closePanels();
+    });
+  }
+  document.addEventListener("keydown", (ev) => {
+    if (ev.key !== "Escape") return;
+    if (orderAsk && !orderAsk.hidden) {
+      hideOrderAsk();
+      return;
+    }
+    const pack = document.getElementById("pack-shift");
+    if (pack && !pack.hidden) return;
+    if (openPanel) closePanels();
+  });
   bindCashDock();
   bindChromeActions();
 

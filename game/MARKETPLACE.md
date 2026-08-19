@@ -1,7 +1,7 @@
 # 2Isles Marketplace
 
 How you buy kit, stand up a business, and run it on **one logistics system**.  
-This is the player-facing spec. Not built yet. Street carts already exist; the rest is the shape we build toward.
+This is the player-facing spec. The center **2Isles Marketplace** sheet and **Hire** business list are in the harbour HUD. Street is live. Other aisles are honestly empty until those loops exist.
 
 Do **not** call this shop PAPER, simulated cash, an outfitter, or books. Money still is not real-world cash — the HUD can say that. This sheet does not.
 
@@ -198,13 +198,13 @@ Trucks that “park and run a route” are this same system: a node with a sched
 
 ---
 
-## Build order (when we implement)
+## Build order
 
-1. Center **2Isles Marketplace** shell: search, South / North, aisles. **Street** lists real carts. Other aisles say coming soon (honest empty, not fake SKUs).
-2. Hire sheet grows from “this cart” to **list of your businesses** — even if the only business is carts at first.
+1. **Done.** Center **2Isles Marketplace** shell: search, South / North, aisles. **Street** lists real carts. Other aisles say coming soon (honest empty, not fake SKUs). Hire lists your businesses.
+2. Hire actions grow as fleet and plant exist on a site.
 3. **Shop fit** when small buildings exist.
 4. **Plant + aggregates** (~20 SKUs) when a quarry lot type exists.
 5. **Farming** orchard kit when a farm lot type exists.
 6. Split fry stock (fish / chips / oil) when we are ready — that is Street stock, not a new aisle.
 
-Until then, the left Market panel can stay as the temporary buy list. This file is the target, not a promise that the quarry is in the build this week.
+Street is live in the HUD. Other aisles stay empty until those lot types exist. Do not fake a quarry you cannot place.

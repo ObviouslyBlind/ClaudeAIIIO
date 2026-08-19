@@ -460,7 +460,7 @@ function aimPointer(ev) {
 }
 
 const HUD_BLOCK =
-  "nav, a, button, #taxi-map, #ferry-ticket, #catalog-picker, .float-panel, #land-card, #buy-ask, #crate-ask, #order-veil, #order-ask, #stand-veil, #stand-menu, #place-hint, #menu-stack, #pack-shift, .lot-tag, #lot-tags, #cash-dock, .cash-plate, .cash-ledger";
+  "nav, a, button, #taxi-map, #ferry-ticket, #catalog-picker, .float-panel, #land-card, #buy-ask, #crate-ask, #order-veil, #order-ask, #stand-veil, #stand-menu, #sheet-veil, #place-hint, #menu-stack, #pack-shift, .lot-tag, #lot-tags, #cash-dock, .cash-plate, .cash-ledger";
 
 const walkPlane = new THREE.Plane();
 const walkHit = new THREE.Vector3();
