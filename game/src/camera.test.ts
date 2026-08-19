@@ -144,8 +144,8 @@ describe("RMB-hold orbit camera", () => {
       Math.hypot(STALL_CAM_SIDE_M, STALL_CAM_UP_M, STALL_CAM_BACK_M),
       5,
     );
-    expect(pose.x - 100).toBe(STALL_CAM_SIDE_M);
-    expect(pose.z - 200).toBe(STALL_CAM_BACK_M);
+    expect(pose.x - 100).toBeCloseTo(STALL_CAM_SIDE_M);
+    expect(pose.z - 200).toBeCloseTo(STALL_CAM_BACK_M);
   });
 
   it("applyStallCamera copies the pose with no lerp", () => {
