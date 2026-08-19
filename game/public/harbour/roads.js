@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { ROAD_CLASSES, carriagewayWidthM, roadClassSpec } from "./roadclass.js";
 import { junctionPad, trimPolylineForPads, pointInJunctionPad } from "./roadnet.js";
 import { addQuadXZ, junctionKerbQuads } from "./roadjoin.js";
-import { buildHubFootprint, buildCircusFootprint, clipPolylineToOutside, multiContains, segmentRing, CIRCUS_ARM_STUB_M, CIRCUS_ARM_TUCK_M, FOOT_SHOULDER_M } from "./roadfoot.js";
+import { buildHubFootprint, buildCircusFootprint, clipPolylineToOutside, multiContains, FOOT_SHOULDER_M } from "./roadfoot.js";
 import { circusesFromGraph, clipPolylineOutsideCircuses } from "./roadclip.js";
 
 /** Dark grit under the tarmac edge. Pale 0x6f6a5e read as a sand gap from spawn. */
@@ -257,8 +257,8 @@ function drawPaved(scene, spec, road, heightAt, graph, hubs, circuses) {
   const cls = classOf(road);
   const width = roadClassSpec(cls).carriageM;
   const runs = clipRuns(pts, hubs, circuses);
-  drawClippedRuns(scene, spec, road, heightAt, runs, width + SHOULDER_PAD_M, SHOULDER, "shoulder", {}, -0.03);
-  drawClippedRuns(scene, spec, road, heightAt, runs, width, ASPHALT, "paved");
+  drawClippedRuns(scene, spec, road, heightAt, runs, width + SHOULDER_PAD_M, SHOULDER, "shoulder", {}, -0.03, Infinity, circuses);
+  drawClippedRuns(scene, spec, road, heightAt, runs, width, ASPHALT, "paved", {}, 0, Infinity, circuses);
   drawLanePaint(scene, spec, road, heightAt, runs, width, false, 1);
 }
 
@@ -377,10 +377,81 @@ function splitRuns(pts, maxGap) {
   return runs;
 }
 
-function drawClippedRuns(scene, spec, road, heightAt, runs, widthM, color, roadKind, matOpts, yLift, skipGap) {
+function projectOnCircle(p, cx, cz, r) {
+  const dx = p.x - cx;
+  const dz = p.z - cz;
+  const d = Math.hypot(dx, dz) || 1;
+  return { x: cx + (dx / d) * r, z: cz + (dz / d) * r };
+}
+
+function arcOnCircle(cx, cz, r, a0, a1, steps) {
+  let d = a1 - a0;
+  while (d > Math.PI) d -= Math.PI * 2;
+  while (d < -Math.PI) d += Math.PI * 2;
+  const n = Math.max(4, steps);
+  const out = [];
+  for (let i = 0; i <= n; i++) {
+    const a = a0 + (d * i) / n;
+    out.push({ x: cx + Math.cos(a) * r, z: cz + Math.sin(a) * r });
+  }
+  return out;
+}
+
+/**
+ * Square ribbon ends become a chord. Fan the last metres onto the circus
+ * circle so the kerb is the ring, not a flat cut in the sand.
+ */
+function drawCircleCaps(scene, spec, road, heightAt, runs, widthM, color, roadKind, yLift, circuses) {
+  if (!circuses || !circuses.length || widthM < 0.4) return;
+  const half = widthM / 2;
+  const lift = (roadKind === "sidewalk" ? 0.18 : 0.16) + (yLift || 0) + 0.04;
+  for (const run of runs) {
+    if (!run || run.length < 2) continue;
+    for (const head of [true, false]) {
+      const p = head ? run[0] : run[run.length - 1];
+      const q = head ? run[1] : run[run.length - 2];
+      let hit = null;
+      for (const c of circuses) {
+        const d = Math.hypot(p.x - c.x, p.z - c.z);
+        const r = c.clip || c.outer;
+        if (Math.abs(d - r) < 2.8) hit = { c, r };
+      }
+      if (!hit) continue;
+      const dx = p.x - q.x;
+      const dz = p.z - q.z;
+      const len = Math.hypot(dx, dz) || 1;
+      const rx = dz / len;
+      const rz = -dx / len;
+      const left = { x: p.x - rx * half, z: p.z - rz * half };
+      const right = { x: p.x + rx * half, z: p.z + rz * half };
+      const a = projectOnCircle(left, hit.c.x, hit.c.z, hit.r);
+      const b = projectOnCircle(right, hit.c.x, hit.c.z, hit.r);
+      const a0 = Math.atan2(a.z - hit.c.z, a.x - hit.c.x);
+      const a1 = Math.atan2(b.z - hit.c.z, b.x - hit.c.x);
+      const arc = arcOnCircle(hit.c.x, hit.c.z, hit.r, a0, a1, 10);
+      const ring = [[left.x, left.z], [a.x, a.z]];
+      for (const s of arc) ring.push([s.x, s.z]);
+      ring.push([b.x, b.z], [right.x, right.z]);
+      const first = ring[0];
+      ring.push([first[0], first[1]]);
+      const y = heightAt(spec, p.x, p.z) + lift;
+      addMultiPolygonMesh(scene, [[ring]], y, color, {
+        island: road.island,
+        roadKind: "junction",
+        roadName: (road.name || "road") + " cap",
+        mode: "PAPER",
+      });
+    }
+  }
+}
+
+function drawClippedRuns(scene, spec, road, heightAt, runs, widthM, color, roadKind, matOpts, yLift, skipGap, circuses) {
   for (const run of runs) {
     if (!run || run.length < 2) continue;
     drawRibbon(scene, spec, { ...road, points: run }, heightAt, widthM, color, roadKind, matOpts || {}, skipGap == null ? Infinity : skipGap, yLift || 0);
+  }
+  if (circuses && circuses.length && (roadKind === "paved" || roadKind === "median" || roadKind === "shoulder")) {
+    drawCircleCaps(scene, spec, road, heightAt, runs, widthM, color, roadKind, yLift || 0, circuses);
   }
 }
 
@@ -489,8 +560,10 @@ function drawHighway(scene, spec, road, heightAt, graph, hubs, circuses) {
     "shoulder",
     {},
     -0.03,
+    Infinity,
+    circuses,
   );
-  drawClippedRuns(scene, spec, { ...road, name: name + " median" }, heightAt, lip, s.medianM, ASPHALT, "median");
+  drawClippedRuns(scene, spec, { ...road, name: name + " median" }, heightAt, lip, s.medianM, ASPHALT, "median", {}, 0, Infinity, circuses);
   for (const side of [-1, 1]) {
     const laneRuns = clipRuns(offsetPolyline(pts, lane * side), hubs, circuses);
     drawClippedRuns(
@@ -502,6 +575,10 @@ function drawHighway(scene, spec, road, heightAt, graph, hubs, circuses) {
       s.carriageM,
       ASPHALT,
       "paved",
+      {},
+      0,
+      Infinity,
+      circuses,
     );
     drawLanePaint(scene, spec, road, heightAt, laneRuns, s.carriageM, true, side);
   }
@@ -516,6 +593,8 @@ function drawHighway(scene, spec, road, heightAt, graph, hubs, circuses) {
     "median",
     {},
     0.03,
+    Infinity,
+    circuses,
   );
 }
 
@@ -634,19 +713,7 @@ function drawJunctions(scene, map, specOf, heightAt) {
   }
 }
 
-function circusArmDir(node, edge) {
-  const pts = edge.points;
-  const fromA = edge.a === node.id;
-  const a = fromA ? pts[0] : pts[pts.length - 1];
-  const b = fromA ? pts[1] : pts[pts.length - 2];
-  const dx = b.x - a.x;
-  const dz = b.z - a.z;
-  const len = Math.hypot(dx, dz) || 1;
-  return { x: dx / len, z: dz / len };
-}
-
 function drawCircusJoins(scene, map, specOf, heightAt, joins) {
-  const graph = map.graph;
   for (const rec of joins || []) {
     const { node, foot } = rec;
     if (!foot) continue;
@@ -657,11 +724,9 @@ function drawCircusJoins(scene, map, specOf, heightAt, joins) {
     const base = { island: node.island, footprint: true, label: node.name || "Circus" };
     const name = node.name || "Circus";
 
-    // Ring is the join (PathPhalt / Curva). Short lips cover the chord where
-    // a ribbon meets the circle. Do not draw 12 m boxes into the grass, and
-    // do not earcut a holed Clipper keyhole (that dropped the arms).
+    // Ring is the join. No arm boxes — those were square edges in the grass.
     const grit = new THREE.Mesh(
-      new THREE.RingGeometry(inner, outer + FOOT_SHOULDER_M, 48),
+      new THREE.RingGeometry(inner, outer + FOOT_SHOULDER_M, 64),
       new THREE.MeshLambertMaterial({ color: SHOULDER }),
     );
     grit.rotation.x = -Math.PI / 2;
@@ -672,7 +737,7 @@ function drawCircusJoins(scene, map, specOf, heightAt, joins) {
     scene.add(grit);
 
     const ring = new THREE.Mesh(
-      new THREE.RingGeometry(inner, outer, 48),
+      new THREE.RingGeometry(inner, outer, 64),
       roadMaterial(ASPHALT, "paved"),
     );
     ring.rotation.x = -Math.PI / 2;
@@ -683,33 +748,6 @@ function drawCircusJoins(scene, map, specOf, heightAt, joins) {
     ring.userData = { kind: "road", mode: "PAPER", ...base, roadKind: "paved", roadName: name };
     ring.name = `road:${node.island}:${name}`;
     scene.add(ring);
-
-    for (const e of graph.edges || []) {
-      if (e.a !== node.id && e.b !== node.id) continue;
-      if (!e.points || e.points.length < 2) continue;
-      const cls = e.cls || "street";
-      if (roadClassSpec(cls).dirt) continue;
-      const dir = circusArmDir(node, e);
-      const half = carriagewayWidthM(cls) / 2;
-      const origin = {
-        x: node.x + dir.x * (outer - CIRCUS_ARM_TUCK_M),
-        z: node.z + dir.z * (outer - CIRCUS_ARM_TUCK_M),
-      };
-      const far = {
-        x: node.x + dir.x * (outer + CIRCUS_ARM_STUB_M),
-        z: node.z + dir.z * (outer + CIRCUS_ARM_STUB_M),
-      };
-      addMultiPolygonMesh(scene, [[segmentRing(origin, far, half + FOOT_SHOULDER_M / 2)]], y + 0.13, SHOULDER, {
-        ...base,
-        roadKind: "shoulder",
-        roadName: name + " hub",
-      });
-      addMultiPolygonMesh(scene, [[segmentRing(origin, far, half)]], y + 0.2, ASPHALT, {
-        ...base,
-        roadKind: "paved",
-        roadName: name + " arm",
-      });
-    }
 
     const disc = new THREE.Mesh(
       new THREE.CylinderGeometry(Math.max(4, inner - 0.25), Math.max(4, inner - 0.25), 0.36, 24),

@@ -328,19 +328,7 @@ describe("paved street from spawn", () => {
     expect(circus).toBeTruthy();
     expect(circus!.geometry.parameters?.innerRadius).toBeCloseTo(radii.inner, 0);
     expect(circus!.geometry.parameters?.outerRadius).toBeCloseTo(radii.outer, 0);
-    expect(added.filter((m) => m.userData.roadName === "Harbour Circus arm").length).toBe(3);
-    for (const arm of added.filter((m) => m.userData.roadName === "Harbour Circus arm")) {
-      const pos = arm.geometry.attributes.position;
-      let maxAlong = 0;
-      for (let i = 0; i < pos.count; i++) {
-        const dx = pos.getX(i) - harbour.x;
-        const dz = pos.getZ(i) - harbour.z;
-        maxAlong = Math.max(maxAlong, Math.hypot(dx, dz));
-      }
-      // Lip, not a 12 m grass slab. Corners sit half a carriage off-axis.
-      expect(maxAlong).toBeLessThan(radii.outer + CIRCUS_ARM_STUB_M + 16);
-      expect(maxAlong).toBeLessThan(radii.outer + 20);
-    }
+    expect(added.filter((m) => m.userData.roadName === "Harbour Circus arm").length).toBe(0);
 
     const quay = added.filter(
       (m) => m.userData.roadKind === "paved" && m.userData.roadName === "Quayward Rd",

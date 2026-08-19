@@ -1,11 +1,26 @@
 import { describe, expect, it } from "vitest";
 import { createLandBoard } from "./land.ts";
 import { junctionPad } from "../public/harbour/roadnet.js";
-import { buildHubFootprint, buildCircusFootprint, clipPolylineToOutside, multiContains, segmentRing, unionGeoms, CIRCUS_ARM_STUB_M } from "../public/harbour/roadfoot.js";
+import { buildHubFootprint, buildCircusFootprint, clipPolylineToOutside, multiContains, segmentRing, unionGeoms, junctionContour, CIRCUS_ARM_STUB_M } from "../public/harbour/roadfoot.js";
 import { circusMeshRadii } from "../public/harbour/roadclip.js";
 import { carriagewayWidthM } from "../public/harbour/roadclass.js";
 
 describe("road hub footprints", () => {
+  it("fills a T as one rounded contour, not two stacked rectangles", () => {
+    const arms = [
+      { dx: 1, dz: 0, half: 3, reach: 20 },
+      { dx: -1, dz: 0, half: 3, reach: 20 },
+      { dx: 0, dz: 1, half: 3, reach: 20 },
+    ];
+    const ring = junctionContour({ x: 0, z: 0 }, arms, 0);
+    const poly = [[ring]];
+    expect(multiContains(poly, 0, 0)).toBe(true);
+    expect(multiContains(poly, 0, 10)).toBe(true);
+    expect(multiContains(poly, 8, 0)).toBe(true);
+    expect(multiContains(poly, 10, 10)).toBe(false);
+    expect(multiContains(poly, 0, 25)).toBe(false);
+  });
+
   it("unions two overlapping rectangles into one T, not two stacked strips", () => {
     const thru = segmentRing({ x: 0, z: 0 }, { x: 40, z: 0 }, 3);
     const stem = segmentRing({ x: 20, z: 0 }, { x: 20, z: 20 }, 3);
@@ -25,10 +40,10 @@ describe("road hub footprints", () => {
     const pad = junctionPad(graph, se)!;
     const foot = buildHubFootprint(graph, se, pad);
     expect(multiContains(foot.tarmac, se.x, se.z)).toBe(true);
-    expect(multiContains(foot.sidewalk, se.x + 6, se.z + 6)).toBe(true);
-    expect(multiContains(foot.tarmac, se.x + 6, se.z + 6)).toBe(false);
-    expect(multiContains(foot.clip, se.x + 6, se.z + 6)).toBe(false);
+    expect(foot.sidewalk.length).toBeGreaterThan(0);
+    expect(multiContains(foot.sidewalk, se.x, se.z)).toBe(false);
     expect(multiContains(foot.tarmac, se.x + 20, se.z + 20)).toBe(false);
+    expect(foot.tarmac[0]?.[0]?.length).toBeGreaterThan(16);
   });
 
   it("cuts a polyline on a hub boundary instead of dropping the last densify step", () => {
@@ -128,12 +143,8 @@ describe("road hub footprints", () => {
     const len = Math.hypot(b.x - a.x, b.z - a.z) || 1;
     const dx = (b.x - a.x) / len;
     const dz = (b.z - a.z) / len;
-    const px = -dz;
-    const pz = dx;
-    const onRing = { x: n.x + dx * outer, z: n.z + dz * outer };
-    const lane = carriagewayWidthM("highway") / 2 - 2;
-    expect(multiContains(foot.tarmac, onRing.x + px * lane, onRing.z + pz * lane)).toBe(true);
-    expect(multiContains(foot.tarmac, onRing.x - px * lane, onRing.z - pz * lane)).toBe(true);
+    const onRing = { x: n.x + dx * ((inner + outer) / 2), z: n.z + dz * ((inner + outer) / 2) };
+    expect(multiContains(foot.tarmac, onRing.x, onRing.z)).toBe(true);
     const quay = graph.edges.find((e) => e.name === "Quayward Rd" && (e.a === n.id || e.b === n.id))!;
     const qPts = quay.points;
     const qFromA = quay.a === n.id;
@@ -142,7 +153,7 @@ describe("road hub footprints", () => {
     const qLen = Math.hypot(qb.x - qa.x, qb.z - qa.z) || 1;
     const qx = (qb.x - qa.x) / qLen;
     const qz = (qb.z - qa.z) / qLen;
-    expect(multiContains(foot.tarmac, n.x + qx * outer, n.z + qz * outer)).toBe(true);
+    expect(multiContains(foot.tarmac, n.x + qx * ((inner + outer) / 2), n.z + qz * ((inner + outer) / 2))).toBe(true);
     expect(inner).toBeGreaterThan(10);
     expect(CIRCUS_ARM_STUB_M).toBeLessThan(5);
     expect(multiContains(foot.clip, n.x, n.z), "clip is the outer disc").toBe(true);

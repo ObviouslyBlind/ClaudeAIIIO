@@ -1,9 +1,8 @@
 /**
- * Junction hubs: buffer the last metres of each arm and union those
- * 2–4 rectangles. That is a T or an L. It is not the whole island.
+ * Junction hubs: one contour per node (SeloSlav / PathPhalt), not stacked
+ * rectangles. Ribbons stop on that outline so the visible kerb is one edge.
  *
- * Island-wide union filled greens and merged nearby streets into a splat.
- * Ribbons still draw the runs. Hubs only exist at joins.
+ * Island-wide union filled greens. Hubs only exist at joins.
  */
 import polygonClipping from "./vendor/polygon-clipping.js";
 import { carriagewayWidthM, roadClassSpec } from "./roadclass.js";
@@ -178,15 +177,41 @@ function boundaryPoint(insidePt, outsidePt, insideFn) {
 }
 
 /**
- * Union of the arm-end rectangles at one node. 2–4 rects. Not the island.
- * Dual highway arms use the full carriageway (both lanes + median), not one lane.
+ * Radial join outline. At each angle, take the farthest point that still
+ * sits inside some arm's rectangle. 15/30/45/90° all fall out of the same
+ * loop. The kerb is a rounded T/L, not two overlapping boxes.
+ *
+ * @param {{ x: number, z: number }} node
+ * @param {{ dx: number, dz: number, half: number, reach: number }[]} arms
+ * @param {number} extraHalf
+ * @param {number} [steps]
  */
-export function buildHubFootprint(graph, node, pad) {
-  const tarmac = [];
-  const grit = [];
-  const walk = [];
-  if (!graph || !node || !pad) return { tarmac: [], shoulder: [], sidewalk: [] };
+export function junctionContour(node, arms, extraHalf, steps) {
+  const n = steps || 96;
+  const hub = Math.max(1.2, extraHalf + 0.8);
+  const ring = [];
+  for (let i = 0; i < n; i++) {
+    const ang = (i / n) * Math.PI * 2;
+    const ux = Math.cos(ang);
+    const uz = Math.sin(ang);
+    let r = hub;
+    for (const arm of arms) {
+      const along = ux * arm.dx + uz * arm.dz;
+      if (along <= 1e-4) continue;
+      const lateral = Math.abs(ux * arm.dz - uz * arm.dx);
+      const half = arm.half + extraHalf;
+      const side = lateral <= 1e-5 ? Infinity : half / lateral;
+      const front = arm.reach / along;
+      r = Math.max(r, Math.min(side, front));
+    }
+    ring.push([snap(node.x + ux * r), snap(node.z + uz * r)]);
+  }
+  return closeRing(ring);
+}
+
+function hubArms(graph, node, pad) {
   const alongDefault = pad.side / 2 + 1.2;
+  const arms = [];
   for (const e of graph.edges) {
     if (e.a !== node.id && e.b !== node.id) continue;
     if (!e.points || e.points.length < 2) continue;
@@ -194,25 +219,37 @@ export function buildHubFootprint(graph, node, pad) {
     if (spec.dirt) continue;
     const dir = armDir(node, e);
     const along = pad.along && pad.along[e.id] != null ? pad.along[e.id] : alongDefault;
-    const far = { x: node.x + dir.x * along, z: node.z + dir.z * along };
-    const origin = { x: node.x, z: node.z };
-    const half = carriagewayWidthM(e.cls) / 2;
-    tarmac.push([segmentRing(origin, far, half)]);
-    grit.push([segmentRing(origin, far, half + FOOT_SHOULDER_M / 2)]);
-    if (spec.sidewalkM > 0) {
-      walk.push([segmentRing(origin, far, half + FOOT_SHOULDER_M / 2 + spec.sidewalkM)]);
-    }
+    arms.push({
+      dx: dir.x,
+      dz: dir.z,
+      half: carriagewayWidthM(e.cls) / 2,
+      reach: along,
+      walk: spec.sidewalkM || 0,
+    });
   }
-  const tar = unionGeoms(tarmac);
-  const gritU = unionGeoms(grit);
-  const walkU = unionGeoms(walk);
+  return arms;
+}
+
+/**
+ * One contour at the node. Dual arms use the full carriageway.
+ * Ribbons clip on `clip`. The drawn kerb is this outline, not 2–4 boxes.
+ */
+export function buildHubFootprint(graph, node, pad) {
+  if (!graph || !node || !pad) return { tarmac: [], shoulder: [], sidewalk: [], clip: [] };
+  const arms = hubArms(graph, node, pad);
+  if (!arms.length) return { tarmac: [], shoulder: [], sidewalk: [], clip: [] };
+  const tarRing = junctionContour(node, arms, 0);
+  const gritRing = junctionContour(node, arms, FOOT_SHOULDER_M / 2);
+  const tar = [[tarRing]];
+  const grit = [[gritRing]];
+  const walkOnly = arms.filter((a) => a.walk > 0).map((a) => ({ ...a, half: a.half + a.walk }));
+  const walk = walkOnly.length
+    ? diffGeoms([[junctionContour(node, walkOnly, FOOT_SHOULDER_M / 2)]], tar)
+    : [];
   return {
     tarmac: tar,
-    /** Rim, not a slab under the black. */
-    shoulder: gritU.length ? diffGeoms(gritU, tar) : [],
-    /** L/T kerb ring. Offset walks clip against tarmac so black ribbons meet the hub. */
-    sidewalk: walkU.length ? diffGeoms(walkU, tar) : [],
-    /** Ribbons stop on tarmac, not the walk. Walk-clip left a sand gap before the hub. */
+    shoulder: grit.length ? diffGeoms(grit, tar) : [],
+    sidewalk: walk,
     clip: tar,
   };
 }
@@ -227,11 +264,8 @@ function circleRing(cx, cz, r, steps = 40) {
 }
 
 /**
- * Circus clip + coverage tests.
- *
- * Drawn mesh is RingGeometry (roads.js), not this polygon earcut.
- * `clip` is the **outer disc only** so offset duals hit the ring face.
- * Tarmac keeps a holed ring plus short lips for coverage tests.
+ * Circus clip. Drawn mesh is RingGeometry. No arm boxes — those were the
+ * square edges in the grass. Duals circle-cut onto the outer face.
  */
 export function buildCircusFootprint(graph, node) {
   if (!graph || !node || !node.radius) {
@@ -241,28 +275,12 @@ export function buildCircusFootprint(graph, node) {
   const cx = node.x;
   const cz = node.z;
   const disc = [[circleRing(cx, cz, outer)]];
-  const tarmac = [disc[0]];
   const grit = [[circleRing(cx, cz, outer + FOOT_SHOULDER_M)]];
-  for (const e of graph.edges) {
-    if (e.a !== node.id && e.b !== node.id) continue;
-    if (!e.points || e.points.length < 2) continue;
-    const spec = roadClassSpec(e.cls);
-    if (spec.dirt) continue;
-    const dir = armDir(node, e);
-    const origin = { x: cx + dir.x * (outer - CIRCUS_ARM_TUCK_M), z: cz + dir.z * (outer - CIRCUS_ARM_TUCK_M) };
-    const far = { x: cx + dir.x * (outer + CIRCUS_ARM_STUB_M), z: cz + dir.z * (outer + CIRCUS_ARM_STUB_M) };
-    const half = carriagewayWidthM(e.cls) / 2;
-    tarmac.push([segmentRing(origin, far, half)]);
-    grit.push([segmentRing(origin, far, half + FOOT_SHOULDER_M / 2)]);
-  }
-  const tar = unionGeoms(tarmac);
-  const holed = diffGeoms(tar, [[circleRing(cx, cz, inner)]]);
-  const gritU = unionGeoms(grit);
+  const holed = diffGeoms(disc, [[circleRing(cx, cz, inner)]]);
   return {
-    tarmac: holed && holed.length ? holed : tar,
-    shoulder: gritU.length ? diffGeoms(gritU, tar) : [],
+    tarmac: holed && holed.length ? holed : disc,
+    shoulder: diffGeoms(grit, disc),
     sidewalk: [],
-    /** Ribbons stop on the outer circle, not on long arm boxes. */
     clip: disc,
     inner,
     outer,
