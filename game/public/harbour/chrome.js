@@ -72,7 +72,7 @@ export function mountChrome(opts) {
   }
 
   const HINTS = {
-    world: "World: left-click walks. Lots shows lot outlines and $ bars.",
+    world: "World: tap the dirt to walk. Green line is the path.",
     lots: "Lots on. Outlines plus a few nearby $ bars. Click Lots again to hide.",
     foot: "Foot traffic: High (green) / Moderate (yellow) / Low (red) on each named road.",
   };

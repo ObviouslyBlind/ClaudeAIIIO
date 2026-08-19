@@ -15,7 +15,7 @@ export const VIEWERS = {
   world: {
     id: "world",
     label: "World",
-    hint: "Walk. Land does not steal taps.",
+    hint: "Tap the dirt to walk. Green line is the path.",
   },
   lots: {
     id: "lots",

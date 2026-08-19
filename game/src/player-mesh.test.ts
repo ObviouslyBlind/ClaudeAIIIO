@@ -73,15 +73,17 @@ describe("player PAPER walker", () => {
     expect(colors.every((c) => !isGrey(c))).toBe(true);
   });
 
-  it("swings named legs and arms while walking", () => {
+  it("swings named legs and arms from gait phase, and shoes ride the legs", () => {
     const player = makePlayer();
     const figure = player.getObjectByName("paper-figure")!;
     const leftLeg = figure.getObjectByName("left-leg")!;
     const rightLeg = figure.getObjectByName("right-leg")!;
     expect(leftLeg).toBeTruthy();
     expect(rightLeg).toBeTruthy();
-    stepPlayerWalk(player, Math.PI / 18, true);
-    expect(leftLeg.rotation.x).not.toBe(0);
+    expect(leftLeg.children.some((c) => c.userData?.part === "shoe")).toBe(true);
+    expect(rightLeg.children.some((c) => c.userData?.part === "shoe")).toBe(true);
+    stepPlayerWalk(player, Math.PI / 2, true);
+    expect(leftLeg.rotation.x).toBeGreaterThan(0.4);
     expect(rightLeg.rotation.x).toBeCloseTo(-leftLeg.rotation.x, 5);
     stepPlayerWalk(player, 0, false);
     expect(leftLeg.rotation.x).toBeCloseTo(0, 8);

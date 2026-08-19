@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { attachPlayerTag } from "./player-tag.js";
+import { PLAYER_SOLE_M } from "./walk-plan.js";
 
 /** Warm PAPER craft — readable body, shirt, head. */
 const SKIN = 0xf2d2a8;
@@ -11,10 +12,10 @@ const SHOES = 0x4a3220;
 
 /**
  * Metres from player.position down to the soles.
- * Spawn / walk set y = landHeight + 1.15 (old capsule centre). Camera uses that
+ * Spawn / walk set y = landHeight + PLAYER_SOLE_M. Camera uses that
  * same point. The figure hangs below it so feet sit on the ground.
  */
-const SOLE_Y = -1.15;
+const SOLE_Y = -PLAYER_SOLE_M;
 
 function paperBox(w, h, d, color) {
   const mesh = new THREE.Mesh(
@@ -26,15 +27,19 @@ function paperBox(w, h, d, color) {
   return mesh;
 }
 
-function limb(name, w, h, d, color, hipY, x) {
+function limb(name, w, h, d, color, hipY, x, shoe) {
   const g = new THREE.Group();
   g.name = name;
   g.userData.part = name;
   g.position.set(x, hipY, 0);
   const mesh = paperBox(w, h, d, color);
   mesh.position.set(0, -h / 2, 0);
-  mesh.userData.part = name;
+  mesh.userData.part = name.indexOf("leg") >= 0 ? "leg" : "arm";
   g.add(mesh);
+  if (shoe) {
+    shoe.position.set(0, -h + 0.04, 0.05);
+    g.add(shoe);
+  }
   return g;
 }
 
@@ -64,14 +69,12 @@ export function dressPlayer(player) {
   figure.position.y = SOLE_Y;
 
   const leftShoe = paperBox(0.16, 0.08, 0.26, SHOES);
-  leftShoe.position.set(-0.12, 0.04, 0.03);
   leftShoe.userData.part = "shoe";
   const rightShoe = paperBox(0.16, 0.08, 0.26, SHOES);
-  rightShoe.position.set(0.12, 0.04, 0.03);
   rightShoe.userData.part = "shoe";
 
-  const leftLeg = limb("left-leg", 0.16, 0.72, 0.18, PANTS, 0.82, -0.12);
-  const rightLeg = limb("right-leg", 0.16, 0.72, 0.18, PANTS, 0.82, 0.12);
+  const leftLeg = limb("left-leg", 0.16, 0.72, 0.18, PANTS, 0.82, -0.12, leftShoe);
+  const rightLeg = limb("right-leg", 0.16, 0.72, 0.18, PANTS, 0.82, 0.12, rightShoe);
   leftLeg.userData.part = "leg";
   rightLeg.userData.part = "leg";
 
@@ -96,24 +99,27 @@ export function dressPlayer(player) {
   hair.position.set(0, 1.8, 0);
   hair.userData.part = "hair";
 
-  figure.add(leftShoe, rightShoe, leftLeg, rightLeg, body, shirt, leftArm, rightArm, head, hair);
+  figure.add(leftLeg, rightLeg, body, shirt, leftArm, rightArm, head, hair);
   player.add(figure);
   attachPlayerTag(player);
 }
 
-/** Swing legs and arms while walking. Idle pose when still. */
-export function stepPlayerWalk(player, t, walking) {
+/**
+ * Swing legs and arms from gait phase (radians from distance), not wall-clock.
+ * Idle pose when still.
+ */
+export function stepPlayerWalk(player, phase, walking) {
   const figure = player && player.getObjectByName && player.getObjectByName("paper-figure");
   if (!figure) return;
   const leftLeg = figure.getObjectByName("left-leg");
   const rightLeg = figure.getObjectByName("right-leg");
   const leftArm = figure.getObjectByName("left-arm");
   const rightArm = figure.getObjectByName("right-arm");
-  const swing = walking ? Math.sin(t * 9) : 0;
-  const amp = walking ? 0.7 : 0;
+  const swing = walking ? Math.sin(phase) : 0;
+  const amp = walking ? 0.62 : 0;
   if (leftLeg) leftLeg.rotation.x = swing * amp;
   if (rightLeg) rightLeg.rotation.x = -swing * amp;
-  if (leftArm) leftArm.rotation.x = -swing * amp * 0.75;
-  if (rightArm) rightArm.rotation.x = swing * amp * 0.75;
-  figure.position.y = SOLE_Y + (walking ? Math.abs(swing) * 0.04 : 0);
+  if (leftArm) leftArm.rotation.x = -swing * amp * 0.8;
+  if (rightArm) rightArm.rotation.x = swing * amp * 0.8;
+  figure.position.y = SOLE_Y + (walking ? Math.abs(swing) * 0.05 : 0);
 }

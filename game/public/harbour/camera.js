@@ -36,6 +36,23 @@ export function closeOrbitState(islandId) {
   };
 }
 
+/** Close enough to read a walking person and the green path. */
+export const WALK_CAM_RADIUS_M = 8;
+export const WALK_CAM_PITCH = 0.48;
+
+export function walkOrbitState(islandId) {
+  const yaw = cartesianToSpherical(spawnCameraOffset(islandId)).yaw;
+  return {
+    yaw,
+    pitch: WALK_CAM_PITCH,
+    radius: WALK_CAM_RADIUS_M,
+    dragging: false,
+    orbited: true,
+    lastX: 0,
+    lastY: 0,
+  };
+}
+
 /** Hard lock on the stall. Metres from the cart origin. No lerp. */
 export const STALL_CAM_SIDE_M = 2.4;
 export const STALL_CAM_BACK_M = 4.4;
@@ -276,6 +293,17 @@ export function createPlayCamera({ camera, canvas, getPlayer, getIslandId }) {
     camera.lookAt(p.x, p.y + LOOK_Y, p.z);
   }
 
+  /** Drop spawn look-at so the walking body stays in frame. Keep a close orbit. */
+  function followWalk() {
+    if (state.orbited && state.radius <= 16) return;
+    state = walkOrbitState(getIslandId());
+    const p = getPlayer();
+    const o = sphericalToCartesian(state);
+    camera.position.set(p.x + o.x, p.y + o.y, p.z + o.z);
+    if (camera.position.y < p.y + 1.6) camera.position.y = p.y + 1.6;
+    camera.lookAt(p.x, p.y + LOOK_Y, p.z);
+  }
+
   function tick(dt) {
     tickCamera(camera, getPlayer(), state, getIslandId(), dt, tmp);
   }
@@ -284,6 +312,7 @@ export function createPlayCamera({ camera, canvas, getPlayer, getIslandId }) {
     tick,
     snap,
     snapClose,
+    followWalk,
     getState: () => state,
   };
 }

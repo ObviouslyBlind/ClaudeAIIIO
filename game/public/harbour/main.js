@@ -15,6 +15,15 @@ import { makeWater, tickHarbourWater } from "./water.js";
 import { makeSky } from "./sky.js";
 import { CAM, LOOK } from "./first-frame.js";
 import { dressPlayer, stepPlayerWalk } from "./player.js";
+import {
+  advanceAlong,
+  faceYaw,
+  gaitPhase,
+  planWalk,
+  PLAYER_SOLE_M,
+  WALK_BEACH_M,
+  WALK_SPEED_MPS,
+} from "./walk-plan.js";
 import { makeStreetCart, makeCrate, makeVendor, detachVendor, findVendor } from "./cart.js";
 import { playPaperBuy } from "./paper-sfx.js";
 import { createWalkPath } from "./walk-path.js";
@@ -130,6 +139,9 @@ const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
 const walkTarget = new THREE.Vector3();
 const tmp = new THREE.Vector3();
+/** Remaining tap-to-walk waypoints (not including current position). */
+let walkWaypoints = [];
+let gaitDist = 0;
 
 let map = null;
 let islandId = "south";
@@ -741,8 +753,10 @@ function focusStand(stand) {
   const px = x + 3.6;
   const pz = z + 2.2;
   walking = false;
+  walkWaypoints = [];
+  gaitDist = 0;
   if (walkPath) walkPath.hide();
-  player.position.set(px, heightAt(spec, px, pz) + 1.15, pz);
+  player.position.set(px, heightAt(spec, px, pz) + PLAYER_SOLE_M, pz);
   followStall({ ...stand, x, z });
   if (playCam && typeof playCam.snapClose === "function") playCam.snapClose();
   else snapCamera();
@@ -1273,8 +1287,10 @@ function spawnAt(id) {
   const spec = specOf(id);
   const x = spec.port.x + (id === "south" ? 10 : 0);
   const z = spec.port.z + (id === "north" ? -8 : 0);
-  player.position.set(x, heightAt(spec, x, z) + 1.15, z);
+  player.position.set(x, heightAt(spec, x, z) + PLAYER_SOLE_M, z);
   walking = false;
+  walkWaypoints = [];
+  gaitDist = 0;
   if (walkPath) walkPath.hide();
   selected = null;
   if (taxi) taxi.hopOut();
@@ -1287,32 +1303,49 @@ function nearPort() {
   return Math.hypot(player.position.x - spec.port.x, player.position.z - spec.port.z) < 28;
 }
 
-function goTo(x, z) {
-  const h = landHeight(x, z);
-  // Keep in sync with game/src/walk.ts BEACH_THRESHOLD_M
-  if (h <= 0.25) {
-    setStatus("Stay on land.");
+function canWalkHere(x, z) {
+  return landHeight(x, z) > WALK_BEACH_M;
+}
+
+function paintWalkPath() {
+  if (!walkPath) return;
+  if (!walking || !walkWaypoints.length) {
+    walkPath.hide();
     return;
   }
-  const midH = landHeight((player.position.x + x) * 0.5, (player.position.z + z) * 0.5);
-  if (midH <= 0.25) {
-    setStatus("Stay on land.");
-    return;
-  }
-  walkTarget.set(x, h + 1.15, z);
-  walking = true;
-  userLeftStall = true;
-  stallFollow = false;
-  islandId = nearestIsland(x, z);
-  dismissLooseLandUi();
-  if (walkPath) {
+  if (typeof walkPath.showPath === "function") {
+    walkPath.showPath(player.position, walkWaypoints, landHeight);
+  } else {
+    const last = walkWaypoints[walkWaypoints.length - 1];
     walkPath.show(
       player.position,
-      walkTarget,
-      player.position.y - 1.15,
-      h,
+      last,
+      player.position.y - PLAYER_SOLE_M,
+      landHeight(last.x, last.z),
     );
   }
+}
+
+function goTo(x, z) {
+  const path = planWalk(player.position.x, player.position.z, x, z, canWalkHere);
+  if (!path || path.length < 2) {
+    setStatus("Stay on land.");
+    walking = false;
+    walkWaypoints = [];
+    if (walkPath) walkPath.hide();
+    return;
+  }
+  const dest = path[path.length - 1];
+  walkTarget.set(dest.x, landHeight(dest.x, dest.z) + PLAYER_SOLE_M, dest.z);
+  walkWaypoints = path.slice(1);
+  walking = true;
+  gaitDist = 0;
+  userLeftStall = true;
+  stallFollow = false;
+  islandId = nearestIsland(dest.x, dest.z);
+  dismissLooseLandUi();
+  if (playCam && typeof playCam.followWalk === "function") playCam.followWalk();
+  paintWalkPath();
   setStatus("Walking.");
 }
 
@@ -1344,6 +1377,8 @@ function selectLand(p, walk) {
 function enterPlot(p) {
   if (!p || !canEnter(p)) return false;
   walking = false;
+  walkWaypoints = [];
+  gaitDist = 0;
   if (taxi && taxi.hopOut) taxi.hopOut();
   void ensureInterior().then((ctl) => {
     if (!ctl) return;
@@ -1364,6 +1399,8 @@ function leaveInterior() {
     selected = left.id;
   }
   walking = false;
+  walkWaypoints = [];
+  gaitDist = 0;
   snapCamera();
   refreshHud();
 }
@@ -1761,31 +1798,34 @@ function tick(dt) {
   pulseCrateGlow();
   tickVendors(clock.elapsedTime);
   if (econHud) econHud.tick(dt);
-  stepPlayerWalk(player, clock.elapsedTime, walking);
   if (walking) {
-    const dx = walkTarget.x - player.position.x;
-    const dz = walkTarget.z - player.position.z;
-    const dist = Math.hypot(dx, dz);
-    const step = 22 * dt;
-    if (dist <= step) {
-      player.position.copy(walkTarget);
+    if (!walkWaypoints.length) {
       walking = false;
+      gaitDist = 0;
       if (walkPath) walkPath.hide();
-      setStatus("Walking.");
     } else {
-      player.position.x += (dx / dist) * step;
-      player.position.z += (dz / dist) * step;
-      player.position.y = landHeight(player.position.x, player.position.z) + 1.15;
-      if (walkPath) {
-        walkPath.show(
-          player.position,
-          walkTarget,
-          player.position.y - 1.15,
-          walkTarget.y - 1.15,
-        );
+      const ox = player.position.x;
+      const oz = player.position.z;
+      const next = advanceAlong(ox, oz, walkWaypoints, dt, WALK_SPEED_MPS);
+      walkWaypoints = next.path;
+      player.position.x = next.x;
+      player.position.z = next.z;
+      player.position.y = landHeight(next.x, next.z) + PLAYER_SOLE_M;
+      if (next.moved > 0.0005) {
+        player.rotation.y = faceYaw(next.x - ox, next.z - oz);
+        gaitDist += next.moved;
+      }
+      if (next.done) {
+        walking = false;
+        gaitDist = 0;
+        if (walkPath) walkPath.hide();
+        setStatus("Here.");
+      } else {
+        paintWalkPath();
       }
     }
   }
+  stepPlayerWalk(player, gaitPhase(gaitDist), walking);
   if (ferryMesh && tickFerry) tickFerry(ferryMesh, dt);
   if (scene.userData.harbourWater) tickHarbourWater(scene.userData.harbourWater, clock.elapsedTime);
   if (parcelMap) parcelMap.tick(player.position, dt, viewerMode());
@@ -2165,7 +2205,7 @@ async function boot() {
       });
     },
   });
-  setStatus("World viewer. Left-click walks. Lots chip shows outlines..");
+  setStatus("World viewer. Tap the dirt to walk. Green line is the path.");
   onResize();
   await idle(80);
   await ensureTaxi();

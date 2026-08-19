@@ -15,6 +15,9 @@ import {
   STALL_CAM_SIDE_M,
   STALL_CAM_UP_M,
   STALL_LOOK_Y,
+  walkOrbitState,
+  WALK_CAM_PITCH,
+  WALK_CAM_RADIUS_M,
   ZOOM_MAX_M,
   ZOOM_MIN_M,
 } from "../public/harbour/camera.js";
@@ -177,5 +180,16 @@ describe("RMB-hold orbit camera", () => {
     expect(cam.lx).toBe(10);
     expect(cam.lz).toBe(20);
     expect(cam.ly).toBeCloseTo(1 + STALL_LOOK_Y);
+  });
+
+  it("walk orbit is close enough to read a person, not 28 m inland", () => {
+    const walk = walkOrbitState("south");
+    expect(walk.orbited).toBe(true);
+    expect(walk.radius).toBe(WALK_CAM_RADIUS_M);
+    expect(walk.pitch).toBe(WALK_CAM_PITCH);
+    expect(walk.radius).toBeLessThan(12);
+    expect(walk.radius).toBeGreaterThan(5);
+    const o = sphericalToCartesian(walk);
+    expect(Math.hypot(o.x, o.y, o.z)).toBeCloseTo(WALK_CAM_RADIUS_M, 5);
   });
 });
