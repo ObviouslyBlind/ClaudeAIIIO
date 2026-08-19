@@ -7,9 +7,12 @@
  */
 import polygonClipping from "./vendor/polygon-clipping.js";
 import { carriagewayWidthM, roadClassSpec } from "./roadclass.js";
+import { circusMeshRadii } from "./roadclip.js";
 
 /** Keep in sync with SHOULDER_PAD_M in roads.js. */
 export const FOOT_SHOULDER_M = 2.2;
+/** Arm stubs past the circus outer ring. Long enough to read from spawn. */
+export const CIRCUS_ARM_STUB_M = 18;
 
 function clsOf(road) {
   if (road.cls) return road.cls;
@@ -204,6 +207,54 @@ export function buildHubFootprint(graph, node, pad) {
     /** L/T kerb ring. Offset walks clip against `clip`, which still includes the heart. */
     sidewalk: walkU.length ? diffGeoms(walkU, tar) : [],
     clip: walkU.length ? walkU : tar,
+  };
+}
+
+function circleRing(cx, cz, r, steps = 40) {
+  const ring = [];
+  for (let i = 0; i < steps; i++) {
+    const t = (i / steps) * Math.PI * 2;
+    ring.push([snap(cx + Math.cos(t) * r), snap(cz + Math.sin(t) * r)]);
+  }
+  return closeRing(ring);
+}
+
+/**
+ * Circus node mesh: one annulus unioned with incoming arm rectangles.
+ * Ribbons stop on `clip`. The ring owns the join — not stacked dual tapes.
+ */
+export function buildCircusFootprint(graph, node) {
+  if (!graph || !node || !node.radius) {
+    return { tarmac: [], shoulder: [], sidewalk: [], clip: [], inner: 0, outer: 0 };
+  }
+  const { outer, inner } = circusMeshRadii(node.radius);
+  const cx = node.x;
+  const cz = node.z;
+  const tarmac = [[circleRing(cx, cz, outer)]];
+  const grit = [[circleRing(cx, cz, outer + FOOT_SHOULDER_M)]];
+  for (const e of graph.edges) {
+    if (e.a !== node.id && e.b !== node.id) continue;
+    if (!e.points || e.points.length < 2) continue;
+    const spec = roadClassSpec(e.cls);
+    if (spec.dirt) continue;
+    const dir = armDir(node, e);
+    const along = outer + CIRCUS_ARM_STUB_M;
+    const far = { x: cx + dir.x * along, z: cz + dir.z * along };
+    const origin = { x: cx, z: cz };
+    const half = carriagewayWidthM(e.cls) / 2;
+    tarmac.push([segmentRing(origin, far, half)]);
+    grit.push([segmentRing(origin, far, half + FOOT_SHOULDER_M / 2)]);
+  }
+  const tar = unionGeoms(tarmac);
+  const holed = diffGeoms(tar, [[circleRing(cx, cz, inner)]]);
+  const gritU = unionGeoms(grit);
+  return {
+    tarmac: holed && holed.length ? holed : tar,
+    shoulder: gritU.length ? diffGeoms(gritU, tar) : [],
+    sidewalk: [],
+    clip: tar,
+    inner,
+    outer,
   };
 }
 

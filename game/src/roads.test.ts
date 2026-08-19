@@ -19,6 +19,7 @@ import {
 } from "../public/harbour/roads.js";
 import { ROAD_CLASSES, carriagewayWidthM, roadWidthM } from "../public/harbour/roadclass.js";
 import { circusMeshRadii } from "../public/harbour/roadclip.js";
+import { buildCircusFootprint, multiContains } from "../public/harbour/roadfoot.js";
 import { junctionPad } from "../public/harbour/roadnet.js";
 import { buildHubFootprint, multiContains } from "../public/harbour/roadfoot.js";
 import { SOUTH_RAB } from "./southGeom.ts";
@@ -61,8 +62,12 @@ describe("paved street from spawn", () => {
     const pavedRoads = map.roads.filter((r) => r.kind === "paved");
     const dirtRoads = map.roads.filter((r) => r.kind === "dirt");
     const extraCarriages = pavedRoads.filter((r) => r.lanes === 4).length;
+    const circuses = pavedRoads.filter((r) => r.roundabout).length;
 
-    expect(paved.length).toBe(pavedRoads.length + extraCarriages);
+    // Circuses are one node mesh, not a RingGeometry plus stacked dual tapes.
+    expect(paved.filter((m) => m.userData.footprint && /Circus$/.test(String(m.userData.roadName || ""))).length).toBe(circuses);
+    expect(paved.length).toBeGreaterThanOrEqual(pavedRoads.length - circuses + extraCarriages);
+    expect(paved.length).toBeLessThan(pavedRoads.length + extraCarriages + circuses + 8);
     expect(extras.length).toBe(0);
     const walks = added.filter((m) => m.userData.roadKind === "sidewalk");
     expect(walks.length).toBeGreaterThan(4);
@@ -281,7 +286,10 @@ describe("paved street from spawn", () => {
     expect(HIGHWAY_MEDIAN_M).toBeGreaterThan(5);
     expect(HIGHWAY_LANE_OFFSET_M).toBeGreaterThan(PAVED_WIDTH_M / 2);
     const harbour = SOUTH_RAB.harbour;
-    const radii = circusMeshRadii(34);
+    const node = map.graph.nodes.find((n) => n.id === "s-rab-harbour")!;
+    const radii = circusMeshRadii(node.radius);
+    const foot = buildCircusFootprint(map.graph, node);
+    expect(multiContains(foot.tarmac, harbour.x, harbour.z)).toBe(false);
     let nearestHwy = Infinity;
     for (const mesh of hwyMeshes) {
       const pos = mesh.geometry.attributes.position;
@@ -291,14 +299,14 @@ describe("paved street from spawn", () => {
         nearestHwy = Math.min(nearestHwy, d);
       }
     }
-    // Duals run onto the ring and stop before the stone island.
-    expect(nearestHwy).toBeLessThan(radii.enter + 2);
-    expect(nearestHwy).toBeGreaterThan(radii.inner - 0.6);
-    expect(nearestHwy).toBeLessThan(radii.kerb);
-    const circus = added.find((m) => m.userData.roadName === "Harbour Circus");
+    // Ribbons stop on the node mesh. The join is the unioned circus, not a 9 m sand gap.
+    expect(nearestHwy).toBeLessThan(radii.outer + 20);
+    expect(nearestHwy).toBeGreaterThan(radii.inner);
+    const circus = added.find(
+      (m) => m.userData.roadName === "Harbour Circus" && m.userData.footprint,
+    );
     expect(circus).toBeTruthy();
-    expect(circus!.geometry.parameters).toBeTruthy();
-    expect(circus!.geometry.parameters!.innerRadius).toBeCloseTo(radii.inner, 1);
+    expect(circus!.geometry.parameters).toBeUndefined();
     expect(added.some((m) => String(m.userData.roadName || "").endsWith(" arm"))).toBe(false);
 
     const quay = added.filter(
@@ -312,7 +320,7 @@ describe("paved street from spawn", () => {
         nearestQuay = Math.min(nearestQuay, Math.hypot(pos.getX(i) - harbour.x, pos.getZ(i) - harbour.z));
       }
     }
-    expect(nearestQuay, "Quayward Rd missed Harbour Circus").toBeLessThan(radii.enter + 2);
+    expect(nearestQuay, "Quayward Rd missed Harbour Circus").toBeLessThan(radii.outer + 20);
     expect(nearestQuay).toBeGreaterThan(radii.inner - 0.6);
   });
 

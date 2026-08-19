@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { createLandBoard } from "./land.ts";
 import { junctionPad } from "../public/harbour/roadnet.js";
-import { buildHubFootprint, clipPolylineToOutside, multiContains, segmentRing, unionGeoms } from "../public/harbour/roadfoot.js";
+import { buildHubFootprint, buildCircusFootprint, clipPolylineToOutside, multiContains, segmentRing, unionGeoms } from "../public/harbour/roadfoot.js";
+import { circusMeshRadii } from "../public/harbour/roadclip.js";
+import { carriagewayWidthM } from "../public/harbour/roadclass.js";
 
 describe("road hub footprints", () => {
   it("unions two overlapping rectangles into one T, not two stacked strips", () => {
@@ -106,5 +108,40 @@ describe("road hub footprints", () => {
       expect(multiContains(fp.tarmac, n.x, n.z), `${id} tarmac`).toBe(true);
       expect(multiContains(fp.sidewalk, n.x, n.z), `${id} walk on tarmac`).toBe(false);
     }
+  });
+
+  it("makes Harbour Circus one tarmac piece covering both duals and Quayward, not stacked tapes", () => {
+    const graph = createLandBoard().graph;
+    const n = graph.nodes.find((x) => x.id === "s-rab-harbour")!;
+    const foot = buildCircusFootprint(graph, n);
+    const { outer, inner } = circusMeshRadii(n.radius);
+    expect(multiContains(foot.tarmac, n.x, n.z), "stone island should be a hole").toBe(false);
+    expect(foot.tarmac.length).toBe(1);
+    const hwy = graph.edges.find(
+      (e) => e.cls === "highway" && (e.a === n.id || e.b === n.id) && (e.a === "s-port" || e.b === "s-port"),
+    )!;
+    const pts = hwy.points;
+    const fromA = hwy.a === n.id;
+    const a = fromA ? pts[0]! : pts[pts.length - 1]!;
+    const b = fromA ? pts[1]! : pts[pts.length - 2]!;
+    const len = Math.hypot(b.x - a.x, b.z - a.z) || 1;
+    const dx = (b.x - a.x) / len;
+    const dz = (b.z - a.z) / len;
+    const px = -dz;
+    const pz = dx;
+    const onRing = { x: n.x + dx * outer, z: n.z + dz * outer };
+    const lane = carriagewayWidthM("highway") / 2 - 2;
+    expect(multiContains(foot.tarmac, onRing.x + px * lane, onRing.z + pz * lane)).toBe(true);
+    expect(multiContains(foot.tarmac, onRing.x - px * lane, onRing.z - pz * lane)).toBe(true);
+    const quay = graph.edges.find((e) => e.name === "Quayward Rd" && (e.a === n.id || e.b === n.id))!;
+    const qPts = quay.points;
+    const qFromA = quay.a === n.id;
+    const qa = qFromA ? qPts[0]! : qPts[qPts.length - 1]!;
+    const qb = qFromA ? qPts[1]! : qPts[qPts.length - 2]!;
+    const qLen = Math.hypot(qb.x - qa.x, qb.z - qa.z) || 1;
+    const qx = (qb.x - qa.x) / qLen;
+    const qz = (qb.z - qa.z) / qLen;
+    expect(multiContains(foot.tarmac, n.x + qx * outer, n.z + qz * outer)).toBe(true);
+    expect(inner).toBeGreaterThan(10);
   });
 });

@@ -2,13 +2,7 @@ import * as THREE from "three";
 import { ROAD_CLASSES, carriagewayWidthM, roadClassSpec } from "./roadclass.js";
 import { junctionPad, trimPolylineForPads, pointInJunctionPad } from "./roadnet.js";
 import { addQuadXZ, junctionKerbQuads } from "./roadjoin.js";
-import { buildHubFootprint, clipPolylineToOutside, multiContains } from "./roadfoot.js";
-import {
-  circusMeshRadii,
-  circusesFromGraph,
-  clipPolylineOutsideCircuses,
-  enterCircusRings,
-} from "./roadclip.js";
+import { buildHubFootprint, buildCircusFootprint, clipPolylineToOutside, multiContains } from "./roadfoot.js";
 
 /** Grit shoulder under the tarmac edge, so a road has a rim instead of a cut edge. */
 export const SHOULDER = 0x6f6a5e;
@@ -237,12 +231,12 @@ function drawablePoints(road, graph) {
   return densifyPts(pts, 6);
 }
 
-function drawPaved(scene, spec, road, heightAt, graph, circuses) {
+function drawPaved(scene, spec, road, heightAt, graph, joins) {
   const pts = drawablePoints(road, graph);
   if (pts.length < 2) return;
   const cls = classOf(road);
   const width = roadClassSpec(cls).carriageM;
-  const runs = enterCircusRings(pts, circuses);
+  const runs = clipToJoins(pts, joins);
   drawClippedRuns(scene, spec, road, heightAt, runs, width + SHOULDER_PAD_M, SHOULDER, "shoulder", {}, -0.03);
   drawClippedRuns(scene, spec, road, heightAt, runs, width, ASPHALT, "paved");
 }
@@ -281,6 +275,36 @@ function omitInsidePads(pts, graph, extra) {
   });
 }
 
+function insideJoin(joins, x, z) {
+  if (!joins) return false;
+  for (const j of joins) {
+    const clip = (j.foot && (j.foot.clip || j.foot.tarmac)) || null;
+    if (clip && multiContains(clip, x, z)) return true;
+  }
+  return false;
+}
+
+function clipToJoins(pts, joins) {
+  if (!pts || pts.length < 2) return [];
+  if (!joins || !joins.length) return [pts];
+  const runs = clipPolylineToOutside(pts, (x, z) => insideJoin(joins, x, z));
+  const extra = 1.6;
+  return runs.map((run) => {
+    if (!run || run.length < 2) return run;
+    let out = run;
+    for (const head of [true, false]) {
+      const b = head ? out[0] : out[out.length - 1];
+      const a = head ? out[1] : out[out.length - 2];
+      const len = Math.hypot(b.x - a.x, b.z - a.z) || 1;
+      const p = { x: b.x + ((b.x - a.x) / len) * extra, z: b.z + ((b.z - a.z) / len) * extra };
+      if (insideJoin(joins, p.x, p.z)) {
+        out = head ? [p].concat(out.slice(1)) : out.slice(0, -1).concat([p]);
+      }
+    }
+    return out;
+  });
+}
+
 function collectHubs(graph) {
   const hubs = [];
   if (!graph || !graph.nodes) return hubs;
@@ -292,13 +316,14 @@ function collectHubs(graph) {
   return hubs;
 }
 
-function insideHubWalk(hubs, x, z) {
-  for (const h of hubs) {
-    const clip = h.foot.clip || h.foot.sidewalk;
-    if (clip && clip.length && multiContains(clip, x, z)) return true;
-    if (h.foot.tarmac && multiContains(h.foot.tarmac, x, z)) return true;
+function collectCircusJoins(graph) {
+  const out = [];
+  if (!graph || !graph.nodes) return out;
+  for (const node of graph.nodes) {
+    if (node.kind !== "circus" || !node.radius) continue;
+    out.push({ node, foot: buildCircusFootprint(graph, node), circus: true });
   }
-  return false;
+  return out;
 }
 
 function splitRuns(pts, maxGap) {
@@ -323,46 +348,31 @@ function drawClippedRuns(scene, spec, road, heightAt, runs, widthM, color, roadK
   }
 }
 
-function drawSidewalks(scene, spec, road, heightAt, graph, hubs, circuses) {
+function drawSidewalks(scene, spec, road, heightAt, graph, joins) {
   if (!hasSidewalk(road)) return;
   const cls = classOf(road);
   const walk = roadClassSpec(cls).sidewalkM;
   const pts = densifyPts(drawablePoints(road, graph), 4);
   if (pts.length < 2) return;
   const offset = roadClassSpec(cls).carriageM / 2 + SHOULDER_PAD_M / 2 + walk / 2;
-  // Offset walks would otherwise keep going and hash through the junction
-  // as a grey plus. Cut them on the hub polygon so the kerb meets the join.
-  // Circuses: walks stop on the outer lip; the ring owns the circulatory road.
   for (const side of [-1, 1]) {
     const offsetPts = offsetPolyline(pts, offset * side);
-    let pieces = clipPolylineOutsideCircuses(offsetPts, circuses);
-    if (hubs && hubs.length) {
-      const next = [];
-      for (const ch of pieces) {
-        next.push(...clipPolylineToOutside(ch, (x, z) => insideHubWalk(hubs, x, z)));
-      }
-      pieces = next;
-    } else {
-      const next = [];
-      for (const ch of pieces) next.push(...splitRuns(omitInsidePads(ch, graph, walk + 0.8), 10));
-      pieces = next;
-    }
+    const pieces = joins && joins.length
+      ? clipToJoins(offsetPts, joins)
+      : splitRuns(omitInsidePads(offsetPts, graph, walk + 0.8), 10);
     drawClippedRuns(scene, spec, road, heightAt, pieces, walk, SIDEWALK, "sidewalk");
   }
 }
 
 /** 2+2 lanes with a stone median. Widths come from the class table. */
-function drawHighway(scene, spec, road, heightAt, graph, circuses) {
+function drawHighway(scene, spec, road, heightAt, graph, joins) {
   const cls = classOf(road);
   const s = roadClassSpec(cls);
   const pts = drawablePoints(road, graph);
   if (pts.length < 2) return;
   const lane = s.medianM / 2 + s.carriageM / 2;
   const name = road.name || "Island Hwy";
-  // Duals run onto the ring (enterCircusRings). Median and shoulder stop on
-  // the outer lip so stone does not stab the island.
-  const lip = clipPolylineOutsideCircuses(pts, circuses);
-  const dual = (side) => enterCircusRings(offsetPolyline(pts, lane * side), circuses);
+  const lip = clipToJoins(pts, joins);
   drawClippedRuns(
     scene,
     spec,
@@ -381,7 +391,7 @@ function drawHighway(scene, spec, road, heightAt, graph, circuses) {
       spec,
       road,
       heightAt,
-      dual(side),
+      clipToJoins(offsetPolyline(pts, lane * side), joins),
       s.carriageM,
       ASPHALT,
       "paved",
@@ -516,57 +526,38 @@ function drawJunctions(scene, map, specOf, heightAt) {
   }
 }
 
-function rabCenter(road) {
-  const pts = road.points || [];
-  let x = 0;
-  let z = 0;
-  for (const p of pts) {
-    x += p.x;
-    z += p.z;
+function drawCircusJoins(scene, map, specOf, heightAt, joins) {
+  for (const rec of joins || []) {
+    const { node, foot } = rec;
+    if (!foot) continue;
+    const spec = specOf(node.island);
+    const y = heightAt(spec, node.x, node.z);
+    const base = { island: node.island, footprint: true, label: node.name || "Circus" };
+    addMultiPolygonMesh(scene, foot.shoulder, y + 0.13, SHOULDER, {
+      ...base,
+      roadKind: "shoulder",
+      roadName: (node.name || "Circus") + " hub",
+    });
+    addMultiPolygonMesh(scene, foot.tarmac, y + 0.2, ASPHALT, {
+      ...base,
+      roadKind: "paved",
+      roadName: node.name || "Circus",
+    });
+    const inner = foot.inner || 24;
+    const disc = new THREE.Mesh(
+      new THREE.CylinderGeometry(Math.max(4, inner - 0.25), Math.max(4, inner - 0.25), 0.36, 24),
+      new THREE.MeshLambertMaterial({ color: STONE }),
+    );
+    disc.position.set(node.x, y + 0.18, node.z);
+    disc.castShadow = false;
+    disc.receiveShadow = true;
+    disc.userData.kind = "road";
+    disc.userData.roadKind = "island";
+    disc.userData.island = node.island;
+    disc.userData.label = (node.name || "Roundabout") + " island";
+    disc.userData.mode = "PAPER";
+    scene.add(disc);
   }
-  return { x: x / pts.length, z: z / pts.length };
-}
-
-/** Flat asphalt annulus + stone island. Not a mitered polyline (those stacked at the circus). */
-function drawRoundabout(scene, spec, road, heightAt, graph) {
-  const pts = road.points || [];
-  if (pts.length < 8) return;
-  const { x, z } = rabCenter(road);
-  const y = heightAt(spec, x, z);
-  const node = graph && road.nodeId ? graph.nodes.find((n) => n.id === road.nodeId) : null;
-  const radii = circusMeshRadii(node && node.radius);
-  const outer = radii.outer;
-  const inner = radii.inner;
-  const ring = new THREE.Mesh(
-    new THREE.RingGeometry(inner, outer, 48),
-    new THREE.MeshLambertMaterial({ color: ASPHALT }),
-  );
-  ring.rotation.x = -Math.PI / 2;
-  ring.position.set(x, y + 0.12, z);
-  ring.castShadow = false;
-  ring.receiveShadow = true;
-  ring.userData.kind = "road";
-  ring.userData.roadKind = "paved";
-  ring.userData.island = road.island;
-  ring.userData.roadName = road.name;
-  ring.userData.label = road.name;
-  ring.userData.widthM = outer - inner;
-  ring.userData.mode = "PAPER";
-  scene.add(ring);
-
-  const disc = new THREE.Mesh(
-    new THREE.CylinderGeometry(inner - 0.25, inner - 0.25, 0.36, 24),
-    new THREE.MeshLambertMaterial({ color: STONE }),
-  );
-  disc.position.set(x, y + 0.18, z);
-  disc.castShadow = false;
-  disc.receiveShadow = true;
-  disc.userData.kind = "road";
-  disc.userData.roadKind = "island";
-  disc.userData.island = road.island;
-  disc.userData.label = (road.name || "Roundabout") + " island";
-  disc.userData.mode = "PAPER";
-  scene.add(disc);
 }
 
 function drawDirt(scene, spec, road, heightAt) {
@@ -781,20 +772,23 @@ function drawLegacyJoins(scene, map, specOf, heightAt) {
 export function makeRoads(map, helpers) {
   const { scene, specOf, heightAt } = helpers;
   const hubs = collectHubs(map.graph);
-  const circuses = circusesFromGraph(map.graph);
+  const circusJoins = collectCircusJoins(map.graph);
+  const joins = hubs.concat(circusJoins);
   for (const road of map.roads) {
     const spec = specOf(road.island);
+    if (road.kind === "paved" && road.roundabout) {
+      continue;
+    }
     if (road.kind === "paved" && road.lanes === 4) {
-      drawHighway(scene, spec, road, heightAt, map.graph, circuses);
-    } else if (road.kind === "paved" && road.roundabout) {
-      drawRoundabout(scene, spec, road, heightAt, map.graph);
+      drawHighway(scene, spec, road, heightAt, map.graph, joins);
     } else if (road.kind === "paved") {
-      drawPaved(scene, spec, road, heightAt, map.graph, circuses);
-      drawSidewalks(scene, spec, road, heightAt, map.graph, hubs, circuses);
+      drawPaved(scene, spec, road, heightAt, map.graph, joins);
+      drawSidewalks(scene, spec, road, heightAt, map.graph, joins);
     } else {
       drawDirt(scene, spec, road, heightAt);
     }
   }
+  drawCircusJoins(scene, map, specOf, heightAt, circusJoins);
   drawHubs(scene, map, specOf, heightAt, hubs);
   drawLegacyJoins(scene, map, specOf, heightAt);
   drawNorthPortCurbs(scene, map, specOf, heightAt);
