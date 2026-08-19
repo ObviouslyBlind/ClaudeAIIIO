@@ -38,7 +38,8 @@ describe("tap-to-walk planner (PAPER)", () => {
     expect(main).toContain("followWalk");
     expect(main).toContain("followRide");
     expect(main).toContain("paintWalkHud");
-    expect(main).toContain('addEventListener("click", onPointer)');
+    expect(main).toContain("groundFromRay");
+    expect(main).toContain("pointerdown");
     expect(main).toContain("Exit taxi is on the dock");
     expect(main).toContain("walk-status");
     const pathSrc = readFileSync(new URL("../public/harbour/walk-path.js", import.meta.url), "utf8");

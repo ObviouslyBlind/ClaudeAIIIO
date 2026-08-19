@@ -162,6 +162,8 @@ let chromeHud = null;
 let walkPath = null;
 let walkHoldUntil = 0;
 let lastWalkDest = null;
+let walkNote = "";
+let walkNoteUntil = 0;
 let overlays = null;
 let deliveries = null;
 let lastInspectKey = "";
@@ -425,22 +427,6 @@ function setStatus(t) {
   if (statusEl) statusEl.textContent = t;
 }
 
-function paintWalkHud() {
-  const walkEl = document.getElementById("walk-status");
-  if (!walkEl) return;
-  if (walking) {
-    walkEl.hidden = false;
-    walkEl.textContent = "Walking.";
-    return;
-  }
-  if (Date.now() < walkHoldUntil) {
-    walkEl.hidden = false;
-    walkEl.textContent = "Here.";
-    return;
-  }
-  walkEl.hidden = true;
-}
-
 function dismissLooseLandUi() {
   if (landPinned) return;
   lastInspectKey = "";
@@ -464,7 +450,36 @@ function aimPointer(ev) {
 }
 
 const HUD_BLOCK =
-  "nav, a, #taxi-map, #ferry-ticket, #catalog-picker, .float-panel, #land-card, #buy-ask, #crate-ask, #order-veil, #order-ask, #stand-veil, #stand-menu, #place-hint, #menu-stack, #pack-shift, .lot-tag, #lot-tags, #near-lease";
+  "nav, a, button, #taxi-map, #ferry-ticket, #catalog-picker, .float-panel, #land-card, #buy-ask, #crate-ask, #order-veil, #order-ask, #stand-veil, #stand-menu, #place-hint, #menu-stack, #pack-shift, .lot-tag, #lot-tags, #near-lease";
+
+const walkPlane = new THREE.Plane();
+const walkHit = new THREE.Vector3();
+
+function groundFromRay() {
+  const dirt = raycaster.intersectObjects(ground.filter(Boolean), false);
+  if (dirt[0] && dirt[0].point) return dirt[0].point;
+  const y = player.position.y - PLAYER_SOLE_M;
+  walkPlane.setFromNormalAndCoplanarPoint(
+    tmp.set(0, 1, 0),
+    walkHit.set(player.position.x, y, player.position.z),
+  );
+  if (raycaster.ray.intersectPlane(walkPlane, walkHit)) return walkHit;
+  return null;
+}
+
+function paintWalkHud() {
+  const walkEl = document.getElementById("walk-status");
+  const hintEl = document.getElementById("viewer-hint");
+  let line = "";
+  if (walking) line = "Walking.";
+  else if (Date.now() < walkHoldUntil) line = "Here.";
+  else if (Date.now() < walkNoteUntil) line = walkNote;
+  if (walkEl) {
+    walkEl.hidden = !line;
+    if (line) walkEl.textContent = line;
+  }
+  if (hintEl && line) hintEl.textContent = line;
+}
 
 function parcelLabel(p) {
   const kind = p.band === "field" ? "field" : p.band === "shore" ? "shore land" : "street land";
@@ -1371,7 +1386,10 @@ function goTo(x, z) {
     setStatus("Stay on land.");
     walking = false;
     walkWaypoints = [];
+    walkNote = "Stay on land.";
+    walkNoteUntil = Date.now() + 2000;
     if (walkPath) walkPath.hide();
+    paintWalkHud();
     return;
   }
   const dest = path[path.length - 1];
@@ -1599,7 +1617,11 @@ function onPointer(ev) {
   );
   const portHit = hits.find((h) => h.object.userData.kind === "port");
   const tap = walkPoint(hits);
-  const tapPt = tap && tap.point;
+  let tapPt = tap && tap.point;
+  if (!tapPt) {
+    const g = groundFromRay();
+    if (g) tapPt = { x: g.x, y: g.y, z: g.z };
+  }
   if (chromeHud && chromeHud.isPlacing && chromeHud.isPlacing()) {
     const tapped = plotToPlace(plotHit?.object.userData.plotId, tapPt?.x, tapPt?.z);
     void placeCartOn(tapped, tapPt?.x, tapPt?.z);
@@ -2279,6 +2301,17 @@ async function boot() {
 
 canvas.addEventListener("pointerup", onPointer);
 canvas.addEventListener("click", onPointer);
+window.addEventListener(
+  "pointerdown",
+  (ev) => {
+    if (ev.button != null && ev.button !== 0) return;
+    if (ev.target && ev.target.closest && ev.target.closest(HUD_BLOCK)) return;
+    if (ev.target === canvas || (ev.target && ev.target.closest && ev.target.closest("#chrome"))) {
+      onPointer(ev);
+    }
+  },
+  true,
+);
 window.addEventListener(
   "pointerup",
   (ev) => {

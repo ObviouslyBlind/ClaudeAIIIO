@@ -6,11 +6,8 @@ Piece in play: **walking**, with taxi camera kept honest. Dual-island prices sta
 
 | Round | Bar | Result |
 |---|---|---|
-| W1 | Tap dirt → person walks, camera close on the body | **PASS** (`bc-d921e5fd`: teal shirt readable). Status + path missed (legacy HUD / grass-green line). |
-| W2 | Visible **Walking.** / **Here.** chip + lime ribbon + dest pin | shipped; critic next |
-| W3 | Camera drops spawn look-at while walking | shipped (W1 camera) |
-| W4 | Water / channel is not a walk corridor | shipped, unit-tested |
-| W5 | Gait from distance, shoes on legs | shipped, unit-tested |
-| W6 | Taxi: hail looks at you; ride looks at the **cab** (not 28 m down the hwy); left-click does not hop out; Exit taxi on the dock | shipped this round |
+| W1 | Tap dirt → person walks, camera close on the body | **PASS** (`bc-d921e5fd`) |
+| W2 | **Walking.** chip + lime path | **FAIL** (`bc-ff3e53ca`): person + yellow taxi visible; chip was bottom-dock (easy to miss) and lime path not seen. Chip moved under cash; path pin taller; HUD driven from walk flag. |
+| W6 | Taxi ride looks at the cab; left-click does not hop out | shipped (unit-tested onHail/onRide) |
 
-Queued: W2 pixel critic, then retarget mid-walk.
+Queued: W2 re-critic, then retarget mid-walk.
