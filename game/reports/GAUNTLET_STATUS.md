@@ -22,8 +22,8 @@ Bar the critic inspects on live `http://127.0.0.1:8787/`. One verdict for the wh
 
 Do **not** grade Market Pay “How many / Where” as the sticker. That card is qty + dest.
 
-Last critic (bc-d92450c7): **FAIL** — two Buy $32 clicks still showed land card YOURS / Close, cash $1000. Second click only leased if buy-ask was visible.
+Last critic (bc-f1aace41): cash $1000 → $912 (cart + pack, no $32). Double-click never posted the lease.
 
-Fix in this round: second click on the same chip always posts /api/lease once that plot is selected. Land card is closed first.
+Fix in this round: the Buy $32 chip is one click — select the plot and POST /api/lease.
 
 Politics frozen. Operator is the brake.

@@ -140,7 +140,8 @@ describe("harbour chrome HUD", () => {
     expect(chrome).toContain("Yellow van from the port.");
     expect(chrome).toContain("if (buyAsk && !buyAsk.hidden) return;");
     expect(chrome).toContain("ownedId");
-    expect(chrome).toContain("if (selectedId === id && opts.lease)");
+    expect(chrome).toContain("if (typeof opts.onNearLease === \"function\") opts.onNearLease(id);");
+    expect(chrome).toContain("if (opts.lease) opts.lease();");
     expect(chrome).toContain("order-label");
     expect(chrome).toContain("dest: marketDest === \"road\" ? \"road\" : \"warehouse\"");
     expect(chrome).toContain("data-order-dest");

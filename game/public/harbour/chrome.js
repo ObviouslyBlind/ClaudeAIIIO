@@ -800,15 +800,12 @@ export function mountChrome(opts) {
     nearLease.addEventListener("click", (ev) => {
       ev.preventDefault();
       ev.stopPropagation();
-      const id = nearLease.dataset.plotId;
+      const fromPlay = ((play && play.leaseOptions) || [])[0];
+      const id = nearLease.dataset.plotId || (fromPlay && fromPlay.id) || "";
       if (!id) return;
       if (landCard) landCard.hidden = true;
-      const selectedId = typeof opts.getPlotId === "function" ? opts.getPlotId() : "";
-      if (selectedId === id && opts.lease) {
-        opts.lease();
-        return;
-      }
       if (typeof opts.onNearLease === "function") opts.onNearLease(id);
+      if (opts.lease) opts.lease();
     });
   }
 
