@@ -81,6 +81,28 @@ describe("South first loop", () => {
     expect(leasePlot(land, visitor, near.id).ok).toBe(true);
   });
 
+  it("sends a kerb van without a lease, and rejects a vacant plotId", () => {
+    const land = createLandBoard();
+    const visitor = createVisitor(1_000);
+    const vacant = land.plots.find(
+      (p) => p.island === "south" && !p.owner && p.band === "street" && p.class === "by_right",
+    );
+    expect(vacant).toBeTruthy();
+    const stolen = orderMarket(visitor, land, { plotId: vacant!.id, skus: ["hotdog_cart"], dest: "road" });
+    expect(stolen.ok).toBe(false);
+    if (!stolen.ok) expect(stolen.reason).toBe("not_yours");
+    const kerb = orderMarket(visitor, land, {
+      skus: ["hotdog_cart"],
+      dest: "road",
+      x: ISLANDS.south.port.x + 10,
+      z: ISLANDS.south.port.z,
+    });
+    expect(kerb.ok).toBe(true);
+    if (!kerb.ok) return;
+    expect(kerb.delivery.dest).toBe("road");
+    expect(kerb.delivery.status).toBe("en_route");
+  });
+
   it("rejects orders that are not a leased South plot", () => {
     const { land, visitor } = leaseCheapSouth();
     const north = land.plots.find((p) => p.island === "north" && !p.owner)!;

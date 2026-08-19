@@ -22,8 +22,8 @@ Bar the critic inspects on live `http://127.0.0.1:8787/`. One verdict for the wh
 
 Do **not** grade Market Pay “How many / Where” as the sticker. That card is qty + dest.
 
-Last critic (bc-17866a98): said **PASS**, pixels did not. Buy $32 needed F5 (chip started `hidden`). After Pay they saw a yellow blob / crate card, not a van driving. Fire was HUD only. Upgrades showed Fridge only.
+Last critic (bc-c5b3e573): **FAIL** — clicked Buy $32 but paid before Yes, buy. Cart went to warehouse. No yellow van.
 
-Fix in this round: Buy chip visible on first paint. Van starts 24 m inland, slower, status “Yellow van from the port.” Upgrades lists the whole chain with +appeal (buy only the next one).
+Fix in this round: buy-ask blocks Market until Yes/No. Kerb Pay only sends an owned lot id, so an unowned $ tag cannot 404 the van into the warehouse.
 
 Politics frozen. Operator is the brake.

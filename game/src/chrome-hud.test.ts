@@ -138,6 +138,8 @@ describe("harbour chrome HUD", () => {
     expect(chrome).toContain("/api/shift/pack");
     expect(chrome).toContain('let marketDest = "road"');
     expect(chrome).toContain("Yellow van from the port.");
+    expect(chrome).toContain("if (buyAsk && !buyAsk.hidden) return;");
+    expect(chrome).toContain("ownedId");
     expect(chrome).toContain("order-label");
     expect(chrome).toContain("dest: marketDest === \"road\" ? \"road\" : \"warehouse\"");
     expect(chrome).toContain("data-order-dest");

@@ -96,6 +96,7 @@ export function mountChrome(opts) {
   }
 
   function open(id) {
+    if (buyAsk && !buyAsk.hidden) return;
     if (openPanel === id) {
       closePanels();
       return;
@@ -289,7 +290,11 @@ export function mountChrome(opts) {
   async function submitOrder() {
     if (!orderSku) return;
     const pose = typeof opts.getPose === "function" ? opts.getPose() : {};
-    const plotId = typeof opts.getPlotId === "function" ? opts.getPlotId() : "";
+    const selectedId = typeof opts.getPlotId === "function" ? opts.getPlotId() : "";
+    const leases = (play && play.leases) || [];
+    const ownedId = leases.some((l) => l.id === selectedId)
+      ? selectedId
+      : (leases[0] && leases[0].id) || "";
     const { ok, data } = await readJson("/api/market/order", {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -300,7 +305,7 @@ export function mountChrome(opts) {
         qty: orderQty,
         x: pose && pose.x,
         z: pose && pose.z,
-        plotId: marketDest === "road" ? plotId || undefined : undefined,
+        plotId: marketDest === "road" ? ownedId || undefined : undefined,
       }),
     });
     hideOrderAsk();
