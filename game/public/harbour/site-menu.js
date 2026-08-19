@@ -113,6 +113,7 @@ function paintStock(site, play) {
   return `
     <p class="stock-num ${stockBand(have, cap)}">${Math.round(have)}<small>/${cap}</small></p>
     ${loaders}
+    <p class="sticker-label">Price</p>
     <div class="sticker-slide">
       <span class="sticker-read ${vs}" data-sticker-out>${money(sticker)}</span>
       <div class="sticker-track">

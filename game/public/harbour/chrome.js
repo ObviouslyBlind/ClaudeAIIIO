@@ -49,7 +49,7 @@ export function mountChrome(opts) {
   let overlay = "world";
   let placing = false;
   let placingKit = "";
-  let marketDest = "warehouse";
+  let marketDest = "road";
   const packShift = mountPackShift();
   let siteTab = "stock";
   let openSiteId = null;
@@ -254,13 +254,13 @@ export function mountChrome(opts) {
     orderAsk.innerHTML = `
       <h2>Buy ${row.label}</h2>
       <p class="order-unit">${money(unit)} each · PAPER · SIMULATED</p>
-      <p class="sticker-label">How many</p>
+      <p class="order-label">How many</p>
       <div class="order-qty">
         <button type="button" class="ghost" data-order-qty="-1" ${orderQty <= 1 ? "disabled" : ""}>−</button>
         <strong>${orderQty}</strong>
         <button type="button" class="ghost" data-order-qty="1" ${orderQty >= 10 ? "disabled" : ""}>+</button>
       </div>
-      <p class="sticker-label">Where</p>
+      <p class="order-label">Where</p>
       <div class="dest-row">
         <button type="button" class="dest ${marketDest === "road" ? "is-on" : ""}" data-order-dest="road">${propertyName()}</button>
         <button type="button" class="dest ${marketDest === "warehouse" ? "is-on" : ""}" data-order-dest="warehouse">Warehouse</button>

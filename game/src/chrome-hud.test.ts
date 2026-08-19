@@ -131,7 +131,8 @@ describe("harbour chrome HUD", () => {
     expect(chrome).toContain("Twelve goods");
     expect(chrome).toContain("/api/buy");
     expect(chrome).toContain("/api/shift/pack");
-    expect(chrome).toContain('let marketDest = "warehouse"');
+    expect(chrome).toContain('let marketDest = "road"');
+    expect(chrome).toContain("order-label");
     expect(chrome).toContain("dest: marketDest === \"road\" ? \"road\" : \"warehouse\"");
     expect(chrome).toContain("data-order-dest");
     expect(chrome).toContain("getPose");
@@ -333,6 +334,7 @@ describe("harbour chrome HUD", () => {
     );
     expect(stock).toContain("stock-num is-low");
     expect(stock).toContain("4");
+    expect(stock).toContain("Price");
     expect(stock).toContain("is-today");
     expect(stock).toContain("sticker-zone");
     expect(stock).toContain("sticker-band");
