@@ -9,7 +9,8 @@ describe("laptop play scripts", () => {
     const sh = readFileSync(new URL("../scripts/play.sh", import.meta.url), "utf8");
     expect(sh).toContain("trycloudflare");
     expect(sh).toContain("PORT:-8787");
-    const root = readFileSync(new URL("../../play.sh", import.meta.url), "utf8");
-    expect(root).toContain("game/scripts/play.sh");
+    const restart = readFileSync(new URL("../scripts/restart-play.sh", import.meta.url), "utf8");
+    expect(restart).toContain("pkill -f \"tsx src/server.ts\"");
+    expect(restart).toContain("fuser -k 8787/tcp");
   });
 });
