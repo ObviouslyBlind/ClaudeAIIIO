@@ -78,9 +78,19 @@ export function segmentRing(a, b, half) {
 export function unionGeoms(geoms) {
   if (!geoms.length) return [];
   if (geoms.length === 1) return [geoms[0]];
+  try {
+    const all = polygonClipping.union(...geoms);
+    if (all && all.length) return all;
+  } catch {
+    /* pairwise below */
+  }
   let acc = [geoms[0]];
   for (let i = 1; i < geoms.length; i++) {
-    acc = polygonClipping.union(acc, geoms[i]);
+    try {
+      acc = polygonClipping.union(acc, geoms[i]);
+    } catch {
+      acc = acc.concat([geoms[i]]);
+    }
   }
   return acc;
 }
@@ -178,8 +188,9 @@ function boundaryPoint(insidePt, outsidePt, insideFn) {
 
 /**
  * Radial join outline. At each angle, take the farthest point that still
- * sits inside some arm's rectangle. 15/30/45/90° all fall out of the same
- * loop. The kerb is a rounded T/L, not two overlapping boxes.
+ * sits inside some arm's rectangle *or* a kerb fillet disc. 15/30/45/90°
+ * all fall out of the same loop. The kerb is a rounded T/L, not two
+ * overlapping boxes and not a Clipper union of a disc that only touches.
  *
  * @param {{ x: number, z: number }} node
  * @param {{ dx: number, dz: number, half: number, reach: number }[]} arms
@@ -189,6 +200,7 @@ function boundaryPoint(insidePt, outsidePt, insideFn) {
 export function junctionContour(node, arms, extraHalf, steps) {
   const n = steps || 128;
   const hub = Math.max(1.2, extraHalf + 0.8);
+  const fillets = filletSpecs(node, arms, extraHalf);
   const ring = [];
   for (let i = 0; i < n; i++) {
     const ang = (i / n) * Math.PI * 2;
@@ -204,9 +216,43 @@ export function junctionContour(node, arms, extraHalf, steps) {
       const front = arm.reach / along;
       r = Math.max(r, Math.min(side, front));
     }
+    for (const f of fillets) {
+      const hit = rayCircleFar(node.x, node.z, ux, uz, f.cx, f.cz, f.rad);
+      if (hit != null) r = Math.max(r, hit);
+    }
     ring.push([snap(node.x + ux * r), snap(node.z + uz * r)]);
   }
   return closeRing(ring);
+}
+
+function rayCircleFar(ox, oz, ux, uz, cx, cz, rad) {
+  const fx = ox - cx;
+  const fz = oz - cz;
+  const b = 2 * (fx * ux + fz * uz);
+  const c = fx * fx + fz * fz - rad * rad;
+  const disc = b * b - 4 * c;
+  if (disc < 0) return null;
+  const s = Math.sqrt(disc);
+  const t = Math.max((-b - s) / 2, (-b + s) / 2);
+  return t > 0.2 ? t : null;
+}
+
+function filletSpecs(node, arms, extraHalf) {
+  const out = [];
+  for (let i = 0; i < arms.length; i++) {
+    for (let j = i + 1; j < arms.length; j++) {
+      const a = arms[i];
+      const b = arms[j];
+      const ang = sectorAngle(a, b);
+      if (ang < 0.44 || ang > 1.92) continue;
+      const r = Math.min(5.5, Math.min(a.half, b.half) * 0.9, (7 * Math.sin(ang / 2)) / Math.sin(Math.PI / 4));
+      if (r < 1.35) continue;
+      const c = kerbIntersect(node, a, b, r);
+      if (!c) continue;
+      out.push({ cx: c.x, cz: c.z, rad: r + extraHalf });
+    }
+  }
+  return out;
 }
 
 function perpToward(arm, other) {
@@ -231,34 +277,6 @@ function kerbIntersect(node, a, b, extra) {
 
 function sectorAngle(a, b) {
   return Math.acos(Math.max(-1, Math.min(1, a.dx * b.dx + a.dz * b.dz)));
-}
-
-/**
- * Circles sitting in the grass armpit, tangent to both kerbs. Unioning a
- * disc on the square corner is a bump with two new corners; this is the
- * PathPhalt/SeloSlav fillet.
- */
-function filletGeoms(node, arms, extraHalf, radius) {
-  const out = [];
-  for (let i = 0; i < arms.length; i++) {
-    for (let j = i + 1; j < arms.length; j++) {
-      const a = arms[i];
-      const b = arms[j];
-      const ang = sectorAngle(a, b);
-      // Sharp inner corners only. Obtuse / through (~180°) stay on the contour.
-      if (ang < 0.44 || ang > 1.92) continue;
-      const r = Math.min(
-        radius,
-        Math.min(a.half, b.half) * 0.9,
-        (7 * Math.sin(ang / 2)) / Math.sin(Math.PI / 4),
-      );
-      if (r < 1.35) continue;
-      const c = kerbIntersect(node, a, b, r);
-      if (!c) continue;
-      out.push([circleRing(c.x, c.z, r + extraHalf, 32)]);
-    }
-  }
-  return out;
 }
 
 function hubArms(graph, node, pad) {
@@ -292,8 +310,8 @@ export function buildHubFootprint(graph, node, pad) {
   if (!arms.length) return { tarmac: [], shoulder: [], sidewalk: [], clip: [] };
   const tarRing = junctionContour(node, arms, 0);
   const gritRing = junctionContour(node, arms, FOOT_SHOULDER_M / 2);
-  const tar = unionGeoms([[tarRing], ...filletGeoms(node, arms, 0, 5.5)]);
-  const grit = unionGeoms([[gritRing], ...filletGeoms(node, arms, FOOT_SHOULDER_M / 2, 5.5)]);
+  const tar = [[tarRing]];
+  const grit = [[gritRing]];
   const walkOnly = arms.filter((a) => a.walk > 0).map((a) => ({ ...a, half: a.half + a.walk }));
   const walk = walkOnly.length
     ? diffGeoms([[junctionContour(node, walkOnly, FOOT_SHOULDER_M / 2)]], tar)

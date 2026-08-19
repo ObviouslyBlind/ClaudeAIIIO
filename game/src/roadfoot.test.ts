@@ -136,8 +136,7 @@ describe("road hub footprints", () => {
           half: carriagewayWidthM(e.cls) / 2,
         });
       }
-      const contour = [[junctionContour(n, arms, 0)]];
-      let filled = 0;
+      expect(foot.tarmac.length, `${id} one hub plate`).toBe(1);
       let checked = 0;
       for (let i = 0; i < arms.length; i++) {
         for (let j = i + 1; j < arms.length; j++) {
@@ -159,12 +158,15 @@ describe("road hub footprints", () => {
             z: n.z + (aP.x * hb - bP.x * ha) / det,
           };
           checked += 1;
-          expect(multiContains(contour, p.x, p.z), `${id} square crotch already filled`).toBe(false);
-          if (multiContains(foot.tarmac, p.x, p.z)) filled += 1;
+          expect(multiContains(foot.tarmac, p.x, p.z), `${id} fillet missed armpit`).toBe(true);
+          const far = {
+            x: n.x + ((a.half + 12) * bP.z - (b.half + 12) * aP.z) / det,
+            z: n.z + (aP.x * (b.half + 12) - bP.x * (a.half + 12)) / det,
+          };
+          expect(multiContains(foot.tarmac, far.x, far.z), `${id} fillet ate the grass`).toBe(false);
         }
       }
       expect(checked, id).toBeGreaterThan(0);
-      expect(filled, id).toBe(checked);
     }
   });
 

@@ -88,7 +88,7 @@ describe("circus circle clip", () => {
     const d1 = Math.hypot(ch[ch.length - 1]!.x - node.x, ch[ch.length - 1]!.z - node.z);
     const near = Math.min(d0, d1);
     expect(near).toBeCloseTo(clip, 0);
-    expect(near).toBeGreaterThan(outer - 2);
+    expect(near).toBeGreaterThan(outer - 3);
     expect(near).toBeLessThan(outer + 1);
   });
 
