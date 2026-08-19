@@ -329,6 +329,13 @@ describe("paved street from spawn", () => {
     expect(circus!.geometry.parameters?.innerRadius).toBeCloseTo(radii.inner, 0);
     expect(circus!.geometry.parameters?.outerRadius).toBeCloseTo(radii.outer, 0);
     expect(added.filter((m) => m.userData.roadName === "Harbour Circus arm").length).toBe(0);
+    const hwyShoulder = added.filter(
+      (m) => m.userData.roadKind === "shoulder" && String(m.userData.roadName || "").startsWith("Island Hwy"),
+    );
+    expect(hwyShoulder.length).toBeGreaterThan(0);
+    for (const mesh of hwyShoulder) {
+      expect(ribbonWidthM(mesh), "26 m dual shoulder is a circus chord").toBeLessThan(14);
+    }
 
     const quay = added.filter(
       (m) => m.userData.roadKind === "paved" && m.userData.roadName === "Quayward Rd",
@@ -343,6 +350,26 @@ describe("paved street from spawn", () => {
     }
     expect(nearestQuay, "Quayward Rd missed Harbour Circus").toBeLessThan(radii.outer + 3);
     expect(nearestQuay).toBeGreaterThan(radii.inner - 0.6);
+  });
+
+  it("stops lane paint at the hub plate instead of running through the join", () => {
+    const map = createLandBoard();
+    const added: RoadMesh[] = [];
+    const scene = { add(obj: RoadMesh) { added.push(obj); } };
+    makeRoads(map, { scene, specOf: (id: "north" | "south") => ISLANDS[id], heightAt });
+    const paint = added.filter((m) => m.userData.roadKind === "paint");
+    expect(paint.length).toBeGreaterThan(8);
+    for (const id of ["s-quay-sw", "s-hwy-hc-j1"]) {
+      const n = map.graph.nodes.find((x) => x.id === id)!;
+      let nearest = Infinity;
+      for (const mesh of paint) {
+        const pos = mesh.geometry.attributes.position;
+        for (let i = 0; i < pos.count; i++) {
+          nearest = Math.min(nearest, Math.hypot(pos.getX(i) - n.x, pos.getZ(i) - n.z));
+        }
+      }
+      expect(nearest, `${id} paint through hub`).toBeGreaterThan(3.2);
+    }
   });
 
   it("keeps south tarmac above the dirt instead of through it", () => {

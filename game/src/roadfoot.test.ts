@@ -115,6 +115,59 @@ describe("road hub footprints", () => {
     expect(multiContains(foot.tarmac, end.x, end.z)).toBe(true);
   });
 
+  it("fills the inner T kerb with a tangent fillet, not a square rectangle crotch", () => {
+    const graph = createLandBoard().graph;
+    for (const id of ["s-quay-sw", "s-hwy-hc-j1"]) {
+      const n = graph.nodes.find((x) => x.id === id)!;
+      const pad = junctionPad(graph, n)!;
+      const foot = buildHubFootprint(graph, n, pad);
+      const arms: { dx: number; dz: number; half: number }[] = [];
+      for (const e of graph.edges) {
+        if (e.a !== n.id && e.b !== n.id) continue;
+        if (!e.points || e.points.length < 2) continue;
+        const pts = e.points;
+        const fromA = e.a === n.id;
+        const a = fromA ? pts[0]! : pts[pts.length - 1]!;
+        const b = fromA ? pts[1]! : pts[pts.length - 2]!;
+        const len = Math.hypot(b.x - a.x, b.z - a.z) || 1;
+        arms.push({
+          dx: (b.x - a.x) / len,
+          dz: (b.z - a.z) / len,
+          half: carriagewayWidthM(e.cls) / 2,
+        });
+      }
+      const contour = [[junctionContour(n, arms, 0)]];
+      let filled = 0;
+      let checked = 0;
+      for (let i = 0; i < arms.length; i++) {
+        for (let j = i + 1; j < arms.length; j++) {
+          const a = arms[i]!;
+          const b = arms[j]!;
+          const ang = Math.acos(Math.max(-1, Math.min(1, a.dx * b.dx + a.dz * b.dz)));
+          if (ang < 0.5 || ang > 1.9) continue;
+          let aP = { x: a.dz, z: -a.dx };
+          let bP = { x: b.dz, z: -b.dx };
+          if (aP.x * b.dx + aP.z * b.dz < 0) aP = { x: -aP.x, z: -aP.z };
+          if (bP.x * a.dx + bP.z * a.dz < 0) bP = { x: -bP.x, z: -bP.z };
+          const det = aP.x * bP.z - aP.z * bP.x;
+          if (Math.abs(det) < 1e-5) continue;
+          const extra = 1.6;
+          const ha = a.half + extra;
+          const hb = b.half + extra;
+          const p = {
+            x: n.x + (ha * bP.z - hb * aP.z) / det,
+            z: n.z + (aP.x * hb - bP.x * ha) / det,
+          };
+          checked += 1;
+          expect(multiContains(contour, p.x, p.z), `${id} square crotch already filled`).toBe(false);
+          if (multiContains(foot.tarmac, p.x, p.z)) filled += 1;
+        }
+      }
+      expect(checked, id).toBeGreaterThan(0);
+      expect(filled, id).toBe(checked);
+    }
+  });
+
   it("keeps hub sidewalk off the tarmac heart at the joins you can see from spawn", () => {
     const graph = createLandBoard().graph;
     for (const id of ["s-quay-sw", "s-quay-se", "s-hwy-hc-j1"]) {

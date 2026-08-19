@@ -187,7 +187,7 @@ function boundaryPoint(insidePt, outsidePt, insideFn) {
  * @param {number} [steps]
  */
 export function junctionContour(node, arms, extraHalf, steps) {
-  const n = steps || 96;
+  const n = steps || 128;
   const hub = Math.max(1.2, extraHalf + 0.8);
   const ring = [];
   for (let i = 0; i < n; i++) {
@@ -207,6 +207,58 @@ export function junctionContour(node, arms, extraHalf, steps) {
     ring.push([snap(node.x + ux * r), snap(node.z + uz * r)]);
   }
   return closeRing(ring);
+}
+
+function perpToward(arm, other) {
+  let p = { x: arm.dz, z: -arm.dx };
+  if (p.x * other.dx + p.z * other.dz < 0) p = { x: -p.x, z: -p.z };
+  return p;
+}
+
+/** Intersection of two offset kerb lines. extra=0 is the square armpit. extra=r is a tangent fillet centre. */
+function kerbIntersect(node, a, b, extra) {
+  const aP = perpToward(a, b);
+  const bP = perpToward(b, a);
+  const det = aP.x * bP.z - aP.z * bP.x;
+  if (Math.abs(det) < 1e-5) return null;
+  const ha = a.half + extra;
+  const hb = b.half + extra;
+  return {
+    x: node.x + (ha * bP.z - hb * aP.z) / det,
+    z: node.z + (aP.x * hb - bP.x * ha) / det,
+  };
+}
+
+function sectorAngle(a, b) {
+  return Math.acos(Math.max(-1, Math.min(1, a.dx * b.dx + a.dz * b.dz)));
+}
+
+/**
+ * Circles sitting in the grass armpit, tangent to both kerbs. Unioning a
+ * disc on the square corner is a bump with two new corners; this is the
+ * PathPhalt/SeloSlav fillet.
+ */
+function filletGeoms(node, arms, extraHalf, radius) {
+  const out = [];
+  for (let i = 0; i < arms.length; i++) {
+    for (let j = i + 1; j < arms.length; j++) {
+      const a = arms[i];
+      const b = arms[j];
+      const ang = sectorAngle(a, b);
+      // Sharp inner corners only. Obtuse / through (~180°) stay on the contour.
+      if (ang < 0.44 || ang > 1.92) continue;
+      const r = Math.min(
+        radius,
+        Math.min(a.half, b.half) * 0.9,
+        (7 * Math.sin(ang / 2)) / Math.sin(Math.PI / 4),
+      );
+      if (r < 1.35) continue;
+      const c = kerbIntersect(node, a, b, r);
+      if (!c) continue;
+      out.push([circleRing(c.x, c.z, r + extraHalf, 32)]);
+    }
+  }
+  return out;
 }
 
 function hubArms(graph, node, pad) {
@@ -240,8 +292,8 @@ export function buildHubFootprint(graph, node, pad) {
   if (!arms.length) return { tarmac: [], shoulder: [], sidewalk: [], clip: [] };
   const tarRing = junctionContour(node, arms, 0);
   const gritRing = junctionContour(node, arms, FOOT_SHOULDER_M / 2);
-  const tar = [[tarRing]];
-  const grit = [[gritRing]];
+  const tar = unionGeoms([[tarRing], ...filletGeoms(node, arms, 0, 5.5)]);
+  const grit = unionGeoms([[gritRing], ...filletGeoms(node, arms, FOOT_SHOULDER_M / 2, 5.5)]);
   const walkOnly = arms.filter((a) => a.walk > 0).map((a) => ({ ...a, half: a.half + a.walk }));
   const walk = walkOnly.length
     ? diffGeoms([[junctionContour(node, walkOnly, FOOT_SHOULDER_M / 2)]], tar)

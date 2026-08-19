@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { ROAD_CLASSES, carriagewayWidthM, roadClassSpec } from "./roadclass.js";
+import { ROAD_CLASSES, roadClassSpec } from "./roadclass.js";
 import { junctionPad, trimPolylineForPads, pointInJunctionPad } from "./roadnet.js";
 import { addQuadXZ, junctionKerbQuads } from "./roadjoin.js";
 import { buildHubFootprint, buildCircusFootprint, clipPolylineToOutside, multiContains, FOOT_SHOULDER_M } from "./roadfoot.js";
@@ -257,9 +257,10 @@ function drawPaved(scene, spec, road, heightAt, graph, hubs, circuses) {
   const cls = classOf(road);
   const width = roadClassSpec(cls).carriageM;
   const runs = clipRuns(pts, hubs, circuses);
+  const paintRuns = clipRuns(pts, hubs, circuses, 0);
   drawClippedRuns(scene, spec, road, heightAt, runs, width + SHOULDER_PAD_M, SHOULDER, "shoulder", {}, -0.03, Infinity, circuses);
   drawClippedRuns(scene, spec, road, heightAt, runs, width, ASPHALT, "paved", {}, 0, Infinity, circuses);
-  drawLanePaint(scene, spec, road, heightAt, runs, width, false, 1);
+  drawLanePaint(scene, spec, road, heightAt, paintRuns, width, false, 1);
 }
 
 export function offsetPolyline(points, dist) {
@@ -414,7 +415,7 @@ function drawCircleCaps(scene, spec, road, heightAt, runs, widthM, color, roadKi
       for (const c of circuses) {
         const d = Math.hypot(p.x - c.x, p.z - c.z);
         const r = c.clip || c.outer;
-        if (Math.abs(d - r) < 2.8) hit = { c, r };
+        if (Math.abs(d - r) < 4.5) hit = { c, r };
       }
       if (!hit) continue;
       const dx = p.x - q.x;
@@ -450,7 +451,8 @@ function drawClippedRuns(scene, spec, road, heightAt, runs, widthM, color, roadK
     if (!run || run.length < 2) continue;
     drawRibbon(scene, spec, { ...road, points: run }, heightAt, widthM, color, roadKind, matOpts || {}, skipGap == null ? Infinity : skipGap, yLift || 0);
   }
-  if (circuses && circuses.length && (roadKind === "paved" || roadKind === "median" || roadKind === "shoulder")) {
+  // 26 m shoulder fans were the circus arm boxes. Cap the driving lanes only.
+  if (circuses && circuses.length && roadKind === "paved") {
     drawCircleCaps(scene, spec, road, heightAt, runs, widthM, color, roadKind, yLift || 0, circuses);
   }
 }
@@ -549,23 +551,27 @@ function drawHighway(scene, spec, road, heightAt, graph, hubs, circuses) {
   const lane = s.medianM / 2 + s.carriageM / 2;
   const name = road.name || "Island Hwy";
   const lip = clipRuns(pts, hubs, circuses);
-  drawClippedRuns(
-    scene,
-    spec,
-    { ...road, name: name + " shoulder" },
-    heightAt,
-    lip,
-    carriagewayWidthM(cls) + SHOULDER_PAD_M,
-    SHOULDER,
-    "shoulder",
-    {},
-    -0.03,
-    Infinity,
-    circuses,
-  );
+  // Per-lane grit. A 26 m shoulder ribbon is a square chord at the circus
+  // and a stacked box at every T.
   drawClippedRuns(scene, spec, { ...road, name: name + " median" }, heightAt, lip, s.medianM, ASPHALT, "median", {}, 0, Infinity, circuses);
   for (const side of [-1, 1]) {
-    const laneRuns = clipRuns(offsetPolyline(pts, lane * side), hubs, circuses);
+    const offsetPts = offsetPolyline(pts, lane * side);
+    const laneRuns = clipRuns(offsetPts, hubs, circuses);
+    const paintRuns = clipRuns(offsetPts, hubs, circuses, 0);
+    drawClippedRuns(
+      scene,
+      spec,
+      { ...road, name: name + " shoulder" },
+      heightAt,
+      laneRuns,
+      s.carriageM + SHOULDER_PAD_M,
+      SHOULDER,
+      "shoulder",
+      {},
+      -0.03,
+      Infinity,
+      circuses,
+    );
     drawClippedRuns(
       scene,
       spec,
@@ -580,7 +586,7 @@ function drawHighway(scene, spec, road, heightAt, graph, hubs, circuses) {
       Infinity,
       circuses,
     );
-    drawLanePaint(scene, spec, road, heightAt, laneRuns, s.carriageM, true, side);
+    drawLanePaint(scene, spec, road, heightAt, paintRuns, s.carriageM, true, side);
   }
   drawClippedRuns(
     scene,
