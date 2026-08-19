@@ -154,7 +154,7 @@ function paintStock(site, play) {
 
 function paintRun(site, play) {
   const names = Array.isArray(site.games) && site.games.length ? site.games : ["Fruit slice"];
-  const cost = Number(play && play.hireCost != null ? play.hireCost : 30);
+  const cost = Number(play && play.hireCost != null ? play.hireCost : 300);
   if (site.hired) {
     return `
       <div class="inv-row">

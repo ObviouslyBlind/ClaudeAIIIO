@@ -22,7 +22,7 @@ Same card for a placed cart, a shop, and a mine.
 - Tabs: **Stock** · **Run** · **Upgrades** · **Stats**.
 - **Stock** is a number, red / yellow / green for low / mid / full. Hired vendor fills remaining room from the warehouse (including after Fridge).
 - **Sticker** is a $1–$16 slider. Green on that cart’s today price (fruit $6, fry $11), yellow within $1.50, red further. The green pip moves with the dictated price. Off-green sales are slower.
-- **Run**: **Hire $30.00** from cash, or **Vendor + Fire**. Play only while unhired.
+- **Run**: **Hire $300.00** from cash, or **Vendor + Fire**. Play only while unhired. A $750 pad plus fruit kit leaves hire for after a few sales.
 - **Upgrades** are ticks then the next buy: Fridge ✓ → Sign → Awning → Lights → Stools. Each row shows its Stats appeal. Fridge $200, doubles cap, no hire required.
 - Stats: each upgrade’s appeal, Area (foot traffic), Sticker band × sell time, Street, Rivals, Sale every Ns, Sales, **$ / min**, Shift.
 
@@ -44,7 +44,7 @@ Same card for a placed cart, a shop, and a mine.
 1. Buy a lot from a nearby $ bar.
 2. Market → Fruit cart → Buy → Pay (warehouse or this lot).
 3. If the kerb: van, then crate → Take all. Place from Carts. Tap **that** cart.
-4. Stock · Run (Hire $30 or Play) · Upgrades (Fridge ✓ then Sign → Awning → Lights → Stools) · Stats.
+4. Stock · Run (Hire $300 or Play) · Upgrades (Fridge ✓ then Sign → Awning → Lights → Stools) · Stats.
 5. Stats shows each upgrade’s appeal, Area, Sticker band, Sale every Ns, $ / min, Shift.
 6. Sales tax 20% goes to the island bank.
 

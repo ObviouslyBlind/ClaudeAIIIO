@@ -13,6 +13,7 @@ describe("lot tags (PAPER)", () => {
     expect(main).toContain("onOpenStand");
     expect(main).toContain("followStall");
     expect(main).toContain("stallFollow");
+    expect(main).toContain("leaveStallCam");
     expect(main).toContain("applyFollowStall");
     expect(main).toContain("applyPlay");
     expect(main).toContain("userLeftStall");

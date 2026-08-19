@@ -747,6 +747,13 @@ function lockStallCam(x, z, spec) {
   applyStallCamera(camera, stallCameraPose(stallCam));
 }
 
+function leaveStallCam() {
+  userLeftStall = true;
+  stallFollow = false;
+  if (playCam && typeof playCam.followWalk === "function") playCam.followWalk({ force: true });
+  else snapCamera();
+}
+
 function followStall(stand) {
   if (!stand) return;
   const x = Number(stand.x);
@@ -2199,7 +2206,9 @@ async function boot() {
     onOpenStand(id) {
       openStandMenu(id);
     },
-    onCloseStand() {},
+    onCloseStand() {
+      leaveStallCam();
+    },
     onCloseLand: closeLandCard,
     onLeased(snapshot) {
       lastInspectKey = "";

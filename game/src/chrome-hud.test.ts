@@ -150,6 +150,8 @@ describe("harbour chrome HUD", () => {
     expect(chrome).toContain("onCloseLand");
     expect(chrome).toContain("onCloseStand");
     expect(chrome).toContain("dismissStandMenu");
+    expect(main).toContain("function leaveStallCam");
+    expect(main).toContain("leaveStallCam();");
     expect(chrome).toContain("opts.onPlay(play)");
     expect(chrome).toContain("landCard.hidden = true");
     expect(chrome).toContain("extras.onTake()");
@@ -226,6 +228,9 @@ describe("harbour chrome HUD", () => {
     expect(pack).toContain("basket");
     expect(pack).toContain("wrap");
     expect(pack).toContain("gold");
+    expect(pack).toContain("goldBandAt");
+    expect(pack).toContain("GOLD_WIDTH_START");
+    expect(pack).toContain("GOLD_WIDTH_END");
     expect(pack).toContain("Tap when the fry is gold");
     expect(pack).toContain("Paper, then fish, then chips");
     expect(siteMenu).toContain("const max = 16");
@@ -296,7 +301,7 @@ describe("harbour chrome HUD", () => {
       { todayPrice: 6, inventory: [], warehouse: { items: [] } },
       "run",
     );
-    expect(run).toContain("Hire $30.00");
+    expect(run).toContain("Hire $300.00");
     expect(run).toContain("id=\"hire-site\"");
     expect(run).toContain("data-pack-start");
     const fryRun = formatSiteMenu(
@@ -352,7 +357,7 @@ describe("harbour chrome HUD", () => {
         games: ["Fruit slice"],
         kind: "fruit",
       },
-      { todayPrice: 6, hireCost: 30, inventory: [], warehouse: { items: [] } },
+      { todayPrice: 6, hireCost: 300, inventory: [], warehouse: { items: [] } },
       "run",
     );
     expect(hiredRun).toContain("data-fire-site");

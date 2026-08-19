@@ -33,7 +33,7 @@ export const CART_PRICES = {
 } as const;
 
 export const CART_PAPER_PRICE = CART_PRICES.fruit.kit;
-export const HIRE_COST = 30;
+export const HIRE_COST = 300;
 /** Pack of 20. Fruit default; fry packs cost more in the catalog. */
 export const HOTDOG_PACK_PRICE = CART_PRICES.fruit.pack;
 export const HOTDOG_PACK_QTY = 20;

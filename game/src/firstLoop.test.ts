@@ -102,8 +102,9 @@ describe("South first loop", () => {
     const pad = land.plots.find((p) => p.class === "cart_pad" && !p.owner)!;
     expect(pad.price).toBe(750);
     expect(leasePlot(land, visitor, pad.id).ok).toBe(true);
-    const kit = CART_PAPER_PRICE + HOTDOG_PACK_PRICE + HIRE_COST;
+    const kit = CART_PAPER_PRICE + HOTDOG_PACK_PRICE;
     expect(visitor.cash).toBeGreaterThanOrEqual(kit);
+    expect(visitor.cash).toBeLessThan(HIRE_COST);
     const snap = playSnapshot(visitor, land);
     expect(snap.leases.some((row) => row.id === pad.id)).toBe(true);
     expect(snap.leaseOptions.some((row) => row.price === 750)).toBe(true);
@@ -470,7 +471,7 @@ describe("South first loop", () => {
     expect(playSnapshot(visitor, land).sites.find((s) => s.id === shop!.id)!.staffName).toBe("Vendor");
   });
 
-  it("charges $30 to hire, lets you fire, and fills extra fridge room while hired", () => {
+  it("charges $300 to hire, lets you fire, and fills extra fridge room while hired", () => {
     const { land, visitor, plot } = leaseCheapSouth();
     const kit = orderMarket(visitor, land, { skus: ["hotdog_cart"], dest: "cart" });
     expect(kit.ok).toBe(true);
@@ -481,7 +482,7 @@ describe("South first loop", () => {
     if (!placed.ok) return;
     visitor.cash = 10;
     expect(hireStand(visitor, placed.stand.id).reason).toBe("no_cash");
-    visitor.cash = 80;
+    visitor.cash = 400;
     const cash0 = visitor.cash;
     expect(hireStand(visitor, placed.stand.id).ok).toBe(true);
     expect(visitor.cash).toBeCloseTo(cash0 - HIRE_COST, 8);

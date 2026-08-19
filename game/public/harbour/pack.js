@@ -8,6 +8,10 @@ export const PACK_SECONDS = 24;
 export const FRUIT_SLICE = ["mango", "pineapple", "papaya", "banana", "watermelon"];
 export const GOLD_LO = 58;
 export const GOLD_HI = 76;
+/** Basket pull: gold starts this wide (% of the heat bar). */
+export const GOLD_WIDTH_START = 20;
+/** Shrinks toward this. Still a readable tap window. */
+export const GOLD_WIDTH_END = 11;
 export const WRAP_ORDER = ["paper", "fish", "chips"];
 
 const FRUIT_TINT = {
@@ -57,8 +61,20 @@ function heatAt(elapsedMs) {
   return (1 - (u - 0.5) * 2) * 100;
 }
 
-function goldHit(heat) {
-  return heat >= GOLD_LO && heat <= GOLD_HI;
+/** Gold window slides and shrinks over the shift. Pale is left, burnt is right. */
+export function goldBandAt(elapsedMs) {
+  const t = Math.max(0, Math.min(1, Number(elapsedMs) / (PACK_SECONDS * 1000)));
+  const width = GOLD_WIDTH_START + (GOLD_WIDTH_END - GOLD_WIDTH_START) * t;
+  const wander = Math.sin(Number(elapsedMs) / 850) * 16 + Math.sin(Number(elapsedMs) / 1430) * 8;
+  const half = width / 2;
+  let center = 52 + wander;
+  center = Math.max(8 + half, Math.min(92 - half, center));
+  return { lo: center - half, hi: center + half };
+}
+
+export function goldHit(heat, band) {
+  const b = band && Number.isFinite(band.lo) ? band : { lo: GOLD_LO, hi: GOLD_HI };
+  return heat >= b.lo && heat <= b.hi;
 }
 
 export function mountPackShift() {
@@ -84,9 +100,38 @@ export function mountPackShift() {
   let mode = "fall";
   let wrapStep = 0;
   let heat = 0;
+  let band = goldBandAt(0);
 
   function paintHits() {
     if (hitsEl) hitsEl.textContent = String(hits);
+  }
+
+  function basketRead(h, b) {
+    if (goldHit(h, b)) return "Gold";
+    if (h < b.lo) return "Pale";
+    return "Burnt";
+  }
+
+  function applyBasketFrame() {
+    const elapsed = performance.now() - startedAt;
+    heat = heatAt(elapsed);
+    band = goldBandAt(elapsed);
+    const inGold = goldHit(heat, band);
+    const zone = slots.querySelector(".pack-heat");
+    const goldZone = slots.querySelector(".pack-heat-zone");
+    const needle = slots.querySelector(".pack-heat-needle");
+    const read = slots.querySelector(".pack-heat-read");
+    if (zone) {
+      zone.classList.toggle("is-gold", inGold);
+      zone.classList.toggle("is-pale", heat < band.lo);
+      zone.classList.toggle("is-burnt", heat > band.hi);
+    }
+    if (goldZone) {
+      goldZone.style.left = band.lo + "%";
+      goldZone.style.width = band.hi - band.lo + "%";
+    }
+    if (needle) needle.style.left = heat + "%";
+    if (read) read.textContent = basketRead(heat, band);
   }
 
   function spawnFall() {
@@ -116,22 +161,27 @@ export function mountPackShift() {
   }
 
   function paintBasket() {
-    const zoneLeft = GOLD_LO;
-    const zoneWidth = GOLD_HI - GOLD_LO;
-    const inGold = goldHit(heat);
+    band = goldBandAt(performance.now() - startedAt);
+    const inGold = goldHit(heat, band);
+    const zoneLeft = band.lo;
+    const zoneWidth = band.hi - band.lo;
     slots.innerHTML = `
-      <div class="pack-heat ${inGold ? "is-gold" : heat < GOLD_LO ? "is-pale" : "is-burnt"}">
+      <div class="pack-heat ${inGold ? "is-gold" : heat < band.lo ? "is-pale" : "is-burnt"}">
         <i class="pack-heat-zone" style="left:${zoneLeft}%;width:${zoneWidth}%"></i>
         <i class="pack-heat-needle" style="left:${heat}%"></i>
       </div>
-      <p class="pack-heat-read">${inGold ? "Gold" : heat < GOLD_LO ? "Pale" : "Burnt"}</p>
+      <p class="pack-heat-read">${basketRead(heat, band)}</p>
       <button type="button" class="pack-pull">Pull</button>
     `;
     const pull = slots.querySelector(".pack-pull");
     if (pull) {
       pull.addEventListener("click", () => {
         if (!running || mode !== "basket") return;
-        if (goldHit(heat)) {
+        const elapsed = performance.now() - startedAt;
+        heat = heatAt(elapsed);
+        band = goldBandAt(elapsed);
+        applyBasketFrame();
+        if (goldHit(heat, band)) {
           hits += 1;
           paintHits();
         }
@@ -186,6 +236,7 @@ export function mountPackShift() {
     hits = 0;
     wrapStep = 0;
     heat = 0;
+    band = goldBandAt(0);
     startedAt = performance.now();
     spawnMs = 720;
     running = true;
@@ -214,18 +265,7 @@ export function mountPackShift() {
       const left = Math.max(0, PACK_SECONDS - spent);
       if (clock) clock.textContent = left.toFixed(0) + "s";
       if (mode === "basket") {
-        heat = heatAt((performance.now() - startedAt));
-        const zone = slots.querySelector(".pack-heat");
-        const needle = slots.querySelector(".pack-heat-needle");
-        const read = slots.querySelector(".pack-heat-read");
-        if (zone) {
-          const inGold = goldHit(heat);
-          zone.classList.toggle("is-gold", inGold);
-          zone.classList.toggle("is-pale", heat < GOLD_LO);
-          zone.classList.toggle("is-burnt", heat > GOLD_HI);
-        }
-        if (needle) needle.style.left = heat + "%";
-        if (read) read.textContent = goldHit(heat) ? "Gold" : heat < GOLD_LO ? "Pale" : "Burnt";
+        applyBasketFrame();
       } else if (mode === "fall") {
         const nextMs = Math.max(380, 720 - spent * 14);
         if (Math.abs(nextMs - spawnMs) > 40) {
