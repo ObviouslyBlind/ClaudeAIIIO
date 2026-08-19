@@ -9,6 +9,6 @@ Piece in play: **Fire despawns in 3D**.
 | 3 | **Fire despawns** | **FAIL**. Last critic: cash $968, cart placed, Price track OK, but camera stayed on the spawn highway so the 3D vendor could not be confirmed. |
 | 4–8 | Remaining | Open. |
 
-Fix this round: while the site card is open, lock the camera on the cart every frame (ignore spawn look-at). Place passes the new stand in if `/api/play` is stale.
+Fix this round: follow the placed cart every frame from `/api/play` (not only while the site card is open). Closing the card or tapping the veil must not restore the spawn highway.
 
 Politics frozen. Operator is the brake.

@@ -140,6 +140,7 @@ export function mountChrome(opts) {
     playGen += 1;
     play = data;
     paintTop();
+    if (typeof opts.onPlay === "function") opts.onPlay(play);
     return true;
   }
 

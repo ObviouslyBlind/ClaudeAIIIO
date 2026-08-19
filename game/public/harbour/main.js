@@ -528,9 +528,11 @@ async function placeCartOn(plot, x, z) {
   if (chromeHud) chromeHud.clearPlacing();
   if (chromeHud && chromeHud.setOverlay) chromeHud.setOverlay("world");
   syncStandMesh(data.stand);
-  if (chromeHud) chromeHud.refresh();
+  if (data.play && chromeHud && typeof chromeHud.applyPlay === "function") chromeHud.applyPlay(data.play);
+  else if (chromeHud) chromeHud.refresh();
   setStatus("Cart placed. Tap it to stock.");
   if (data.stand) {
+    followStall(data.stand);
     focusStand(data.stand);
     openStandMenu(data.stand.id, data.stand);
   }
@@ -684,12 +686,48 @@ function objectWithStand(obj) {
   return null;
 }
 
-/** While set, tick copies this pose every frame (spawn look-at cannot fight). */
+/** While true, tick copies a close stall pose every frame (spawn look-at cannot fight). */
 let stallCam = null;
+/** False only after you walk or RMB-orbit away from the stall. */
+let stallFollow = false;
+let userLeftStall = false;
 
 function lockStallCam(x, z, spec) {
   stallCam = { x, y: heightAt(spec, x, z), z };
   applyStallCamera(camera, stallCameraPose(stallCam));
+}
+
+function followStall(stand) {
+  if (!stand) return;
+  const x = Number(stand.x);
+  const z = Number(stand.z);
+  if (!Number.isFinite(x) || !Number.isFinite(z)) return;
+  userLeftStall = false;
+  stallFollow = true;
+  lockStallCam(x, z, specOf(stand.island || islandId));
+}
+
+function stallPoseFrom(stand) {
+  if (!stand) return null;
+  const x = Number(stand.x);
+  const z = Number(stand.z);
+  if (!Number.isFinite(x) || !Number.isFinite(z)) return null;
+  const spec = specOf(stand.island || islandId);
+  const y = Number.isFinite(Number(stand.y)) ? Number(stand.y) : heightAt(spec, x, z);
+  return stallCameraPose({ x, y, z });
+}
+
+function applyFollowStall() {
+  if (!stallFollow) return false;
+  const play = chromeHud && chromeHud.getPlay && chromeHud.getPlay();
+  const fromPlay =
+    play &&
+    (((play.stands || [])[0]) ||
+      ((play.sites || []).find((s) => s && s.siteClass === "cart")));
+  const pose = stallPoseFrom(fromPlay || stallCam);
+  if (!pose) return false;
+  applyStallCamera(camera, pose);
+  return true;
 }
 
 function focusStand(stand) {
@@ -705,7 +743,7 @@ function focusStand(stand) {
   walking = false;
   if (walkPath) walkPath.hide();
   player.position.set(px, heightAt(spec, px, pz) + 1.15, pz);
-  lockStallCam(x, z, spec);
+  followStall({ ...stand, x, z });
   if (playCam && typeof playCam.snapClose === "function") playCam.snapClose();
   else snapCamera();
 }
@@ -1263,6 +1301,8 @@ function goTo(x, z) {
   }
   walkTarget.set(x, h + 1.15, z);
   walking = true;
+  userLeftStall = true;
+  stallFollow = false;
   islandId = nearestIsland(x, z);
   dismissLooseLandUi();
   if (walkPath) {
@@ -1760,8 +1800,12 @@ function tick(dt) {
   inspectNearbyLand();
   btnFerry.disabled = !nearPort();
   refreshHud();
-  if (stallCam) applyStallCamera(camera, stallCameraPose(stallCam));
-  else playCam.tick(dt);
+  const camState = playCam && typeof playCam.getState === "function" ? playCam.getState() : null;
+  if (camState && camState.dragging) {
+    userLeftStall = true;
+    stallFollow = false;
+  }
+  if (!applyFollowStall()) playCam.tick(dt);
   sun.position.set(player.position.x + 180, 260, player.position.z + 80);
   sun.target.position.copy(player.position);
   sun.target.updateMatrixWorld();
@@ -1773,7 +1817,12 @@ function startLoop() {
   loopStarted = true;
   renderer.setAnimationLoop(() => {
     const dt = Math.min(0.05, clock.getDelta());
-    tick(dt);
+    try {
+      tick(dt);
+    } catch (err) {
+      console.error(err);
+    }
+    applyFollowStall();
     renderer.render(scene, camera);
   });
 }
@@ -2034,9 +2083,7 @@ async function boot() {
     onOpenStand(id) {
       openStandMenu(id);
     },
-    onCloseStand() {
-      stallCam = null;
-    },
+    onCloseStand() {},
     onCloseLand: closeLandCard,
     onLeased(snapshot) {
       lastInspectKey = "";
@@ -2101,6 +2148,7 @@ async function boot() {
         if (d.status === "arrived") syncCrateMesh(d);
       }
       for (const s of play.stands || []) syncStandMesh(s);
+      if (!userLeftStall && (play.stands || [])[0]) followStall(play.stands[0]);
     },
     onOrder(delivery) {
       if (!delivery) return;
