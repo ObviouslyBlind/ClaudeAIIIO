@@ -9,13 +9,13 @@ export const FRUIT_SLICE = ["mango", "pineapple", "papaya", "banana", "watermelo
 export const GOLD_LO = 58;
 export const GOLD_HI = 76;
 /** Basket pull: gold starts this wide (% of the heat bar). */
-export const GOLD_WIDTH_START = 13;
-/** Shrinks toward this. Tight tap, still readable. */
-export const GOLD_WIDTH_END = 6;
+export const GOLD_WIDTH_START = 16;
+/** Shrinks toward this. Middle of easy 11 and hard 6. */
+export const GOLD_WIDTH_END = 9;
 /** Needle sweep. Shorter = less time in gold. */
-export const HEAT_CYCLE_MS = 3000;
-/** Cannot mash Pull. Time the next gold. */
-export const PULL_LOCK_MS = 720;
+export const HEAT_CYCLE_MS = 3500;
+/** Stops mash. Short enough to retry the next pass. */
+export const PULL_LOCK_MS = 480;
 export const WRAP_ORDER = ["paper", "fish", "chips"];
 
 const FRUIT_TINT = {
@@ -69,7 +69,7 @@ function heatAt(elapsedMs) {
 export function goldBandAt(elapsedMs) {
   const t = Math.max(0, Math.min(1, Number(elapsedMs) / (PACK_SECONDS * 1000)));
   const width = GOLD_WIDTH_START + (GOLD_WIDTH_END - GOLD_WIDTH_START) * t;
-  const wander = Math.sin(Number(elapsedMs) / 620) * 22 + Math.sin(Number(elapsedMs) / 1090) * 11;
+  const wander = Math.sin(Number(elapsedMs) / 740) * 18 + Math.sin(Number(elapsedMs) / 1260) * 9;
   const half = width / 2;
   let center = 52 + wander;
   center = Math.max(8 + half, Math.min(92 - half, center));

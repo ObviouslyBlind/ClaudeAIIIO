@@ -15,10 +15,12 @@ describe("basket pull gold band", () => {
     expect(start.hi - start.lo).toBeCloseTo(GOLD_WIDTH_START, 5);
     const end = goldBandAt(PACK_SECONDS * 1000);
     expect(end.hi - end.lo).toBeCloseTo(GOLD_WIDTH_END, 5);
-    expect(end.hi - end.lo).toBeGreaterThan(5);
+    expect(end.hi - end.lo).toBeGreaterThan(8);
     expect(end.hi - end.lo).toBeLessThan(GOLD_WIDTH_START);
-    expect(GOLD_WIDTH_START).toBeLessThanOrEqual(14);
-    expect(GOLD_WIDTH_END).toBeLessThanOrEqual(7);
+    expect(GOLD_WIDTH_START).toBe(16);
+    expect(GOLD_WIDTH_END).toBe(9);
+    expect(HEAT_CYCLE_MS).toBe(3500);
+    expect(PULL_LOCK_MS).toBe(480);
     const a = goldBandAt(400);
     const b = goldBandAt(1200);
     expect(a.lo).not.toBeCloseTo(b.lo, 2);
@@ -26,6 +28,8 @@ describe("basket pull gold band", () => {
     expect(goldHit(start.lo - 1, start)).toBe(false);
     expect(goldHit(start.hi + 1, start)).toBe(false);
     expect(HEAT_CYCLE_MS).toBeLessThan(4000);
-    expect(PULL_LOCK_MS).toBeGreaterThanOrEqual(500);
+    expect(HEAT_CYCLE_MS).toBeGreaterThan(3200);
+    expect(PULL_LOCK_MS).toBeGreaterThanOrEqual(400);
+    expect(PULL_LOCK_MS).toBeLessThan(700);
   });
 });
