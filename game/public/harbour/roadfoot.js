@@ -244,10 +244,10 @@ function boundaryPoint(insidePt, outsidePt, insideFn) {
  * @param {number} extraHalf
  * @param {number} [steps]
  */
-export function junctionContour(node, arms, extraHalf, steps) {
+export function junctionContour(node, arms, extraHalf, steps, withFillets) {
   const n = steps || 128;
   const hub = Math.max(1.2, extraHalf + 0.8);
-  const fillets = filletSpecs(node, arms, extraHalf);
+  const fillets = withFillets === false ? [] : filletSpecs(node, arms, extraHalf);
   const ring = [];
   for (let i = 0; i < n; i++) {
     const ang = (i / n) * Math.PI * 2;
@@ -292,8 +292,8 @@ function filletSpecs(node, arms, extraHalf) {
       const b = arms[j];
       const ang = sectorAngle(a, b);
       if (ang < 0.44 || ang > 1.92) continue;
-      const r = Math.min(2.6, Math.min(a.half, b.half) * 0.5, (4 * Math.sin(ang / 2)) / Math.sin(Math.PI / 4));
-      if (r < 1.05) continue;
+      const r = Math.min(1.2, Math.min(a.half, b.half) * 0.28, (2.4 * Math.sin(ang / 2)) / Math.sin(Math.PI / 4));
+      if (r < 0.7) continue;
       const c = kerbIntersect(node, a, b, r);
       if (!c) continue;
       out.push({ cx: c.x, cz: c.z, rad: r + extraHalf });
@@ -405,12 +405,12 @@ export function buildHubFootprint(graph, node, pad) {
   const arms = hubArms(graph, node, pad);
   if (!arms.length) return { tarmac: [], shoulder: [], sidewalk: [], clip: [] };
   const tarRing = junctionContour(node, arms, 0);
-  const gritRing = swellRing(tarRing, FOOT_SHOULDER_M);
+  const gritRing = swellRing(junctionContour(node, arms, 0, 128, false), 1.1);
   const tar = [[tarRing]];
   const grit = [[gritRing]];
   const walkOnly = arms.filter((a) => a.walk > 0).map((a) => ({ ...a, half: a.half + a.walk }));
   const walk = walkOnly.length
-    ? diffGeoms([[swellRing(junctionContour(node, walkOnly, 0), FOOT_SHOULDER_M)]], tar)
+    ? diffGeoms([[swellRing(junctionContour(node, walkOnly, 0, 128, false), 1.1)]], tar)
     : [];
   return {
     tarmac: tar,

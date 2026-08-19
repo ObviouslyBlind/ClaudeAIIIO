@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { ROAD_CLASSES, carriagewayWidthM, roadClassSpec } from "./roadclass.js";
+import { ROAD_CLASSES, roadClassSpec } from "./roadclass.js";
 import { junctionPad, trimPolylineForPads, pointInJunctionPad } from "./roadnet.js";
 import { addQuadXZ, junctionKerbQuads } from "./roadjoin.js";
 import { buildHubFootprint, buildCircusFootprint, clipPolylineToOutside, multiContains, FOOT_SHOULDER_M, biteRibbonWith, circleRing } from "./roadfoot.js";
@@ -358,7 +358,7 @@ function clipRuns(pts, hubs, circuses, overlapM = 1.6, edgeId, alwaysClip) {
 function paintCircuses(circuses) {
   return (circuses || []).map((c) => ({
     ...c,
-    clip: (c.outer || c.clip || 0) + 2.4,
+    clip: (c.outer || c.clip || 0) + 0.3,
   }));
 }
 
@@ -599,27 +599,6 @@ function drawSidewalks(scene, spec, road, heightAt, graph, hubs, circuses) {
 }
 
 /**
- * Dual meeting a circus is one 26 m approach bitten to the ring, not
- * three 8 m square chords. Only the stub — never a 26 m slab along the run.
- */
-function drawDualCircusLips(scene, spec, road, heightAt, runs, circuses) {
-  if (!circuses || !circuses.length) return;
-  const width = carriagewayWidthM(classOf(road));
-  const name = (road.name || "Island Hwy") + " lip";
-  for (const run of runs || []) {
-    if (!run || run.length < 2) continue;
-    for (const head of [true, false]) {
-      const p = head ? run[0] : run[run.length - 1];
-      const cutter = joinCutterAt(p, null, circuses, "paved", road.edgeId);
-      if (!cutter) continue;
-      const part = splitJoinEnd(run, head, 18);
-      if (!part.stub || part.stub.length < 2) continue;
-      drawBittenStub(scene, spec, { ...road, name }, heightAt, part.stub, cutter, width, ASPHALT, "paved", 0);
-    }
-  }
-}
-
-/**
  * Two 8 m lanes plus a black median fill. A single 26 m mitered slab
  * blew out on bends, ate the verge, and left circus arms as grass blobs.
  */
@@ -685,7 +664,6 @@ function drawHighway(scene, spec, road, heightAt, graph, hubs, circuses) {
     hubs,
     circuses,
   );
-  drawDualCircusLips(scene, spec, road, heightAt, lip, circuses);
 }
 
 function addJunctionPlate(scene, spec, heightAt, pad) {
@@ -1068,6 +1046,7 @@ export function makeRoads(map, helpers) {
   const circusJoins = collectCircusJoins(map.graph);
   const circuses = circusesFromGraph(map.graph);
   drawHubs(scene, map, specOf, heightAt, hubs);
+  drawCircusJoins(scene, map, specOf, heightAt, circusJoins);
   for (const road of map.roads) {
     const spec = specOf(road.island);
     if (road.kind === "paved" && road.roundabout) {
@@ -1082,7 +1061,6 @@ export function makeRoads(map, helpers) {
       drawDirt(scene, spec, road, heightAt);
     }
   }
-  drawCircusJoins(scene, map, specOf, heightAt, circusJoins);
   drawLegacyJoins(scene, map, specOf, heightAt);
   drawNorthPortCurbs(scene, map, specOf, heightAt);
 }

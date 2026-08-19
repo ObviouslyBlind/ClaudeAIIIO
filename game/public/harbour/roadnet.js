@@ -403,8 +403,20 @@ function cutEndAt(pts, node, trimM, head) {
  */
 function padTrimM(pad, edgeId) {
   if (!pad || !edgeId) return 0;
-  if (Array.isArray(pad.throughEdgeIds) && pad.throughEdgeIds.includes(edgeId)) return 0;
+  if (Array.isArray(pad.throughEdgeIds) && pad.throughEdgeIds.includes(edgeId)) return -1.4;
   return pad.trim[edgeId] || 0;
+}
+
+function extendPastNode(pts, node, extraM, head) {
+  if (extraM <= 0 || !pts || pts.length < 2 || !node) return pts;
+  const seq = head ? pts.slice() : pts.slice().reverse();
+  const a = seq[0];
+  const b = seq[1];
+  const dx = b.x - a.x;
+  const dz = b.z - a.z;
+  const len = Math.hypot(dx, dz) || 1;
+  seq[0] = { x: a.x - (dx / len) * extraM, z: a.z - (dz / len) * extraM };
+  return head ? seq : seq.reverse();
 }
 
 export function trimPolylineForPads(pts, graph, edge) {
@@ -414,7 +426,13 @@ export function trimPolylineForPads(pts, graph, edge) {
   const b = nodeById(graph, edge.b);
   const padA = junctionPad(graph, a);
   const padB = junctionPad(graph, b);
-  if (padA && a) out = cutEndAt(out, a, padTrimM(padA, edge.id), true);
-  if (padB && b) out = cutEndAt(out, b, padTrimM(padB, edge.id), false);
+  if (padA && a) {
+    const t = padTrimM(padA, edge.id);
+    out = t < 0 ? extendPastNode(out, a, -t, true) : cutEndAt(out, a, t, true);
+  }
+  if (padB && b) {
+    const t = padTrimM(padB, edge.id);
+    out = t < 0 ? extendPastNode(out, b, -t, false) : cutEndAt(out, b, t, false);
+  }
   return out.length >= 2 ? out : pts;
 }

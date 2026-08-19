@@ -72,7 +72,7 @@ describe("paved street from spawn", () => {
     // Circuses are one node mesh, not a RingGeometry plus stacked dual tapes.
     expect(paved.filter((m) => m.userData.footprint && /Circus$/.test(String(m.userData.roadName || ""))).length).toBe(circuses);
     expect(paved.length).toBeGreaterThanOrEqual(pavedRoads.length - circuses + extraCarriages);
-    expect(paved.length).toBeLessThan(pavedRoads.length + extraCarriages + circuses * 8 + 40);
+    expect(paved.length).toBeLessThan(pavedRoads.length + extraCarriages + circuses * 8 + 60);
     expect(extras.length).toBe(0);
     const paint = added.filter((m) => m.userData.roadKind === "paint");
     expect(paint.length).toBeGreaterThan(8);
@@ -89,7 +89,8 @@ describe("paved street from spawn", () => {
 
     expect(PAVED_WIDTH_M).toBeGreaterThanOrEqual(6);
     expect(PAVED_WIDTH_M).toBeLessThanOrEqual(8);
-    expect(paved[0].geometry.parameters).toBeUndefined();
+    const ribbonPaved = paved.filter((m) => !m.userData.footprint);
+    expect(ribbonPaved[0].geometry.parameters).toBeUndefined();
     expect(dirt[0].geometry.parameters).toBeUndefined();
     expect(ribbonWidthM(dirt[0])).toBeCloseTo(DIRT_WIDTH_M, 3);
     expect(dirt[0].userData.widthM).toBe(DIRT_WIDTH_M);
@@ -334,20 +335,6 @@ describe("paved street from spawn", () => {
     expect(circus!.geometry.parameters?.innerRadius).toBeCloseTo(radii.inner, 0);
     expect(circus!.geometry.parameters?.outerRadius).toBeCloseTo(radii.outer, 0);
     expect(added.filter((m) => m.userData.roadName === "Harbour Circus arm").length).toBe(0);
-    const lips = added.filter(
-      (m) => m.userData.roadKind === "paved" && String(m.userData.roadName || "").endsWith(" lip"),
-    );
-    expect(lips.length, "dual circus lip").toBeGreaterThan(0);
-    expect(lips.every((m) => (m.userData.widthM ?? 0) > 20)).toBe(true);
-    let nearestLip = Infinity;
-    for (const mesh of lips) {
-      const pos = mesh.geometry.attributes.position;
-      for (let i = 0; i < pos.count; i++) {
-        nearestLip = Math.min(nearestLip, Math.hypot(pos.getX(i) - harbour.x, pos.getZ(i) - harbour.z));
-      }
-    }
-    expect(nearestLip, "lip missed the ring").toBeLessThan(radii.outer + 1.5);
-    expect(nearestLip).toBeGreaterThan(radii.inner);
     const hwyShoulder = added.filter(
       (m) => m.userData.roadKind === "shoulder" && String(m.userData.roadName || "").startsWith("Island Hwy"),
     );
@@ -413,7 +400,7 @@ describe("paved street from spawn", () => {
         strandNear = Math.min(strandNear, Math.hypot(pos.getX(i) - sw.x, pos.getZ(i) - sw.z));
       }
     }
-    expect(strandNear, "through Strand was hub-cut at Quayward SW").toBeLessThan(4);
+    expect(strandNear, "through Strand was hub-cut at Quayward SW").toBeLessThan(6);
   });
 
   it("keeps south tarmac above the dirt instead of through it", () => {

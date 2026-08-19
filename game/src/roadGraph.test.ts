@@ -304,13 +304,14 @@ describe("road graph", () => {
     expect(misses).toEqual([]);
   });
 
-  it("stops the through street on the hub at the Quayward SW T", () => {
+  it("keeps the through street running through the Quayward SW T", () => {
     const graph = createLandBoard().graph;
     const sw = graph.nodes.find((n) => n.id === "s-quay-sw")!;
     const pad = junctionPad(graph, sw)!;
     const strand = graph.edges.find(
       (e) => e.name === "South Strand" && (e.a === sw.id || e.b === sw.id),
     )!;
-    expect(pad.trim[strand.id]).toBeGreaterThan(2);
+    expect(pad.throughEdgeIds).toContain(strand.id);
+    expect(pad.trim[strand.id] || 0).toBe(0);
   });
 });

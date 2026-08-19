@@ -193,7 +193,7 @@ describe("road hub footprints", () => {
           if (bP.x * a.dx + bP.z * a.dz < 0) bP = { x: -bP.x, z: -bP.z };
           const det = aP.x * bP.z - aP.z * bP.x;
           if (Math.abs(det) < 1e-5) continue;
-          const extra = 1.2;
+          const extra = 0.75;
           const ha = a.half + extra;
           const hb = b.half + extra;
           const p = {
