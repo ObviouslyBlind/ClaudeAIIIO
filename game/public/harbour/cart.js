@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { dressPlayer } from "./player.js";
 
 /**
  * Placeable South street cart — kerb stall, not a handheld wagon.
@@ -182,33 +183,22 @@ export function detachVendor(root) {
   return removed;
 }
 
-/** Hired vendor. Stands by the cart. ~1.7 m like the player. */
-export function makeVendor() {
+/** Hired vendor. Same figure as the player, so they look like you. */
+export function makeVendor(look) {
   const g = new THREE.Group();
   g.name = "vendor";
   g.userData.kind = "vendor";
   g.userData.label = "hired vendor";
   g.userData.layer = "world";
   g.userData.mode = "PAPER";
-  const body = new THREE.Mesh(
-    new THREE.CapsuleGeometry(0.28, 0.85, 4, 8),
-    new THREE.MeshLambertMaterial({ color: 0xc45c12 }),
-  );
-  body.position.y = 0.85;
-  body.userData.part = "body";
-  const shirt = box(0.52, 0.42, 0.36, 0x2f7a8a);
-  shirt.position.y = 1.12;
-  shirt.userData.part = "shirt";
-  const head = new THREE.Mesh(
-    new THREE.SphereGeometry(0.22, 8, 6),
+  const holder = new THREE.Mesh(
+    new THREE.BoxGeometry(0.08, 0.08, 0.08),
     new THREE.MeshLambertMaterial({ color: 0xf2d2a8 }),
   );
-  head.position.y = 1.62;
-  head.userData.part = "head";
-  const hat = box(0.42, 0.1, 0.42, 0xb42318);
-  hat.position.y = 1.84;
-  hat.userData.part = "hat";
-  g.add(body, shirt, head, hat);
+  holder.userData.kind = "vendor";
+  dressPlayer(holder, look, { solesAtZero: true });
+  const figure = holder.getObjectByName("paper-figure");
+  if (figure) g.add(figure);
   return g;
 }
 

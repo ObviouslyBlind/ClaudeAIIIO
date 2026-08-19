@@ -1,8 +1,8 @@
 /**
  * Launch PAPER prices. SIMULATED. The sim owns these numbers.
  *
- * Land is scarce and generally expensive. Street carts are the cheap first
- * loop: $1000 PAPER buys a cart, hire, and stock, not a street lease.
+ * Land is scarce and generally expensive. $1000 buys a highway pad and a
+ * fruit cart, not a street lease and not the dearer carts.
  * Sales tax is one statute rate for books, stalls, and carts.
  */
 
@@ -25,12 +25,34 @@ export const LAND_ISLAND_BUMP = 0.012;
 export const LAND_GLOBAL_BUMP = 0.004;
 export const LAND_ASK_CAP_MUL = 4;
 
-/** Street-cart kit stays the affordable entry vs land. Fruit is cheapest. */
+/**
+ * Fruit is the start. Watermelon and fry kits sit above starter cash so the
+ * first pad + fruit shift is required. Fry stays under the South street floor.
+ */
 export const CART_PRICES = {
-  fruit: { kit: 85, pack: 12, sale: 6 },
-  watermelon: { kit: 95, pack: 14, sale: 7 },
-  fish_chips: { kit: 140, pack: 22, sale: 11 },
+  fruit: { kit: 90, pack: 14, sale: 6 },
+  watermelon: { kit: 1_150, pack: 22, sale: 8 },
+  fish_chips: { kit: 1_850, pack: 28, sale: 11 },
 } as const;
+
+/** Empty fruit / melon carts read 1/10. Fry starts a notch higher. */
+export const CART_BASE_GRADE: Record<"fruit" | "watermelon" | "fish_chips", number> = {
+  fruit: 1,
+  watermelon: 1,
+  fish_chips: 2,
+};
+
+/**
+ * Path from 1–2/10 to 8–10/10. Sum is on the order of a South street lot.
+ * Fridge still first; later kit is the grind.
+ */
+export const CART_UPGRADES: { id: string; label: string; cost: number; appeal: number }[] = [
+  { id: "fridge", label: "Fridge", cost: 180, appeal: 1.5 },
+  { id: "sign", label: "Sign", cost: 260, appeal: 1.0 },
+  { id: "awning", label: "Awning", cost: 400, appeal: 1.2 },
+  { id: "lights", label: "Lights", cost: 480, appeal: 1.2 },
+  { id: "stools", label: "Stools", cost: 720, appeal: 1.6 },
+];
 
 export const CART_PAPER_PRICE = CART_PRICES.fruit.kit;
 export const HIRE_COST = 300;
@@ -46,3 +68,8 @@ export const PROPANE_SALES = 40;
 /** Tiny highway-verge cart pads. Fixed ask. Max three per visitor. */
 export const CART_PAD_PRICE = 750;
 export const CART_PAD_MAX = 3;
+
+export const STORAGE_UPGRADE_COST = CART_UPGRADES[0]!.cost;
+
+export const OWNER_ACCOUNT_NO = 1;
+export const VISITOR_ACCOUNT_NO = 2;

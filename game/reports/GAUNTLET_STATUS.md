@@ -1,18 +1,18 @@
 # Gauntlet status
 
-Piece in play: **2Isles Marketplace HUD**. Politics frozen. Slice closed unless the operator asks for another round.
+Piece in play: **street carts grind** (warehouse buy, scores, games, account, look). Politics frozen.
 
 | Round | Bar | Result |
 |---|---|---|
 | W1 | Tap dirt → person walks | **PASS** |
-| M1 | Center Marketplace, South live, North locked, Street Buy, phone + desktop | **FAIL** — North looked live |
-| M1b | North lock + dashed twin | **FAIL** — still a twin tab |
-| M1c | North plaque beside South | **FAIL** — still read as a North tab |
-| M1d | South full-width. Sentence: North is closed until you ferry. | **PASS** |
-| H1 | Hire center sheet. Empty state: Market → pad. Phone + desktop. | **PASS** |
-| A1 | Phone 390: all five aisles reachable (scroll ok). Farming honest empty. | **PASS** |
-| M2 | Compact chrome. Gold rectangular Add Cart. North island hover. List-majority sheet. No 1Hz scroll jump. Phone 390 five aisles. | **PASS** |
+| M2 | Compact Marketplace, gold Add Cart, North hover, phone aisles | **PASS** |
+| W3 | Pay from Marketplace lands in Warehouse. Kit row has Place. Phone + desktop. | queued |
+| S2 | Finish Fruit slice with stock in the warehouse → sold > 0, or a status that names empty/cooldown. | queued |
+| C2 | Fruit buyable after a $750 pad. Watermelon and fish kits > $1000. Stats start 1–2/10. | queued |
+| G2 | Fruit and watermelon each have a second tap game. Fish and chips still Fry / Basket / Wrap. | queued |
+| A3 | Account shows Google placeholder, #0002, red Reset, red Delete with three confirms. | queued |
+| P2 | Account look: hair, skin, three wear colours. Hired vendor matches the player. No hot-pink skin. | queued |
 
-Ratchet: M1d North lock, H1 empty Hire copy, A1/M2 five aisles on phone, M2 gold Add Cart + compact top + North hover.
+Ratchet: M2 marketplace chrome.
 
-Not queued. Operator is the brake.
+Operator is the brake.

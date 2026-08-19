@@ -46,12 +46,16 @@ export function modeFor(title) {
   const t = String(title || "").toLowerCase();
   if (t.includes("basket")) return "basket";
   if (t.includes("wrap")) return "wrap";
+  if (t.includes("ripe") || t.includes("sort")) return "sort";
+  if (t.includes("seed")) return "seed";
   return "fall";
 }
 
 export function hintFor(mode, goods) {
   if (mode === "basket") return "Tap when the fry is gold. Pale is early. Burnt is late.";
   if (mode === "wrap") return "Paper, then fish, then chips.";
+  if (mode === "sort") return "Tap ripe fruit. Leave the brown ones.";
+  if (mode === "seed") return "Tap seeds. Leave the rind.";
   const pool = Array.isArray(goods) ? goods : [];
   if (pool.includes("fish") || pool.includes("batter")) return "Tap fish, chips, batter.";
   if (pool.includes("watermelon") && pool.length <= 3) return "Tap melon.";
@@ -140,21 +144,39 @@ export function mountPackShift() {
   }
 
   function spawnFall() {
-    if (!running || mode !== "fall") return;
-    const pool = goods.length ? goods : FRUIT_SLICE;
-    const id = pool[Math.floor(Math.random() * pool.length)] || "mango";
-    const tint = FRUIT_TINT[id] || "mango";
+    if (!running || (mode !== "fall" && mode !== "sort" && mode !== "seed")) return;
+    let id;
+    let bad = false;
+    if (mode === "seed") {
+      bad = Math.random() < 0.38;
+      id = bad ? "rind" : "seeds";
+    } else if (mode === "sort") {
+      const pool = goods.length ? goods : FRUIT_SLICE;
+      id = pool[Math.floor(Math.random() * pool.length)] || "mango";
+      bad = Math.random() < 0.32;
+    } else {
+      const pool = goods.length ? goods : FRUIT_SLICE;
+      id = pool[Math.floor(Math.random() * pool.length)] || "mango";
+    }
+    const tint = FRUIT_TINT[id] || (bad ? "chips" : "mango");
     const btn = document.createElement("button");
     btn.type = "button";
-    btn.className = "pack-good pack-fall pack-" + tint;
+    btn.className = "pack-good pack-fall pack-" + tint + (bad ? " is-mush" : "");
     btn.setAttribute("data-fruit", tint);
-    btn.innerHTML = `<i></i><span>${id}</span>`;
+    btn.setAttribute("data-ripe", bad ? "0" : "1");
+    btn.innerHTML = `<i></i><span>${bad && mode === "sort" ? "brown " + id : id}</span>`;
     btn.style.left = 6 + Math.random() * 70 + "%";
     const life = 2100;
     btn.style.animationDuration = life + "ms";
     btn.addEventListener("click", () => {
       if (!running) return;
-      hits += 1;
+      const ripe = btn.getAttribute("data-ripe") !== "0";
+      if (mode === "sort" || mode === "seed") {
+        if (ripe) hits += 1;
+        else hits = Math.max(0, hits - 1);
+      } else {
+        hits += 1;
+      }
       paintHits();
       btn.classList.add("is-sliced");
       window.setTimeout(() => btn.remove(), 120);
@@ -275,7 +297,7 @@ export function mountPackShift() {
       if (clock) clock.textContent = left.toFixed(0) + "s";
       if (mode === "basket") {
         applyBasketFrame();
-      } else if (mode === "fall") {
+      } else if (mode === "fall" || mode === "sort" || mode === "seed") {
         const nextMs = Math.max(380, 720 - spent * 14);
         if (Math.abs(nextMs - spawnMs) > 40) {
           spawnMs = nextMs;

@@ -64,11 +64,17 @@ describe("street cart (kerb stall, not a handheld wagon)", () => {
     expect(detachVendor(cart)).toBe(false);
   });
 
-  it("builds a hired vendor under door height", () => {
+  it("builds a hired vendor under door height that matches the player look", () => {
     const vendor = makeVendor();
     expect(vendor.userData.kind).toBe("vendor");
-    const shirt = vendor.children.find((c) => c.userData && c.userData.part === "shirt") as THREE.Mesh;
-    expect((shirt.material as THREE.MeshLambertMaterial).color.getHex()).toBe(0x2f7a8a);
+    let shirt: THREE.Mesh | undefined;
+    vendor.traverse((obj) => {
+      if ((obj as THREE.Mesh).isMesh && obj.userData && obj.userData.part === "shirt") {
+        shirt = obj as THREE.Mesh;
+      }
+    });
+    expect(shirt).toBeTruthy();
+    expect((shirt!.material as THREE.MeshLambertMaterial).color.getHex()).toBe(0x2f7a8a);
     let maxY = 0;
     vendor.traverse((obj) => {
       if (!(obj as THREE.Mesh).isMesh) return;

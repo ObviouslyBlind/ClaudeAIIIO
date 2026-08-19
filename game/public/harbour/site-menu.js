@@ -26,11 +26,11 @@ const TABS = [
 ];
 
 const DEFAULT_UPGRADES = [
-  { id: "fridge", label: "Fridge", cost: 200, appeal: 3 },
-  { id: "sign", label: "Sign", cost: 80, appeal: 0.8 },
-  { id: "awning", label: "Awning", cost: 120, appeal: 0.7 },
-  { id: "lights", label: "Lights", cost: 60, appeal: 0.4 },
-  { id: "stools", label: "Stools", cost: 50, appeal: 0.4 },
+  { id: "fridge", label: "Fridge", cost: 180, appeal: 1.5 },
+  { id: "sign", label: "Sign", cost: 260, appeal: 1.0 },
+  { id: "awning", label: "Awning", cost: 400, appeal: 1.2 },
+  { id: "lights", label: "Lights", cost: 480, appeal: 1.2 },
+  { id: "stools", label: "Stools", cost: 720, appeal: 1.6 },
 ];
 
 export const SITE_GAMES = {

@@ -18,6 +18,8 @@ import { tickStaff, type StaffSlot } from "./staff.ts";
 import { tickUpkeep, type UpkeepLand } from "./upkeep.ts";
 import { createVisitorCart, type CartLine } from "./visitorCart.ts";
 import { createPlayState, tickPlay } from "./firstLoop.ts";
+import { clampLook, defaultLook, type PlayerLook } from "./look.ts";
+import { VISITOR_ACCOUNT_NO } from "./economy.ts";
 import { islandAskMul, islandDemandMul, islandSupplyMul } from "./islandEconomy.ts";
 import { landAskIndex } from "./landPrice.ts";
 
@@ -284,6 +286,9 @@ export type Visitor = {
   cart: CartLine[];
   /** Last client-side pack shift. Bonus only. */
   lastPackAtMs?: number;
+  /** Predetermined hair / skin / wear. */
+  look: PlayerLook;
+  accountNo: number;
   /** South first-loop inventory / stands / crates. */
   play: PlayState;
 };
@@ -297,6 +302,8 @@ export function createVisitor(cash = 1_000): Visitor {
     goods: stock,
     staffSlots: [],
     cart: createVisitorCart(),
+    look: defaultLook(),
+    accountNo: VISITOR_ACCOUNT_NO,
     play: createPlayState(),
   };
 }

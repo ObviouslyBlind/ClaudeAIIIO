@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { formatCartsBody } from "../public/harbour/carts-hud.js";
 import { formatSiteMenu } from "../public/harbour/site-menu.js";
+import { formatAccountSheet } from "../public/harbour/account-sheet.js";
 
 const html = readFileSync(new URL("../public/harbour/index.html", import.meta.url), "utf8");
 const chrome = readFileSync(new URL("../public/harbour/chrome.js", import.meta.url), "utf8");
@@ -223,7 +224,7 @@ describe("harbour chrome HUD", () => {
     expect(chrome).toContain("formatHireSheet");
     expect(chrome).toContain("/api/buy");
     expect(chrome).toContain("/api/shift/pack");
-    expect(chrome).toContain('let marketDest = "road"');
+    expect(chrome).toContain('let marketDest = "warehouse"');
     expect(chrome).toContain("Yellow van from the port.");
     expect(chrome).toContain("if (buyAsk && !buyAsk.hidden)");
     expect(chrome).toContain("ownedId");
@@ -271,6 +272,19 @@ describe("harbour chrome HUD", () => {
     expect(pack).toContain("PULL_LOCK_MS");
     expect(pack).toContain("Tap when the fry is gold");
     expect(pack).toContain("Paper, then fish, then chips");
+    expect(pack).toContain('return "sort"');
+    expect(pack).toContain('return "seed"');
+    expect(pack).toContain("Tap ripe fruit");
+    expect(pack).toContain("Tap seeds");
+    expect(chrome).toContain("No stock — load it from the warehouse first");
+    expect(chrome).toContain("No sales — load stock from the warehouse");
+    expect(chrome).toContain('data-place="${r.kind}"');
+    expect(chrome).toContain("Bring to me");
+    expect(css).toContain(".google-ph");
+    expect(css).toContain("button.danger");
+    expect(css).toContain(".look-swatch");
+    expect(css).toContain(".acct-wipe");
+    expect(css).toContain(".pack-good.is-mush");
     expect(siteMenu).toContain("const max = 16");
     expect(siteMenu).toContain("data-fuel");
     expect(siteMenu).toContain("Propane");
@@ -541,5 +555,43 @@ describe("harbour chrome HUD", () => {
     expect(css).toContain(".sticker-read.is-near");
     expect(css).toContain(".sticker-read.is-far");
     expect(css).toContain(".upg-tick");
+  });
+
+  it("paints Account as Google placeholder, #0002, look swatches, and red wipes", () => {
+    const htmlSheet = formatAccountSheet({
+      cash: 1_000,
+      incomePerMinute: 0,
+      salesTax: 0.08,
+      accountTag: "#0002",
+      look: { hair: "short", skin: "sand", shirt: "sea", jacket: "brass", pants: "moss" },
+    });
+    expect(htmlSheet).toContain("Google · signed in");
+    expect(htmlSheet).toContain("placeholder");
+    expect(htmlSheet).toContain("#0002");
+    expect(htmlSheet).toContain("#0001 is the owner");
+    expect(htmlSheet).toContain("data-wipe=\"reset-1\"");
+    expect(htmlSheet).toContain("Reset data");
+    expect(htmlSheet).toContain("data-wipe=\"delete-1\"");
+    expect(htmlSheet).toContain("Delete game account");
+    expect(htmlSheet).toContain('data-look="hair"');
+    expect(htmlSheet).toContain('data-look="skin"');
+    expect(htmlSheet).toContain('data-look="shirt"');
+    expect(htmlSheet).toContain('data-look="jacket"');
+    expect(htmlSheet).toContain('data-look="pants"');
+    expect(htmlSheet).toContain("class=\"danger\"");
+    const sure = formatAccountSheet({ cash: 1_000, accountTag: "#0002" }, { wipe: "delete-1" });
+    expect(sure).toContain("Are you sure?");
+    expect(sure).toContain("I am sure");
+    const sureSure = formatAccountSheet({ cash: 1_000, accountTag: "#0002" }, { wipe: "delete-2" });
+    expect(sureSure).toContain("Are you sure sure?");
+    const last = formatAccountSheet({ cash: 1_000, accountTag: "#0002" }, { wipe: "delete-3" });
+    expect(last).toContain("Last chance");
+    expect(last).toContain("Delete account");
+    expect(chrome).toContain("/api/look");
+    expect(chrome).toContain("/api/play/reset");
+    expect(chrome).toContain("/api/play/delete");
+    expect(chrome).toContain("accountWipe === \"delete-3\"");
+    expect(main).toContain("onLook");
+    expect(main).toContain("restylePeople");
   });
 });

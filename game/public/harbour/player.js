@@ -1,14 +1,10 @@
 import * as THREE from "three";
 import { attachPlayerTag } from "./player-tag.js";
 import { PLAYER_SOLE_M } from "./walk-plan.js";
+import { clampLook, defaultLook, skinHex, wearHex } from "./look.js";
 
-/** Warm PAPER craft — readable body, shirt, head. */
-const SKIN = 0xf2d2a8;
-const SHIRT = 0x2f7a8a;
-const BODY = 0xc45c12;
-const PANTS = 0x3d4a38;
-const HAIR = 0x3d2a1c;
 const SHOES = 0x4a3220;
+const HAIR_COLOUR = 0x3d2a1c;
 
 /**
  * Metres from player.position down to the soles.
@@ -43,6 +39,46 @@ function limb(name, w, h, d, color, hipY, x, shoe) {
   return g;
 }
 
+function addHair(figure, style, skin) {
+  if (style === "bald") return;
+  const hairCol = HAIR_COLOUR;
+  if (style === "bun") {
+    const cap = paperBox(0.32, 0.08, 0.28, hairCol);
+    cap.position.set(0, 1.78, 0);
+    cap.userData.part = "hair";
+    const bun = paperBox(0.16, 0.14, 0.16, hairCol);
+    bun.position.set(0, 1.86, -0.12);
+    bun.userData.part = "hair";
+    figure.add(cap, bun);
+    return;
+  }
+  if (style === "fade") {
+    const fade = paperBox(0.3, 0.06, 0.26, hairCol);
+    fade.position.set(0, 1.76, 0);
+    fade.userData.part = "hair";
+    figure.add(fade);
+    return;
+  }
+  if (style === "locs") {
+    const cap = paperBox(0.32, 0.08, 0.28, hairCol);
+    cap.position.set(0, 1.78, 0);
+    cap.userData.part = "hair";
+    figure.add(cap);
+    for (const x of [-0.1, 0, 0.1]) {
+      const loc = paperBox(0.05, 0.22, 0.05, hairCol);
+      loc.position.set(x, 1.66, -0.12);
+      loc.userData.part = "hair";
+      figure.add(loc);
+    }
+    return;
+  }
+  const hair = paperBox(0.32, 0.1, 0.28, hairCol);
+  hair.position.set(0, 1.8, 0);
+  hair.userData.part = "hair";
+  figure.add(hair);
+  void skin;
+}
+
 /**
  * Simple PAPER walker: coloured body, little shirt, head, swinging limbs.
  * `player` stays the same THREE.Mesh: position / rotation are the walk+camera
@@ -51,14 +87,22 @@ function limb(name, w, h, d, color, hipY, x, shoe) {
  * Figure y = 0 at soles. Group is at (0, -1.15, 0) on the player so
  * world feet = player.y - 1.15. Crown ≈ 1.78 m.
  */
-export function dressPlayer(player) {
+export function dressPlayer(player, look, opts) {
+  const worn = clampLook(look || defaultLook());
+  const skin = skinHex(worn.skin);
+  const shirtCol = wearHex(worn.shirt);
+  const bodyCol = wearHex(worn.jacket);
+  const pantsCol = wearHex(worn.pants);
+  const solesAtZero = Boolean(opts && opts.solesAtZero);
+
   player.castShadow = true;
   player.userData.mode = "PAPER";
-  player.userData.kind = "player";
+  player.userData.kind = player.userData.kind || "player";
+  player.userData.look = worn;
 
   if (player.geometry) player.geometry.dispose();
   player.geometry = new THREE.BoxGeometry(0.08, 0.08, 0.08);
-  if (!player.material) player.material = new THREE.MeshLambertMaterial({ color: SKIN });
+  if (!player.material) player.material = new THREE.MeshLambertMaterial({ color: skin });
   player.material.visible = false;
 
   while (player.children.length) player.remove(player.children[0]);
@@ -66,42 +110,39 @@ export function dressPlayer(player) {
   const figure = new THREE.Group();
   figure.name = "paper-figure";
   figure.userData.mode = "PAPER";
-  figure.position.y = SOLE_Y;
+  figure.position.y = solesAtZero ? 0 : SOLE_Y;
 
   const leftShoe = paperBox(0.16, 0.08, 0.26, SHOES);
   leftShoe.userData.part = "shoe";
   const rightShoe = paperBox(0.16, 0.08, 0.26, SHOES);
   rightShoe.userData.part = "shoe";
 
-  const leftLeg = limb("left-leg", 0.16, 0.72, 0.18, PANTS, 0.82, -0.12, leftShoe);
-  const rightLeg = limb("right-leg", 0.16, 0.72, 0.18, PANTS, 0.82, 0.12, rightShoe);
+  const leftLeg = limb("left-leg", 0.16, 0.72, 0.18, pantsCol, 0.82, -0.12, leftShoe);
+  const rightLeg = limb("right-leg", 0.16, 0.72, 0.18, pantsCol, 0.82, 0.12, rightShoe);
   leftLeg.userData.part = "leg";
   rightLeg.userData.part = "leg";
 
-  const body = paperBox(0.42, 0.38, 0.26, BODY);
+  const body = paperBox(0.42, 0.38, 0.26, bodyCol);
   body.position.set(0, 1.0, 0);
   body.userData.part = "body";
 
-  const shirt = paperBox(0.46, 0.36, 0.3, SHIRT);
+  const shirt = paperBox(0.46, 0.36, 0.3, shirtCol);
   shirt.position.set(0, 1.32, 0);
   shirt.userData.part = "shirt";
 
-  const leftArm = limb("left-arm", 0.12, 0.52, 0.12, SHIRT, 1.48, -0.3);
-  const rightArm = limb("right-arm", 0.12, 0.52, 0.12, SHIRT, 1.48, 0.3);
+  const leftArm = limb("left-arm", 0.12, 0.52, 0.12, shirtCol, 1.48, -0.3);
+  const rightArm = limb("right-arm", 0.12, 0.52, 0.12, shirtCol, 1.48, 0.3);
   leftArm.userData.part = "arm";
   rightArm.userData.part = "arm";
 
-  const head = paperBox(0.3, 0.3, 0.26, SKIN);
+  const head = paperBox(0.3, 0.3, 0.26, skin);
   head.position.set(0, 1.64, 0.01);
   head.userData.part = "head";
 
-  const hair = paperBox(0.32, 0.1, 0.28, HAIR);
-  hair.position.set(0, 1.8, 0);
-  hair.userData.part = "hair";
-
-  figure.add(leftLeg, rightLeg, body, shirt, leftArm, rightArm, head, hair);
+  figure.add(leftLeg, rightLeg, body, shirt, leftArm, rightArm, head);
+  addHair(figure, worn.hair, skin);
   player.add(figure);
-  attachPlayerTag(player);
+  if (!solesAtZero) attachPlayerTag(player);
 }
 
 /**

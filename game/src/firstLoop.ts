@@ -4,15 +4,17 @@
  * on that cart. Cash is $. One shared island warehouse on the dock.
  */
 
-import { findParcelAt, getPlot, ISLANDS, type IslandId, type LandBoard, type Parcel } from "./land.ts";
+import { findParcelAt, getPlot, ISLANDS, STARTER_CASH, type IslandId, type LandBoard, type Parcel } from "./land.ts";
 import { plotTrafficBand } from "./footTraffic.ts";
 import { roadsideDrop, type DropPoint } from "./roadside.ts";
 import { skuFitsPlot, type ZoneId } from "./zones.ts";
 import type { Visitor } from "./sim.ts";
 import { scoreSite, siteClassForUse, type SiteClass, type SiteScore } from "./siteScore.ts";
 import {
+  CART_BASE_GRADE,
   CART_PAPER_PRICE,
   CART_PRICES,
+  CART_UPGRADES,
   HIRE_COST,
   HOTDOG_PACK_PRICE,
   HOTDOG_PACK_QTY,
@@ -20,7 +22,12 @@ import {
   LAUNCH_SALES_TAX,
   PROPANE_PRICE,
   PROPANE_SALES,
+  STORAGE_UPGRADE_COST,
+  VISITOR_ACCOUNT_NO,
 } from "./economy.ts";
+import { PACK_COOLDOWN_MS } from "./shiftBonus.ts";
+import { createVisitorCart } from "./visitorCart.ts";
+import { clampLook, defaultLook } from "./look.ts";
 
 export const FIRST_LOOP_NOTE = "South island. One visitor on this process.";
 
@@ -35,6 +42,7 @@ export {
   LAUNCH_SALES_TAX,
   PROPANE_PRICE,
   PROPANE_SALES,
+  STORAGE_UPGRADE_COST,
 };
 export const TODAY_PRICE = HOTDOG_SALE_PRICE;
 /** Launch default. Live ticks write the statute rate onto PlayState. */
@@ -44,7 +52,6 @@ export const WAREHOUSE_RENT_TICKS = 3600;
 /** Seconds the kerb crate waits before it goes to the warehouse. */
 export const DELIVERY_WAIT_MS = 60_000;
 export const ORDER_MAX_QTY = 10;
-export const STORAGE_UPGRADE_COST = 200;
 export const STICKER_MIN = 1;
 export const STICKER_MAX = 16;
 /** |sticker − today| within this is yellow. Exact match is green. Further is red. */
@@ -86,7 +93,7 @@ export const CART_KINDS: CartKind[] = [
     kitLabel: "Fruit cart",
     stockLabel: "Fruit",
     note: "Caribbean fruit stall. Buy fruit packs, place, then stock this cart.",
-    games: ["Fruit slice"],
+    games: ["Fruit slice", "Ripe sort"],
   },
   {
     id: "watermelon",
@@ -96,7 +103,7 @@ export const CART_KINDS: CartKind[] = [
     kitLabel: "Watermelon cart",
     stockLabel: "Watermelon",
     note: "Cut melon on the kerb. Same hire / run / stats menu as the fruit cart.",
-    games: ["Melon slice"],
+    games: ["Melon slice", "Seed spit"],
   },
   {
     id: "fish_chips",
@@ -136,7 +143,7 @@ export const MARKET_AISLES: { id: MarketAisle; label: string; note: string }[] =
   {
     id: "street_carts",
     label: "Street carts",
-    note: "Fruit, watermelon, or fish and chips. Buy to the warehouse or the kerb — not onto a stall.",
+    note: "Fruit, watermelon, or fish and chips. Buys land in the South warehouse.",
   },
   {
     id: "stock",
@@ -234,13 +241,8 @@ function hasKit(play: PlayState): boolean {
 /** Metres from your lot toward the paved road where a cart may sit. */
 export const PLACE_CORRIDOR_M = 22;
 
-export const SITE_UPGRADES: { id: string; label: string; cost: number; appeal: number }[] = [
-  { id: "fridge", label: "Fridge", cost: STORAGE_UPGRADE_COST, appeal: 3 },
-  { id: "sign", label: "Sign", cost: 80, appeal: 0.8 },
-  { id: "awning", label: "Awning", cost: 120, appeal: 0.7 },
-  { id: "lights", label: "Lights", cost: 60, appeal: 0.4 },
-  { id: "stools", label: "Stools", cost: 50, appeal: 0.4 },
-];
+export const SITE_UPGRADES: { id: string; label: string; cost: number; appeal: number }[] =
+  CART_UPGRADES.map((u) => ({ ...u }));
 
 /** One Hire. An AI vendor appears and runs the site. */
 export const HIRE_ROSTER: { id: string; name: string; role: string; suggest: string }[] = [
@@ -493,10 +495,12 @@ function scoreWork(
     upgraded: boolean;
     upgrades?: string[];
     boostLeft: number;
+    kind?: string;
   },
 ): SiteScore {
   const plot = getPlot(land, row.plotId);
   const band = plot ? plotTrafficBand(land, plot) : "red";
+  const kind = cartKindById(row.kind) ? row.kind : "fruit";
   return scoreSite({
     hired: row.hired,
     stocked: row.stock >= 1,
@@ -505,6 +509,7 @@ function scoreWork(
     traffic: band,
     rivalsOnStreet: rivalsOnStreet(land, play, row.plotId, row.id),
     boostLeft: row.boostLeft,
+    baseGrade: CART_BASE_GRADE[kind as CartKindId] ?? 1,
   });
 }
 
@@ -517,6 +522,7 @@ export function scoreForStand(stand: Stand, land: LandBoard, play: PlayState): S
     upgraded: stand.upgraded,
     upgrades: stand.upgrades,
     boostLeft: stand.boostLeft || 0,
+    kind: stand.kind,
   });
 }
 
@@ -719,26 +725,54 @@ function sellOnce(play: PlayState, sticker: number): number {
   return net;
 }
 
+function pullBagsOntoStand(play: PlayState, stand: Stand): void {
+  const stockId = cartKindForStand(stand).stockId;
+  let room = Math.max(0, stand.storageCap - stand.hotdogs);
+  if (room > 0) {
+    const fromWh = Math.min(warehouseQty(play, stockId), room);
+    if (fromWh > 0 && takeWarehouse(play, stockId, fromWh)) {
+      stand.hotdogs = roundMoney(stand.hotdogs + fromWh);
+      room -= fromWh;
+    }
+  }
+  if (room > 0) {
+    const fromInv = Math.min(play.inventory.find((r) => r.kind === stockId)?.qty ?? 0, room);
+    if (fromInv > 0 && takeInv(play, stockId, fromInv)) {
+      stand.hotdogs = roundMoney(stand.hotdogs + fromInv);
+    }
+  }
+  if (isFryCart(stand) && (stand.propaneLeft || 0) < 1) {
+    if (takeWarehouse(play, "propane", 1)) stand.propaneLeft = PROPANE_SALES;
+    else if (takeInv(play, "propane", 1)) stand.propaneLeft = PROPANE_SALES;
+  }
+}
+
+export type BurstSale = { sold: number; earned: number; reason: string };
+
 /** After a finished mini-game: sell 5–10 from stock in one go. Hire not required. */
 export function sellShiftBurst(
   visitor: Visitor,
   land: LandBoard,
   siteId: string,
   hits: number,
-): { sold: number; earned: number } {
+): BurstSale {
   const play = ensurePlay(visitor);
   syncWorkSites(play, land);
   const found = findStandOrSite(play, siteId);
-  if (!found) return { sold: 0, earned: 0 };
-  if (found.row.hired) return { sold: 0, earned: 0 };
+  if (!found) return { sold: 0, earned: 0, reason: "no_stand" };
+  if (found.row.hired) return { sold: 0, earned: 0, reason: "hired" };
   const want = burstCount(hits);
-  if (want < 1) return { sold: 0, earned: 0 };
+  if (want < 1) return { sold: 0, earned: 0, reason: "no_hits" };
+  if (found.kind === "stand") pullBagsOntoStand(play, found.row);
   let have = found.kind === "stand" ? found.row.hotdogs : found.row.stock;
   if (found.kind === "stand" && isFryCart(found.row)) {
+    if ((found.row.propaneLeft || 0) < 1 && have >= 1) {
+      return { sold: 0, earned: 0, reason: "no_propane" };
+    }
     have = Math.min(have, Math.max(0, Math.floor(found.row.propaneLeft || 0)));
   }
   const n = Math.min(want, Math.floor(have));
-  if (n < 1) return { sold: 0, earned: 0 };
+  if (n < 1) return { sold: 0, earned: 0, reason: "empty" };
   let earned = 0;
   for (let i = 0; i < n; i++) earned = roundMoney(earned + sellOnce(play, found.row.stickerPrice));
   if (found.kind === "stand") {
@@ -748,7 +782,7 @@ export function sellShiftBurst(
   visitor.cash = roundMoney(visitor.cash + earned);
   play.salesRing.push(earned);
   if (play.salesRing.length > INCOME_WINDOW) play.salesRing.shift();
-  return { sold: n, earned };
+  return { sold: n, earned, reason: "ok" };
 }
 
 function siteNeeds(site: WorkSite, today = TODAY_PRICE): CartNeed[] {
@@ -1311,6 +1345,28 @@ export function tickHotdogSales(visitor: Visitor, land: LandBoard): number {
   return earned;
 }
 
+export type WipeKind = "reset" | "delete";
+
+/** Wipe this visitor's island save. Delete also restores the default look. */
+export function resetVisitorPlay(land: LandBoard, visitor: Visitor, kind: WipeKind = "reset"): void {
+  for (const plot of land.plots) {
+    if (plot.owner !== "visitor") continue;
+    plot.owner = null;
+    plot.use = null;
+  }
+  visitor.cash = STARTER_CASH;
+  visitor.play = createPlayState();
+  visitor.lastPackAtMs = 0;
+  visitor.cart = createVisitorCart();
+  visitor.staffSlots = [];
+  visitor.look = kind === "delete" ? defaultLook() : clampLook(visitor.look);
+}
+
+export function setVisitorLook(visitor: Visitor, patch: Record<string, unknown>): ReturnType<typeof clampLook> {
+  visitor.look = clampLook({ ...clampLook(visitor.look), ...patch });
+  return visitor.look;
+}
+
 export function tickPlay(
   visitor: Visitor,
   land: LandBoard,
@@ -1400,6 +1456,10 @@ export function playSnapshot(visitor: Visitor, land: LandBoard, taxRate?: number
     note: FIRST_LOOP_NOTE,
     island: "south" as const,
     cash: visitor.cash,
+    accountNo: VISITOR_ACCOUNT_NO,
+    accountTag: "#" + String(VISITOR_ACCOUNT_NO).padStart(4, "0"),
+    look: clampLook(visitor.look),
+    packCooldownMs: Math.max(0, PACK_COOLDOWN_MS - (Date.now() - (Number(visitor.lastPackAtMs) || 0))),
     incomePerMinute: incomePerMinute(play),
     todayPrice: TODAY_PRICE,
     hireCost: HIRE_COST,

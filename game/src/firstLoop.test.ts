@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createLandBoard, developPlot, ISLANDS, leasePlot } from "./land.ts";
+import { createLandBoard, developPlot, ISLANDS, leasePlot, STARTER_CASH } from "./land.ts";
 import { createVisitor } from "./sim.ts";
 import { BAND_LEVEL, footTrafficSnapshot, roadTrafficBand } from "./footTraffic.ts";
 import { roadsideDrop } from "./roadside.ts";
@@ -41,6 +41,8 @@ import {
   upgradeStand,
   withdrawWarehouse,
   sellShiftBurst,
+  resetVisitorPlay,
+  setVisitorLook,
 } from "./firstLoop.ts";
 
 function leaseCheapSouth() {
@@ -212,8 +214,8 @@ describe("South first loop", () => {
     expect(snap.stands[0]!.desirability).toBeGreaterThan(0);
     expect(snap.stands[0]!.stickerBand).toBe("green");
     expect(snap.stands[0]!.stickerMul).toBe(1);
-    expect(snap.stands[0]!.parts.some((p) => p.id === "fridge" && p.points === 3)).toBe(true);
-    expect(snap.upgradeCatalog.some((u) => u.id === "lights" && u.appeal === 0.4)).toBe(true);
+    expect(snap.stands[0]!.parts.some((p) => p.id === "fridge" && p.points === 1.5)).toBe(true);
+    expect(snap.upgradeCatalog.some((u) => u.id === "lights" && u.appeal === 1.2)).toBe(true);
     expect(snap.upgradeCatalog.some((u) => u.id === "stools")).toBe(true);
   });
 
@@ -436,6 +438,7 @@ describe("South first loop", () => {
       "Watermelon cart",
       "Fish and chips cart",
     ]);
+    visitor.cash = 8_000;
     const kit = orderMarket(visitor, land, { skus: ["melon_cart", "hotdogs"], dest: "cart" });
     expect(kit.ok).toBe(true);
     const placed = placeStand(visitor, land, plot.id, { kitId: "melon_cart" });
@@ -453,7 +456,7 @@ describe("South first loop", () => {
     const snap = playSnapshot(visitor, land);
     expect(snap.stands[0]!.label).toBe("Watermelon cart");
     expect(snap.stands[0]!.stockId).toBe("melon");
-    expect(snap.stands[0]!.games).toContain("Melon slice");
+    expect(snap.stands[0]!.games).toEqual(["Melon slice", "Seed spit"]);
   });
 
   it("uses the same site card for a shop and a mine", () => {
@@ -516,6 +519,7 @@ describe("South first loop", () => {
     const cash0 = visitor.cash;
     const burst = sellShiftBurst(visitor, land, placed.stand.id, 8);
     expect(burst.sold).toBe(0);
+    expect(burst.reason).toBe("hired");
     expect(placed.stand.hotdogs).toBe(20);
     expect(visitor.cash).toBe(cash0);
   });
@@ -548,7 +552,9 @@ describe("South first loop", () => {
     const cash0 = visitor.cash;
     const miss = sellShiftBurst(visitor, land, placed.stand.id, 0);
     expect(miss.sold).toBe(0);
+    expect(miss.reason).toBe("no_hits");
     const burst = sellShiftBurst(visitor, land, placed.stand.id, 8);
+    expect(burst.reason).toBe("ok");
     expect(burst.sold).toBeGreaterThanOrEqual(5);
     expect(burst.sold).toBeLessThanOrEqual(10);
     expect(placed.stand.hotdogs).toBe(20 - burst.sold);
@@ -576,22 +582,27 @@ describe("South first loop", () => {
   });
 
   it("makes fish and chips the dear propane cart with the highest sticker", () => {
-    expect(CART_PRICES.fruit.kit).toBe(85);
-    expect(CART_PRICES.watermelon.kit).toBeGreaterThan(CART_PRICES.fruit.kit);
+    expect(CART_PRICES.fruit.kit).toBe(90);
+    expect(CART_PRICES.watermelon.kit).toBeGreaterThan(1_000);
     expect(CART_PRICES.fish_chips.kit).toBeGreaterThan(CART_PRICES.watermelon.kit);
+    expect(CART_PRICES.fish_chips.kit).toBeLessThan(2_400);
     expect(CART_PRICES.fish_chips.sale).toBe(11);
     expect(CART_PRICES.fish_chips.sale).toBeGreaterThan(CART_PRICES.fruit.sale);
     expect(PROPANE_PRICE).toBe(18);
     expect(PROPANE_SALES).toBe(40);
     expect(MARKET_CATALOG.find((s) => s.id === "propane")?.paperPrice).toBe(PROPANE_PRICE);
     expect(MARKET_CATALOG.find((s) => s.id === "fish_cart")?.paperPrice).toBe(CART_PRICES.fish_chips.kit);
+    expect(CART_KINDS.find((c) => c.id === "fruit")?.games).toEqual(["Fruit slice", "Ripe sort"]);
+    expect(CART_KINDS.find((c) => c.id === "watermelon")?.games).toEqual(["Melon slice", "Seed spit"]);
     expect(CART_KINDS.find((c) => c.id === "fish_chips")?.games).toEqual(["Fry run", "Basket pull", "Wrap ticket"]);
     const fryStart =
       CART_PRICES.fish_chips.kit + CART_PRICES.fish_chips.pack + PROPANE_PRICE + HIRE_COST;
-    expect(fryStart).toBeLessThan(1_000);
+    expect(fryStart).toBeGreaterThan(1_000);
+    expect(fryStart).toBeLessThan(2_400);
     expect(fryStart).toBeGreaterThan(CART_PRICES.fruit.kit + HOTDOG_PACK_PRICE + HIRE_COST);
 
     const { land, visitor, plot } = leaseCheapSouth();
+    visitor.cash = 8_000;
     const order = orderMarket(visitor, land, {
       skus: ["fish_cart", "fish_chips", "propane"],
       dest: "cart",
@@ -631,6 +642,7 @@ describe("South first loop", () => {
 
   it("will not burst-sell fry without heat, and one bottle lasts 40 sales", () => {
     const { land, visitor, plot } = leaseCheapSouth();
+    visitor.cash = 8_000;
     const order = orderMarket(visitor, land, { skus: ["fish_cart", "fish_chips"], dest: "cart" });
     expect(order.ok).toBe(true);
     const placed = placeStand(visitor, land, plot.id, { kitId: "fish_cart" });
@@ -639,6 +651,7 @@ describe("South first loop", () => {
     expect(stockStand(visitor, placed.stand.id).ok).toBe(true);
     const dry = sellShiftBurst(visitor, land, placed.stand.id, 8);
     expect(dry.sold).toBe(0);
+    expect(dry.reason).toBe("no_propane");
     expect(placed.stand.hotdogs).toBe(20);
     expect(orderMarket(visitor, land, { skus: ["propane"], dest: "cart" }).ok).toBe(true);
     expect(fuelStand(visitor, placed.stand.id, "inventory").ok).toBe(true);
@@ -646,5 +659,62 @@ describe("South first loop", () => {
     expect(wet.sold).toBeGreaterThan(0);
     expect(placed.stand.propaneLeft).toBe(PROPANE_SALES - wet.sold);
     expect(fuelStand(visitor, "stand-missing").reason).toBe("no_stand");
+  });
+
+  it("keeps watermelon and fry kits above starter cash", () => {
+    const land = createLandBoard();
+    const visitor = createVisitor(1_000);
+    expect(orderMarket(visitor, land, { skus: ["melon_cart"], dest: "warehouse" }).ok).toBe(false);
+    expect(orderMarket(visitor, land, { skus: ["fish_cart"], dest: "warehouse" }).ok).toBe(false);
+    expect(orderMarket(visitor, land, { skus: ["hotdog_cart"], dest: "warehouse" }).ok).toBe(true);
+    expect(visitor.play.warehouse.items.find((i) => i.kind === "hotdog_cart")?.qty).toBe(1);
+  });
+
+  it("pulls warehouse packs onto the cart when a finished shift sells", () => {
+    const { land, visitor, plot } = leaseCheapSouth();
+    const order = orderMarket(visitor, land, { skus: ["hotdog_cart", "hotdogs"], dest: "warehouse" });
+    expect(order.ok).toBe(true);
+    const placed = placeStand(visitor, land, plot.id);
+    expect(placed.ok).toBe(true);
+    if (!placed.ok) return;
+    expect(placed.stand.hotdogs).toBe(0);
+    expect(visitor.play.warehouse.items.find((i) => i.kind === "hotdogs")?.qty).toBe(20);
+    const cash0 = visitor.cash;
+    const empty = sellShiftBurst(visitor, land, placed.stand.id, 8);
+    expect(empty.reason).toBe("ok");
+    expect(empty.sold).toBeGreaterThanOrEqual(5);
+    expect(visitor.cash).toBeGreaterThan(cash0);
+    expect(visitor.play.warehouse.items.find((i) => i.kind === "hotdogs")?.qty ?? 0).toBeLessThan(20);
+  });
+
+  it("names empty when there is nothing left to sell", () => {
+    const { land, visitor, plot } = leaseCheapSouth();
+    const order = orderMarket(visitor, land, { skus: ["hotdog_cart"], dest: "warehouse" });
+    expect(order.ok).toBe(true);
+    const placed = placeStand(visitor, land, plot.id);
+    expect(placed.ok).toBe(true);
+    if (!placed.ok) return;
+    const burst = sellShiftBurst(visitor, land, placed.stand.id, 8);
+    expect(burst.sold).toBe(0);
+    expect(burst.reason).toBe("empty");
+  });
+
+  it("resets the island save and keeps look; delete restores the default look", () => {
+    const { land, visitor, plot } = leaseCheapSouth();
+    expect(orderMarket(visitor, land, { skus: ["hotdog_cart"], dest: "warehouse" }).ok).toBe(true);
+    expect(placeStand(visitor, land, plot.id).ok).toBe(true);
+    setVisitorLook(visitor, { skin: "deep", hair: "locs", shirt: "night" });
+    expect(visitor.look.skin).toBe("deep");
+    resetVisitorPlay(land, visitor, "reset");
+    expect(visitor.cash).toBe(STARTER_CASH);
+    expect(visitor.play.stands).toHaveLength(0);
+    expect(land.plots.some((p) => p.owner === "visitor")).toBe(false);
+    expect(visitor.look.skin).toBe("deep");
+    expect(visitor.look.hair).toBe("locs");
+    expect(playSnapshot(visitor, land).accountTag).toBe("#0002");
+    resetVisitorPlay(land, visitor, "delete");
+    expect(visitor.look.skin).toBe("sand");
+    expect(visitor.look.hair).toBe("short");
+    expect(visitor.accountNo).toBe(2);
   });
 });

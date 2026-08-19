@@ -590,9 +590,22 @@ async function placeCartOn(plot, x, z) {
 
 function attachVendor(cart) {
   if (!cart || findVendor(cart)) return;
-  const vendor = makeVendor();
+  const playNow = chromeHud && chromeHud.getPlay && chromeHud.getPlay();
+  const vendor = makeVendor(playNow && playNow.look);
   vendor.position.set(1.05, 0, 0.15);
   cart.add(vendor);
+}
+
+function restylePeople(look) {
+  dressPlayer(player, look);
+  const playNow = chromeHud && chromeHud.getPlay && chromeHud.getPlay();
+  for (const mesh of standMeshes.values()) {
+    const had = Boolean(findVendor(mesh));
+    if (!had) continue;
+    detachVendor(mesh);
+    attachVendor(mesh);
+  }
+  void playNow;
 }
 
 function tickVendors(t) {
@@ -2317,7 +2330,11 @@ async function boot() {
       hideCrateCard();
       if (chromeHud && chromeHud.hideBuyAsk) chromeHud.hideBuyAsk();
     },
+    onLook(look) {
+      restylePeople(look);
+    },
     onPlay(play) {
+      if (play && play.look) dressPlayer(player, play.look);
       if (overlays) overlays.refresh(play, map);
       pruneCrates(play);
       for (const d of play.deliveries || []) {

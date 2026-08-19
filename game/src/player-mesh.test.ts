@@ -61,6 +61,7 @@ describe("player PAPER walker", () => {
     expect(p).toContain("head");
     expect(p).toContain("leg");
     expect(p).toContain("arm");
+    expect(p).toContain("hair");
     expect(p).not.toContain("satchel");
     expect(p).not.toContain("visor");
     expect(p).not.toContain("lanyard");

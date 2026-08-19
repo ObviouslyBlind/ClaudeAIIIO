@@ -20,6 +20,7 @@ import {
   basketCount,
 } from "./marketplace.js";
 import { formatHireSheet } from "./hire-sheet.js";
+import { formatAccountSheet } from "./account-sheet.js";
 
 export const POLL_MS = 1000;
 
@@ -66,7 +67,8 @@ export function mountChrome(opts) {
   let overlay = "world";
   let placing = false;
   let placingKit = "";
-  let marketDest = "road";
+  let marketDest = "warehouse";
+  let accountWipe = "";
   let marketAisle = "street";
   let marketIsland = "south";
   let marketQuery = "";
@@ -410,8 +412,8 @@ export function mountChrome(opts) {
     if (delivery && delivery.dest === "road") {
       closePanels();
       if (typeof opts.onOrder === "function") opts.onOrder(delivery);
-    } else if (openPanel === "market") {
-      paintMarket();
+    } else {
+      open("warehouse");
     }
     if (opts.setStatus) {
       opts.setStatus(
@@ -485,10 +487,9 @@ export function mountChrome(opts) {
       closePanels();
       if (typeof opts.onOrder === "function") opts.onOrder(delivery);
     } else {
-      paintTop();
-      paintMarket();
+      open("warehouse");
     }
-    if (opts.setStatus) opts.setStatus("Paid from the market cart.");
+    if (opts.setStatus) opts.setStatus("Paid. In the South warehouse.");
   }
 
   function paintFootLegend() {
@@ -540,14 +541,11 @@ export function mountChrome(opts) {
   function paintAccount() {
     const body = document.getElementById("acct-body");
     if (!body || !play) return;
-    const taxPct = Math.round((Number(play.salesTax) || 0.08) * 100);
-    body.innerHTML = `
-      ${title("Account")}
-      <p>Visitor on South island. Sales tax ${taxPct}% is already in every sale.</p>
-      <div class="stand-row"><span>Balance</span><strong>${money(play.cash)}</strong></div>
-      <div class="stand-row"><span>Income</span><strong>${money(play.incomePerMinute)}/min</strong></div>
-      <div class="stand-row"><span>Island bank</span><strong>${money(play.gameBank)}</strong></div>
-    `;
+    body.innerHTML = formatAccountSheet(play, { wipe: accountWipe });
+  }
+
+  function isKitKind(kind) {
+    return ((play && play.catalog) || []).some((s) => s.id === kind && s.role === "kit");
   }
 
   function paintWarehouse() {
@@ -558,26 +556,87 @@ export function mountChrome(opts) {
     const island = wh.island === "north" ? "North" : "South";
     body.innerHTML = `
       ${title("Warehouse")}
-      <p class="whisper">${island} dock · shared · ${money(wh.feePerDay)}/day while occupied</p>
+      <p class="whisper">${island} dock · buys land here · ${money(wh.feePerDay)}/day while occupied</p>
       ${
         items.length
           ? items
-              .map(
-                (r) => `
+              .map((r) => {
+                const label = ((play.catalog || []).find((s) => s.id === r.kind) || {}).label || r.kind;
+                const kit = isKitKind(r.kind);
+                return `
         <div class="inv-row">
-          <span>${((play.catalog || []).find((s) => s.id === r.kind) || {}).label || r.kind} × ${r.qty}</span>
-          <button type="button" data-withdraw="${r.kind}">Bring to me</button>
-        </div>`,
-              )
+          <span>${label} × ${r.qty}</span>
+          ${
+            kit
+              ? `<button type="button" data-place="${r.kind}">Place</button>`
+              : `<button type="button" data-withdraw="${r.kind}">Bring to me</button>`
+          }
+        </div>`;
+              })
               .join("")
-          : "<p>Nothing stored. Market can send kit here.</p>"
+          : "<p>Nothing stored. Marketplace Add Cart pays into this warehouse.</p>"
       }
     `;
   }
 
+  function packLine(ok, data) {
+    if (!ok) {
+      const why = data && data.reason;
+      if (why === "cooldown") return "Wait a minute — this cart just ran.";
+      if (why === "hired") return "Hired staff already sell.";
+      return "Pack skipped";
+    }
+    const sold = Number(data && data.sold) || 0;
+    const earned = Number(data && data.earned) || 0;
+    if (sold > 0) return `Sold ${sold} · ${money(earned)}`;
+    const why = (data && data.burstReason) || (data && data.reason);
+    if (why === "empty") return "No sales — load stock from the warehouse.";
+    if (why === "no_propane") return "No sales — the fry cart needs propane.";
+    if (why === "no_hits") return "No sales — tap during the shift.";
+    if (why === "hired") return "Hired staff already sell.";
+    return "No sales this shift.";
+  }
+
+  function qtyOf(kind) {
+    const inv = ((play && play.inventory) || []).find((r) => r.kind === kind);
+    const wh = ((((play && play.warehouse) || {}).items) || []).find((r) => r.kind === kind);
+    return (Number(inv && inv.qty) || 0) + (Number(wh && wh.qty) || 0);
+  }
+
+  function packCanSell(site) {
+    if (!site) return { ok: true };
+    const stockId = site.stockId || "hotdogs";
+    const onCart = Number(site.hotdogs != null ? site.hotdogs : site.stock) || 0;
+    if (onCart + qtyOf(stockId) < 1) return { ok: false, why: "empty" };
+    const fry = site.kind === "fish_chips" || stockId === "fish_chips";
+    if (fry && (Number(site.propaneLeft) || 0) < 1 && qtyOf("propane") < 1) {
+      return { ok: false, why: "no_propane" };
+    }
+    return { ok: true };
+  }
+
   function startPack(goods, standId, title) {
     const site = findSite(standId);
-    if (site && site.hired) return;
+    if (site && site.hired) {
+      if (opts.setStatus) opts.setStatus("Hired staff already sell.");
+      return;
+    }
+    const wait = Number(play && play.packCooldownMs) || 0;
+    if (wait > 800) {
+      if (opts.setStatus) opts.setStatus("Wait " + Math.ceil(wait / 1000) + "s before the next shift.");
+      return;
+    }
+    const stocked = packCanSell(site);
+    if (!stocked.ok) {
+      if (opts.setStatus) {
+        opts.setStatus(
+          stocked.why === "no_propane"
+            ? "No propane — fuel the fry cart first."
+            : "No stock — load it from the warehouse first.",
+        );
+      }
+      return;
+    }
     packShift.open({
       goods,
       title,
@@ -591,9 +650,7 @@ export function mountChrome(opts) {
         if (openPanel === "inventory") paintInv();
         const fresh = findSite(standId);
         if (fresh) paintStandMenu(fresh);
-        if (opts.setStatus) {
-          opts.setStatus(ok ? `Sold ${data.sold || 0}` : "Pack skipped");
-        }
+        if (opts.setStatus) opts.setStatus(packLine(ok, data));
       },
     });
   }
@@ -774,7 +831,7 @@ export function mountChrome(opts) {
     root.addEventListener("click", async (ev) => {
       const hit = ev.target && ev.target.closest
         ? ev.target.closest(
-            "[data-dest], [data-order], [data-buy], [data-place], [data-withdraw], [data-open-stand], [data-order-qty], [data-order-dest], [data-aisle], [data-island], [data-sheet-close], [data-hire-pick], [data-hire-back], [data-sheet-hire], [data-add-cart], [data-market-cart], [data-basket-remove], [data-basket-buy], [data-basket-pay], #order-pay, #order-cancel",
+            "[data-dest], [data-order], [data-buy], [data-place], [data-withdraw], [data-open-stand], [data-order-qty], [data-order-dest], [data-aisle], [data-island], [data-sheet-close], [data-hire-pick], [data-hire-back], [data-sheet-hire], [data-add-cart], [data-market-cart], [data-basket-remove], [data-basket-buy], [data-basket-pay], [data-look], [data-wipe], [data-wipe-go], [data-wipe-cancel], #order-pay, #order-cancel",
           )
         : null;
       if (!hit || (standMenu && standMenu.contains(hit))) return;
@@ -938,6 +995,65 @@ export function mountChrome(opts) {
         paintMarket();
         paintInv();
         if (opts.setStatus) opts.setStatus("In the cart.");
+        return;
+      }
+      if (hit.hasAttribute("data-wipe-cancel")) {
+        accountWipe = "";
+        paintAccount();
+        return;
+      }
+      if (hit.hasAttribute("data-wipe")) {
+        accountWipe = hit.getAttribute("data-wipe") || "";
+        paintAccount();
+        return;
+      }
+      if (hit.hasAttribute("data-wipe-go")) {
+        const kind = hit.getAttribute("data-wipe-go");
+        if (kind === "reset") {
+          const { data } = await readJson("/api/play/reset", { method: "POST" });
+          accountWipe = "";
+          if (data && data.play) stampPlay(data.play);
+          paintPanels();
+          if (typeof opts.onLook === "function") opts.onLook(play && play.look);
+          if (opts.setStatus) opts.setStatus("Save reset.");
+          return;
+        }
+        if (kind === "delete") {
+          if (accountWipe === "delete-1") {
+            accountWipe = "delete-2";
+            paintAccount();
+            return;
+          }
+          if (accountWipe === "delete-2") {
+            accountWipe = "delete-3";
+            paintAccount();
+            return;
+          }
+          if (accountWipe === "delete-3") {
+            const { data } = await readJson("/api/play/delete", { method: "POST" });
+            accountWipe = "";
+            if (data && data.play) stampPlay(data.play);
+            paintPanels();
+            if (typeof opts.onLook === "function") opts.onLook(play && play.look);
+            if (opts.setStatus) opts.setStatus("Account deleted on this shard.");
+          }
+          return;
+        }
+        return;
+      }
+      if (hit.hasAttribute("data-look")) {
+        const field = hit.getAttribute("data-look");
+        const id = hit.getAttribute("data-look-id");
+        const body = {};
+        body[field] = id;
+        const { data } = await readJson("/api/look", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        if (data && data.play) stampPlay(data.play);
+        paintAccount();
+        if (typeof opts.onLook === "function") opts.onLook((data && data.look) || (play && play.look));
         return;
       }
       if (hit.hasAttribute("data-place")) {

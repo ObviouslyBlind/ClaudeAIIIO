@@ -295,6 +295,13 @@ html, body {
   overflow: visible;
   z-index: 11;
 }
+.float-panel.pos-tr {
+  right: 0;
+  left: auto;
+  top: calc(100% + 8px);
+  width: min(360px, calc(100vw - 24px));
+  max-height: min(74vh, 680px);
+}
 .chrome-row {
   display: flex;
   flex-wrap: wrap;
@@ -2095,6 +2102,9 @@ nav.dock.travel-dock {
   transform: scale(0.7) rotate(-18deg);
   transition: transform 0.12s ease-out, opacity 0.12s ease-out;
 }
+.pack-good.is-mush {
+  filter: grayscale(0.75) brightness(0.62);
+}
 .pack-fall {
   position: absolute;
   top: -8px;
@@ -2183,4 +2193,95 @@ nav.dock.travel-dock {
   background: transparent;
   color: var(--ink);
   font-weight: 600;
+}
+
+#acct-body .google-ph {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  margin: 0 0 8px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(244, 241, 230, 0.08);
+  color: var(--muted);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: not-allowed;
+  opacity: 0.88;
+}
+#acct-body .acct-no {
+  margin: 4px 0 2px;
+  font-family: "Big Shoulders Display", "Red Hat Text", sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--brass-hi);
+}
+#acct-body .look-label {
+  margin: 12px 0 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+#acct-body .look-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+#acct-body .look-swatch {
+  min-height: 34px;
+  padding: 6px 10px 6px 28px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 12px 50%, var(--sw, var(--btn)) 0 7px, transparent 8px),
+    rgba(8, 28, 32, 0.55);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+#acct-body .look-swatch.is-on {
+  border-color: var(--brass-hi);
+  box-shadow: 0 0 0 1px var(--brass-hi);
+  color: var(--brass-hi);
+}
+#acct-body button.danger {
+  display: block;
+  width: 100%;
+  min-height: 40px;
+  margin-top: 10px;
+  border: 1px solid #c45a3a;
+  border-radius: 10px;
+  background: #5a1c18;
+  color: #ffd4c8;
+  font-weight: 800;
+  cursor: pointer;
+}
+#acct-body .acct-wipe {
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px solid #c45a3a;
+  border-radius: 10px;
+  background: rgba(90, 28, 24, 0.42);
+}
+#acct-body .acct-wipe p {
+  margin: 0 0 10px;
+  color: #ffd4c8;
+  font-weight: 600;
+}
+#acct-body .acct-wipe .ghost {
+  width: 100%;
+  min-height: 36px;
+  margin-top: 8px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #24444c;
+  color: var(--ink);
+  font-weight: 700;
+  cursor: pointer;
 }

@@ -46,6 +46,8 @@ import {
   withdrawWarehouse,
   ensurePlay,
   isKnownSku,
+  resetVisitorPlay,
+  setVisitorLook,
   sellShiftBurst,
 } from "./firstLoop.ts";
 import { footTrafficSnapshot } from "./footTraffic.ts";
@@ -347,9 +349,15 @@ const server = createServer(async (req, res) => {
     const tax0 = visitor.play?.salesTaxCollected ?? 0;
     const result = completePackShift(visitor, body || {});
     const burst =
-      result.ok && standId ? sellShiftBurst(visitor, land, standId, result.hits) : { sold: 0, earned: 0 };
+      result.ok && standId ? sellShiftBurst(visitor, land, standId, result.hits) : { sold: 0, earned: 0, reason: result.ok ? "ok" : result.reason };
     sinkCash((visitor.play?.salesTaxCollected ?? tax0) - tax0);
-    json(res, result.ok ? 200 : 400, { ...result, sold: burst.sold, earned: burst.earned, play: playPayload() });
+    json(res, result.ok ? 200 : 400, {
+      ...result,
+      sold: burst.sold,
+      earned: burst.earned,
+      burstReason: burst.reason,
+      play: playPayload(),
+    });
     return;
   }
 
@@ -362,6 +370,25 @@ const server = createServer(async (req, res) => {
     }
     const result = withdrawWarehouse(visitor, kind, Number(body?.qty ?? 0));
     json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/look") {
+    const body = await readJsonBody(req);
+    const look = setVisitorLook(visitor, body && typeof body === "object" ? body : {});
+    json(res, 200, { ok: true, look, play: playPayload() });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/play/reset") {
+    resetVisitorPlay(land, visitor, "reset");
+    json(res, 200, { ok: true, play: playPayload() });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/play/delete") {
+    resetVisitorPlay(land, visitor, "delete");
+    json(res, 200, { ok: true, play: playPayload() });
     return;
   }
 

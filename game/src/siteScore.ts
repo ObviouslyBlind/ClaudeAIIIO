@@ -4,6 +4,8 @@
  * PAPER / SIMULATED.
  */
 
+import { CART_UPGRADES } from "./economy.ts";
+
 export type SiteClass = "cart" | "shop" | "mine";
 export type TrafficBand = "green" | "yellow" | "red";
 
@@ -25,14 +27,12 @@ export type SiteUpgradePart = {
   points: number;
 };
 
-/** Fridge is the big one. Later kit adds smaller street appeal. */
-export const UPGRADE_APPEAL: SiteUpgradePart[] = [
-  { id: "fridge", label: "Fridge", points: 3 },
-  { id: "sign", label: "Sign", points: 0.8 },
-  { id: "awning", label: "Awning", points: 0.7 },
-  { id: "lights", label: "Lights", points: 0.4 },
-  { id: "stools", label: "Stools", points: 0.4 },
-];
+/** Fridge is first. Later kit is how you climb toward 8–10. */
+export const UPGRADE_APPEAL: SiteUpgradePart[] = CART_UPGRADES.map((u) => ({
+  id: u.id,
+  label: u.label,
+  points: u.appeal,
+}));
 
 export function appealFor(id: string): number {
   return UPGRADE_APPEAL.find((u) => u.id === id)?.points ?? 0;
@@ -46,6 +46,8 @@ export type SiteScoreInput = {
   traffic: TrafficBand;
   rivalsOnStreet: number;
   boostLeft?: number;
+  /** Empty cart floor. Fruit 1, fry 2. */
+  baseGrade?: number;
 };
 
 export type SiteScore = {
@@ -63,7 +65,7 @@ function round1(n: number): number {
 }
 
 function trafficPoints(band: TrafficBand): number {
-  if (band === "green") return 2;
+  if (band === "green") return 1.5;
   if (band === "yellow") return 1;
   return 0.5;
 }
@@ -82,19 +84,25 @@ function upgradeParts(input: SiteScoreInput): SiteScorePart[] {
       return { id, label: spec?.label || id, points: spec?.points ?? 0 };
     });
   }
-  return [{ id: "upgrade", label: "Upgraded", points: input.upgraded ? 3 : 0 }];
+  return [{ id: "upgrade", label: "Upgraded", points: input.upgraded ? appealFor("fridge") : 0 }];
 }
 
 /**
- * Staff 2.5, stock 2.5, fridge 3, extras, foot traffic up to 2.
+ * Empty carts sit at 1–2. Hire, stock, and paid kit climb toward 8–10.
  * Two or more rivals on the same street cap the score at 5.
  */
 export function scoreSite(input: SiteScoreInput): SiteScore {
+  const base = Math.max(1, Math.min(2, Number(input.baseGrade) || 1));
   const parts: SiteScorePart[] = [
-    { id: "staff", label: "Staffed", points: input.hired ? 2.5 : 0 },
-    { id: "stock", label: "Stocked", points: input.stocked ? 2.5 : 0 },
+    { id: "cart", label: "Cart", points: base },
+    { id: "staff", label: "Staffed", points: input.hired ? 1 : 0 },
+    { id: "stock", label: "Stocked", points: input.stocked ? 1 : 0 },
     ...upgradeParts(input),
-    { id: "traffic", label: "Foot traffic", points: trafficPoints(input.traffic) },
+    {
+      id: "traffic",
+      label: "Foot traffic",
+      points: input.stocked ? trafficPoints(input.traffic) : 0,
+    },
   ];
   const raw = round1(parts.reduce((sum, p) => sum + p.points, 0));
   const rivals = Math.max(0, Math.floor(Number(input.rivalsOnStreet) || 0));
