@@ -88,8 +88,7 @@ describe("street cart (kerb stall, not a handheld wagon)", () => {
   });
 
   it("stands the hired vendor on the serving apron, in front of the counter", () => {
-    expect(VENDOR_LOCAL.z).toBeGreaterThan(0.7);
-    expect(VENDOR_LOCAL.x).toBeGreaterThan(0.4);
-    expect(VENDOR_LOCAL.x).toBeLessThan(1);
+    expect(VENDOR_LOCAL.z).toBeGreaterThan(1);
+    expect(Math.abs(VENDOR_LOCAL.x)).toBeLessThan(0.4);
   });
 });

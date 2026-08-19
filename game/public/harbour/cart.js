@@ -31,8 +31,8 @@ function box(w, h, d, color) {
 export const HOTDOG_CART_MESH_COUNT = 11;
 export const STREET_CART_MESH_COUNT = HOTDOG_CART_MESH_COUNT;
 
-/** Serving apron, toward the stall camera (+X/+Z), not tucked behind the body. */
-export const VENDOR_LOCAL = { x: 0.62, y: 0, z: 0.92 };
+/** Dead-centre on the serving apron, facing the stall camera (+Z). */
+export const VENDOR_LOCAL = { x: 0, y: 0, z: 1.25 };
 
 export function makeStreetCart(kind) {
   const look = CART_LOOK[kind] || CART_LOOK.fruit;
@@ -188,20 +188,16 @@ export function detachVendor(root) {
 
 /** Hired vendor. Same figure as the player, so they look like you. */
 export function makeVendor(look) {
-  const g = new THREE.Group();
+  const g = new THREE.Mesh(
+    new THREE.BoxGeometry(0.08, 0.08, 0.08),
+    new THREE.MeshLambertMaterial({ color: 0xf2d2a8 }),
+  );
   g.name = "vendor";
   g.userData.kind = "vendor";
   g.userData.label = "hired vendor";
   g.userData.layer = "world";
   g.userData.mode = "PAPER";
-  const holder = new THREE.Mesh(
-    new THREE.BoxGeometry(0.08, 0.08, 0.08),
-    new THREE.MeshLambertMaterial({ color: 0xf2d2a8 }),
-  );
-  holder.userData.kind = "vendor";
-  dressPlayer(holder, look, { solesAtZero: true });
-  const figure = holder.getObjectByName("paper-figure");
-  if (figure) g.add(figure);
+  dressPlayer(g, look, { solesAtZero: true });
   return g;
 }
 

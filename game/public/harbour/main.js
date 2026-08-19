@@ -594,24 +594,22 @@ async function placeCartOn(plot, x, z) {
   }
 }
 
-function attachVendor(cart) {
+function attachVendor(cart, look) {
   if (!cart || findVendor(cart)) return;
   const playNow = chromeHud && chromeHud.getPlay && chromeHud.getPlay();
-  const vendor = makeVendor(playNow && playNow.look);
+  const vendor = makeVendor(look || (playNow && playNow.look));
   vendor.position.set(VENDOR_LOCAL.x, VENDOR_LOCAL.y, VENDOR_LOCAL.z);
   cart.add(vendor);
 }
 
 function restylePeople(look) {
   dressPlayer(player, look);
-  const playNow = chromeHud && chromeHud.getPlay && chromeHud.getPlay();
   for (const mesh of standMeshes.values()) {
     const had = Boolean(findVendor(mesh));
     if (!had) continue;
     detachVendor(mesh);
-    attachVendor(mesh);
+    attachVendor(mesh, look);
   }
-  void playNow;
 }
 
 function tickVendors(t) {
