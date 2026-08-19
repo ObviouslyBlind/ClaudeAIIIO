@@ -2,7 +2,7 @@
  * HTML $ bars over lots. Real buttons, not Three sprites.
  * Vacant: opens the buy-ask. Taken / yours: inspect only.
  *
- * World: no $ bars (Lots chip owns them; Buy $32 is the HUD chip).
+ * World: no $ bars (Lots chip owns them).
  * Lots: a few nearby vacant prices, not the whole highway.
  * Placing: YOURS / PLACE only.
  */

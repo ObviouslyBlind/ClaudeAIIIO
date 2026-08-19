@@ -110,7 +110,10 @@ export function mountChrome(opts) {
   }
 
   function open(id) {
-    if (buyAsk && !buyAsk.hidden) return;
+    if (buyAsk && !buyAsk.hidden) {
+      buyAsk.hidden = true;
+      if (opts.onCloseLand) opts.onCloseLand();
+    }
     if (openPanel === id) {
       closePanels();
       return;
@@ -161,19 +164,6 @@ export function mountChrome(opts) {
     if (hiddenCash) {
       hiddenCash.textContent =
         "Cash $" + Number(play.cash).toLocaleString("en-US", { maximumFractionDigits: 0 });
-    }
-    const near = document.getElementById("near-lease");
-    if (near) {
-      const leased = ((play.leases || []).length > 0);
-      const opt = leased ? null : ((play.leaseOptions || [])[0] || null);
-      near.hidden = !opt;
-      near.disabled = false;
-      if (opt) {
-        near.dataset.plotId = opt.id;
-        near.textContent = "Buy " + money(opt.price).replace(/\.00$/, "");
-      } else {
-        near.dataset.plotId = "";
-      }
     }
   }
 
@@ -870,40 +860,6 @@ export function mountChrome(opts) {
     });
   }
   bindChromeActions();
-
-  const nearLease = document.getElementById("near-lease");
-  if (nearLease) {
-    nearLease.addEventListener("click", async (ev) => {
-      ev.preventDefault();
-      ev.stopPropagation();
-      const fromPlay = ((play && play.leaseOptions) || [])[0];
-      const id = nearLease.dataset.plotId || (fromPlay && fromPlay.id) || "";
-      if (!id) return;
-      nearLease.disabled = true;
-      if (landCard) landCard.hidden = true;
-      if (buyAsk) buyAsk.hidden = true;
-      const { ok, data } = await readJson("/api/lease", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ plotId: id }),
-      });
-      if (!ok || !data || !data.ok || !data.play) {
-        nearLease.disabled = false;
-        if (opts.setStatus) opts.setStatus("Could not buy that lot.");
-        return;
-      }
-      stampPlay(data.play);
-      playPaperBuy();
-      if (typeof opts.onLeased === "function") opts.onLeased(data.snapshot);
-      const row = ((data.play.leases || []).find((item) => item.id === id)) || fromPlay;
-      if (row) {
-        paintLand(row, { note: "Yours for " + money(data.paid) + "." });
-      }
-      if (opts.setStatus) {
-        opts.setStatus("This land is yours for " + money(data.paid) + ". Order from Market.");
-      }
-    });
-  }
 
   setOverlay("world");
 

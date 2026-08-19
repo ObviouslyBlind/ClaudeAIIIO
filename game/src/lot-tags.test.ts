@@ -8,7 +8,7 @@ describe("lot tags (PAPER)", () => {
   it("does not treat a $ tag click as a walk tap", () => {
     expect(main).toContain(".lot-tag");
     expect(main).toContain("#lot-tags");
-    expect(main).toContain("#near-lease");
+    expect(main).not.toContain("#near-lease");
     expect(main).toContain("focusStand");
     expect(main).toContain("onOpenStand");
     expect(main).toContain("followStall");

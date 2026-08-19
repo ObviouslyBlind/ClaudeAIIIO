@@ -20,8 +20,9 @@ describe("harbour chrome HUD", () => {
     expect(html).toContain('class="chrome-tr"');
     expect(html).toContain('class="chrome-left"');
     expect(html).toContain('id="viewers"');
-    expect(html).toContain('id="near-lease">Buy lot');
-    expect(html).toContain("is-buy-lot");
+    expect(html).not.toContain("near-lease");
+    expect(html).not.toContain("is-buy-lot");
+    expect(html).not.toContain("Buy lot");
     expect(html).toContain('data-overlay="lots"');
     expect(html).toContain('data-overlay="foot"');
     expect(html).not.toContain('data-panel="view"');
@@ -98,9 +99,9 @@ describe("harbour chrome HUD", () => {
     expect(chrome).toContain("buyAskModel");
     expect(chrome).toContain("toggleViewer");
     expect(chrome).toContain("paintBuyAsk");
-    expect(chrome).toContain('getElementById("near-lease")');
-    expect(css).toContain(".chip.is-buy-lot");
-    expect(css).toContain("#near-lease");
+    expect(chrome).not.toContain("near-lease");
+    expect(css).not.toContain(".chip.is-buy-lot");
+    expect(css).not.toContain("#near-lease");
     expect(chrome).toContain('id="buy-ask-yes"');
     expect(chrome).toContain('id="buy-ask-no"');
     expect(chrome).toContain('id="land-lease"');
@@ -146,7 +147,7 @@ describe("harbour chrome HUD", () => {
     expect(chrome).toContain("/api/shift/pack");
     expect(chrome).toContain('let marketDest = "road"');
     expect(chrome).toContain("Yellow van from the port.");
-    expect(chrome).toContain("if (buyAsk && !buyAsk.hidden) return;");
+    expect(chrome).toContain("if (buyAsk && !buyAsk.hidden)");
     expect(chrome).toContain("ownedId");
     expect(chrome).not.toContain("opts.onNearLease(id)");
     expect(chrome).not.toContain("opts.lease(id)");
@@ -157,7 +158,7 @@ describe("harbour chrome HUD", () => {
     expect(chrome).toContain('"/api/lease"');
     expect(chrome).toContain("JSON.stringify({ plotId: id })");
     expect(chrome).toContain("plotIsYours");
-    expect(chrome).toContain("Could not buy that lot.");
+    expect(chrome).toContain('id="land-lease"');
     expect(chrome).toContain("order-label");
     expect(chrome).toContain("dest: marketDest === \"road\" ? \"road\" : \"warehouse\"");
     expect(chrome).toContain("data-order-dest");
