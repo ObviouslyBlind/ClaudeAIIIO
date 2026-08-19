@@ -1557,6 +1557,9 @@ function clickTargets() {
   if (parcelMap && typeof parcelMap.clickables === "function") {
     objs.push(...parcelMap.clickables());
   }
+  if (lotTags && typeof lotTags.clickables === "function") {
+    objs.push(...lotTags.clickables());
+  }
   return objs.filter(Boolean);
 }
 
@@ -1682,7 +1685,6 @@ function onPointer(ev) {
   }
   const viewer = viewerMode();
   const hits = raycaster.intersectObjects(clickTargets(), true);
-  const labelHit = hits.find((h) => objectWithKind(h.object, "parcel-label"));
   const standHit = hits.find((h) => objectWithStand(h.object));
   const crateHit = hits.find((h) => objectWithKind(h.object, "crate"));
   const vanHit = hits.find((h) => objectWithKind(h.object, "van"));
@@ -1720,25 +1722,15 @@ function onPointer(ev) {
     const id = crate && crate.userData.deliveryId;
     if (id && showCrateCard(id)) return;
   }
-  const tagPick =
-    isLotsViewer(viewer) &&
-    parcelMap &&
-    typeof parcelMap.pickLabel === "function"
-      ? parcelMap.pickLabel(camera, ev.clientX, ev.clientY, window.innerWidth, window.innerHeight, canvas)
-      : null;
-  if (tagPick && tagPick.plotId && map) {
-    const tagged = map.plots.find((x) => x.id === tagPick.plotId);
+  const tagObj =
+    isLotsViewer(viewer) && hits[0] ? objectWithKind(hits[0].object, "parcel-label") : null;
+  if (tagObj && map) {
+    const id = tagObj.userData.plotId || (tagObj.userData.plot && tagObj.userData.plot.id);
+    const tagged = id && map.plots.find((x) => x.id === id);
     if (tagged) {
       buyPlot(tagged);
       return;
     }
-  }
-  if (labelHit && isLotsViewer(viewer)) {
-    const spr = objectWithKind(labelHit.object, "parcel-label");
-    const id = spr && (spr.userData.plotId || (spr.userData.plot && spr.userData.plot.id));
-    const p = id && map && map.plots.find((x) => x.id === id);
-    if (p) buyPlot(p);
-    return;
   }
   if (
     !placingUse &&
@@ -2248,16 +2240,10 @@ async function boot() {
     getPlots: () => (map ? map.plots : []),
   });
   lotTags = mountLotTags({
-    canvas,
-    camera,
+    worldAdd,
     heightAt,
     specOf,
     getPlots: () => (map ? map.plots : []),
-    onBuy: askToBuy,
-    onInspect: showLandCard,
-    onPlace(plot) {
-      void placeCartOn(plot, plot.x, plot.z);
-    },
   });
   ground.push(...parcelMap.buildIsland("south"));
   await idle(48);

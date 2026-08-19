@@ -72,6 +72,7 @@ describe("foot-traffic viewer (PAPER)", () => {
     expect(lines.length).toBe(1);
     expect(lines[0].userData.plotCount).toBeGreaterThan(8);
     expect(lines[0].geometry.getAttribute("position").count).toBeGreaterThan(64);
+    expect(lines[0].material.depthTest).toBe(true);
     overlays.setMode("world", {}, land);
     expect(overlays.group.children.filter((c) => c.userData.kind === "lot-outline").length).toBe(0);
   });

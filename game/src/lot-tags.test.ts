@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { ndcToLayer, pickTagPlots, TAG_POOL, TAG_RADIUS_LOTS_M, tagKindFor, tagLabelFor } from "../public/harbour/lot-tags.js";
 
 const main = readFileSync(new URL("../public/harbour/main.js", import.meta.url), "utf8");
+const tags = readFileSync(new URL("../public/harbour/lot-tags.js", import.meta.url), "utf8");
 
 describe("lot tags (PAPER)", () => {
   it("does not treat a $ tag click as a walk tap", () => {
@@ -18,6 +19,11 @@ describe("lot tags (PAPER)", () => {
     expect(main).toContain("applyPlay");
     expect(main).toContain("userLeftStall");
     expect(main).toContain("taxi.hopOut");
+    expect(main).toContain("lotTags.clickables");
+    expect(tags).toContain("depthTest: true");
+    expect(tags).toContain("depthWrite: false");
+    expect(tags).toContain("TAG_Y_M");
+    expect(tags).not.toContain("btn.style.left");
   });
 
   it("labels vacant as the $ bar, yours, and taken", () => {

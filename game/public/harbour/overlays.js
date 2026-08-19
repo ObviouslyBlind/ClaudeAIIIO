@@ -299,7 +299,7 @@ export function createOverlays({ scene, heightAt, specOf, getMap }) {
       geo,
       new THREE.LineBasicMaterial({
         vertexColors: true,
-        depthTest: false,
+        depthTest: true,
         transparent: true,
         opacity: 0.95,
       }),

@@ -65,7 +65,7 @@ describe("harbour boot import graph", () => {
     expect(src).toContain("function askToBuy");
     expect(src).toContain("mountLotTags");
     expect(src).toContain("parcel-label");
-    expect(src).toContain("pickLabel");
+    expect(src).toContain("lotTags.clickables");
     expect(src).toContain("Never auto-open a lot card");
     expect(src).toContain("function dismissLooseLandUi");
     expect(src).toContain("function plotToPlace");

@@ -322,7 +322,7 @@ export function mountParcelMap({ worldAdd, specOf, heightAt, getPlots }) {
     return sprites[i];
   }
 
-  /** 3D billboards stay off. HTML #lot-tags are the clickable $ bars. */
+  /** 3D billboards stay off. World $ / YOURS live in lot-tags.js with depth test. */
   function tick() {
     for (const rec of sprites) {
       if (rec && rec.sprite) rec.sprite.visible = false;
