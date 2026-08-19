@@ -36,6 +36,11 @@ describe("tap-to-walk planner (PAPER)", () => {
     expect(main).toContain("planWalk");
     expect(main).toContain("advanceAlong");
     expect(main).toContain("followWalk");
+    expect(main).toContain("walk-status");
+    const pathSrc = readFileSync(new URL("../public/harbour/walk-path.js", import.meta.url), "utf8");
+    expect(pathSrc).toContain("WALK_MARK");
+    expect(pathSrc).toContain("0xd8ff2a");
+    expect(pathSrc).not.toMatch(/const GREEN = 0x3dcc6a/);
   });
 
   it("lets you walk inland from the south port on land", () => {

@@ -723,6 +723,25 @@ nav.dock.travel-dock {
 }
 #place-hint[hidden] { display: none !important; }
 
+.walk-status {
+  position: absolute;
+  left: 50%;
+  bottom: max(92px, calc(env(safe-area-inset-bottom) + 76px));
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 7px 16px;
+  background: rgba(8, 18, 22, 0.9);
+  color: #d8ff2a;
+  border: 1px solid rgba(216, 255, 42, 0.7);
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+  z-index: 9;
+}
+.walk-status[hidden] { display: none !important; }
+
 #buy-ask {
   position: absolute;
   left: 50%;

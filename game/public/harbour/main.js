@@ -160,6 +160,8 @@ let lotTags = null;
 let propsMod = null;
 let chromeHud = null;
 let walkPath = null;
+let walkHoldUntil = 0;
+let lastWalkDest = null;
 let overlays = null;
 let deliveries = null;
 let lastInspectKey = "";
@@ -421,6 +423,11 @@ function findParcelAt(x, z) {
 
 function setStatus(t) {
   if (statusEl) statusEl.textContent = t;
+  const walkEl = document.getElementById("walk-status");
+  if (!walkEl) return;
+  const show = t === "Walking." || t === "Here." || t === "Stay on land.";
+  walkEl.hidden = !show;
+  if (show) walkEl.textContent = t;
 }
 
 function dismissLooseLandUi() {
@@ -1309,21 +1316,28 @@ function canWalkHere(x, z) {
 
 function paintWalkPath() {
   if (!walkPath) return;
-  if (!walking || !walkWaypoints.length) {
-    walkPath.hide();
+  if (walkWaypoints.length) {
+    lastWalkDest = walkWaypoints[walkWaypoints.length - 1];
+    if (typeof walkPath.showPath === "function") {
+      walkPath.showPath(player.position, walkWaypoints, landHeight);
+    } else {
+      const last = lastWalkDest;
+      walkPath.show(
+        player.position,
+        last,
+        player.position.y - PLAYER_SOLE_M,
+        landHeight(last.x, last.z),
+      );
+    }
     return;
   }
-  if (typeof walkPath.showPath === "function") {
-    walkPath.showPath(player.position, walkWaypoints, landHeight);
-  } else {
-    const last = walkWaypoints[walkWaypoints.length - 1];
-    walkPath.show(
-      player.position,
-      last,
-      player.position.y - PLAYER_SOLE_M,
-      landHeight(last.x, last.z),
-    );
+  if (lastWalkDest && Date.now() < walkHoldUntil) {
+    if (typeof walkPath.showPath === "function") {
+      walkPath.showPath(player.position, [lastWalkDest], landHeight);
+    }
+    return;
   }
+  walkPath.hide();
 }
 
 function goTo(x, z) {
@@ -1340,6 +1354,7 @@ function goTo(x, z) {
   walkWaypoints = path.slice(1);
   walking = true;
   gaitDist = 0;
+  walkHoldUntil = 0;
   userLeftStall = true;
   stallFollow = false;
   islandId = nearestIsland(dest.x, dest.z);
@@ -1802,7 +1817,8 @@ function tick(dt) {
     if (!walkWaypoints.length) {
       walking = false;
       gaitDist = 0;
-      if (walkPath) walkPath.hide();
+      walkHoldUntil = Date.now() + 2200;
+      paintWalkPath();
     } else {
       const ox = player.position.x;
       const oz = player.position.z;
@@ -1818,12 +1834,15 @@ function tick(dt) {
       if (next.done) {
         walking = false;
         gaitDist = 0;
-        if (walkPath) walkPath.hide();
+        walkHoldUntil = Date.now() + 2200;
+        paintWalkPath();
         setStatus("Here.");
       } else {
         paintWalkPath();
       }
     }
+  } else {
+    paintWalkPath();
   }
   stepPlayerWalk(player, gaitPhase(gaitDist), walking);
   if (ferryMesh && tickFerry) tickFerry(ferryMesh, dt);
