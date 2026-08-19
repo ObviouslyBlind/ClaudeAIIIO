@@ -1715,35 +1715,34 @@ nav.dock.travel-dock {
 .sticker-band {
   display: flex;
   flex-direction: row;
-  gap: 4px;
-  height: 22px;
-  padding: 0;
+  gap: 8px;
+  height: 28px;
+  padding: 3px;
   pointer-events: none;
-  background: #050b0d;
-  border-radius: 11px;
+  background: #000;
+  border-radius: 8px;
 }
 .sticker-seg {
   display: block;
   height: 100%;
   min-width: 10px;
-  box-shadow: inset 0 1px 0 rgba(244, 241, 230, 0.18);
+  border: 2px solid #000;
+  box-sizing: border-box;
 }
 .sticker-seg.is-red { background: #c45a3a; min-width: 0; }
-.sticker-seg.is-yellow { background: #e2c04a; flex-shrink: 0; min-width: 16px; }
-.sticker-seg:first-child { border-radius: 11px 2px 2px 11px; }
-.sticker-seg:last-child { border-radius: 2px 11px 11px 2px; }
+.sticker-seg.is-yellow { background: #e2c04a; flex-shrink: 0; min-width: 18px; }
+.sticker-seg:first-child { border-radius: 6px 2px 2px 6px; }
+.sticker-seg:last-child { border-radius: 2px 6px 6px 2px; }
 .sticker-seg.is-green {
   background: var(--green);
   flex-shrink: 0;
-  min-width: 16px;
-  transform: scaleY(1.18);
+  min-width: 18px;
   border-radius: 4px;
-  box-shadow: 0 0 0 1px #050b0d, inset 0 1px 0 rgba(244, 241, 230, 0.22);
   z-index: 1;
 }
 @media (max-width: 480px) {
-  .sticker-band { height: 24px; gap: 5px; }
-  .sticker-seg.is-yellow, .sticker-seg.is-green { min-width: 18px; }
+  .sticker-band { height: 30px; gap: 8px; }
+  .sticker-seg.is-yellow, .sticker-seg.is-green { min-width: 20px; }
 }
 .sticker-track {
   position: relative;
