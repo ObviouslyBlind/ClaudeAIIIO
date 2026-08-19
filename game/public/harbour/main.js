@@ -59,10 +59,21 @@ const plotLineEl = document.getElementById("plot-line");
 const btnLease = document.getElementById("btn-lease");
 const btnDevelop = document.getElementById("btn-develop");
 const btnFerry = document.getElementById("btn-ferry");
+const FERRY_TIP_AWAY = "Go to Port to use Ferry";
+const FERRY_TIP_READY = "Ferry";
+
+function syncFerryTip() {
+  if (!btnFerry) return;
+  const atPort = nearPort();
+  btnFerry.disabled = !atPort;
+  const tip = atPort ? FERRY_TIP_READY : FERRY_TIP_AWAY;
+  btnFerry.setAttribute("data-tip", tip);
+  btnFerry.setAttribute("aria-label", tip);
+}
 const btnTaxi = document.getElementById("btn-taxi");
 const btnEnter = ensureDockButton("btn-enter", "Enter");
 const btnExit = ensureDockButton("btn-exit", "Exit");
-if (btnEnter) btnEnter.hidden = false;
+if (btnEnter) btnEnter.hidden = true;
 if (btnExit) btnExit.hidden = true;
 
 function bootFail(err) {
@@ -862,7 +873,7 @@ function refreshHud() {
   if (inside) {
     placeEl.textContent = interior.currentFloor() === "upstairs" ? "Upstairs" : "Downstairs";
     plotLineEl.textContent = "Inside";
-    btnLease.disabled = true;
+    if (btnLease) btnLease.disabled = true;
     btnDevelop.disabled = true;
     if (btnEnter) {
       btnEnter.disabled = true;
@@ -892,21 +903,21 @@ function refreshHud() {
     plotLineEl.textContent = placingUse
       ? "Tap your leased land to place it"
       : "Tap land to inspect it";
-    btnLease.disabled = true;
+    if (btnLease) btnLease.disabled = true;
     return;
   }
   const p = pSel;
   if (p.owner === "visitor") {
     plotLineEl.textContent = parcelLabel(p) + (p.use ? " · " + p.use : " · yours");
-    btnLease.disabled = true;
+    if (btnLease) btnLease.disabled = true;
   } else if (p.owner) {
     plotLineEl.textContent = parcelLabel(p) + " · taken";
-    btnLease.disabled = true;
+    if (btnLease) btnLease.disabled = true;
   } else {
     plotLineEl.textContent = parcelLabel(p) + " · $" + money(p.price);
     const headroom = map.visitor.cash - p.price;
     const need = map.developCost ?? 40;
-    btnLease.disabled = map.visitor.cash < p.price || headroom < need;
+    if (btnLease) btnLease.disabled = map.visitor.cash < p.price || headroom < need;
     if (map.visitor.cash < p.price) {
       plotLineEl.textContent = parcelLabel(p) + " · $" + money(p.price) + " · need cash";
     } else if (headroom < need) {
@@ -1885,7 +1896,7 @@ function tick(dt) {
     );
   }
   inspectNearbyLand();
-  btnFerry.disabled = !nearPort();
+  syncFerryTip();
   refreshHud();
   const camState = playCam && typeof playCam.getState === "function" ? playCam.getState() : null;
   if (camState && camState.dragging) {
@@ -2321,15 +2332,17 @@ canvas.addEventListener("pointerup", (ev) => {
     return;
   }
 });
-btnLease.addEventListener("click", () => {
-  const ask = document.getElementById("buy-ask");
-  if (ask && !ask.hidden) {
-    void lease();
-    return;
-  }
-  const p = selected && map ? map.plots.find((x) => x.id === selected) : null;
-  if (p) askToBuy(p);
-});
+if (btnLease) {
+  btnLease.addEventListener("click", () => {
+    const ask = document.getElementById("buy-ask");
+    if (ask && !ask.hidden) {
+      void lease();
+      return;
+    }
+    const p = selected && map ? map.plots.find((x) => x.id === selected) : null;
+    if (p) askToBuy(p);
+  });
+}
 btnDevelop.addEventListener("click", openCatalog);
 if (btnTaxi) {
   btnTaxi.addEventListener("click", async () => {

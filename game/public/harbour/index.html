@@ -56,15 +56,23 @@
           <span class="game-title">Two Harbors</span>
         </h1>
         <p class="meta" id="online">1 online</p>
-        <p class="cash-plate"><span id="balance">$1,000.00</span> <span id="income" class="is-zero">+$0.00/min</span></p>
         <p class="whisper" id="storage-fee" hidden>South warehouse $5.00/day</p>
       </div>
       <div class="chrome-tr">
+        <button type="button" class="chip icon-chip" data-panel="account" aria-label="Account" data-tip="Account" aria-expanded="false" aria-controls="panel-account">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3"/><path d="M6 20c0-3.4 2.7-6 6-6s6 2.6 6 6"/></svg>
+        </button>
+        <p class="cash-plate" title="PAPER / SIMULATED"><span id="balance">$1,000.00</span> <span id="income" class="is-zero">+$0.00/min</span></p>
         <div class="chrome-row" id="viewers">
-          <button type="button" class="chip" data-panel="account" aria-expanded="false" aria-controls="panel-account">Account</button>
-          <button type="button" class="chip" data-overlay="lots">Lots</button>
-          <button type="button" class="chip" data-overlay="foot">Foot traffic</button>
-          <button type="button" class="chip" data-panel="minerals" aria-expanded="false" aria-controls="panel-minerals">Minerals</button>
+          <button type="button" class="chip icon-chip" data-overlay="lots" aria-label="Lots" data-tip="Lots">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/></svg>
+          </button>
+          <button type="button" class="chip icon-chip" data-overlay="foot" aria-label="Foot traffic" data-tip="Foot traffic">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="14" cy="5" r="2"/><path d="M9 21V11l3-2 3 3 3 1"/><path d="M9 13 6 16"/><path d="M12 21v-6"/></svg>
+          </button>
+          <button type="button" class="chip icon-chip" data-panel="minerals" aria-label="Minerals" data-tip="Minerals" aria-expanded="false" aria-controls="panel-minerals">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 9v6l7 6 7-6V9z"/><path d="M5 9h14M12 3v18"/></svg>
+          </button>
         </div>
         <p class="viewer-hint" id="viewer-hint">World: tap the dirt to walk. Green line is the path.</p>
         <div id="panel-account" class="float-panel pos-tr" hidden><div id="acct-body"></div></div>
@@ -75,21 +83,17 @@
         <div id="foot-legend" hidden></div>
       </div>
       <div class="chrome-left">
-        <button type="button" class="rail-btn" data-panel="inventory" aria-label="Carts">
+        <button type="button" class="rail-btn" data-panel="inventory" aria-label="Carts" data-tip="Carts">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8h10l1.2 12H5.8L7 8z"/><path d="M9 8V6.4a3 3 0 0 1 6 0V8"/></svg>
-          <span>Carts</span>
         </button>
-        <button type="button" class="rail-btn" data-panel="warehouse" aria-label="Warehouse">
+        <button type="button" class="rail-btn" data-panel="warehouse" aria-label="Warehouse" data-tip="Warehouse">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10.5 12 4l8 6.5V20H4z"/><path d="M4 10.5h16M12 10.5V20"/></svg>
-          <span>Wh</span>
         </button>
-        <button type="button" class="rail-btn" data-panel="market" aria-label="Market">
+        <button type="button" class="rail-btn" data-panel="market" aria-label="Market" data-tip="Market">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11h16"/><path d="M5 11 12 5l7 6"/><path d="M6 11v8M18 11v8M8 16h8"/></svg>
-          <span>Mkt</span>
         </button>
-        <button type="button" class="rail-btn" data-panel="employees" aria-label="Staff">
+        <button type="button" class="rail-btn" data-panel="employees" aria-label="Staff" data-tip="Staff">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3"/><path d="M6 20c0-3.4 2.7-6 6-6s6 2.6 6 6"/></svg>
-          <span>Staff</span>
         </button>
       </div>
       <div id="panel-inventory" class="float-panel pos-inv" hidden><div id="inv-body"></div></div>
@@ -141,15 +145,14 @@
       <p id="pack-hits">0</p>
       <button type="button" id="pack-close">Skip</button>
     </div>
-    <nav class="dock travel-dock">
-      <button type="button" id="btn-lease" disabled>Lease</button>
+    <nav class="dock travel-dock" aria-label="Travel">
       <button type="button" id="btn-develop" hidden>Develop</button>
       <button type="button" id="btn-hire" hidden>Hire</button>
       <button type="button" id="btn-fire" hidden>Fire</button>
       <button type="button" id="btn-enter" hidden>Enter</button>
       <button type="button" id="btn-exit" hidden>Exit taxi</button>
-      <button type="button" id="btn-ferry" disabled>Ferry</button>
-      <button type="button" id="btn-taxi">Taxi</button>
+      <button type="button" id="btn-ferry" disabled aria-label="Go to Port to use Ferry" data-tip="Go to Port to use Ferry">Ferry</button>
+      <button type="button" id="btn-taxi" aria-label="Taxi" data-tip="Taxi">Taxi</button>
       <button type="button" id="btn-minerals" hidden>Minerals</button>
     </nav>
     <script>

@@ -15,6 +15,10 @@
   --radius: 10px;
   --shadow: 0 10px 22px rgba(0, 0, 0, 0.45);
   --inset: inset 0 1px 0 rgba(244, 241, 230, 0.14);
+  --rail-size: 44px;
+  --rail-gap: 6px;
+  --view-size: 36px;
+  --travel-size: 32px;
 }
 
 .legacy-hud {
@@ -102,7 +106,7 @@ html, body {
   display: inline-flex;
   align-items: baseline;
   gap: 8px;
-  margin: 6px 0 0;
+  margin: 0;
   padding: 5px 10px 6px;
   background: linear-gradient(180deg, #162428 0%, var(--hull) 100%);
   border: 1px solid var(--line);
@@ -133,7 +137,7 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 6px;
+  gap: 8px;
   max-width: min(96vw, 360px);
   z-index: 11;
 }
@@ -156,6 +160,24 @@ html, body {
   cursor: pointer;
   box-shadow: var(--inset), 0 4px 10px rgba(0, 0, 0, 0.28);
 }
+.icon-chip {
+  width: var(--view-size);
+  height: var(--view-size);
+  min-height: var(--view-size);
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+}
+.icon-chip svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
 .chip:hover { border-color: var(--brass-hi); color: var(--brass-hi); }
 .chip.is-on {
   background: linear-gradient(180deg, var(--brass-hi), var(--btn));
@@ -175,33 +197,29 @@ html, body {
 .chrome-left {
   position: absolute;
   left: max(10px, env(safe-area-inset-left));
-  top: 76px;
+  top: 50%;
+  transform: translateY(-50%);
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--rail-gap);
+  z-index: 11;
 }
 .rail-btn {
-  width: 44px;
-  height: 44px;
-  padding: 6px 4px 5px;
+  width: var(--rail-size);
+  height: var(--rail-size);
+  padding: 0;
   border: 1px solid var(--line);
   border-radius: 14px;
   background: linear-gradient(180deg, #162428 0%, var(--hull) 100%);
   color: var(--ink);
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
   cursor: pointer;
   display: grid;
-  justify-items: center;
-  align-content: center;
-  gap: 3px;
+  place-items: center;
   box-shadow: var(--inset), 0 6px 14px rgba(0, 0, 0, 0.32);
 }
 .rail-btn svg {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   fill: none;
   stroke: currentColor;
   stroke-width: 1.7;
@@ -218,35 +236,84 @@ html, body {
   color: #1a140c;
 }
 
+[data-tip] {
+  position: relative;
+}
+[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  z-index: 30;
+  padding: 5px 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: linear-gradient(180deg, #162428 0%, var(--hull) 100%);
+  color: var(--ink);
+  font-family: "Red Hat Text", "Segoe UI", system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  text-transform: none;
+  box-shadow: var(--shadow), var(--inset);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+[data-tip]:hover::after,
+[data-tip]:focus-visible::after {
+  opacity: 1;
+}
+.chrome-left [data-tip]::after {
+  left: calc(100% + 8px);
+  top: 50%;
+}
+.chrome-tr [data-tip]::after {
+  left: auto;
+  right: calc(100% + 8px);
+  top: 50%;
+}
+.travel-dock [data-tip]::after {
+  left: 0;
+  right: auto;
+  top: auto;
+  bottom: calc(100% + 8px);
+  transform: none;
+}
+
 nav.dock.travel-dock {
-  left: 50%;
+  left: max(10px, env(safe-area-inset-left));
   right: auto;
   width: auto;
   max-width: calc(100vw - 16px);
   flex-wrap: nowrap;
-  transform: translateX(-50%);
-  gap: 6px;
-  padding: 5px 7px;
+  transform: none;
+  gap: 4px;
+  padding: 4px 5px;
   background: linear-gradient(180deg, #162428 0%, var(--hull) 100%);
   border: 1px solid var(--line);
-  border-radius: 16px;
+  border-radius: 14px;
   box-shadow: var(--shadow), var(--inset);
   font-family: "Red Hat Text", "Segoe UI", system-ui, sans-serif;
 }
 .travel-dock button {
-  min-height: 36px;
-  min-width: 56px;
+  min-height: var(--travel-size);
+  min-width: 48px;
   flex: 0 0 auto;
   border: 0;
-  border-radius: 10px;
+  border-radius: 8px;
   background: linear-gradient(180deg, var(--brass-hi), var(--btn));
   color: #1a140c;
   font-weight: 700;
-  font-size: 13px;
+  font-size: 12px;
   letter-spacing: 0.02em;
+  padding: 0 10px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.32);
 }
-.travel-dock button:disabled { opacity: 0.35; }
+.travel-dock button:disabled {
+  opacity: 0.35;
+  pointer-events: auto;
+  cursor: not-allowed;
+}
 .travel-dock #btn-taxi {
   background: linear-gradient(180deg, #f0d56a, #d4a82a);
 }
@@ -331,10 +398,27 @@ nav.dock.travel-dock {
   font-weight: 500;
   color: var(--muted);
 }
-.float-panel.pos-inv { left: 62px; top: 76px; width: min(340px, calc(100vw - 24px)); max-height: min(72vh, 640px); }
-.float-panel.pos-warehouse { left: 62px; top: 128px; }
-.float-panel.pos-market { left: 62px; top: 180px; }
-.float-panel.pos-staff { left: 62px; top: 232px; }
+.float-panel.pos-inv,
+.float-panel.pos-warehouse,
+.float-panel.pos-market,
+.float-panel.pos-staff {
+  left: calc(var(--rail-size) + 18px);
+  transform: translateX(6px);
+}
+.float-panel.pos-inv.is-open,
+.float-panel.pos-warehouse.is-open,
+.float-panel.pos-market.is-open,
+.float-panel.pos-staff.is-open {
+  transform: translateX(0);
+}
+.float-panel.pos-inv {
+  top: calc(50% - (2 * var(--rail-size) + 1.5 * var(--rail-gap)));
+  width: min(340px, calc(100vw - 24px));
+  max-height: min(72vh, 640px);
+}
+.float-panel.pos-warehouse { top: calc(50% - (1 * var(--rail-size) + 0.5 * var(--rail-gap))); }
+.float-panel.pos-market { top: calc(50% + (0.5 * var(--rail-gap))); }
+.float-panel.pos-staff { top: calc(50% + (1 * var(--rail-size) + 1.5 * var(--rail-gap))); }
 .chrome-tr .float-panel {
   position: relative;
   right: auto;
@@ -765,9 +849,9 @@ nav.dock.travel-dock {
 
 #land-card {
   position: absolute;
-  left: 68px;
-  bottom: calc(56px + env(safe-area-inset-bottom));
-  width: min(260px, calc(100vw - 80px));
+  left: max(10px, env(safe-area-inset-left));
+  bottom: calc(52px + env(safe-area-inset-bottom));
+  width: min(260px, calc(100vw - 24px));
   padding: 10px;
   background: linear-gradient(180deg, #142226 0%, var(--hull) 100%);
   border: 1px solid var(--line);
@@ -1269,23 +1353,30 @@ nav.dock.travel-dock {
   .chrome-tl .meta { display: none; }
   .chrome-tl { max-width: 44%; }
   .chrome-tr { max-width: 54%; }
-  .chip {
-    min-height: 28px;
-    padding: 0 8px;
-    font-size: 10px;
+  :root {
+    --rail-size: 40px;
+    --view-size: 32px;
+    --travel-size: 30px;
   }
-  .chrome-left { top: 62px; }
+  .icon-chip svg {
+    width: 16px;
+    height: 16px;
+  }
+  .cash-plate { padding: 4px 8px 5px; }
+  #balance { font-size: 15px; }
+  #income { font-size: 11px; }
+  .chrome-left { top: 50%; transform: translateY(-50%); }
   .rail-btn span { display: none; }
   .rail-btn {
-    width: 44px;
-    height: 44px;
-    padding: 8px;
+    width: var(--rail-size);
+    height: var(--rail-size);
+    padding: 0;
     border-radius: 12px;
   }
   .float-panel.pos-inv,
   .float-panel.pos-warehouse,
   .float-panel.pos-market,
-  .float-panel.pos-staff { top: 62px; left: 56px; }
+  .float-panel.pos-staff { left: calc(var(--rail-size) + 12px); }
 }
 
 @media (prefers-reduced-motion: reduce) {

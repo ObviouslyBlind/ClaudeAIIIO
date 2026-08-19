@@ -96,7 +96,7 @@ export function mountChrome(opts) {
       p.classList.remove("is-open");
       p.hidden = true;
     });
-    root.querySelectorAll(".rail-btn, .chrome-tr .chip[data-panel]").forEach((b) => {
+    root.querySelectorAll("[data-panel]").forEach((b) => {
       b.classList.remove("is-on");
       if (b.hasAttribute("aria-expanded")) b.setAttribute("aria-expanded", "false");
     });
