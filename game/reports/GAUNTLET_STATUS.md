@@ -22,8 +22,8 @@ Bar the critic inspects on live `http://127.0.0.1:8787/`. One verdict for the wh
 
 Do **not** grade Market Pay “How many / Where” as the sticker. That card is qty + dest.
 
-Last critic (bc-27a21abd): **FAIL** — could not see any $14–$32 tags. Vacant Quayward lots sit ~350 m inland of the south pad.
+Last critic (bc-17866a98): said **PASS**, pixels did not. Buy $32 needed F5 (chip started `hidden`). After Pay they saw a yellow blob / crate card, not a van driving. Fire was HUD only. Upgrades showed Fridge only.
 
-Fix in this round: seed one vacant Island Hwy street lot within 80 m of the south pad, plus a top-right **Buy $** chip from `leaseOptions[0]` that opens “Do you want to buy this lot?”.
+Fix in this round: Buy chip visible on first paint. Van starts 24 m inland, slower, status “Yellow van from the port.” Upgrades lists the whole chain with +appeal (buy only the next one).
 
 Politics frozen. Operator is the brake.

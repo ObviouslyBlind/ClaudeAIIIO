@@ -175,8 +175,12 @@ function paintUpgrades(site, play) {
           <span>${esc(u.label)}<small>${appealTxt}</small></span>
           <button type="button" class="go" data-upgrade="${esc(site.id)}" data-upgrade-id="${esc(u.id)}">${money(u.cost)}</button>
         </div>`);
-      break;
+      continue;
     }
+    rows.push(`
+      <div class="upg-row is-wait">
+        <span>${esc(u.label)}<small>${appealTxt}</small></span>
+      </div>`);
   }
   return rows.join("") || `<div class="upg-row is-on"><span>Done</span><strong class="upg-tick">✓</strong></div>`;
 }

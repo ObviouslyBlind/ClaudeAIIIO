@@ -4,7 +4,7 @@ import { roadsideDrop } from "./roadside.js";
 
 /** Delivery van. Same paved graph as the taxi. PAPER / SIMULATED. */
 
-const SPEED = 18;
+const SPEED = 9;
 const YELLOW = 0xe2c04a;
 const CAB = 0xf0c430;
 const STEEL = 0x3a4046;
@@ -155,13 +155,21 @@ export function createDeliveries({ scene, getMap, specOf, heightAt, onDrop }) {
             : dest);
       const curb = curbOf(drop, dest) || curbOf(from, null);
       if (!curb) return;
-      let path = drivePath(map, delivery.island, from, curb);
-      if (path.length < 2) path = densify([from, curb]);
-      if (path.length < 2) path = [from, curb];
+      const dx = curb.x - from.x;
+      const dz = curb.z - from.z;
+      const span = Math.hypot(dx, dz) || 1;
+      const inset = span > 32 ? 24 : 0;
+      const startAt =
+        inset > 0
+          ? { x: from.x + (dx / span) * inset, z: from.z + (dz / span) * inset }
+          : from;
+      let path = drivePath(map, delivery.island, startAt, curb);
+      if (path.length < 2) path = densify([startAt, curb]);
+      if (path.length < 2) path = [startAt, curb];
       const mesh = makeVan();
       mesh.userData.deliveryId = delivery.id;
       mesh.userData.island = delivery.island;
-      mesh.position.set(from.x, heightAt(spec, from.x, from.z), from.z);
+      mesh.position.set(startAt.x, heightAt(spec, startAt.x, startAt.z), startAt.z);
       scene.add(mesh);
       vans.set(delivery.id, {
         mesh,

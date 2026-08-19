@@ -42,6 +42,20 @@ describe("delivery van (PAPER)", () => {
     expect(scene.children[0]!.name).toBe("delivery-van");
   });
 
+  it("starts inland of the port so the camera is not inside the van", () => {
+    const scene = new THREE.Scene();
+    const vans = createDeliveries({
+      scene,
+      getMap: () => ({ roads: [] }),
+      specOf: () => ({ port: { x: 0, z: 0 } }),
+      heightAt: () => 0,
+      onDrop: () => {},
+    });
+    vans.start({ id: "del-in", island: "south", drop: { x: 80, z: 0, awayX: 120, awayZ: 0 } }, null);
+    expect(scene.children[0]!.position.x).toBeCloseTo(24, 5);
+    expect(scene.children[0]!.position.z).toBeCloseTo(0, 5);
+  });
+
   it("builds a box van with a cab, lamps, and wheels", () => {
     const van = makeVan();
     const parts = new Set<string>();

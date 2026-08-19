@@ -20,7 +20,7 @@ describe("harbour chrome HUD", () => {
     expect(html).toContain('class="chrome-tr"');
     expect(html).toContain('class="chrome-left"');
     expect(html).toContain('id="viewers"');
-    expect(html).toContain('id="near-lease"');
+    expect(html).toContain('id="near-lease">Buy lot');
     expect(html).toContain("is-buy-lot");
     expect(html).toContain('data-overlay="lots"');
     expect(html).toContain('data-overlay="foot"');
@@ -137,6 +137,7 @@ describe("harbour chrome HUD", () => {
     expect(chrome).toContain("/api/buy");
     expect(chrome).toContain("/api/shift/pack");
     expect(chrome).toContain('let marketDest = "road"');
+    expect(chrome).toContain("Yellow van from the port.");
     expect(chrome).toContain("order-label");
     expect(chrome).toContain("dest: marketDest === \"road\" ? \"road\" : \"warehouse\"");
     expect(chrome).toContain("data-order-dest");
@@ -261,8 +262,13 @@ describe("harbour chrome HUD", () => {
       "upgrades",
     );
     expect(upgrades).toContain("Fridge");
+    expect(upgrades).toContain("Sign");
+    expect(upgrades).toContain("Awning");
+    expect(upgrades).toContain("Lights");
+    expect(upgrades).toContain("Stools");
     expect(upgrades).toContain("data-upgrade");
     expect(upgrades).toContain('data-upgrade-id="fridge"');
+    expect(upgrades).not.toContain('data-upgrade-id="sign"');
     expect(upgrades).not.toContain("id=\"hire-site\"");
     const fridgeOn = formatSiteMenu(
       {
@@ -282,7 +288,8 @@ describe("harbour chrome HUD", () => {
     expect(fridgeOn).toContain("upg-tick");
     expect(fridgeOn).toContain("Sign");
     expect(fridgeOn).toContain('data-upgrade-id="sign"');
-    expect(fridgeOn).not.toContain("Awning");
+    expect(fridgeOn).toContain("Awning");
+    expect(fridgeOn).not.toContain('data-upgrade-id="awning"');
     const stats = formatSiteMenu(
       {
         id: "site-1",

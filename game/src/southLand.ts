@@ -350,7 +350,7 @@ function seedPortStreetLot(
   if (!hwy) return;
   const setback = clearanceFor(hwy) + 2;
   const front = 16;
-  for (const dist of [56, 64, 72, 48, 80, 40]) {
+  for (const dist of [40, 48, 36, 56, 64, 72]) {
     const st = stationAt(hwy.points, dist);
     if (!st) continue;
     const sa = offsetBy(st.at, { x: -st.dir.x, z: -st.dir.z }, front / 2);

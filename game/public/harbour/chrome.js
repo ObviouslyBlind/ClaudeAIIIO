@@ -320,7 +320,7 @@ export function mountChrome(opts) {
     if (opts.setStatus) {
       opts.setStatus(
         marketDest === "road"
-          ? "Paid. Green package on the kerb — tap it."
+          ? "Yellow van from the port."
           : "Paid. In the South warehouse.",
       );
     }
