@@ -77,7 +77,9 @@ function stockBand(have, cap) {
 }
 
 function paintStock(site, play) {
-  const todayN = Number(play && play.todayPrice != null ? play.todayPrice : 6);
+  const todayN = Number(
+    site && site.todayPrice != null ? site.todayPrice : play && play.todayPrice != null ? play.todayPrice : 6,
+  );
   const sticker = Number(site.stickerPrice != null ? site.stickerPrice : todayN);
   const cap = Number(site.storageCap || 20);
   const have = Number(site.hotdogs != null ? site.hotdogs : site.stock) || 0;
@@ -89,7 +91,11 @@ function paintStock(site, play) {
   const maxFromWh = Math.min(whQty, room);
   const vs = stickerTone(sticker, todayN);
   const min = 1;
-  const max = 11;
+  const max = 16;
+  const fry = site && site.kind === "fish_chips";
+  const propane = Number(site && site.propaneLeft) || 0;
+  const invGas = ((play && play.inventory) || []).find((r) => r.kind === "propane")?.qty || 0;
+  const whGas = ((play && play.warehouse && play.warehouse.items) || []).find((r) => r.kind === "propane")?.qty || 0;
   const span = max - min;
   const mark = ((todayN - min) / span) * 100;
   const zoneLo = Math.max(min, todayN - 1.5);
@@ -110,9 +116,29 @@ function paintStock(site, play) {
           <strong>${whQty}</strong><span>Warehouse</span>
         </button>
       </div>`;
+  const gasLoaders =
+    !fry || hired
+      ? ""
+      : `
+      <div class="source-row">
+        <button type="button" class="source src-pocket" data-fuel="inventory" ${invGas ? "" : "disabled"}>
+          <strong>${invGas}</strong><span>On you</span>
+        </button>
+        <button type="button" class="source src-wh" data-fuel="warehouse" ${whGas ? "" : "disabled"}>
+          <strong>${whGas}</strong><span>Warehouse</span>
+        </button>
+      </div>`;
+  const propaneBlock = fry
+    ? `<div class="propane-row">
+        <p class="sticker-label">Propane</p>
+        <p class="stock-num ${propane < 1 ? "is-low" : propane < 12 ? "is-mid" : "is-full"}">${Math.round(propane)}<small> sales of heat</small></p>
+        ${gasLoaders}
+      </div>`
+    : "";
   return `
     <p class="stock-num ${stockBand(have, cap)}">${Math.round(have)}<small>/${cap}</small></p>
     ${loaders}
+    ${propaneBlock}
     <p class="sticker-label">Price</p>
     <div class="sticker-slide">
       <span class="sticker-read ${vs}" data-sticker-out>${money(sticker)}</span>

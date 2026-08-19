@@ -12,17 +12,30 @@ import type { Visitor } from "./sim.ts";
 import { scoreSite, siteClassForUse, type SiteClass, type SiteScore } from "./siteScore.ts";
 import {
   CART_PAPER_PRICE,
+  CART_PRICES,
   HIRE_COST,
   HOTDOG_PACK_PRICE,
   HOTDOG_PACK_QTY,
   HOTDOG_SALE_PRICE,
   LAUNCH_SALES_TAX,
+  PROPANE_PRICE,
+  PROPANE_SALES,
 } from "./economy.ts";
 
 export const FIRST_LOOP_NOTE = "South island. One visitor on this process.";
 
 /** Island sticker hint. You set the price; this sits beside the field. */
-export { CART_PAPER_PRICE, HIRE_COST, HOTDOG_PACK_PRICE, HOTDOG_PACK_QTY, HOTDOG_SALE_PRICE, LAUNCH_SALES_TAX };
+export {
+  CART_PAPER_PRICE,
+  CART_PRICES,
+  HIRE_COST,
+  HOTDOG_PACK_PRICE,
+  HOTDOG_PACK_QTY,
+  HOTDOG_SALE_PRICE,
+  LAUNCH_SALES_TAX,
+  PROPANE_PRICE,
+  PROPANE_SALES,
+};
 export const TODAY_PRICE = HOTDOG_SALE_PRICE;
 /** Launch default. Live ticks write the statute rate onto PlayState. */
 export const SALES_TAX = LAUNCH_SALES_TAX;
@@ -33,7 +46,7 @@ export const DELIVERY_WAIT_MS = 60_000;
 export const ORDER_MAX_QTY = 10;
 export const STORAGE_UPGRADE_COST = 200;
 export const STICKER_MIN = 1;
-export const STICKER_MAX = 11;
+export const STICKER_MAX = 16;
 /** |sticker − today| within this is yellow. Exact match is green. Further is red. */
 export const STICKER_YELLOW = 1.5;
 export const CART_STORAGE = 20;
@@ -50,7 +63,8 @@ export type InvKind =
   | "melon_cart"
   | "melon"
   | "fish_cart"
-  | "fish_chips";
+  | "fish_chips"
+  | "propane";
 
 export type CartKind = {
   id: CartKindId;
@@ -91,8 +105,8 @@ export const CART_KINDS: CartKind[] = [
     label: "Fish and chips",
     kitLabel: "Fish and chips cart",
     stockLabel: "Fish and chips",
-    note: "Harbour fry cart. Same site menu as fruit and melon.",
-    games: ["Fry run"],
+    note: "Harbour fry cart. Needs propane. Dearest kit, highest sticker.",
+    games: ["Fry run", "Basket pull", "Wrap ticket"],
   },
 ];
 
@@ -127,36 +141,60 @@ export const MARKET_AISLES: { id: MarketAisle; label: string; note: string }[] =
   {
     id: "stock",
     label: "Stock",
-    note: "Fruit packs for a cart you already placed. Load them from that cart's menu.",
+    note: "Packs for a cart you already placed. Fry carts also need a propane canister.",
   },
 ];
 
-export const MARKET_CATALOG: CatalogSku[] = CART_KINDS.flatMap((cart) => [
+export const MARKET_CATALOG: CatalogSku[] = [
+  ...CART_KINDS.flatMap((cart) => [
+    {
+      id: cart.kitId,
+      aisle: "street_carts" as const,
+      aisleLabel: "Street carts",
+      label: cart.kitLabel,
+      paperPrice: CART_PRICES[cart.id].kit,
+      qty: 1,
+      note: cart.note,
+      zone: "commercial" as const,
+      cartKind: cart.id,
+      role: "kit" as const,
+    },
+    {
+      id: cart.stockId,
+      aisle: "stock" as const,
+      aisleLabel: "Stock",
+      label: `${cart.stockLabel} (×${HOTDOG_PACK_QTY})`,
+      paperPrice: CART_PRICES[cart.id].pack,
+      qty: HOTDOG_PACK_QTY,
+      note: `Stock for the ${cart.label}. Load it after the cart is on the kerb.`,
+      zone: "commercial" as const,
+      cartKind: cart.id,
+      role: "stock" as const,
+    },
+  ]),
   {
-    id: cart.kitId,
-    aisle: "street_carts" as const,
-    aisleLabel: "Street carts",
-    label: cart.kitLabel,
-    paperPrice: CART_PAPER_PRICE,
-    qty: 1,
-    note: cart.note,
-    zone: "commercial" as const,
-    cartKind: cart.id,
-    role: "kit" as const,
-  },
-  {
-    id: cart.stockId,
-    aisle: "stock" as const,
+    id: "propane",
+    aisle: "stock",
     aisleLabel: "Stock",
-    label: `${cart.stockLabel} (×${HOTDOG_PACK_QTY})`,
-    paperPrice: HOTDOG_PACK_PRICE,
-    qty: HOTDOG_PACK_QTY,
-    note: `Stock for the ${cart.label}. Load it after the cart is on the kerb.`,
-    zone: "commercial" as const,
-    cartKind: cart.id,
-    role: "stock" as const,
+    label: "Propane canister",
+    paperPrice: PROPANE_PRICE,
+    qty: 1,
+    note: "Fuel for the fry cart. One bottle lasts 40 sales. First-loop stock, not a book good.",
+    zone: "commercial",
+    cartKind: "fish_chips",
+    role: "stock",
   },
-]);
+];
+
+export function cartTodayPrice(kind: string | undefined): number {
+  if (kind === "watermelon") return CART_PRICES.watermelon.sale;
+  if (kind === "fish_chips") return CART_PRICES.fish_chips.sale;
+  return CART_PRICES.fruit.sale;
+}
+
+export function isFryCart(stand: { kind?: string }): boolean {
+  return stand.kind === "fish_chips";
+}
 
 export function cartKindById(id: string | undefined): CartKind | undefined {
   return CART_KINDS.find((row) => row.id === id);
@@ -222,7 +260,7 @@ const KIND_FIX: Record<string, CartKindId> = {
   hotdog: "fruit",
 };
 
-export type CartNeedId = "buy" | "place" | "hire" | "stock" | "fridge" | "sticker";
+export type CartNeedId = "buy" | "place" | "hire" | "stock" | "propane" | "fridge" | "sticker";
 
 export type CartNeed = {
   id: CartNeedId;
@@ -230,10 +268,11 @@ export type CartNeed = {
 };
 
 /** What a placed street cart still wants before it earns. */
-export function standNeeds(stand: Stand, today = TODAY_PRICE): CartNeed[] {
+export function standNeeds(stand: Stand, today = cartTodayPrice(stand.kind)): CartNeed[] {
   const needs: CartNeed[] = [];
   if (!stand.hired) needs.push({ id: "hire", label: "Hire" });
   if (Number(stand.hotdogs) < 1) needs.push({ id: "stock", label: "Stock" });
+  if (isFryCart(stand) && Number(stand.propaneLeft) < 1) needs.push({ id: "propane", label: "Propane" });
   if (!stand.upgraded) needs.push({ id: "fridge", label: "Fridge" });
   if (Math.abs(Number(stand.stickerPrice) - today) > 0.01) {
     needs.push({ id: "sticker", label: `Sticker $${today.toFixed(2)}` });
@@ -290,6 +329,7 @@ export type Stand = {
   upgrades: string[];
   sellAcc: number;
   boostLeft: number;
+  propaneLeft: number;
   mode: "PAPER";
   provenance: "SIMULATED";
 };
@@ -370,11 +410,12 @@ export function ensurePlay(visitor: Visitor): PlayState {
     const mapped = KIND_FIX[String(stand.kind)];
     if (mapped) stand.kind = mapped;
     if (!stand.kind || !cartKindById(stand.kind)) stand.kind = "fruit";
-    if (!Number.isFinite(stand.stickerPrice)) stand.stickerPrice = TODAY_PRICE;
+    if (!Number.isFinite(stand.stickerPrice)) stand.stickerPrice = cartTodayPrice(stand.kind);
     if (!Number.isFinite(stand.storageCap)) stand.storageCap = CART_STORAGE;
     if (stand.upgraded == null) stand.upgraded = false;
     if (!Array.isArray(stand.upgrades)) stand.upgrades = stand.upgraded ? ["fridge"] : [];
     if (!Number.isFinite(stand.boostLeft)) stand.boostLeft = 0;
+    if (!Number.isFinite(stand.propaneLeft)) stand.propaneLeft = 0;
   }
   for (const site of play.workSites) {
     if (site.upgraded == null) site.upgraded = false;
@@ -574,11 +615,31 @@ function buyPackInto(
   return n;
 }
 
+function autoFuelStand(play: PlayState, stand: Stand, visitor?: Visitor): void {
+  if (!isFryCart(stand) || !stand.hired) return;
+  if ((stand.propaneLeft || 0) >= 1) return;
+  if (takeWarehouse(play, "propane", 1)) {
+    stand.propaneLeft = PROPANE_SALES;
+    return;
+  }
+  if (takeInv(play, "propane", 1)) {
+    stand.propaneLeft = PROPANE_SALES;
+    return;
+  }
+  if (visitor) {
+    const bought = buyPackInto(visitor, play, "propane", 1);
+    if (bought > 0) stand.propaneLeft = PROPANE_SALES;
+  }
+}
+
 function autoStockStand(play: PlayState, stand: Stand, visitor?: Visitor): void {
   if (!stand.hired) return;
   const stockId = cartKindForStand(stand).stockId;
   let room = Math.max(0, stand.storageCap - stand.hotdogs);
-  if (room <= 0) return;
+  if (room <= 0) {
+    autoFuelStand(play, stand, visitor);
+    return;
+  }
   const fromWh = Math.min(warehouseQty(play, stockId), room);
   if (fromWh > 0 && takeWarehouse(play, stockId, fromWh)) {
     stand.hotdogs = roundMoney(stand.hotdogs + fromWh);
@@ -593,6 +654,7 @@ function autoStockStand(play: PlayState, stand: Stand, visitor?: Visitor): void 
     const bought = buyPackInto(visitor, play, stockId, Math.max(room, 1));
     if (bought > 0) stand.hotdogs = roundMoney(stand.hotdogs + bought);
   }
+  autoFuelStand(play, stand, visitor);
 }
 
 function autoStockWork(play: PlayState, site: WorkSite, visitor?: Visitor): void {
@@ -672,12 +734,17 @@ export function sellShiftBurst(
   const want = burstCount(hits);
   if (want < 1) return { sold: 0, earned: 0 };
   let have = found.kind === "stand" ? found.row.hotdogs : found.row.stock;
+  if (found.kind === "stand" && isFryCart(found.row)) {
+    have = Math.min(have, Math.max(0, Math.floor(found.row.propaneLeft || 0)));
+  }
   const n = Math.min(want, Math.floor(have));
   if (n < 1) return { sold: 0, earned: 0 };
   let earned = 0;
   for (let i = 0; i < n; i++) earned = roundMoney(earned + sellOnce(play, found.row.stickerPrice));
-  if (found.kind === "stand") found.row.hotdogs = roundMoney(found.row.hotdogs - n);
-  else found.row.stock = roundMoney(found.row.stock - n);
+  if (found.kind === "stand") {
+    found.row.hotdogs = roundMoney(found.row.hotdogs - n);
+    if (isFryCart(found.row)) found.row.propaneLeft = roundMoney((found.row.propaneLeft || 0) - n);
+  } else found.row.stock = roundMoney(found.row.stock - n);
   visitor.cash = roundMoney(visitor.cash + earned);
   play.salesRing.push(earned);
   if (play.salesRing.length > INCOME_WINDOW) play.salesRing.shift();
@@ -695,8 +762,8 @@ function siteNeeds(site: WorkSite, today = TODAY_PRICE): CartNeed[] {
   return needs;
 }
 
-function sellTicksAt(sticker: number, scored: SiteScore): number {
-  return Math.max(6, Math.round(scored.sellTicks * stickerSellMul(stickerBand(sticker))));
+function sellTicksAt(sticker: number, scored: SiteScore, today = TODAY_PRICE): number {
+  return Math.max(6, Math.round(scored.sellTicks * stickerSellMul(stickerBand(sticker, today))));
 }
 
 function perMinuteAt(sticker: number, sellTicks: number, taxRate = LAUNCH_SALES_TAX): number {
@@ -999,12 +1066,13 @@ export function placeStand(
     staffId: null,
     staffName: null,
     attending: false,
-    stickerPrice: TODAY_PRICE,
+    stickerPrice: cartTodayPrice(cart.id),
     storageCap: CART_STORAGE,
     upgraded: false,
     upgrades: [],
     sellAcc: 0,
     boostLeft: 0,
+    propaneLeft: 0,
     mode: "PAPER",
     provenance: "SIMULATED",
   };
@@ -1054,6 +1122,30 @@ export function stockStand(
   if (takeInvN && !takeInv(play, stockId, takeInvN)) return fail("no_stock");
   if (takeWhN && !takeWarehouse(play, stockId, takeWhN)) return fail("no_stock");
   stand.hotdogs = roundMoney(stand.hotdogs + want);
+  return ok({ stand });
+}
+
+export function fuelStand(
+  visitor: Visitor,
+  standId: string,
+  from?: string,
+): LoopOk<{ stand: Stand }> | LoopFail {
+  const play = ensurePlay(visitor);
+  const found = findStandOrSite(play, standId);
+  if (!found || found.kind !== "stand") return fail("no_stand");
+  const stand = found.row;
+  if (!isFryCart(stand)) return fail("not_fry");
+  let fromInv = play.inventory.find((r) => r.kind === "propane")?.qty ?? 0;
+  let fromWh = warehouseQty(play, "propane");
+  if (from === "inventory") fromWh = 0;
+  else if (from === "warehouse") fromInv = 0;
+  if (fromInv < 1 && fromWh < 1) return fail("no_propane");
+  if (fromInv >= 1) {
+    if (!takeInv(play, "propane", 1)) return fail("no_propane");
+  } else if (!takeWarehouse(play, "propane", 1)) {
+    return fail("no_propane");
+  }
+  stand.propaneLeft = roundMoney((stand.propaneLeft || 0) + PROPANE_SALES);
   return ok({ stand });
 }
 
@@ -1168,13 +1260,20 @@ export function tickHotdogSales(visitor: Visitor, land: LandBoard): number {
   for (const stand of play.stands) {
     autoStockStand(play, stand, visitor);
     if (stand.hotdogs < 1 || !stand.hired) continue;
+    if (isFryCart(stand) && (stand.propaneLeft || 0) < 1) continue;
     if (!getPlot(land, stand.plotId)) continue;
     stand.sellAcc += 1;
+    const today = cartTodayPrice(stand.kind);
     while (stand.hotdogs >= 1) {
-      const need = sellTicksAt(stand.stickerPrice, scoreForStand(stand, land, play));
+      if (isFryCart(stand) && (stand.propaneLeft || 0) < 1) {
+        autoFuelStand(play, stand, visitor);
+        if ((stand.propaneLeft || 0) < 1) break;
+      }
+      const need = sellTicksAt(stand.stickerPrice, scoreForStand(stand, land, play), today);
       if (stand.sellAcc < need) break;
       stand.sellAcc -= need;
       stand.hotdogs = roundMoney(stand.hotdogs - 1);
+      if (isFryCart(stand)) stand.propaneLeft = roundMoney((stand.propaneLeft || 0) - 1);
       if ((stand.boostLeft || 0) > 0) stand.boostLeft -= 1;
       earned = roundMoney(earned + sellOnce(play, stand.stickerPrice));
     }
@@ -1234,8 +1333,9 @@ export function playSnapshot(visitor: Visitor, land: LandBoard, taxRate?: number
     const cart = cartKindForStand(s);
     const scored = scoreForStand(s, land, play);
     const plot = getPlot(land, s.plotId);
-    const band = stickerBand(s.stickerPrice);
-    const ticks = sellTicksAt(s.stickerPrice, scored);
+    const today = cartTodayPrice(s.kind);
+    const band = stickerBand(s.stickerPrice, today);
+    const ticks = sellTicksAt(s.stickerPrice, scored, today);
     return {
       ...s,
       kind: cart.id,
@@ -1243,8 +1343,10 @@ export function playSnapshot(visitor: Visitor, land: LandBoard, taxRate?: number
       stockId: cart.stockId,
       stockLabel: cart.stockLabel,
       games: cart.games,
+      todayPrice: today,
+      propaneLeft: s.propaneLeft || 0,
       siteClass: "cart" as const,
-      needs: standNeeds(s),
+      needs: standNeeds(s, today),
       desirability: scored.score,
       sellTicks: ticks,
       parts: scored.parts,

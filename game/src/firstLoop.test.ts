@@ -6,12 +6,15 @@ import { roadsideDrop } from "./roadside.ts";
 import {
   CART_KINDS,
   CART_PAPER_PRICE,
+  CART_PRICES,
   DELIVERY_WAIT_MS,
   HIRE_COST,
   HIRE_ROSTER,
   HOTDOG_PACK_PRICE,
   HOTDOG_SALE_PRICE,
   MARKET_CATALOG,
+  PROPANE_PRICE,
+  PROPANE_SALES,
   PLACE_CORRIDOR_M,
   SALES_TAX,
   STORAGE_UPGRADE_COST,
@@ -20,6 +23,7 @@ import {
   WAREHOUSE_RENT_TICKS,
   cartLoopNeeds,
   fireStand,
+  fuelStand,
   hireStand,
   incomePerMinute,
   markArrived,
@@ -548,5 +552,78 @@ describe("South first loop", () => {
     expect(hireStand(visitor, placed.stand.id).ok).toBe(true);
     expect(placed.stand.hotdogs).toBe(20);
     expect(visitor.cash).toBeCloseTo(cash0 - HIRE_COST - HOTDOG_PACK_PRICE, 8);
+  });
+
+  it("makes fish and chips the dear propane cart with the highest sticker", () => {
+    expect(CART_PRICES.fruit.kit).toBe(85);
+    expect(CART_PRICES.watermelon.kit).toBeGreaterThan(CART_PRICES.fruit.kit);
+    expect(CART_PRICES.fish_chips.kit).toBeGreaterThan(CART_PRICES.watermelon.kit);
+    expect(CART_PRICES.fish_chips.sale).toBe(11);
+    expect(CART_PRICES.fish_chips.sale).toBeGreaterThan(CART_PRICES.fruit.sale);
+    expect(PROPANE_PRICE).toBe(18);
+    expect(PROPANE_SALES).toBe(40);
+    expect(MARKET_CATALOG.find((s) => s.id === "propane")?.paperPrice).toBe(PROPANE_PRICE);
+    expect(MARKET_CATALOG.find((s) => s.id === "fish_cart")?.paperPrice).toBe(CART_PRICES.fish_chips.kit);
+    expect(CART_KINDS.find((c) => c.id === "fish_chips")?.games).toEqual(["Fry run", "Basket pull", "Wrap ticket"]);
+    const fryStart =
+      CART_PRICES.fish_chips.kit + CART_PRICES.fish_chips.pack + PROPANE_PRICE + HIRE_COST;
+    expect(fryStart).toBeLessThan(1_000);
+    expect(fryStart).toBeGreaterThan(CART_PRICES.fruit.kit + HOTDOG_PACK_PRICE + HIRE_COST);
+
+    const { land, visitor, plot } = leaseCheapSouth();
+    const order = orderMarket(visitor, land, {
+      skus: ["fish_cart", "fish_chips", "propane"],
+      dest: "cart",
+    });
+    expect(order.ok).toBe(true);
+    if (!order.ok) return;
+    expect(order.paid).toBe(CART_PRICES.fish_chips.kit + CART_PRICES.fish_chips.pack + PROPANE_PRICE);
+    const placed = placeStand(visitor, land, plot.id, { kitId: "fish_cart" });
+    expect(placed.ok).toBe(true);
+    if (!placed.ok) return;
+    expect(placed.stand.kind).toBe("fish_chips");
+    expect(placed.stand.stickerPrice).toBe(CART_PRICES.fish_chips.sale);
+    expect(placed.stand.propaneLeft).toBe(0);
+    expect(standNeeds(placed.stand).map((n) => n.id)).toEqual(["hire", "stock", "propane", "fridge"]);
+    expect(stockStand(visitor, placed.stand.id, 0, "inventory").ok).toBe(true);
+    expect(fuelStand(visitor, placed.stand.id, "inventory").ok).toBe(true);
+    expect(placed.stand.propaneLeft).toBe(PROPANE_SALES);
+    const snap = playSnapshot(visitor, land);
+    expect(snap.stands[0]!.todayPrice).toBe(11);
+    expect(snap.stands[0]!.games).toEqual(["Fry run", "Basket pull", "Wrap ticket"]);
+    expect(snap.stands[0]!.stickerBand).toBe("green");
+
+    expect(hireStand(visitor, placed.stand.id).ok).toBe(true);
+    visitor.cash = 0;
+    visitor.play.inventory = [];
+    visitor.play.warehouse.items = [];
+    placed.stand.hotdogs = 5;
+    placed.stand.propaneLeft = 1;
+    placed.stand.sellAcc = 10_000;
+    tickHotdogSales(visitor, land);
+    expect(placed.stand.propaneLeft).toBe(0);
+    expect(placed.stand.hotdogs).toBe(4);
+    tickHotdogSales(visitor, land);
+    expect(placed.stand.hotdogs).toBe(4);
+    expect(placed.stand.propaneLeft).toBe(0);
+  });
+
+  it("will not burst-sell fry without heat, and one bottle lasts 40 sales", () => {
+    const { land, visitor, plot } = leaseCheapSouth();
+    const order = orderMarket(visitor, land, { skus: ["fish_cart", "fish_chips"], dest: "cart" });
+    expect(order.ok).toBe(true);
+    const placed = placeStand(visitor, land, plot.id, { kitId: "fish_cart" });
+    expect(placed.ok).toBe(true);
+    if (!placed.ok) return;
+    expect(stockStand(visitor, placed.stand.id).ok).toBe(true);
+    const dry = sellShiftBurst(visitor, land, placed.stand.id, 8);
+    expect(dry.sold).toBe(0);
+    expect(placed.stand.hotdogs).toBe(20);
+    expect(orderMarket(visitor, land, { skus: ["propane"], dest: "cart" }).ok).toBe(true);
+    expect(fuelStand(visitor, placed.stand.id, "inventory").ok).toBe(true);
+    const wet = sellShiftBurst(visitor, land, placed.stand.id, 8);
+    expect(wet.sold).toBeGreaterThan(0);
+    expect(placed.stand.propaneLeft).toBe(PROPANE_SALES - wet.sold);
+    expect(fuelStand(visitor, "stand-missing").reason).toBe("no_stand");
   });
 });

@@ -7,11 +7,13 @@
 
 Caribbean fruit-style stalls. Starter kit id stays `hotdog_cart` so old saves still place.
 
-| Cart | Kit in Market | Stock pack | Mini-game |
+| Cart | Kit in Market | Stock pack | Mini-games |
 |---|---|---|---|
-| Fruit cart | Fruit cart | Fruit ×20 | Fruit slice |
-| Watermelon cart | Watermelon cart | Watermelon ×20 | Melon slice |
-| Fish and chips | Fish and chips cart | Fish and chips ×20 | Fry run |
+| Fruit cart | Fruit cart $85 | Fruit ×20 $12 | Fruit slice |
+| Watermelon cart | Watermelon cart $95 | Watermelon ×20 $14 | Melon slice |
+| Fish and chips | Fish and chips cart $140 | Fish and chips ×20 $22 + propane $18 | Fry run · Basket pull · Wrap ticket |
+
+Fry cart is the dear run: a propane canister fuels 40 sales. Sticker sits at $11 (fruit $6). Mini-games are tap-only; Skip never cuts hired output.
 
 ## Site menu (cart, shop, mine)
 
@@ -19,7 +21,7 @@ Same card for a placed cart, a shop, and a mine.
 
 - Tabs: **Stock** · **Run** · **Upgrades** · **Stats**.
 - **Stock** is a number, red / yellow / green for low / mid / full. Hired vendor fills remaining room from the warehouse (including after Fridge).
-- **Sticker** is a $1–$11 slider, middle $6. Green on today’s price, yellow within $1.50, red further. The green pip moves with the dictated price. Off-green sales are slower.
+- **Sticker** is a $1–$16 slider. Green on that cart’s today price (fruit $6, fry $11), yellow within $1.50, red further. The green pip moves with the dictated price. Off-green sales are slower.
 - **Run**: **Hire $30.00** from cash, or **Vendor + Fire**. Play only while unhired.
 - **Upgrades** are ticks then the next buy: Fridge ✓ → Sign → Awning → Lights → Stools. Each row shows its Stats appeal. Fridge $200, doubles cap, no hire required.
 - Stats: each upgrade’s appeal, Area (foot traffic), Sticker band × sell time, Street, Rivals, Sale every Ns, Sales, **$ / min**, Shift.

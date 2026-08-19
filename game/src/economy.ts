@@ -25,10 +25,20 @@ export const LAND_ISLAND_BUMP = 0.012;
 export const LAND_GLOBAL_BUMP = 0.004;
 export const LAND_ASK_CAP_MUL = 4;
 
-/** Street-cart kit stays the affordable entry vs land. */
-export const CART_PAPER_PRICE = 85;
+/** Street-cart kit stays the affordable entry vs land. Fruit is cheapest. */
+export const CART_PRICES = {
+  fruit: { kit: 85, pack: 12, sale: 6 },
+  watermelon: { kit: 95, pack: 14, sale: 7 },
+  fish_chips: { kit: 140, pack: 22, sale: 11 },
+} as const;
+
+export const CART_PAPER_PRICE = CART_PRICES.fruit.kit;
 export const HIRE_COST = 30;
-/** Pack of 20. COGS high enough that land is the grind, not a first tap. */
-export const HOTDOG_PACK_PRICE = 12;
+/** Pack of 20. Fruit default; fry packs cost more in the catalog. */
+export const HOTDOG_PACK_PRICE = CART_PRICES.fruit.pack;
 export const HOTDOG_PACK_QTY = 20;
-export const HOTDOG_SALE_PRICE = 6;
+export const HOTDOG_SALE_PRICE = CART_PRICES.fruit.sale;
+
+/** Fry cart bottle. Not a 13th market good — first-loop stock only. */
+export const PROPANE_PRICE = 18;
+export const PROPANE_SALES = 40;

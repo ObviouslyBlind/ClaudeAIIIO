@@ -40,6 +40,7 @@ import {
   playSnapshot,
   setStandPrice,
   stockStand,
+  fuelStand,
   takeAll,
   upgradeStand,
   withdrawWarehouse,
@@ -278,6 +279,13 @@ const server = createServer(async (req, res) => {
       Number(body?.qty ?? 0),
       body?.from ? String(body.from) : undefined,
     );
+    json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/stand/fuel") {
+    const body = await readJsonBody(req);
+    const result = fuelStand(visitor, String(body?.standId ?? ""), body?.from ? String(body.from) : undefined);
     json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
     return;
   }

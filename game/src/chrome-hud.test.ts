@@ -223,6 +223,17 @@ describe("harbour chrome HUD", () => {
     expect(pack).toContain("performance.now()");
     expect(pack).toContain("pack-good");
     expect(pack).toContain("mango");
+    expect(pack).toContain("basket");
+    expect(pack).toContain("wrap");
+    expect(pack).toContain("gold");
+    expect(pack).toContain("Tap when the fry is gold");
+    expect(pack).toContain("Paper, then fish, then chips");
+    expect(siteMenu).toContain("const max = 16");
+    expect(siteMenu).toContain("data-fuel");
+    expect(siteMenu).toContain("Propane");
+    expect(css).toContain("pack-heat");
+    expect(css).toContain("pack-wrap");
+    expect(chrome).toContain("/api/stand/fuel");
     const body = formatCartsBody({
       todayPrice: 6,
       cartNeeds: [{ id: "place", label: "Place the cart on your YOURS lot or the verge by the road." }],
@@ -288,6 +299,46 @@ describe("harbour chrome HUD", () => {
     expect(run).toContain("Hire $30.00");
     expect(run).toContain("id=\"hire-site\"");
     expect(run).toContain("data-pack-start");
+    const fryRun = formatSiteMenu(
+      {
+        id: "stand-fry",
+        label: "Fish and chips",
+        siteClass: "cart",
+        hired: false,
+        hotdogs: 0,
+        storageCap: 20,
+        stickerPrice: 11,
+        todayPrice: 11,
+        propaneLeft: 0,
+        games: ["Fry run", "Basket pull", "Wrap ticket"],
+        kind: "fish_chips",
+      },
+      { todayPrice: 6, inventory: [{ kind: "propane", qty: 1 }], warehouse: { items: [] } },
+      "run",
+    );
+    expect(fryRun).toContain("Fry run");
+    expect(fryRun).toContain("Basket pull");
+    expect(fryRun).toContain("Wrap ticket");
+    const fryStock = formatSiteMenu(
+      {
+        id: "stand-fry",
+        label: "Fish and chips",
+        siteClass: "cart",
+        hired: false,
+        hotdogs: 8,
+        storageCap: 20,
+        stickerPrice: 11,
+        todayPrice: 11,
+        propaneLeft: 0,
+        kind: "fish_chips",
+      },
+      { todayPrice: 6, inventory: [{ kind: "propane", qty: 1 }], warehouse: { items: [] } },
+      "stock",
+    );
+    expect(fryStock).toContain("Propane");
+    expect(fryStock).toContain("data-fuel=\"inventory\"");
+    expect(fryStock).toContain("is-today");
+    expect(fryStock).toContain('max="16"');
     const hiredRun = formatSiteMenu(
       {
         id: "stand-1",

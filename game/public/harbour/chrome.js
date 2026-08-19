@@ -513,7 +513,13 @@ export function mountChrome(opts) {
     const priceEl = standMenu.querySelector("#sticker-price");
     const priceOut = standMenu.querySelector("[data-sticker-out]");
     if (priceEl) {
-      const todayN = Number(play && play.todayPrice != null ? play.todayPrice : 6);
+      const todayN = Number(
+        live && live.todayPrice != null
+          ? live.todayPrice
+          : play && play.todayPrice != null
+            ? play.todayPrice
+            : 6,
+      );
       const paintRead = () => {
         const v = Number(priceEl.value);
         if (!priceOut) return;
@@ -558,6 +564,22 @@ export function mountChrome(opts) {
     }
     standMenu.querySelectorAll("[data-stock]").forEach((btn) => {
       btn.addEventListener("click", () => stockFrom(btn.getAttribute("data-stock")));
+    });
+    async function fuelFrom(from) {
+      const { ok, data } = await readJson("/api/stand/fuel", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ standId: live.id, from }),
+      });
+      if (data && data.play) stampPlay(data.play);
+      const fresh = findSite(live.id);
+      paintStandMenu(fresh, onStock, onHire);
+      if (opts.setStatus) {
+        opts.setStatus(ok ? "Propane on this cart." : "Could not fuel: " + ((data && data.reason) || "fail"));
+      }
+    }
+    standMenu.querySelectorAll("[data-fuel]").forEach((btn) => {
+      btn.addEventListener("click", () => fuelFrom(btn.getAttribute("data-fuel")));
     });
     const hireBtn = standMenu.querySelector("#hire-site");
     if (hireBtn) {
