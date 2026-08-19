@@ -1,7 +1,15 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
 import { ndcToLayer, pickTagPlots, TAG_RADIUS_LOTS_M, tagKindFor, tagLabelFor } from "../public/harbour/lot-tags.js";
 
+const main = readFileSync(new URL("../public/harbour/main.js", import.meta.url), "utf8");
+
 describe("lot tags (PAPER)", () => {
+  it("does not treat a $ tag click as a walk tap", () => {
+    expect(main).toContain(".lot-tag");
+    expect(main).toContain("#lot-tags");
+  });
+
   it("labels vacant as the $ bar, yours, and taken", () => {
     expect(tagKindFor({ owner: null, price: 80 })).toBe("buy");
     expect(tagLabelFor({ owner: null, price: 80 })).toBe("$80");

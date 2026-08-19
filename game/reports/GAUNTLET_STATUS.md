@@ -22,8 +22,8 @@ Bar the critic inspects on live `http://127.0.0.1:8787/`. One verdict for the wh
 
 Do **not** grade Market Pay “How many / Where” as the sticker. That card is qty + dest.
 
-Last critic (bc-249d7572): **FAIL** — walked Lots overlay to taken Field Lane. $ tags were hidden on world view and vacant Quayward lots sit ~350 m from the pad (outside the old 180 m radius).
+Last critic (bc-b3ff9e7a): **FAIL** — saw green $23 but click walked the camera instead of opening Buy lot. pointerup on a $ tag was not in HUD_BLOCK.
 
-Fix in this round: world-view $ bars on vacant lots, radius out to Quayward.
+Fix in this round: $ tags sit above the chrome and do not start a walk.
 
 Politics frozen. Operator is the brake.
