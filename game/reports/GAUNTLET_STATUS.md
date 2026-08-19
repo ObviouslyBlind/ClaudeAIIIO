@@ -1,6 +1,6 @@
 # Gauntlet status
 
-Piece in play: **2Isles Marketplace HUD**. Politics frozen.
+Piece in play: **2Isles Marketplace HUD**. Politics frozen. Slice closed unless the operator asks for another round.
 
 | Round | Bar | Result |
 |---|---|---|
@@ -11,10 +11,8 @@ Piece in play: **2Isles Marketplace HUD**. Politics frozen.
 | M1d | South full-width. Sentence: North is closed until you ferry. | **PASS** |
 | H1 | Hire center sheet. Empty state: Market → pad. Phone + desktop. | **PASS** |
 | A1 | Phone 390: all five aisles reachable (scroll ok). Farming honest empty. | **PASS** |
-| M2 | Compact chrome. Gold rectangular Add Cart (no circular Buy). North island hover names the lock. Street list is most of the sheet. Scroll does not jump on the 1Hz poll. Phone 390 + desktop. | queued |
+| M2 | Compact chrome. Gold rectangular Add Cart. North island hover. List-majority sheet. No 1Hz scroll jump. Phone 390 five aisles. | **PASS** |
 
-Ratchet: M1d North lock, H1 empty Hire copy, A1 five aisles on phone.
+Ratchet: M1d North lock, H1 empty Hire copy, A1/M2 five aisles on phone, M2 gold Add Cart + compact top + North hover.
 
-Queued: **M2** (this round). Then stop unless the critic names a gap worth the cost.
-
-Operator is the brake.
+Not queued. Operator is the brake.
