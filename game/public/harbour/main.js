@@ -1340,7 +1340,22 @@ function paintWalkPath() {
   walkPath.hide();
 }
 
+function stopWalking() {
+  walking = false;
+  walkWaypoints = [];
+  gaitDist = 0;
+  lastWalkDest = null;
+  walkHoldUntil = 0;
+  if (walkPath) walkPath.hide();
+  const walkEl = document.getElementById("walk-status");
+  if (walkEl) walkEl.hidden = true;
+}
+
 function goTo(x, z) {
+  if (taxi && typeof taxi.riding === "function" && taxi.riding()) {
+    setStatus("Exit taxi is on the dock. Left click does not hop out.");
+    return;
+  }
   const path = planWalk(player.position.x, player.position.z, x, z, canWalkHere);
   if (!path || path.length < 2) {
     setStatus("Stay on land.");
@@ -1813,7 +1828,7 @@ function tick(dt) {
   pulseCrateGlow();
   tickVendors(clock.elapsedTime);
   if (econHud) econHud.tick(dt);
-  if (walking) {
+  if (walking && !(taxi && typeof taxi.riding === "function" && taxi.riding())) {
     if (!walkWaypoints.length) {
       walking = false;
       gaitDist = 0;
@@ -1965,13 +1980,23 @@ async function ensureTaxi() {
     heightAt,
     getIslandId: () => islandId,
     setWalking: (v) => {
-      walking = v;
+      if (v) walking = true;
+      else stopWalking();
     },
     setStatus,
     button: btnTaxi,
     onEta: (label) => etaChip.set(label),
-    onRide() {
+    onHail() {
+      if (playCam && typeof playCam.followWalk === "function") playCam.followWalk();
+    },
+    onRide(on) {
       refreshHud();
+      if (on) {
+        stopWalking();
+        if (playCam && typeof playCam.followRide === "function") playCam.followRide();
+      } else if (playCam && typeof playCam.followWalk === "function") {
+        playCam.followWalk({ force: true });
+      }
     },
   });
   return taxi;

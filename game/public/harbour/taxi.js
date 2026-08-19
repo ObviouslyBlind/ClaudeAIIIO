@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { HIGHWAY_LANE_OFFSET_M, offsetPolyline } from "./roads.js";
 import { laneOffsetM } from "./roadclass.js";
 import { nearestEdge, projectOnEdge, routeOnGraph } from "./roadnet.js";
+import { PLAYER_SOLE_M } from "./walk-plan.js";
 
 /** Metres. Player can board from the verge, including a dual carriageway lip. */
 const NEAR_PAVED = 22;
@@ -722,6 +723,7 @@ export function createTaxi({
   setStatus,
   button,
   onRide,
+  onHail,
   onEta,
   etaRng = Math.random,
   now: nowFn = () => Date.now(),
@@ -947,7 +949,7 @@ export function createTaxi({
     closeOverlay();
     if (riding) {
       const spec = specOf(island);
-      player.position.y = heightAt(spec, player.position.x, player.position.z) + 1.15;
+      player.position.y = heightAt(spec, player.position.x, player.position.z) + PLAYER_SOLE_M;
     }
     setRide(false);
   }
@@ -1040,6 +1042,7 @@ export function createTaxi({
     mode = "called";
     emitEta(formatTaxiEta(etaMs));
     setStatus(formatTaxiEta(etaMs));
+    if (typeof onHail === "function") onHail();
   }
 
   /**

@@ -53,6 +53,23 @@ export function walkOrbitState(islandId) {
   };
 }
 
+/** Pulled back so the yellow cab fills the view — not spawn look-at down the highway. */
+export const RIDE_CAM_RADIUS_M = 14;
+export const RIDE_CAM_PITCH = 0.4;
+
+export function rideOrbitState(islandId) {
+  const yaw = cartesianToSpherical(spawnCameraOffset(islandId)).yaw;
+  return {
+    yaw,
+    pitch: RIDE_CAM_PITCH,
+    radius: RIDE_CAM_RADIUS_M,
+    dragging: false,
+    orbited: true,
+    lastX: 0,
+    lastY: 0,
+  };
+}
+
 /** Hard lock on the stall. Metres from the cart origin. No lerp. */
 export const STALL_CAM_SIDE_M = 2.4;
 export const STALL_CAM_BACK_M = 4.4;
@@ -293,15 +310,27 @@ export function createPlayCamera({ camera, canvas, getPlayer, getIslandId }) {
     camera.lookAt(p.x, p.y + LOOK_Y, p.z);
   }
 
-  /** Drop spawn look-at so the walking body stays in frame. Keep a close orbit. */
-  function followWalk() {
-    if (state.orbited && state.radius <= 16) return;
-    state = walkOrbitState(getIslandId());
+  function applyFollow(next) {
+    state = next;
     const p = getPlayer();
     const o = sphericalToCartesian(state);
     camera.position.set(p.x + o.x, p.y + o.y, p.z + o.z);
     if (camera.position.y < p.y + 1.6) camera.position.y = p.y + 1.6;
     camera.lookAt(p.x, p.y + LOOK_Y, p.z);
+  }
+
+  /** Drop spawn look-at so the walking body stays in frame. Keep a close orbit. */
+  function followWalk(opts) {
+    if (state.dragging) return;
+    const force = Boolean(opts && opts.force);
+    if (!force && state.orbited && state.radius <= 16 && state.radius >= 6) return;
+    applyFollow(walkOrbitState(getIslandId()));
+  }
+
+  /** Look at the cab you are in, not 28 m down Island Hwy. */
+  function followRide() {
+    if (state.dragging) return;
+    applyFollow(rideOrbitState(getIslandId()));
   }
 
   function tick(dt) {
@@ -313,6 +342,7 @@ export function createPlayCamera({ camera, canvas, getPlayer, getIslandId }) {
     snap,
     snapClose,
     followWalk,
+    followRide,
     getState: () => state,
   };
 }

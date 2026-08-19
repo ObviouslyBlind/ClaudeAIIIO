@@ -102,6 +102,45 @@ describe("taxi hail wait", () => {
     taxi.hopOut();
     expect(taxi.riding()).toBe(false);
   });
+
+  it("hails then boards with onHail / onRide so the camera can follow the cab", () => {
+    const board = createLandBoard();
+    const spec = ISLANDS.south;
+    const player = {
+      position: { x: spec.port.x + 40, y: 2, z: spec.port.z + 8 },
+      rotation: { y: 0 },
+    };
+    let clock = 2_000_000;
+    const hail: boolean[] = [];
+    const ride: boolean[] = [];
+    const taxi = createTaxi({
+      scene: { add() {} },
+      player,
+      getMap: () => board,
+      specOf: (id: "north" | "south") => ISLANDS[id],
+      heightAt,
+      getIslandId: () => "south" as const,
+      setWalking: () => {},
+      setStatus: () => {},
+      button: { addEventListener() {} },
+      etaRng: () => 0,
+      now: () => clock,
+      onHail: () => hail.push(true),
+      onRide: (on: boolean) => ride.push(on),
+    });
+    taxi.call();
+    expect(hail).toEqual([true]);
+    clock += 5_000;
+    taxi.tick(0.016, clock);
+    for (let i = 0; i < 400 && taxi.mode() !== "boarded"; i++) {
+      clock += 50;
+      taxi.tick(0.05, clock);
+    }
+    expect(taxi.mode()).toBe("boarded");
+    expect(ride).toContain(true);
+    taxi.hopOut();
+    expect(ride[ride.length - 1]).toBe(false);
+  });
 });
 
 describe("taxi wait timeout", () => {

@@ -18,6 +18,9 @@ import {
   walkOrbitState,
   WALK_CAM_PITCH,
   WALK_CAM_RADIUS_M,
+  rideOrbitState,
+  RIDE_CAM_PITCH,
+  RIDE_CAM_RADIUS_M,
   ZOOM_MAX_M,
   ZOOM_MIN_M,
 } from "../public/harbour/camera.js";
@@ -191,5 +194,16 @@ describe("RMB-hold orbit camera", () => {
     expect(walk.radius).toBeGreaterThan(5);
     const o = sphericalToCartesian(walk);
     expect(Math.hypot(o.x, o.y, o.z)).toBeCloseTo(WALK_CAM_RADIUS_M, 5);
+  });
+
+  it("ride orbit is pulled back to show the cab, not spawn look-at", () => {
+    const ride = rideOrbitState("south");
+    expect(ride.orbited).toBe(true);
+    expect(ride.radius).toBe(RIDE_CAM_RADIUS_M);
+    expect(ride.pitch).toBe(RIDE_CAM_PITCH);
+    expect(ride.radius).toBeGreaterThan(WALK_CAM_RADIUS_M);
+    expect(ride.radius).toBeLessThan(22);
+    const o = sphericalToCartesian(ride);
+    expect(Math.hypot(o.x, o.y, o.z)).toBeCloseTo(RIDE_CAM_RADIUS_M, 5);
   });
 });
