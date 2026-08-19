@@ -246,6 +246,8 @@ describe("harbour chrome HUD", () => {
     expect(pack).toContain("goldBandAt");
     expect(pack).toContain("GOLD_WIDTH_START");
     expect(pack).toContain("GOLD_WIDTH_END");
+    expect(pack).toContain("HEAT_CYCLE_MS");
+    expect(pack).toContain("PULL_LOCK_MS");
     expect(pack).toContain("Tap when the fry is gold");
     expect(pack).toContain("Paper, then fish, then chips");
     expect(siteMenu).toContain("const max = 16");

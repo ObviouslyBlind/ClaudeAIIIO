@@ -9,9 +9,13 @@ export const FRUIT_SLICE = ["mango", "pineapple", "papaya", "banana", "watermelo
 export const GOLD_LO = 58;
 export const GOLD_HI = 76;
 /** Basket pull: gold starts this wide (% of the heat bar). */
-export const GOLD_WIDTH_START = 20;
-/** Shrinks toward this. Still a readable tap window. */
-export const GOLD_WIDTH_END = 11;
+export const GOLD_WIDTH_START = 13;
+/** Shrinks toward this. Tight tap, still readable. */
+export const GOLD_WIDTH_END = 6;
+/** Needle sweep. Shorter = less time in gold. */
+export const HEAT_CYCLE_MS = 3000;
+/** Cannot mash Pull. Time the next gold. */
+export const PULL_LOCK_MS = 720;
 export const WRAP_ORDER = ["paper", "fish", "chips"];
 
 const FRUIT_TINT = {
@@ -55,7 +59,7 @@ export function hintFor(mode, goods) {
 }
 
 function heatAt(elapsedMs) {
-  const cycle = 4000;
+  const cycle = HEAT_CYCLE_MS;
   const u = (elapsedMs % cycle) / cycle;
   if (u < 0.5) return u * 2 * 100;
   return (1 - (u - 0.5) * 2) * 100;
@@ -65,7 +69,7 @@ function heatAt(elapsedMs) {
 export function goldBandAt(elapsedMs) {
   const t = Math.max(0, Math.min(1, Number(elapsedMs) / (PACK_SECONDS * 1000)));
   const width = GOLD_WIDTH_START + (GOLD_WIDTH_END - GOLD_WIDTH_START) * t;
-  const wander = Math.sin(Number(elapsedMs) / 850) * 16 + Math.sin(Number(elapsedMs) / 1430) * 8;
+  const wander = Math.sin(Number(elapsedMs) / 620) * 22 + Math.sin(Number(elapsedMs) / 1090) * 11;
   const half = width / 2;
   let center = 52 + wander;
   center = Math.max(8 + half, Math.min(92 - half, center));
@@ -101,6 +105,7 @@ export function mountPackShift() {
   let wrapStep = 0;
   let heat = 0;
   let band = goldBandAt(0);
+  let lastPullAt = 0;
 
   function paintHits() {
     if (hitsEl) hitsEl.textContent = String(hits);
@@ -177,7 +182,10 @@ export function mountPackShift() {
     if (pull) {
       pull.addEventListener("click", () => {
         if (!running || mode !== "basket") return;
-        const elapsed = performance.now() - startedAt;
+        const now = performance.now();
+        if (now - lastPullAt < PULL_LOCK_MS) return;
+        lastPullAt = now;
+        const elapsed = now - startedAt;
         heat = heatAt(elapsed);
         band = goldBandAt(elapsed);
         applyBasketFrame();
@@ -237,6 +245,7 @@ export function mountPackShift() {
     wrapStep = 0;
     heat = 0;
     band = goldBandAt(0);
+    lastPullAt = 0;
     startedAt = performance.now();
     spawnMs = 720;
     running = true;
