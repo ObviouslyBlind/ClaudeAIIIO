@@ -57,6 +57,8 @@ describe("tap-to-walk planner (PAPER)", () => {
     const pathSrc = readFileSync(new URL("../public/harbour/walk-path.js", import.meta.url), "utf8");
     const lift = Number((pathSrc.match(/export const DEST_LIFT_M = ([0-9.]+)/) || [])[1]);
     expect(lift).toBeGreaterThan(0.4);
+    expect(pathSrc).not.toContain("walk-pin");
+    expect(pathSrc).not.toContain("CylinderGeometry");
   });
 
   it("lets you walk inland from the south port on land", () => {

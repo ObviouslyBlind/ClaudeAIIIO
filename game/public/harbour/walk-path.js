@@ -1,7 +1,7 @@
 import * as THREE from "three";
 
 /**
- * Lime tap-to-walk ribbon + dest pin.
+ * Lime tap-to-walk ribbon + dest disc on the ground. No vertical pin.
  * Unlit so it does not disappear into south grass (0x87bb60).
  * Index buffer is allocated once.
  */
@@ -80,19 +80,9 @@ export function createWalkPath(scene) {
   ring.userData.kind = "walk-dest-edge";
   scene.add(ring);
 
-  const pin = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.08, 0.08, 2.2, 8),
-    new THREE.MeshBasicMaterial({ color: WALK_MARK }),
-  );
-  pin.visible = false;
-  pin.frustumCulled = false;
-  pin.userData.kind = "walk-pin";
-  scene.add(pin);
-
   function placeDest(x, y, z) {
     disc.position.set(x, y + DEST_LIFT_M, z);
     ring.position.set(x, y + DEST_LIFT_M + 0.02, z);
-    pin.position.set(x, y + DEST_LIFT_M + 0.9, z);
   }
 
   function writeRibbon(pts) {
@@ -151,7 +141,6 @@ export function createWalkPath(scene) {
     ribbon.visible = pts.length >= 2;
     disc.visible = true;
     ring.visible = true;
-    pin.visible = true;
   }
 
   return {
@@ -164,24 +153,20 @@ export function createWalkPath(scene) {
       ribbon.visible = true;
       disc.visible = true;
       ring.visible = true;
-      pin.visible = true;
     },
     showPath(from, waypoints, heightAt) {
       showAll(from, waypoints, heightAt);
     },
-    /** Keep the dest disc after arrival; hide the remaining ribbon. */
     showDest(x, z, y) {
       placeDest(x, y, z);
       ribbon.visible = false;
       disc.visible = true;
       ring.visible = true;
-      pin.visible = true;
     },
     hide() {
       ribbon.visible = false;
       disc.visible = false;
       ring.visible = false;
-      pin.visible = false;
     },
     get visible() {
       return ribbon.visible || disc.visible;
