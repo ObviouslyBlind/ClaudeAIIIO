@@ -15,6 +15,8 @@ Why earlier rounds looked like zero change: Harbour Circus is ~250 m from spawn.
 | R4 | Raster spawn corridor: one black road, not two tapes with a sand gap | **PASS** (overhead) |
 | R5 | Raster Quayward SW: centreline tarmac 0–16 m, 0 sand | **PASS** (mesh sample; coarse PNG can fake a kerb hairline) |
 | R6 | Raster Channel Sands T: hub covers both duals | **PASS** (overhead) |
-| R7–R10 | Live play (3–4): spawn look along Island Hwy + zoomed circus | queued after restart |
+| R7 | Live spawn: one black highway | **FAIL** — two pale-gapped tapes (stale page and/or Lambert tan-wash) |
+| R8 | Emissive black tarmac so the bed stays black under the tan hemisphere | builder shipped |
+| R9–R10 | Live play after restart: spawn highway + zoomed circus | queued |
 
-Queued: live critics on `http://localhost:8787/` (spawn highway reads as one road into Harbour Circus). Operator is the brake.
+Queued: live critics on a **fresh** `http://localhost:8787/` load. Operator is the brake.

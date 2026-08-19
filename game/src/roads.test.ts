@@ -88,6 +88,7 @@ describe("paved street from spawn", () => {
     expect(DIRT_WIDTH_M).toBeLessThan(4);
 
     expect(paved[0].material.color.getHex()).toBe(ASPHALT);
+    expect(paved[0].material.emissive.getHex()).toBe(ASPHALT);
     expect(dirt[0].material.color.getHex()).toBe(DIRT);
     expect(DIRT).toBe(0x8a6238);
     expect(lum(ASPHALT)).toBeLessThan(0.12);

@@ -26,6 +26,19 @@ export const MEDIAN = 0x1a1a18;
 export const SIDEWALK = 0xb0a48c;
 /** Drawn median width. Class medianM is the driving gap; this is the paint. */
 export const MEDIAN_STRIPE_M = 1.8;
+
+/** Tan hemisphere fill washes Lambert 0x141414 toward sand. Keep tarmac black. */
+function roadMaterial(color, roadKind, extra = {}) {
+  const keepBlack = roadKind === "paved" || roadKind === "junction" || roadKind === "median";
+  return new THREE.MeshLambertMaterial({
+    color,
+    ...(keepBlack ? { emissive: color, emissiveIntensity: 0.42 } : {}),
+    polygonOffset: true,
+    polygonOffsetFactor: -2,
+    polygonOffsetUnits: -2,
+    ...extra,
+  });
+}
 export const SIDEWALK_WIDTH_M = 2.8;
 /** Local T-stubs and town lanes — narrower than the arterial. */
 export const LOCAL_WIDTH_M = ROAD_CLASSES.lane.carriageM;
@@ -151,16 +164,7 @@ function drawRibbon(scene, spec, road, heightAt, widthM, color, roadKind, matOpt
   geo.setIndex(indices);
   geo.computeVertexNormals();
 
-  const m = new THREE.Mesh(
-    geo,
-    new THREE.MeshLambertMaterial({
-      color,
-      polygonOffset: true,
-      polygonOffsetFactor: -2,
-      polygonOffsetUnits: -2,
-      ...matOpts,
-    }),
-  );
+  const m = new THREE.Mesh(geo, roadMaterial(color, roadKind, matOpts));
   m.castShadow = false;
   m.receiveShadow = true;
   m.renderOrder = 2;
@@ -703,9 +707,7 @@ function addMultiPolygonMesh(scene, mp, y, color, userData) {
     geo.computeVertexNormals();
     const mesh = new THREE.Mesh(
       geo,
-      new THREE.MeshLambertMaterial({
-        color,
-        polygonOffset: true,
+      roadMaterial(color, userData.roadKind, {
         polygonOffsetFactor: -3,
         polygonOffsetUnits: -3,
       }),
