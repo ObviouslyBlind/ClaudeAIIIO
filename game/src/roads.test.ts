@@ -121,7 +121,7 @@ describe("paved street from spawn", () => {
         (m) => m.userData.roadKind === "paved" && m.userData.roadName === road!.name,
       );
       expect(mesh, `no mesh for ${cls}`).toBeTruthy();
-      return ribbonWidthM(mesh!);
+      return mesh!.userData.widthM ?? ribbonWidthM(mesh!);
     };
 
     const highway = widthFor("highway");
@@ -282,7 +282,7 @@ describe("paved street from spawn", () => {
     const hwyMeshes = paved.filter((m) => m.userData.roadName === "Island Hwy");
     expect(hwyMeshes.length).toBeGreaterThanOrEqual(2);
     expect(hwyMeshes.length % 2).toBe(0);
-    expect(ribbonWidthM(hwyMeshes[0]!)).toBeCloseTo(ROAD_CLASSES.highway.carriageM, 1);
+    expect(hwyMeshes[0]!.userData.widthM ?? ribbonWidthM(hwyMeshes[0]!)).toBeCloseTo(ROAD_CLASSES.highway.carriageM, 1);
     const median = added.find((m) => m.userData.roadKind === "median");
     expect(median).toBeTruthy();
     expect(lum(median!.material.color.getHex())).toBeLessThan(0.12);

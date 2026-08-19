@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { ROAD_CLASSES, roadClassSpec } from "./roadclass.js";
 import { junctionPad, trimPolylineForPads, pointInJunctionPad } from "./roadnet.js";
 import { addQuadXZ, junctionKerbQuads } from "./roadjoin.js";
-import { buildHubFootprint, buildCircusFootprint, clipPolylineToOutside, multiContains, FOOT_SHOULDER_M } from "./roadfoot.js";
+import { buildHubFootprint, buildCircusFootprint, clipPolylineToOutside, multiContains, FOOT_SHOULDER_M, biteRibbonWith, circleRing } from "./roadfoot.js";
 import { circusesFromGraph, clipPolylineOutsideCircuses } from "./roadclip.js";
 
 /** Dark grit under the tarmac edge. Pale 0x6f6a5e read as a sand gap from spawn. */
@@ -91,7 +91,7 @@ function ribbonStations(points) {
  * One prism along the polyline: mitered left/right edges, world-up
  * (no Frenet twist). Reads as a continuous ribbon, not paving slabs.
  */
-function drawRibbon(scene, spec, road, heightAt, widthM, color, roadKind, matOpts = {}, skipGap = Infinity, yLift = 0) {
+function drawRibbon(scene, spec, road, heightAt, widthM, color, roadKind, matOpts = {}, skipGap = Infinity, yLift = 0, capStart = true, capEnd = true) {
   const pts = ribbonStations(road.points);
   if (pts.length < 2) return;
 
@@ -164,9 +164,11 @@ function drawRibbon(scene, spec, road, heightAt, widthM, color, roadKind, matOpt
     indices.push(a, a + 2, b + 2, a, b + 2, b);
     indices.push(a + 1, b + 1, b + 3, a + 1, b + 3, a + 3);
   }
-  indices.push(2, 3, 1, 2, 1, 0);
-  const e = (n - 1) * 4;
-  indices.push(e, e + 1, e + 3, e, e + 3, e + 2);
+  if (capStart) indices.push(2, 3, 1, 2, 1, 0);
+  if (capEnd) {
+    const e = (n - 1) * 4;
+    indices.push(e, e + 1, e + 3, e, e + 3, e + 2);
+  }
 
   const geo = new THREE.BufferGeometry();
   geo.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
@@ -258,8 +260,8 @@ function drawPaved(scene, spec, road, heightAt, graph, hubs, circuses) {
   const width = roadClassSpec(cls).carriageM;
   const runs = clipRuns(pts, hubs, circuses);
   const paintRuns = clipRuns(pts, hubs, circuses, 0);
-  drawClippedRuns(scene, spec, road, heightAt, runs, width + SHOULDER_PAD_M, SHOULDER, "shoulder", {}, -0.03, Infinity, circuses);
-  drawClippedRuns(scene, spec, road, heightAt, runs, width, ASPHALT, "paved", {}, 0, Infinity, circuses);
+  drawClippedRuns(scene, spec, road, heightAt, runs, width + SHOULDER_PAD_M, SHOULDER, "shoulder", {}, -0.03, Infinity, hubs, circuses);
+  drawClippedRuns(scene, spec, road, heightAt, runs, width, ASPHALT, "paved", {}, 0, Infinity, hubs, circuses);
   drawLanePaint(scene, spec, road, heightAt, paintRuns, width, false, 1);
 }
 
@@ -378,82 +380,113 @@ function splitRuns(pts, maxGap) {
   return runs;
 }
 
-function projectOnCircle(p, cx, cz, r) {
-  const dx = p.x - cx;
-  const dz = p.z - cz;
-  const d = Math.hypot(dx, dz) || 1;
-  return { x: cx + (dx / d) * r, z: cz + (dz / d) * r };
+function extendEnd(pts, head, extraM) {
+  if (!pts || pts.length < 2 || extraM <= 0) return pts || [];
+  const p = head ? pts[0] : pts[pts.length - 1];
+  const q = head ? pts[1] : pts[pts.length - 2];
+  const len = Math.hypot(p.x - q.x, p.z - q.z) || 1;
+  const extra = { x: p.x + ((p.x - q.x) / len) * extraM, z: p.z + ((p.z - q.z) / len) * extraM };
+  return head ? [extra].concat(pts) : pts.concat([extra]);
 }
 
-function arcOnCircle(cx, cz, r, a0, a1, steps) {
-  let d = a1 - a0;
-  while (d > Math.PI) d -= Math.PI * 2;
-  while (d < -Math.PI) d += Math.PI * 2;
-  const n = Math.max(4, steps);
-  const out = [];
-  for (let i = 0; i <= n; i++) {
-    const a = a0 + (d * i) / n;
-    out.push({ x: cx + Math.cos(a) * r, z: cz + Math.sin(a) * r });
+function splitJoinEnd(pts, head, stubM) {
+  const total = polylineLen(pts);
+  if (total <= stubM + 4) {
+    return { stub: extendEnd(pts, head, 6), rest: null };
   }
-  return out;
+  if (head) {
+    const stub = sliceAlong(pts, 0, stubM);
+    const rest = sliceAlong(pts, Math.max(0, stubM - 2.2), total);
+    return { stub: extendEnd(stub, true, 6), rest };
+  }
+  const stub = sliceAlong(pts, Math.max(0, total - stubM), total);
+  const rest = sliceAlong(pts, 0, total - stubM + 2.2);
+  return { stub: extendEnd(stub, false, 6), rest };
+}
+
+function joinCutterAt(p, hubs, circuses, roadKind) {
+  if (!p) return null;
+  for (const c of circuses || []) {
+    const face = c.clip || c.outer;
+    if (!(face > 0)) continue;
+    const d = Math.hypot(p.x - c.x, p.z - c.z);
+    if (Math.abs(d - face) > 10 && d > face + 4) continue;
+    const r = roadKind === "shoulder" ? (c.outer || face) + FOOT_SHOULDER_M : face;
+    return [[circleRing(c.x, c.z, r, 48)]];
+  }
+  for (const h of hubs || []) {
+    const n = h.node;
+    if (!n) continue;
+    const reach = (h.pad && h.pad.side) || 22;
+    if (Math.hypot(p.x - n.x, p.z - n.z) > reach + 10) continue;
+    if (roadKind === "shoulder") return h.foot.outerClip || h.foot.clip || null;
+    return h.foot.clip || h.foot.tarmac || null;
+  }
+  return null;
+}
+
+function drawBittenStub(scene, spec, road, heightAt, stub, cutter, widthM, color, roadKind, yLift) {
+  const bitten = biteRibbonWith(stub, widthM / 2, cutter);
+  if (!bitten || !bitten.length) {
+    drawRibbon(scene, spec, { ...road, points: stub }, heightAt, widthM, color, roadKind, {}, Infinity, yLift || 0, false, false);
+    return;
+  }
+  const mid = stub[Math.floor(stub.length / 2)] || stub[0];
+  const lift = (roadKind === "sidewalk" ? 0.18 : 0.16) + (yLift || 0);
+  addMultiPolygonMesh(scene, bitten, heightAt(spec, mid.x, mid.z) + lift, color, {
+    island: road.island,
+    roadKind,
+    roadName: road.name || "road",
+    widthM,
+    mode: "PAPER",
+  });
 }
 
 /**
- * Square ribbon ends become a chord. Fan the last metres onto the circus
- * circle so the kerb is the ring, not a flat cut in the sand.
+ * Strip body plus a join-bitten stub. The prism's square cap is the chord;
+ * biting an overlap into the hub/circus makes the kerb the join outline.
  */
-function drawCircleCaps(scene, spec, road, heightAt, runs, widthM, color, roadKind, yLift, circuses) {
-  if (!circuses || !circuses.length || widthM < 0.4) return;
-  const half = widthM / 2;
-  const lift = (roadKind === "sidewalk" ? 0.18 : 0.16) + (yLift || 0) + 0.04;
+function drawClippedRuns(scene, spec, road, heightAt, runs, widthM, color, roadKind, matOpts, yLift, skipGap, hubs, circuses) {
+  const hasJoins = (hubs && hubs.length) || (circuses && circuses.length);
   for (const run of runs) {
     if (!run || run.length < 2) continue;
-    for (const head of [true, false]) {
-      const p = head ? run[0] : run[run.length - 1];
-      const q = head ? run[1] : run[run.length - 2];
-      let hit = null;
-      for (const c of circuses) {
-        const d = Math.hypot(p.x - c.x, p.z - c.z);
-        const r = c.clip || c.outer;
-        if (Math.abs(d - r) < 4.5) hit = { c, r };
-      }
-      if (!hit) continue;
-      const dx = p.x - q.x;
-      const dz = p.z - q.z;
-      const len = Math.hypot(dx, dz) || 1;
-      const rx = dz / len;
-      const rz = -dx / len;
-      const left = { x: p.x - rx * half, z: p.z - rz * half };
-      const right = { x: p.x + rx * half, z: p.z + rz * half };
-      const a = projectOnCircle(left, hit.c.x, hit.c.z, hit.r);
-      const b = projectOnCircle(right, hit.c.x, hit.c.z, hit.r);
-      const a0 = Math.atan2(a.z - hit.c.z, a.x - hit.c.x);
-      const a1 = Math.atan2(b.z - hit.c.z, b.x - hit.c.x);
-      const arc = arcOnCircle(hit.c.x, hit.c.z, hit.r, a0, a1, 10);
-      const ring = [[left.x, left.z], [a.x, a.z]];
-      for (const s of arc) ring.push([s.x, s.z]);
-      ring.push([b.x, b.z], [right.x, right.z]);
-      const first = ring[0];
-      ring.push([first[0], first[1]]);
-      const y = heightAt(spec, p.x, p.z) + lift;
-      addMultiPolygonMesh(scene, [[ring]], y, color, {
-        island: road.island,
-        roadKind: "junction",
-        roadName: (road.name || "road") + " cap",
-        mode: "PAPER",
-      });
+    if (!hasJoins) {
+      drawRibbon(scene, spec, { ...road, points: run }, heightAt, widthM, color, roadKind, matOpts || {}, skipGap == null ? Infinity : skipGap, yLift || 0);
+      continue;
     }
-  }
-}
-
-function drawClippedRuns(scene, spec, road, heightAt, runs, widthM, color, roadKind, matOpts, yLift, skipGap, circuses) {
-  for (const run of runs) {
-    if (!run || run.length < 2) continue;
-    drawRibbon(scene, spec, { ...road, points: run }, heightAt, widthM, color, roadKind, matOpts || {}, skipGap == null ? Infinity : skipGap, yLift || 0);
-  }
-  // 26 m shoulder fans were the circus arm boxes. Cap the driving lanes only.
-  if (circuses && circuses.length && roadKind === "paved") {
-    drawCircleCaps(scene, spec, road, heightAt, runs, widthM, color, roadKind, yLift || 0, circuses);
+    const headCut = joinCutterAt(run[0], hubs, circuses, roadKind);
+    const tailCut = joinCutterAt(run[run.length - 1], hubs, circuses, roadKind);
+    let body = run;
+    let capStart = true;
+    let capEnd = true;
+    if (headCut) {
+      const part = splitJoinEnd(body, true, 16);
+      drawBittenStub(scene, spec, road, heightAt, part.stub, headCut, widthM, color, roadKind, yLift);
+      body = part.rest;
+      capStart = false;
+    }
+    if (body && tailCut) {
+      const part = splitJoinEnd(body, false, 16);
+      drawBittenStub(scene, spec, road, heightAt, part.stub, tailCut, widthM, color, roadKind, yLift);
+      body = part.rest;
+      capEnd = false;
+    }
+    if (body && body.length >= 2) {
+      drawRibbon(
+        scene,
+        spec,
+        { ...road, points: body },
+        heightAt,
+        widthM,
+        color,
+        roadKind,
+        matOpts || {},
+        skipGap == null ? Infinity : skipGap,
+        yLift || 0,
+        capStart,
+        capEnd,
+      );
+    }
   }
 }
 
@@ -535,7 +568,7 @@ function drawSidewalks(scene, spec, road, heightAt, graph, hubs, circuses) {
     const pieces = hasJoins
       ? clipRuns(offsetPts, hubs, circuses, 0)
       : splitRuns(omitInsidePads(offsetPts, graph, walk + 0.8), 10);
-    drawClippedRuns(scene, spec, road, heightAt, pieces, walk, SIDEWALK, "sidewalk");
+    drawClippedRuns(scene, spec, road, heightAt, pieces, walk, SIDEWALK, "sidewalk", {}, 0, Infinity, hubs, circuses);
   }
 }
 
@@ -553,7 +586,7 @@ function drawHighway(scene, spec, road, heightAt, graph, hubs, circuses) {
   const lip = clipRuns(pts, hubs, circuses);
   // Per-lane grit. A 26 m shoulder ribbon is a square chord at the circus
   // and a stacked box at every T.
-  drawClippedRuns(scene, spec, { ...road, name: name + " median" }, heightAt, lip, s.medianM, ASPHALT, "median", {}, 0, Infinity, circuses);
+  drawClippedRuns(scene, spec, { ...road, name: name + " median" }, heightAt, lip, s.medianM, ASPHALT, "median", {}, 0, Infinity, hubs, circuses);
   for (const side of [-1, 1]) {
     const offsetPts = offsetPolyline(pts, lane * side);
     const laneRuns = clipRuns(offsetPts, hubs, circuses);
@@ -570,6 +603,7 @@ function drawHighway(scene, spec, road, heightAt, graph, hubs, circuses) {
       {},
       -0.03,
       Infinity,
+      hubs,
       circuses,
     );
     drawClippedRuns(
@@ -584,6 +618,7 @@ function drawHighway(scene, spec, road, heightAt, graph, hubs, circuses) {
       {},
       0,
       Infinity,
+      hubs,
       circuses,
     );
     drawLanePaint(scene, spec, road, heightAt, paintRuns, s.carriageM, true, side);
@@ -600,6 +635,7 @@ function drawHighway(scene, spec, road, heightAt, graph, hubs, circuses) {
     {},
     0.03,
     Infinity,
+    hubs,
     circuses,
   );
 }

@@ -1,11 +1,25 @@
 import { describe, expect, it } from "vitest";
 import { createLandBoard } from "./land.ts";
 import { junctionPad } from "../public/harbour/roadnet.js";
-import { buildHubFootprint, buildCircusFootprint, clipPolylineToOutside, multiContains, segmentRing, unionGeoms, junctionContour, CIRCUS_ARM_STUB_M } from "../public/harbour/roadfoot.js";
+import { buildHubFootprint, buildCircusFootprint, clipPolylineToOutside, multiContains, segmentRing, unionGeoms, junctionContour, CIRCUS_ARM_STUB_M, biteRibbonWith, circleRing } from "../public/harbour/roadfoot.js";
 import { circusMeshRadii } from "../public/harbour/roadclip.js";
 import { carriagewayWidthM } from "../public/harbour/roadclass.js";
 
 describe("road hub footprints", () => {
+  it("bites a square ribbon end into a circular kerb instead of leaving a chord", () => {
+    const stub = [
+      { x: 55, z: 0 },
+      { x: 42, z: 0 },
+      { x: 36, z: 0 },
+    ];
+    const disc = [[circleRing(0, 0, 42, 48)]];
+    const bitten = biteRibbonWith(stub, 4, disc);
+    expect(bitten.length).toBeGreaterThan(0);
+    expect(multiContains(bitten, 50, 0)).toBe(true);
+    expect(multiContains(bitten, 36, 0), "square end left inside the circus").toBe(false);
+    expect(multiContains(bitten, 20, 0)).toBe(false);
+  });
+
   it("fills a T as one rounded contour, not two stacked rectangles", () => {
     const arms = [
       { dx: 1, dz: 0, half: 3, reach: 20 },

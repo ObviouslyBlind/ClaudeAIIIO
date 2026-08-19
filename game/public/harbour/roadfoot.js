@@ -43,6 +43,53 @@ function snap(n) {
   return Math.round(n * 50) / 50;
 }
 
+export function circleRing(cx, cz, r, steps = 40) {
+  const ring = [];
+  for (let i = 0; i < steps; i++) {
+    const t = (i / steps) * Math.PI * 2;
+    ring.push([snap(cx + Math.cos(t) * r), snap(cz + Math.sin(t) * r)]);
+  }
+  return closeRing(ring);
+}
+
+/** Closed outline of a constant-width ribbon. Used to bite a join out of the end. */
+export function ribbonOutline(pts, half) {
+  if (!pts || pts.length < 2 || !(half > 0)) return null;
+  const left = [];
+  const right = [];
+  for (let i = 0; i < pts.length; i++) {
+    let dx;
+    let dz;
+    if (i === 0) {
+      dx = pts[1].x - pts[0].x;
+      dz = pts[1].z - pts[0].z;
+    } else if (i === pts.length - 1) {
+      dx = pts[i].x - pts[i - 1].x;
+      dz = pts[i].z - pts[i - 1].z;
+    } else {
+      dx = pts[i + 1].x - pts[i - 1].x;
+      dz = pts[i + 1].z - pts[i - 1].z;
+    }
+    const len = Math.hypot(dx, dz) || 1;
+    const rx = dz / len;
+    const rz = -dx / len;
+    left.push([snap(pts[i].x - rx * half), snap(pts[i].z - rz * half)]);
+    right.push([snap(pts[i].x + rx * half), snap(pts[i].z + rz * half)]);
+  }
+  return closeRing(left.concat(right.reverse()));
+}
+
+/**
+ * Ribbon minus a join (circus disc or hub plate). Extending the centreline
+ * into the join first is required: a strip clipped *on* the circle does not
+ * overlap it, so a difference is a no-op and the end stays a square chord.
+ */
+export function biteRibbonWith(pts, half, cutter) {
+  const ring = ribbonOutline(pts, half);
+  if (!ring || !cutter || !cutter.length) return ring ? [[ring]] : [];
+  return diffGeoms([[ring]], cutter);
+}
+
 function armDir(node, edge) {
   const pts = edge.points;
   const fromA = edge.a === node.id;
@@ -321,16 +368,8 @@ export function buildHubFootprint(graph, node, pad) {
     shoulder: grit.length ? diffGeoms(grit, tar) : [],
     sidewalk: walk,
     clip: tar,
+    outerClip: grit,
   };
-}
-
-function circleRing(cx, cz, r, steps = 40) {
-  const ring = [];
-  for (let i = 0; i < steps; i++) {
-    const t = (i / steps) * Math.PI * 2;
-    ring.push([snap(cx + Math.cos(t) * r), snap(cz + Math.sin(t) * r)]);
-  }
-  return closeRing(ring);
 }
 
 /**

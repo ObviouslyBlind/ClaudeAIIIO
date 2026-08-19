@@ -14,6 +14,8 @@
  * - Dual = two 8 m lanes + black asphalt median fill. Per-lane grit, not one 26 m slab.
  * - T/L inner kerb is a tangent fillet, not a square rectangle crotch.
  * - Lane paint stops at the hub plate (overlap 0). Tarmac still tucks 1.6 m under.
+ * - Ribbon ends that meet a join are bitten (difference) so the kerb is the
+ *   hub contour / circus circle, not the prism's square cap.
  * - Circus clip is the outer circle. Offset lanes hit the ring, not 9 m of sand.
  * - No circus arm boxes. 12 m stubs sat in the grass as extra black rectangles.
  * - Legal turns: 15 / 30 / 45 / 90°. Kit cases, not a continuous CS2 compiler.
