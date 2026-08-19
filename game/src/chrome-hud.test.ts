@@ -46,8 +46,9 @@ describe("harbour chrome HUD", () => {
     expect(html).toContain('id="taxi-map-exit"');
     expect(html).toContain("Keep riding");
     expect(html).toContain('id="chrome"');
-    expect(html).toContain('id="stand-veil"');
-    expect(html).toContain('id="stand-menu"');
+    expect(css).toContain("#stand-menu");
+    expect(css).toContain("rgba(6, 16, 20, 0.12)");
+    expect(css).toContain("height: 14px");
     expect(siteMenu).toContain('data-stock="inventory"');
     expect(html).toContain('id="buy-ask"');
     expect(html).toContain('id="crate-ask"');
@@ -156,6 +157,7 @@ describe("harbour chrome HUD", () => {
     expect(chrome).toContain("getPose");
     expect(chrome).toContain("hideOrderAsk");
     expect(chrome).toContain("data-open-stand");
+    expect(chrome).toContain("onOpenStand");
     expect(siteMenu).toContain("Fruit slice");
     expect(siteMenu).toContain("Fridge");
     expect(siteMenu).toContain("data-upgrade");

@@ -695,8 +695,9 @@ export function mountChrome(opts) {
         return;
       }
       if (hit.hasAttribute("data-open-stand")) {
-        const stand = findSite(hit.getAttribute("data-open-stand"));
-        paintStandMenu(stand);
+        const id = hit.getAttribute("data-open-stand");
+        if (typeof opts.onOpenStand === "function") opts.onOpenStand(id);
+        else paintStandMenu(findSite(id));
         return;
       }
       if (hit.hasAttribute("data-withdraw")) {

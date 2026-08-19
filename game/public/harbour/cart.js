@@ -192,10 +192,13 @@ export function makeVendor() {
   g.userData.mode = "PAPER";
   const body = new THREE.Mesh(
     new THREE.CapsuleGeometry(0.28, 0.85, 4, 8),
-    new THREE.MeshLambertMaterial({ color: 0xc4a574 }),
+    new THREE.MeshLambertMaterial({ color: 0xc45c12 }),
   );
   body.position.y = 0.85;
   body.userData.part = "body";
+  const shirt = box(0.52, 0.42, 0.36, 0x2f7a8a);
+  shirt.position.y = 1.12;
+  shirt.userData.part = "shirt";
   const head = new THREE.Mesh(
     new THREE.SphereGeometry(0.22, 8, 6),
     new THREE.MeshLambertMaterial({ color: 0xf2d2a8 }),
@@ -205,7 +208,7 @@ export function makeVendor() {
   const hat = box(0.42, 0.1, 0.42, 0xb42318);
   hat.position.y = 1.84;
   hat.userData.part = "hat";
-  g.add(body, head, hat);
+  g.add(body, shirt, head, hat);
   return g;
 }
 

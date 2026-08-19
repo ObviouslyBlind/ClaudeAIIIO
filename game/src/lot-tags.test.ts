@@ -9,6 +9,8 @@ describe("lot tags (PAPER)", () => {
     expect(main).toContain(".lot-tag");
     expect(main).toContain("#lot-tags");
     expect(main).toContain("#near-lease");
+    expect(main).toContain("focusStand");
+    expect(main).toContain("onOpenStand");
   });
 
   it("labels vacant as the $ bar, yours, and taken", () => {

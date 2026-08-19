@@ -1,6 +1,6 @@
 # Gauntlet status
 
-Piece in play: **harbour loop — remaining bars after the cash gate.**
+Piece in play: **Fire despawns in 3D** (cash gate already passed).
 
 Source (operator, in order):
 
@@ -8,22 +8,15 @@ Source (operator, in order):
 2. Fire despawns. Fruit clock is real. More upgrades that show Stats appeal. Per-cart maths (area, fruit slice / shift, sticker $ can slow sales). Simple player: walk, body colour, shirt, head. Delivery van works again.
 3. Gauntlet until all of that is fixed.
 
-Bar the critic inspects on live `http://127.0.0.1:8787/`.
-
 | # | Bar | Status |
 |---|---|---|
-| 1 | **Buy $32 → cash $968** | **PASS** (bc-0dfa7ea1). Chip click. Cash $968.00. Chip gone. Server leased `south-street-5`. |
-| 2 | **Price sticker** | **Not graded.** Critic read Market goods (corn/potato). Bar is the **placed cart** Stock tab: label Price, red–yellow–green–yellow–red, green on $6. |
-| 3 | **Fire despawns** | **Not graded.** Critic used Staff HUD. Live stand `stand-4` is still `hired: true`. Bar: Run → Fire → 3D vendor gone. |
-| 4 | **Fruit clock** | Untested while hired. |
-| 5 | **Upgrades + appeal** | Critic saw +appeal rows. Confirm on the cart Upgrades/Stats tabs. |
-| 6 | **Cart maths** | Untested on the cart Stats tab. |
-| 7 | **Simple walker** | Critic saw body/shirt/head. |
-| 8 | **Kerb van** | Critic reported a yellow van. Confirm it drives from the port, drops a large glowing crate, then leaves. |
+| 1 | **Buy $32 → cash $968** | **PASS** |
+| 2 | **Price sticker** | Control exists. Track was thin. Thickened red–yellow–green–yellow–red. Default $6. |
+| 3 | **Fire despawns** | **FAIL** last critic: cart was ~400 m inland (52 Quayward Loop). Site card veiled the world. Nobody could see a 3D vendor. |
+| 4–8 | Fruit clock, upgrades, maths, walker, van | Not closed. |
 
-Do **not** grade Market Pay or Market aisle prices as the sticker.
-Do **not** click Lots first.
+Fix in this round: opening a cart **stands you next to it**. Site card docks right with a light veil so the stall stays on camera. Fire still `detachVendor`. Vendor has a teal shirt + red hat.
 
-Live shard is dirty (cash $213, two leases, hired fruit cart on 52 Quayward Loop). Next critic uses that cart: tap it → Stock Price, Run Fire.
+Next critic, fresh play: Buy $32 → place cart on the nearby YOURS lot → Hire → see the person at the stall → Fire → person gone.
 
 Politics frozen. Operator is the brake.

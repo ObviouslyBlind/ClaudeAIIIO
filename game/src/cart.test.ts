@@ -67,6 +67,8 @@ describe("street cart (kerb stall, not a handheld wagon)", () => {
   it("builds a hired vendor under door height", () => {
     const vendor = makeVendor();
     expect(vendor.userData.kind).toBe("vendor");
+    const shirt = vendor.children.find((c) => c.userData && c.userData.part === "shirt") as THREE.Mesh;
+    expect((shirt.material as THREE.MeshLambertMaterial).color.getHex()).toBe(0x2f7a8a);
     let maxY = 0;
     vendor.traverse((obj) => {
       if (!(obj as THREE.Mesh).isMesh) return;

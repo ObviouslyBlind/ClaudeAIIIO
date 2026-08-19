@@ -530,7 +530,10 @@ async function placeCartOn(plot, x, z) {
   syncStandMesh(data.stand);
   if (chromeHud) chromeHud.refresh();
   setStatus("Cart placed. Tap it to stock.");
-  if (data.stand) openStandMenu(data.stand.id);
+  if (data.stand) {
+    focusStand(data.stand);
+    openStandMenu(data.stand.id);
+  }
 }
 
 function attachVendor(cart) {
@@ -681,6 +684,21 @@ function objectWithStand(obj) {
   return null;
 }
 
+function focusStand(stand) {
+  if (!stand) return;
+  const plot = map && map.plots.find((p) => p.id === stand.plotId);
+  const x = Number.isFinite(Number(stand.x)) ? Number(stand.x) : plot ? plot.x : NaN;
+  const z = Number.isFinite(Number(stand.z)) ? Number(stand.z) : plot ? plot.z : NaN;
+  if (!Number.isFinite(x) || !Number.isFinite(z)) return;
+  const spec = specOf((plot && plot.island) || islandId);
+  const px = x + 3.6;
+  const pz = z + 2.2;
+  walking = false;
+  if (walkPath) walkPath.hide();
+  player.position.set(px, heightAt(spec, px, pz) + 1.15, pz);
+  snapCamera();
+}
+
 function openStandMenu(standId) {
   const play = chromeHud && chromeHud.getPlay && chromeHud.getPlay();
   const stand =
@@ -689,6 +707,7 @@ function openStandMenu(standId) {
       ((play.stands || []).find((s) => s.id === standId)) ||
       ((play.workSites || []).find((s) => s.id === standId)));
   if (!stand || !chromeHud) return;
+  focusStand(stand);
   chromeHud.paintStandMenu(stand, null, () => {
     const mesh = standMeshes.get(standId);
     if (mesh) attachVendor(mesh);
@@ -1998,6 +2017,9 @@ async function boot() {
     getPose: () => ({ x: player.position.x, z: player.position.z }),
     getPlotId: () => selected || "",
     lease,
+    onOpenStand(id) {
+      openStandMenu(id);
+    },
     onCloseLand: closeLandCard,
     onLeased(snapshot) {
       lastInspectKey = "";
@@ -2016,7 +2038,10 @@ async function boot() {
         playNow &&
         ((playNow.stands || []).find((s) => s.id === standId) ||
           (playNow.sites || []).find((s) => s.id === standId));
-      if (hired) syncStandMesh({ ...hired, hired: true });
+      if (hired) {
+        syncStandMesh({ ...hired, hired: true });
+        focusStand(hired);
+      }
       setStatus("Hired.");
     },
     onFired(standId) {
@@ -2025,7 +2050,10 @@ async function boot() {
         playNow &&
         ((playNow.stands || []).find((s) => s.id === standId) ||
           (playNow.sites || []).find((s) => s.id === standId));
-      if (fired) syncStandMesh({ ...fired, hired: false });
+      if (fired) {
+        syncStandMesh({ ...fired, hired: false });
+        focusStand(fired);
+      }
       else {
         const mesh = standMeshes.get(standId);
         if (mesh) detachVendor(mesh);
