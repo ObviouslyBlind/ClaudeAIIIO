@@ -102,6 +102,8 @@ describe("harbour chrome HUD", () => {
     expect(chrome).toContain('id="land-lease"');
     expect(chrome).toContain('id="land-close"');
     expect(chrome).toContain("onCloseLand");
+    expect(chrome).toContain("onCloseStand");
+    expect(chrome).toContain("dismissStandMenu");
     expect(chrome).toContain("landCard.hidden = true");
     expect(chrome).toContain("extras.onTake()");
     expect(chrome).toContain("data-place");

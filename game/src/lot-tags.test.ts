@@ -11,7 +11,11 @@ describe("lot tags (PAPER)", () => {
     expect(main).toContain("#near-lease");
     expect(main).toContain("focusStand");
     expect(main).toContain("onOpenStand");
+    expect(main).toContain("onCloseStand");
     expect(main).toContain("snapClose");
+    expect(main).toContain("stallCam");
+    expect(main).toContain("stallCameraPose");
+    expect(main).toContain("openStandMenu(data.stand.id, data.stand)");
     expect(main).toContain("taxi.hopOut");
   });
 

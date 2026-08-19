@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { spawnCameraOffset } from "../public/harbour/roads.js";
 import {
+  applyStallCamera,
   cameraNearForRadius,
   cartesianToSpherical,
   closeOrbitState,
@@ -9,6 +10,11 @@ import {
   LMB,
   RMB,
   sphericalToCartesian,
+  stallCameraPose,
+  STALL_CAM_BACK_M,
+  STALL_CAM_SIDE_M,
+  STALL_CAM_UP_M,
+  STALL_LOOK_Y,
   ZOOM_MAX_M,
   ZOOM_MIN_M,
 } from "../public/harbour/camera.js";
@@ -124,5 +130,52 @@ describe("RMB-hold orbit camera", () => {
     expect(close.radius).toBeLessThan(Math.hypot(-8, 5.2, -10));
     const o = sphericalToCartesian(close);
     expect(Math.hypot(o.x, o.y, o.z)).toBeCloseTo(9, 5);
+  });
+
+  it("stall pose sits a few metres from the cart, looking at the stall not the highway", () => {
+    const pose = stallCameraPose({ x: 100, y: 2, z: 200 });
+    expect(pose.lookX).toBe(100);
+    expect(pose.lookZ).toBe(200);
+    expect(pose.lookY).toBeCloseTo(2 + STALL_LOOK_Y);
+    const dist = Math.hypot(pose.x - 100, pose.y - 2, pose.z - 200);
+    expect(dist).toBeGreaterThan(4);
+    expect(dist).toBeLessThan(8);
+    expect(dist).toBeCloseTo(
+      Math.hypot(STALL_CAM_SIDE_M, STALL_CAM_UP_M, STALL_CAM_BACK_M),
+      5,
+    );
+    expect(pose.x - 100).toBe(STALL_CAM_SIDE_M);
+    expect(pose.z - 200).toBe(STALL_CAM_BACK_M);
+  });
+
+  it("applyStallCamera copies the pose with no lerp", () => {
+    const cam = {
+      position: {
+        x: 0,
+        y: 0,
+        z: 0,
+        set(x, y, z) {
+          this.x = x;
+          this.y = y;
+          this.z = z;
+        },
+      },
+      lookAt(x, y, z) {
+        this.lx = x;
+        this.ly = y;
+        this.lz = z;
+      },
+      near: 12,
+      updateProjectionMatrix() {
+        this.updated = true;
+      },
+    };
+    applyStallCamera(cam, stallCameraPose({ x: 10, y: 1, z: 20 }));
+    expect(cam.position.x).toBeCloseTo(10 + STALL_CAM_SIDE_M);
+    expect(cam.position.y).toBeCloseTo(1 + STALL_CAM_UP_M);
+    expect(cam.position.z).toBeCloseTo(20 + STALL_CAM_BACK_M);
+    expect(cam.lx).toBe(10);
+    expect(cam.lz).toBe(20);
+    expect(cam.ly).toBeCloseTo(1 + STALL_LOOK_Y);
   });
 });

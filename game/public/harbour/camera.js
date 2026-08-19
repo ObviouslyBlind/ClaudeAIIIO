@@ -36,6 +36,40 @@ export function closeOrbitState(islandId) {
   };
 }
 
+/** Hard lock on the stall. Metres from the cart origin. No lerp. */
+export const STALL_CAM_SIDE_M = 2.4;
+export const STALL_CAM_BACK_M = 4.4;
+export const STALL_CAM_UP_M = 2.8;
+export const STALL_LOOK_Y = 1.15;
+
+/**
+ * Camera a few metres from the cart, looking at the stall — not 28 m down
+ * the highway. Used while the site card is open so Hire/Fire is visible.
+ */
+export function stallCameraPose(cart) {
+  const x = Number(cart && cart.x);
+  const y = Number(cart && cart.y) || 0;
+  const z = Number(cart && cart.z);
+  return {
+    x: x + STALL_CAM_SIDE_M,
+    y: y + STALL_CAM_UP_M,
+    z: z + STALL_CAM_BACK_M,
+    lookX: x,
+    lookY: y + STALL_LOOK_Y,
+    lookZ: z,
+  };
+}
+
+export function applyStallCamera(camera, pose) {
+  if (!camera || !pose) return;
+  camera.position.set(pose.x, pose.y, pose.z);
+  camera.lookAt(pose.lookX, pose.lookY, pose.lookZ);
+  applyZoomNear(
+    camera,
+    Math.hypot(STALL_CAM_SIDE_M, STALL_CAM_UP_M, STALL_CAM_BACK_M),
+  );
+}
+
 /** Exponential wheel zoom, clamped. Positive deltaY zooms out. */
 export function zoomRadius(radius, deltaY) {
   const next = radius * Math.exp((deltaY || 0) * 0.0011);

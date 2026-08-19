@@ -9,7 +9,7 @@ import {
   spawnLookAtOffset,
 } from "./roads.js";
 import { canEnter, objectWithKind, wrapHarbourWorld } from "./harbour-world.js";
-import { createPlayCamera, PLAY_FOV } from "./camera.js";
+import { applyStallCamera, createPlayCamera, PLAY_FOV, stallCameraPose } from "./camera.js";
 import { createFerryTicket } from "./ferry-ticket.js";
 import { makeWater, tickHarbourWater } from "./water.js";
 import { makeSky } from "./sky.js";
@@ -532,7 +532,7 @@ async function placeCartOn(plot, x, z) {
   setStatus("Cart placed. Tap it to stock.");
   if (data.stand) {
     focusStand(data.stand);
-    openStandMenu(data.stand.id);
+    openStandMenu(data.stand.id, data.stand);
   }
 }
 
@@ -684,6 +684,14 @@ function objectWithStand(obj) {
   return null;
 }
 
+/** While set, tick copies this pose every frame (spawn look-at cannot fight). */
+let stallCam = null;
+
+function lockStallCam(x, z, spec) {
+  stallCam = { x, y: heightAt(spec, x, z), z };
+  applyStallCamera(camera, stallCameraPose(stallCam));
+}
+
 function focusStand(stand) {
   if (!stand) return;
   if (taxi && typeof taxi.hopOut === "function") taxi.hopOut();
@@ -697,21 +705,24 @@ function focusStand(stand) {
   walking = false;
   if (walkPath) walkPath.hide();
   player.position.set(px, heightAt(spec, px, pz) + 1.15, pz);
+  lockStallCam(x, z, spec);
   if (playCam && typeof playCam.snapClose === "function") playCam.snapClose();
   else snapCamera();
 }
 
-function openStandMenu(standId) {
+function openStandMenu(standId, fallback) {
   const play = chromeHud && chromeHud.getPlay && chromeHud.getPlay();
   const stand =
-    play &&
-    (((play.sites || []).find((s) => s.id === standId)) ||
-      ((play.stands || []).find((s) => s.id === standId)) ||
-      ((play.workSites || []).find((s) => s.id === standId)));
+    (play &&
+      (((play.sites || []).find((s) => s.id === standId)) ||
+        ((play.stands || []).find((s) => s.id === standId)) ||
+        ((play.workSites || []).find((s) => s.id === standId)))) ||
+    fallback ||
+    null;
   if (!stand || !chromeHud) return;
   focusStand(stand);
   chromeHud.paintStandMenu(stand, null, () => {
-    const mesh = standMeshes.get(standId);
+    const mesh = standMeshes.get(stand.id || standId);
     if (mesh) attachVendor(mesh);
   });
 }
@@ -1749,7 +1760,8 @@ function tick(dt) {
   inspectNearbyLand();
   btnFerry.disabled = !nearPort();
   refreshHud();
-  playCam.tick(dt);
+  if (stallCam) applyStallCamera(camera, stallCameraPose(stallCam));
+  else playCam.tick(dt);
   sun.position.set(player.position.x + 180, 260, player.position.z + 80);
   sun.target.position.copy(player.position);
   sun.target.updateMatrixWorld();
@@ -2021,6 +2033,9 @@ async function boot() {
     lease,
     onOpenStand(id) {
       openStandMenu(id);
+    },
+    onCloseStand() {
+      stallCam = null;
     },
     onCloseLand: closeLandCard,
     onLeased(snapshot) {

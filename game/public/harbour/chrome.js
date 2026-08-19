@@ -101,6 +101,14 @@ export function mountChrome(opts) {
     });
   }
 
+  function dismissStandMenu() {
+    if (standMenu) standMenu.hidden = true;
+    if (standVeil) standVeil.hidden = true;
+    const wasOpen = openSiteId != null;
+    openSiteId = null;
+    if (wasOpen && typeof opts.onCloseStand === "function") opts.onCloseStand();
+  }
+
   function open(id) {
     if (buyAsk && !buyAsk.hidden) return;
     if (openPanel === id) {
@@ -108,8 +116,7 @@ export function mountChrome(opts) {
       return;
     }
     closePanels();
-    if (standMenu) standMenu.hidden = true;
-    if (standVeil) standVeil.hidden = true;
+    dismissStandMenu();
     openPanel = id;
     const panel = document.getElementById("panel-" + id);
     if (panel) {
@@ -485,9 +492,7 @@ export function mountChrome(opts) {
   function paintStandMenu(stand, onStock, onHire) {
     if (!standMenu) return;
     if (!stand) {
-      standMenu.hidden = true;
-      if (standVeil) standVeil.hidden = true;
-      openSiteId = null;
+      dismissStandMenu();
       return;
     }
     closePanels();
@@ -497,9 +502,7 @@ export function mountChrome(opts) {
     const live = findSite(stand.id) || stand;
     standMenu.innerHTML = formatSiteMenu(live, play, siteTab);
     function closeStand() {
-      standMenu.hidden = true;
-      if (standVeil) standVeil.hidden = true;
-      openSiteId = null;
+      dismissStandMenu();
     }
     standMenu.querySelector("#stand-close")?.addEventListener("click", closeStand);
     standMenu.querySelectorAll("[data-site-tab]").forEach((btn) => {
@@ -862,9 +865,7 @@ export function mountChrome(opts) {
   }
   if (standVeil) {
     standVeil.addEventListener("click", () => {
-      standMenu.hidden = true;
-      standVeil.hidden = true;
-      openSiteId = null;
+      dismissStandMenu();
     });
   }
   bindChromeActions();
@@ -935,9 +936,7 @@ export function mountChrome(opts) {
     paintLand,
     paintStandMenu,
     hideStandMenu() {
-      if (standMenu) standMenu.hidden = true;
-      if (standVeil) standVeil.hidden = true;
-      openSiteId = null;
+      dismissStandMenu();
     },
   };
 }
