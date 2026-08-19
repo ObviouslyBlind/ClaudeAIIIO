@@ -5,7 +5,9 @@ import {
   clipPolylineOutsideCircle,
   clipPolylineOutsideCircuses,
   circusesFromGraph,
+  enterCircusRings,
   segmentCircleHits,
+  snapPolylineEndToCircle,
 } from "../public/harbour/roadclip.js";
 import { offsetPolyline } from "../public/harbour/roads.js";
 import { laneOffsetM } from "../public/harbour/roadclass.js";
@@ -38,23 +40,34 @@ describe("circus circle clip", () => {
     }
   });
 
-  it("lands an Island Hwy dual carriageway on Harbour Circus, not 9 m beside it", () => {
+  it("extends a kerb stub onto the circus ring instead of stopping in the sand", () => {
+    const pts = [
+      { x: 80, z: 0 },
+      { x: 34, z: 0 },
+    ];
+    const out = snapPolylineEndToCircle(pts, 0, 0, 28, false);
+    expect(out[out.length - 1]!.x).toBeCloseTo(28, 1);
+    expect(out[0]!.x).toBe(80);
+  });
+
+  it("runs an Island Hwy dual onto Harbour Circus, not 9 m beside the kerb", () => {
     const map = createLandBoard();
     const node = map.graph.nodes.find((n) => n.id === "s-rab-harbour")!;
     const edge = map.graph.edges.find(
       (e) => e.name === "Island Hwy" && e.cls === "highway" && (e.a === node.id || e.b === node.id) && (e.a === "s-port" || e.b === "s-port"),
     )!;
     expect(edge).toBeTruthy();
-    const { clip, inner } = circusMeshRadii(node.radius);
+    const { enter, inner, outer } = circusMeshRadii(node.radius);
     const lane = laneOffsetM("highway");
-    const chains = clipPolylineOutsideCircle(offsetPolyline(edge.points, lane), node.x, node.z, clip);
+    const chains = enterCircusRings(offsetPolyline(edge.points, lane), circusesFromGraph(map.graph).filter((c) => c.id === node.id));
     expect(chains.length).toBe(1);
     const ch = chains[0]!;
     const d0 = Math.hypot(ch[0]!.x - node.x, ch[0]!.z - node.z);
     const d1 = Math.hypot(ch[ch.length - 1]!.x - node.x, ch[ch.length - 1]!.z - node.z);
     const near = Math.min(d0, d1);
-    expect(near).toBeCloseTo(clip, 0);
+    expect(near).toBeLessThan(enter + 1.5);
     expect(near).toBeGreaterThan(inner);
+    expect(near).toBeLessThan(outer);
   });
 
   it("clips every south circus in one pass without eating the whole highway", () => {

@@ -291,10 +291,10 @@ describe("paved street from spawn", () => {
         nearestHwy = Math.min(nearestHwy, d);
       }
     }
-    // Offset ribbons clip on the outer ring. The node mesh is the join —
-    // not arm discs, and not a 9 m sand gap beside the kerb.
-    expect(nearestHwy).toBeLessThan(radii.clip + 1.6);
-    expect(nearestHwy).toBeGreaterThan(radii.inner);
+    // Duals run onto the ring and stop before the stone island.
+    expect(nearestHwy).toBeLessThan(radii.enter + 2);
+    expect(nearestHwy).toBeGreaterThan(radii.inner - 0.6);
+    expect(nearestHwy).toBeLessThan(radii.kerb);
     const circus = added.find((m) => m.userData.roadName === "Harbour Circus");
     expect(circus).toBeTruthy();
     expect(circus!.geometry.parameters).toBeTruthy();
@@ -312,7 +312,7 @@ describe("paved street from spawn", () => {
         nearestQuay = Math.min(nearestQuay, Math.hypot(pos.getX(i) - harbour.x, pos.getZ(i) - harbour.z));
       }
     }
-    expect(nearestQuay, "Quayward Rd missed Harbour Circus").toBeLessThan(radii.clip + 2);
+    expect(nearestQuay, "Quayward Rd missed Harbour Circus").toBeLessThan(radii.enter + 2);
     expect(nearestQuay).toBeGreaterThan(radii.inner - 0.6);
   });
 

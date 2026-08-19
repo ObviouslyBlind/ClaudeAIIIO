@@ -7,6 +7,7 @@ import {
   circusMeshRadii,
   circusesFromGraph,
   clipPolylineOutsideCircuses,
+  enterCircusRings,
 } from "./roadclip.js";
 
 /** Grit shoulder under the tarmac edge, so a road has a rim instead of a cut edge. */
@@ -241,7 +242,7 @@ function drawPaved(scene, spec, road, heightAt, graph, circuses) {
   if (pts.length < 2) return;
   const cls = classOf(road);
   const width = roadClassSpec(cls).carriageM;
-  const runs = clipPolylineOutsideCircuses(pts, circuses);
+  const runs = enterCircusRings(pts, circuses);
   drawClippedRuns(scene, spec, road, heightAt, runs, width + SHOULDER_PAD_M, SHOULDER, "shoulder", {}, -0.03);
   drawClippedRuns(scene, spec, road, heightAt, runs, width, ASPHALT, "paved");
 }
@@ -331,7 +332,7 @@ function drawSidewalks(scene, spec, road, heightAt, graph, hubs, circuses) {
   const offset = roadClassSpec(cls).carriageM / 2 + SHOULDER_PAD_M / 2 + walk / 2;
   // Offset walks would otherwise keep going and hash through the junction
   // as a grey plus. Cut them on the hub polygon so the kerb meets the join.
-  // Circuses are a circle clip, not "delete the last 30 m".
+  // Circuses: walks stop on the outer lip; the ring owns the circulatory road.
   for (const side of [-1, 1]) {
     const offsetPts = offsetPolyline(pts, offset * side);
     let pieces = clipPolylineOutsideCircuses(offsetPts, circuses);
@@ -358,16 +359,16 @@ function drawHighway(scene, spec, road, heightAt, graph, circuses) {
   if (pts.length < 2) return;
   const lane = s.medianM / 2 + s.carriageM / 2;
   const name = road.name || "Island Hwy";
-  // Clip each ribbon on the circus *outer* circle so a dual lane lands on
-  // the ring. Offsetting after a centreline clip would miss again (the
-  // 9 m lateral gap the arm discs used to hide).
-  const centre = clipPolylineOutsideCircuses(pts, circuses);
+  // Duals run onto the ring (enterCircusRings). Median and shoulder stop on
+  // the outer lip so stone does not stab the island.
+  const lip = clipPolylineOutsideCircuses(pts, circuses);
+  const dual = (side) => enterCircusRings(offsetPolyline(pts, lane * side), circuses);
   drawClippedRuns(
     scene,
     spec,
     { ...road, name: name + " shoulder" },
     heightAt,
-    centre,
+    lip,
     carriagewayWidthM(cls) + SHOULDER_PAD_M,
     SHOULDER,
     "shoulder",
@@ -380,7 +381,7 @@ function drawHighway(scene, spec, road, heightAt, graph, circuses) {
       spec,
       road,
       heightAt,
-      clipPolylineOutsideCircuses(offsetPolyline(pts, lane * side), circuses),
+      dual(side),
       s.carriageM,
       ASPHALT,
       "paved",
@@ -391,7 +392,7 @@ function drawHighway(scene, spec, road, heightAt, graph, circuses) {
     spec,
     { ...road, name: name + " median" },
     heightAt,
-    centre,
+    lip,
     s.medianM,
     STONE,
     "median",

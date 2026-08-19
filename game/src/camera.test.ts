@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
 import { spawnCameraOffset } from "../public/harbour/roads.js";
 import {
   applyStallCamera,
@@ -208,6 +209,18 @@ describe("RMB-hold orbit camera", () => {
     expect(walk.radius).toBeGreaterThan(5);
     const o = sphericalToCartesian(walk);
     expect(Math.hypot(o.x, o.y, o.z)).toBeCloseTo(WALK_CAM_RADIUS_M, 5);
+  });
+
+  it("does not snap the camera when Taxi is clicked", () => {
+    const main = readFileSync(new URL("../public/harbour/main.js", import.meta.url), "utf8");
+    const hail = main.slice(main.indexOf("onHail"), main.indexOf("onRide"));
+    expect(hail).not.toContain("followWalk");
+    expect(hail).not.toContain("followRide");
+    expect(hail).not.toContain("snap(");
+    expect(hail).not.toContain("snapClose");
+    const ride = main.slice(main.indexOf("onRide"), main.indexOf("ensureDeliveries"));
+    expect(ride).toContain("st.orbited");
+    expect(ride).not.toContain("force: true");
   });
 
   it("ride orbit is pulled back to show the cab, not spawn look-at", () => {

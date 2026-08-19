@@ -2011,16 +2011,15 @@ async function ensureTaxi() {
     button: btnTaxi,
     onEta: (label) => etaChip.set(label),
     onHail() {
-      if (playCam && typeof playCam.followWalk === "function") playCam.followWalk();
+      // Cab is not here yet. Keep the player's zoom / spawn look.
     },
     onRide(on) {
       refreshHud();
-      if (on) {
-        stopWalking();
-        if (playCam && typeof playCam.followRide === "function") playCam.followRide();
-      } else if (playCam && typeof playCam.followWalk === "function") {
-        playCam.followWalk({ force: true });
-      }
+      if (!on) return;
+      stopWalking();
+      const st = playCam && typeof playCam.getState === "function" ? playCam.getState() : null;
+      if (st && st.orbited) return;
+      if (playCam && typeof playCam.followRide === "function") playCam.followRide();
     },
   });
   return taxi;
