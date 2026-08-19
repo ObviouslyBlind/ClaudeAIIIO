@@ -24,7 +24,8 @@ describe("lot tags (PAPER)", () => {
   });
 
   it("keeps Lots $ bars nearby, not the whole island", () => {
-    expect(TAG_RADIUS_LOTS_M).toBeLessThanOrEqual(280);
+    expect(TAG_RADIUS_LOTS_M).toBeGreaterThanOrEqual(500);
+    expect(TAG_RADIUS_LOTS_M).toBeLessThanOrEqual(600);
     const plots = [
       { id: "far-buy", owner: null, price: 40, x: 800, z: 0 },
       { id: "near-buy", owner: null, price: 40, x: 20, z: 0 },

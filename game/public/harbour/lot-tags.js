@@ -6,9 +6,10 @@
 import * as THREE from "three";
 
 export const TAG_POOL = 28;
-export const TAG_RADIUS_M = 180;
+/** Metres. Vacant Quayward $ lots sit ~350 m inland of the south pad. */
+export const TAG_RADIUS_M = 480;
 /** Nearby streets only. Whole-island tags made the $ bars unreadable. */
-export const TAG_RADIUS_LOTS_M = 240;
+export const TAG_RADIUS_LOTS_M = 520;
 
 export function tagKindFor(plot) {
   if (!plot) return "none";
@@ -107,7 +108,7 @@ export function mountLotTags({ canvas, camera, heightAt, specOf, getPlots, onBuy
 
   function tick(playerPos, dt = 0.016, overlay = "world", placing = false) {
     placingMode = Boolean(placing);
-    if (overlay !== "lots") {
+    if (overlay !== "lots" && overlay !== "world") {
       shownCache = [];
       clock = 0;
       root.hidden = true;
@@ -120,9 +121,11 @@ export function mountLotTags({ canvas, camera, heightAt, specOf, getPlots, onBuy
     clock -= dt;
     if (clock <= 0) {
       clock = 0.2;
-      shownCache = pickTagPlots(getPlots(), playerPos, overlay, TAG_POOL).filter((slot) =>
-        placingMode ? slot.kind === "yours" : true,
-      );
+      shownCache = pickTagPlots(getPlots(), playerPos, overlay, TAG_POOL).filter((slot) => {
+        if (placingMode) return slot.kind === "yours";
+        if (overlay !== "lots") return slot.kind === "buy" || slot.kind === "yours";
+        return true;
+      });
     }
     if (!camera || !canvas) return;
     const rect = canvas.getBoundingClientRect();
