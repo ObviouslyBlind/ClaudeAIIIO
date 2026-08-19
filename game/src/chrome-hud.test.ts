@@ -57,6 +57,8 @@ describe("harbour chrome HUD", () => {
     expect(html).toContain('id="order-veil"');
     expect(html).toContain('id="lot-tags"');
     expect(html).toContain('id="walk-status"');
+    expect(html.indexOf('id="walk-status"')).toBeGreaterThan(html.indexOf('class="chrome-tl"'));
+    expect(html.indexOf('id="walk-status"')).toBeLessThan(html.indexOf('class="chrome-tr"'));
     expect(css).toContain(".walk-status");
     expect(html).toContain('id="storage-fee"');
     expect(html).toContain('id="pack-shift"');

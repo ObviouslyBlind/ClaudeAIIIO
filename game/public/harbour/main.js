@@ -423,11 +423,22 @@ function findParcelAt(x, z) {
 
 function setStatus(t) {
   if (statusEl) statusEl.textContent = t;
+}
+
+function paintWalkHud() {
   const walkEl = document.getElementById("walk-status");
   if (!walkEl) return;
-  const show = t === "Walking." || t === "Here." || t === "Stay on land.";
-  walkEl.hidden = !show;
-  if (show) walkEl.textContent = t;
+  if (walking) {
+    walkEl.hidden = false;
+    walkEl.textContent = "Walking.";
+    return;
+  }
+  if (Date.now() < walkHoldUntil) {
+    walkEl.hidden = false;
+    walkEl.textContent = "Here.";
+    return;
+  }
+  walkEl.hidden = true;
 }
 
 function dismissLooseLandUi() {
@@ -1347,8 +1358,7 @@ function stopWalking() {
   lastWalkDest = null;
   walkHoldUntil = 0;
   if (walkPath) walkPath.hide();
-  const walkEl = document.getElementById("walk-status");
-  if (walkEl) walkEl.hidden = true;
+  paintWalkHud();
 }
 
 function goTo(x, z) {
@@ -1376,6 +1386,7 @@ function goTo(x, z) {
   dismissLooseLandUi();
   if (playCam && typeof playCam.followWalk === "function") playCam.followWalk();
   paintWalkPath();
+  paintWalkHud();
   setStatus("Walking.");
 }
 
@@ -1859,6 +1870,7 @@ function tick(dt) {
   } else {
     paintWalkPath();
   }
+  paintWalkHud();
   stepPlayerWalk(player, gaitPhase(gaitDist), walking);
   if (ferryMesh && tickFerry) tickFerry(ferryMesh, dt);
   if (scene.userData.harbourWater) tickHarbourWater(scene.userData.harbourWater, clock.elapsedTime);
@@ -2266,6 +2278,7 @@ async function boot() {
 }
 
 canvas.addEventListener("pointerup", onPointer);
+canvas.addEventListener("click", onPointer);
 window.addEventListener(
   "pointerup",
   (ev) => {

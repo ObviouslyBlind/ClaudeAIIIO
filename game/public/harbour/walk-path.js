@@ -1,27 +1,39 @@
 import * as THREE from "three";
 
 /**
- * Lime tap-to-walk ribbon + dest disc.
+ * Lime tap-to-walk ribbon + dest pin.
  * Unlit so it does not disappear into south grass (0x87bb60).
- * One strip, no per-frame allocations after setup.
+ * Index buffer is allocated once.
  */
 
 export const WALK_MARK = 0xd8ff2a;
 const EDGE = 0x143808;
 const MAX_VERTS = 64;
-const HALF_W = 0.28;
+const HALF_W = 0.34;
 
 export function createWalkPath(scene) {
   const positions = new Float32Array(MAX_VERTS * 2 * 3);
+  const indexArr = new Uint16Array((MAX_VERTS - 1) * 6);
+  for (let i = 0; i < MAX_VERTS - 1; i++) {
+    const a = i * 2;
+    const o = i * 6;
+    indexArr[o] = a;
+    indexArr[o + 1] = a + 1;
+    indexArr[o + 2] = a + 2;
+    indexArr[o + 3] = a + 1;
+    indexArr[o + 4] = a + 3;
+    indexArr[o + 5] = a + 2;
+  }
   const geom = new THREE.BufferGeometry();
   geom.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+  geom.setIndex(new THREE.BufferAttribute(indexArr, 1));
   geom.setDrawRange(0, 0);
   const ribbon = new THREE.Mesh(
     geom,
     new THREE.MeshBasicMaterial({
       color: WALK_MARK,
       transparent: true,
-      opacity: 0.96,
+      opacity: 0.98,
       side: THREE.DoubleSide,
       depthWrite: false,
     }),
@@ -33,11 +45,11 @@ export function createWalkPath(scene) {
   scene.add(ribbon);
 
   const disc = new THREE.Mesh(
-    new THREE.CircleGeometry(0.72, 28),
+    new THREE.CircleGeometry(0.95, 28),
     new THREE.MeshBasicMaterial({
       color: WALK_MARK,
       transparent: true,
-      opacity: 0.94,
+      opacity: 0.95,
       side: THREE.DoubleSide,
       depthWrite: false,
     }),
@@ -50,7 +62,7 @@ export function createWalkPath(scene) {
   scene.add(disc);
 
   const ring = new THREE.Mesh(
-    new THREE.RingGeometry(0.78, 1.08, 28),
+    new THREE.RingGeometry(1.0, 1.35, 28),
     new THREE.MeshBasicMaterial({
       color: EDGE,
       transparent: true,
@@ -67,7 +79,7 @@ export function createWalkPath(scene) {
   scene.add(ring);
 
   const pin = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.06, 0.06, 1.1, 8),
+    new THREE.CylinderGeometry(0.08, 0.08, 2.2, 8),
     new THREE.MeshBasicMaterial({ color: WALK_MARK }),
   );
   pin.visible = false;
@@ -76,9 +88,9 @@ export function createWalkPath(scene) {
   scene.add(pin);
 
   function placeDest(x, y, z) {
-    disc.position.set(x, y + 0.1, z);
-    ring.position.set(x, y + 0.11, z);
-    pin.position.set(x, y + 0.65, z);
+    disc.position.set(x, y + 0.12, z);
+    ring.position.set(x, y + 0.13, z);
+    pin.position.set(x, y + 1.15, z);
   }
 
   function writeRibbon(pts) {
@@ -99,7 +111,7 @@ export function createWalkPath(scene) {
       dz /= len;
       const nx = -dz * HALF_W;
       const nz = dx * HALF_W;
-      const y = p.y + 0.14;
+      const y = p.y + 0.16;
       positions[o++] = p.x + nx;
       positions[o++] = y;
       positions[o++] = p.z + nz;
@@ -107,13 +119,7 @@ export function createWalkPath(scene) {
       positions[o++] = y;
       positions[o++] = p.z - nz;
     }
-    const index = [];
-    for (let i = 0; i < n - 1; i++) {
-      const a = i * 2;
-      index.push(a, a + 1, a + 2, a + 1, a + 3, a + 2);
-    }
-    geom.setIndex(index);
-    geom.setDrawRange(0, index.length);
+    geom.setDrawRange(0, (n - 1) * 6);
     geom.attributes.position.needsUpdate = true;
     geom.computeBoundingSphere();
   }
@@ -124,7 +130,7 @@ export function createWalkPath(scene) {
       {
         x: from.x,
         z: from.z,
-        y: from.y != null ? from.y - 1.15 : hOf(from.x, from.z),
+        y: Number.isFinite(from.y) ? from.y - 1.15 : hOf(from.x, from.z),
       },
     ];
     const rest = Array.isArray(waypoints) ? waypoints : [];
@@ -148,13 +154,15 @@ export function createWalkPath(scene) {
 
   return {
     show(from, to, yFrom, yTo) {
-      showAll(from, [{ x: to.x, z: to.z }], () => yTo);
-      const fy = yFrom != null ? yFrom : 0;
       writeRibbon([
-        { x: from.x, z: from.z, y: fy },
+        { x: from.x, z: from.z, y: yFrom },
         { x: to.x, z: to.z, y: yTo },
       ]);
       placeDest(to.x, yTo, to.z);
+      ribbon.visible = true;
+      disc.visible = true;
+      ring.visible = true;
+      pin.visible = true;
     },
     showPath(from, waypoints, heightAt) {
       showAll(from, waypoints, heightAt);
