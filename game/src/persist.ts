@@ -48,6 +48,7 @@ export type ShardBlob = {
   statutes: {
     sales_tax: { rate: number };
   };
+  landAsks: { id: string; price: number }[];
   events: ShardEvent[];
 };
 
@@ -65,6 +66,32 @@ function salesTaxSlider(world: World): number {
   const row = statuteById(world.statutes, "sales_tax");
   const rate = Number(row?.sliders.rate);
   return Number.isFinite(rate) ? rate : 0;
+}
+
+function dumpLandAsks(land: LandBoard): { id: string; price: number }[] {
+  return land.plots.map((p) => ({ id: p.id, price: p.price }));
+}
+
+function readLandAsks(raw: unknown): { id: string; price: number }[] {
+  if (!Array.isArray(raw)) return [];
+  const out: { id: string; price: number }[] = [];
+  for (const row of raw) {
+    if (!row || typeof row !== "object") continue;
+    const r = row as Record<string, unknown>;
+    const id = String(r.id ?? "").trim();
+    if (!id || !isFiniteNumber(r.price) || r.price <= 0) continue;
+    out.push({ id, price: r.price });
+  }
+  return out;
+}
+
+function applyLandAsks(land: LandBoard, asks: { id: string; price: number }[]): void {
+  if (!asks.length) return;
+  const byId = new Map(asks.map((row) => [row.id, row.price]));
+  for (const plot of land.plots) {
+    const price = byId.get(plot.id);
+    if (price != null) plot.price = price;
+  }
 }
 
 function visitorLeaseIds(land: LandBoard): string[] {
@@ -128,6 +155,7 @@ function readBlob(raw: unknown): ShardBlob | null {
       visitorOrders: restoreVisitorOrders(v.visitorOrders),
     },
     statutes: { sales_tax: { rate } },
+    landAsks: readLandAsks(b.landAsks),
     events: dumpEvents(restoreEvents(b.events)),
   };
 }
@@ -151,6 +179,7 @@ export function serializeShard(input: ShardInput): ShardBlob {
     statutes: {
       sales_tax: { rate: salesTaxSlider(input.world) },
     },
+    landAsks: dumpLandAsks(input.land),
     events: dumpEvents(input.events ?? restoreEvents([])),
   });
 }
@@ -169,6 +198,7 @@ export function restoreShard(raw: unknown): RestoreResult {
   setStatuteSlider(world.statutes, "sales_tax", "rate", blob.statutes.sales_tax.rate);
 
   const land = createLandBoard();
+  applyLandAsks(land, blob.landAsks);
   const leaseCost = blob.visitor.leases.reduce((sum, id) => {
     const plot = getPlot(land, id);
     return sum + (plot?.price ?? 0);
@@ -176,7 +206,7 @@ export function restoreShard(raw: unknown): RestoreResult {
   const visitor = createVisitor(leaseCost + DEVELOP_COST + Math.max(0, blob.visitor.cash));
 
   for (const id of blob.visitor.leases) {
-    const leased = leasePlot(land, visitor, id);
+    const leased = leasePlot(land, visitor, id, "visitor", { inflate: false });
     if (!leased.ok) return { ok: false, reason: leased.reason };
   }
   for (const row of blob.visitor.develops) {

@@ -26,7 +26,7 @@ function cheapVacant(land: ReturnType<typeof createLandBoard>, cash: number) {
 
 describe("PAPER staffSlots + open visitorOrders persist", () => {
   it("dumps and restores PAPER staff slots; junk and missing become empty", () => {
-    const visitor = createVisitor(1_000);
+    const visitor = createVisitor(80_000);
     expect(hireStaff(visitor, farm()).ok).toBe(true);
 
     const blob = JSON.parse(JSON.stringify(dumpStaffSlots(visitor.staffSlots)));
@@ -64,7 +64,7 @@ describe("PAPER staffSlots + open visitorOrders persist", () => {
   it("round-trips staffSlots and open visitorOrders on the PAPER shard dump/restore", () => {
     const world = createWorld(3);
     const land = createLandBoard();
-    const visitor = createVisitor(1_000);
+    const visitor = createVisitor(80_000);
     const vacant = cheapVacant(land, visitor.cash);
     expect(leasePlot(land, visitor, vacant.id).ok).toBe(true);
     expect(hireStaff(visitor, farm(vacant.id)).ok).toBe(true);
@@ -107,7 +107,7 @@ describe("PAPER staffSlots + open visitorOrders persist", () => {
   it("does not evict a lease when restoring staff and orders", () => {
     const world = createWorld(9);
     const land = createLandBoard();
-    const visitor = createVisitor(1_000);
+    const visitor = createVisitor(80_000);
     const vacant = cheapVacant(land, visitor.cash);
     expect(leasePlot(land, visitor, vacant.id).ok).toBe(true);
     hireStaff(visitor, farm(vacant.id));
@@ -153,7 +153,7 @@ describe("PAPER staffSlots + open visitorOrders persist", () => {
   it("loads an old PAPER blob that has no staffSlots or visitorOrders", () => {
     const world = createWorld(3);
     const land = createLandBoard();
-    const visitor = createVisitor(1_000);
+    const visitor = createVisitor(80_000);
     const vacant = cheapVacant(land, visitor.cash);
     expect(leasePlot(land, visitor, vacant.id).ok).toBe(true);
     const blob = serializeShard({ world, land, visitor });

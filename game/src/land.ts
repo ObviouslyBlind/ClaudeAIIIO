@@ -23,6 +23,7 @@ import {
 } from "./southGeom.ts";
 import { buildSouthLand, southTaxiStops } from "./southLand.ts";
 import type { RoadGraph } from "./roadGraph.ts";
+import { inflateAsksAfterLease, plotAsk } from "./landPrice.ts";
 
 export { BUILDING_CATALOG, DEVELOP_COST };
 export type { LandUseId };
@@ -56,6 +57,8 @@ export type Parcel = {
   band: PlotBand;
   class: PlotClass;
   price: number;
+  /** Ask at seed. Inflation caps against this, not the live ask. */
+  seedPrice: number;
   owner: string | null;
   use: LandUse;
   /** Street the lot fronts. */
@@ -383,10 +386,7 @@ function publicQuay(spec: IslandSpec, x: number, z: number): boolean {
 }
 
 function priceOf(spec: IslandSpec, area: number, band: PlotBand, portDist: number): number {
-  const rate = spec.id === "north" ? 0.32 : 0.12;
-  const bandMul = band === "shore" ? 1.55 : band === "street" ? 1 : 0.62;
-  const distMul = 1.35 - Math.min(0.7, portDist / 520);
-  return Math.max(24, Math.round(area * rate * bandMul * distMul));
+  return plotAsk(spec.id, area, band, portDist);
 }
 
 function quad(
@@ -448,6 +448,7 @@ function pushParcel(
   const portDist = Math.hypot(c.x - spec.port.x, c.z - spec.port.z);
   const id = `${spec.id}-${band}-${n}`;
   const street = streetName || streetLabelForBand(band);
+  const price = priceOf(spec, area, band, portDist);
   out.push({
     id,
     island: spec.id,
@@ -457,7 +458,8 @@ function pushParcel(
     area: Math.round(area),
     band,
     class: "by_right",
-    price: priceOf(spec, area, band, portDist),
+    price,
+    seedPrice: price,
     owner: null,
     use: null,
     street,
@@ -647,7 +649,7 @@ function seedNpcLots(plots: Parcel[]): void {
 const NPC_TOWN_USES: Exclude<LandUse, null>[] = ["house", "shop", "house_shop", "house", "warehouse"];
 /** Per island. The world starts inhabited (evergreen), the player interferes. */
 const NPC_TOWN_LOTS = 10;
-/** Leave everything a $1000 starter could want: cheap street lots near spawn stay vacant. */
+/** Near-quay street lots stay vacant so spawn can inspect them. They are not cheap. */
 const NPC_TOWN_MIN_PORT_M = 260;
 
 function seedNpcTown(plots: Parcel[]): void {
@@ -732,18 +734,17 @@ export function findParcelAt(board: LandBoard, x: number, z: number): Parcel | u
   return hits.reduce((a, b) => (a.area <= b.area ? a : b));
 }
 
-/** Cheap vacant north street lots (or already yours) inside the spawn window. */
+/** Vacant north street lots (or already yours) inside the spawn window. Not a cheap ask. */
 export function isStarterPlot(
   plot: Parcel,
   spec: IslandSpec = ISLANDS.north,
-  cash = STARTER_CASH,
+  _cash = STARTER_CASH,
 ): boolean {
   if (plot.island !== spec.id) return false;
   if (Math.hypot(plot.x - spec.port.x, plot.z - spec.port.z) >= SPAWN_PARCEL_M) return false;
   if (plot.owner === "visitor") return true;
   if (plot.owner) return false;
-  if (plot.band !== "street") return false;
-  return plot.price + DEVELOP_COST <= cash;
+  return plot.band === "street";
 }
 
 /** Prefer a starter street lot under the tap, else the nearest within STARTER_SNAP_M. */
@@ -774,6 +775,7 @@ export function leasePlot(
   visitor: Visitor,
   plotId: string,
   owner = "visitor",
+  opts?: { inflate?: boolean },
 ): { ok: true; paid: number; plot: Parcel } | { ok: false; reason: string } {
   const plot = getPlot(board, plotId);
   if (!plot) return { ok: false, reason: "no_plot" };
@@ -784,6 +786,7 @@ export function leasePlot(
   if (visitor.cash - plot.price < DEVELOP_COST) return { ok: false, reason: "need_develop_cash" };
   visitor.cash = Math.round((visitor.cash - plot.price) * 10000) / 10000;
   plot.owner = owner;
+  if (opts?.inflate !== false) inflateAsksAfterLease(board.plots, plot);
   return { ok: true, paid: plot.price, plot };
 }
 

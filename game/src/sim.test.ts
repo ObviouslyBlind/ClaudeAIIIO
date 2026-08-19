@@ -14,8 +14,9 @@ describe("headless sim step A", () => {
     expect(Number.isFinite(h.moneySupply)).toBe(true);
     expect(h.moneySupply).toBeGreaterThan(49_990);
     expect(h.moneySupply).toBeLessThan(50_010);
-    expect(h.faucet).toBe(0);
-    expect(h.sink).toBe(0);
+    expect(h.faucet).toBeGreaterThan(0);
+    expect(h.sink).toBeGreaterThan(0);
+    expect(h.sink).toBeCloseTo(h.faucet, 4);
     expect(Number.isFinite(h.priceIndex)).toBe(true);
     expect(h.priceIndex).toBeGreaterThan(0.2);
     expect(h.priceIndex).toBeLessThan(5);
@@ -45,10 +46,12 @@ describe("headless sim step A", () => {
     const result = buyFromStall(world, visitor, "corn", 4);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
+    const tax = Math.round(result.paid * salesTaxRate(world.statutes) * 10000) / 10000;
     expect(visitor.stock.corn).toBe(4);
     expect(visitor.cash).toBeCloseTo(1_000 - result.paid, 4);
-    expect(world.npcCash).toBeCloseTo(beforeNpc + result.paid, 4);
+    expect(world.npcCash).toBeCloseTo(beforeNpc + result.paid - tax, 4);
     expect(world.npcStock.corn).toBeCloseTo(beforeStock - 4, 4);
+    expect(hud(world).sink).toBeGreaterThanOrEqual(tax);
   });
 });
 
@@ -87,14 +90,15 @@ describe("step D dual island books", () => {
     }
   });
 
-  it("still sinks sales tax on fills when the statute rate is raised", () => {
+  it("still sinks extra sales tax on fills when the statute rate is raised", () => {
     const world = createWorld(7);
-    expect(salesTaxRate(world.statutes)).toBe(0);
+    expect(salesTaxRate(world.statutes)).toBeCloseTo(0.08);
     fastForward(world, 20);
-    expect(hud(world).sink).toBe(0);
-    expect(setStatuteSlider(world.statutes, "sales_tax", "rate", 0.05)).toBe(true);
+    const before = hud(world).sink;
+    expect(before).toBeGreaterThan(0);
+    expect(setStatuteSlider(world.statutes, "sales_tax", "rate", 0.15)).toBe(true);
     fastForward(world, 20);
-    expect(hud(world).sink).toBeGreaterThan(0);
+    expect(hud(world).sink).toBeGreaterThan(before);
   });
 
   it("prints South food cheaper than North, and North tools cheaper than South", () => {

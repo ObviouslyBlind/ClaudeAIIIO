@@ -25,20 +25,21 @@ const GROUPS = [
 ] as const;
 
 describe("starter statute pack step B", () => {
-  it("loads a catalog and keeps launch sales tax at 0 so step A cash is conserved", () => {
+  it("loads a catalog and keeps launch sales tax as a sink with recycled NPC wages", () => {
     const world = createWorld(42);
     expect(world.statutes.length).toBeGreaterThan(0);
-    expect(salesTaxRate(world.statutes)).toBe(0);
+    expect(salesTaxRate(world.statutes)).toBeCloseTo(0.08);
     fastForward(world, 200);
-    expect(hud(world).sink).toBe(0);
+    expect(hud(world).sink).toBeGreaterThan(0);
+    expect(hud(world).faucet).toBeCloseTo(hud(world).sink, 4);
   });
 
   it("writes sales tax into ledger.sink on the next ticks after the slider moves", () => {
     const world = createWorld(7);
     fastForward(world, 40);
     const before = hud(world).sink;
-    expect(setStatuteSlider(world.statutes, "sales_tax", "rate", 0.05)).toBe(true);
-    expect(salesTaxRate(world.statutes)).toBeCloseTo(0.05);
+    expect(setStatuteSlider(world.statutes, "sales_tax", "rate", 0.15)).toBe(true);
+    expect(salesTaxRate(world.statutes)).toBeCloseTo(0.15);
     fastForward(world, 40);
     expect(hud(world).sink).toBeGreaterThan(before);
   });
@@ -69,7 +70,7 @@ describe("starter statute pack step B", () => {
     const ferry = statuteById(catalog, "ferry_ticket");
 
     expect(tax?.enabled).toBe(true);
-    expect(tax?.sliders.rate).toBe(0);
+    expect(tax?.sliders.rate).toBeCloseTo(0.08);
     expect(tax?.writes).toContain("ledger.sink");
     expect(ferry?.enabled).toBe(true);
     expect(ferry?.sliders.cost).toBe(15);

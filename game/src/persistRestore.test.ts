@@ -74,7 +74,7 @@ describe("PAPER restoreLive last shard blob", () => {
     const savedWorld = createWorld(3);
     fastForward(savedWorld, 12);
     const savedLand = createLandBoard();
-    const savedVisitor = createVisitor(1_000);
+    const savedVisitor = createVisitor(80_000);
     const vacant = cheapVacant(savedLand, savedVisitor.cash);
     expect(leasePlot(savedLand, savedVisitor, vacant.id).ok).toBe(true);
     expect(setStatuteSlider(savedWorld.statutes, "sales_tax", "rate", 0.05)).toBe(true);

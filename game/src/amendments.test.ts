@@ -11,46 +11,46 @@ function dayTick(day: number): number {
 describe("PAPER House money bills step H", () => {
   it("tables a PAPER sales-tax slider bill without writing the live rate", () => {
     const world = createWorld(3);
-    expect(salesTaxRate(world.statutes)).toBe(0);
+    expect(salesTaxRate(world.statutes)).toBeCloseTo(0.08);
 
-    const bill = tableMoneyBill({ statuteId: "sales_tax", slider: "rate", value: 0.05 });
+    const bill = tableMoneyBill({ statuteId: "sales_tax", slider: "rate", value: 0.12 });
     expect(bill.statuteId).toBe("sales_tax");
     expect(bill.slider).toBe("rate");
-    expect(bill.value).toBe(0.05);
+    expect(bill.value).toBe(0.12);
     expect(bill.mode).toBe("PAPER");
     expect(bill.provenance).toBe("SIMULATED");
     expect(bill.note).toMatch(/PAPER/);
-    expect(salesTaxRate(world.statutes)).toBe(0);
+    expect(salesTaxRate(world.statutes)).toBeCloseTo(0.08);
   });
 
   it("writes the live rate only after the day-14 House can originate", () => {
     expect(FIRST_GENERAL_DAY).toBe(14);
     const world = createWorld(5);
-    const bill = tableMoneyBill({ statuteId: "sales_tax", slider: "rate", value: 0.05 });
+    const bill = tableMoneyBill({ statuteId: "sales_tax", slider: "rate", value: 0.12 });
 
     const vacant = passMoneyBill({ statutes: world.statutes, tick: dayTick(13) }, bill);
     expect(vacant.ok).toBe(false);
     if (!vacant.ok) expect(vacant.reason).toBe("cannot_originate");
-    expect(salesTaxRate(world.statutes)).toBe(0);
+    expect(salesTaxRate(world.statutes)).toBeCloseTo(0.08);
 
     const passed = passMoneyBill({ statutes: world.statutes, tick: dayTick(14) }, bill);
     expect(passed.ok).toBe(true);
-    expect(salesTaxRate(world.statutes)).toBeCloseTo(0.05);
+    expect(salesTaxRate(world.statutes)).toBeCloseTo(0.12);
   });
 
-  it("sinks sales tax on a real createWorld after House passage vs rate 0", () => {
+  it("sinks more sales tax on a real createWorld after House raises the launch rate", () => {
     const taxed = createWorld(7);
     const control = createWorld(7);
-    const bill = tableMoneyBill({ statuteId: "sales_tax", slider: "rate", value: 0.05 });
+    const bill = tableMoneyBill({ statuteId: "sales_tax", slider: "rate", value: 0.15 });
 
     const passed = passMoneyBill({ statutes: taxed.statutes, tick: dayTick(14) }, bill);
     expect(passed.ok).toBe(true);
-    expect(salesTaxRate(taxed.statutes)).toBeCloseTo(0.05);
-    expect(salesTaxRate(control.statutes)).toBe(0);
+    expect(salesTaxRate(taxed.statutes)).toBeCloseTo(0.15);
+    expect(salesTaxRate(control.statutes)).toBeCloseTo(0.08);
 
     fastForward(taxed, 40);
     fastForward(control, 40);
-    expect(control.ledger.sink).toBe(0);
+    expect(control.ledger.sink).toBeGreaterThan(0);
     expect(taxed.ledger.sink).toBeGreaterThan(control.ledger.sink);
   });
 });

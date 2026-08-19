@@ -24,9 +24,11 @@ export function formatEconLine(data) {
   const mode = (data && data.mode) || "PAPER";
   const provenance = (data && data.provenance) || "SIMULATED";
   const idx = hud && Number.isFinite(Number(hud.priceIndex)) ? fmtIndex(hud.priceIndex) : "—";
+  const land = hud && Number.isFinite(Number(hud.landPriceIndex)) ? fmtIndex(hud.landPriceIndex) : "";
   const npc = hud && Number.isFinite(Number(hud.moneySupply)) ? "$" + fmtQty(hud.moneySupply) : "—";
   const out = hud && Number.isFinite(Number(hud.goodsProducedWindow)) ? fmtQty(hud.goodsProducedWindow) : "—";
-  return `${mode} · ${provenance} · Index ${idx} · NPC ${npc} · out ${out}`;
+  const landBit = land ? ` · land ${land}` : "";
+  return `${mode} · ${provenance} · Index ${idx}${landBit} · NPC ${npc} · out ${out}`;
 }
 
 export function mountEconHud(opts = {}) {

@@ -96,7 +96,7 @@ describe("first-frame flow / tax / goods placeholders", () => {
       "utf8",
     );
     expect(html).toMatch(/id="flow">PAPER · SIMULATED · Faucet 0 · sink 0</);
-    expect(html).toMatch(/id="tax">PAPER · SIMULATED · Sales tax 0%</);
+    expect(html).toMatch(/id="tax">PAPER · SIMULATED · Sales tax 8%</);
     expect(html).toMatch(/id="goods"><\/p>/);
     expect(html).toMatch(/id="persist-line">PAPER · SIMULATED · restart wipes</);
     expect(html).not.toMatch(/id="goods">PAPER · SIMULATED</);

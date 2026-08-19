@@ -16,7 +16,7 @@ describe("PAPER shard persist step C", () => {
     const world = createWorld(3);
     fastForward(world, 12);
     const land = createLandBoard();
-    const visitor = createVisitor(1_000);
+    const visitor = createVisitor(80_000);
     const vacant = cheapVacant(land, visitor.cash);
     expect(leasePlot(land, visitor, vacant.id).ok).toBe(true);
     expect(setStatuteSlider(world.statutes, "sales_tax", "rate", 0.05)).toBe(true);
@@ -44,7 +44,7 @@ describe("PAPER shard persist step C", () => {
   it("keeps a leased plot owned after restore", () => {
     const world = createWorld(9);
     const land = createLandBoard();
-    const visitor = createVisitor(1_000);
+    const visitor = createVisitor(80_000);
     const vacant = cheapVacant(land, visitor.cash);
     expect(leasePlot(land, visitor, vacant.id).ok).toBe(true);
     expect(vacant.owner).toBe("visitor");
@@ -74,7 +74,7 @@ describe("PAPER shard persist step C", () => {
   it("round-trips visitor PAPER cart lines", () => {
     const world = createWorld(3);
     const land = createLandBoard();
-    const visitor = createVisitor(1_000);
+    const visitor = createVisitor(80_000);
     expect(addLine(visitor, "potato", 8).ok).toBe(true);
 
     const restored = restoreShard(serializeShard({ world, land, visitor }));
@@ -86,7 +86,7 @@ describe("PAPER shard persist step C", () => {
   it("keeps a developed house on restore, not only the lease", () => {
     const world = createWorld(3);
     const land = createLandBoard();
-    const visitor = createVisitor(1_000);
+    const visitor = createVisitor(80_000);
     const vacant = cheapVacant(land, visitor.cash);
     expect(leasePlot(land, visitor, vacant.id).ok).toBe(true);
     expect(developPlot(land, visitor, vacant.id, "house").ok).toBe(true);

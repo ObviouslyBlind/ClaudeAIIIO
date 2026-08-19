@@ -17,8 +17,9 @@ import { matchVisitorOrders } from "./orders.ts";
 import { tickStaff, type StaffSlot } from "./staff.ts";
 import { tickUpkeep, type UpkeepLand } from "./upkeep.ts";
 import { createVisitorCart, type CartLine } from "./visitorCart.ts";
-import { createPlayState, tickPlay, type PlayState } from "./firstLoop.ts";
+import { createPlayState, tickPlay } from "./firstLoop.ts";
 import { islandAskMul, islandDemandMul, islandSupplyMul } from "./islandEconomy.ts";
+import { landAskIndex } from "./landPrice.ts";
 
 export {
   BOOK_ISLANDS,
@@ -56,6 +57,8 @@ export type World = {
   priceIndex: number;
   priceIndexNorth: number;
   priceIndexSouth: number;
+  /** Mean vacant land ask / seed ask. 1 at spawn. */
+  landPriceIndex: number;
   /** Mean |North − South| / fair0. The ferry wedge you can see. */
   ferrySpread: number;
   ledger: Ledger;
@@ -90,6 +93,7 @@ export function createWorld(seed = 1): World {
     priceIndex: 1,
     priceIndexNorth: 1,
     priceIndexSouth: 1,
+    landPriceIndex: 1,
     ferrySpread: 0,
     ledger: { produced: 0, consumed: 0, faucet: 0, sink: 0 },
     tradeCount: 0,
@@ -145,6 +149,9 @@ function match(world: World, island: BookIsland, good: GoodId): void {
     if (tax > 0) {
       world.npcCash = roundMoney(world.npcCash - tax);
       world.ledger.sink = roundMoney(world.ledger.sink + tax);
+      // PLAN §3.4: NPC-NPC tax recycles as wages so 0-player money stays in a band.
+      world.npcCash = roundMoney(world.npcCash + tax);
+      world.ledger.faucet = roundMoney(world.ledger.faucet + tax);
     }
     world.ledger.consumed += qty;
     world.tradeCount += 1;
@@ -221,7 +228,7 @@ function basketIndex(prices: Record<GoodId, number>): number {
   return roundMoney(num / den);
 }
 
-function refreshIndex(world: World, visitor?: Visitor): void {
+function refreshIndex(world: World, visitor?: Visitor, land?: UpkeepLand): void {
   world.priceIndexNorth = basketIndex(world.lastPrice);
   world.priceIndexSouth = basketIndex(world.lastPriceSouth);
   world.priceIndex = roundMoney((world.priceIndexNorth + world.priceIndexSouth) / 2);
@@ -232,6 +239,14 @@ function refreshIndex(world: World, visitor?: Visitor): void {
   world.ferrySpread = roundMoney(spread / GOOD_IDS.length);
   world.arbSpread = arbSpreads(world.lastPrice, world.lastPriceSouth);
   world.moneySupply = roundMoney(world.npcCash + (visitor?.cash ?? 0));
+  const plots = land && Array.isArray((land as { plots?: unknown }).plots)
+    ? (land as { plots: Parameters<typeof landAskIndex>[0] }).plots
+    : null;
+  if (plots) world.landPriceIndex = landAskIndex(plots);
+}
+
+export function refreshWorldHud(world: World, visitor?: Visitor, land?: UpkeepLand): void {
+  refreshIndex(world, visitor, land);
 }
 
 export function tick(world: World, visitor?: Visitor, land?: UpkeepLand): void {
@@ -242,12 +257,17 @@ export function tick(world: World, visitor?: Visitor, land?: UpkeepLand): void {
     for (const id of GOOD_IDS) match(world, island, id);
   }
   settleUnfilled(world);
-  refreshIndex(world, visitor);
+  refreshIndex(world, visitor, land);
   world.tick += 1;
   if (visitor) tickStaff(world, visitor);
   if (visitor && land) {
     tickUpkeep(world, visitor, land);
-    tickPlay(visitor, land as never, world.tick);
+    const play = visitor.play;
+    const tax0 = play && Number.isFinite(play.salesTaxCollected) ? play.salesTaxCollected : 0;
+    tickPlay(visitor, land as never, world.tick, Date.now(), salesTaxRate(world.statutes));
+    const tax1 = visitor.play?.salesTaxCollected ?? tax0;
+    const cartTax = roundMoney(tax1 - tax0);
+    if (cartTax > 0) world.ledger.sink = roundMoney(world.ledger.sink + cartTax);
   }
 }
 
@@ -298,6 +318,11 @@ export function buyFromStall(
   visitor.stock[good] = roundMoney(visitor.stock[good] + want);
   world.npcStock[good] = roundMoney(world.npcStock[good] - want);
   world.npcCash = roundMoney(world.npcCash + paid);
+  const tax = roundMoney(paid * salesTaxRate(world.statutes));
+  if (tax > 0) {
+    world.npcCash = roundMoney(world.npcCash - tax);
+    world.ledger.sink = roundMoney(world.ledger.sink + tax);
+  }
   world.ledger.consumed += want;
   world.tradeCount += 1;
   refreshIndex(world, visitor);
@@ -311,6 +336,7 @@ export function hud(world: World, visitor?: Visitor): {
   priceIndex: number;
   priceIndexNorth: number;
   priceIndexSouth: number;
+  landPriceIndex: number;
   ferrySpread: number;
   tradeCount: number;
   faucet: number;
@@ -324,6 +350,7 @@ export function hud(world: World, visitor?: Visitor): {
     priceIndex: world.priceIndex,
     priceIndexNorth: world.priceIndexNorth,
     priceIndexSouth: world.priceIndexSouth,
+    landPriceIndex: world.landPriceIndex,
     ferrySpread: world.ferrySpread,
     tradeCount: world.tradeCount,
     faucet: world.ledger.faucet,

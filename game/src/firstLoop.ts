@@ -10,28 +10,33 @@ import { roadsideDrop, type DropPoint } from "./roadside.ts";
 import { skuFitsPlot, type ZoneId } from "./zones.ts";
 import type { Visitor } from "./sim.ts";
 import { scoreSite, siteClassForUse, type SiteClass, type SiteScore } from "./siteScore.ts";
+import {
+  CART_PAPER_PRICE,
+  HIRE_COST,
+  HOTDOG_PACK_PRICE,
+  HOTDOG_PACK_QTY,
+  HOTDOG_SALE_PRICE,
+  LAUNCH_SALES_TAX,
+} from "./economy.ts";
 
 export const FIRST_LOOP_NOTE = "South island. One visitor on this process.";
 
 /** Island sticker hint. You set the price; this sits beside the field. */
-export const HOTDOG_SALE_PRICE = 6;
+export { CART_PAPER_PRICE, HIRE_COST, HOTDOG_PACK_PRICE, HOTDOG_PACK_QTY, HOTDOG_SALE_PRICE, LAUNCH_SALES_TAX };
 export const TODAY_PRICE = HOTDOG_SALE_PRICE;
-export const SALES_TAX = 0.2;
+/** Launch default. Live ticks write the statute rate onto PlayState. */
+export const SALES_TAX = LAUNCH_SALES_TAX;
 export const WAREHOUSE_FEE_PER_DAY = 5;
 export const WAREHOUSE_RENT_TICKS = 3600;
 /** Seconds the kerb crate waits before it goes to the warehouse. */
 export const DELIVERY_WAIT_MS = 60_000;
 export const ORDER_MAX_QTY = 10;
 export const STORAGE_UPGRADE_COST = 200;
-export const HIRE_COST = 30;
 export const STICKER_MIN = 1;
 export const STICKER_MAX = 11;
 /** |sticker − today| within this is yellow. Exact match is green. Further is red. */
 export const STICKER_YELLOW = 1.5;
 export const CART_STORAGE = 20;
-export const CART_PAPER_PRICE = 85;
-export const HOTDOG_PACK_PRICE = 3;
-export const HOTDOG_PACK_QTY = 20;
 export const INCOME_WINDOW = 60;
 export const BOOST_PER_HIT = 1;
 export const SHIFT_BURST_MIN = 5;
@@ -322,6 +327,8 @@ export type PlayState = {
   workSites: WorkSite[];
   gameBank: number;
   nextId: number;
+  salesTaxRate: number;
+  salesTaxCollected: number;
 };
 
 export function createPlayState(): PlayState {
@@ -339,6 +346,8 @@ export function createPlayState(): PlayState {
     workSites: [],
     gameBank: 0,
     nextId: 1,
+    salesTaxRate: LAUNCH_SALES_TAX,
+    salesTaxCollected: 0,
   };
 }
 
@@ -354,6 +363,8 @@ export function ensurePlay(visitor: Visitor): PlayState {
     };
   }
   if (!Number.isFinite(play.gameBank)) play.gameBank = 0;
+  if (!Number.isFinite(play.salesTaxRate)) play.salesTaxRate = LAUNCH_SALES_TAX;
+  if (!Number.isFinite(play.salesTaxCollected)) play.salesTaxCollected = 0;
   if (!play.workSites) play.workSites = [];
   for (const stand of play.stands) {
     const mapped = KIND_FIX[String(stand.kind)];
@@ -632,10 +643,17 @@ function burstCount(hits: number): number {
   return Math.min(SHIFT_BURST_MAX, SHIFT_BURST_MIN + Math.floor((hits - 1) / 3));
 }
 
+function cartTaxRate(play: PlayState): number {
+  const rate = Number(play.salesTaxRate);
+  if (!Number.isFinite(rate) || rate < 0) return LAUNCH_SALES_TAX;
+  return rate;
+}
+
 function sellOnce(play: PlayState, sticker: number): number {
-  const tax = roundMoney(sticker * SALES_TAX);
+  const tax = roundMoney(sticker * cartTaxRate(play));
   const net = roundMoney(sticker - tax);
   play.gameBank = roundMoney(play.gameBank + tax);
+  play.salesTaxCollected = roundMoney((play.salesTaxCollected || 0) + tax);
   return net;
 }
 
@@ -681,8 +699,8 @@ function sellTicksAt(sticker: number, scored: SiteScore): number {
   return Math.max(6, Math.round(scored.sellTicks * stickerSellMul(stickerBand(sticker))));
 }
 
-function perMinuteAt(sticker: number, sellTicks: number): number {
-  return roundMoney((60 / Math.max(1, sellTicks)) * sticker * (1 - SALES_TAX));
+function perMinuteAt(sticker: number, sellTicks: number, taxRate = LAUNCH_SALES_TAX): number {
+  return roundMoney((60 / Math.max(1, sellTicks)) * sticker * (1 - taxRate));
 }
 
 function warehouseQty(play: PlayState, kind: InvKind): number {
@@ -1194,14 +1212,23 @@ export function tickHotdogSales(visitor: Visitor, land: LandBoard): number {
   return earned;
 }
 
-export function tickPlay(visitor: Visitor, land: LandBoard, tick: number, nowMs = Date.now()): number {
+export function tickPlay(
+  visitor: Visitor,
+  land: LandBoard,
+  tick: number,
+  nowMs = Date.now(),
+  taxRate = LAUNCH_SALES_TAX,
+): number {
+  const play = ensurePlay(visitor);
+  play.salesTaxRate = taxRate;
   recallStaleDeliveries(visitor, nowMs);
   tickWarehouseRent(visitor, tick);
   return tickHotdogSales(visitor, land);
 }
 
-export function playSnapshot(visitor: Visitor, land: LandBoard) {
+export function playSnapshot(visitor: Visitor, land: LandBoard, taxRate?: number) {
   const play = ensurePlay(visitor);
+  if (Number.isFinite(taxRate)) play.salesTaxRate = Number(taxRate);
   syncWorkSites(play, land);
   const stands = play.stands.map((s) => {
     const cart = cartKindForStand(s);
@@ -1224,7 +1251,7 @@ export function playSnapshot(visitor: Visitor, land: LandBoard) {
       searching: scored.searching,
       cap: scored.cap,
       rivalsOnStreet: scored.rivalsOnStreet,
-      perMinute: perMinuteAt(s.stickerPrice, ticks),
+      perMinute: perMinuteAt(s.stickerPrice, ticks, play.salesTaxRate),
       boostLeft: s.boostLeft || 0,
       stickerBand: band,
       stickerMul: stickerSellMul(band),
@@ -1256,7 +1283,7 @@ export function playSnapshot(visitor: Visitor, land: LandBoard) {
       searching: scored.searching,
       cap: scored.cap,
       rivalsOnStreet: scored.rivalsOnStreet,
-      perMinute: perMinuteAt(s.stickerPrice, ticks),
+      perMinute: perMinuteAt(s.stickerPrice, ticks, play.salesTaxRate),
       boostLeft: s.boostLeft || 0,
       stickerBand: band,
       stickerMul: stickerSellMul(band),
@@ -1274,7 +1301,7 @@ export function playSnapshot(visitor: Visitor, land: LandBoard) {
     hireCost: HIRE_COST,
     upgradeCatalog: SITE_UPGRADES.map((u) => ({ ...u })),
     deliveryWaitMs: DELIVERY_WAIT_MS,
-    salesTax: SALES_TAX,
+    salesTax: play.salesTaxRate,
     gameBank: play.gameBank,
     warehouse: {
       island: play.warehouse.island,

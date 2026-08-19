@@ -93,7 +93,7 @@ describe("South land (no buildings)", () => {
     );
     expect(near.length).toBeGreaterThan(0);
     expect(near[0]!.zone).toBe("commercial");
-    expect(near[0]!.price).toBeLessThan(400);
+    expect(near[0]!.price).toBeGreaterThanOrEqual(2400);
     expect(near[0]!.street).toBe("Island Hwy");
   });
 

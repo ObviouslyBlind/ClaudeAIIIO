@@ -9,7 +9,7 @@ import {
   mountStaffHud,
 } from "../public/harbour/staff-hud.js";
 
-function developedFarm(cash = 1_000) {
+function developedFarm(cash = 80_000) {
   const land = createLandBoard();
   const visitor = createVisitor(cash);
   const plot = land.plots.find((p) => !p.owner && p.class === "by_right")!;
@@ -65,7 +65,7 @@ describe("POST /api/staff PAPER hire/fire", () => {
 
   it("rejects hire on leased land that is not developed", () => {
     const land = createLandBoard();
-    const visitor = createVisitor(1_000);
+    const visitor = createVisitor(80_000);
     const plot = land.plots.find((p) => !p.owner && p.class === "by_right")!;
     expect(leasePlot(land, visitor, plot.id).ok).toBe(true);
     const result = postStaff(land, visitor, { plotId: plot.id, action: "hire" });

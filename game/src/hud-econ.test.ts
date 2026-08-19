@@ -9,6 +9,7 @@ const SNAPSHOT = {
     moneySupply: 50_000.4,
     goodsProducedWindow: 4321.7,
     priceIndex: 1.2531,
+    landPriceIndex: 1.0412,
     tradeCount: 9,
     faucet: 0,
     sink: 0,
@@ -41,7 +42,7 @@ afterEach(() => {
 describe("harbour PAPER econ strip", () => {
   it("is one short line with index, NPC money, output, and PAPER / SIMULATED", () => {
     const line = formatEconLine(SNAPSHOT);
-    expect(line).toBe("PAPER · SIMULATED · Index 1.25 · NPC $50,000 · out 4,322");
+    expect(line).toBe("PAPER · SIMULATED · Index 1.25 · land 1.04 · NPC $50,000 · out 4,322");
     expect(line.includes("\n")).toBe(false);
     expect(line.length).toBeLessThan(80);
   });
@@ -63,7 +64,7 @@ describe("harbour PAPER econ strip", () => {
     await Promise.resolve();
     await Promise.resolve();
     expect(urls).toEqual(["/api/snapshot"]);
-    expect(node.textContent).toBe("PAPER · SIMULATED · Index 1.25 · NPC $50,000 · out 4,322");
+    expect(node.textContent).toBe("PAPER · SIMULATED · Index 1.25 · land 1.04 · NPC $50,000 · out 4,322");
     expect(node.textContent).not.toContain("7777");
   });
 

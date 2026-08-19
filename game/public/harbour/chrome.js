@@ -420,7 +420,7 @@ export function mountChrome(opts) {
   function paintAccount() {
     const body = document.getElementById("acct-body");
     if (!body || !play) return;
-    const taxPct = Math.round((Number(play.salesTax) || 0.2) * 100);
+    const taxPct = Math.round((Number(play.salesTax) || 0.08) * 100);
     body.innerHTML = `
       ${title("Account")}
       <p>Visitor on South island. Sales tax ${taxPct}% is already in every sale.</p>

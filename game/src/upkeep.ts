@@ -4,6 +4,14 @@ import { TICKS_PER_SIM_DAY } from "./calendar.ts";
 
 /** PAPER cash charged once per sim day (3600 ticks) per visitor-leased plot. */
 export const UPKEEP_PER_DAY = 1;
+/** Inflated asks pay more to hold. Floor stays $1 so old tests without a price still sink. */
+export const UPKEEP_OF_ASK = 0.0004;
+
+export function upkeepDue(plot: UpkeepPlot): number {
+  const price = Number(plot.price);
+  if (!Number.isFinite(price) || price <= 0) return UPKEEP_PER_DAY;
+  return Math.max(UPKEEP_PER_DAY, Math.round(price * UPKEEP_OF_ASK));
+}
 
 export const UPKEEP_NOTE =
   "PAPER daily land upkeep sink. Visitor-leased plots only. SIMULATED. Not live. Unpaid stays leased in v1.";
@@ -13,6 +21,7 @@ export type UpkeepPlot = {
   owner?: string | null;
   use?: string | null;
   unpaid?: boolean;
+  price?: number;
 };
 
 export type UpkeepLand = {
@@ -70,7 +79,7 @@ export function tickUpkeep(world: UpkeepWorld, visitor: UpkeepVisitor, land: Upk
   for (const plot of plots) {
     if (!plot || !isVisitorLease(plot)) continue;
 
-    const due = UPKEEP_PER_DAY;
+    const due = upkeepDue(plot);
     if (!Number.isFinite(visitor.cash) || visitor.cash < due) {
       plot.unpaid = true;
       continue;

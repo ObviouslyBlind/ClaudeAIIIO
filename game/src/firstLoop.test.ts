@@ -41,11 +41,11 @@ import {
 
 function leaseCheapSouth() {
   const land = createLandBoard();
-  const visitor = createVisitor(1_000);
   const plot = land.plots.find(
-    (p) => p.island === "south" && !p.owner && p.band === "street" && p.class === "by_right" && p.price < 400,
+    (p) => p.island === "south" && !p.owner && p.band === "street" && p.class === "by_right",
   );
   expect(plot).toBeTruthy();
+  const visitor = createVisitor(plot!.price + 800);
   const leased = leasePlot(land, visitor, plot!.id);
   expect(leased.ok).toBe(true);
   return { land, visitor, plot: plot! };
@@ -71,17 +71,18 @@ describe("PAPER foot traffic", () => {
 });
 
 describe("South first loop", () => {
-  it("offers a vacant street lot next to the south pad", () => {
+  it("offers a vacant street lot next to the south pad that $1000 cannot lease", () => {
     const land = createLandBoard();
     const visitor = createVisitor(1_000);
     const snap = playSnapshot(visitor, land);
     expect(snap.leaseOptions.length).toBeGreaterThan(0);
     const near = snap.leaseOptions[0]!;
     expect(Math.hypot(near.x - ISLANDS.south.port.x, near.z - ISLANDS.south.port.z)).toBeLessThan(80);
-    expect(leasePlot(land, visitor, near.id).ok).toBe(true);
-    expect(visitor.cash).toBeCloseTo(1_000 - near.price, 8);
-    const after = playSnapshot(visitor, land);
-    expect(after.cash).toBeCloseTo(1_000 - near.price, 8);
+    expect(near.price).toBeGreaterThan(1_000);
+    expect(leasePlot(land, visitor, near.id).ok).toBe(false);
+    const rich = createVisitor(near.price + 800);
+    expect(leasePlot(land, rich, near.id).ok).toBe(true);
+    const after = playSnapshot(rich, land);
     expect(after.leases.some((row) => row.id === near.id)).toBe(true);
     expect(after.leaseOptions.some((row) => row.id === near.id)).toBe(false);
   });
@@ -432,7 +433,7 @@ describe("South first loop", () => {
 
   it("uses the same site card for a shop and a mine", () => {
     const land = createLandBoard();
-    const visitor = createVisitor(20_000);
+    const visitor = createVisitor(80_000);
     const plot = land.plots.find(
       (p) => p.island === "south" && !p.owner && p.band === "street" && p.class === "by_right" && p.zone === "commercial",
     );

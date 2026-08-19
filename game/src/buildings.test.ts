@@ -98,9 +98,9 @@ describe("paper building catalogue", () => {
 
   it("still leases then develops, and accepts catalogue ids at paper cost", () => {
     const board = createLandBoard();
-    const visitor = createVisitor(1_000);
+    const visitor = createVisitor(80_000);
     const vacant = board.plots
-      .filter((p) => !p.owner && p.class === "by_right" && p.price <= 200)
+      .filter((p) => !p.owner && p.class === "by_right")
       .sort((a, b) => a.price - b.price)[0]!;
     const leased = leasePlot(board, visitor, vacant.id);
     expect(leased.ok).toBe(true);

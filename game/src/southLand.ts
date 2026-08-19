@@ -34,6 +34,7 @@ import {
   type RoadNode,
 } from "./roadGraph.ts";
 import { zoneForBand } from "./zones.ts";
+import { plotAsk } from "./landPrice.ts";
 import type { IslandSpec, Parcel, PlotBand, PlotClass, Ring, Road, TaxiStop } from "./land.ts";
 
 export type SouthBuilt = {
@@ -151,11 +152,7 @@ function quad(a: XZ, b: XZ, perp: XZ, setback: number, depth: number, skew: numb
 }
 
 function priceOf(area: number, band: PlotBand, portDist: number): number {
-  const bandMul = band === "shore" ? 1.55 : band === "street" ? 1 : 0.62;
-  const distMul = 1.35 - Math.min(0.7, portDist / 520);
-  // Floor low enough that a small South stall plot still prices below North
-  // land per m². A $24 floor made the tiniest lots the dearest on the board.
-  return Math.max(12, Math.round(area * 0.12 * bandMul * distMul));
+  return plotAsk("south", area, band, portDist);
 }
 
 function publicQuay(x: number, z: number): boolean {
@@ -278,6 +275,7 @@ function pushParcel(out: Parcel[], ring: Ring, opts: PushOpts): boolean {
   const band = opts.band;
   const id = `south-${band}-${out.length}`;
   const street = opts.street;
+  const price = priceOf(area, band, portDist);
   out.push({
     id,
     island: "south",
@@ -287,7 +285,8 @@ function pushParcel(out: Parcel[], ring: Ring, opts: PushOpts): boolean {
     area: Math.round(area),
     band,
     class: opts.cls ?? "by_right",
-    price: priceOf(area, band, portDist),
+    price,
+    seedPrice: price,
     owner: null,
     use: null,
     street,

@@ -7,7 +7,7 @@ import { createLandBoard, developPlot, leasePlot } from "./land.ts";
 import { parseLandUse } from "./buildings.ts";
 import { buyAtIsland } from "./buy.ts";
 import { sellAtIsland } from "./sell.ts";
-import { createVisitor, createWorld, hud, tick } from "./sim.ts";
+import { createVisitor, createWorld, hud, refreshWorldHud, tick } from "./sim.ts";
 import { cancelOrder } from "./cancelOrder.ts";
 import { listOpenOrders, placeAsk, placeBid } from "./orders.ts";
 import { postStaff, staffMapSnapshot } from "./staff-http.ts";
@@ -49,15 +49,21 @@ import {
 } from "./firstLoop.ts";
 import { footTrafficSnapshot } from "./footTraffic.ts";
 import { completePackShift } from "./shiftBonus.ts";
+import { salesTaxRate } from "./statutes.ts";
 
 function playPayload() {
   return {
-    ...playSnapshot(visitor, land),
+    ...playSnapshot(visitor, land, salesTaxRate(world.statutes)),
     traffic: footTrafficSnapshot(land),
     cart: dumpCart(visitor.cart),
     lastPricesSouth: world.lastPriceSouth,
     goods: GOOD_IDS,
   };
+}
+
+function sinkCash(amount: number): void {
+  if (!(amount > 0)) return;
+  world.ledger.sink = Math.round((world.ledger.sink + amount) * 10000) / 10000;
 }
 
 const root = join(fileURLToPath(new URL(".", import.meta.url)), "..");
@@ -330,9 +336,11 @@ const server = createServer(async (req, res) => {
       });
       return;
     }
+    const tax0 = visitor.play?.salesTaxCollected ?? 0;
     const result = completePackShift(visitor, body || {});
     const burst =
       result.ok && standId ? sellShiftBurst(visitor, land, standId, result.hits) : { sold: 0, earned: 0 };
+    sinkCash((visitor.play?.salesTaxCollected ?? tax0) - tax0);
     json(res, result.ok ? 200 : 400, { ...result, sold: burst.sold, earned: burst.earned, play: playPayload() });
     return;
   }
@@ -362,6 +370,8 @@ const server = createServer(async (req, res) => {
     }
     const result = leasePlot(land, visitor, String(body.plotId ?? ""));
     if (result.ok) {
+      sinkCash(result.paid);
+      refreshWorldHud(world, visitor, land);
       appendEvent(events, {
         tick: world.tick,
         kind: "lease",

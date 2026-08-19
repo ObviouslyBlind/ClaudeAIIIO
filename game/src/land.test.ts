@@ -48,10 +48,12 @@ describe("harbour land board", () => {
       Math.abs(sample.ring[1][0] - sample.ring[0][0]) === 20 &&
       Math.abs(sample.ring[1][1] - sample.ring[0][1]) === 0;
     expect(squareish).toBe(false);
-    const northStreet = plots.filter((p) => p.island === "north" && p.band === "street");
-    const southStreet = plots.filter((p) => p.island === "south" && p.band === "street");
+    const northStreet = plots.filter((p) => p.island === "north" && p.band === "street" && p.area >= 350);
+    const southStreet = plots.filter((p) => p.island === "south" && p.band === "street" && p.area >= 350);
     const nMin = Math.min(...northStreet.map((p) => p.price / p.area));
     const sMax = Math.max(...southStreet.map((p) => p.price / p.area));
+    expect(northStreet.length).toBeGreaterThan(0);
+    expect(southStreet.length).toBeGreaterThan(0);
     expect(nMin).toBeGreaterThan(sMax);
   });
 
@@ -86,7 +88,7 @@ describe("harbour land board", () => {
     expect(along).toBeGreaterThan(2500);
   });
 
-  it("leaves vacant street lots on the inland walk from the north quay that $1000 PAPER can lease and develop", () => {
+  it("leaves vacant street lots on the inland walk from the north quay that are too dear for $1000 PAPER", () => {
     const board = createLandBoard();
     const spec = ISLANDS.north;
     const pts = pavedPolyline(spec);
@@ -101,35 +103,32 @@ describe("harbour land board", () => {
       const pz = dx / len;
       for (const side of [-1, 1] as const) {
         const hit = findParcelAt(board, pts[i].x + px * side * 22, pts[i].z + pz * side * 22);
-        if (
-          hit &&
-          !hit.owner &&
-          hit.band === "street" &&
-          hit.price <= 500 &&
-          hit.price + DEVELOP_COST <= 1_000
-        ) {
+        if (hit && !hit.owner && hit.band === "street") {
           starters.push({ id: hit.id, price: hit.price });
         }
       }
     }
     const unique = [...new Map(starters.map((s) => [s.id, s])).values()];
     expect(unique.length).toBeGreaterThanOrEqual(2);
+    expect(unique.every((s) => s.price + DEVELOP_COST > 1_000)).toBe(true);
 
     const visitor = createVisitor(1_000);
     const pick = unique.sort((a, b) => a.price - b.price)[0]!;
-    expect(leasePlot(board, visitor, pick.id).ok).toBe(true);
-    expect(developPlot(board, visitor, pick.id, "house").ok).toBe(true);
+    expect(leasePlot(board, visitor, pick.id).ok).toBe(false);
+    const rich = createVisitor(pick.price + DEVELOP_COST + 40);
+    expect(leasePlot(board, rich, pick.id).ok).toBe(true);
+    expect(developPlot(board, rich, pick.id, "house").ok).toBe(true);
   });
 
-  it("keeps $1000 PAPER starter street lots at north spawn, not 6500 m² fields", () => {
+  it("keeps north spawn street lots as the inspect snap, not cheap $1000 leases", () => {
     const board = createLandBoard();
     const spec = ISLANDS.north;
     const starters = board.plots.filter((p) => isStarterPlot(p, spec));
     expect(starters.length).toBeGreaterThanOrEqual(2);
     expect(starters.every((p) => p.band === "street")).toBe(true);
-    expect(starters.every((p) => p.price + DEVELOP_COST <= STARTER_CASH)).toBe(true);
+    expect(starters.every((p) => p.price + DEVELOP_COST > STARTER_CASH)).toBe(true);
     expect(starters.every((p) => p.area < 2000)).toBe(true);
-    expect(starters.some((p) => p.price <= 500)).toBe(true);
+    expect(starters.every((p) => p.price >= 6_800)).toBe(true);
 
     const street = starters.sort((a, b) => a.price - b.price)[0]!;
     const snapped = pickStarterPlotAt(board.plots, street.x + 12, street.z + 12, spec);
@@ -148,10 +147,10 @@ describe("harbour land board", () => {
 
   it("lets you lease a piece of ground underfoot and then develop it", () => {
     const board = createLandBoard();
-    const visitor = createVisitor(1_000);
     const vacant = board.plots
-      .filter((p) => !p.owner && p.class === "by_right" && p.price <= visitor.cash)
+      .filter((p) => !p.owner && p.class === "by_right")
       .sort((a, b) => a.price - b.price)[0]!;
+    const visitor = createVisitor(vacant.price + DEVELOP_COST + 40);
     expect(pointInRing(vacant.x, vacant.z, vacant.ring)).toBe(true);
     expect(findParcelAt(board, vacant.x, vacant.z)?.id).toBe(vacant.id);
 

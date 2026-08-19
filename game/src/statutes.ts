@@ -1,5 +1,7 @@
 /** Paper statute catalog. Players amend rows; they do not author from blank paper. */
 
+import { LAUNCH_SALES_TAX } from "./economy.ts";
+
 export type StatuteGroup =
   | "money"
   | "trade"
@@ -51,7 +53,7 @@ export function createStatuteCatalog(): Statute[] {
       group: "money",
       enabled: true,
       money_bill: true,
-      sliders: { rate: 0 },
+      sliders: { rate: LAUNCH_SALES_TAX },
       writes: ["ledger.sink"],
     }),
     statute({

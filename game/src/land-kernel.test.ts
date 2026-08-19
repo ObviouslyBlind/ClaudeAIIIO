@@ -12,7 +12,7 @@ describe("harbour land board kernel", () => {
     expect(plots.some((p) => p.deposit === "ore")).toBe(true);
   });
 
-  it("seeds enough lots that a $1000 starter can still lease after overlap reject", () => {
+  it("seeds enough lots that a later grind can still lease after overlap reject", () => {
     const board = createLandBoard();
     expect(board.plots.length).toBeGreaterThan(40);
   });
