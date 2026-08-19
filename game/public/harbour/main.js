@@ -2000,7 +2000,6 @@ async function boot() {
     lease,
     onCloseLand: closeLandCard,
     onLeased(snapshot) {
-      landPinned = false;
       lastInspectKey = "";
       applySnapshot(snapshot);
       const ids = snapshot.visitor && snapshot.visitor.leases;
@@ -2010,7 +2009,6 @@ async function boot() {
         if (p) paintParcel(p);
         if (parcelMap) parcelMap.setSelected(selected);
       }
-      if (chromeHud) chromeHud.refresh();
     },
     onHired(standId) {
       const playNow = chromeHud && chromeHud.getPlay && chromeHud.getPlay();

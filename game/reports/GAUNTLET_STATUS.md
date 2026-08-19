@@ -12,7 +12,7 @@ Bar the critic inspects on live `http://127.0.0.1:8787/`. One verdict for the wh
 
 | # | Bar | How to see it |
 |---|---|---|
-| 1 | **Buy $32 → cash $968** | Top-right **Buy $32** chip (not a world $ tag). One click. Cash plate ~$968. Chip gone. |
+| 1 | **Buy $32 → cash $968** | Top-right **Buy $32** chip (not a world $ tag). One click. Cash plate ~$968. Chip gone. YOURS only after that cash drop. |
 | 2 | **Price sticker** | Tap a **placed cart** → **Stock**. Track is red–yellow–green–yellow–red. Green on $6. Label says Price. Not the Market Pay card. |
 | 3 | **Fire despawns** | Run → Hire $30 → vendor at cart. Fire → vendor gone immediately. |
 | 4 | **Fruit clock** | Run → Play (only while unhired). Clock is wall-clock seconds. |
@@ -24,8 +24,8 @@ Bar the critic inspects on live `http://127.0.0.1:8787/`. One verdict for the wh
 Do **not** grade Market Pay “How many / Where” as the sticker. That card is qty + dest.
 Do **not** click Lots first. Do **not** click a world `$32` tag. The chip is top-right **Buy $32**.
 
-Last critic (bc-3c66cfcb): **FAIL** — Buy $32, card “44 ISLAND HWY / YOURS / Close”, cash stayed $1,000.
+Last critic (bc-6a98335a): **FAIL** — Buy $32 twice, cash stayed $1,000, chip stayed, land card said YOURS. Server still had a vacant lot. Card lied YOURS before a paid lease.
 
-Fix in this round: chip click posts lease only (no land-card / Yes-buy race). `stampPlay` bumps `playGen` so a stale GET `/api/play` cannot restore $1,000 after the lease response.
+Fix in this round: chip POSTs `/api/lease` itself and stamps cash first. Land card says YOURS only when `play.leases` has that lot.
 
-Politics frozen. Operator is the brake. Stale critic transcripts are not the product.
+Politics frozen. Operator is the brake.

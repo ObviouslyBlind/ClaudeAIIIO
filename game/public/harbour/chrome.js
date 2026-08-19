@@ -26,9 +26,13 @@ function el(html) {
 }
 
 async function readJson(url, opts) {
-  const res = await fetch(url, opts);
-  const data = await res.json().catch(() => null);
-  return { ok: res.ok, data };
+  try {
+    const res = await fetch(url, opts);
+    const data = await res.json().catch(() => null);
+    return { ok: res.ok, data };
+  } catch {
+    return { ok: false, data: null };
+  }
 }
 
 export function mountChrome(opts) {
@@ -781,6 +785,66 @@ export function mountChrome(opts) {
     }
   }
 
+  function plotIsYours(plot) {
+    if (!plot || !plot.id) return false;
+    const leases = (play && play.leases) || [];
+    return leases.some((row) => row.id === plot.id);
+  }
+
+  function paintLand(plot, extras) {
+    if (!landCard) return;
+    if (buyAsk && !buyAsk.hidden) return;
+    if (!plot) {
+      landCard.hidden = true;
+      return;
+    }
+    landCard.hidden = false;
+    const band = extras && extras.band ? extras.band : "";
+    const crate = extras && extras.crate;
+    const roadside = extras && extras.roadside;
+    const title = roadside ? "Roadside crate" : plotDisplayName(plot);
+    const yours = !roadside && plotIsYours(plot);
+    const taken = !roadside && !yours && Boolean(plot.owner) && plot.owner !== "visitor";
+    const vacant = !roadside && !yours && !taken;
+    const price = roadside
+      ? ""
+      : vacant
+        ? `<button type="button" class="land-buy take-all" id="land-lease">${money(plot.price)} · Buy lot</button>`
+        : `<p class="price">${yours ? "YOURS" : "taken"}</p>`;
+    const note = extras && extras.note ? `<p class="lease-note">${extras.note}</p>` : "";
+    landCard.innerHTML = `
+      <h2>${title}</h2>
+      ${price}
+      ${note}
+      ${band ? `<p><span class="band-dot ${band}"></span>Foot traffic ${footLevel(band)}</p>` : ""}
+      ${
+        roadside
+          ? ""
+          : `<div class="land-row"><button type="button" class="take-all" id="land-close">Close</button></div>`
+      }
+      ${crate ? `<button type="button" class="take-all" id="land-take">Take all</button>` : ""}
+      ${roadside ? `<button type="button" class="take-all" id="land-close">Close</button>` : ""}
+    `;
+    const leaseBtn = landCard.querySelector("#land-lease");
+    if (leaseBtn) leaseBtn.addEventListener("click", () => paintBuyAsk(plot, extras || {}));
+    const closeBtn = landCard.querySelector("#land-close");
+    if (closeBtn) {
+      closeBtn.addEventListener("click", () => {
+        landCard.hidden = true;
+        if (opts.onCloseLand) opts.onCloseLand();
+      });
+    }
+    const takeBtn = landCard.querySelector("#land-take");
+    if (takeBtn && extras && extras.onTake) {
+      takeBtn.addEventListener("click", (ev) => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        landCard.hidden = true;
+        extras.onTake();
+      });
+    }
+  }
+
   const placeCancel = document.getElementById("place-cancel");
   if (placeCancel) {
     placeCancel.addEventListener("click", () => {
@@ -806,7 +870,7 @@ export function mountChrome(opts) {
 
   const nearLease = document.getElementById("near-lease");
   if (nearLease) {
-    nearLease.addEventListener("click", (ev) => {
+    nearLease.addEventListener("click", async (ev) => {
       ev.preventDefault();
       ev.stopPropagation();
       const fromPlay = ((play && play.leaseOptions) || [])[0];
@@ -815,7 +879,26 @@ export function mountChrome(opts) {
       nearLease.disabled = true;
       if (landCard) landCard.hidden = true;
       if (buyAsk) buyAsk.hidden = true;
-      if (opts.lease) opts.lease(id);
+      const { ok, data } = await readJson("/api/lease", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ plotId: id }),
+      });
+      if (!ok || !data || !data.ok || !data.play) {
+        nearLease.disabled = false;
+        if (opts.setStatus) opts.setStatus("Could not buy that lot.");
+        return;
+      }
+      stampPlay(data.play);
+      playPaperBuy();
+      if (typeof opts.onLeased === "function") opts.onLeased(data.snapshot);
+      const row = ((data.play.leases || []).find((item) => item.id === id)) || fromPlay;
+      if (row) {
+        paintLand(row, { note: "Yours for " + money(data.paid) + "." });
+      }
+      if (opts.setStatus) {
+        opts.setStatus("This land is yours for " + money(data.paid) + ". Order from Market.");
+      }
     });
   }
 
@@ -848,57 +931,7 @@ export function mountChrome(opts) {
     paintCrateAsk,
     hideOrderAsk,
     paintBuyAsk,
-    paintLand(plot, extras) {
-      if (!landCard) return;
-      if (buyAsk && !buyAsk.hidden) return;
-      if (!plot) {
-        landCard.hidden = true;
-        return;
-      }
-      landCard.hidden = false;
-      const band = extras && extras.band ? extras.band : "";
-      const crate = extras && extras.crate;
-      const roadside = extras && extras.roadside;
-      const title = roadside ? "Roadside crate" : plotDisplayName(plot);
-      const vacant = !roadside && !plot.owner;
-      const price = roadside
-        ? ""
-        : vacant
-          ? `<button type="button" class="land-buy take-all" id="land-lease">${money(plot.price)} · Buy lot</button>`
-          : `<p class="price">${plot.owner === "visitor" ? "YOURS" : "taken"}</p>`;
-      const note = extras && extras.note ? `<p class="lease-note">${extras.note}</p>` : "";
-      landCard.innerHTML = `
-        <h2>${title}</h2>
-        ${price}
-        ${note}
-        ${band ? `<p><span class="band-dot ${band}"></span>Foot traffic ${footLevel(band)}</p>` : ""}
-        ${
-          roadside
-            ? ""
-            : `<div class="land-row"><button type="button" class="take-all" id="land-close">Close</button></div>`
-        }
-        ${crate ? `<button type="button" class="take-all" id="land-take">Take all</button>` : ""}
-        ${roadside ? `<button type="button" class="take-all" id="land-close">Close</button>` : ""}
-      `;
-      const leaseBtn = landCard.querySelector("#land-lease");
-      if (leaseBtn) leaseBtn.addEventListener("click", () => paintBuyAsk(plot, extras || {}));
-      const closeBtn = landCard.querySelector("#land-close");
-      if (closeBtn) {
-        closeBtn.addEventListener("click", () => {
-          landCard.hidden = true;
-          if (opts.onCloseLand) opts.onCloseLand();
-        });
-      }
-      const takeBtn = landCard.querySelector("#land-take");
-      if (takeBtn && extras.onTake) {
-        takeBtn.addEventListener("click", (ev) => {
-          ev.preventDefault();
-          ev.stopPropagation();
-          landCard.hidden = true;
-          extras.onTake();
-        });
-      }
-    },
+    paintLand,
     paintStandMenu,
     hideStandMenu() {
       if (standMenu) standMenu.hidden = true;

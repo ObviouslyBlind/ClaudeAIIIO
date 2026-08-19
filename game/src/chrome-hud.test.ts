@@ -95,6 +95,7 @@ describe("harbour chrome HUD", () => {
     expect(chrome).toContain("paintBuyAsk");
     expect(chrome).toContain('getElementById("near-lease")');
     expect(css).toContain(".chip.is-buy-lot");
+    expect(css).toContain("#near-lease");
     expect(chrome).toContain('id="buy-ask-yes"');
     expect(chrome).toContain('id="buy-ask-no"');
     expect(chrome).toContain('id="land-lease"');
@@ -140,12 +141,15 @@ describe("harbour chrome HUD", () => {
     expect(chrome).toContain("if (buyAsk && !buyAsk.hidden) return;");
     expect(chrome).toContain("ownedId");
     expect(chrome).not.toContain("opts.onNearLease(id)");
+    expect(chrome).not.toContain("opts.lease(id)");
     expect(chrome).toContain("applyPlay");
     expect(chrome).toContain("stampPlay");
     expect(chrome).toContain("playGen");
     expect(chrome).toContain("if (gen !== playGen) return");
-    expect(chrome).toContain("opts.lease(id)");
-    expect(chrome).toContain("nearLease.disabled = true");
+    expect(chrome).toContain('"/api/lease"');
+    expect(chrome).toContain("JSON.stringify({ plotId: id })");
+    expect(chrome).toContain("plotIsYours");
+    expect(chrome).toContain("Could not buy that lot.");
     expect(chrome).toContain("order-label");
     expect(chrome).toContain("dest: marketDest === \"road\" ? \"road\" : \"warehouse\"");
     expect(chrome).toContain("data-order-dest");
