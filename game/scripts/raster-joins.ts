@@ -1,6 +1,7 @@
 /**
  * Overhead raster of drawn tarmac. Polygon tests can pass while ShapeGeometry
- * drops triangles — this paints the actual BufferGeometry in XZ.
+ * drops triangles — this paints the actual BufferGeometry in world XZ
+ * (RingGeometry / PlaneGeometry are local XY until the mesh transform).
  * Run: cd game && npx tsx scripts/raster-joins.ts
  */
 import { deflateSync } from "node:zlib";
@@ -18,6 +19,9 @@ type Mesh = {
     index: { count: number; getX?: (i: number) => number; array?: ArrayLike<number> } | null;
   };
   material: { color: { getHex: () => number } };
+  position?: { x: number; y: number; z: number };
+  matrixWorld?: { elements: ArrayLike<number> };
+  updateMatrixWorld?: (force?: boolean) => void;
 };
 
 function indexAt(mesh: Mesh, i: number) {
@@ -25,6 +29,24 @@ function indexAt(mesh: Mesh, i: number) {
   if (!idx) return i;
   if (idx.array) return Number(idx.array[i]);
   return idx.getX ? idx.getX(i) : i;
+}
+
+/** RingGeometry / PlaneGeometry live in local XY; apply the mesh transform. */
+function worldXZ(mesh: Mesh, i: number) {
+  const pos = mesh.geometry.attributes.position;
+  const vx = pos.getX(i);
+  const vy = pos.getY(i);
+  const vz = pos.getZ(i);
+  if (typeof mesh.updateMatrixWorld === "function") {
+    mesh.updateMatrixWorld(true);
+    const e = mesh.matrixWorld!.elements;
+    return {
+      x: e[0] * vx + e[4] * vy + e[8] * vz + e[12],
+      z: e[2] * vx + e[6] * vy + e[10] * vz + e[14],
+    };
+  }
+  const p = mesh.position;
+  return { x: vx + (p?.x || 0), z: vz + (p?.z || 0) };
 }
 
 function triCount(mesh: Mesh) {
@@ -131,7 +153,10 @@ function rasterWindow(
       const ia = indexAt(m, i);
       const ib = indexAt(m, i + 1);
       const ic = indexAt(m, i + 2);
-      fillTri(pos.getX(ia), pos.getZ(ia), pos.getX(ib), pos.getZ(ib), pos.getX(ic), pos.getZ(ic), hex);
+      const a = worldXZ(m, ia);
+      const b = worldXZ(m, ib);
+      const c = worldXZ(m, ic);
+      fillTri(a.x, a.z, b.x, b.z, c.x, c.z, hex);
     }
   }
   return rgb;
@@ -158,13 +183,14 @@ const circus = added.filter((m) => m.userData.footprint && /Circus/.test(String(
 const harbourMesh = added.find((m) => m.userData.roadName === "Harbour Circus" && m.userData.footprint);
 console.log("circus footprint meshes", circus.length, circus.map((m) => `${m.userData.roadName} tris=${triCount(m)} verts=${m.geometry.attributes.position.count}`).join(" | "));
 if (harbourMesh) {
-  const pos = harbourMesh.geometry.attributes.position;
+  const nVert = harbourMesh.geometry.attributes.position.count;
   let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
-  for (let i = 0; i < pos.count; i++) {
-    minX = Math.min(minX, pos.getX(i));
-    maxX = Math.max(maxX, pos.getX(i));
-    minZ = Math.min(minZ, pos.getZ(i));
-    maxZ = Math.max(maxZ, pos.getZ(i));
+  for (let i = 0; i < nVert; i++) {
+    const p = worldXZ(harbourMesh, i);
+    minX = Math.min(minX, p.x);
+    maxX = Math.max(maxX, p.x);
+    minZ = Math.min(minZ, p.z);
+    maxZ = Math.max(maxZ, p.z);
   }
   console.log("Harbour Circus bbox", { minX, maxX, minZ, maxZ, w: maxX - minX, d: maxZ - minZ, tris: triCount(harbourMesh) });
 }
