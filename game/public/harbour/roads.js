@@ -406,21 +406,14 @@ function splitJoinEnd(pts, head, stubM) {
 
 function joinCutterAt(p, hubs, circuses, roadKind) {
   if (!p) return null;
+  void hubs;
   for (const c of circuses || []) {
     const face = c.clip || c.outer;
     if (!(face > 0)) continue;
     const d = Math.hypot(p.x - c.x, p.z - c.z);
-    if (Math.abs(d - face) > 10 && d > face + 4) continue;
+    if (Math.abs(d - face) > 10) continue;
     const r = roadKind === "shoulder" ? (c.outer || face) + FOOT_SHOULDER_M : face;
     return [[circleRing(c.x, c.z, r, 48)]];
-  }
-  for (const h of hubs || []) {
-    const n = h.node;
-    if (!n) continue;
-    const reach = (h.pad && h.pad.side) || 22;
-    if (Math.hypot(p.x - n.x, p.z - n.z) > reach + 10) continue;
-    if (roadKind === "shoulder") return h.foot.outerClip || h.foot.clip || null;
-    return h.foot.clip || h.foot.tarmac || null;
   }
   return null;
 }

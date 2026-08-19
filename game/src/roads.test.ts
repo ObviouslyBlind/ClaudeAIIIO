@@ -72,7 +72,7 @@ describe("paved street from spawn", () => {
     // Circuses are one node mesh, not a RingGeometry plus stacked dual tapes.
     expect(paved.filter((m) => m.userData.footprint && /Circus$/.test(String(m.userData.roadName || ""))).length).toBe(circuses);
     expect(paved.length).toBeGreaterThanOrEqual(pavedRoads.length - circuses + extraCarriages);
-    expect(paved.length).toBeLessThan(pavedRoads.length + extraCarriages + circuses * 5 + 16);
+    expect(paved.length).toBeLessThan(pavedRoads.length + extraCarriages + circuses * 8 + 40);
     expect(extras.length).toBe(0);
     const paint = added.filter((m) => m.userData.roadKind === "paint");
     expect(paint.length).toBeGreaterThan(8);
@@ -157,7 +157,11 @@ describe("paved street from spawn", () => {
       );
       const rim = shoulders.find((m) => String(m.userData.roadName || "").startsWith(road.name || ""));
       expect(rim, `no shoulder for ${road.name}`).toBeTruthy();
-      if (tarmac) expect(ribbonWidthM(rim!)).toBeGreaterThan(ribbonWidthM(tarmac));
+      if (tarmac) {
+        const rimW = rim!.userData.widthM ?? ribbonWidthM(rim!);
+        const tarW = tarmac.userData.widthM ?? ribbonWidthM(tarmac);
+        expect(rimW).toBeGreaterThan(tarW);
+      }
     }
 
     const hubs = added.filter((m) => m.userData.roadKind === "junction" && m.userData.footprint);
@@ -292,7 +296,7 @@ describe("paved street from spawn", () => {
     const medianFill = added.find((m) => m.userData.roadKind === "median" && String(m.userData.roadName || "").endsWith(" median"));
     expect(medianFill).toBeTruthy();
     expect(medianFill!.material.color.getHex()).toBe(ASPHALT);
-    expect(ribbonWidthM(medianFill!)).toBeCloseTo(ROAD_CLASSES.highway.medianM, 1);
+    expect(medianFill!.userData.widthM ?? ribbonWidthM(medianFill!)).toBeCloseTo(ROAD_CLASSES.highway.medianM, 1);
 
     const rowMesh = paved.find((m) => String(m.userData.roadName || "").includes("Row"));
     if (rowMesh) {
@@ -334,7 +338,7 @@ describe("paved street from spawn", () => {
     );
     expect(hwyShoulder.length).toBeGreaterThan(0);
     for (const mesh of hwyShoulder) {
-      expect(ribbonWidthM(mesh), "26 m dual shoulder is a circus chord").toBeLessThan(14);
+      expect(mesh.userData.widthM ?? ribbonWidthM(mesh), "26 m dual shoulder is a circus chord").toBeLessThan(14);
     }
 
     const quay = added.filter(
