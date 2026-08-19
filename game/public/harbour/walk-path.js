@@ -7,6 +7,8 @@ import * as THREE from "three";
  */
 
 export const WALK_MARK = 0xd8ff2a;
+/** Metres above dirt. Tarmac sits ~0.23 m up; this keeps the dest disc on the road. */
+export const DEST_LIFT_M = 0.55;
 const EDGE = 0x143808;
 const MAX_VERTS = 64;
 const HALF_W = 0.34;
@@ -88,9 +90,9 @@ export function createWalkPath(scene) {
   scene.add(pin);
 
   function placeDest(x, y, z) {
-    disc.position.set(x, y + 0.12, z);
-    ring.position.set(x, y + 0.13, z);
-    pin.position.set(x, y + 1.15, z);
+    disc.position.set(x, y + DEST_LIFT_M, z);
+    ring.position.set(x, y + DEST_LIFT_M + 0.02, z);
+    pin.position.set(x, y + DEST_LIFT_M + 0.9, z);
   }
 
   function writeRibbon(pts) {
@@ -111,7 +113,7 @@ export function createWalkPath(scene) {
       dz /= len;
       const nx = -dz * HALF_W;
       const nz = dx * HALF_W;
-      const y = p.y + 0.16;
+      const y = p.y + DEST_LIFT_M;
       positions[o++] = p.x + nx;
       positions[o++] = y;
       positions[o++] = p.z + nz;
@@ -166,6 +168,14 @@ export function createWalkPath(scene) {
     },
     showPath(from, waypoints, heightAt) {
       showAll(from, waypoints, heightAt);
+    },
+    /** Keep the dest disc after arrival; hide the remaining ribbon. */
+    showDest(x, z, y) {
+      placeDest(x, y, z);
+      ribbon.visible = false;
+      disc.visible = true;
+      ring.visible = true;
+      pin.visible = true;
     },
     hide() {
       ribbon.visible = false;

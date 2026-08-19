@@ -27,6 +27,9 @@ export const STRIDE_M = 1.4;
 /** Keep in sync with game/src/walk.ts BEACH_THRESHOLD_M. */
 export const WALK_BEACH_M = 0.25;
 
+/** Dest pin stays after you arrive, then fades. */
+export const WALK_HOLD_MS = 5000;
+
 export function hypot2(ax, az, bx, bz) {
   return Math.hypot(bx - ax, bz - az);
 }

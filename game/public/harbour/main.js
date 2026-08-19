@@ -22,6 +22,7 @@ import {
   planWalk,
   PLAYER_SOLE_M,
   WALK_BEACH_M,
+  WALK_HOLD_MS,
   WALK_SPEED_MPS,
 } from "./walk-plan.js";
 import { makeStreetCart, makeCrate, makeVendor, detachVendor, findVendor } from "./cart.js";
@@ -1358,8 +1359,8 @@ function paintWalkPath() {
     return;
   }
   if (lastWalkDest && Date.now() < walkHoldUntil) {
-    if (typeof walkPath.showPath === "function") {
-      walkPath.showPath(player.position, [lastWalkDest], landHeight);
+    if (typeof walkPath.showDest === "function") {
+      walkPath.showDest(lastWalkDest.x, lastWalkDest.z, landHeight(lastWalkDest.x, lastWalkDest.z));
     }
     return;
   }
@@ -1395,6 +1396,7 @@ function goTo(x, z) {
   const dest = path[path.length - 1];
   walkTarget.set(dest.x, landHeight(dest.x, dest.z) + PLAYER_SOLE_M, dest.z);
   walkWaypoints = path.slice(1);
+  lastWalkDest = dest;
   walking = true;
   gaitDist = 0;
   walkHoldUntil = 0;
@@ -1865,7 +1867,7 @@ function tick(dt) {
     if (!walkWaypoints.length) {
       walking = false;
       gaitDist = 0;
-      walkHoldUntil = Date.now() + 2200;
+      walkHoldUntil = Date.now() + WALK_HOLD_MS;
       paintWalkPath();
     } else {
       const ox = player.position.x;
@@ -1882,7 +1884,7 @@ function tick(dt) {
       if (next.done) {
         walking = false;
         gaitDist = 0;
-        walkHoldUntil = Date.now() + 2200;
+        walkHoldUntil = Date.now() + WALK_HOLD_MS;
         paintWalkPath();
         setStatus("Here.");
       } else {
