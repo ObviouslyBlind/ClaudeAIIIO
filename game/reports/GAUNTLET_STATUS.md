@@ -1,6 +1,6 @@
 # Gauntlet status
 
-Piece in play: **harbour loop — the three prompts, whole system.**
+Piece in play: **harbour loop — remaining bars after the cash gate.**
 
 Source (operator, in order):
 
@@ -8,24 +8,22 @@ Source (operator, in order):
 2. Fire despawns. Fruit clock is real. More upgrades that show Stats appeal. Per-cart maths (area, fruit slice / shift, sticker $ can slow sales). Simple player: walk, body colour, shirt, head. Delivery van works again.
 3. Gauntlet until all of that is fixed.
 
-Bar the critic inspects on live `http://127.0.0.1:8787/`. One verdict for the whole list.
+Bar the critic inspects on live `http://127.0.0.1:8787/`.
 
-| # | Bar | How to see it |
+| # | Bar | Status |
 |---|---|---|
-| 1 | **Buy $32 → cash $968** | Top-right **Buy $32** chip (not a world $ tag). One click. Cash plate ~$968. Chip gone. YOURS only after that cash drop. |
-| 2 | **Price sticker** | Tap a **placed cart** → **Stock**. Track is red–yellow–green–yellow–red. Green on $6. Label says Price. Not the Market Pay card. |
-| 3 | **Fire despawns** | Run → Hire $30 → vendor at cart. Fire → vendor gone immediately. |
-| 4 | **Fruit clock** | Run → Play (only while unhired). Clock is wall-clock seconds. |
-| 5 | **Upgrades + appeal** | Upgrades: Fridge → Sign → Awning → Lights → Stools. Each row shows +appeal. Stats lists those points. |
-| 6 | **Cart maths** | Stats: Area, Sticker band × sell time, Sale every Ns, $ / min, Shift. Off-green sticker slows hired sales. |
-| 7 | **Simple walker** | Coloured body, shirt, head. Tap-walk swings limbs. Camera close enough to read a person. |
-| 8 | **Kerb van** | Market → Buy → Pay (default is the lot / kerb). Yellow box van from the port, large green crate, van drives away. Take all / Close. |
+| 1 | **Buy $32 → cash $968** | **PASS** (bc-0dfa7ea1). Chip click. Cash $968.00. Chip gone. Server leased `south-street-5`. |
+| 2 | **Price sticker** | **Not graded.** Critic read Market goods (corn/potato). Bar is the **placed cart** Stock tab: label Price, red–yellow–green–yellow–red, green on $6. |
+| 3 | **Fire despawns** | **Not graded.** Critic used Staff HUD. Live stand `stand-4` is still `hired: true`. Bar: Run → Fire → 3D vendor gone. |
+| 4 | **Fruit clock** | Untested while hired. |
+| 5 | **Upgrades + appeal** | Critic saw +appeal rows. Confirm on the cart Upgrades/Stats tabs. |
+| 6 | **Cart maths** | Untested on the cart Stats tab. |
+| 7 | **Simple walker** | Critic saw body/shirt/head. |
+| 8 | **Kerb van** | Critic reported a yellow van. Confirm it drives from the port, drops a large glowing crate, then leaves. |
 
-Do **not** grade Market Pay “How many / Where” as the sticker. That card is qty + dest.
-Do **not** click Lots first. Do **not** click a world `$32` tag. The chip is top-right **Buy $32**.
+Do **not** grade Market Pay or Market aisle prices as the sticker.
+Do **not** click Lots first.
 
-Last critic (bc-6a98335a): **FAIL** — Buy $32 twice, cash stayed $1,000, chip stayed, land card said YOURS. Server still had a vacant lot. Card lied YOURS before a paid lease.
-
-Fix in this round: chip POSTs `/api/lease` itself and stamps cash first. Land card says YOURS only when `play.leases` has that lot.
+Live shard is dirty (cash $213, two leases, hired fruit cart on 52 Quayward Loop). Next critic uses that cart: tap it → Stock Price, Run Fire.
 
 Politics frozen. Operator is the brake.
