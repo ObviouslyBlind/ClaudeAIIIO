@@ -53,6 +53,17 @@ export function walkOrbitState(islandId) {
   };
 }
 
+/**
+ * Spawn look-at is 28 m down the highway. First walk drops onto a close orbit.
+ * After the user zooms or RMB-orbits, keep that framing — do not snap back to 8 m.
+ */
+export function nextWalkFollow(state, islandId, opts) {
+  if (state && state.dragging) return state;
+  if (opts && opts.force) return walkOrbitState(islandId);
+  if (state && state.orbited) return state;
+  return walkOrbitState(islandId);
+}
+
 /** Pulled back so the yellow cab fills the view — not spawn look-at down the highway. */
 export const RIDE_CAM_RADIUS_M = 14;
 export const RIDE_CAM_PITCH = 0.4;
@@ -319,12 +330,11 @@ export function createPlayCamera({ camera, canvas, getPlayer, getIslandId }) {
     camera.lookAt(p.x, p.y + LOOK_Y, p.z);
   }
 
-  /** Drop spawn look-at so the walking body stays in frame. Keep a close orbit. */
   function followWalk(opts) {
     if (state.dragging) return;
-    const force = Boolean(opts && opts.force);
-    if (!force && state.orbited && state.radius <= 16 && state.radius >= 6) return;
-    applyFollow(walkOrbitState(getIslandId()));
+    const next = nextWalkFollow(state, getIslandId(), opts);
+    if (next === state) return;
+    applyFollow(next);
   }
 
   /** Look at the cab you are in, not 28 m down Island Hwy. */

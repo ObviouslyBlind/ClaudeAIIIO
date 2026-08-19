@@ -15,6 +15,7 @@ import {
   STALL_CAM_SIDE_M,
   STALL_CAM_UP_M,
   STALL_LOOK_Y,
+  nextWalkFollow,
   walkOrbitState,
   WALK_CAM_PITCH,
   WALK_CAM_RADIUS_M,
@@ -183,6 +184,19 @@ describe("RMB-hold orbit camera", () => {
     expect(cam.lx).toBe(10);
     expect(cam.lz).toBe(20);
     expect(cam.ly).toBeCloseTo(1 + STALL_LOOK_Y);
+  });
+
+  it("walk follow keeps a zoomed-out orbit instead of snapping to 8 m", () => {
+    const zoomed = { ...walkOrbitState("south"), radius: 80 };
+    expect(nextWalkFollow(zoomed, "south")).toBe(zoomed);
+    expect(nextWalkFollow(zoomed, "south").radius).toBe(80);
+    const spawn = createOrbitState(spawnCameraOffset("south"));
+    expect(spawn.orbited).toBe(false);
+    const first = nextWalkFollow(spawn, "south");
+    expect(first.radius).toBe(WALK_CAM_RADIUS_M);
+    expect(first.orbited).toBe(true);
+    const forced = nextWalkFollow(zoomed, "south", { force: true });
+    expect(forced.radius).toBe(WALK_CAM_RADIUS_M);
   });
 
   it("walk orbit is close enough to read a person, not 28 m inland", () => {
