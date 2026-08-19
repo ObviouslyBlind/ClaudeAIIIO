@@ -22,8 +22,8 @@ Bar the critic inspects on live `http://127.0.0.1:8787/`. One verdict for the wh
 
 Do **not** grade Market Pay “How many / Where” as the sticker. That card is qty + dest.
 
-Last critic (bc-f1aace41): cash $1000 → $912 (cart + pack, no $32). Double-click never posted the lease.
+Last critic (bc-2cc757e4): **FAIL** — Buy $32 showed the lot card; cash $1000 → $915 (cart only). lease() returned because map was not ready so selected was never set.
 
-Fix in this round: the Buy $32 chip is one click — select the plot and POST /api/lease.
+Fix in this round: chip passes the plot id into lease(); askToBuy no longer requires map.
 
 Politics frozen. Operator is the brake.

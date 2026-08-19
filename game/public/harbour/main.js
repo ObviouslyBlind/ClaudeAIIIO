@@ -1350,14 +1350,17 @@ function showLandCard(p) {
 }
 
 function askToBuy(p) {
-  if (!p || !map) return;
-  const prev = selected ? map.plots.find((row) => row.id === selected) : null;
+  if (!p) return;
+  const prev = selected && map ? map.plots.find((row) => row.id === selected) : null;
   selected = p.id;
   landPinned = true;
   lastInspectKey = p.id + ":ask";
-  if (prev && prev.id !== p.id) paintParcel(prev);
-  paintParcel(p);
-  if (parcelMap) parcelMap.setSelected(p.id);
+  if (map) {
+    if (prev && prev.id !== p.id) paintParcel(prev);
+    const row = map.plots.find((x) => x.id === p.id) || p;
+    paintParcel(row);
+    if (parcelMap) parcelMap.setSelected(p.id);
+  }
   if (p.owner) {
     showLandCard(p);
     return;
@@ -1564,12 +1567,14 @@ staffHud = mountStaffHud({
   setStatus,
 });
 
-async function lease() {
-  if (!selected) return;
+async function lease(plotId) {
+  const id = plotId || selected;
+  if (!id) return;
+  selected = id;
   const res = await fetch("/api/lease", {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ plotId: selected }),
+    body: JSON.stringify({ plotId: id }),
   });
   const body = await res.json();
   if (!body.ok) {
@@ -1585,11 +1590,11 @@ async function lease() {
     return;
   }
   applySnapshot(body.snapshot);
-  paintParcel(map.plots.find((x) => x.id === selected));
+  const p = map && selected ? map.plots.find((x) => x.id === selected) : null;
+  if (p) paintParcel(p);
   if (chromeHud) chromeHud.refresh();
   landPinned = true;
   lastInspectKey = "";
-  const p = map.plots.find((x) => x.id === selected);
   if (chromeHud && chromeHud.hideBuyAsk) chromeHud.hideBuyAsk();
   if (p && chromeHud && chromeHud.paintLand) {
     chromeHud.paintLand(p, { band: bandForPlot(p), note: "Yours for $" + money(body.paid) + "." });

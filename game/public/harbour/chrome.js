@@ -805,7 +805,7 @@ export function mountChrome(opts) {
       if (!id) return;
       if (landCard) landCard.hidden = true;
       if (typeof opts.onNearLease === "function") opts.onNearLease(id);
-      if (opts.lease) opts.lease();
+      if (opts.lease) opts.lease(id);
     });
   }
 
