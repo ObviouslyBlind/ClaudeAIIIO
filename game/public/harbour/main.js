@@ -466,18 +466,7 @@ function groundFromRay() {
   return null;
 }
 
-function paintWalkHud() {
-  const walkEl = document.getElementById("walk-status");
-  const hintEl = document.getElementById("viewer-hint");
-  let line = "";
-  if (walking) line = "Walking.";
-  else if (Date.now() < walkNoteUntil) line = walkNote;
-  if (walkEl) {
-    walkEl.hidden = !line;
-    if (line) walkEl.textContent = line;
-  }
-  if (hintEl && line) hintEl.textContent = line;
-}
+function paintWalkHud() {}
 
 function parcelLabel(p) {
   const kind = p.band === "field" ? "field" : p.band === "shore" ? "shore land" : "street land";
@@ -1373,10 +1362,6 @@ function arriveWalk() {
   gaitDist = 0;
   lastWalkDest = null;
   if (walkPath) walkPath.hide();
-  walkNote = "Here.";
-  walkNoteUntil = Date.now() + 1600;
-  paintWalkHud();
-  setStatus("Here.");
 }
 
 function goTo(x, z) {
@@ -1408,8 +1393,6 @@ function goTo(x, z) {
   dismissLooseLandUi();
   if (playCam && typeof playCam.followWalk === "function") playCam.followWalk();
   paintWalkPath();
-  paintWalkHud();
-  setStatus("Walking.");
 }
 
 function selectLand(p, walk) {
@@ -1421,7 +1404,6 @@ function selectLand(p, walk) {
   refreshHud();
   if (walk && !nearParcel(p)) {
     goTo(p.x, p.z);
-    setStatus("Walking onto that land.");
   } else if (canEnter(p)) {
     setStatus("Yours. Tap the building or Enter.");
   } else {

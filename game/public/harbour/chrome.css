@@ -134,12 +134,13 @@ html, body {
   flex-direction: column;
   align-items: flex-end;
   gap: 6px;
-  max-width: min(92vw, 300px);
+  max-width: min(96vw, 360px);
   z-index: 11;
 }
 .chrome-row {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 6px;
 }
 .chip {
@@ -706,22 +707,6 @@ nav.dock.travel-dock {
   font-weight: 800;
 }
 #place-hint[hidden] { display: none !important; }
-
-.walk-status {
-  display: inline-block;
-  margin: 8px 0 0;
-  padding: 5px 10px;
-  background: rgba(8, 18, 22, 0.92);
-  color: #d8ff2a;
-  border: 1px solid rgba(216, 255, 42, 0.75);
-  border-radius: 8px;
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  pointer-events: none;
-  text-shadow: none;
-}
-.walk-status[hidden] { display: none !important; }
 
 #buy-ask {
   position: absolute;

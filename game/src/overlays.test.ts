@@ -7,6 +7,8 @@ import { VIEWERS, createOverlays, footLevel, toggleViewer } from "../public/harb
 describe("foot-traffic viewer (PAPER)", () => {
   it("exposes the four top-right viewers", () => {
     expect(Object.keys(VIEWERS)).toEqual(["world", "lots", "foot", "logistics", "minerals"]);
+    expect(VIEWERS.foot.label).toBe("Foot traffic");
+    expect(VIEWERS.minerals.label).toBe("Minerals");
   });
 
   it("names red Low, yellow Moderate, green High — not danger", () => {

@@ -75,6 +75,7 @@ export function mountChrome(opts) {
     world: "World: tap the dirt to walk. Green line is the path.",
     lots: "Lots on. Outlines plus a few nearby $ bars. Click Lots again to hide.",
     foot: "Foot traffic: High (green) / Moderate (yellow) / Low (red) on each named road.",
+    minerals: "Minerals are not in yet.",
   };
 
   function setOverlay(id) {

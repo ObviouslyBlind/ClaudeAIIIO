@@ -35,7 +35,7 @@ export const VIEWERS = {
   minerals: {
     id: "minerals",
     label: "Minerals",
-    hint: "Minerals: ore catalog is in. Overlay paint comes next.",
+    hint: "Minerals are not in yet.",
   },
 };
 
