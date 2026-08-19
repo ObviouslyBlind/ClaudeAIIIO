@@ -172,8 +172,12 @@ export function formatMarketplace(play, opts = {}) {
       </label>
       <div class="isle-row" role="tablist" aria-label="Island">
         <button type="button" class="isle${island === "south" ? " is-on" : ""}" data-island="south">South</button>
-        <button type="button" class="isle is-locked" data-island="north" disabled aria-disabled="true">North</button>
+        <button type="button" class="isle is-locked" data-island="north" disabled aria-disabled="true" aria-label="North, closed until you ferry">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="11" width="12" height="9" rx="1"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+          North
+        </button>
       </div>
+      <p class="mp-isle-note">North is shut until you ferry. Nothing to buy there yet.</p>
     </div>
     <div class="mp-aisles" role="tablist" aria-label="Aisle">${aisles}</div>
     <div class="mp-scroll">${list}</div>

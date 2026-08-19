@@ -39,6 +39,9 @@ describe("2Isles Marketplace sheet", () => {
     expect(html).toContain(">South<");
     expect(html).toContain("North");
     expect(html).toContain("disabled");
+    expect(html).toContain("is-locked");
+    expect(html).toContain("closed until you ferry");
+    expect(html).toContain("North is shut until you ferry");
     expect(html).not.toMatch(/PAPER/i);
     expect(html).not.toMatch(/outfitter/i);
     expect(html).not.toMatch(/\bbooks?\b/i);

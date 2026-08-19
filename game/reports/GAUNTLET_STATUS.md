@@ -1,15 +1,12 @@
 # Gauntlet status
 
-Piece in play: **road joins**. Operator: roads still look horribly fucked after the 26 m bed. Politics frozen.
-
-The 26 m mitered slab was the live failure: it ate the verge (props on tarmac), blew out on bends (jagged grey stairs), and circus 36 m arms sat in the grass as extra black rectangles. Duals are two 8 m lanes again; the 10 m gap is **black asphalt**, not pale stone.
+Piece in play: **2Isles Marketplace HUD**. Politics frozen.
 
 | Round | Bar | Result |
 |---|---|---|
 | W1 | Tap dirt → person walks | **PASS** |
-| R7 | Live spawn: one black highway bed | **FAIL** — 26 m slab looked like disconnected blobs |
-| R8 | Emissive black tarmac | shipped; did not fix the slab |
-| R9 | Restore dual 8 m lanes; black median fill; 12 m circus arms | builder shipped |
-| R10 | Circus drawn as RingGeometry + arm boxes, not earcut union | builder shipped |
+| M1 | Live Market: center **2Isles Marketplace** sheet (wordmark, search, South on / North locked, Street carts with Buy). Phone + desktop. No PAPER / books / outfitter. Shop fit honest empty. | **FAIL** — North looked like a live twin tab, not locked |
+| M1b | Same bar. North must read as shut (lock, dashed, ferry-later). | builder |
 
-Queued: live critic on a **fresh** load (tab stamp after restart). Operator is the brake.
+Queued after pass: Hire sheet; phone aisle thumb reach.
+

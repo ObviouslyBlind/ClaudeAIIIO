@@ -941,6 +941,10 @@ nav.dock.travel-dock {
   letter-spacing: 0.04em;
   text-transform: uppercase;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 .isle.is-on {
   border-color: var(--btn);
@@ -949,8 +953,36 @@ nav.dock.travel-dock {
 }
 .isle.is-locked,
 .isle:disabled {
-  opacity: 0.38;
+  opacity: 1;
+  color: #7a9088;
+  background: repeating-linear-gradient(
+    -45deg,
+    #0c1416,
+    #0c1416 6px,
+    #101a1c 6px,
+    #101a1c 12px
+  );
+  border: 1px dashed rgba(183, 208, 200, 0.35);
   cursor: not-allowed;
+  box-shadow: none;
+}
+.isle.is-locked svg {
+  width: 13px;
+  height: 13px;
+  flex: 0 0 auto;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+.float-panel p.mp-isle-note,
+.mp-isle-note {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #8aa8a0;
 }
 .mp-aisles {
   display: flex;
