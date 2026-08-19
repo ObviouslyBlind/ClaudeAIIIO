@@ -1434,7 +1434,13 @@ export function playSnapshot(visitor: Visitor, land: LandBoard, taxRate?: number
       use: p.use,
     })),
     leaseOptions: land.plots
-      .filter((p) => p.island === "south" && p.band === "street" && !p.owner && p.class === "by_right")
+      .filter(
+        (p) =>
+          p.island === "south" &&
+          !p.owner &&
+          (p.class === "by_right" || p.class === "cart_pad") &&
+          (p.band === "street" || p.class === "cart_pad"),
+      )
       .sort((a, b) => {
         const port = ISLANDS.south.port;
         return Math.hypot(a.x - port.x, a.z - port.z) - Math.hypot(b.x - port.x, b.z - port.z);

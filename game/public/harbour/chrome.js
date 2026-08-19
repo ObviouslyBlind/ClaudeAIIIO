@@ -834,7 +834,7 @@ export function mountChrome(opts) {
     const price = roadside
       ? ""
       : vacant
-        ? `<button type="button" class="land-buy take-all" id="land-lease">${money(plot.price)} · Buy lot</button>`
+        ? `<button type="button" class="land-buy take-all" id="land-lease">${money(plot.price)} · ${plot.class === "cart_pad" ? "Buy pad" : "Buy lot"}</button>`
         : `<p class="price">${yours ? "YOURS" : "taken"}</p>`;
     const note = extras && extras.note ? `<p class="lease-note">${extras.note}</p>` : "";
     landCard.innerHTML = `

@@ -41,6 +41,7 @@ export function fillColorFor(plot, selectedId) {
   if (selectedId && plot.id === selectedId) return FILL_SELECTED;
   if (plot.owner === "visitor") return FILL_VISITOR;
   if (plot.owner) return FILL_NPC;
+  if (plot.class === "cart_pad") return 0xc4a574;
   return FILL_VACANT[plot.band] ?? FILL_VACANT.field;
 }
 

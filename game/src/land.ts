@@ -24,13 +24,14 @@ import {
 import { buildSouthLand, southTaxiStops } from "./southLand.ts";
 import type { RoadGraph } from "./roadGraph.ts";
 import { inflateAsksAfterLease, plotAsk } from "./landPrice.ts";
+import { CART_PAD_MAX, CART_PAD_PRICE } from "./economy.ts";
 
 export { BUILDING_CATALOG, DEVELOP_COST };
 export type { LandUseId };
 
 export type IslandId = "north" | "south";
 export type PlotBand = "shore" | "street" | "field";
-export type PlotClass = "by_right" | "reserved";
+export type PlotClass = "by_right" | "reserved" | "cart_pad";
 export type LandUse = LandUseId | null;
 export type Ring = [number, number][];
 
@@ -770,6 +771,14 @@ export function pickStarterPlotAt(
   return best;
 }
 
+export function isCartPad(plot: { class?: string } | null | undefined): boolean {
+  return plot?.class === "cart_pad";
+}
+
+export function visitorCartPadCount(board: LandBoard, owner = "visitor"): number {
+  return board.plots.filter((p) => p.owner === owner && isCartPad(p)).length;
+}
+
 export function leasePlot(
   board: LandBoard,
   visitor: Visitor,
@@ -782,8 +791,13 @@ export function leasePlot(
   if (plot.class === "reserved") return { ok: false, reason: "reserved" };
   if (plot.owner) return { ok: false, reason: "owned" };
   if (!zoneUnlocked(plot.zone)) return { ok: false, reason: "zone_locked" };
+  if (isCartPad(plot) && visitorCartPadCount(board, owner) >= CART_PAD_MAX) {
+    return { ok: false, reason: "pad_cap" };
+  }
   if (visitor.cash < plot.price) return { ok: false, reason: "no_cash" };
-  if (visitor.cash - plot.price < DEVELOP_COST) return { ok: false, reason: "need_develop_cash" };
+  if (!isCartPad(plot) && visitor.cash - plot.price < DEVELOP_COST) {
+    return { ok: false, reason: "need_develop_cash" };
+  }
   visitor.cash = Math.round((visitor.cash - plot.price) * 10000) / 10000;
   plot.owner = owner;
   if (opts?.inflate !== false) inflateAsksAfterLease(board.plots, plot);
@@ -799,6 +813,7 @@ export function developPlot(
   const plot = getPlot(board, plotId);
   if (!plot) return { ok: false, reason: "no_plot" };
   if (plot.owner !== "visitor") return { ok: false, reason: "not_yours" };
+  if (isCartPad(plot)) return { ok: false, reason: "cart_only" };
   if (plot.use) return { ok: false, reason: "already_built" };
   if (!isLandUse(use)) return { ok: false, reason: "bad_use" };
   const cost = paperCostFor(use);
@@ -885,6 +900,9 @@ export function landSnapshot(board: LandBoard, visitor: Visitor) {
     note: "Authored island parcels in metres. Not Earth. Not OSM. Leases are paper.",
     islands: ISLANDS,
     developCost: DEVELOP_COST,
+    cartPadPrice: CART_PAD_PRICE,
+    cartPadMax: CART_PAD_MAX,
+    cartPadsOwned: visitorCartPadCount(board),
     catalog: BUILDING_CATALOG,
     visitor: {
       cash: visitor.cash,

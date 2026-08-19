@@ -12,6 +12,7 @@ import {
   isStarterPlot,
   pickStarterPlotAt,
   STARTER_CASH,
+  visitorCartPadCount,
   pavedPolyline,
   pointInRing,
   roadNodes,
@@ -40,7 +41,9 @@ describe("harbour land board", () => {
     expect(plots.length).toBeGreaterThan(40);
     expect(plots.every((p) => p.ring.length >= 4)).toBe(true);
     expect(plots.filter((p) => p.island === "north").every((p) => p.area > 180)).toBe(true);
-    expect(plots.filter((p) => p.island === "south").every((p) => p.area > SOUTH_MIN_LOT_M2)).toBe(true);
+    expect(
+      plots.filter((p) => p.island === "south" && p.class !== "cart_pad").every((p) => p.area > SOUTH_MIN_LOT_M2),
+    ).toBe(true);
     expect(plots.some((p) => p.band === "field")).toBe(true);
     expect(plots.some((p) => p.band === "street")).toBe(true);
     const sample = plots[0];
@@ -182,6 +185,29 @@ describe("harbour land board", () => {
     expect(plot.owner).toBeNull();
   });
 
+  it("lets $1000 PAPER buy a highway cart pad, max three, carts only", () => {
+    const board = createLandBoard();
+    const pads = board.plots.filter((p) => p.class === "cart_pad" && !p.owner);
+    expect(pads.length).toBeGreaterThan(3);
+    const starter = createVisitor(STARTER_CASH);
+    const first = pads[0]!;
+    expect(first.price).toBe(750);
+    expect(leasePlot(board, starter, first.id).ok).toBe(true);
+    expect(starter.cash).toBe(STARTER_CASH - 750);
+    expect(developPlot(board, starter, first.id, "house").reason).toBe("cart_only");
+
+    const board2 = createLandBoard();
+    const more = board2.plots.filter((p) => p.class === "cart_pad" && !p.owner);
+    const rich = createVisitor(750 * 3 + 40);
+    expect(leasePlot(board2, rich, more[0]!.id).ok).toBe(true);
+    expect(leasePlot(board2, rich, more[1]!.id).ok).toBe(true);
+    expect(leasePlot(board2, rich, more[2]!.id).ok).toBe(true);
+    expect(visitorCartPadCount(board2)).toBe(3);
+    const fourth = leasePlot(board2, rich, more[3]!.id);
+    expect(fourth.ok).toBe(false);
+    if (!fourth.ok) expect(fourth.reason).toBe("pad_cap");
+  });
+
   it("counts standing inside a large field as on that parcel, not only the centroid", () => {
     const board = createLandBoard();
     const field = board.plots
@@ -199,7 +225,7 @@ describe("harbour land board", () => {
   });
   it("names every lot as a house number on the street it fronts", () => {
     const board = createLandBoard();
-    const numbered = board.plots.filter((p) => p.class !== "reserved");
+    const numbered = board.plots.filter((p) => p.class !== "reserved" && p.class !== "cart_pad");
     expect(numbered.every((p) => /^\d+ .+$/.test(p.name))).toBe(true);
     expect(board.plots.filter((p) => p.class === "reserved").every((p) => /Green$/.test(p.name))).toBe(true);
     expect(board.plots.some((p) => p.street === "Harbour Rd")).toBe(true);

@@ -24,4 +24,16 @@ describe("buy-ask (PAPER)", () => {
     expect(buyAskModel({ id: "b", price: 10, owner: "visitor" })).toBeNull();
     expect(buyAskModel(null)).toBeNull();
   });
+
+  it("asks for a cart pad by that name", () => {
+    const model = buyAskModel({
+      id: "south-cart-0",
+      name: "Cart pad · Island Hwy",
+      price: 750,
+      owner: null,
+      class: "cart_pad",
+    });
+    expect(model?.question).toBe("Do you want to buy this cart pad?");
+    expect(model?.priceLabel).toBe("$750");
+  });
 });

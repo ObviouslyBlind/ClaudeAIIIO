@@ -14,6 +14,15 @@ export function askMoney(n) {
 /** Null when the lot cannot be offered (taken / yours / missing). */
 export function buyAskModel(plot) {
   if (!plot || plot.owner) return null;
+  if (plot.class === "cart_pad") {
+    return {
+      question: "Do you want to buy this cart pad?",
+      name: plotDisplayName(plot),
+      priceLabel: askMoney(plot.price),
+      yes: "Yes, buy",
+      no: "No",
+    };
+  }
   return {
     question: "Do you want to buy this lot?",
     name: plotDisplayName(plot),

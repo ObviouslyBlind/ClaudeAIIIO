@@ -29,6 +29,7 @@ export {
   leasePlot,
   developPlot,
   landSnapshot,
+  isCartPad,
   ISLANDS,
   type Parcel,
 } from "./land.ts";

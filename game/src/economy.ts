@@ -42,3 +42,7 @@ export const HOTDOG_SALE_PRICE = CART_PRICES.fruit.sale;
 /** Fry cart bottle. Not a 13th market good — first-loop stock only. */
 export const PROPANE_PRICE = 18;
 export const PROPANE_SALES = 40;
+
+/** Tiny highway-verge cart pads. Fixed ask. Max three per visitor. */
+export const CART_PAD_PRICE = 750;
+export const CART_PAD_MAX = 3;

@@ -1,7 +1,7 @@
 # South first loop
 
 - Spawn: South west quay. Cash is $. PAPER / SIMULATED.
-- Land: stone quay wrapping to sand, Island Hwy (2+2, stone median) through the island, 5 empty town centres, volcano no-go.
+- Land: stone quay wrapping to sand, Island Hwy (2+2, stone median) through the island, 5 empty town centres, volcano no-go. Street lots stay dear. **Cart pads** on the highway verge are $750, max three, carts only.
 
 ## Street carts
 

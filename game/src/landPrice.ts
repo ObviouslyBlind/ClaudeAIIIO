@@ -24,6 +24,7 @@ export type AskPlot = {
   owner: string | null;
   price: number;
   seedPrice: number;
+  class?: string;
 };
 
 function roundAsk(n: number): number {
@@ -62,11 +63,14 @@ function capAsk(plot: AskPlot, next: number): number {
   return Math.min(roundAsk(seed * LAND_ASK_CAP_MUL), roundAsk(next));
 }
 
-/** Raise vacant asks after a lease. Restore passes inflate: false. */
+/** Raise vacant asks after a lease. Restore passes inflate: false.
+ *  Cart pads stay $750 and do not bump street / field asks. */
 export function inflateAsksAfterLease(plots: AskPlot[], bought: AskPlot): void {
+  if (bought.class === "cart_pad") return;
   for (const other of plots) {
     if (other.id === bought.id) continue;
     if (other.owner) continue;
+    if (other.class === "cart_pad") continue;
     const next = other.price * (1 + bumpFor(bought, other));
     other.price = capAsk(other, next);
   }

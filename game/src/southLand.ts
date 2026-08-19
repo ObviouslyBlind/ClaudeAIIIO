@@ -35,6 +35,7 @@ import {
 } from "./roadGraph.ts";
 import { zoneForBand } from "./zones.ts";
 import { plotAsk } from "./landPrice.ts";
+import { CART_PAD_PRICE } from "./economy.ts";
 import type { IslandSpec, Parcel, PlotBand, PlotClass, Ring, Road, TaxiStop } from "./land.ts";
 
 export type SouthBuilt = {
@@ -258,6 +259,9 @@ type PushOpts = {
   zone?: Parcel["zone"];
   minArea?: number;
   skipRoads?: boolean;
+  price?: number;
+  name?: string;
+  idPrefix?: string;
 };
 
 function pushParcel(out: Parcel[], ring: Ring, opts: PushOpts): boolean {
@@ -273,9 +277,12 @@ function pushParcel(out: Parcel[], ring: Ring, opts: PushOpts): boolean {
   if (area < minA || area > SOUTH_MAX_LOT_M2) return false;
   const portDist = Math.hypot(c.x - SOUTH_PORT.x, c.z - SOUTH_PORT.z);
   const band = opts.band;
-  const id = `south-${band}-${out.length}`;
+  const id = `${opts.idPrefix ?? `south-${band}`}-${out.length}`;
   const street = opts.street;
-  const price = priceOf(area, band, portDist);
+  const price = opts.price ?? priceOf(area, band, portDist);
+  const name =
+    opts.name ??
+    (opts.cls === "cart_pad" ? `Cart pad · ${street}` : `${houseNumberFor(id)} ${street}`);
   out.push({
     id,
     island: "south",
@@ -290,7 +297,7 @@ function pushParcel(out: Parcel[], ring: Ring, opts: PushOpts): boolean {
     owner: null,
     use: null,
     street,
-    name: `${houseNumberFor(id)} ${street}`,
+    name,
     deposit: null,
     zone: opts.zone ?? zoneForBand(band),
   });
@@ -332,6 +339,52 @@ function lotsAlong(
       }
     }
     acc += segLen;
+  }
+}
+
+/** Tiny $750 cart pads on the Island Hwy verge. Not house lots. */
+function nearCircus(x: number, z: number): boolean {
+  for (const rab of Object.values(SOUTH_RAB)) {
+    if (Math.hypot(x - rab.x, z - rab.z) < RAB_R + 24) return true;
+  }
+  return false;
+}
+
+function seedHighwayCartPads(
+  lots: Parcel[],
+  roads: Road[],
+  base: Omit<PushOpts, "street" | "band">,
+): void {
+  const hwys = roads.filter((r) => r.name === "Island Hwy" && !r.roundabout && r.cls === "highway");
+  for (const road of hwys) {
+    const setback = clearanceFor(road) + 0.8;
+    const front = 6;
+    const depth = 5;
+    const step = 48;
+    const pts = road.points;
+    const len = polylineLen(pts);
+    for (let dist = 56; dist < len - 36; dist += step) {
+      const st = stationAt(pts, dist);
+      if (!st) continue;
+      if (publicQuay(st.at.x, st.at.z)) continue;
+      if (nearCircus(st.at.x, st.at.z)) continue;
+      const sa = offsetBy(st.at, { x: -st.dir.x, z: -st.dir.z }, front / 2);
+      const sb = offsetBy(st.at, st.dir, front / 2);
+      for (const side of [-1, 1] as const) {
+        const perp = { x: st.perp.x * side, z: st.perp.z * side };
+        const ring = quad(sa, sb, perp, setback, depth, 0);
+        pushParcel(lots, ring, {
+          ...base,
+          street: "Island Hwy",
+          band: "street",
+          cls: "cart_pad",
+          zone: "commercial",
+          minArea: 18,
+          price: CART_PAD_PRICE,
+          idPrefix: "south-cart",
+        });
+      }
+    }
   }
 }
 
@@ -841,6 +894,8 @@ export function buildSouthLand(spec: IslandSpec, heightAt: HeightFn): SouthBuilt
       seed: 81 + (road.name?.length ?? 0),
     });
   }
+
+  seedHighwayCartPads(lots, roads, base);
 
   const stops = southTaxiStops();
   return { plots: lots, roads, stops, graph };

@@ -480,7 +480,14 @@ function groundFromRay() {
 function paintWalkHud() {}
 
 function parcelLabel(p) {
-  const kind = p.band === "field" ? "field" : p.band === "shore" ? "shore land" : "street land";
+  const kind =
+    p.class === "cart_pad"
+      ? "cart pad"
+      : p.band === "field"
+        ? "field"
+        : p.band === "shore"
+          ? "shore land"
+          : "street land";
   return kind + " · " + money(p.area) + " m²";
 }
 
@@ -916,7 +923,7 @@ function refreshHud() {
   } else {
     plotLineEl.textContent = parcelLabel(p) + " · $" + money(p.price);
     const headroom = map.visitor.cash - p.price;
-    const need = map.developCost ?? 40;
+    const need = p.class === "cart_pad" ? 0 : map.developCost ?? 40;
     if (btnLease) btnLease.disabled = map.visitor.cash < p.price || headroom < need;
     if (map.visitor.cash < p.price) {
       plotLineEl.textContent = parcelLabel(p) + " · $" + money(p.price) + " · need cash";
@@ -930,6 +937,7 @@ function parcelTint(p, isSel) {
   if (isSel) return 0xf0d060;
   if (p.owner === "visitor") return 0xc47848;
   if (p.owner) return 0x7e9458;
+  if (p.class === "cart_pad") return 0xc4a574;
   if (p.band === "shore") return 0xd4b483;
   if (p.band === "field") return 0x6a8f44;
   return 0xb7c47a;
@@ -1257,11 +1265,12 @@ function starterLotOn(p, islandId) {
     STARTER_CASH,
     map.visitor && Number.isFinite(map.visitor.cash) ? map.visitor.cash : STARTER_CASH,
   );
-  const need = map.developCost ?? 40;
+  const need = p.class === "cart_pad" ? 0 : map.developCost ?? 40;
   if (p.island !== islandId) return false;
   if (Math.hypot(p.x - spec.port.x, p.z - spec.port.z) >= SPAWN_PARCEL_M) return false;
   if (p.owner === "visitor") return true;
   if (p.owner) return false;
+  if (p.class === "cart_pad") return p.price <= cash;
   if (p.band !== "street") return false;
   return p.price + need <= cash;
 }

@@ -78,17 +78,35 @@ describe("South first loop", () => {
   it("offers a vacant street lot next to the south pad that $1000 cannot lease", () => {
     const land = createLandBoard();
     const visitor = createVisitor(1_000);
-    const snap = playSnapshot(visitor, land);
-    expect(snap.leaseOptions.length).toBeGreaterThan(0);
-    const near = snap.leaseOptions[0]!;
-    expect(Math.hypot(near.x - ISLANDS.south.port.x, near.z - ISLANDS.south.port.z)).toBeLessThan(80);
-    expect(near.price).toBeGreaterThan(1_000);
-    expect(leasePlot(land, visitor, near.id).ok).toBe(false);
-    const rich = createVisitor(near.price + 800);
-    expect(leasePlot(land, rich, near.id).ok).toBe(true);
+    const near = land.plots.find(
+      (p) =>
+        p.island === "south" &&
+        !p.owner &&
+        p.band === "street" &&
+        p.class === "by_right" &&
+        Math.hypot(p.x - ISLANDS.south.port.x, p.z - ISLANDS.south.port.z) < 80,
+    );
+    expect(near).toBeTruthy();
+    expect(near!.price).toBeGreaterThan(1_000);
+    expect(leasePlot(land, visitor, near!.id).ok).toBe(false);
+    const rich = createVisitor(near!.price + 800);
+    expect(leasePlot(land, rich, near!.id).ok).toBe(true);
     const after = playSnapshot(rich, land);
-    expect(after.leases.some((row) => row.id === near.id)).toBe(true);
-    expect(after.leaseOptions.some((row) => row.id === near.id)).toBe(false);
+    expect(after.leases.some((row) => row.id === near!.id)).toBe(true);
+    expect(after.leaseOptions.some((row) => row.id === near!.id)).toBe(false);
+  });
+
+  it("lets $1000 PAPER lease a highway cart pad and still buy a fruit cart", () => {
+    const land = createLandBoard();
+    const visitor = createVisitor(1_000);
+    const pad = land.plots.find((p) => p.class === "cart_pad" && !p.owner)!;
+    expect(pad.price).toBe(750);
+    expect(leasePlot(land, visitor, pad.id).ok).toBe(true);
+    const kit = CART_PAPER_PRICE + HOTDOG_PACK_PRICE + HIRE_COST;
+    expect(visitor.cash).toBeGreaterThanOrEqual(kit);
+    const snap = playSnapshot(visitor, land);
+    expect(snap.leases.some((row) => row.id === pad.id)).toBe(true);
+    expect(snap.leaseOptions.some((row) => row.price === 750)).toBe(true);
   });
 
   it("sends a kerb van without a lease, and rejects a vacant plotId", () => {

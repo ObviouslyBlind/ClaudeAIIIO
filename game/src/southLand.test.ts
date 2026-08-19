@@ -97,6 +97,40 @@ describe("South land (no buildings)", () => {
     expect(near[0]!.street).toBe("Island Hwy");
   });
 
+  it("seeds tiny $750 cart pads on both sides of Island Hwy", () => {
+    const board = createLandBoard();
+    const pads = board.plots.filter((p) => p.class === "cart_pad");
+    expect(pads.length).toBeGreaterThan(8);
+    expect(pads.every((p) => p.price === 750)).toBe(true);
+    expect(pads.every((p) => p.street === "Island Hwy")).toBe(true);
+    expect(pads.every((p) => p.zone === "commercial")).toBe(true);
+    expect(pads.every((p) => p.area < 90)).toBe(true);
+    expect(pads.every((p) => p.island === "south")).toBe(true);
+    const near = pads.filter((p) => Math.hypot(p.x - SOUTH_PORT.x, p.z - SOUTH_PORT.z) < 220);
+    expect(near.length).toBeGreaterThan(0);
+    const hwys = board.roads.filter((r) => r.name === "Island Hwy" && !r.roundabout);
+    function sideOf(p: { x: number; z: number }): number {
+      let best = Infinity;
+      let s = 0;
+      for (const r of hwys) {
+        for (let i = 0; i < r.points.length - 1; i++) {
+          const a = r.points[i]!;
+          const b = r.points[i + 1]!;
+          const mx = (a.x + b.x) / 2;
+          const mz = (a.z + b.z) / 2;
+          const d = Math.hypot(p.x - mx, p.z - mz);
+          if (d < best) {
+            best = d;
+            s = (p.x - a.x) * -(b.z - a.z) + (p.z - a.z) * (b.x - a.x);
+          }
+        }
+      }
+      return s;
+    }
+    expect(pads.some((p) => sideOf(p) > 0)).toBe(true);
+    expect(pads.some((p) => sideOf(p) < 0)).toBe(true);
+  });
+
   it("puts street lots on both sides and seeds hamlets so long roads are not a void", () => {
     const board = createLandBoard();
     const south = board.plots.filter((p) => p.island === "south");
