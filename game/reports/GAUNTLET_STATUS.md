@@ -7,7 +7,7 @@ Piece in play: **street carts grind** (warehouse buy, scores, games, account, lo
 | W1 | Tap dirt → person walks | **PASS** |
 | M2 | Compact Marketplace, gold Add Cart, North hover, phone aisles | **PASS** |
 | W3 | Pay from Marketplace lands in Warehouse. Kit row has Place. Phone + desktop. | **PASS** |
-| S2 | Finish Fruit slice with stock in the warehouse → sold > 0, or a status that names empty/cooldown. | queued |
+| S2 | Finish Fruit slice with stock in the warehouse → sold > 0, or a status that names empty/cooldown. | **PASS** |
 | C2 | Fruit buyable after a $750 pad. Watermelon and fish kits > $1000. Stats start 1–2/10. | queued |
 | G2 | Fruit and watermelon each have a second tap game. Fish and chips still Fry / Basket / Wrap. | queued |
 | A3 | Account shows Google placeholder, #0002, red Reset, red Delete with three confirms. | queued |
