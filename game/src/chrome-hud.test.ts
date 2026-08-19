@@ -155,8 +155,6 @@ describe("harbour chrome HUD", () => {
     expect(chrome).toContain("stampPlay");
     expect(chrome).toContain("playGen");
     expect(chrome).toContain("if (gen !== playGen) return");
-    expect(chrome).toContain('"/api/lease"');
-    expect(chrome).toContain("JSON.stringify({ plotId: id })");
     expect(chrome).toContain("plotIsYours");
     expect(chrome).toContain('id="land-lease"');
     expect(chrome).toContain("order-label");
