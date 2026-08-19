@@ -11,8 +11,8 @@ import { circusMeshRadii } from "./roadclip.js";
 
 /** Keep in sync with SHOULDER_PAD_M in roads.js. */
 export const FOOT_SHOULDER_M = 2.2;
-/** Arm stubs past the circus outer ring. Long enough to read from spawn. */
-export const CIRCUS_ARM_STUB_M = 18;
+/** Arm stubs past the circus outer ring. Long enough to read as a throat from spawn. */
+export const CIRCUS_ARM_STUB_M = 36;
 
 function clsOf(road) {
   if (road.cls) return road.cls;
@@ -204,9 +204,10 @@ export function buildHubFootprint(graph, node, pad) {
     tarmac: tar,
     /** Rim, not a slab under the black. */
     shoulder: gritU.length ? diffGeoms(gritU, tar) : [],
-    /** L/T kerb ring. Offset walks clip against `clip`, which still includes the heart. */
+    /** L/T kerb ring. Offset walks clip against tarmac so black ribbons meet the hub. */
     sidewalk: walkU.length ? diffGeoms(walkU, tar) : [],
-    clip: walkU.length ? walkU : tar,
+    /** Ribbons stop on tarmac, not the walk. Walk-clip left a sand gap before the hub. */
+    clip: tar,
   };
 }
 

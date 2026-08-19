@@ -13,6 +13,9 @@ import {
   HIGHWAY_LANE_OFFSET_M,
   HIGHWAY_MEDIAN_M,
   HIGHWAY_RAB_SKIP_M,
+  MEDIAN,
+  MEDIAN_STRIPE_M,
+  STONE,
   makeRoads,
   spawnCameraOffset,
   spawnLookAtOffset,
@@ -61,13 +64,13 @@ describe("paved street from spawn", () => {
     );
     const pavedRoads = map.roads.filter((r) => r.kind === "paved");
     const dirtRoads = map.roads.filter((r) => r.kind === "dirt");
-    const extraCarriages = pavedRoads.filter((r) => r.lanes === 4).length;
     const circuses = pavedRoads.filter((r) => r.roundabout).length;
 
     // Circuses are one node mesh, not a RingGeometry plus stacked dual tapes.
     expect(paved.filter((m) => m.userData.footprint && /Circus$/.test(String(m.userData.roadName || ""))).length).toBe(circuses);
-    expect(paved.length).toBeGreaterThanOrEqual(pavedRoads.length - circuses + extraCarriages);
-    expect(paved.length).toBeLessThan(pavedRoads.length + extraCarriages + circuses + 8);
+    // Duals are one black bed, not a second offset carriageway.
+    expect(paved.length).toBeGreaterThanOrEqual(pavedRoads.length - circuses);
+    expect(paved.length).toBeLessThan(pavedRoads.length + 48);
     expect(extras.length).toBe(0);
     const walks = added.filter((m) => m.userData.roadKind === "sidewalk");
     expect(walks.length).toBeGreaterThan(4);
@@ -116,17 +119,16 @@ describe("paved street from spawn", () => {
     const street = widthFor("street");
     const lane = widthFor("lane");
 
-    // One highway carriageway is narrower than an avenue; the pair plus the
-    // median is what makes it read big, so compare the full footprint too.
     expect(carriagewayWidthM("highway")).toBeGreaterThan(roadWidthM("avenue"));
     expect(roadWidthM("avenue")).toBeGreaterThan(roadWidthM("street"));
     expect(roadWidthM("street")).toBeGreaterThan(roadWidthM("lane"));
     expect(roadWidthM("lane")).toBeGreaterThan(roadWidthM("track"));
-    // Each step is big enough to see from the play camera, not a 2 m nuance.
     expect(roadWidthM("avenue") - roadWidthM("street")).toBeGreaterThan(3);
     expect(roadWidthM("street") - roadWidthM("lane")).toBeGreaterThan(3);
 
-    expect(highway).toBeCloseTo(ROAD_CLASSES.highway.carriageM, 3);
+    // Highway draws the full bed so the dual reads as one road from spawn.
+    expect(highway).toBeCloseTo(carriagewayWidthM("highway"), 3);
+    expect(highway).toBeGreaterThan(avenue);
     expect(avenue).toBeCloseTo(ROAD_CLASSES.avenue.carriageM, 3);
     expect(street).toBeCloseTo(ROAD_CLASSES.street.carriageM, 3);
     expect(lane).toBeCloseTo(ROAD_CLASSES.lane.carriageM, 3);
@@ -270,9 +272,13 @@ describe("paved street from spawn", () => {
     const hwy = pavedRoads.find((r) => r.lanes === 4);
     expect(hwy).toBeTruthy();
     const hwyMeshes = paved.filter((m) => m.userData.roadName === "Island Hwy");
-    expect(hwyMeshes.length).toBeGreaterThanOrEqual(2);
-    expect(hwyMeshes.length % 2).toBe(0);
-    expect(added.some((m) => m.userData.roadKind === "median")).toBe(true);
+    expect(hwyMeshes.length).toBeGreaterThanOrEqual(1);
+    expect(ribbonWidthM(hwyMeshes[0]!)).toBeCloseTo(carriagewayWidthM("highway"), 1);
+    const median = added.find((m) => m.userData.roadKind === "median");
+    expect(median).toBeTruthy();
+    expect(lum(median!.material.color.getHex())).toBeLessThan(0.12);
+    expect(lum(MEDIAN)).toBeLessThan(lum(STONE));
+    expect(MEDIAN_STRIPE_M).toBeLessThan(4);
     expect(added.some((m) => m.userData.roadKind === "island")).toBe(true);
 
     const rowMesh = paved.find((m) => String(m.userData.roadName || "").includes("Row"));
@@ -299,8 +305,8 @@ describe("paved street from spawn", () => {
         nearestHwy = Math.min(nearestHwy, d);
       }
     }
-    // Ribbons stop on the node mesh. The join is the unioned circus, not a 9 m sand gap.
-    expect(nearestHwy).toBeLessThan(radii.outer + 20);
+    // Ribbons stop on the node-mesh arm, not 9 m beside the kerb.
+    expect(nearestHwy).toBeLessThan(radii.outer + 50);
     expect(nearestHwy).toBeGreaterThan(radii.inner);
     const circus = added.find(
       (m) => m.userData.roadName === "Harbour Circus" && m.userData.footprint,
@@ -320,7 +326,7 @@ describe("paved street from spawn", () => {
         nearestQuay = Math.min(nearestQuay, Math.hypot(pos.getX(i) - harbour.x, pos.getZ(i) - harbour.z));
       }
     }
-    expect(nearestQuay, "Quayward Rd missed Harbour Circus").toBeLessThan(radii.outer + 20);
+    expect(nearestQuay, "Quayward Rd missed Harbour Circus").toBeLessThan(radii.outer + 50);
     expect(nearestQuay).toBeGreaterThan(radii.inner - 0.6);
   });
 

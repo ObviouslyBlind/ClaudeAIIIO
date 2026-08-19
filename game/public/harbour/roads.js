@@ -17,8 +17,15 @@ export const ASPHALT = 0x141414;
 export const DIRT = 0x8a6238;
 /** Same stone as house plinth / window sills — original palette, not a new hex. */
 export const STONE = 0x9a8a72;
+/**
+ * Dual median stripe. Pale stone (STONE) reads as sand from spawn, so the
+ * highway looked like two unconnected tapes. Stay in the asphalt family.
+ */
+export const MEDIAN = 0x1a1a18;
 /** Pale coping walk beside the tarmac. Same cap family as the south quay. */
 export const SIDEWALK = 0xb0a48c;
+/** Drawn median width. Class medianM is the driving gap; this is the paint. */
+export const MEDIAN_STRIPE_M = 1.8;
 export const SIDEWALK_WIDTH_M = 2.8;
 /** Local T-stubs and town lanes — narrower than the arterial. */
 export const LOCAL_WIDTH_M = ROAD_CLASSES.lane.carriageM;
@@ -284,11 +291,11 @@ function insideJoin(joins, x, z) {
   return false;
 }
 
-function clipToJoins(pts, joins) {
+function clipToJoins(pts, joins, overlapM = 1.6) {
   if (!pts || pts.length < 2) return [];
   if (!joins || !joins.length) return [pts];
   const runs = clipPolylineToOutside(pts, (x, z) => insideJoin(joins, x, z));
-  const extra = 1.6;
+  const extra = overlapM;
   return runs.map((run) => {
     if (!run || run.length < 2) return run;
     let out = run;
@@ -297,7 +304,7 @@ function clipToJoins(pts, joins) {
       const a = head ? out[1] : out[out.length - 2];
       const len = Math.hypot(b.x - a.x, b.z - a.z) || 1;
       const p = { x: b.x + ((b.x - a.x) / len) * extra, z: b.z + ((b.z - a.z) / len) * extra };
-      if (insideJoin(joins, p.x, p.z)) {
+      if (extra > 0 && insideJoin(joins, p.x, p.z)) {
         out = head ? [p].concat(out.slice(1)) : out.slice(0, -1).concat([p]);
       }
     }
@@ -358,56 +365,47 @@ function drawSidewalks(scene, spec, road, heightAt, graph, joins) {
   for (const side of [-1, 1]) {
     const offsetPts = offsetPolyline(pts, offset * side);
     const pieces = joins && joins.length
-      ? clipToJoins(offsetPts, joins)
+      ? clipToJoins(offsetPts, joins, 0)
       : splitRuns(omitInsidePads(offsetPts, graph, walk + 0.8), 10);
     drawClippedRuns(scene, spec, road, heightAt, pieces, walk, SIDEWALK, "sidewalk");
   }
 }
 
-/** 2+2 lanes with a stone median. Widths come from the class table. */
+/**
+ * Dual as one black bed plus a dark stripe. Two offset tapes with a pale
+ * stone gap read as unconnected roads from the spawn camera.
+ */
 function drawHighway(scene, spec, road, heightAt, graph, joins) {
   const cls = classOf(road);
-  const s = roadClassSpec(cls);
   const pts = drawablePoints(road, graph);
   if (pts.length < 2) return;
-  const lane = s.medianM / 2 + s.carriageM / 2;
   const name = road.name || "Island Hwy";
   const lip = clipToJoins(pts, joins);
+  const bed = carriagewayWidthM(cls);
   drawClippedRuns(
     scene,
     spec,
     { ...road, name: name + " shoulder" },
     heightAt,
     lip,
-    carriagewayWidthM(cls) + SHOULDER_PAD_M,
+    bed + SHOULDER_PAD_M,
     SHOULDER,
     "shoulder",
     {},
     -0.03,
   );
-  for (const side of [-1, 1]) {
-    drawClippedRuns(
-      scene,
-      spec,
-      road,
-      heightAt,
-      clipToJoins(offsetPolyline(pts, lane * side), joins),
-      s.carriageM,
-      ASPHALT,
-      "paved",
-    );
-  }
+  drawClippedRuns(scene, spec, road, heightAt, lip, bed, ASPHALT, "paved");
   drawClippedRuns(
     scene,
     spec,
     { ...road, name: name + " median" },
     heightAt,
     lip,
-    s.medianM,
-    STONE,
+    MEDIAN_STRIPE_M,
+    MEDIAN,
     "median",
     {},
-    0.02,
+    0.03,
   );
 }
 

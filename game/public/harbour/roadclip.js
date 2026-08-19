@@ -9,11 +9,11 @@
  */
 
 /** Metres past the graph kerb. Duals hit this circle face-on instead of beside it. */
-export const CIRCUS_OUTER_PAD_M = 8;
+export const CIRCUS_OUTER_PAD_M = 10;
 /** Ribbons tuck this far under the ring so a 1-px sand seam cannot show. */
 export const CIRCUS_OVERLAP_M = 0.5;
 /** Circulatory asphalt width — fat enough to read from the spawn camera. */
-export const CIRCUS_RING_WIDTH_M = 16;
+export const CIRCUS_RING_WIDTH_M = 18;
 /** Stop this far outside the stone island so duals sit on the ring, not the kerb. */
 export const CIRCUS_ENTER_PAD_M = 1.6;
 

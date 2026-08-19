@@ -27,6 +27,7 @@ describe("road hub footprints", () => {
     expect(multiContains(foot.tarmac, se.x, se.z)).toBe(true);
     expect(multiContains(foot.sidewalk, se.x + 6, se.z + 6)).toBe(true);
     expect(multiContains(foot.tarmac, se.x + 6, se.z + 6)).toBe(false);
+    expect(multiContains(foot.clip, se.x + 6, se.z + 6)).toBe(false);
     expect(multiContains(foot.tarmac, se.x + 20, se.z + 20)).toBe(false);
   });
 
