@@ -334,6 +334,20 @@ describe("paved street from spawn", () => {
     expect(circus!.geometry.parameters?.innerRadius).toBeCloseTo(radii.inner, 0);
     expect(circus!.geometry.parameters?.outerRadius).toBeCloseTo(radii.outer, 0);
     expect(added.filter((m) => m.userData.roadName === "Harbour Circus arm").length).toBe(0);
+    const lips = added.filter(
+      (m) => m.userData.roadKind === "paved" && String(m.userData.roadName || "").endsWith(" lip"),
+    );
+    expect(lips.length, "dual circus lip").toBeGreaterThan(0);
+    expect(lips.every((m) => (m.userData.widthM ?? 0) > 20)).toBe(true);
+    let nearestLip = Infinity;
+    for (const mesh of lips) {
+      const pos = mesh.geometry.attributes.position;
+      for (let i = 0; i < pos.count; i++) {
+        nearestLip = Math.min(nearestLip, Math.hypot(pos.getX(i) - harbour.x, pos.getZ(i) - harbour.z));
+      }
+    }
+    expect(nearestLip, "lip missed the ring").toBeLessThan(radii.outer + 1.5);
+    expect(nearestLip).toBeGreaterThan(radii.inner);
     const hwyShoulder = added.filter(
       (m) => m.userData.roadKind === "shoulder" && String(m.userData.roadName || "").startsWith("Island Hwy"),
     );
@@ -386,6 +400,20 @@ describe("paved street from spawn", () => {
       }
     }
     expect(hwyNear, "through dual paint was cut by the T plate").toBeLessThan(6);
+
+    const sw = map.graph.nodes.find((x) => x.id === "s-quay-sw")!;
+    const strandPaved = added.filter(
+      (m) => m.userData.roadKind === "paved" && /South Strand/.test(String(m.userData.roadName || "")),
+    );
+    expect(strandPaved.length).toBeGreaterThan(0);
+    let strandNear = Infinity;
+    for (const mesh of strandPaved) {
+      const pos = mesh.geometry.attributes.position;
+      for (let i = 0; i < pos.count; i++) {
+        strandNear = Math.min(strandNear, Math.hypot(pos.getX(i) - sw.x, pos.getZ(i) - sw.z));
+      }
+    }
+    expect(strandNear, "through Strand was hub-cut at Quayward SW").toBeLessThan(4);
   });
 
   it("keeps south tarmac above the dirt instead of through it", () => {

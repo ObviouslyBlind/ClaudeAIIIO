@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createLandBoard } from "./land.ts";
 import { junctionPad } from "../public/harbour/roadnet.js";
-import { buildHubFootprint, buildCircusFootprint, clipPolylineToOutside, multiContains, segmentRing, unionGeoms, junctionContour, CIRCUS_ARM_STUB_M, biteRibbonWith, circleRing } from "../public/harbour/roadfoot.js";
+import { buildHubFootprint, buildCircusFootprint, clipPolylineToOutside, multiContains, segmentRing, unionGeoms, junctionContour, CIRCUS_ARM_STUB_M, biteRibbonWith, circleRing, swellRing } from "../public/harbour/roadfoot.js";
 import { circusMeshRadii } from "../public/harbour/roadclip.js";
 import { carriagewayWidthM } from "../public/harbour/roadclass.js";
 
@@ -18,6 +18,21 @@ describe("road hub footprints", () => {
     expect(multiContains(bitten, 50, 0)).toBe(true);
     expect(multiContains(bitten, 36, 0), "square end left inside the circus").toBe(false);
     expect(multiContains(bitten, 20, 0)).toBe(false);
+  });
+
+  it("swells a hub outline for grit instead of growing a second fillet star", () => {
+    const square = [
+      [0, 0],
+      [10, 0],
+      [10, 10],
+      [0, 10],
+      [0, 0],
+    ];
+    const lip = swellRing(square, 2);
+    const poly = [[lip]];
+    expect(multiContains(poly, 5, -1.5)).toBe(true);
+    expect(multiContains(poly, 5, -6)).toBe(false);
+    expect(multiContains(poly, 12, 12)).toBe(false);
   });
 
   it("fills a T as one rounded contour, not two stacked rectangles", () => {
@@ -129,6 +144,20 @@ describe("road hub footprints", () => {
     expect(multiContains(foot.tarmac, end.x, end.z)).toBe(true);
   });
 
+  it("does not lay a runway plate under a through road", () => {
+    const graph = createLandBoard().graph;
+    const hwyT = graph.nodes.find((n) => n.id === "s-hwy-hc-j1")!;
+    const hwyPad = junctionPad(graph, hwyT)!;
+    const hwy = graph.edges.find((e) => e.cls === "highway" && (e.a === hwyT.id || e.b === hwyT.id))!;
+    expect(hwyPad.throughEdgeIds).toContain(hwy.id);
+    expect(hwyPad.along[hwy.id]).toBeLessThan(carriagewayWidthM("highway") / 2 + 2);
+    const sw = graph.nodes.find((n) => n.id === "s-quay-sw")!;
+    const swPad = junctionPad(graph, sw)!;
+    const strand = graph.edges.find((e) => e.name === "South Strand" && (e.a === sw.id || e.b === sw.id))!;
+    expect(swPad.throughEdgeIds).toContain(strand.id);
+    expect(swPad.along[strand.id]).toBeLessThan(carriagewayWidthM(strand.cls) / 2 + 2);
+  });
+
   it("fills the inner T kerb with a tangent fillet, not a square rectangle crotch", () => {
     const graph = createLandBoard().graph;
     for (const id of ["s-quay-sw", "s-hwy-hc-j1"]) {
@@ -164,7 +193,7 @@ describe("road hub footprints", () => {
           if (bP.x * a.dx + bP.z * a.dz < 0) bP = { x: -bP.x, z: -bP.z };
           const det = aP.x * bP.z - aP.z * bP.x;
           if (Math.abs(det) < 1e-5) continue;
-          const extra = 1.6;
+          const extra = 1.2;
           const ha = a.half + extra;
           const hb = b.half + extra;
           const p = {

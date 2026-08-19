@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { ROAD_CLASSES, roadClassSpec } from "./roadclass.js";
+import { ROAD_CLASSES, carriagewayWidthM, roadClassSpec } from "./roadclass.js";
 import { junctionPad, trimPolylineForPads, pointInJunctionPad } from "./roadnet.js";
 import { addQuadXZ, junctionKerbQuads } from "./roadjoin.js";
 import { buildHubFootprint, buildCircusFootprint, clipPolylineToOutside, multiContains, FOOT_SHOULDER_M, biteRibbonWith, circleRing } from "./roadfoot.js";
@@ -303,12 +303,12 @@ function omitInsidePads(pts, graph, extra) {
   });
 }
 
-function insideJoin(joins, x, z, edgeId) {
+function insideJoin(joins, x, z, edgeId, alwaysClip) {
   if (!joins) return false;
   for (const j of joins) {
     // Through / dual arms have trim 0. Cutting them is what made a T
-    // read as two tapes plus a black plate.
-    if (edgeId && j.pad) {
+    // read as two tapes plus a black plate. Walks still give way.
+    if (!alwaysClip && edgeId && j.pad) {
       if (j.pad.trim && j.pad.trim[edgeId] === 0) continue;
       if (Array.isArray(j.pad.throughEdgeIds) && j.pad.throughEdgeIds.includes(edgeId)) continue;
     }
@@ -318,10 +318,10 @@ function insideJoin(joins, x, z, edgeId) {
   return false;
 }
 
-function clipToJoins(pts, joins, overlapM = 1.6, edgeId) {
+function clipToJoins(pts, joins, overlapM = 1.6, edgeId, alwaysClip) {
   if (!pts || pts.length < 2) return [];
   if (!joins || !joins.length) return [pts];
-  const runs = clipPolylineToOutside(pts, (x, z) => insideJoin(joins, x, z, edgeId));
+  const runs = clipPolylineToOutside(pts, (x, z) => insideJoin(joins, x, z, edgeId, alwaysClip));
   const extra = overlapM;
   return runs.map((run) => {
     if (!run || run.length < 2) return run;
@@ -331,7 +331,7 @@ function clipToJoins(pts, joins, overlapM = 1.6, edgeId) {
       const a = head ? out[1] : out[out.length - 2];
       const len = Math.hypot(b.x - a.x, b.z - a.z) || 1;
       const p = { x: b.x + ((b.x - a.x) / len) * extra, z: b.z + ((b.z - a.z) / len) * extra };
-      if (extra > 0 && insideJoin(joins, p.x, p.z, edgeId)) {
+      if (extra > 0 && insideJoin(joins, p.x, p.z, edgeId, alwaysClip)) {
         out = head ? [p].concat(out.slice(1)) : out.slice(0, -1).concat([p]);
       }
     }
@@ -344,8 +344,8 @@ function clipToJoins(pts, joins, overlapM = 1.6, edgeId) {
  * Offset duals must hit the ring face, not a 12 m arm box in the grass.
  * Through arms are not hub-clipped.
  */
-function clipRuns(pts, hubs, circuses, overlapM = 1.6, edgeId) {
-  const afterHubs = clipToJoins(pts, hubs, overlapM, edgeId);
+function clipRuns(pts, hubs, circuses, overlapM = 1.6, edgeId, alwaysClip) {
+  const afterHubs = clipToJoins(pts, hubs, overlapM, edgeId, alwaysClip);
   if (!circuses || !circuses.length) return afterHubs;
   const out = [];
   for (const run of afterHubs) {
@@ -410,28 +410,42 @@ function extendEnd(pts, head, extraM) {
 function splitJoinEnd(pts, head, stubM) {
   const total = polylineLen(pts);
   if (total <= stubM + 4) {
-    return { stub: extendEnd(pts, head, 6), rest: null };
+    return { stub: extendEnd(pts, head, 8), rest: null };
   }
   if (head) {
     const stub = sliceAlong(pts, 0, stubM);
     const rest = sliceAlong(pts, Math.max(0, stubM - 2.2), total);
-    return { stub: extendEnd(stub, true, 6), rest };
+    return { stub: extendEnd(stub, true, 8), rest };
   }
   const stub = sliceAlong(pts, Math.max(0, total - stubM), total);
   const rest = sliceAlong(pts, 0, total - stubM + 2.2);
-  return { stub: extendEnd(stub, false, 6), rest };
+  return { stub: extendEnd(stub, false, 8), rest };
 }
 
-function joinCutterAt(p, hubs, circuses, roadKind) {
+function isThroughEdge(pad, edgeId) {
+  if (!pad || !edgeId) return false;
+  if (pad.trim && pad.trim[edgeId] === 0) return true;
+  return Array.isArray(pad.throughEdgeIds) && pad.throughEdgeIds.includes(edgeId);
+}
+
+function joinCutterAt(p, hubs, circuses, roadKind, edgeId) {
   if (!p) return null;
-  void hubs;
   for (const c of circuses || []) {
-    const face = c.clip || c.outer;
-    if (!(face > 0)) continue;
+    const outer = c.outer || c.clip;
+    if (!(outer > 0)) continue;
     const d = Math.hypot(p.x - c.x, p.z - c.z);
-    if (Math.abs(d - face) > 10) continue;
-    const r = roadKind === "shoulder" ? (c.outer || face) + FOOT_SHOULDER_M : face;
-    return [[circleRing(c.x, c.z, r, 48)]];
+    if (d > outer + 14 || d < (c.inner || 8) * 0.4) continue;
+    const r = roadKind === "shoulder" ? outer + FOOT_SHOULDER_M : outer;
+    return [[circleRing(c.x, c.z, r, 64)]];
+  }
+  for (const h of hubs || []) {
+    const n = h.node;
+    if (!n) continue;
+    if (isThroughEdge(h.pad, edgeId)) continue;
+    const reach = ((h.pad && h.pad.side) || 22) / 2 + 10;
+    if (Math.hypot(p.x - n.x, p.z - n.z) > reach) continue;
+    if (roadKind === "shoulder") return h.foot.outerClip || h.foot.clip || null;
+    return h.foot.clip || h.foot.tarmac || null;
   }
   return null;
 }
@@ -459,14 +473,15 @@ function drawBittenStub(scene, spec, road, heightAt, stub, cutter, widthM, color
  */
 function drawClippedRuns(scene, spec, road, heightAt, runs, widthM, color, roadKind, matOpts, yLift, skipGap, hubs, circuses) {
   const hasJoins = (hubs && hubs.length) || (circuses && circuses.length);
+  const edgeId = road && road.edgeId;
   for (const run of runs) {
     if (!run || run.length < 2) continue;
     if (!hasJoins) {
       drawRibbon(scene, spec, { ...road, points: run }, heightAt, widthM, color, roadKind, matOpts || {}, skipGap == null ? Infinity : skipGap, yLift || 0);
       continue;
     }
-    const headCut = joinCutterAt(run[0], hubs, circuses, roadKind);
-    const tailCut = joinCutterAt(run[run.length - 1], hubs, circuses, roadKind);
+    const headCut = joinCutterAt(run[0], hubs, circuses, roadKind, edgeId);
+    const tailCut = joinCutterAt(run[run.length - 1], hubs, circuses, roadKind, edgeId);
     let body = run;
     let capStart = true;
     let capEnd = true;
@@ -577,9 +592,30 @@ function drawSidewalks(scene, spec, road, heightAt, graph, hubs, circuses) {
   for (const side of [-1, 1]) {
     const offsetPts = offsetPolyline(pts, offset * side);
     const pieces = hasJoins
-      ? clipRuns(offsetPts, hubs, circuses, 0, road.edgeId)
+      ? clipRuns(offsetPts, hubs, circuses, 0, road.edgeId, true)
       : splitRuns(omitInsidePads(offsetPts, graph, walk + 0.8), 10);
     drawClippedRuns(scene, spec, road, heightAt, pieces, walk, SIDEWALK, "sidewalk", {}, 0, Infinity, hubs, circuses);
+  }
+}
+
+/**
+ * Dual meeting a circus is one 26 m approach bitten to the ring, not
+ * three 8 m square chords. Only the stub — never a 26 m slab along the run.
+ */
+function drawDualCircusLips(scene, spec, road, heightAt, runs, circuses) {
+  if (!circuses || !circuses.length) return;
+  const width = carriagewayWidthM(classOf(road));
+  const name = (road.name || "Island Hwy") + " lip";
+  for (const run of runs || []) {
+    if (!run || run.length < 2) continue;
+    for (const head of [true, false]) {
+      const p = head ? run[0] : run[run.length - 1];
+      const cutter = joinCutterAt(p, null, circuses, "paved", road.edgeId);
+      if (!cutter) continue;
+      const part = splitJoinEnd(run, head, 18);
+      if (!part.stub || part.stub.length < 2) continue;
+      drawBittenStub(scene, spec, { ...road, name }, heightAt, part.stub, cutter, width, ASPHALT, "paved", 0);
+    }
   }
 }
 
@@ -649,6 +685,7 @@ function drawHighway(scene, spec, road, heightAt, graph, hubs, circuses) {
     hubs,
     circuses,
   );
+  drawDualCircusLips(scene, spec, road, heightAt, lip, circuses);
 }
 
 function addJunctionPlate(scene, spec, heightAt, pad) {

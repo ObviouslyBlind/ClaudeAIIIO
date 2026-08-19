@@ -292,14 +292,63 @@ function filletSpecs(node, arms, extraHalf) {
       const b = arms[j];
       const ang = sectorAngle(a, b);
       if (ang < 0.44 || ang > 1.92) continue;
-      const r = Math.min(5.5, Math.min(a.half, b.half) * 0.9, (7 * Math.sin(ang / 2)) / Math.sin(Math.PI / 4));
-      if (r < 1.35) continue;
+      const r = Math.min(2.6, Math.min(a.half, b.half) * 0.5, (4 * Math.sin(ang / 2)) / Math.sin(Math.PI / 4));
+      if (r < 1.05) continue;
       const c = kerbIntersect(node, a, b, r);
       if (!c) continue;
       out.push({ cx: c.x, cz: c.z, rad: r + extraHalf });
     }
   }
   return out;
+}
+
+/** Outward offset of a closed [x,z] ring. Grit is this lip, not a second fat star. */
+export function swellRing(ring, extra) {
+  if (!ring || ring.length < 4 || !(extra > 0)) return ring;
+  const pts = [];
+  for (let i = 0; i < ring.length; i++) {
+    const p = ring[i];
+    if (i === ring.length - 1 && p[0] === ring[0][0] && p[1] === ring[0][1]) continue;
+    pts.push(p);
+  }
+  const n = pts.length;
+  if (n < 3) return ring;
+  let area = 0;
+  for (let i = 0; i < n; i++) {
+    const a = pts[i];
+    const b = pts[(i + 1) % n];
+    area += a[0] * b[1] - b[0] * a[1];
+  }
+  const sign = area >= 0 ? 1 : -1;
+  const out = [];
+  const miterMax = extra * 2.2;
+  for (let i = 0; i < n; i++) {
+    const a = pts[(i + n - 1) % n];
+    const b = pts[i];
+    const c = pts[(i + 1) % n];
+    const dx1 = b[0] - a[0];
+    const dz1 = b[1] - a[1];
+    const dx2 = c[0] - b[0];
+    const dz2 = c[1] - b[1];
+    const l1 = Math.hypot(dx1, dz1) || 1;
+    const l2 = Math.hypot(dx2, dz2) || 1;
+    const n1x = (sign * dz1) / l1;
+    const n1z = (sign * -dx1) / l1;
+    const n2x = (sign * dz2) / l2;
+    const n2z = (sign * -dx2) / l2;
+    const ox = n1x + n2x;
+    const oz = n1z + n2z;
+    const ol2 = ox * ox + oz * oz || 1;
+    let mx = ox * ((extra * 2) / ol2);
+    let mz = oz * ((extra * 2) / ol2);
+    const ml = Math.hypot(mx, mz);
+    if (ml > miterMax) {
+      mx *= miterMax / ml;
+      mz *= miterMax / ml;
+    }
+    out.push([snap(b[0] + mx), snap(b[1] + mz)]);
+  }
+  return closeRing(out);
 }
 
 function perpToward(arm, other) {
@@ -356,12 +405,12 @@ export function buildHubFootprint(graph, node, pad) {
   const arms = hubArms(graph, node, pad);
   if (!arms.length) return { tarmac: [], shoulder: [], sidewalk: [], clip: [] };
   const tarRing = junctionContour(node, arms, 0);
-  const gritRing = junctionContour(node, arms, FOOT_SHOULDER_M / 2);
+  const gritRing = swellRing(tarRing, FOOT_SHOULDER_M);
   const tar = [[tarRing]];
   const grit = [[gritRing]];
   const walkOnly = arms.filter((a) => a.walk > 0).map((a) => ({ ...a, half: a.half + a.walk }));
   const walk = walkOnly.length
-    ? diffGeoms([[junctionContour(node, walkOnly, FOOT_SHOULDER_M / 2)]], tar)
+    ? diffGeoms([[swellRing(junctionContour(node, walkOnly, 0), FOOT_SHOULDER_M)]], tar)
     : [];
   return {
     tarmac: tar,

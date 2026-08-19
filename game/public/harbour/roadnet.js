@@ -331,9 +331,11 @@ export function junctionPad(graph, node) {
       clear = Math.max(clear, o.width / 2 / sin);
     }
     const walkM = roadClassSpec(a.edge.cls).sidewalkM || 0;
-    if (roadClassSpec(a.edge.cls).dual) {
+    const isThrough = throughEdgeIds.includes(a.edge.id);
+    // Through / dual arms stay a crossing, not a 20 m runway under the ribbons.
+    if (roadClassSpec(a.edge.cls).dual || isThrough) {
       trim[a.edge.id] = 0;
-      along[a.edge.id] = Math.max(clear, a.width / 2) + 1.2;
+      along[a.edge.id] = a.width / 2 + 1.2;
     } else if (clear <= 0) {
       trim[a.edge.id] = 0;
       along[a.edge.id] = side / 2 + 1.2;
