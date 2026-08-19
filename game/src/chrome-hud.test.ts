@@ -141,7 +141,7 @@ describe("harbour chrome HUD", () => {
     expect(chrome).toContain("if (buyAsk && !buyAsk.hidden) return;");
     expect(chrome).toContain("ownedId");
     expect(chrome).toContain("if (typeof opts.onNearLease === \"function\") opts.onNearLease(id);");
-    expect(chrome).toContain("if (opts.lease) opts.lease(id);");
+    expect(chrome).toContain("applyPlay");
     expect(chrome.indexOf("opts.lease(id)")).toBeLessThan(chrome.indexOf("opts.onNearLease(id)"));
     expect(chrome).toContain("order-label");
     expect(chrome).toContain("dest: marketDest === \"road\" ? \"road\" : \"warehouse\"");

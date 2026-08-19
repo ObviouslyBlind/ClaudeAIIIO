@@ -816,6 +816,11 @@ export function mountChrome(opts) {
       clearInterval(timer);
     },
     refresh: poll,
+    applyPlay(data) {
+      if (!data || data.mode !== "PAPER") return;
+      play = data;
+      paintTop();
+    },
     isPlacing: () => placing,
     getPlaceKit: () => placingKit,
     clearPlacing() {

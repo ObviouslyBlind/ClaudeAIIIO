@@ -1592,7 +1592,8 @@ async function lease(plotId) {
   applySnapshot(body.snapshot);
   const p = map && selected ? map.plots.find((x) => x.id === selected) : null;
   if (p) paintParcel(p);
-  if (chromeHud) chromeHud.refresh();
+  if (body.play && chromeHud && typeof chromeHud.applyPlay === "function") chromeHud.applyPlay(body.play);
+  else if (chromeHud) chromeHud.refresh();
   landPinned = true;
   lastInspectKey = "";
   if (chromeHud && chromeHud.hideBuyAsk) chromeHud.hideBuyAsk();
