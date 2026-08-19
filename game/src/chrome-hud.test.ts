@@ -203,9 +203,12 @@ describe("harbour chrome HUD", () => {
     expect(siteMenu).toContain("sticker-mark");
     expect(siteMenu).toContain("sticker-seg");
     expect(siteMenu).toContain("sticker-band");
+    expect(siteMenu).toContain("sticker-knob");
+    expect(siteMenu).toContain("data-sticker-knob");
     expect(siteMenu).toContain("stickerTrackSegs");
     expect(siteMenu).not.toContain("sticker-zone");
     expect(chrome).toContain('slide.setAttribute("data-tone"');
+    expect(chrome).toContain("data-sticker-knob");
     expect(siteMenu).toContain("stock-num");
     expect(siteMenu).toContain('type="range"');
     expect(chrome).toContain("Warehouse");
@@ -545,6 +548,7 @@ describe("harbour chrome HUD", () => {
     expect(stock).toContain("sticker-seg is-green");
     expect(stock).toContain('data-tone="today"');
     expect(stock).toContain("sticker-band");
+    expect(stock).toContain("sticker-knob");
     expect(stock).toContain("flex:23.3333");
     expect(stock).not.toContain("sticker-zone");
     expect(stock).not.toContain("id=\"hire-site\"");
@@ -590,6 +594,8 @@ describe("harbour chrome HUD", () => {
     expect(css).not.toMatch(/#5fe3a0 50%/);
     expect(css).not.toMatch(/#e25b6a 16%/);
     expect(css).not.toContain("linear-gradient(\n    90deg,\n    #c42b3a");
+    expect(css).toContain(".sticker-knob");
+    expect(css).toContain("gap: 3px");
     expect(css).toContain("::-webkit-slider-runnable-track");
     expect(css).toContain("::-moz-range-progress");
     expect(css).toContain(".upg-tick");

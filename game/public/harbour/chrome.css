@@ -1717,27 +1717,35 @@ nav.dock.travel-dock {
   left: 0;
   right: 0;
   top: 50%;
-  height: 14px;
+  height: 18px;
   display: flex;
   flex-direction: row;
-  border-radius: 7px;
-  overflow: hidden;
+  gap: 3px;
   pointer-events: none;
   z-index: 0;
   transform: translateY(-50%);
-  background: #132428;
+  background: transparent;
 }
 .sticker-seg {
   display: block;
   height: 100%;
   min-width: 0;
+  box-shadow: inset 0 1px 0 rgba(244, 241, 230, 0.18);
 }
 .sticker-seg.is-red { background: #c45a3a; }
 .sticker-seg.is-yellow { background: #e2c04a; }
-.sticker-seg.is-green { background: var(--green); }
+.sticker-seg:first-child { border-radius: 9px 2px 2px 9px; }
+.sticker-seg:last-child { border-radius: 2px 9px 9px 2px; }
+.sticker-seg.is-green {
+  background: var(--green);
+  transform: scaleY(1.28);
+  border-radius: 4px;
+  box-shadow: 0 0 0 1px #0c1416, inset 0 1px 0 rgba(244, 241, 230, 0.22);
+  z-index: 1;
+}
 .sticker-track {
   position: relative;
-  height: 28px;
+  height: 32px;
 }
 .upg-row small {
   margin-left: 6px;
@@ -1750,10 +1758,23 @@ nav.dock.travel-dock {
   top: 50%;
   left: 50%;
   width: 3px;
-  height: 18px;
+  height: 26px;
   background: #0c1416;
   border: 1px solid var(--green);
   border-radius: 2px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 2;
+}
+.sticker-knob {
+  position: absolute;
+  top: 50%;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 3px solid #0c1416;
+  background: transparent;
+  box-shadow: 0 0 0 2px var(--sticker-thumb, var(--green)), 0 1px 5px rgba(0, 0, 0, 0.5);
   transform: translate(-50%, -50%);
   pointer-events: none;
   z-index: 3;
@@ -1761,50 +1782,25 @@ nav.dock.travel-dock {
 .sticker-track input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
-  position: relative;
-  z-index: 2;
+  position: absolute;
+  inset: 0;
+  z-index: 4;
   width: 100%;
+  height: 100%;
   margin: 0;
-  height: 28px;
+  opacity: 0;
+  cursor: pointer;
   background: transparent;
-  accent-color: var(--sticker-thumb, var(--green));
 }
-.sticker-track input[type="range"]::-webkit-slider-runnable-track {
-  background: transparent;
-  border: none;
-  height: 14px;
-}
-.sticker-track input[type="range"]::-moz-range-track {
-  background: transparent;
-  border: none;
-  height: 14px;
-}
+.sticker-track input[type="range"]::-webkit-slider-runnable-track,
+.sticker-track input[type="range"]::-moz-range-track,
 .sticker-track input[type="range"]::-moz-range-progress {
   background: transparent;
+  border: none;
 }
-.sticker-track input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 20px;
-  height: 20px;
-  margin-top: -3px;
-  border-radius: 50%;
-  background: var(--sticker-thumb, var(--green));
-  border: 2px solid #0c1416;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
-  cursor: pointer;
-}
+.sticker-track input[type="range"]::-webkit-slider-thumb,
 .sticker-track input[type="range"]::-moz-range-thumb {
-  width: 20px;
-  height: 20px;
-  border: 2px solid #0c1416;
-  border-radius: 50%;
-  background: var(--sticker-thumb, var(--green));
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
-  cursor: pointer;
-}
-#stand-menu .sticker-track input[type="range"] {
-  accent-color: var(--sticker-thumb, var(--green));
+  opacity: 0;
 }
 .upg-row {
   display: flex;

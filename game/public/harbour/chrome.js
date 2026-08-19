@@ -713,6 +713,11 @@ export function mountChrome(opts) {
         }
         const slide = priceEl.closest(".sticker-slide");
         if (slide) slide.setAttribute("data-tone", today ? "today" : near ? "near" : "far");
+        const knob = slide && slide.querySelector("[data-sticker-knob]");
+        const lo = Number(priceEl.min);
+        const hi = Number(priceEl.max);
+        const span = hi - lo;
+        if (knob && span > 0) knob.style.left = `${((v - lo) / span) * 100}%`;
       };
       paintRead();
       priceEl.addEventListener("input", paintRead);

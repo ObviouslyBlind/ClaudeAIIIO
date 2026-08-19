@@ -137,6 +137,7 @@ function paintStock(site, play) {
   const whGas = ((play && play.warehouse && play.warehouse.items) || []).find((r) => r.kind === "propane")?.qty || 0;
   const span = max - min;
   const mark = ((todayN - min) / span) * 100;
+  const knob = ((sticker - min) / span) * 100;
   const segs = stickerTrackSegs(todayN, min, max);
   const tone = stickerToneAttr(vs);
   const mine = site.siteClass === "mine";
@@ -180,13 +181,14 @@ function paintStock(site, play) {
     <div class="sticker-slide" data-tone="${tone}">
       <span class="sticker-read ${vs}" data-sticker-out>${money(sticker)}</span>
       <div class="sticker-track">
-        <i class="sticker-band" aria-hidden="true">${segs
+        <div class="sticker-band" aria-hidden="true">${segs
           .map(
             (s) =>
-              `<i class="sticker-seg is-${s.tone}" style="flex:${s.width.toFixed(4)} 0 0"></i>`,
+              `<span class="sticker-seg is-${s.tone}" style="flex:${s.width.toFixed(4)} 0 0"></span>`,
           )
-          .join("")}</i>
+          .join("")}</div>
         <i class="sticker-mark" style="left:${mark}%"></i>
+        <i class="sticker-knob" data-sticker-knob style="left:${knob}%"></i>
         <input id="sticker-price" type="range" min="${min}" max="${max}" step="0.5" value="${sticker}" />
       </div>
     </div>
