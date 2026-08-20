@@ -2,6 +2,8 @@
 
 Paper leases on two authored islands. Not live. Not Earth.
 
+Doc map: [`docs/README.md`](docs/README.md). South quay notes: [`docs/SOUTH_LAND.md`](docs/SOUTH_LAND.md). Live pads and prices: [`docs/PLAY.md`](docs/PLAY.md).
+
 ## What Capital Rift does in public (genre only)
 
 The play client is behind Google. We did not copy it. Public sources:

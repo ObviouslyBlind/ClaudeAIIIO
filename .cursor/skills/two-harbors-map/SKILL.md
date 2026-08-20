@@ -5,7 +5,7 @@ description: Two Harbors map templates. Two fictional islands, local metres, chu
 
 # Two Harbors map
 
-Read `game/BACKEND.md`. The map is **content**, not a planet.
+Read `game/BACKEND.md`. The map is **content**, not a planet. Doc map: `game/docs/README.md`. South notes: `game/docs/SOUTH_LAND.md`.
 
 ## What exists
 

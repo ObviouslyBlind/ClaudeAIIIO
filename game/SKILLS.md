@@ -1,6 +1,8 @@
 # Skills to get Two Harbors rolling
 
-What this agent needs, what is in `.cursor/skills/`, and what to ignore.
+Public name: **2Isles**. What this agent needs, what is in `.cursor/skills/`, and what to ignore.
+
+**Mid-alpha.** Harbour loop is the base. Doc map: [`docs/README.md`](docs/README.md).
 
 Nothing named **aeiou** was in this workspace. If that was a Cursor dashboard source, remove it there.
 
@@ -21,7 +23,7 @@ Nothing named **aeiou** was in this workspace. If that was a Cursor dashboard so
 | **performance-optimization** | 30fps harbour |
 | **survival-crafting** | Genre notes only |
 
-Stack research: [BACKEND.md](BACKEND.md). Kernel: [FOUNDATION.md](FOUNDATION.md). Gauntlet Loop: [GAUNTLET.md](GAUNTLET.md).
+Stack research: [BACKEND.md](BACKEND.md). Kernel: [FOUNDATION.md](FOUNDATION.md). Gauntlet Loop: [GAUNTLET.md](GAUNTLET.md). Live status: [docs/HANDOVER.md](docs/HANDOVER.md).
 
 ## Needed in our heads
 

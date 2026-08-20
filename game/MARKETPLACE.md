@@ -3,6 +3,8 @@
 How you buy kit, stand up a business, and run it on **one logistics system**.  
 This is the player-facing spec. The center **2Isles Marketplace** sheet and **Hire** business list are in the harbour HUD. Street is live. Other aisles are honestly empty until those loops exist.
 
+Live loop: [`docs/PLAY.md`](docs/PLAY.md). Doc map: [`docs/README.md`](docs/README.md).
+
 Do **not** call this shop PAPER, simulated cash, an outfitter, or books. Money still is not real-world cash — the HUD can say that. This sheet does not.
 
 ---

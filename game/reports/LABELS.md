@@ -1,6 +1,6 @@
 # Two Harbors labels — find things for the island redesign
 
-PAPER / SIMULATED. Grep these `kind` / `layer` / `.name` strings. Source of truth: `game/src/labels.ts`.
+PAPER / SIMULATED. Grep these `kind` / `layer` / `.name` strings. Source of truth: `game/src/labels.ts`. Doc map: [`../docs/README.md`](../docs/README.md).
 
 ## Viewers (top right)
 

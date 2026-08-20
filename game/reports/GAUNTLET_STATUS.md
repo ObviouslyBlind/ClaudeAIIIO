@@ -1,8 +1,10 @@
 # Gauntlet status
 
-Piece in play: **sticker price selector** (Stock tab). Politics frozen.
+**Mid-alpha.** The harbour loop (land → pad → fruit cart → hire → sticker → Books) is the ratchet base. Next pieces are **features on that base**, not a new foundation.
 
-Street carts grind (warehouse buy, scores, games, account, look) remains the prior ratchet.
+Last logged piece: **sticker price selector** (Stock tab). Politics frozen. Street carts grind (warehouse buy, scores, games, account, look) remains the prior ratchet.
+
+Live map: [`../docs/HANDOVER.md`](../docs/HANDOVER.md). Do not restart the pixel-critic swarm unless a named piece is in a real Gauntlet Loop.
 
 | Round | Bar | Result |
 |---|---|---|

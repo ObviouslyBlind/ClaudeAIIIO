@@ -4,11 +4,16 @@ This repo is a harbour MMO shard, not a loop game and not a trading bot.
 There is no Polymarket code, SENTINEL dashboard, or paper-trading pipeline here. Do not put them back.
 One shard. The sim owns cash, plots, staff, and prices. The browser is a camera.
 
+Public name: **2Isles**. **Mid-alpha:** the harbour loop is the base. Next work is features on that base, not a new foundation. Politics stay frozen until the loop is honest.
+
 ## What to build
 - Headless 1Hz sim in `game/src/`
 - 3D harbour camera in `game/public/harbour/`
 - Kernel contracts in `game/src/kernel/` (plots, players, minerals, interest)
 - PAPER / SIMULATED only. No wallet. No live trading.
+
+## Docs
+Start at `game/docs/README.md`. Live status: `game/docs/HANDOVER.md`. Spec: `game/PLAN.md`. Kernel: `game/FOUNDATION.md`. Economy: `game/ECONOMY.md`.
 
 ## Do
 - Follow `game/PLAN.md` and `game/FOUNDATION.md`

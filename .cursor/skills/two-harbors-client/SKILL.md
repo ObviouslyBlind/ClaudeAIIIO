@@ -5,7 +5,9 @@ description: Two Harbors Three.js harbour client. Use when building or debugging
 
 # Two Harbors client
 
-Read `game/PLAN.md` §3.9–3.10 and `game/BACKEND.md`. Do not start this before the headless sim is honest.
+Read `game/PLAN.md` §3.9–3.10 and `game/BACKEND.md`. Doc map: `game/docs/README.md`. Live loop: `game/docs/PLAY.md`.
+
+The headless sim already moves prices. The canvas is a camera on that sim — do not skip PLAN.md or invent a second economy.
 
 ## Job
 

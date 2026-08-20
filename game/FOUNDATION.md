@@ -1,8 +1,10 @@
 # Two Harbors — Shard kernel (K.1)
 
-This is the game before the features. PLAN.md is still the spec. This file is the **contract** the rest of the repo must sit on.
+Public name: **2Isles**. This is the game before the features. [PLAN.md](PLAN.md) is still the spec. This file is the **contract** the rest of the repo must sit on.
 
 PAPER / SIMULATED. No wallet. Not a Capital Rift clone. Politics stays frozen.
+
+Doc map: [`docs/README.md`](docs/README.md). Live status: [`docs/HANDOVER.md`](docs/HANDOVER.md).
 
 ---
 

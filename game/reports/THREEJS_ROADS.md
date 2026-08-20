@@ -1,5 +1,7 @@
 # How Three.js games actually draw roads
 
+Research note. Live draw rules: [`../docs/ROAD_MESH.md`](../docs/ROAD_MESH.md). Graph: [`../docs/ROADS.md`](../docs/ROADS.md). Doc map: [`../docs/README.md`](../docs/README.md).
+
 Asked: search 500+ high-star GitHubs that make very good Three.js roads, then overhaul ours.
 
 ## Honest count

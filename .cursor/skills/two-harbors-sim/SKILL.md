@@ -5,13 +5,13 @@ description: Build the Two Harbors persistent economy and politics sim. Use when
 
 # Two Harbors sim
 
-Read `game/PLAN.md` before writing game code. That file is the spec. Stack and map: `game/BACKEND.md`.
+Read `game/PLAN.md` before writing game code. That file is the spec. Stack and map: `game/BACKEND.md`. Doc map: `game/docs/README.md`. Live status: `game/docs/HANDOVER.md`.
 
 ## Now
 
-We are on **step A**: a headless 1Hz sim, 12 goods, NPC supply/demand, money supply and a price index. No Three.js, no House, no HUD chrome.
+**Mid-alpha.** The harbour loop is the base (land, pad, fruit cart, hire, sticker, Books). Next work is **features on that base**, not a new foundation and not step-A from scratch. Politics (House / Senate / councils / elections) stay frozen until the loop is honest.
 
-Prove it with tests: fast-forward thousands of ticks with **zero players**. Prices stay finite. Money circulates. The index is defined.
+Prove sim changes with tests. Prices stay finite. Money is PAPER / SIMULATED. The browser is a camera.
 
 ## Rules
 

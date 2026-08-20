@@ -1,5 +1,7 @@
 # The Gauntlet Loop (research)
 
+Method note for 2Isles. Last ratchet: [`reports/GAUNTLET_STATUS.md`](reports/GAUNTLET_STATUS.md). Doc map: [`docs/README.md`](docs/README.md). Do not restart the pixel-critic swarm unless a named piece is in a real loop.
+
 Matt Shumer named it after [Claude of Duty](https://github.com/mshumer/Claude-of-Duty) (July 2026). The method is not that one FPS. People pointed the same three-paragraph prompt at other bars and shipped a lot of other things.
 
 Directory of playable games: [somethingbig.ai/games](https://somethingbig.ai/games) (47 listed when researched). Method: [somethingbig.ai/gauntlet-loop](https://somethingbig.ai/gauntlet-loop). Independent four-run test including **non-game SEO**: [wotai.co/blog/gauntlet-loop-playbook](https://wotai.co/blog/gauntlet-loop-playbook).

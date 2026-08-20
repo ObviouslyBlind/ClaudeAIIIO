@@ -1,17 +1,19 @@
-# Two Harbors
+# 2Isles
 
-PAPER / SIMULATED harbour MMO shard. No wallet. Not a trading bot.
+PAPER / SIMULATED harbour MMO shard. Not a loop game. Not a trading bot. No wallet.
 
-One shard. The sim owns cash, plots, staff, and prices. The browser is a camera. Live sockets and Postgres are not in yet.
+One shard. The sim owns cash, plots, staff, and prices. The browser is a camera.
+
+**Mid-alpha.** Harbour loop is the base. Features on top. Politics frozen.
 
 ```bash
 cd game
 npm install
 npm test
 npm run play
-npm run play:laptop   # pasteable https link
+npm run play:laptop
 ```
 
-South spawn. **World:** left-click walks. **Lots** chip shows outlines — click it again to hide. $ bar opens a buy ask. Taxi on paved. Ferry $15. Restarting play wipes.
+South spawn. Left-click walks. **Lots** chip for outlines. Click a $ tag to buy. Restarting play wipes.
 
-Spec: [game/PLAN.md](game/PLAN.md) · Loop: [game/reports/FIRST_LOOP.md](game/reports/FIRST_LOOP.md) · Kernel: [game/FOUNDATION.md](game/FOUNDATION.md) · Live status: [game/reports/HANDOVER.md](game/reports/HANDOVER.md)
+**Docs:** [game/docs/README.md](game/docs/README.md) · live status [game/docs/HANDOVER.md](game/docs/HANDOVER.md) · spec [game/PLAN.md](game/PLAN.md)

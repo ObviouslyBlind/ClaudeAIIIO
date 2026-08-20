@@ -1,10 +1,14 @@
 # Two Harbors — Game Plan
 
-Working title. Replace before any public page. This is the build spec for a browser 3D multiplayer economy + politics game that also has to run on a phone.
+Public name: **2Isles**. Working title in this file stays until a rename pass.
+
+This is the long-form **build spec** for a browser 3D multiplayer economy + politics game that also has to run on a phone. **Mid-alpha:** the harbour loop is the base. Features go on top. House / Senate / councils / elections stay frozen until that loop is honest.
+
+Live status and play URL: [`docs/HANDOVER.md`](docs/HANDOVER.md). Doc map: [`docs/README.md`](docs/README.md). Economy slice: [`ECONOMY.md`](ECONOMY.md). Kernel: [`FOUNDATION.md`](FOUNDATION.md). Backend: [`BACKEND.md`](BACKEND.md).
 
 The world is already running when you join. You do not start the islands. You interfere with a machine that was already moving.
 
-At launch the **base economy is already law**. A curated pack of 50–100 statutes is in force before anyone holds office. Players do not invent the legal system. They **amend** a catalog the game wrote. The first general election is two weeks in. The first council elections are a week after that. Then both run every four weeks.
+At launch the **base economy is already law**. A curated pack of 50–100 statutes is in force before anyone holds office. Players do not invent the legal system. They **amend** a catalog the game wrote. The first general election is two weeks in. The first council elections are a week after that. Then both run every four weeks. That calendar is law in this spec; it is **not** the current build.
 
 ---
 

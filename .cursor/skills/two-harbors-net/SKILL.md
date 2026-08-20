@@ -5,7 +5,7 @@ description: Two Harbors networking. One shard, HTTP intents plus WebSocket pres
 
 # Two Harbors net
 
-Read `game/BACKEND.md` and `game/PLAN.md` first.
+Read `game/BACKEND.md` and `game/PLAN.md` first. Doc map: `game/docs/README.md`.
 
 ## Shape
 

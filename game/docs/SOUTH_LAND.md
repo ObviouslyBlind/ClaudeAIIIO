@@ -1,5 +1,7 @@
 # South land (v1, land only)
 
+Land-only notes for the South island. Doc map: [README.md](README.md). Parcel contract: [../LAND.md](../LAND.md). Live pads: [PLAY.md](PLAY.md).
+
 No buildings on this pass. Lots, roads, sidewalks, and a stone seawall. Zero houses.
 
 ## Which island is “more developed”?

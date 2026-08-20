@@ -1,5 +1,9 @@
 # Two Harbors backend
 
+Public name: **2Isles**. Stack contract for one live shard.
+
+Doc map: [`docs/README.md`](docs/README.md). Spec: [`PLAN.md`](PLAN.md). Kernel: [`FOUNDATION.md`](FOUNDATION.md).
+
 What Capital Rift is doing in public, what we copy as **architecture**, and what we do not copy.
 
 We are not cloning their client, UI, Earth map, OSM pipeline, or source. We are building the same *kind* of server: one live shard, sim owns the numbers, the client is a camera plus intents. Our map is two fictional islands. We still do not render the whole of those islands at once.

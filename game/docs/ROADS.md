@@ -1,5 +1,7 @@
 # Roads
 
+How the South (and later North) road graph is built. Doc map: [README.md](README.md). Draw notes: [ROAD_MESH.md](ROAD_MESH.md).
+
 ## The model
 
 Roads are a **graph**, not a pile of polylines. `src/roadGraph.ts` owns it.

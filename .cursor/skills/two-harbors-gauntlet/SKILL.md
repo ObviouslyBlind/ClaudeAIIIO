@@ -5,7 +5,7 @@ description: Run a constrained Gauntlet Loop on one Two Harbors piece. Builder a
 
 # Two Harbors Gauntlet
 
-Read `game/GAUNTLET.md` and `game/PLAN.md` first.
+Read `game/GAUNTLET.md` and `game/PLAN.md` first. Live ratchet: `game/reports/GAUNTLET_STATUS.md`. Doc map: `game/docs/README.md`. Do not restart the swarm unless a named piece is in a real loop.
 
 ## Roles (do not mix)
 

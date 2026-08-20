@@ -2,6 +2,8 @@
 
 PAPER / SIMULATED. No wallet. No live trading. The sim owns cash, prices, stock, tax, and listings. The browser is a camera.
 
+Live numbers and the player loop: [`docs/HANDOVER.md`](docs/HANDOVER.md) · [`docs/PLAY.md`](docs/PLAY.md). Doc map: [`docs/README.md`](docs/README.md).
+
 This is the live economy slice of 2Isles, written from what is already law in [`PLAN.md`](PLAN.md), [`economy.ts`](src/economy.ts), and the harbour first loop — not a second system glued on the side.
 
 Politics (House / Senate / councils / elections) stays frozen until the harbour loop is honest. Amending tax is already a statute slider in the catalog; seating a House is not this slice.
