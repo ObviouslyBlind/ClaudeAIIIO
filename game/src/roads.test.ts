@@ -388,6 +388,27 @@ describe("paved street from spawn", () => {
       }
     }
     expect(nearestQuayGrit, "grit V onto the ring").toBeGreaterThan(radii.outer - 0.5);
+    const armPaint = added.filter(
+      (m) => m.userData.roadKind === "paint" && /^(Island Hwy|Quayward Rd)/.test(String(m.userData.roadName || "")),
+    );
+    expect(armPaint.length).toBeGreaterThan(0);
+    for (const mesh of armPaint) {
+      const pos = mesh.geometry.attributes.position;
+      for (let i = 0; i < pos.count; i++) {
+        const d = Math.hypot(pos.getX(i) - harbour.x, pos.getZ(i) - harbour.z);
+        expect(d, "lane paint ran into the circus").toBeGreaterThan(radii.outer - 1);
+      }
+    }
+    const hwyMedian = added.filter(
+      (m) => m.userData.roadKind === "median" && String(m.userData.roadName || "").startsWith("Island Hwy"),
+    );
+    for (const mesh of hwyMedian) {
+      const pos = mesh.geometry.attributes.position;
+      for (let i = 0; i < pos.count; i++) {
+        const d = Math.hypot(pos.getX(i) - harbour.x, pos.getZ(i) - harbour.z);
+        expect(d, "median stripe ran into the circus").toBeGreaterThan(radii.outer - 1);
+      }
+    }
   });
 
   it("keeps stem paint off the through heart, and lets the through carriageway stay painted", () => {

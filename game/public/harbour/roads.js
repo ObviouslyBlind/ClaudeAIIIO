@@ -455,7 +455,7 @@ function drawPaved(scene, spec, road, heightAt, graph, hubs, circuses) {
   const width = roadClassSpec(cls).carriageM;
   const tarRuns = clipRuns(pts, null, circuses, 1.6, road.edgeId);
   const gritRuns = clipRunsAtCircusRim(pts, null, circuses, 1.6, road.edgeId);
-  const paintRuns = clipRuns(pts, hubs, paintCircuses(circuses), 0, road.edgeId);
+  const paintRuns = clipRunsAtCircusRim(pts, hubs, circuses, 0, road.edgeId);
   drawClippedRuns(scene, spec, road, heightAt, gritRuns, width + SHOULDER_PAD_M, SHOULDER, "shoulder", {}, -0.03, Infinity, null, circuses);
   drawClippedRuns(scene, spec, road, heightAt, tarRuns, width, ASPHALT, "paved", {}, 0, Infinity, null, circuses);
   drawRoundJoins(scene, spec, road, heightAt, width, circuses);
@@ -547,7 +547,7 @@ function clipRuns(pts, hubs, circuses, overlapM = 1.6, edgeId, alwaysClip) {
   return out.filter((r) => r && r.length >= 2);
 }
 
-/** Grit and walks stop on the outer rim. Only black tarmac runs onto the ring. */
+/** Grit, walks, and lane paint stop on the outer rim. Only black tarmac runs onto the ring. */
 function clipRunsAtCircusRim(pts, hubs, circuses, overlapM = 1.6, edgeId, alwaysClip) {
   const afterHubs = clipToJoins(pts, hubs, overlapM, edgeId, alwaysClip);
   if (!circuses || !circuses.length) return afterHubs;
@@ -557,10 +557,6 @@ function clipRunsAtCircusRim(pts, hubs, circuses, overlapM = 1.6, edgeId, always
     out.push(...clipPolylineOutsideCircuses(run, circuses));
   }
   return out.filter((r) => r && r.length >= 2);
-}
-
-function paintCircuses(circuses) {
-  return circuses || [];
 }
 
 function collectHubs(graph) {
@@ -829,7 +825,7 @@ function drawHighway(scene, spec, road, heightAt, graph, hubs, circuses) {
     spec,
     { ...road, name: name + " median" },
     heightAt,
-    tarRuns,
+    gritRuns,
     MEDIAN_STRIPE_M,
     MEDIAN,
     "median",
@@ -841,7 +837,7 @@ function drawHighway(scene, spec, road, heightAt, graph, hubs, circuses) {
   );
   for (const side of [-1, 1]) {
     const offsetPts = offsetPolyline(pts, lane * side);
-    const paintRuns = clipRuns(offsetPts, hubs, paintCircuses(circuses), 0, road.edgeId);
+    const paintRuns = clipRunsAtCircusRim(offsetPts, hubs, circuses, 0, road.edgeId);
     drawLanePaint(scene, spec, road, heightAt, paintRuns, s.carriageM, true, side);
   }
 }
