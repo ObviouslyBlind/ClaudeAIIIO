@@ -4,7 +4,7 @@
  * on that cart. Cash is $. One shared island warehouse on the dock.
  */
 
-import { findParcelAt, getPlot, ISLANDS, STARTER_CASH, type IslandId, type LandBoard, type Parcel } from "./land.ts";
+import { findParcelAt, getPlot, isCartPad, ISLANDS, STARTER_CASH, type IslandId, type LandBoard, type Parcel } from "./land.ts";
 import { plotTrafficBand } from "./footTraffic.ts";
 import { roadsideDrop, type DropPoint } from "./roadside.ts";
 import { skuFitsPlot, type ZoneId } from "./zones.ts";
@@ -28,6 +28,7 @@ import {
 import { PACK_COOLDOWN_MS } from "./shiftBonus.ts";
 import { createVisitorCart } from "./visitorCart.ts";
 import { clampLook, defaultLook } from "./look.ts";
+import { CART_FOOTPRINT_M, footprintInRing } from "../public/harbour/place-pose.js";
 
 export const FIRST_LOOP_NOTE = "South island. One visitor on this process.";
 
@@ -288,7 +289,7 @@ export function cartLoopNeeds(play: PlayState, today = TODAY_PRICE): CartNeed[] 
     return [{ id: "buy", label: "Buy a street cart in Market." }];
   }
   if (!play.stands.length) {
-    return [{ id: "place", label: "Place the cart on your YOURS lot or the verge by the road." }];
+    return [{ id: "place", label: "Place the cart on your pad or YOURS lot. Hold R to rotate." }];
   }
   return play.stands.flatMap((stand) => standNeeds(stand, today));
 }
@@ -319,6 +320,7 @@ export type Stand = {
   island: IslandId;
   x: number;
   z: number;
+  yaw: number;
   kind: CartKindId;
   hotdogs: number;
   hired: boolean;
@@ -1025,7 +1027,7 @@ export function takeAll(visitor: Visitor, deliveryId: string): LoopOk<{ inventor
   return ok({ inventory: play.inventory.map((row) => ({ ...row })) });
 }
 
-/** Your South lot, or the lot whose road verge you tapped. */
+/** Your South lot, or the lot whose road verge you tapped. Pads must be tapped on the dirt. */
 export function plotForPlace(
   land: LandBoard,
   plotId?: string,
@@ -1038,11 +1040,15 @@ export function plotForPlace(
   }
   if (Number.isFinite(x) && Number.isFinite(z)) {
     const at = findParcelAt(land, x as number, z as number);
-    if (at && at.island === "south" && at.owner === "visitor") return at;
+    if (at && at.island === "south" && at.owner === "visitor") {
+      if (isCartPad(at)) return at;
+      return at;
+    }
     let best: Parcel | null = null;
     let bestD = Infinity;
     for (const p of land.plots) {
       if (p.island !== "south" || p.owner !== "visitor") continue;
+      if (isCartPad(p)) continue;
       const drop = roadsideDrop(land.roads, "south", p.x, p.z);
       const dPlot = Math.hypot((x as number) - p.x, (z as number) - p.z);
       const dDrop = drop ? Math.hypot((x as number) - drop.x, (z as number) - drop.z) : Infinity;
@@ -1062,7 +1068,7 @@ export function placeStand(
   visitor: Visitor,
   land: LandBoard,
   plotId: string,
-  pose?: { x?: number; z?: number; kitId?: string },
+  pose?: { x?: number; z?: number; yaw?: number; kitId?: string },
 ): LoopOk<{ stand: Stand }> | LoopFail {
   const play = ensurePlay(visitor);
   const plot = plotForPlace(land, plotId, pose?.x, pose?.z);
@@ -1078,22 +1084,40 @@ export function placeStand(
     const fit = skuFitsPlot(kitSku.zone, plot.zone);
     if (!fit.ok) return fail(fit.reason);
   }
-  const cart = takeKit(play, pose?.kitId);
-  if (!cart) return fail("no_cart");
   const tapX = Number.isFinite(pose?.x) ? (pose!.x as number) : plot.x;
   const tapZ = Number.isFinite(pose?.z) ? (pose!.z as number) : plot.z;
-  const drop = roadsideDrop(land.roads, "south", plot.x, plot.z);
-  const dPlot = Math.hypot(tapX - plot.x, tapZ - plot.z);
-  const dDrop = drop ? Math.hypot(tapX - drop.x, tapZ - drop.z) : Infinity;
-  const onVerge = dPlot <= PLACE_CORRIDOR_M || dDrop <= PLACE_CORRIDOR_M;
-  const x = onVerge ? tapX : drop ? drop.x : plot.x;
-  const z = onVerge ? tapZ : drop ? drop.z : plot.z;
+  const yaw = Number.isFinite(pose?.yaw) ? Number(pose!.yaw) : 0;
+  let x = tapX;
+  let z = tapZ;
+  if (isCartPad(plot)) {
+    const fits = (px: number, pz: number) =>
+      footprintInRing(px, pz, yaw, CART_FOOTPRINT_M.w, CART_FOOTPRINT_M.d, plot.ring);
+    if (fits(tapX, tapZ)) {
+      x = tapX;
+      z = tapZ;
+    } else if (!Number.isFinite(pose?.x) && !Number.isFinite(pose?.z) && fits(plot.x, plot.z)) {
+      x = plot.x;
+      z = plot.z;
+    } else {
+      return fail("off_pad");
+    }
+  } else {
+    const drop = roadsideDrop(land.roads, "south", plot.x, plot.z);
+    const dPlot = Math.hypot(tapX - plot.x, tapZ - plot.z);
+    const dDrop = drop ? Math.hypot(tapX - drop.x, tapZ - drop.z) : Infinity;
+    const onVerge = dPlot <= PLACE_CORRIDOR_M || dDrop <= PLACE_CORRIDOR_M;
+    x = onVerge ? tapX : drop ? drop.x : plot.x;
+    z = onVerge ? tapZ : drop ? drop.z : plot.z;
+  }
+  const cart = takeKit(play, pose?.kitId);
+  if (!cart) return fail("no_cart");
   const stand: Stand = {
     id: `stand-${play.nextId++}`,
     plotId: plot.id,
     island: "south",
     x,
     z,
+    yaw,
     kind: cart.id,
     hotdogs: 0,
     hired: false,

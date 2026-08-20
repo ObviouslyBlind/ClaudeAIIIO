@@ -86,6 +86,11 @@ describe("harbour chrome HUD", () => {
     expect(html).toContain('id="sheet-veil"');
     expect(html).toContain('id="market-body"');
     expect(html).toContain('id="place-hint"');
+    expect(html).toContain("Hold R to rotate");
+    expect(chrome).toContain("Hold R to rotate");
+    expect(main).toContain("createPlacePreview");
+    expect(main).toContain("Stay inside the pad");
+    expect(main).toContain("mesh.rotation.y");
     expect(html).toContain('id="play-toast"');
     expect(html).toContain('id="place-cancel"');
     expect(html).toContain('id="taxi-map-exit"');
@@ -316,7 +321,7 @@ describe("harbour chrome HUD", () => {
     expect(chrome).toContain("/api/stand/fuel");
     const body = formatCartsBody({
       todayPrice: 6,
-      cartNeeds: [{ id: "place", label: "Place the cart on your YOURS lot or the verge by the road." }],
+      cartNeeds: [{ id: "place", label: "Place the cart on your pad or YOURS lot. Hold R to rotate." }],
       catalog: [{ id: "hotdog_cart", aisle: "street_carts", role: "kit", label: "Fruit cart" }],
       inventory: [{ kind: "hotdog_cart", qty: 1 }],
       cart: [],

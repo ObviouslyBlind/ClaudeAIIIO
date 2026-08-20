@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createLandBoard, heightAt, ISLANDS } from "./land.ts";
 import { SOUTH_PORT, SOUTH_RAB, SOUTH_TOWNS, SOUTH_VOLCANO, volcanoDist, distToPolyline } from "./southGeom.ts";
+import { CART_PAD_DEPTH_M, CART_PAD_FRONT_M } from "./southLand.ts";
 import { canWalk } from "./walk.ts";
 import { carriagewayWidthM } from "./roadGraph.ts";
 
@@ -109,6 +110,15 @@ describe("South land (no buildings)", () => {
     expect(pads.every((p) => p.island === "south")).toBe(true);
     const near = pads.filter((p) => Math.hypot(p.x - SOUTH_PORT.x, p.z - SOUTH_PORT.z) < 220);
     expect(near.length).toBeGreaterThan(0);
+    const inland = pads.filter((p) => Math.hypot(p.x - SOUTH_PORT.x, p.z - SOUTH_PORT.z) > 800);
+    expect(inland.length).toBeGreaterThan(0);
+    for (const p of pads.slice(0, 16)) {
+      const front = Math.hypot(p.ring[1]![0] - p.ring[0]![0], p.ring[1]![1] - p.ring[0]![1]);
+      const depth = Math.hypot(p.ring[2]![0] - p.ring[1]![0], p.ring[2]![1] - p.ring[1]![1]);
+      expect(depth).toBeLessThan(front);
+      expect(front).toBeCloseTo(CART_PAD_FRONT_M, 0);
+      expect(depth).toBeCloseTo(CART_PAD_DEPTH_M, 0);
+    }
     const hwys = board.roads.filter((r) => r.name === "Island Hwy" && !r.roundabout);
     function sideOf(p: { x: number; z: number }): number {
       let best = Infinity;

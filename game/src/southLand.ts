@@ -343,6 +343,11 @@ function lotsAlong(
   }
 }
 
+/** Along the kerb, short off the road — a rectangle, not a square bay. */
+export const CART_PAD_FRONT_M = 7.2;
+export const CART_PAD_DEPTH_M = 2.6;
+export const CART_PAD_STEP_M = 8;
+
 /** Tiny $750 cart pads packed on the Island Hwy verge. Not house lots. */
 function nearCircus(x: number, z: number): boolean {
   for (const rab of Object.values(SOUTH_RAB)) {
@@ -357,19 +362,16 @@ function seedHighwayCartPads(
   base: Omit<PushOpts, "street" | "band">,
 ): void {
   const hwys = roads.filter((r) => r.name === "Island Hwy" && !r.roundabout && r.cls === "highway");
-  // Packed bay at spawn, not a 5 km ribbon of $750 pads.
-  const spawnHwys = hwys.filter((r) =>
-    r.points.some((p) => Math.hypot(p.x - SOUTH_PORT.x, p.z - SOUTH_PORT.z) < 420),
-  );
   const half = carriagewayWidthM("highway") / 2;
   const setback = half + 0.55;
-  const front = 6.2;
-  const depth = 4.2;
-  const step = 6.8;
-  for (const road of spawnHwys.length ? spawnHwys : hwys) {
+  const front = CART_PAD_FRONT_M;
+  const depth = CART_PAD_DEPTH_M;
+  const step = CART_PAD_STEP_M;
+  for (const road of hwys) {
     const pts = road.points;
     const len = polylineLen(pts);
-    for (let dist = 24; dist < Math.min(len - 24, 24 + step * 12); dist += step) {
+    if (len < 48) continue;
+    for (let dist = 18; dist < len - 18; dist += step) {
       const st = stationAt(pts, dist);
       if (!st) continue;
       if (publicQuay(st.at.x, st.at.z)) continue;
@@ -385,7 +387,7 @@ function seedHighwayCartPads(
           band: "street",
           cls: "cart_pad",
           zone: "commercial",
-          minArea: 18,
+          minArea: 12,
           price: CART_PAD_PRICE,
           idPrefix: "south-cart",
           skipRoads: true,

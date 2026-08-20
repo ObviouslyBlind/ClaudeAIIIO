@@ -268,6 +268,7 @@ const server = createServer(async (req, res) => {
       x: Number(body?.x),
       z: Number(body?.z),
       kitId: body?.kitId ? String(body.kitId) : undefined,
+      yaw: Number(body?.yaw),
     });
     json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
     return;

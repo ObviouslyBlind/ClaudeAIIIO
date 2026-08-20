@@ -36,6 +36,7 @@ import { mountStaffHud } from "./staff-hud.js";
 import { mountCalendarHud } from "./calendar-hud.js";
 import { mountParcelMap, pointerToNdc } from "./parcel-map.js";
 import { mountLotTags } from "./lot-tags.js";
+import { createPlacePreview } from "./place-preview.js";
 
 function ensureDockButton(id, label) {
   let btn = document.getElementById(id);
@@ -168,6 +169,7 @@ let catalogPicker = null;
 let staffHud = null;
 let parcelMap = null;
 let lotTags = null;
+let placeGhost = null;
 let propsMod = null;
 let chromeHud = null;
 let walkPath = null;
@@ -504,6 +506,20 @@ function nearParcel(p) {
   );
 }
 
+function ensurePlaceGhost() {
+  if (!placeGhost) placeGhost = createPlacePreview(worldScene());
+  return placeGhost;
+}
+
+function refreshPlaceGhost() {
+  if (!placeGhost || !placeGhost.isOn() || !map) return;
+  raycaster.setFromCamera(pointer, camera);
+  const g = groundFromRay();
+  if (!g) return;
+  const plot = plotToPlace(null, g.x, g.z);
+  placeGhost.moveTo(g.x, (g.y || 0) + 0.04, g.z, plot);
+}
+
 function cheapestDevelop() {
   const cat = map.catalog && map.catalog.length ? map.catalog : [];
   if (!cat.length) return map.developCost ?? 40;
@@ -547,10 +563,20 @@ function standOn(plotId) {
 
 async function placeCartOn(plot, x, z) {
   const kitId = chromeHud && chromeHud.getPlaceKit ? chromeHud.getPlaceKit() : "";
+  const pose = placeGhost && typeof placeGhost.pose === "function" ? placeGhost.pose() : null;
+  const yaw = pose && Number.isFinite(pose.yaw) ? pose.yaw : 0;
+  if (plot && plot.class === "cart_pad" && pose && pose.ok === false) {
+    setStatus("Stay inside the pad.");
+    const line = document.getElementById("place-hint-text");
+    if (line) line.textContent = "Stay inside the pad. Green outline must fit.";
+    const hint = document.getElementById("place-hint");
+    if (hint) hint.hidden = false;
+    return;
+  }
   const res = await fetch("/api/inventory/place", {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ plotId: (plot && plot.id) || "", x, z, kitId: kitId || undefined }),
+    body: JSON.stringify({ plotId: (plot && plot.id) || "", x, z, yaw, kitId: kitId || undefined }),
   });
   const data = await res.json();
   if (!res.ok) {
@@ -574,8 +600,10 @@ async function placeCartOn(plot, x, z) {
     if (line) {
       line.textContent =
         reason === "not_yours"
-          ? "Tap the green YOURS lot, or the verge out to the road."
-          : "Could not place: " + reason;
+          ? "Tap your pad or YOURS lot. Hold R to rotate."
+          : reason === "off_pad"
+            ? "Stay inside the pad. Green outline must fit."
+            : "Could not place: " + reason;
     }
     const hint = document.getElementById("place-hint");
     if (hint) hint.hidden = false;
@@ -647,6 +675,7 @@ function syncStandMesh(stand, look) {
     standMeshes.set(stand.id, mesh);
   }
   mesh.position.set(x, heightAt(specOf(island), x, z), z);
+  mesh.rotation.y = Number.isFinite(stand.yaw) ? stand.yaw : 0;
   if (stand.hired) {
     const v = findVendor(mesh);
     if (!v || !looksSame(v.userData.look, look)) {
@@ -943,6 +972,7 @@ function plotToPlace(hitPlotId, x, z) {
     let bestD = PLACE_CORRIDOR_M;
     for (const p of map.plots || []) {
       if (!minePlot(p) || p.island !== "south") continue;
+      if (p.class === "cart_pad") continue;
       const d = Math.hypot(x - p.x, z - p.z);
       if (d <= bestD) {
         best = p;
@@ -1965,6 +1995,10 @@ function tick(dt) {
   if (taxi) taxi.tick(dt);
   if (traffic) traffic.tick(dt);
   if (deliveries) deliveries.tick(dt);
+  if (placeGhost && placeGhost.isOn()) {
+    placeGhost.tick(dt);
+    refreshPlaceGhost();
+  }
   pulseCrateGlow();
   tickVendors(clock.elapsedTime);
   if (econHud) econHud.tick(dt);
@@ -2344,10 +2378,16 @@ async function boot() {
       paintHoldingGlow(id);
     },
     onPlaceMode(on) {
-      if (!on) return;
+      if (!on) {
+        if (placeGhost) placeGhost.hide();
+        return;
+      }
       landPinned = false;
       hideCrateCard();
       if (chromeHud && chromeHud.hideBuyAsk) chromeHud.hideBuyAsk();
+      ensurePlaceGhost();
+      placeGhost.show("cart");
+      refreshPlaceGhost();
     },
     onLook(look) {
       restylePeople(look);
@@ -2402,6 +2442,17 @@ async function boot() {
 
 canvas.addEventListener("pointerup", onPointer);
 canvas.addEventListener("click", onPointer);
+canvas.addEventListener("pointermove", (ev) => {
+  if (!(chromeHud && chromeHud.isPlacing && chromeHud.isPlacing())) return;
+  aimPointer(ev);
+  refreshPlaceGhost();
+});
+window.addEventListener("keydown", (ev) => {
+  if (placeGhost && placeGhost.onKeyDown(ev)) return;
+});
+window.addEventListener("keyup", (ev) => {
+  if (placeGhost) placeGhost.onKeyUp(ev);
+});
 window.addEventListener(
   "pointerdown",
   (ev) => {

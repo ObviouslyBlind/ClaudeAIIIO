@@ -247,6 +247,44 @@ describe("South first loop", () => {
     expect(Math.hypot(placed.stand.x - plot.x, placed.stand.z - plot.z)).toBeLessThan(PLACE_CORRIDOR_M + 4);
   });
 
+  it("places a cart on a highway pad and keeps yaw", () => {
+    const land = createLandBoard();
+    const pad = land.plots.find((p) => p.class === "cart_pad" && !p.owner)!;
+    const visitor = createVisitor(1_000);
+    expect(leasePlot(land, visitor, pad.id).ok).toBe(true);
+    const order = orderMarket(visitor, land, { plotId: pad.id, skus: ["hotdog_cart"] });
+    expect(order.ok).toBe(true);
+    if (!order.ok) return;
+    takeAll(visitor, order.delivery.id);
+    const yaw = 0.85;
+    const placed = placeStand(visitor, land, pad.id, { x: pad.x, z: pad.z, yaw });
+    expect(placed.ok).toBe(true);
+    if (!placed.ok) return;
+    expect(placed.stand.plotId).toBe(pad.id);
+    expect(placed.stand.yaw).toBeCloseTo(yaw);
+    expect(Math.hypot(placed.stand.x - pad.x, placed.stand.z - pad.z)).toBeLessThan(0.05);
+    const snap = playSnapshot(visitor, land);
+    expect(snap.stands[0]!.yaw).toBeCloseTo(yaw);
+  });
+
+  it("refuses a cart that hangs off the pad and does not take the kit", () => {
+    const land = createLandBoard();
+    const pad = land.plots.find((p) => p.class === "cart_pad" && !p.owner)!;
+    const visitor = createVisitor(1_000);
+    expect(leasePlot(land, visitor, pad.id).ok).toBe(true);
+    const order = orderMarket(visitor, land, { plotId: pad.id, skus: ["hotdog_cart"] });
+    expect(order.ok).toBe(true);
+    if (!order.ok) return;
+    takeAll(visitor, order.delivery.id);
+    const before = visitor.play.inventory.find((r) => r.kind === "hotdog_cart")?.qty ?? 0;
+    const placed = placeStand(visitor, land, pad.id, { x: pad.x + 40, z: pad.z + 40, yaw: 0 });
+    expect(placed.ok).toBe(false);
+    if (placed.ok) return;
+    expect(placed.reason).toBe("off_pad");
+    expect(visitor.play.inventory.find((r) => r.kind === "hotdog_cart")?.qty).toBe(before);
+    expect(visitor.play.stands).toHaveLength(0);
+  });
+
   it("lets a kerb crate drop by a residential lot, but will not place a cart there", () => {
     const land = createLandBoard();
     const visitor = createVisitor(20_000);
@@ -406,6 +444,8 @@ describe("South first loop", () => {
     const order = orderMarket(visitor, land, { skus: ["hotdog_cart", "hotdogs"], dest: "cart" });
     expect(order.ok).toBe(true);
     expect(cartLoopNeeds(visitor.play).map((n) => n.id)).toEqual(["place"]);
+    expect(cartLoopNeeds(visitor.play)[0]!.label).toMatch(/pad/);
+    expect(cartLoopNeeds(visitor.play)[0]!.label).toMatch(/Hold R/);
     const placed = placeStand(visitor, land, plot.id);
     expect(placed.ok).toBe(true);
     if (!placed.ok) return;

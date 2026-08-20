@@ -69,6 +69,8 @@ describe("harbour boot import graph", () => {
     expect(src).toContain("Never auto-open a lot card");
     expect(src).toContain("function dismissLooseLandUi");
     expect(src).toContain("function plotToPlace");
+    expect(src).toContain("createPlacePreview");
+    expect(src).toContain('from "./place-preview.js"');
     expect(src).toContain("takenCrates");
     expect(src).toContain("function showCrateCard");
     expect(src).toContain("function pruneCrates");

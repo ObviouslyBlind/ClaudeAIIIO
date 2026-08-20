@@ -523,9 +523,9 @@ export function mountChrome(opts) {
     if (buyAsk) buyAsk.hidden = true;
     setOverlay("yours");
     closePanels();
-    setPlaceHint("Tap the green YOURS lot, or the verge by the road.", true);
+    setPlaceHint("Tap your pad or YOURS lot. Hold R to rotate.", true);
     if (opts.setStatus) {
-      opts.setStatus("Tap your lot or the verge out to the main road to place the cart.");
+      opts.setStatus("Green outline is the cart. Hold R to rotate, then tap the pad.");
     }
     if (opts.onPlaceMode) opts.onPlaceMode(true);
   }

@@ -107,7 +107,7 @@ export function formatCartsBody(play) {
           </article>`;
         })
         .join("")
-    : `<p>Place a cart on your YOURS lot or the verge, then tap that cart. ${money(today)} is today's price.</p>`;
+    : `<p>Place a cart on your pad or YOURS lot. Hold R to rotate. ${money(today)} is today's price.</p>`;
 
   return `
     <h2>Carts</h2>
