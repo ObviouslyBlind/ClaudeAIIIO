@@ -1766,24 +1766,38 @@ nav.dock.travel-dock {
 .sticker-seg.is-green { background: var(--green); }
 .sticker-today-line {
   position: relative;
-  height: 16px;
+  height: 28px;
   margin: 2px 0 0;
 }
 .sticker-today {
   position: absolute;
-  top: 0;
+  top: 4px;
+  width: 4.6em;
   transform: translateX(-50%);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  line-height: 1.2;
+  text-align: center;
   color: var(--green);
   font-variant-numeric: tabular-nums;
-  white-space: nowrap;
+  white-space: normal;
   pointer-events: none;
 }
+.sticker-today::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -7px;
+  width: 0;
+  height: 0;
+  border: 4px solid transparent;
+  border-bottom-color: var(--green);
+  transform: translateX(-50%);
+}
 .sticker-today.is-start { transform: none; }
+.sticker-today.is-start::before { left: 12px; }
 .sticker-today.is-end { transform: translateX(-100%); }
+.sticker-today.is-end::before { left: auto; right: 12px; transform: none; }
 .upg-row small {
   margin-left: 6px;
   font-size: 12px;
@@ -1791,7 +1805,15 @@ nav.dock.travel-dock {
   color: var(--green);
 }
 .sticker-mark {
-  display: none;
+  position: absolute;
+  top: 50%;
+  width: 2px;
+  height: 20px;
+  background: var(--green);
+  box-shadow: 0 0 0 1px #0c1416;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 2;
 }
 .sticker-knob {
   position: absolute;

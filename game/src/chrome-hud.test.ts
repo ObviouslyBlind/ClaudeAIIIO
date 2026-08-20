@@ -595,6 +595,7 @@ describe("harbour chrome HUD", () => {
     expect(css).toContain(".sticker-seg.is-yellow");
     expect(css).toContain(".sticker-seg.is-green");
     expect(css).toContain(".sticker-today");
+    expect(css).toContain("width: 4.6em");
     expect(css).toContain("width: 6px");
     expect(css).toContain("gap: 1px");
     expect(css).not.toContain(".sticker-zone");
