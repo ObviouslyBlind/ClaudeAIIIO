@@ -201,9 +201,9 @@ describe("harbour chrome HUD", () => {
     expect(chrome).not.toContain("data-hire-person");
     expect(chrome).toContain("place-cancel");
     expect(siteMenu).toContain("sticker-mark");
+    expect(siteMenu).toContain("sticker-seg");
     expect(siteMenu).toContain("sticker-band");
     expect(siteMenu).toContain("sticker-knob");
-    expect(siteMenu).toContain("sticker-good");
     expect(siteMenu).toContain("sticker-today");
     expect(siteMenu).toContain("Today ");
     expect(siteMenu).toContain("data-sticker-knob");
@@ -211,7 +211,6 @@ describe("harbour chrome HUD", () => {
     expect(siteMenu).toContain("stickerBandGradient");
     expect(siteMenu).not.toContain("sticker-zone");
     expect(siteMenu).not.toContain("sticker-rail");
-    expect(siteMenu).not.toContain("sticker-seg");
     expect(chrome).toContain('slide.setAttribute("data-tone"');
     expect(chrome).toContain("data-sticker-knob");
     expect(siteMenu).toContain("stock-num");
@@ -426,7 +425,7 @@ describe("harbour chrome HUD", () => {
     expect(fryStock).toContain("data-fuel=\"inventory\"");
     expect(fryStock).toContain("is-today");
     expect(fryStock).toContain('max="16"');
-    expect(fryStock).toContain("56.67%");
+    expect(fryStock).toContain("flex:56.6667");
     const hiredRun = formatSiteMenu(
       {
         id: "stand-1",
@@ -551,13 +550,11 @@ describe("harbour chrome HUD", () => {
     expect(stock).toContain('data-tone="today"');
     expect(stock).toContain("sticker-band");
     expect(stock).toContain("sticker-knob");
-    expect(stock).toContain("sticker-good");
+    expect(stock).toContain("sticker-seg is-green");
     expect(stock).toContain("Today $6.00");
-    expect(stock).toContain("linear-gradient(90deg");
-    expect(stock).toContain("23.33%");
+    expect(stock).toContain("flex:23.3333");
     expect(stock).not.toContain("sticker-zone");
     expect(stock).not.toContain("sticker-rail");
-    expect(stock).not.toContain("sticker-seg");
     expect(stock).not.toContain("id=\"hire-site\"");
     const near = formatSiteMenu(
       {
@@ -591,16 +588,18 @@ describe("harbour chrome HUD", () => {
     expect(css).toContain(".stock-num.is-low");
     expect(css).toContain(".sticker-mark");
     expect(css).toContain(".sticker-band");
-    expect(css).toContain(".sticker-good");
+    expect(css).toContain(".sticker-seg.is-red");
+    expect(css).toContain(".sticker-seg.is-yellow");
+    expect(css).toContain(".sticker-seg.is-green");
     expect(css).toContain(".sticker-today");
     expect(css).toContain("width: 5px");
+    expect(css).toContain("gap: 1px");
+    expect(css).not.toContain(".sticker-zone");
+    expect(css).not.toContain(".sticker-rail");
     expect(css).toContain(".sticker-read.is-near");
     expect(css).toContain(".sticker-read.is-far");
     expect(css).toContain("#c45a3a");
-    expect(css).not.toContain(".sticker-zone");
-    expect(css).not.toContain(".sticker-seg");
-    expect(css).not.toContain(".sticker-rail");
-    expect(css).not.toMatch(/#5fe3a0 50%/);
+    expect(css).toContain("#be3d3d");
     expect(css).not.toMatch(/#e25b6a 16%/);
     expect(css).not.toContain("linear-gradient(\n    90deg,\n    #c42b3a");
     expect(css).toContain(".sticker-knob");
