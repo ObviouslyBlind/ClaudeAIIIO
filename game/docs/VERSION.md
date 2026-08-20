@@ -2,7 +2,7 @@
 
 PAPER / SIMULATED. No wallet.
 
-**Now: Alpha 0.5** — units scripts. Rooms, packer / till, leases. No Blender pass.
+**Now: Alpha 0.5.1** — units scripts shipped. Rooms, packer / till, leases. No Blender pass.
 
 Always update this file and [HANDOVER.md](HANDOVER.md) in the same change.
 
@@ -23,3 +23,4 @@ Read the next feature out in [HANDOVER.md](HANDOVER.md) **before** writing code 
 | Version | Date | What |
 |---|---|---|
 | 0.5 | 2026-08-20 | Start. Spec accepted: 4 buildings, 13 rooms, buyable dirt (dear), cheap rooms. Scripts only. Operator mocks buildings in Blender later. |
+| 0.5.1 | 2026-08-20 | Units sim scripts green. `units.ts` buy room / dirt, packer + till on the existing crate, apartment / office leases, persist round-trip. 747 tests. No 3D. |

@@ -168,9 +168,9 @@ Buy Quay Shops room 0, leave room 1 vacant. Fruit pack dest = that unit. Hire pa
 
 | Version | What |
 |---|---|
-| **0.5** | This spec + sim scripts (`units.ts`). Tests. Persist blob round-trip. HTTP intents. **No 3D, no Blender, no dollhouse.** |
-| **0.5.1** | This scripts slice, once tests pass. |
-| Later | Dollhouse camera, Blender shells, Books rows, Shopfit SKUs from inventory. |
+| **0.5** | Spec + scripts start. |
+| **0.5.1** | Scripts shipped. Tests green. Persist blob round-trip. HTTP intents. **No 3D, no Blender, no dollhouse.** |
+| **0.5.2** | Dollhouse camera / grey boxes. Operator Blender shells when ready. |
 
 **Not this pass:** quarry, farming aisle, rezoning, walking interiors, WASD, a Job class, walking NPCs with boxes, renaming hotdog fields, merging `staff.ts` / `labour.ts`, politics, Postgres (blob must still store units), Capital Rift clone.
 

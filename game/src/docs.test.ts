@@ -23,7 +23,7 @@ describe("documentation library", () => {
   it("versions the shard from alpha 0.5 and always hands over", () => {
     const version = md("docs/VERSION.md");
     expect(version).toContain("# 2Isles version");
-    expect(version).toMatch(/Alpha 0\.5/);
+    expect(version).toMatch(/Alpha 0\.5\.1/);
     expect(version).toContain("Beta");
     expect(version).toContain("1.0");
     expect(version).toContain("HANDOVER.md");
@@ -42,7 +42,7 @@ describe("documentation library", () => {
     expect(handover).toContain("Politics frozen");
     expect(handover).toContain("inventory only");
     expect(handover).toContain("VERSION.md");
-    expect(handover).toMatch(/Alpha 0\.5/);
+    expect(handover).toMatch(/Alpha 0\.5\.1/);
     expect(handover).toContain("Blender");
     expect(handover).not.toMatch(/House \/ Senate .* this slice/i);
   });
