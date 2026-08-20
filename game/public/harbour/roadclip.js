@@ -12,8 +12,8 @@
 export const CIRCUS_OUTER_PAD_M = 8;
 /** Ribbons tuck this far under the ring so a 1-px sand seam cannot show. */
 export const CIRCUS_OVERLAP_M = 2.2;
-/** Circulatory asphalt width — fat enough to read from the spawn camera. */
-export const CIRCUS_RING_WIDTH_M = 16;
+/** Circulatory asphalt width — as fat as Island Hwy so duals merge, not dump into a thin doughnut. */
+export const CIRCUS_RING_WIDTH_M = 26;
 /** Stop this far outside the stone island so duals sit on the ring, not the kerb. */
 export const CIRCUS_ENTER_PAD_M = 1.6;
 

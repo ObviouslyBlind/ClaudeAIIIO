@@ -598,16 +598,16 @@ function extendEnd(pts, head, extraM) {
 function splitJoinEnd(pts, head, stubM) {
   const total = polylineLen(pts);
   if (total <= stubM + 4) {
-    return { stub: extendEnd(pts, head, 8), rest: null };
+    return { stub: extendEnd(pts, head, 12), rest: null };
   }
   if (head) {
     const stub = sliceAlong(pts, 0, stubM);
     const rest = sliceAlong(pts, Math.max(0, stubM - 2.2), total);
-    return { stub: extendEnd(stub, true, 8), rest };
+    return { stub: extendEnd(stub, true, 12), rest };
   }
   const stub = sliceAlong(pts, Math.max(0, total - stubM), total);
   const rest = sliceAlong(pts, 0, total - stubM + 2.2);
-  return { stub: extendEnd(stub, false, 8), rest };
+  return { stub: extendEnd(stub, false, 12), rest };
 }
 
 function isThroughEdge(pad, edgeId) {
@@ -954,6 +954,81 @@ function drawJunctions(scene, map, specOf, heightAt) {
   }
 }
 
+function circusArmDir(node, edge) {
+  const pts = edge.points;
+  const fromA = edge.a === node.id;
+  const a = fromA ? pts[0] : pts[pts.length - 1];
+  const b = fromA ? pts[1] : pts[pts.length - 2];
+  const dx = b.x - a.x;
+  const dz = b.z - a.z;
+  const len = Math.hypot(dx, dz) || 1;
+  return { x: dx / len, z: dz / len };
+}
+
+/**
+ * Trapezoid from the ring chord out along the road. Fills the square-cap
+ * seam so a dual dumps into the circus as one tarmac, not two tapes in grass.
+ */
+function addCircusMerge(scene, spec, heightAt, node, edge, outer) {
+  if (!edge || !edge.points || edge.points.length < 2) return;
+  if (roadClassSpec(edge.cls).dirt) return;
+  const dir = circusArmDir(node, edge);
+  const half = carriagewayWidthM(edge.cls) / 2;
+  const cap = Math.min(half, outer * 0.9);
+  const dRing = Math.sqrt(Math.max(1, outer * outer - cap * cap));
+  const dFar = outer + 16;
+  const rx = dir.z;
+  const rz = -dir.x;
+  const at = (d, h, sign) => [
+    node.x + dir.x * d + rx * h * sign,
+    node.z + dir.z * d + rz * h * sign,
+  ];
+  const ring = [
+    at(dRing, cap, -1),
+    at(dRing, cap, 1),
+    at(dFar, half, 1),
+    at(dFar, half, -1),
+  ];
+  ring.push(ring[0]);
+  const grit = [
+    at(dRing, cap + FOOT_SHOULDER_M * 0.5, -1),
+    at(dRing, cap + FOOT_SHOULDER_M * 0.5, 1),
+    at(dFar, half + FOOT_SHOULDER_M * 0.5, 1),
+    at(dFar, half + FOOT_SHOULDER_M * 0.5, -1),
+  ];
+  grit.push(grit[0]);
+  const mid = {
+    x: node.x + dir.x * ((dRing + dFar) / 2),
+    z: node.z + dir.z * ((dRing + dFar) / 2),
+  };
+  const y0 = heightAt(spec, mid.x, mid.z);
+  const label = (edge.name || "road") + " merge";
+  addMultiPolygonMesh(scene, [[grit]], y0 + 0.13, SHOULDER, {
+    island: node.island,
+    roadKind: "shoulder",
+    roadName: label,
+    widthM: half * 2 + FOOT_SHOULDER_M,
+    mode: "PAPER",
+  }, 1);
+  addMultiPolygonMesh(scene, [[ring]], y0 + TARMAC_TOP_M, ASPHALT, {
+    island: node.island,
+    roadKind: "paved",
+    roadName: label,
+    widthM: half * 2,
+    mode: "PAPER",
+  }, 2);
+}
+
+function drawCircusMerges(scene, map, specOf, heightAt, node, outer) {
+  const graph = map && map.graph;
+  if (!graph || !graph.edges) return;
+  const spec = specOf(node.island);
+  for (const e of graph.edges) {
+    if (e.a !== node.id && e.b !== node.id) continue;
+    addCircusMerge(scene, spec, heightAt, node, e, outer);
+  }
+}
+
 function drawCircusJoins(scene, map, specOf, heightAt, joins) {
   for (const rec of joins || []) {
     const { node, foot } = rec;
@@ -983,6 +1058,7 @@ function drawCircusJoins(scene, map, specOf, heightAt, joins) {
       2,
     );
     ring.name = `road:${node.island}:${name}`;
+    drawCircusMerges(scene, map, specOf, heightAt, node, outer);
 
     addCircusRing(
       scene, x, y + TARMAC_TOP_M + 0.05, z,

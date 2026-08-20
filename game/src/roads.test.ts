@@ -26,7 +26,7 @@ import {
   spawnLookAtOffset,
 } from "../public/harbour/roads.js";
 import { ROAD_CLASSES, carriagewayWidthM, roadWidthM } from "../public/harbour/roadclass.js";
-import { circusMeshRadii } from "../public/harbour/roadclip.js";
+import { circusMeshRadii, CIRCUS_RING_WIDTH_M } from "../public/harbour/roadclip.js";
 import { buildCircusFootprint, buildHubFootprint, CIRCUS_ARM_STUB_M, multiContains } from "../public/harbour/roadfoot.js";
 import { junctionPad } from "../public/harbour/roadnet.js";
 import { SOUTH_RAB } from "./southGeom.ts";
@@ -341,7 +341,8 @@ describe("paved street from spawn", () => {
     expect(circus!.geometry.parameters?.innerRadius).toBeCloseTo(radii.inner, 0);
     expect(circus!.geometry.parameters?.outerRadius).toBeCloseTo(radii.outer, 0);
     expect(circus!.material.map).toBeTruthy();
-    expect(added.filter((m) => m.userData.roadName === "Harbour Circus arm").length).toBe(0);
+    expect(CIRCUS_RING_WIDTH_M).toBeGreaterThanOrEqual(carriagewayWidthM("highway"));
+    expect(added.filter((m) => / merge$/.test(String(m.userData.roadName || "")) && m.userData.roadKind === "paved").length).toBeGreaterThan(2);
     const island = added.find(
       (m) => m.userData.roadKind === "island" && /Harbour/.test(String(m.userData.label || "")),
     );
