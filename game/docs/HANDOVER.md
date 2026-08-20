@@ -6,7 +6,7 @@ Public name **2Isles**. Spec still says Two Harbors in places; same game.
 
 **Mid-alpha (2026-08-20).** The harbour loop is the base. We build features on it. We do not reopen the foundation, clone Capital Rift, or unfreeze House / Senate / councils / elections.
 
-**Version: Alpha 0.5.1** — the **buildings push**, **playable**. Grey boxes in the spawn look. Starter $1,000 buys a Strand flat ($900). Not Blender. [VERSION.md](VERSION.md). Beta is **1.0**.
+**Version: Alpha 0.5.1** — the **buildings push**, **playable**. Spawn **$10,000**. Grey boxes in the spawn look. Not Blender. [VERSION.md](VERSION.md). Beta is **1.0**.
 
 Doc map: [README.md](README.md) · spec: [../PLAN.md](../PLAN.md) · play: [PLAY.md](PLAY.md) · money: [../ECONOMY.md](../ECONOMY.md) · units: [UNITS.md](UNITS.md)
 
@@ -62,9 +62,9 @@ South spawn. Tap-to-walk. RMB-hold orbit. No WASD.
 | Site card | Stock · Run · Upgrades · Stats. Hire $300. Play shifts while unhired. |
 | Hire | Left-rail Hire sheet, or Run tab on the cart. |
 | Account | #0002. Look swatches. Reset / delete. Cash chip expands to holdings. |
-| Units (0.5.1) | Grey boxes **in the spawn look**. Strand Flats **$900** is buyable with starter $1,000. Shop rooms $1,200 — fruit first. Tap the name/$ tag. Kit is small grey boxes. Packer + till. Scout + lease. Dest **This room** when you own a shop. |
+| Units (0.5.1) | Grey boxes **in the spawn look**. Spawn **$10,000** — shop $1,200, flat $900, dirt $15,000. Tap the name/$ tag. Kit is small grey boxes. Packer + till. Scout + lease. Dest **This room** when you own a shop. |
 
-Starter: cash **$1000**. Pad **$750**. Fruit kit **$90**, pack **$14** / 20. Today fruit **$6**, tax **8%**. Melon and fry kits sit above starter cash. Hire after first sales.
+Starter: cash **$10,000**. Pad **$750**. Fruit kit **$90**, pack **$14** / 20. Today fruit **$6**, tax **8%**. A shop room is **$1,200**. Building dirt is **$15,000**. Hire **$300**.
 
 Controls: primary tap/click walks or uses. Secondary long-press / right-click extra. Taxi on paved. Ferry $15 (North kit is closed until you ferry).
 
@@ -120,4 +120,4 @@ Known polish (not the product next): road hub hairlines at a few South joins. Do
 - Restart a pixel-critic swarm unasked
 - Invent a second inflation index or live stock quotes
 - Spend a design pass on building meshes — Blender comes from the operator
-- Change live starter cash to $10,000
+- Drop live starter cash back to $1,000 while 0.5.1 is the play

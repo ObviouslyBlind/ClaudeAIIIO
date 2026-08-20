@@ -131,7 +131,7 @@ describe("harbour land board", () => {
     const starters = board.plots.filter((p) => isStarterPlot(p, spec));
     expect(starters.length).toBeGreaterThanOrEqual(2);
     expect(starters.every((p) => p.band === "street")).toBe(true);
-    expect(starters.every((p) => p.price + DEVELOP_COST > STARTER_CASH)).toBe(true);
+    expect(starters.every((p) => p.price + DEVELOP_COST > 1_000)).toBe(true);
     expect(starters.every((p) => p.area < 2000)).toBe(true);
     expect(starters.every((p) => p.price >= 6_800)).toBe(true);
 

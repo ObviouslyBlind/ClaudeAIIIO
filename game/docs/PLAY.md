@@ -8,7 +8,7 @@ This is the live loop. Long-range design stays in [PLAN.md](../PLAN.md). Money m
 
 ## Spawn
 
-Starter cash **$1,000**. **Alpha:** harbour spawn / hard-refresh / play restart wipes this visitor.
+Starter cash **$10,000**. **Alpha:** harbour spawn / hard-refresh / play restart wipes this visitor.
 
 World: left-click walks. RMB-hold orbits. No WASD.
 
@@ -16,7 +16,7 @@ World: left-click walks. RMB-hold orbits. No WASD.
 
 ## Land
 
-Street lots are dear. **$1000** does not buy a South street lease.
+Street lots are dear versus the old $1,000 cart tutorial. South street starts at **$2,400**. Building dirt is **$15,000**.
 
 **Cart pads** line Island Hwy: short rectangles, **$750**, max three, carts only. Click a $ tag to buy. Lots overlay: click the lot dirt.
 
@@ -60,7 +60,7 @@ Sales tax **8%**. Fruit net ≈ **$5.52** a sale. Pack COGS **$0.70** / unit.
 
 Cash chip (top right) expands to holdings. Click a placed cart for **Stock · Run · Upgrades · Stats**.
 
-Rooms inside harbour buildings are **Alpha 0.5.1**. Grey placeholder boxes sit in the south spawn look. **Strand Flats is $900** — buyable with starter $1,000. A shop room is $1,200, so fruit first for Quay Shops. Tap a building name/$ tag. Spec: [UNITS.md](UNITS.md).
+Rooms inside harbour buildings are **Alpha 0.5.1**. Grey placeholder boxes sit in the south spawn look. Spawn is **$10,000** — a shop is $1,200, a flat is $900, dirt is $15,000. Tap a building name/$ tag. Spec: [UNITS.md](UNITS.md).
 
 ---
 

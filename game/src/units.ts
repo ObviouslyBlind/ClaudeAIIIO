@@ -78,7 +78,7 @@ const SHOP_STOCK: InvKind[] = ["hotdogs", "melon", "fish_chips"];
 
 /**
  * First-frame cluster, inland of Island Hwy, in the south spawn look.
- * Strand Flats ($900) is closest so $1,000 spawn can buy a room.
+ * Strand Flats ($900) is closest. Spawn is $10,000 so a shop is buyable too.
  */
 export const UNIT_BUILDINGS: BuildingSpec[] = [
   {

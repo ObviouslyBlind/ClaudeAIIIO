@@ -33,7 +33,7 @@ A player cart is **not** one of the six island listings. “Stock price” on yo
 
 ## 2. Starter loop (honest)
 
-Spawn cash **$1,000**. Alpha wipe on harbour spawn / hard-refresh.
+Spawn cash **$10,000**. Alpha wipe on harbour spawn / hard-refresh.
 
 | Buy | PAPER | Fits starter? |
 |---|---|---|
@@ -95,7 +95,7 @@ Island listings on that sheet are the six PLAN firms. Last print moves on auctio
 
 ## 5. Units (Alpha 0.5)
 
-Rooms inside authored buildings. Spec: [`docs/UNITS.md`](docs/UNITS.md). Live spawn stays **$1,000**. Unit tests use a **$10,000** faucet. Dirt under a building is a landlord buy, not a starter buy.
+Rooms inside authored buildings. Spec: [`docs/UNITS.md`](docs/UNITS.md). Live spawn is **$10,000**. Dirt under a building is **$15,000**.
 
 | Thing | PAPER |
 |---|---|

@@ -59,11 +59,12 @@ describe("units scripts (alpha 0.5)", () => {
     }
   });
 
-  it("lets live starter cash buy a Strand flat, not a shop", () => {
+  it("lets live starter cash buy a flat and a shop, not the dirt", () => {
     const visitor = createVisitor(STARTER_CASH);
-    expect(STARTER_CASH).toBe(1000);
+    expect(STARTER_CASH).toBe(10_000);
     expect(buyRoom(visitor, STRAND).ok).toBe(true);
-    expect(buyRoom(visitor, QUAY_LEFT).reason).toBe("no_cash");
+    expect(buyRoom(visitor, QUAY_LEFT).ok).toBe(true);
+    expect(buyBuildingLand(visitor, "quay-shops").reason).toBe("no_cash");
   });
 
   it("lets $10k buy a room but not the dirt", () => {

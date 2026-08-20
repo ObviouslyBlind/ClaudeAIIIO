@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import { extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { GOOD_IDS } from "./goods.ts";
-import { createLandBoard, developPlot, leasePlot } from "./land.ts";
+import { createLandBoard, developPlot, leasePlot, STARTER_CASH } from "./land.ts";
 import { parseLandUse } from "./buildings.ts";
 import { buyAtIsland } from "./buy.ts";
 import { sellAtIsland } from "./sell.ts";
@@ -98,7 +98,7 @@ const publicDir = join(root, "public");
 const port = Number(process.env.PORT ?? 8787);
 
 let world = createWorld(7);
-let visitor = createVisitor(1_000);
+let visitor = createVisitor(STARTER_CASH);
 let land = createLandBoard();
 let events = createEventLog();
 const presence = createPresence();

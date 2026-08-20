@@ -1448,7 +1448,7 @@ function addParcel(p) {
 export const SPAWN_PARCEL_M = 420;
 /** Keep in sync with game/src/land.ts STARTER_SNAP_M */
 const STARTER_SNAP_M = 40;
-const STARTER_CASH = 1000;
+const STARTER_CASH = 10000;
 
 function starterLotOn(p, islandId) {
   const spec = specOf(islandId);

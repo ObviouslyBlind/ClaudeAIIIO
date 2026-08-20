@@ -24,12 +24,12 @@ describe("PAPER land asks and lease inflation", () => {
   it("leaves $1000 PAPER on the street cart, not a vacant lease", () => {
     const board = createLandBoard();
     const kit = CART_PAPER_PRICE + HIRE_COST + HOTDOG_PACK_PRICE;
-    expect(kit).toBeLessThan(STARTER_CASH);
+    expect(kit).toBeLessThan(1_000);
     expect(LAUNCH_SALES_TAX).toBeCloseTo(0.08);
     const vacant = board.plots.filter((p) => !p.owner && p.class === "by_right");
     expect(vacant.length).toBeGreaterThan(10);
-    expect(vacant.every((p) => p.price + DEVELOP_COST > STARTER_CASH)).toBe(true);
-    expect(leasePlot(board, createVisitor(STARTER_CASH), vacant[0]!.id).ok).toBe(false);
+    expect(vacant.every((p) => p.price + DEVELOP_COST > 1_000)).toBe(true);
+    expect(leasePlot(board, createVisitor(1_000), vacant[0]!.id).ok).toBe(false);
   });
 
   it("does not inflate street asks when someone buys a $750 cart pad", () => {

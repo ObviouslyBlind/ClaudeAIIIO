@@ -64,7 +64,7 @@ function paintRoot(building, play) {
     ask < Infinity && cash >= ask
       ? "You can buy a room here."
       : ask < Infinity
-        ? "Need " + money(ask) + " for a room here. Live spawn is $1,000. A flat is $900."
+        ? "Need " + money(ask) + " for a room here. Spawn is $10,000. Building dirt is $15,000."
         : "No vacant rooms.";
   return `
     <p class="whisper">${building.floors} floor${building.floors === 1 ? "" : "s"} · ${building.rooms.length} rooms · PAPER</p>

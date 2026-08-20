@@ -60,7 +60,7 @@ Grey boxes are the product for the camera later. Kit is also grey boxes (shelf, 
 
 Use is marked **per room**, not per building. Two shops in Quay Shops are two businesses: you can buy the left room and leave the right vacant. The player cannot rezone a shop room into a flat this pass.
 
-Live spawn cash stays **$1,000** (cart loop). Unit tests use a **$10,000** PAPER faucet. Do not change `STARTER_CASH`.
+Live spawn cash is **$10,000**. That buys one or two rooms and kit, not the $15,000 dirt. Do not drop spawn back to $1,000 while this buildings slice is the play.
 
 ---
 
@@ -169,7 +169,7 @@ Buy Quay Shops room 0, leave room 1 vacant. Fruit pack dest = that unit. Hire pa
 | Version | What |
 |---|---|
 | **0.5** | Spec start. |
-| **0.5.1** | **The whole buildings push, playable.** Sim, grey boxes you can tap, manage. Starter $1,000 buys a Strand flat ($900). Blender shells when the operator has files. |
+| **0.5.1** | **The whole buildings push, playable.** Sim, grey boxes you can tap, manage. Spawn **$10,000**. Blender shells when the operator has files. |
 
 **Not this pass:** quarry, farming aisle, rezoning, walking interiors, WASD, a Job class, walking NPCs with boxes, renaming hotdog fields, merging `staff.ts` / `labour.ts`, politics, Postgres (blob must still store units), Capital Rift clone.
 
@@ -186,4 +186,4 @@ Buy Quay Shops room 0, leave room 1 vacant. Fruit pack dest = that unit. Hire pa
 - Wall-clock tenant leases
 - Place kit from the warehouse (inventory / Bring to me, same as carts — kit cash-buy is the scripts stand-in until Shopfit SKUs exist)
 - Unfreeze House / Senate / councils
-- Change live `STARTER_CASH` to $10,000
+- Drop live `STARTER_CASH` back to $1,000 while 0.5.1 is the play

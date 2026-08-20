@@ -139,18 +139,20 @@ describe("units 0.5.1 systems (placeholders, not façades)", () => {
     expect(play.books.sites.some((s) => s.siteClass === "shop" && s.label.includes("Quay"))).toBe(true);
   });
 
-  it("does not change live starter cash", () => {
+  it("starts live spawn at $10,000 so a shop room is buyable", () => {
     expect(UNIT_ROOM_PRICE.shop).toBeGreaterThan(1000);
-    const { play } = snapWithCash(1000);
-    expect(play.cash).toBe(1000);
+    expect(UNIT_ROOM_PRICE.shop).toBeLessThan(10_000);
+    const { play } = snapWithCash(10_000);
+    expect(play.cash).toBe(10_000);
     const shop = formatBuildingSheet(play, { buildingId: "quay-shops", view: "buy", floor: 0 });
-    expect(shop).toMatch(/data-buy-unit="quay-shops-0-0"[^>]*disabled/);
-    expect(shop).toContain("Need $1,200.00");
-    const flat = formatBuildingSheet(play, { buildingId: "strand-flats", view: "buy", floor: 0 });
-    expect(flat).not.toMatch(/data-buy-unit="strand-flats-0-0"[^>]*disabled/);
-    expect(flat).toContain("Buy $900.00");
-    const root = formatBuildingSheet(play, { buildingId: "strand-flats", view: "root" });
+    expect(shop).not.toMatch(/data-buy-unit="quay-shops-0-0"[^>]*disabled/);
+    expect(shop).toContain("Buy $1,200.00");
+    const root = formatBuildingSheet(play, { buildingId: "quay-shops", view: "root" });
     expect(root).toContain("You can buy a room here.");
+    expect(root).toMatch(/data-buy-land="quay-shops"[^>]*disabled/);
+    const broke = formatBuildingSheet(snapWithCash(1000).play, { buildingId: "quay-shops", view: "buy", floor: 0 });
+    expect(broke).toMatch(/data-buy-unit="quay-shops-0-0"[^>]*disabled/);
+    expect(broke).toContain("Need $1,200.00");
   });
 
   it("opens an owned shop on the room sheet with kit, not a skipped site card", () => {

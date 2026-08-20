@@ -74,7 +74,7 @@ export const STORAGE_UPGRADE_COST = CART_UPGRADES[0]!.cost;
 export const OWNER_ACCOUNT_NO = 1;
 export const VISITOR_ACCOUNT_NO = 2;
 
-/** Unit tests / slice faucet. Live spawn stays STARTER_CASH. */
+/** Live spawn / reset. $10,000 buys one or two rooms and kit, not $15,000 dirt. */
 export const UNIT_SLICE_FAUCET = 10_000;
 export const UNIT_ROOM_PRICE = { shop: 1_200, apartment: 900, office: 1_100 } as const;
 export const BUILDING_LAND_PRICE = 15_000;

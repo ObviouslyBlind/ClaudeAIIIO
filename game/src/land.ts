@@ -135,7 +135,7 @@ export const ISLANDS: Record<IslandId, IslandSpec> = {
 export const ROAD_CLEAR = 11;
 /** First-frame lots. Keep in sync with public/harbour/main.js */
 export const SPAWN_PARCEL_M = 420;
-export const STARTER_CASH = 1_000;
+export const STARTER_CASH = 10_000;
 /** Metres. Tap this close to a starter street centroid to select it. */
 export const STARTER_SNAP_M = 40;
 
