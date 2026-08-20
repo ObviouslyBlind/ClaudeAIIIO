@@ -21,7 +21,7 @@ Keep `createWorld` in `game/src/server.ts`. Keep `heightAt` in `game/src/land.ts
 
 Operator plays from **cursor.com/agents** in a browser. Do not tell them to use localhost.
 
-**https://predict-thunder-buried-income.trycloudflare.com/**
+**https://physics-sitting-scholar-fridge.trycloudflare.com/**
 
 ```bash
 cd game
