@@ -254,7 +254,7 @@ export function mountChrome(opts) {
       const shop = ownedShopUnits(play).find((r) => r.id === marketUnitId);
       return shop ? "This room · " + shop.label : "This room";
     }
-    return "Pick where it goes";
+    return "Pick warehouse or bring to me";
   }
 
   function marketOpts() {

@@ -52,7 +52,7 @@ function plantLine(site) {
   return rows.map((r) => r.label || r.kind || "Machine").join(", ");
 }
 
-function peopleLine(site) {
+export function peopleLine(site) {
   if (site && site.unitId) {
     const bits = [];
     if (site.packerHired) bits.push(site.packerStaffName || "Packer");
