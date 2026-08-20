@@ -6,7 +6,7 @@ PAPER / SIMULATED. No wallet. One shard. The sim owns cash, plots, staff, and pr
 |---|---|
 | Public name | **2Isles** (this repo still says Two Harbors in older specs; same game) |
 | Status | **Mid-alpha** — harbour loop is the base; features go on top |
-| Version | **Alpha 0.5.1** — buildings push, in progress. See [VERSION.md](VERSION.md) |
+| Version | **Alpha 0.5.1** — buildings push, playable. See [VERSION.md](VERSION.md) |
 | Politics | Frozen until the harbour loop is honest |
 | Money | PAPER / SIMULATED |
 

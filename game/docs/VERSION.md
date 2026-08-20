@@ -2,7 +2,7 @@
 
 PAPER / SIMULATED. No wallet.
 
-**Now: Alpha 0.5.1** — the **buildings push** (in progress). Sim + placeholder grey boxes + buy/manage sheets. Not Blender. Not done until a room is buyable on the live harbour.
+**Now: Alpha 0.5.1** — the **buildings push**, playable. Grey boxes in the spawn look. Starter $1,000 buys a Strand flat ($900). Not Blender.
 
 Always update this file and [HANDOVER.md](HANDOVER.md) in the same change.
 
@@ -11,7 +11,7 @@ Always update this file and [HANDOVER.md](HANDOVER.md) in the same change.
 | Lane | Number |
 |---|---|
 | Alpha | `0.x` and `0.x.y` |
-| **0.5.1** | The whole buildings / rooms push. Not a scripts-only stamp. Camera, grey boxes, and manage sheets stay **0.5.1** until this push is actually playable. |
+| **0.5.1** | The whole buildings / rooms push. Playable: tap a grey shell, buy a room. Camera and manage sheets stay **0.5.1**. Blender meshes are not a version bump. |
 | Next number | Only after 0.5.1 is done. That next number is a **different** feature, not the harbour camera. |
 | Beta | **1.0** |
 
@@ -24,4 +24,4 @@ Read the next feature out in [HANDOVER.md](HANDOVER.md) **before** writing code 
 | Version | Date | What |
 |---|---|---|
 | 0.5 | 2026-08-20 | Start of the buildings push. Spec accepted. |
-| 0.5.1 | 2026-08-20– | **This push.** Sim + placeholder boxes + buy/manage sheets. Blender shells later. Not done until you can buy a room in the harbour. |
+| 0.5.1 | 2026-08-20 | **This push, playable.** Sim + grey boxes in the spawn look + buy/manage. Strand Flats $900 with starter $1,000. Blender shells later. |

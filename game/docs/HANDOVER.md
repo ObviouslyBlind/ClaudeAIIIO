@@ -6,7 +6,7 @@ Public name **2Isles**. Spec still says Two Harbors in places; same game.
 
 **Mid-alpha (2026-08-20).** The harbour loop is the base. We build features on it. We do not reopen the foundation, clone Capital Rift, or unfreeze House / Senate / councils / elections.
 
-**Version: Alpha 0.5.1** — the **buildings push**, in progress. Sim + placeholder boxes + buy/manage sheets. Not Blender. [VERSION.md](VERSION.md). Beta is **1.0**.
+**Version: Alpha 0.5.1** — the **buildings push**, **playable**. Grey boxes in the spawn look. Starter $1,000 buys a Strand flat ($900). Not Blender. [VERSION.md](VERSION.md). Beta is **1.0**.
 
 Doc map: [README.md](README.md) · spec: [../PLAN.md](../PLAN.md) · play: [PLAY.md](PLAY.md) · money: [../ECONOMY.md](../ECONOMY.md) · units: [UNITS.md](UNITS.md)
 
@@ -98,7 +98,7 @@ Tests: `cd game && npm test` — **766 passed** (2026-08-20).
 
 Do these in order unless the operator names a piece. Politics stay frozen. **Read the piece out before coding it.**
 
-1. **Finish 0.5.1 (buildings)** — play the placeholder loop on the live shard (fruit grind to $1,200, tap a grey box, buy a room). Blender shells when the operator has files. Spec: [UNITS.md](UNITS.md).
+1. **Blender shells** — when the operator has files. Do not design façades in code. Spec: [UNITS.md](UNITS.md).
 2. **Durable persist** — Postgres (PLAN step C). Restart must not wipe a mid-alpha shard once accounts exist. Alpha spawn wipe can stay until then.
 3. **Shopfit / farming / aggregates aisles** — only when that lot type exists. Honest empty until then.
 4. **North harbour pass** — sidewalks and kit, not a second sim.

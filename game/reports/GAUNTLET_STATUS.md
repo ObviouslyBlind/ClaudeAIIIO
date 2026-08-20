@@ -49,6 +49,6 @@ Systems camera bar: 13 placeholder boxes, Manage grey until owned, dest This roo
 | U1 | Quay left buy, right vacant, packer then till, fire packer crate sits; cart fruit still sells | **PASS** (tests) |
 | U2 | Flat/office need full kit before scout; rent on sim-hour clock; ground rent $8 or skip if you own dirt | **PASS** (tests) |
 | U3 | Shop kit is siteScore parts (shelf/till/fridge). Ground-floor traffic band. Two quay shops = two Books rows. Stale unit crate warehouses. | **PASS** (tests) |
-| U5 | Spawn look: Strand Flats $900 tag, tap, buy a room with starter $1,000 | **in play** |
+| U5 | Spawn look: Strand Flats $900 tag, tap, buy a room with starter $1,000 | **PASS** (live harbour) |
 
 Operator is the brake.
