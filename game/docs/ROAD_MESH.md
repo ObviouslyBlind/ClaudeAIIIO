@@ -14,9 +14,8 @@
  * dropped the arms. Do not bring those back.
  *
  * Draw rules:
- * - Dual = one black deck across both carriageways and the median. Paint
- *   marks lanes and a thin median stripe. Round joins at corners, not a
- *   miter flare into the verge.
+ * - Dual = one charcoal deck with grit, a light concrete kerb, and paint
+ *   you can read from spawn. Cars drive the graph above the mesh.
  * - Tarmac runs through T/L hubs (overlap). Paint and sidewalks still give
  *   way. The plate sits under so the meeting is one black shape.
  * - T/L inner kerb is a tangent fillet plus a round node disc, not a sand crotch.

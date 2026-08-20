@@ -5,15 +5,15 @@ import { addQuadXZ, junctionKerbQuads } from "./roadjoin.js";
 import { buildHubFootprint, buildCircusFootprint, clipPolylineToOutside, multiContains, FOOT_SHOULDER_M, biteRibbonWith, circleRing } from "./roadfoot.js";
 import { circusesFromGraph, clipPolylineOutsideCircuses } from "./roadclip.js";
 
-/** Dark grit under the tarmac edge. Pale 0x6f6a5e read as a sand gap from spawn. */
-export const SHOULDER = 0x3f3c36;
+/** Concrete lip. Dark grit (0x3f3c36) sat next to black tarmac and vanished. */
+export const SHOULDER = 0x9aa0a6;
 
 /** Metres. A black tarmac ribbon, not a kerbed highway kit. */
 export const PAVED_WIDTH_M = 7.2;
 /** Metres. Field tracks only — thinner than the street. */
 export const DIRT_WIDTH_M = 2.6;
-/** Black tarmac. */
-export const ASPHALT = 0x141414;
+/** Charcoal you can light — 0x141414 was a hole, not a road. */
+export const ASPHALT = 0x333338;
 /** Packed earth — same kraft family as crates, not grey pavement. */
 export const DIRT = 0x8a6238;
 /** Same stone as house plinth / window sills — original palette, not a new hex. */
@@ -27,26 +27,73 @@ export const MEDIAN = 0x1a1a18;
 export const SIDEWALK = 0xb0a48c;
 /** Drawn median width. Class medianM is the driving gap; this is the paint. */
 export const MEDIAN_STRIPE_M = 1.8;
-/** PathPhalt markings. Paper cream / kraft gold, not a kerb kit. */
-export const PAINT = 0xe8e2d4;
-export const PAINT_YELLOW = 0xc9a227;
-export const PAINT_WIDTH_M = 0.24;
-export const PAINT_DASH_M = 4.2;
-export const PAINT_GAP_M = 4.8;
+/** PathPhalt markings. Paper cream / kraft gold, wide enough to read from spawn. */
+export const PAINT = 0xf4f0e4;
+export const PAINT_YELLOW = 0xe0b03a;
+export const PAINT_WIDTH_M = 0.36;
+export const PAINT_DASH_M = 8;
+export const PAINT_GAP_M = 5.5;
+export const ASPHALT_TILE_M = 6;
 
-/** Tan hemisphere fill washes Lambert 0x141414 toward sand. Keep tarmac black. */
+function hash2(x, y) {
+  let n = Math.imul(x, 374761393) + Math.imul(y, 668265263);
+  n = Math.imul(n ^ (n >>> 13), 1274126177);
+  return ((n ^ (n >>> 16)) >>> 0) / 4294967296;
+}
+
+let asphaltTex = null;
+function asphaltMap() {
+  if (asphaltTex) return asphaltTex;
+  const s = 128;
+  const data = new Uint8Array(s * s * 4);
+  for (let y = 0; y < s; y++) {
+    for (let x = 0; x < s; x++) {
+      const i = (y * s + x) * 4;
+      const n = hash2(x, y);
+      const speck = hash2(x * 3, y * 5) > 0.9 ? -28 : 0;
+      const b = Math.max(80, Math.min(255, 150 + n * 70 + speck));
+      data[i] = b;
+      data[i + 1] = b;
+      data[i + 2] = Math.max(70, b - 8);
+      data[i + 3] = 255;
+    }
+  }
+  const tex = new THREE.DataTexture(data, s, s);
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.wrapT = THREE.RepeatWrapping;
+  tex.magFilter = THREE.LinearFilter;
+  tex.minFilter = THREE.LinearMipmapLinearFilter;
+  tex.generateMipmaps = true;
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.needsUpdate = true;
+  asphaltTex = tex;
+  return tex;
+}
+
+const matByKey = new Map();
+
+/** Cool asphalt + grit. Tan hemisphere used to wash Lambert black into sand. */
 function roadMaterial(color, roadKind, extra = {}) {
-  const keepBlack = roadKind === "paved" || roadKind === "junction" || roadKind === "median";
+  const tarmac = roadKind === "paved" || roadKind === "junction" || roadKind === "median" || roadKind === "join";
   const paint = roadKind === "paint";
-  return new THREE.MeshLambertMaterial({
+  const kerb = roadKind === "shoulder";
+  const key = `${color}|${roadKind}|${extra.polygonOffsetFactor || 0}|${extra.emissiveIntensity || ""}`;
+  const hit = matByKey.get(key);
+  if (hit && !extra.emissive) return hit;
+  const mat = new THREE.MeshStandardMaterial({
     color,
-    ...(keepBlack ? { emissive: color, emissiveIntensity: 0.42 } : {}),
-    ...(paint ? { emissive: color, emissiveIntensity: 0.62 } : {}),
+    roughness: paint ? 0.42 : kerb ? 0.86 : 0.9,
+    metalness: 0,
+    map: tarmac || kerb ? asphaltMap() : null,
+    emissive: paint ? color : 0x000000,
+    emissiveIntensity: paint ? 0.38 : 0,
     polygonOffset: true,
     polygonOffsetFactor: paint ? -4 : -2,
     polygonOffsetUnits: paint ? -4 : -2,
     ...extra,
   });
+  if (!extra.emissive) matByKey.set(key, mat);
+  return mat;
 }
 export const SIDEWALK_WIDTH_M = 2.8;
 /** Local T-stubs and town lanes — narrower than the arterial. */
@@ -99,7 +146,10 @@ function drawRibbon(scene, spec, road, heightAt, widthM, color, roadKind, matOpt
   const thick = RIBBON_HALF_THICK_M * 2;
   const n = pts.length;
   const positions = new Float32Array(n * 12);
+  const uvs = new Float32Array(n * 8);
   const indices = [];
+  const vSpan = Math.max(0.4, widthM / ASPHALT_TILE_M);
+  let along = 0;
 
   for (let i = 0; i < n; i++) {
     let dx;
@@ -156,6 +206,17 @@ function drawRibbon(scene, spec, road, heightAt, widthM, color, roadKind, matOpt
     positions[o + 9] = qx;
     positions[o + 10] = yB;
     positions[o + 11] = qz;
+    if (i > 0) along += Math.hypot(pts[i].x - pts[i - 1].x, pts[i].z - pts[i - 1].z);
+    const u = along / ASPHALT_TILE_M;
+    const uo = i * 8;
+    uvs[uo] = u;
+    uvs[uo + 1] = 0;
+    uvs[uo + 2] = u;
+    uvs[uo + 3] = vSpan;
+    uvs[uo + 4] = u;
+    uvs[uo + 5] = 0;
+    uvs[uo + 6] = u;
+    uvs[uo + 7] = vSpan;
   }
 
   for (let i = 0; i < n - 1; i++) {
@@ -176,6 +237,7 @@ function drawRibbon(scene, spec, road, heightAt, widthM, color, roadKind, matOpt
 
   const geo = new THREE.BufferGeometry();
   geo.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+  geo.setAttribute("uv", new THREE.Float32BufferAttribute(uvs, 2));
   geo.setIndex(indices);
   geo.computeVertexNormals();
 
@@ -302,6 +364,9 @@ function drawRoundJoins(scene, spec, road, heightAt, widthM, circuses, yLift = 0
   if (!slots.length) return;
   const geo = new THREE.CircleGeometry(half, 20);
   geo.rotateX(-Math.PI / 2);
+  const uv = geo.attributes.uv;
+  const uvScale = Math.max(1, widthM / ASPHALT_TILE_M);
+  for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * uvScale, uv.getY(i) * uvScale);
   const mesh = new THREE.InstancedMesh(geo, roadMaterial(ASPHALT, "paved"), slots.length);
   mesh.castShadow = false;
   mesh.receiveShadow = true;
@@ -726,7 +791,7 @@ function addJunctionPlate(scene, spec, heightAt, pad) {
   const y = heightAt(spec, pad.x, pad.z);
   const grit = new THREE.Mesh(
     new THREE.PlaneGeometry(pad.side + SHOULDER_PAD_M, pad.side + SHOULDER_PAD_M),
-    new THREE.MeshLambertMaterial({ color: SHOULDER }),
+    roadMaterial(SHOULDER, "shoulder"),
   );
   grit.rotation.order = "YXZ";
   grit.rotation.set(-Math.PI / 2, pad.yaw || 0, 0);
@@ -744,7 +809,7 @@ function addJunctionPlate(scene, spec, heightAt, pad) {
     pad.round
       ? new THREE.CircleGeometry(pad.side / 2, 20)
       : new THREE.PlaneGeometry(pad.side, pad.side),
-    new THREE.MeshLambertMaterial({ color: ASPHALT }),
+    roadMaterial(ASPHALT, "junction"),
   );
   mesh.rotation.order = "YXZ";
   mesh.rotation.set(-Math.PI / 2, pad.yaw || 0, 0);
@@ -851,7 +916,7 @@ function drawCircusJoins(scene, map, specOf, heightAt, joins) {
     // Ring is the join. No arm boxes — those were square edges in the grass.
     const grit = new THREE.Mesh(
       new THREE.RingGeometry(inner, outer + FOOT_SHOULDER_M, 64),
-      new THREE.MeshLambertMaterial({ color: SHOULDER }),
+      roadMaterial(SHOULDER, "shoulder"),
     );
     grit.rotation.x = -Math.PI / 2;
     grit.position.set(node.x, y + 0.13, node.z);
@@ -1023,13 +1088,19 @@ function addMultiPolygonMesh(scene, mp, y, color, userData, renderOrder = 3) {
     const g = new THREE.ShapeGeometry(shape);
     const pos = g.attributes.position;
     const flat = new Float32Array(pos.count * 3);
+    const uv = new Float32Array(pos.count * 2);
     for (let i = 0; i < pos.count; i++) {
-      flat[i * 3] = pos.getX(i);
+      const px = pos.getX(i);
+      const pz = pos.getY(i);
+      flat[i * 3] = px;
       flat[i * 3 + 1] = y;
-      flat[i * 3 + 2] = pos.getY(i);
+      flat[i * 3 + 2] = pz;
+      uv[i * 2] = px / ASPHALT_TILE_M;
+      uv[i * 2 + 1] = pz / ASPHALT_TILE_M;
     }
     const geo = new THREE.BufferGeometry();
     geo.setAttribute("position", new THREE.BufferAttribute(flat, 3));
+    geo.setAttribute("uv", new THREE.BufferAttribute(uv, 2));
     if (g.index) geo.setIndex(Array.from(g.index.array));
     geo.computeVertexNormals();
     const mesh = new THREE.Mesh(

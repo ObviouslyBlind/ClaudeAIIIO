@@ -18,6 +18,7 @@ import {
   PAINT,
   PAINT_WIDTH_M,
   PAINT_YELLOW,
+  SHOULDER,
   STONE,
   makeRoads,
   spawnCameraOffset,
@@ -81,6 +82,7 @@ describe("paved street from spawn", () => {
     expect(paint.some((m) => m.material.color.getHex() === PAINT)).toBe(true);
     expect(paint.some((m) => m.material.color.getHex() === PAINT_YELLOW)).toBe(true);
     expect(lum(PAINT)).toBeGreaterThan(lum(ASPHALT));
+    expect(PAINT_WIDTH_M).toBeGreaterThan(0.3);
     expect(PAINT_WIDTH_M).toBeLessThan(0.4);
     const walks = added.filter((m) => m.userData.roadKind === "sidewalk");
     expect(walks.length).toBeGreaterThan(4);
@@ -99,10 +101,12 @@ describe("paved street from spawn", () => {
     expect(DIRT_WIDTH_M).toBeLessThan(4);
 
     expect(paved[0].material.color.getHex()).toBe(ASPHALT);
-    expect(paved[0].material.emissive.getHex()).toBe(ASPHALT);
+    expect(paved[0].material.map).toBeTruthy();
+    expect(paved[0].material.roughness).toBeGreaterThan(0.7);
     expect(dirt[0].material.color.getHex()).toBe(DIRT);
     expect(DIRT).toBe(0x8a6238);
-    expect(lum(ASPHALT)).toBeLessThan(0.12);
+    expect(lum(ASPHALT)).toBeLessThan(0.22);
+    expect(lum(SHOULDER)).toBeGreaterThan(lum(ASPHALT) + 0.15);
     expect(lum(dirt[0].material.color.getHex())).toBeGreaterThan(lum(ASPHALT));
 
     const dirtKinds = new Set(map.roads.filter((r) => r.kind === "dirt").map((r) => r.kind));
