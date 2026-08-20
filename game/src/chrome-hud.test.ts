@@ -201,11 +201,10 @@ describe("harbour chrome HUD", () => {
     expect(chrome).not.toContain("data-hire-person");
     expect(chrome).toContain("place-cancel");
     expect(siteMenu).toContain("sticker-mark");
-    expect(siteMenu).toContain("sticker-seg");
     expect(siteMenu).toContain("sticker-band");
     expect(siteMenu).toContain("sticker-knob");
     expect(siteMenu).toContain("sticker-today");
-    expect(siteMenu).toContain("Optimal ");
+    expect(siteMenu).toContain("Optimal: ");
     expect(siteMenu).toContain("per unit");
     expect(siteMenu).toContain("Price set");
     expect(siteMenu).toContain("data-sticker-knob");
@@ -427,7 +426,7 @@ describe("harbour chrome HUD", () => {
     expect(fryStock).toContain("data-fuel=\"inventory\"");
     expect(fryStock).toContain("is-today");
     expect(fryStock).toContain('max="16"');
-    expect(fryStock).toContain("flex:56.6667");
+    expect(fryStock).toContain("#c6f000 66.67%");
     const hiredRun = formatSiteMenu(
       {
         id: "stand-1",
@@ -553,9 +552,12 @@ describe("harbour chrome HUD", () => {
     expect(stock).toContain('data-tone="today"');
     expect(stock).toContain("sticker-band");
     expect(stock).toContain("sticker-knob");
-    expect(stock).toContain("sticker-seg is-green");
-    expect(stock).toContain("Optimal $6.00");
-    expect(stock).toContain("flex:23.3333");
+    expect(stock).toContain("background-image:");
+    expect(stock).toContain("linear-gradient(90deg");
+    expect(stock).toContain("#c6f000 33.33%");
+    expect(stock).toContain("Optimal: $6.00");
+    expect(stock).not.toContain("sticker-seg");
+    expect(stock).not.toContain("flex:23.3333");
     expect(stock).not.toContain("sticker-zone");
     expect(stock).not.toContain("sticker-rail");
     expect(stock).not.toContain("id=\"hire-site\"");
@@ -591,18 +593,16 @@ describe("harbour chrome HUD", () => {
     expect(css).toContain(".stock-num.is-low");
     expect(css).toContain(".sticker-mark");
     expect(css).toContain(".sticker-band");
-    expect(css).toContain(".sticker-seg.is-red");
-    expect(css).toContain(".sticker-seg.is-yellow");
-    expect(css).toContain(".sticker-seg.is-green");
     expect(css).toContain(".sticker-today");
-    expect(css).toContain("width: 4.6em");
-    expect(css).toContain("width: 6px");
-    expect(css).toContain("gap: 1px");
+    expect(css).toContain("width: 7px");
+    expect(css).toContain("background: #ffffff");
     expect(css).not.toContain(".sticker-zone");
     expect(css).not.toContain(".sticker-rail");
+    expect(css).not.toContain(".sticker-seg.is-red");
     expect(css).toContain(".sticker-read.is-near");
     expect(css).toContain(".sticker-read.is-far");
-    expect(css).toContain("#c43a3a");
+    expect(css).toContain("#c6f000");
+    expect(css).toContain("#c41e2a");
     expect(css).not.toContain("#be3d3d");
     expect(css).not.toMatch(/#e25b6a 16%/);
     expect(css).not.toContain("linear-gradient(\n    90deg,\n    #c42b3a");
@@ -626,13 +626,15 @@ describe("harbour chrome HUD", () => {
     expect(edgeLow[0].tone).toBe("green");
     const edgeHigh = stickerTrackSegs(16);
     expect(edgeHigh[edgeHigh.length - 1].tone).toBe("green");
-    const fruitCss = stickerBandGradient(fruitSegs);
-    expect(fruitCss).toContain("#c43a3a 0.00%");
-    expect(fruitCss).toContain("#c43a3a 23.33%");
-    expect(fruitCss).toContain("#5fe3a0");
+    const fruitCss = stickerBandGradient(6);
+    expect(fruitCss).toContain("#c41e2a 0.00%");
+    expect(fruitCss).toContain("#c6f000 33.33%");
+    expect(fruitCss).toContain("#ffd400");
+    expect(fruitCss).toContain("#ff7a18");
     expect(fruitCss).not.toMatch(/#e25b6a/);
-    const fryCss = stickerBandGradient(frySegs);
-    expect(fryCss).toContain("56.67%");
+    const fryCss = stickerBandGradient(11);
+    expect(fryCss).toContain("#c6f000 66.67%");
+    expect(stickerBandGradient(fruitSegs)).toContain("#c6f000 33.33%");
   });
 
   it("paints Account as Google placeholder, #0002, look swatches, and red wipes", () => {
