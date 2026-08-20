@@ -11,7 +11,7 @@ import { createVisitor, createWorld, hud, refreshWorldHud, tick } from "./sim.ts
 import { cancelOrder } from "./cancelOrder.ts";
 import { listOpenOrders, placeAsk, placeBid } from "./orders.ts";
 import { postStaff, staffMapSnapshot } from "./staff-http.ts";
-import { ASSET_NONCE, bustFontUrls, bustHarbourAssets, bustModuleImports } from "./cache-bust.ts";
+import { bustFontUrls, bustHarbourAssets, bustModuleImports, harbourAssetNonce } from "./cache-bust.ts";
 import { resolvePublicPath } from "./public-path.ts";
 import { confirmFerry, listFerryRoutes } from "./ferry-routes.ts";
 import { calendarHud } from "./calendar.ts";
@@ -600,14 +600,15 @@ const server = createServer(async (req, res) => {
       headers["pragma"] = "no-cache";
       headers["expires"] = "0";
     }
+    const nonce = harbourAssetNonce(join(publicDir, "harbour"));
     if (ext === ".html") {
-      data = bustHarbourAssets(data.toString("utf8"), ASSET_NONCE);
+      data = bustHarbourAssets(data.toString("utf8"), nonce);
     }
     if (ext === ".css" && pathname.startsWith("/harbour/")) {
-      data = bustFontUrls(data.toString("utf8"), ASSET_NONCE);
+      data = bustFontUrls(data.toString("utf8"), nonce);
     }
     if (ext === ".js" && pathname.startsWith("/harbour/")) {
-      data = bustModuleImports(data.toString("utf8"), ASSET_NONCE);
+      data = bustModuleImports(data.toString("utf8"), nonce);
     }
     res.writeHead(200, headers);
     res.end(data);

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { ASSET_NONCE, bustFontUrls, bustHarbourAssets, bustModuleImports } from "./cache-bust.ts";
+import { fileURLToPath } from "node:url";
+import { ASSET_NONCE, bustFontUrls, bustHarbourAssets, bustModuleImports, harbourAssetNonce } from "./cache-bust.ts";
 
 describe("harbour cache bust", () => {
   it("stamps script and stylesheet so a fresh load is enough", () => {
@@ -49,5 +50,12 @@ import("./lease-hud.js?v=1");`;
     expect(first).toBe(`import("./main.js?v=${ASSET_NONCE}");`);
     expect(main).toBe(`import { CAM, LOOK } from "./first-frame.js?v=${ASSET_NONCE}";`);
     expect(again).toBe(first);
+  });
+
+  it("stamps from harbour file mtime so a JS edit is not an old boot", () => {
+    const dir = new URL("../public/harbour", import.meta.url);
+    const n = harbourAssetNonce(fileURLToPath(dir));
+    expect(n).toBeGreaterThan(1_700_000_000_000);
+    expect(harbourAssetNonce(fileURLToPath(dir))).toBe(n);
   });
 });
