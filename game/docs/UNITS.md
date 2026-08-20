@@ -168,9 +168,8 @@ Buy Quay Shops room 0, leave room 1 vacant. Fruit pack dest = that unit. Hire pa
 
 | Version | What |
 |---|---|
-| **0.5** | Spec + scripts start. |
-| **0.5.1** | Scripts shipped. Tests green. Persist blob round-trip. HTTP intents. **No 3D, no Blender, no dollhouse.** |
-| **0.5.2** | Dollhouse camera / grey boxes. Operator Blender shells when ready. |
+| **0.5** | Spec start. |
+| **0.5.1** | **The whole buildings push.** Sim, then grey boxes you can tap, then manage. Not done until you can buy a room in the harbour. Blender shells when the operator has files. |
 
 **Not this pass:** quarry, farming aisle, rezoning, walking interiors, WASD, a Job class, walking NPCs with boxes, renaming hotdog fields, merging `staff.ts` / `labour.ts`, politics, Postgres (blob must still store units), Capital Rift clone.
 

@@ -6,7 +6,7 @@ PAPER / SIMULATED. No wallet. One shard. The sim owns cash, plots, staff, and pr
 |---|---|
 | Public name | **2Isles** (this repo still says Two Harbors in older specs; same game) |
 | Status | **Mid-alpha** — harbour loop is the base; features go on top |
-| Version | **Alpha 0.5.1** — see [VERSION.md](VERSION.md) |
+| Version | **Alpha 0.5.1** — buildings push, in progress. See [VERSION.md](VERSION.md) |
 | Politics | Frozen until the harbour loop is honest |
 | Money | PAPER / SIMULATED |
 
@@ -40,8 +40,8 @@ These files are law. New work extends them; it does not start a second design.
 | [ECONOMY.md](../ECONOMY.md) | Faucets, sinks, land inflation, cart books, six PAPER listings. |
 | [MARKETPLACE.md](../MARKETPLACE.md) | Catalog aisles and the one logistics engine. |
 | [LAND.md](../LAND.md) | Parcels, pads, lease inflation. |
-| [UNITS.md](UNITS.md) | Rooms inside a building. Shop / apartment / office. Alpha 0.5.1 scripts. |
-| [VERSION.md](VERSION.md) | Alpha 0.5.1 now. Next successful slice is 0.5.2. Beta is 1.0. |
+| [UNITS.md](UNITS.md) | Rooms inside a building. Shop / apartment / office. The 0.5.1 buildings push. |
+| [VERSION.md](VERSION.md) | Alpha 0.5.1 is the whole buildings push. Beta is 1.0. |
 
 ---
 

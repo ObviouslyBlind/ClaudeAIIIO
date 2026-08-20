@@ -2,7 +2,7 @@
 
 PAPER / SIMULATED. No wallet.
 
-**Now: Alpha 0.5.1** — units scripts shipped. Rooms, packer / till, leases. No Blender pass.
+**Now: Alpha 0.5.1** — the **buildings push** (in progress). Scripts are in. Nothing is in the harbour camera yet. Operator mocks shells in Blender later.
 
 Always update this file and [HANDOVER.md](HANDOVER.md) in the same change.
 
@@ -11,16 +11,17 @@ Always update this file and [HANDOVER.md](HANDOVER.md) in the same change.
 | Lane | Number |
 |---|---|
 | Alpha | `0.x` and `0.x.y` |
-| This block | started **0.5**, then **0.5.1**, **0.5.2**, … after each successful implementation |
+| **0.5.1** | The whole buildings / rooms push. Not a scripts-only stamp. Camera, grey boxes, and manage sheets stay **0.5.1** until this push is actually playable. |
+| Next number | Only after 0.5.1 is done. That next number is a **different** feature, not the harbour camera. |
 | Beta | **1.0** |
 
-Do not skip a bump because the change “felt small.” If the slice shipped and tests passed, bump. If the slice failed, do not bump.
+Do not bump because a file landed. Bump when the named push is playable.
 
-Read the next feature out in [HANDOVER.md](HANDOVER.md) **before** writing code for it. Gauntlet: one piece, real bar, tests for sim, camera later.
+Read the next feature out in [HANDOVER.md](HANDOVER.md) **before** writing code for it.
 
 ## History
 
 | Version | Date | What |
 |---|---|---|
-| 0.5 | 2026-08-20 | Start. Spec accepted: 4 buildings, 13 rooms, buyable dirt (dear), cheap rooms. Scripts only. Operator mocks buildings in Blender later. |
-| 0.5.1 | 2026-08-20 | Units sim scripts green. `units.ts` buy room / dirt, packer + till on the existing crate, apartment / office leases, persist round-trip. 747 tests. No 3D. |
+| 0.5 | 2026-08-20 | Start of the buildings push. Spec accepted. |
+| 0.5.1 | 2026-08-20– | **This push.** Headless room sim is in (`units.ts`). Harbour camera / grey boxes / tap-to-buy **not in**. Not done. |

@@ -6,7 +6,7 @@ Public name **2Isles**. Spec still says Two Harbors in places; same game.
 
 **Mid-alpha (2026-08-20).** The harbour loop is the base. We build features on it. We do not reopen the foundation, clone Capital Rift, or unfreeze House / Senate / councils / elections.
 
-**Version: Alpha 0.5.1** — units scripts shipped. Always bump [VERSION.md](VERSION.md) after a successful implementation (next: 0.5.2). Beta is **1.0**.
+**Version: Alpha 0.5.1** — the **buildings push**, in progress. Scripts exist. You cannot see or buy a room in the harbour yet. [VERSION.md](VERSION.md). Beta is **1.0**.
 
 Doc map: [README.md](README.md) · spec: [../PLAN.md](../PLAN.md) · play: [PLAY.md](PLAY.md) · money: [../ECONOMY.md](../ECONOMY.md) · units: [UNITS.md](UNITS.md)
 
@@ -18,7 +18,7 @@ You are a game dev. Work the task that is set. Do not deviate. Gauntlet loops un
 
 **Read every feature out in this file before implementing it.** Do not jump to 3D, Blender, or dollhouse chrome because it looks like content.
 
-Visual buildings: the operator will mock a few simple shells in **Blender**. Do not spend a design pass on façades. Right now we are writing **game scripts**.
+Visual buildings: the operator will mock a few simple shells in **Blender**. Do not spend a design pass on façades. **0.5.1 is the whole buildings push** — sim, then grey boxes in the harbour, then manage sheets. Blender files when the operator has them.
 
 Always update this handover when the live loop, version, play URL, or next piece changes.
 
@@ -62,7 +62,7 @@ South spawn. Tap-to-walk. RMB-hold orbit. No WASD.
 | Site card | Stock · Run · Upgrades · Stats. Hire $300. Play shifts while unhired. |
 | Hire | Left-rail Hire sheet, or Run tab on the cart. |
 | Account | #0002. Look swatches. Reset / delete. Cash chip expands to holdings. |
-| Units scripts | `src/units.ts` — 4 buildings, 13 rooms. Buy a room. Packer / till. Leases. Not on the camera yet. |
+| Units (0.5.1, not done) | Headless only. 4 buildings / 13 rooms in `src/units.ts`. Buy / packer / till / lease work in tests and HTTP. **No boxes in the world. No tap-to-buy.** |
 
 Starter: cash **$1000**. Pad **$750**. Fruit kit **$90**, pack **$14** / 20. Today fruit **$6**, tax **8%**. Melon and fry kits sit above starter cash. Hire after first sales.
 
@@ -98,7 +98,7 @@ Tests: `cd game && npm test` — **747 passed** (2026-08-20).
 
 Do these in order unless the operator names a piece. Politics stay frozen. **Read the piece out before coding it.**
 
-1. **Units camera (Alpha 0.5.2, next)** — grey boxes in the harbour, floor picker, tap a room. Read this out before coding. Operator Blender shells when ready. Spec: [UNITS.md](UNITS.md). No mesh pass until the operator brings Blender files.
+1. **Finish 0.5.1 (buildings)** — grey boxes near South spawn, tap a building, buy a room, manage packer/till/leases. Same spec: [UNITS.md](UNITS.md). No Blender façades. Read the camera piece out before coding it.
 2. **Durable persist** — Postgres (PLAN step C). Restart must not wipe a mid-alpha shard once accounts exist. Alpha spawn wipe can stay until then.
 3. **Shopfit / farming / aggregates aisles** — only when that lot type exists. Honest empty until then.
 4. **North harbour pass** — sidewalks and kit, not a second sim.
