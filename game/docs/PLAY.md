@@ -60,7 +60,7 @@ Sales tax **8%**. Fruit net ≈ **$5.52** a sale. Pack COGS **$0.70** / unit.
 
 Cash chip (top right) expands to holdings. Click a placed cart for **Stock · Run · Upgrades · Stats**.
 
-Rooms inside harbour buildings are a separate loop (Alpha 0.5 scripts). Spec: [UNITS.md](UNITS.md). Not on the camera yet. Operator will mock shells in Blender. Live spawn cash stays **$1,000**.
+Rooms inside harbour buildings are **Alpha 0.5.1**. Grey placeholder boxes near spawn. Tap a building to buy a room. Live spawn cash stays **$1,000** — a shop room is $1,200, so fruit first. Spec: [UNITS.md](UNITS.md).
 
 ---
 

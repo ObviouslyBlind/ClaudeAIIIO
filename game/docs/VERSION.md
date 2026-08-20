@@ -24,4 +24,4 @@ Read the next feature out in [HANDOVER.md](HANDOVER.md) **before** writing code 
 | Version | Date | What |
 |---|---|---|
 | 0.5 | 2026-08-20 | Start of the buildings push. Spec accepted. |
-| 0.5.1 | 2026-08-20– | **This push.** Headless room sim is in (`units.ts`). Harbour camera / grey boxes / tap-to-buy **not in**. Not done. |
+| 0.5.1 | 2026-08-20– | **This push.** Sim + placeholder boxes + buy/manage sheets. Blender shells later. Not done until you can buy a room in the harbour. |

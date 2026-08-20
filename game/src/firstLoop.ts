@@ -23,6 +23,7 @@ import {
   PROPANE_PRICE,
   PROPANE_SALES,
   STORAGE_UPGRADE_COST,
+  UNIT_ROOM_PRICE,
   VISITOR_ACCOUNT_NO,
 } from "./economy.ts";
 import { PACK_COOLDOWN_MS } from "./shiftBonus.ts";
@@ -1689,6 +1690,38 @@ export function buildBusinessBooks(
     const extra = standRows.find((r) => r.id === stand.id);
     if (!extra) continue;
     sites.push(siteBookFromStand(stand, land, play, extra));
+  }
+  for (const site of play.workSites || []) {
+    if (!site.unitId) continue;
+    const tax = cartTaxRate(play);
+    const cogsEst = packUnitCost("fruit");
+    const unitsSold = Number(site.unitsSold) || 0;
+    const perMinute = 0;
+    sites.push({
+      standId: site.id,
+      kind: "shop",
+      label: site.label,
+      siteClass: "shop",
+      lotName: site.label,
+      plotClass: null,
+      staffName: site.tillHired ? site.staffName : site.packerHired ? site.packerStaffName : null,
+      hired: Boolean(site.tillHired),
+      attending: false,
+      sticker: site.stickerPrice,
+      todayPrice: TODAY_PRICE,
+      stickerBand: stickerBand(site.stickerPrice),
+      priceTrend: priceTrendOf(site.stickerPrice, TODAY_PRICE),
+      cogsEst,
+      cogsSold: roundMoney(unitsSold * cogsEst),
+      taxRate: tax,
+      netPerSale: roundMoney(site.stickerPrice * (1 - tax)),
+      worthPaper: UNIT_ROOM_PRICE.shop,
+      stock: site.stock,
+      unitsSold,
+      perMinute,
+      projHour: 0,
+      projDay: 0,
+    });
   }
   return {
     mode: "PAPER",

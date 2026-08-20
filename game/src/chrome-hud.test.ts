@@ -293,7 +293,9 @@ describe("harbour chrome HUD", () => {
     expect(chrome).toContain("dest: marketDest,");
     expect(chrome).not.toContain("dest: marketDest === \"road\" ? \"road\" : \"warehouse\"");
     expect(chrome).toContain('id="order-pay" ${canPay ? "" : "disabled"}');
-    expect(chrome).toContain("data-order-dest");
+    expect(chrome).toContain("/api/unit/buy");
+    expect(chrome).toContain("openBuildingSheet");
+    expect(chrome).toContain("formatOrderDests");
     expect(chrome).toContain("getPose");
     expect(chrome).toContain("hideOrderAsk");
     expect(chrome).toContain("data-open-stand");

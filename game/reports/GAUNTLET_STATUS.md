@@ -40,6 +40,8 @@ Ratchet: one-bar Price set with Optimal on today’s green.
 
 ## Buildings push (Alpha 0.5.1)
 
-Headless bar: buy one Quay Shops room, sibling vacant, packer fills from the crate, till sells, fire packer and the crate sits. Cart fruit loop still passes. **PASS** (747 tests). Camera / grey boxes **not started**. This version is not done until the harbour shows the buildings. Spec: [`../docs/UNITS.md`](../docs/UNITS.md). Version: [`../docs/VERSION.md`](../docs/VERSION.md).
+Headless bar: buy one Quay Shops room, sibling vacant, packer fills from the crate, till sells, fire packer and the crate sits. **PASS**.
+
+Systems camera bar: 13 placeholder boxes, Manage grey until owned, dest This room, shop Run has packer + till. Not Blender. Spec: [`../docs/UNITS.md`](../docs/UNITS.md).
 
 Operator is the brake.

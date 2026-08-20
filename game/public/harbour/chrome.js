@@ -22,6 +22,7 @@ import {
 } from "./marketplace.js";
 import { formatHireSheet } from "./hire-sheet.js";
 import { formatAccountSheet } from "./account-sheet.js";
+import { formatBuildingSheet, formatOrderDests, ownedShopUnits } from "./units-hud.js";
 
 export const POLL_MS = 1000;
 
@@ -83,6 +84,11 @@ export function mountChrome(opts) {
   const packShift = mountPackShift();
   let siteTab = "stock";
   let openSiteId = null;
+  let unitBuildingId = "";
+  let unitView = "root";
+  let unitFloor = 0;
+  let unitRoomId = "";
+  let marketUnitId = "";
   let orderSku = null;
   let orderQty = 1;
   const orderAsk = document.getElementById("order-ask");
@@ -149,8 +155,11 @@ export function mountChrome(opts) {
   function dismissStandMenu() {
     if (standMenu) standMenu.hidden = true;
     if (standVeil) standVeil.hidden = true;
-    const wasOpen = openSiteId != null;
+    const wasOpen = openSiteId != null || unitBuildingId;
     openSiteId = null;
+    unitBuildingId = "";
+    unitView = "root";
+    unitRoomId = "";
     if (wasOpen && typeof opts.onCloseStand === "function") opts.onCloseStand();
   }
 
@@ -241,7 +250,11 @@ export function mountChrome(opts) {
   function destLabel() {
     if (marketDest === "road") return "Comes to you on the kerb";
     if (marketDest === "warehouse") return "South warehouse";
-    return "Pick warehouse or bring to me";
+    if (marketDest === "unit") {
+      const shop = ownedShopUnits(play).find((r) => r.id === marketUnitId);
+      return shop ? "This room · " + shop.label : "This room";
+    }
+    return "Pick where it goes";
   }
 
   function marketOpts() {
@@ -373,7 +386,10 @@ export function mountChrome(opts) {
     const total = basketMode ? null : unit * orderQty;
     const loc = destLabel();
     const waitS = Math.round(Number(play.deliveryWaitMs || 60000) / 1000);
-    const canPay = marketDest === "road" || marketDest === "warehouse";
+    const canPay =
+      marketDest === "road" ||
+      marketDest === "warehouse" ||
+      (marketDest === "unit" && Boolean(marketUnitId));
     orderAsk.hidden = false;
     if (orderVeil) orderVeil.hidden = false;
     const title = basketMode ? "Where should this go?" : "Buy " + row.label;
@@ -394,8 +410,7 @@ export function mountChrome(opts) {
       ${qtyBlock}
       <p class="order-label">Where</p>
       <div class="dest-row">
-        <button type="button" class="dest ${marketDest === "road" ? "is-on" : ""}" data-order-dest="road">Bring to me</button>
-        <button type="button" class="dest ${marketDest === "warehouse" ? "is-on" : ""}" data-order-dest="warehouse">Warehouse</button>
+        ${formatOrderDests(play, marketDest, marketUnitId)}
       </div>
       <div class="order-pay">
         <p class="buy-loc is-ask">${loc}${marketDest === "road" ? " · " + waitS + "s on the kerb" : ""}</p>
@@ -406,8 +421,34 @@ export function mountChrome(opts) {
     if (canPay) orderAsk.querySelector("#order-pay")?.focus();
   }
 
+  function orderDestBody(extra) {
+    const pose = typeof opts.getPose === "function" ? opts.getPose() : {};
+    const selectedId = typeof opts.getPlotId === "function" ? opts.getPlotId() : "";
+    const leases = (play && play.leases) || [];
+    const ownedId = leases.some((l) => l.id === selectedId)
+      ? selectedId
+      : (leases[0] && leases[0].id) || "";
+    return {
+      island: "south",
+      dest: marketDest,
+      x: pose && pose.x,
+      z: pose && pose.z,
+      plotId: marketDest === "road" ? ownedId || undefined : undefined,
+      unitId: marketDest === "unit" ? marketUnitId || undefined : undefined,
+      ...extra,
+    };
+  }
+
+  function destPicked() {
+    return (
+      marketDest === "road" ||
+      marketDest === "warehouse" ||
+      (marketDest === "unit" && Boolean(marketUnitId))
+    );
+  }
+
   async function submitOrder() {
-    if (marketDest !== "road" && marketDest !== "warehouse") {
+    if (!destPicked()) {
       paintOrderAsk();
       return;
     }
@@ -417,24 +458,10 @@ export function mountChrome(opts) {
       return;
     }
     if (!orderSku) return;
-    const pose = typeof opts.getPose === "function" ? opts.getPose() : {};
-    const selectedId = typeof opts.getPlotId === "function" ? opts.getPlotId() : "";
-    const leases = (play && play.leases) || [];
-    const ownedId = leases.some((l) => l.id === selectedId)
-      ? selectedId
-      : (leases[0] && leases[0].id) || "";
     const { ok, data } = await readJson("/api/market/order", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        skus: [orderSku],
-        island: "south",
-        dest: marketDest,
-        qty: orderQty,
-        x: pose && pose.x,
-        z: pose && pose.z,
-        plotId: marketDest === "road" ? ownedId || undefined : undefined,
-      }),
+      body: JSON.stringify(orderDestBody({ skus: [orderSku], qty: orderQty })),
     });
     hideOrderAsk();
     if (!ok) {
@@ -445,7 +472,7 @@ export function mountChrome(opts) {
     marketBasket = removeBasketLine(marketBasket, orderSku, "order");
     await refreshPlay(data);
     const delivery = data && data.delivery;
-    if (delivery && delivery.dest === "road") {
+    if (delivery && (delivery.dest === "road" || delivery.dest === "unit")) {
       closePanels();
       if (typeof opts.onOrder === "function") opts.onOrder(delivery);
     } else {
@@ -453,7 +480,7 @@ export function mountChrome(opts) {
     }
     if (opts.setStatus) {
       opts.setStatus(
-        marketDest === "road"
+        marketDest === "road" || marketDest === "unit"
           ? "Yellow van from the port."
           : "Paid. In the South warehouse.",
       );
@@ -461,18 +488,12 @@ export function mountChrome(opts) {
   }
 
   async function submitBasket() {
-    if (marketDest !== "road" && marketDest !== "warehouse") {
+    if (!destPicked()) {
       pendingBasketPay = true;
       paintOrderAsk();
       return;
     }
     if (!marketBasket.length) return;
-    const pose = typeof opts.getPose === "function" ? opts.getPose() : {};
-    const selectedId = typeof opts.getPlotId === "function" ? opts.getPlotId() : "";
-    const leases = (play && play.leases) || [];
-    const ownedId = leases.some((l) => l.id === selectedId)
-      ? selectedId
-      : (leases[0] && leases[0].id) || "";
     const skus = [];
     for (const row of marketBasket.filter((r) => r.via !== "good")) {
       const q = Math.max(1, Math.min(10, Number(row.qty) || 1));
@@ -483,15 +504,7 @@ export function mountChrome(opts) {
       const { ok, data } = await readJson("/api/market/order", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          skus,
-          island: "south",
-          dest: marketDest,
-          qty: 1,
-          x: pose && pose.x,
-          z: pose && pose.z,
-          plotId: marketDest === "road" ? ownedId || undefined : undefined,
-        }),
+        body: JSON.stringify(orderDestBody({ skus, qty: 1 })),
       });
       if (!ok) {
         if (opts.setStatus) opts.setStatus("Order failed: " + (data && data.reason));
@@ -524,7 +537,7 @@ export function mountChrome(opts) {
     marketBasket = [];
     marketView = "shop";
     const delivery = last && last.delivery;
-    if (marketDest === "road") {
+    if (marketDest === "road" || marketDest === "unit") {
       closePanels();
       if (delivery && typeof opts.onOrder === "function") opts.onOrder(delivery);
     } else {
@@ -532,7 +545,7 @@ export function mountChrome(opts) {
     }
     if (opts.setStatus) {
       opts.setStatus(
-        marketDest === "road" ? "Yellow van from the port." : "Paid. In the South warehouse.",
+        marketDest === "road" || marketDest === "unit" ? "Yellow van from the port." : "Paid. In the South warehouse.",
       );
     }
   }
@@ -706,8 +719,123 @@ export function mountChrome(opts) {
       ((play.sites || []).find((s) => s.id === id)) ||
       ((play.stands || []).find((s) => s.id === id)) ||
       ((play.workSites || []).find((s) => s.id === id)) ||
+      ((play.workSites || []).find((s) => s.unitId === id)) ||
       null
     );
+  }
+
+  async function postUnit(path, body) {
+    const { ok, data } = await readJson(path, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (data && data.play) stampPlay(data.play);
+    return { ok, data };
+  }
+
+  function bindUnitSheet(root) {
+    root.querySelector("#stand-close")?.addEventListener("click", () => dismissStandMenu());
+    root.querySelectorAll("[data-unit-view]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (btn.disabled) return;
+        unitView = btn.getAttribute("data-unit-view") || "root";
+        paintBuildingSheet(unitBuildingId);
+      });
+    });
+    root.querySelectorAll("[data-unit-floor]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        unitFloor = Number(btn.getAttribute("data-unit-floor") || 0);
+        unitView = "buy";
+        paintBuildingSheet(unitBuildingId);
+      });
+    });
+    root.querySelectorAll("[data-buy-unit]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        if (btn.disabled) return;
+        const { ok, data } = await postUnit("/api/unit/buy", { unitId: btn.getAttribute("data-buy-unit") });
+        if (opts.setStatus) opts.setStatus(ok ? "Room is yours." : "Could not buy: " + ((data && data.reason) || "fail"));
+        paintBuildingSheet(unitBuildingId);
+      });
+    });
+    root.querySelectorAll("[data-buy-land]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        if (btn.disabled) return;
+        const { ok, data } = await postUnit("/api/building/land", { buildingId: btn.getAttribute("data-buy-land") });
+        if (opts.setStatus) opts.setStatus(ok ? "You own the dirt." : "Could not buy land: " + ((data && data.reason) || "fail"));
+        paintBuildingSheet(unitBuildingId);
+      });
+    });
+    root.querySelectorAll("[data-unit-room]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        unitRoomId = btn.getAttribute("data-unit-room") || "";
+        const site = findSite(unitRoomId);
+        if (site && site.unitId) {
+          unitView = "root";
+          paintStandMenu(site);
+          return;
+        }
+        unitView = "room";
+        paintBuildingSheet(unitBuildingId);
+      });
+    });
+    root.querySelectorAll("[data-fit-kit]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        if (btn.disabled) return;
+        const { ok, data } = await postUnit("/api/unit/kit", {
+          unitId: btn.getAttribute("data-unit-id"),
+          kitId: btn.getAttribute("data-fit-kit"),
+        });
+        if (opts.setStatus) opts.setStatus(ok ? "Kit in the room." : "Could not fit: " + ((data && data.reason) || "fail"));
+        paintBuildingSheet(unitBuildingId);
+      });
+    });
+    root.querySelectorAll("[data-scout-unit]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const { ok, data } = await postUnit("/api/unit/scout", { unitId: btn.getAttribute("data-scout-unit") });
+        if (opts.setStatus) {
+          opts.setStatus(ok ? "Tenant offer." : (data && data.reason) === "no_takers" ? "Empty room. Fit kit first." : "No tenants.");
+        }
+        paintBuildingSheet(unitBuildingId);
+      });
+    });
+    root.querySelectorAll("[data-sign-lease]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const { ok, data } = await postUnit("/api/unit/lease", {
+          unitId: btn.getAttribute("data-sign-lease"),
+          hours: Number(btn.getAttribute("data-hours")),
+        });
+        if (opts.setStatus) opts.setStatus(ok ? "Lease signed." : "Could not sign: " + ((data && data.reason) || "fail"));
+        paintBuildingSheet(unitBuildingId);
+      });
+    });
+  }
+
+  function paintBuildingSheet(buildingId, quiet) {
+    if (!standMenu) return;
+    const id = buildingId || unitBuildingId;
+    if (!id || !play) {
+      dismissStandMenu();
+      return;
+    }
+    if (!quiet) closePanels();
+    openSiteId = null;
+    unitBuildingId = id;
+    standMenu.hidden = false;
+    if (standVeil) standVeil.hidden = false;
+    standMenu.innerHTML = formatBuildingSheet(play, {
+      buildingId: id,
+      view: unitView,
+      floor: unitFloor,
+      unitId: unitRoomId,
+    });
+    bindUnitSheet(standMenu);
+    standMenu.querySelectorAll("[data-open-stand]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const site = findSite(btn.getAttribute("data-open-stand"));
+        if (site) paintStandMenu(site);
+      });
+    });
   }
 
   function paintStandMenu(stand, onStock, onHire) {
@@ -850,6 +978,30 @@ export function mountChrome(opts) {
         if (ok && opts.onFired) opts.onFired(id);
       });
     }
+    standMenu.querySelectorAll("[data-unit-hire]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const { ok, data } = await postUnit("/api/unit/hire", {
+          unitId: btn.getAttribute("data-unit-hire"),
+          role: btn.getAttribute("data-unit-role"),
+        });
+        const fresh = findSite(live.id);
+        paintStandMenu(fresh, onStock, onHire);
+        if (ok && opts.onHired) opts.onHired(live.id);
+        if (opts.setStatus) opts.setStatus(ok ? "Hired." : "Could not hire: " + ((data && data.reason) || "fail"));
+      });
+    });
+    standMenu.querySelectorAll("[data-unit-fire]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const { ok, data } = await postUnit("/api/unit/fire", {
+          unitId: btn.getAttribute("data-unit-fire"),
+          role: btn.getAttribute("data-unit-role"),
+        });
+        const fresh = findSite(live.id);
+        paintStandMenu(fresh, onStock, onHire);
+        if (ok && opts.onFired) opts.onFired(live.id);
+        if (opts.setStatus) opts.setStatus(ok ? "Fired." : "Could not fire: " + ((data && data.reason) || "fail"));
+      });
+    });
     const pickupBtn = standMenu.querySelector("[data-pickup-stand]");
     if (pickupBtn) {
       pickupBtn.addEventListener("click", async () => {
@@ -1045,8 +1197,24 @@ export function mountChrome(opts) {
         return;
       }
       if (hit.hasAttribute("data-order-dest")) {
-        marketDest = hit.getAttribute("data-order-dest") === "road" ? "road" : "warehouse";
+        const dest = hit.getAttribute("data-order-dest");
+        if (dest === "unit") {
+          marketDest = "unit";
+          marketUnitId = hit.getAttribute("data-order-unit") || "";
+        } else {
+          marketDest = dest === "road" ? "road" : "warehouse";
+          marketUnitId = "";
+        }
         paintOrderAsk();
+        return;
+      }
+      if (hit.hasAttribute("data-unit-hire")) {
+        const unitId = hit.getAttribute("data-unit-hire");
+        const role = hit.getAttribute("data-unit-role");
+        const { ok, data } = await postUnit("/api/unit/hire", { unitId, role });
+        paintStaff();
+        if (ok && opts.onHired) opts.onHired(unitId);
+        if (opts.setStatus) opts.setStatus(ok ? "Hired." : "Could not hire: " + ((data && data.reason) || "fail"));
         return;
       }
       if (hit.id === "order-cancel") {
@@ -1244,6 +1412,8 @@ export function mountChrome(opts) {
           const fresh = findSite(openSiteId);
           if (fresh) paintStandMenu(fresh);
         }
+      } else if (unitBuildingId && standMenu && !standMenu.hidden) {
+        paintBuildingSheet(unitBuildingId, true);
       }
     }
   }
@@ -1508,6 +1678,13 @@ export function mountChrome(opts) {
     paintBuyAsk,
     paintLand,
     paintStandMenu,
+    paintBuildingSheet,
+    openBuildingSheet(buildingId) {
+      unitView = "root";
+      unitFloor = 0;
+      unitRoomId = "";
+      paintBuildingSheet(buildingId);
+    },
     hideStandMenu() {
       dismissStandMenu();
     },

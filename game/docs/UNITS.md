@@ -82,19 +82,19 @@ Designated use is set per room. The tenant fits out that use. They do not flip a
 
 ---
 
-## Camera and menu (later — not 0.5)
+## Camera and menu (placeholders)
 
 Primary = tap / left click. Secondary = long-press / right click. No WASD. No virtual stick.
 
-Do **not** build the dollhouse this version. Scripts first. When the camera comes:
+Grey boxes in the harbour are the **systems camera**. Not Blender. Not a dollhouse orbit.
 
-1. Tap **one building** → small menu on that shell.
-2. **View floor** (only floors that exist). Rooms on the floor are separate grey boxes. Not first-person walk.
-3. Submenu: **Buy rooms** · **Manage rooms** (grey if you own none in this building) · **Buy this land**.
+1. Tap **one building** (placeholder boxes) → sheet on that shell.
+2. Floor chips filter the room list (Ground / First / Second). Rooms stay facts, not a walkable interior.
+3. **Buy rooms** · **Manage rooms** (grey if you own none in this building) · **Buy this land**.
 4. Buy: one vacant room → pay → you own **that room**. Neighbours stay listed.
-5. Manage: only rooms you own in this building.
+5. Manage: only rooms you own. Shop Run has packer + till. Flat/office: kit, scout, lease.
 
-Indoor presence stays off. Reuse existing sheets. Site card = cart tabs; shop Run has **two** hires (packer, till).
+Indoor presence stays off. Reuse existing sheets. Marketplace dest adds **This room** when you own a shop unit.
 
 ---
 

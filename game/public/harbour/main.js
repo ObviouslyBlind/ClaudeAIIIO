@@ -36,6 +36,7 @@ import { mountStaffHud } from "./staff-hud.js";
 import { mountCalendarHud } from "./calendar-hud.js";
 import { mountParcelMap, pointerToNdc } from "./parcel-map.js";
 import { mountLotTags } from "./lot-tags.js";
+import { mountUnitBlocks } from "./unit-blocks.js";
 import { createPlacePreview } from "./place-preview.js";
 import { CART_FOOTPRINT_M, SNAP_PAD_M, snapPlacePose } from "./place-pose.js";
 
@@ -170,6 +171,7 @@ let catalogPicker = null;
 let staffHud = null;
 let parcelMap = null;
 let lotTags = null;
+let unitBlocks = null;
 let placeGhost = null;
 let propsMod = null;
 let chromeHud = null;
@@ -1679,6 +1681,9 @@ function clickTargets() {
   if (lotTags && typeof lotTags.clickables === "function") {
     objs.push(...lotTags.clickables());
   }
+  if (unitBlocks && typeof unitBlocks.clickables === "function") {
+    objs.push(...unitBlocks.clickables());
+  }
   return objs.filter(Boolean);
 }
 
@@ -1814,6 +1819,7 @@ function onPointer(ev) {
   const vanHit = hits.find((h) => objectWithKind(h.object, "van"));
   const padHit = hits.find((h) => objectWithKind(h.object, "logistics-pad"));
   const buildingHit = hits.find((h) => objectWithKind(h.object, "building"));
+  const unitHit = hits.find((h) => objectWithKind(h.object, "unit-block"));
   const plotHit = hits.find(
     (h) => h.object.userData.kind === "plot" || h.object.userData.kind === "plot-line",
   );
@@ -1833,6 +1839,14 @@ function onPointer(ev) {
     const standObj = objectWithStand(standHit.object);
     if (standObj) {
       openStandMenu(standObj.userData.standId);
+      return;
+    }
+  }
+  if (unitHit) {
+    const block = objectWithKind(unitHit.object, "unit-block");
+    const bid = block && block.userData && block.userData.buildingId;
+    if (bid && chromeHud && chromeHud.openBuildingSheet) {
+      chromeHud.openBuildingSheet(bid);
       return;
     }
   }
@@ -2432,6 +2446,10 @@ async function boot() {
     specOf,
     getMap: () => map,
   });
+  unitBlocks = mountUnitBlocks({
+    scene: harbourGroup || scene,
+    heightAt,
+  });
   chromeHud = mountChrome({
     setStatus,
     getPose: () => ({ x: player.position.x, z: player.position.z }),
@@ -2515,6 +2533,7 @@ async function boot() {
     onPlay(play) {
       if (play && play.look) dressPlayer(player, play.look);
       if (overlays) overlays.refresh(play, map);
+      if (unitBlocks) unitBlocks.sync(play);
       pruneCrates(play);
       pruneStands(play);
       for (const d of play.deliveries || []) {
