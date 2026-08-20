@@ -367,9 +367,9 @@ export function circusMergeRing(cx, cz, dir, outer, half, filletM) {
   ring.push(world(dFar, -h));
   ring.push(world(dFar, h));
   ring.push(world(xc, h));
-  appendLocalArc(ring, world, xc, h + F, F, aLineR, aCircR, 10);
-  appendLocalArc(ring, world, 0, 0, R, angR, angL, 12);
-  appendLocalArc(ring, world, xc, -(h + F), F, aCircL, aLineL, 10);
+  appendLocalArc(ring, world, xc, h + F, F, aLineR, aCircR, 20);
+  appendLocalArc(ring, world, 0, 0, R, angR, angL, 24);
+  appendLocalArc(ring, world, xc, -(h + F), F, aCircL, aLineL, 20);
   return closeXy(ring);
 }
 

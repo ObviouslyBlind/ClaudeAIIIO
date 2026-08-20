@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createLandBoard } from "./land.ts";
 import { junctionPad } from "../public/harbour/roadnet.js";
 import { buildHubFootprint, buildCircusFootprint, clipPolylineToOutside, multiContains, segmentRing, unionGeoms, junctionContour, CIRCUS_ARM_STUB_M, biteRibbonWith, circleRing, swellRing } from "../public/harbour/roadfoot.js";
-import { circusArmDir, circusMeshRadii, circusMergeGeom } from "../public/harbour/roadclip.js";
+import { circusArmDir, circusMeshRadii, circusMergeGeom, circusMergeRing } from "../public/harbour/roadclip.js";
 import { carriagewayWidthM } from "../public/harbour/roadclass.js";
 
 describe("road hub footprints", () => {
@@ -250,21 +250,13 @@ describe("road hub footprints", () => {
     expect(multiContains(foot.tarmac, n.x + qx * ((inner + outer) / 2), n.z + qz * ((inner + outer) / 2))).toBe(true);
     expect(inner).toBeGreaterThan(10);
     expect(CIRCUS_ARM_STUB_M).toBeLessThan(5);
-    expect(multiContains(foot.clip, n.x, n.z), "clip is the solid clover, island included").toBe(true);
+    expect(multiContains(foot.clip, n.x, n.z), "clip is the outer disc").toBe(true);
+    expect(multiContains(foot.clip, n.x + dx * (outer + 10), n.z + dz * (outer + 10)), "12 m grass stub").toBe(false);
     const hwyHalf = carriagewayWidthM("highway") / 2;
     const g = circusMergeGeom(hwyHalf, outer);
-    expect(multiContains(foot.tarmac, n.x + dx * (outer + 8), n.z + dz * (outer + 8)), "arm merge stays in the join").toBe(true);
-    expect(multiContains(foot.clip, n.x + dx * (g.reach - 1), n.z + dz * (g.reach - 1))).toBe(true);
+    const flare = circusMergeRing(n.x, n.z, dir, outer, hwyHalf, g.filletM);
     const px = -dz;
     const pz = dx;
-    expect(
-      multiContains(
-        foot.tarmac,
-        n.x + dx * (g.xc + g.filletM + 3) + px * (hwyHalf + g.filletM),
-        n.z + dz * (g.xc + g.filletM + 3) + pz * (hwyHalf + g.filletM),
-      ),
-      "12 m grass stub",
-    ).toBe(false);
     const midA0 = -Math.PI / 2;
     let dAng = Math.atan2(-(hwyHalf + g.filletM), -g.xc) - midA0;
     while (dAng > Math.PI) dAng -= Math.PI * 2;
@@ -276,6 +268,32 @@ describe("road hub footprints", () => {
     const ax = mx + (chord - mx) * 0.4;
     const az = mz + (hwyHalf - mz) * 0.4;
     expect(az).toBeGreaterThan(hwyHalf);
-    expect(multiContains(foot.tarmac, n.x + dx * ax + px * az, n.z + dz * ax + pz * az), "fillet missed Hwy armpit").toBe(true);
+    expect(ringContains(flare, n.x + dx * ax + px * az, n.z + dz * ax + pz * az), "fillet missed Hwy armpit").toBe(true);
   });
 });
+
+function ringContains(ring: number[][], x: number, z: number) {
+  const pts = ring.slice();
+  if (
+    pts.length > 1 &&
+    pts[0]![0] === pts[pts.length - 1]![0] &&
+    pts[0]![1] === pts[pts.length - 1]![1]
+  ) {
+    pts.pop();
+  }
+  let inside = false;
+  const n = pts.length;
+  for (let i = 0, j = n - 1; i < n; i++) {
+    const a = pts[i]!;
+    const b = pts[j]!;
+    const zi = a[1]!;
+    const zj = b[1]!;
+    if ((zi > z) !== (zj > z)) {
+      const xi = a[0]!;
+      const xj = b[0]!;
+      if (x < ((xj - xi) * (z - zi)) / (zj - zi) + xi) inside = !inside;
+    }
+    j = i;
+  }
+  return inside;
+}
