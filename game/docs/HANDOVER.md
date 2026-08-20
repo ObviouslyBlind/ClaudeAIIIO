@@ -60,7 +60,7 @@ Controls: primary tap/click walks or uses. Secondary long-press / right-click ex
 
 Working branch for this mid-alpha slice: **`cursor/highway-pads-1949`**.
 
-Tests: `cd game && npm test` — **735 passed** (2026-08-20).
+Tests: `cd game && npm test` — **739 passed** (2026-08-20).
 
 ---
 
