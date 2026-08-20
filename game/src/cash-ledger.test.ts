@@ -134,6 +134,6 @@ describe("cash hover ledger (PAPER)", () => {
     expect(html).toContain("Fruit cart");
     expect(html).toContain("In South warehouse");
     expect(html).toContain("Empty");
-    expect(html).not.toContain("Hired");
+    expect(html).toContain("Not placed");
   });
 });
