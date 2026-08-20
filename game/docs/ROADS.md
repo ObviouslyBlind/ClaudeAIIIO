@@ -38,11 +38,11 @@ Each step is big enough to see from 30 m up.
 
 See `reports/THREEJS_ROADS.md` and `docs/ROAD_MESH.md`.
 
-- Local paved **runs** are ribbons. A **T/L** is a small union of the 2–4 arm-end rectangles (a hub). Ribbons cut on that polygon. Not the whole island boolean-unioned into a splat.
-- Offset sidewalks are densified and clipped out of the hub. Stem ribbons overlap the through road by ~1.6 m so a grey hairline cannot show between two black rectangles.
+- Local paved **runs** are ribbons that overlap hub fills. A **T/L** is a filled hub plus a round join at the node. Ribbons do not stop short in the sand.
+- Offset sidewalks are densified and clipped out of the hub. Stem paint stops at the through kerb.
 - Quayward Loop is a **rectangle**. Quayward Rd hits the north edge at **45°** from Harbour Circus.
-- A **circus** is a `RingGeometry` (the join surface) plus a stone island. Duals are **circle-cut onto the outer face** so offset lanes hit the ring, not 9 m of sand beside the kerb. Short lips cover the chord. Do not earcut a holed Clipper keyhole; do not draw 12 m black rectangles into the grass.
-- Dual carriageway: two 8 m lanes + black asphalt median fill. Never a 26 m mitered slab.
+- A **circus** is a `RingGeometry` (the join surface) plus a stone island. Duals are **circle-cut onto the outer face**. Short lips cover the chord. Do not earcut a holed Clipper keyhole; do not draw 12 m black rectangles into the grass.
+- Dual carriageway: one black deck (both lanes + median). Paint marks the lanes. Taxi, vans, and AI cars follow graph nodes slightly above the deck — they do not sit on the mesh.
 
 ## Routing
 

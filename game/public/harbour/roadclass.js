@@ -10,7 +10,7 @@
 /** @typedef {"highway"|"avenue"|"street"|"lane"|"track"} RoadClass */
 
 export const ROAD_CLASSES = {
-  /** Dual carriageway. Two black ribbons either side of a stone median. */
+  /** Dual carriageway. One filled tarmac deck; paint marks the median. */
   highway: { carriageM: 8, dual: true, medianM: 10, sidewalkM: 0, dirt: false, rank: 5 },
   /** Town arterial. Wide single carriageway with walks both sides. */
   avenue: { carriageM: 9, dual: false, medianM: 0, sidewalkM: 2.6, dirt: false, rank: 4 },

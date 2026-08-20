@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import * as THREE from "three";
 import { createDeliveries, makeVan } from "../public/harbour/delivery.js";
+import { ROAD_DRIVE_LIFT_M } from "../public/harbour/roads.js";
 
 describe("delivery van (PAPER)", () => {
   it("drops the crate then drives away", () => {
@@ -54,6 +55,7 @@ describe("delivery van (PAPER)", () => {
     vans.start({ id: "del-in", island: "south", drop: { x: 80, z: 0, awayX: 120, awayZ: 0 } }, null);
     expect(scene.children[0]!.position.x).toBeCloseTo(24, 5);
     expect(scene.children[0]!.position.z).toBeCloseTo(0, 5);
+    expect(scene.children[0]!.position.y).toBeCloseTo(ROAD_DRIVE_LIFT_M, 5);
   });
 
   it("builds a box van with a cab, lamps, and wheels", () => {

@@ -71,8 +71,9 @@ describe("paved street from spawn", () => {
 
     // Circuses are one node mesh, not a RingGeometry plus stacked dual tapes.
     expect(paved.filter((m) => m.userData.footprint && /Circus$/.test(String(m.userData.roadName || ""))).length).toBe(circuses);
-    expect(paved.length).toBeGreaterThanOrEqual(pavedRoads.length - circuses + extraCarriages);
-    expect(paved.length).toBeLessThan(pavedRoads.length + extraCarriages + circuses * 8 + 60);
+    // Dual is one filled deck per span, not two offset tapes.
+    expect(paved.length).toBeGreaterThanOrEqual(pavedRoads.length - circuses);
+    expect(paved.length).toBeLessThan(pavedRoads.length + extraCarriages + circuses * 8 + 80);
     expect(extras.length).toBe(0);
     const paint = added.filter((m) => m.userData.roadKind === "paint");
     expect(paint.length).toBeGreaterThan(8);
@@ -137,7 +138,7 @@ describe("paved street from spawn", () => {
     expect(roadWidthM("avenue") - roadWidthM("street")).toBeGreaterThan(3);
     expect(roadWidthM("street") - roadWidthM("lane")).toBeGreaterThan(3);
 
-    expect(highway).toBeCloseTo(ROAD_CLASSES.highway.carriageM, 3);
+    expect(highway).toBeCloseTo(carriagewayWidthM("highway"), 3);
     expect(avenue).toBeCloseTo(ROAD_CLASSES.avenue.carriageM, 3);
     expect(street).toBeCloseTo(ROAD_CLASSES.street.carriageM, 3);
     expect(lane).toBeCloseTo(ROAD_CLASSES.lane.carriageM, 3);
@@ -167,6 +168,7 @@ describe("paved street from spawn", () => {
 
     const hubs = added.filter((m) => m.userData.roadKind === "junction" && m.userData.footprint);
     expect(hubs.length).toBeGreaterThan(8);
+    expect(added.some((m) => m.userData.roadKind === "join")).toBe(true);
     const sw = map.graph.nodes.find((n) => n.id === "s-quay-sw");
     expect(sw).toBeTruthy();
     const swPad = junctionPad(map.graph, sw);
@@ -286,19 +288,18 @@ describe("paved street from spawn", () => {
     const hwy = pavedRoads.find((r) => r.lanes === 4);
     expect(hwy).toBeTruthy();
     const hwyMeshes = paved.filter((m) => m.userData.roadName === "Island Hwy");
-    expect(hwyMeshes.length).toBeGreaterThanOrEqual(2);
-    expect(hwyMeshes.length % 2).toBe(0);
-    expect(hwyMeshes[0]!.userData.widthM ?? ribbonWidthM(hwyMeshes[0]!)).toBeCloseTo(ROAD_CLASSES.highway.carriageM, 1);
+    expect(hwyMeshes.length).toBeGreaterThanOrEqual(1);
+    expect(hwyMeshes[0]!.userData.widthM ?? ribbonWidthM(hwyMeshes[0]!)).toBeCloseTo(carriagewayWidthM("highway"), 1);
     const median = added.find((m) => m.userData.roadKind === "median");
     expect(median).toBeTruthy();
     expect(lum(median!.material.color.getHex())).toBeLessThan(0.12);
     expect(lum(MEDIAN)).toBeLessThan(lum(STONE));
     expect(MEDIAN_STRIPE_M).toBeLessThan(4);
-    // Median fill is asphalt, not pale stone, so the dual does not read as a sand gap.
+    // Median is a dark stripe on one black deck, not a sand gap between tapes.
     const medianFill = added.find((m) => m.userData.roadKind === "median" && String(m.userData.roadName || "").endsWith(" median"));
     expect(medianFill).toBeTruthy();
-    expect(medianFill!.material.color.getHex()).toBe(ASPHALT);
-    expect(medianFill!.userData.widthM ?? ribbonWidthM(medianFill!)).toBeCloseTo(ROAD_CLASSES.highway.medianM, 1);
+    expect(lum(medianFill!.material.color.getHex())).toBeLessThan(0.12);
+    expect(medianFill!.userData.widthM ?? ribbonWidthM(medianFill!)).toBeCloseTo(MEDIAN_STRIPE_M, 1);
 
     const rowMesh = paved.find((m) => String(m.userData.roadName || "").includes("Row"));
     if (rowMesh) {
@@ -340,7 +341,9 @@ describe("paved street from spawn", () => {
     );
     expect(hwyShoulder.length).toBeGreaterThan(0);
     for (const mesh of hwyShoulder) {
-      expect(mesh.userData.widthM ?? ribbonWidthM(mesh), "26 m dual shoulder is a circus chord").toBeLessThan(14);
+      const w = mesh.userData.widthM ?? ribbonWidthM(mesh);
+      expect(w, "dual grit should rim the full deck").toBeGreaterThan(carriagewayWidthM("highway"));
+      expect(w).toBeLessThan(carriagewayWidthM("highway") + 6);
     }
 
     const quay = added.filter(
@@ -376,6 +379,18 @@ describe("paved street from spawn", () => {
       }
     }
     expect(sandsNear, "Channel Sands paint on the dual heart").toBeGreaterThan(6);
+    const sandsPaved = added.filter(
+      (m) => m.userData.roadKind === "paved" && /Channel Sands/.test(String(m.userData.roadName || "")),
+    );
+    expect(sandsPaved.length).toBeGreaterThan(0);
+    let sandsPavedNear = Infinity;
+    for (const mesh of sandsPaved) {
+      const pos = mesh.geometry.attributes.position;
+      for (let i = 0; i < pos.count; i++) {
+        sandsPavedNear = Math.min(sandsPavedNear, Math.hypot(pos.getX(i) - hwyT.x, pos.getZ(i) - hwyT.z));
+      }
+    }
+    expect(sandsPavedNear, "stem tarmac died in the sand before Island Hwy").toBeLessThan(8);
     const hwyPaint = added.filter(
       (m) => m.userData.roadKind === "paint" && String(m.userData.roadName || "").startsWith("Island Hwy"),
     );

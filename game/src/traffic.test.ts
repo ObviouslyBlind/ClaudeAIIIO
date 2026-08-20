@@ -9,6 +9,7 @@ import {
   SPAWN_SPAN_M,
 } from "../public/harbour/traffic.js";
 import { projectOnPolyline } from "../public/harbour/taxi.js";
+import { ROAD_DRIVE_LIFT_M } from "../public/harbour/roads.js";
 
 describe("road node traffic", () => {
   it("keeps sampled cars on the paved spline, never on dirt", () => {
@@ -46,7 +47,8 @@ describe("road node traffic", () => {
     expect(north.length).toBeGreaterThanOrEqual(5);
     expect(SPAWN_SPAN_M).toBeLessThan(220);
     for (const car of north) {
-      expect(car.mesh.position.y).toBeGreaterThan(0.5);
+      const h = heightAt(ISLANDS.north, car.mesh.position.x, car.mesh.position.z);
+      expect(car.mesh.position.y).toBeCloseTo(h + ROAD_DRIVE_LIFT_M, 4);
     }
     const port = ISLANDS.north.port;
     const nearest = Math.min(

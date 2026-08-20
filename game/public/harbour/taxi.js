@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { HIGHWAY_LANE_OFFSET_M, offsetPolyline } from "./roads.js";
+import { HIGHWAY_LANE_OFFSET_M, offsetPolyline, ROAD_DRIVE_LIFT_M } from "./roads.js";
 import { laneOffsetM } from "./roadclass.js";
 import { nearestEdge, projectOnEdge, routeOnGraph } from "./roadnet.js";
 import { PLAYER_SOLE_M } from "./walk-plan.js";
@@ -9,7 +9,8 @@ const NEAR_PAVED = 22;
 /** Metres. Cab that has arrived at you just collects — no extra walk onto the tarmac. */
 const BOARD_CAB_M = 24;
 const SPEED = 42;
-const TAXI_Y = 0.04;
+/** Cab follows graph nodes; Y sits just above the visual tarmac. */
+const TAXI_Y = ROAD_DRIVE_LIFT_M;
 /** Hailed cab leaves if nobody boards. */
 export const TAXI_WAIT_MS = 60_000;
 

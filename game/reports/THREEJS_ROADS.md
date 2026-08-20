@@ -64,9 +64,9 @@ PathPhalt / Curva / medieval-settlement, mapped onto our graph:
 
 | Piece | Draw |
 |---|---|
-| Run (street, avenue, dual lane) | Ribbon (`drawRibbon`) plus PathPhalt cream/kraft **lane paint**. Dual = two 8 m lanes + black asphalt median fill + dashes. Never a 26 m mitered slab. |
-| T / L | Union of 2–4 arm rectangles. Ribbons **cut on that polygon**. Hub mesh is the join. |
-| Circus | `RingGeometry` is the node surface. Duals **circle-cut onto the outer face** so offset lanes hit the ring, not 9 m of sand beside the kerb. Short lip caps at each arm — not 12 m black rectangles in the grass. Stone island in the hole. **Do not** `ShapeGeometry` a holed Clipper keyhole. |
+| Run (street, avenue, dual) | Ribbon (`drawRibbon`) plus PathPhalt cream/kraft **lane paint**. Dual = one filled deck across both lanes and the median, round joins at corners, thin median stripe. Cars drive the graph above the mesh. |
+| T / L | Filled hub polygon plus a round node disc. Tarmac **overlaps** the hub. Paint and walks still cut. |
+| Circus | `RingGeometry` is the node surface. Duals **circle-cut onto the outer face**. Short lip caps at each arm — not 12 m black rectangles in the grass. Stone island in the hole. **Do not** `ShapeGeometry` a holed Clipper keyhole. |
 | Legal turns | 15 / 30 / 45 / 90° (`ROAD_TURN_DEG`). Treat as kit cases, not a continuous CS2 compiler. |
 
 Clip polygon for a circus is the **outer circle**, not a union of ring + long stubs. Circle clip already lived in `roadclip.js` and was never called from `makeRoads` — that is why the duals still died on the arm boxes.
@@ -78,4 +78,5 @@ Clip polygon for a circus is the **outer circle**, not a union of ring + long st
 - OSM / Mapbox / Cesium / procedural-gl-js as a map source
 - 3D CSG of the whole net
 - Pale stone median (reads as sand from spawn)
-- 26 m mitered highway slab
+- Two offset dual tapes with a sand crotch
+- Trimming visual ribbons short of a T so the stem dies in dirt

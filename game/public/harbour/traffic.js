@@ -1,11 +1,11 @@
 import * as THREE from "three";
-import { HIGHWAY_LANE_OFFSET_M } from "./roads.js";
+import { HIGHWAY_LANE_OFFSET_M, ROAD_DRIVE_LIFT_M } from "./roads.js";
 import { laneOffsetM } from "./roadclass.js";
 import { drivableEdges, edgeLength, projectOnEdge } from "./roadnet.js";
 
 const CAR_COUNT = 6;
 const SPEED = 9;
-const Y_LIFT = 0.45;
+const Y_LIFT = ROAD_DRIVE_LIFT_M;
 /** Metres from the port along the spline. Spawn must see cars here. */
 export const SPAWN_SPAN_M = 160;
 

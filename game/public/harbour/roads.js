@@ -1,6 +1,6 @@
 import * as THREE from "three";
-import { ROAD_CLASSES, roadClassSpec } from "./roadclass.js";
-import { junctionPad, trimPolylineForPads, pointInJunctionPad } from "./roadnet.js";
+import { ROAD_CLASSES, roadClassSpec, carriagewayWidthM } from "./roadclass.js";
+import { junctionPad, pointInJunctionPad } from "./roadnet.js";
 import { addQuadXZ, junctionKerbQuads } from "./roadjoin.js";
 import { buildHubFootprint, buildCircusFootprint, clipPolylineToOutside, multiContains, FOOT_SHOULDER_M, biteRibbonWith, circleRing } from "./roadfoot.js";
 import { circusesFromGraph, clipPolylineOutsideCircuses } from "./roadclip.js";
@@ -19,8 +19,8 @@ export const DIRT = 0x8a6238;
 /** Same stone as house plinth / window sills — original palette, not a new hex. */
 export const STONE = 0x9a8a72;
 /**
- * Dual median stripe. Pale stone (STONE) reads as sand from spawn, so the
- * highway looked like two unconnected tapes. Stay in the asphalt family.
+ * Dual median stripe. Pale stone (STONE) reads as sand from spawn.
+ * Stay in the asphalt family — the dual is one black deck with this paint.
  */
 export const MEDIAN = 0x1a1a18;
 /** Pale coping walk beside the tarmac. Same cap family as the south quay. */
@@ -126,7 +126,11 @@ function drawRibbon(scene, spec, road, heightAt, widthM, color, roadKind, matOpt
       const sz = pts[i].z - pts[i - 1].z;
       const sl = Math.hypot(sx, sz) || 1;
       const dot = rx * (sz / sl) + rz * (-sx / sl);
-      if (dot > 0.25) scale = Math.min(half / dot, half * 1.7);
+      if (dot > 0.25) {
+        // Wide dual decks used to miter-blow into the verge. Cap the flare.
+        const maxMiter = half > 9 ? 1.1 : 1.7;
+        scale = Math.min(half / dot, half * maxMiter);
+      }
     }
     const lx = pts[i].x - rx * scale;
     const lz = pts[i].z - rz * scale;
@@ -231,6 +235,11 @@ const RIBBON_LIFT_M = 0.16;
 /** Ribbon prism half-thickness. Flat join meshes sit on the ribbon top. */
 const RIBBON_HALF_THICK_M = 0.07;
 const TARMAC_TOP_M = RIBBON_LIFT_M + RIBBON_HALF_THICK_M;
+/**
+ * Taxi, delivery van, and AI cars follow graph nodes in XZ.
+ * Y is terrain plus this lift so wheels sit on the visual deck, not in it.
+ */
+export const ROAD_DRIVE_LIFT_M = TARMAC_TOP_M + 0.08;
 const SHOULDER_PAD_M = 2.2;
 
 function densifyPts(pts, step) {
@@ -250,22 +259,84 @@ function densifyPts(pts, step) {
   return ribbonStations(out);
 }
 
-function drawablePoints(road, graph) {
-  let pts = ribbonStations(road.points);
-  const edge = graph && road.edgeId ? graph.edges.find((e) => e.id === road.edgeId) : null;
-  if (edge) pts = ribbonStations(trimPolylineForPads(pts, graph, edge));
-  return densifyPts(pts, 6);
+function drawablePoints(road) {
+  // Vehicles drive the graph. The camera mesh is a filled deck — do not trim
+  // ribbons away from hubs. That left sand stubs at every T.
+  return densifyPts(ribbonStations(road.points), 6);
+}
+
+function joinKeepout(x, z, circuses, half) {
+  for (const c of circuses || []) {
+    const outer = c.outer || c.clip || 0;
+    if (outer > 0 && Math.hypot(x - c.x, z - c.z) < outer + Math.max(2, half * 0.15)) return true;
+  }
+  return false;
+}
+
+function isCornerOrEnd(pts, i) {
+  if (i === 0 || i === pts.length - 1) return true;
+  const ax = pts[i].x - pts[i - 1].x;
+  const az = pts[i].z - pts[i - 1].z;
+  const bx = pts[i + 1].x - pts[i].x;
+  const bz = pts[i + 1].z - pts[i].z;
+  const al = Math.hypot(ax, az) || 1;
+  const bl = Math.hypot(bx, bz) || 1;
+  return (ax / al) * (bx / bl) + (az / al) * (bz / bl) < 0.97;
+}
+
+/**
+ * Round caps at corners and ends (canvas lineJoin/lineCap round). The T
+ * crotch is a disc, not a square plate sitting in sand.
+ */
+function drawRoundJoins(scene, spec, road, heightAt, widthM, circuses, yLift = 0) {
+  const pts = ribbonStations(road.points);
+  if (!pts.length) return;
+  const half = widthM / 2;
+  const slots = [];
+  for (let i = 0; i < pts.length; i++) {
+    if (!isCornerOrEnd(pts, i)) continue;
+    const p = pts[i];
+    if (joinKeepout(p.x, p.z, circuses, half)) continue;
+    slots.push(p);
+  }
+  if (!slots.length) return;
+  const geo = new THREE.CircleGeometry(half, 20);
+  geo.rotateX(-Math.PI / 2);
+  const mesh = new THREE.InstancedMesh(geo, roadMaterial(ASPHALT, "paved"), slots.length);
+  mesh.castShadow = false;
+  mesh.receiveShadow = true;
+  mesh.renderOrder = 2;
+  mesh.frustumCulled = false;
+  mesh.name = `road:${road.island}:${road.name || "road"} join`;
+  mesh.userData = {
+    kind: "road",
+    mode: "PAPER",
+    island: road.island,
+    roadKind: "join",
+    roadName: (road.name || "road") + " join",
+    widthM,
+  };
+  const dummy = new THREE.Object3D();
+  for (let i = 0; i < slots.length; i++) {
+    const p = slots[i];
+    dummy.position.set(p.x, heightAt(spec, p.x, p.z) + TARMAC_TOP_M + yLift, p.z);
+    dummy.updateMatrix();
+    mesh.setMatrixAt(i, dummy.matrix);
+  }
+  mesh.instanceMatrix.needsUpdate = true;
+  scene.add(mesh);
 }
 
 function drawPaved(scene, spec, road, heightAt, graph, hubs, circuses) {
-  const pts = drawablePoints(road, graph);
+  const pts = drawablePoints(road);
   if (pts.length < 2) return;
   const cls = classOf(road);
   const width = roadClassSpec(cls).carriageM;
-  const runs = clipRuns(pts, hubs, circuses, 1.6, road.edgeId);
+  const runs = clipRuns(pts, null, circuses, 1.6, road.edgeId);
   const paintRuns = clipRuns(pts, hubs, paintCircuses(circuses), 0, road.edgeId);
-  drawClippedRuns(scene, spec, road, heightAt, runs, width + SHOULDER_PAD_M, SHOULDER, "shoulder", {}, -0.03, Infinity, hubs, circuses);
-  drawClippedRuns(scene, spec, road, heightAt, runs, width, ASPHALT, "paved", {}, 0, Infinity, hubs, circuses);
+  drawClippedRuns(scene, spec, road, heightAt, runs, width + SHOULDER_PAD_M, SHOULDER, "shoulder", {}, -0.03, Infinity, null, circuses);
+  drawClippedRuns(scene, spec, road, heightAt, runs, width, ASPHALT, "paved", {}, 0, Infinity, null, circuses);
+  drawRoundJoins(scene, spec, road, heightAt, width, circuses);
   drawLanePaint(scene, spec, road, heightAt, paintRuns, width, false, 1);
 }
 
@@ -585,7 +656,7 @@ function drawSidewalks(scene, spec, road, heightAt, graph, hubs, circuses) {
   if (!hasSidewalk(road)) return;
   const cls = classOf(road);
   const walk = roadClassSpec(cls).sidewalkM;
-  const pts = densifyPts(drawablePoints(road, graph), 4);
+  const pts = densifyPts(ribbonStations(road.points), 4);
   if (pts.length < 2) return;
   const offset = roadClassSpec(cls).carriageM / 2 + SHOULDER_PAD_M / 2 + walk / 2;
   const hasJoins = (hubs && hubs.length) || (circuses && circuses.length);
@@ -599,71 +670,56 @@ function drawSidewalks(scene, spec, road, heightAt, graph, hubs, circuses) {
 }
 
 /**
- * Two 8 m lanes plus a black median fill. A single 26 m mitered slab
- * blew out on bends, ate the verge, and left circus arms as grass blobs.
+ * One filled dual deck. Cars drive the graph a few centimetres above it,
+ * so the camera can paint a continuous black road instead of two tapes.
+ * Circus ends are still circle-bitten so the stone island stays a hole.
  */
 function drawHighway(scene, spec, road, heightAt, graph, hubs, circuses) {
   const cls = classOf(road);
   const s = roadClassSpec(cls);
-  const pts = drawablePoints(road, graph);
+  const pts = drawablePoints(road);
   if (pts.length < 2) return;
+  const deck = carriagewayWidthM(cls);
   const lane = s.medianM / 2 + s.carriageM / 2;
   const name = road.name || "Island Hwy";
-  const lip = clipRuns(pts, hubs, circuses, 1.6, road.edgeId);
-  // Per-lane grit. A 26 m shoulder ribbon is a square chord at the circus
-  // and a stacked box at every T.
-  drawClippedRuns(scene, spec, { ...road, name: name + " median" }, heightAt, lip, s.medianM, ASPHALT, "median", {}, 0, Infinity, hubs, circuses);
-  for (const side of [-1, 1]) {
-    const offsetPts = offsetPolyline(pts, lane * side);
-    const laneRuns = clipRuns(offsetPts, hubs, circuses, 1.6, road.edgeId);
-    const paintRuns = clipRuns(offsetPts, hubs, paintCircuses(circuses), 0, road.edgeId);
-    drawClippedRuns(
-      scene,
-      spec,
-      { ...road, name: name + " shoulder" },
-      heightAt,
-      laneRuns,
-      s.carriageM + SHOULDER_PAD_M,
-      SHOULDER,
-      "shoulder",
-      {},
-      -0.03,
-      Infinity,
-      hubs,
-      circuses,
-    );
-    drawClippedRuns(
-      scene,
-      spec,
-      road,
-      heightAt,
-      laneRuns,
-      s.carriageM,
-      ASPHALT,
-      "paved",
-      {},
-      0,
-      Infinity,
-      hubs,
-      circuses,
-    );
-    drawLanePaint(scene, spec, road, heightAt, paintRuns, s.carriageM, true, side);
-  }
+  const runs = clipRuns(pts, null, circuses, 1.6, road.edgeId);
   drawClippedRuns(
     scene,
     spec,
-    { ...road, name: name + " stripe" },
+    { ...road, name: name + " shoulder" },
     heightAt,
-    lip,
+    runs,
+    deck + SHOULDER_PAD_M,
+    SHOULDER,
+    "shoulder",
+    {},
+    -0.03,
+    Infinity,
+    null,
+    circuses,
+  );
+  drawClippedRuns(scene, spec, road, heightAt, runs, deck, ASPHALT, "paved", {}, 0, Infinity, null, circuses);
+  drawRoundJoins(scene, spec, road, heightAt, deck, circuses);
+  drawClippedRuns(
+    scene,
+    spec,
+    { ...road, name: name + " median" },
+    heightAt,
+    runs,
     MEDIAN_STRIPE_M,
     MEDIAN,
     "median",
     {},
-    0.03,
+    0.04,
     Infinity,
-    hubs,
+    null,
     circuses,
   );
+  for (const side of [-1, 1]) {
+    const offsetPts = offsetPolyline(pts, lane * side);
+    const paintRuns = clipRuns(offsetPts, hubs, paintCircuses(circuses), 0, road.edgeId);
+    drawLanePaint(scene, spec, road, heightAt, paintRuns, s.carriageM, true, side);
+  }
 }
 
 function addJunctionPlate(scene, spec, heightAt, pad) {
@@ -1037,8 +1093,9 @@ function drawLegacyJoins(scene, map, specOf, heightAt) {
 }
 
 /**
- * Draw `/api/map` roads. Runs are ribbons. A T/L is a small unioned hub.
- * A circus is a RingGeometry; duals circle-cut onto that face.
+ * Draw `/api/map` roads. Runs are ribbons that overlap hub fills.
+ * A T/L is a filled hub plus round joins. A circus is a RingGeometry;
+ * duals circle-cut onto that face. Cars do not sit on this mesh.
  */
 export function makeRoads(map, helpers) {
   const { scene, specOf, heightAt } = helpers;

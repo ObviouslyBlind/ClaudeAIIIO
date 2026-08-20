@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { routeTaxi } from "./taxi.js";
 import { roadsideDrop } from "./roadside.js";
+import { ROAD_DRIVE_LIFT_M } from "./roads.js";
 
 /** Delivery van. Same paved graph as the taxi. PAPER / SIMULATED. */
 
@@ -117,7 +118,7 @@ export function createDeliveries({ scene, getMap, specOf, heightAt, onDrop }) {
     const { mesh, path, i } = job;
     if (i >= path.length) return true;
     const target = path[i];
-    const y = heightAt(specOf(job.island), mesh.position.x, mesh.position.z);
+    const y = heightAt(specOf(job.island), mesh.position.x, mesh.position.z) + ROAD_DRIVE_LIFT_M;
     const dx = target.x - mesh.position.x;
     const dz = target.z - mesh.position.z;
     const dist = Math.hypot(dx, dz);
@@ -169,7 +170,7 @@ export function createDeliveries({ scene, getMap, specOf, heightAt, onDrop }) {
       const mesh = makeVan();
       mesh.userData.deliveryId = delivery.id;
       mesh.userData.island = delivery.island;
-      mesh.position.set(startAt.x, heightAt(spec, startAt.x, startAt.z), startAt.z);
+      mesh.position.set(startAt.x, heightAt(spec, startAt.x, startAt.z) + ROAD_DRIVE_LIFT_M, startAt.z);
       scene.add(mesh);
       vans.set(delivery.id, {
         mesh,
