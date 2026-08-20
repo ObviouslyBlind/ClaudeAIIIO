@@ -58,8 +58,17 @@ function paintRoot(building, play) {
   const landOwned = building.landOwner === "visitor";
   const canLand = !landOwned && cash >= Number(building.landPrice);
   const manageOff = !building.canManage;
+  const vacant = (building.rooms || []).filter((r) => r.owner !== "visitor");
+  const ask = vacant.reduce((m, r) => Math.min(m, Number(r.price) || Infinity), Infinity);
+  const hint =
+    ask < Infinity && cash >= ask
+      ? "You can buy a room here."
+      : ask < Infinity
+        ? "Need " + money(ask) + " for a room here. Live spawn is $1,000. A flat is $900."
+        : "No vacant rooms.";
   return `
     <p class="whisper">${building.floors} floor${building.floors === 1 ? "" : "s"} · ${building.rooms.length} rooms · PAPER</p>
+    <p class="whisper">${esc(hint)}</p>
     <div class="unit-actions">
       <button type="button" class="go" data-unit-view="buy">Buy rooms</button>
       <button type="button" class="go" data-unit-view="manage" ${manageOff ? "disabled" : ""}>Manage rooms</button>
@@ -93,7 +102,7 @@ function paintBuy(building, play, floor) {
       <div class="inv-row">
         <span>${esc(r.label)} · ${esc(r.use)}</span>
         <button type="button" class="go" data-buy-unit="${esc(r.id)}" ${can ? "" : "disabled"}>
-          ${owned ? "Owned" : "Buy " + money(r.price)}
+          ${owned ? "Owned" : can ? "Buy " + money(r.price) : "Need " + money(r.price)}
         </button>
       </div>`;
   };

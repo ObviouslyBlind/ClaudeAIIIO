@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { createLandBoard, leasePlot } from "./land.ts";
+import { createLandBoard, leasePlot, STARTER_CASH } from "./land.ts";
+import { southSpawnPad } from "./southGeom.ts";
 import { createVisitor, createWorld } from "./sim.ts";
 import {
   BUILDING_LAND_PRICE,
@@ -50,6 +51,19 @@ describe("units scripts (alpha 0.5)", () => {
     expect(rooms).toHaveLength(13);
     expect(visitor.play.units).toHaveLength(13);
     expect(playSnapshot(visitor, createLandBoard()).units.buildings).toHaveLength(4);
+    const spawn = southSpawnPad();
+    const strand = UNIT_BUILDINGS.find((b) => b.id === "strand-flats");
+    expect(Math.hypot(strand.x - spawn.x, strand.z - spawn.z)).toBeLessThan(40);
+    for (const b of UNIT_BUILDINGS) {
+      expect(Math.hypot(b.x - spawn.x, b.z - spawn.z)).toBeLessThan(80);
+    }
+  });
+
+  it("lets live starter cash buy a Strand flat, not a shop", () => {
+    const visitor = createVisitor(STARTER_CASH);
+    expect(STARTER_CASH).toBe(1000);
+    expect(buyRoom(visitor, STRAND).ok).toBe(true);
+    expect(buyRoom(visitor, QUAY_LEFT).reason).toBe("no_cash");
   });
 
   it("lets $10k buy a room but not the dirt", () => {

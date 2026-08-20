@@ -62,7 +62,7 @@ South spawn. Tap-to-walk. RMB-hold orbit. No WASD.
 | Site card | Stock · Run · Upgrades · Stats. Hire $300. Play shifts while unhired. |
 | Hire | Left-rail Hire sheet, or Run tab on the cart. |
 | Account | #0002. Look swatches. Reset / delete. Cash chip expands to holdings. |
-| Units (0.5.1) | Placeholder grey boxes near South spawn. Tap a building → buy room / manage / buy land. Shop kit is shelf/till/fridge on the **same** 0–10 siteScore. Packer + till. Flat/office: full kit then scout + lease. Market dest **This room** when you own a shop. Live spawn still **$1,000** (a room is $1,200 — grind first). |
+| Units (0.5.1) | Grey boxes **in the spawn look**. Strand Flats **$900** is buyable with starter $1,000. Shop rooms $1,200 — fruit first. Tap the name/$ tag. Kit is small grey boxes. Packer + till. Scout + lease. Dest **This room** when you own a shop. |
 
 Starter: cash **$1000**. Pad **$750**. Fruit kit **$90**, pack **$14** / 20. Today fruit **$6**, tax **8%**. Melon and fry kits sit above starter cash. Hire after first sales.
 
@@ -74,7 +74,7 @@ Controls: primary tap/click walks or uses. Secondary long-press / right-click ex
 
 Working branch for this slice: **`cursor/units-gameplan-3924`**.
 
-Tests: `cd game && npm test` — **764 passed** (2026-08-20).
+Tests: `cd game && npm test` — **766 passed** (2026-08-20).
 
 ---
 

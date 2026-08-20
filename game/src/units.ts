@@ -76,24 +76,17 @@ export type BuildingSpec = {
 
 const SHOP_STOCK: InvKind[] = ["hotdogs", "melon", "fish_chips"];
 
+/**
+ * First-frame cluster, inland of Island Hwy, in the south spawn look.
+ * Strand Flats ($900) is closest so $1,000 spawn can buy a room.
+ */
 export const UNIT_BUILDINGS: BuildingSpec[] = [
-  {
-    id: "quay-shops",
-    name: "Quay Shops",
-    floors: 1,
-    x: SOUTH_PORT.x + 36,
-    z: SOUTH_PORT.z + 48,
-    rooms: [
-      { floor: 0, room: 0, use: "shop", label: "Quay shop left" },
-      { floor: 0, room: 1, use: "shop", label: "Quay shop right" },
-    ],
-  },
   {
     id: "strand-flats",
     name: "Strand Flats",
     floors: 2,
-    x: SOUTH_PORT.x + 72,
-    z: SOUTH_PORT.z + 64,
+    x: SOUTH_PORT.x + 28,
+    z: SOUTH_PORT.z + 10,
     rooms: [
       { floor: 0, room: 0, use: "apartment", label: "Strand flat G-L" },
       { floor: 0, room: 1, use: "apartment", label: "Strand flat G-R" },
@@ -102,28 +95,39 @@ export const UNIT_BUILDINGS: BuildingSpec[] = [
     ],
   },
   {
-    id: "harbour-offices",
-    name: "Harbour Offices",
-    floors: 2,
-    x: SOUTH_PORT.x + 108,
-    z: SOUTH_PORT.z + 80,
+    id: "quay-shops",
+    name: "Quay Shops",
+    floors: 1,
+    x: SOUTH_PORT.x + 44,
+    z: SOUTH_PORT.z + 12,
     rooms: [
-      { floor: 0, room: 0, use: "office", label: "Harbour office G-L" },
-      { floor: 0, room: 1, use: "office", label: "Harbour office G-R" },
-      { floor: 1, room: 0, use: "office", label: "Harbour office 1-L" },
-      { floor: 1, room: 1, use: "office", label: "Harbour office 1-R" },
+      { floor: 0, room: 0, use: "shop", label: "Quay shop left" },
+      { floor: 0, room: 1, use: "shop", label: "Quay shop right" },
     ],
   },
   {
     id: "mixed-house",
     name: "Mixed House",
     floors: 3,
-    x: SOUTH_PORT.x + 48,
-    z: SOUTH_PORT.z + 96,
+    x: SOUTH_PORT.x + 34,
+    z: SOUTH_PORT.z + 22,
     rooms: [
       { floor: 0, room: 0, use: "shop", label: "Mixed house shop" },
       { floor: 1, room: 0, use: "apartment", label: "Mixed house flat" },
       { floor: 2, room: 0, use: "office", label: "Mixed house office" },
+    ],
+  },
+  {
+    id: "harbour-offices",
+    name: "Harbour Offices",
+    floors: 2,
+    x: SOUTH_PORT.x + 52,
+    z: SOUTH_PORT.z + 22,
+    rooms: [
+      { floor: 0, room: 0, use: "office", label: "Harbour office G-L" },
+      { floor: 0, room: 1, use: "office", label: "Harbour office G-R" },
+      { floor: 1, room: 0, use: "office", label: "Harbour office 1-L" },
+      { floor: 1, room: 1, use: "office", label: "Harbour office 1-R" },
     ],
   },
 ];

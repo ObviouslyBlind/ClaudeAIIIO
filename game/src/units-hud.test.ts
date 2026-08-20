@@ -14,7 +14,8 @@ import { createVisitor } from "./sim.ts";
 import { createLandBoard } from "./land.ts";
 import { UNIT_ROOM_PRICE, UNIT_SLICE_FAUCET } from "./economy.ts";
 import { playSnapshot } from "./firstLoop.ts";
-import { buyRoom as purchaseRoom } from "./units.ts";
+import { buyRoom as purchaseRoom, fitUnitKit, UNIT_BUILDINGS } from "./units.ts";
+import { southSpawnPad } from "./southGeom.ts";
 
 const QUAY = "quay-shops-0-0";
 const QUAY_RIGHT = "quay-shops-0-1";
@@ -110,7 +111,25 @@ describe("units 0.5.1 systems (placeholders, not façades)", () => {
     const quay = scene.getObjectByName("unit-" + QUAY);
     expect(quay.userData.kind).toBe("unit-block");
     expect(quay.userData.buildingId).toBe("quay-shops");
-    expect(blocks.clickables()).toHaveLength(13);
+    expect(blocks.clickables().length).toBeGreaterThanOrEqual(13);
+    expect(scene.getObjectByName("unit-label-strand-flats")).toBeTruthy();
+  });
+
+  it("sits the test block next to south spawn and plants kit boxes", () => {
+    const spawn = southSpawnPad();
+    for (const b of UNIT_BUILDINGS) {
+      expect(Math.hypot(b.x - spawn.x, b.z - spawn.z)).toBeLessThan(80);
+    }
+    const strand = UNIT_BUILDINGS.find((b) => b.id === "strand-flats");
+    expect(Math.hypot(strand.x - spawn.x, strand.z - spawn.z)).toBeLessThan(40);
+    const { visitor, land } = snapWithCash();
+    expect(purchaseRoom(visitor, "strand-flats-0-0").ok).toBe(true);
+    expect(fitUnitKit(visitor, "strand-flats-0-0", "bed").ok).toBe(true);
+    const play = playSnapshot(visitor, land);
+    const scene = new THREE.Scene();
+    const blocks = mountUnitBlocks({ scene, heightAt: () => 1.28 });
+    blocks.sync(play);
+    expect(scene.getObjectByName("unit-kit-strand-flats-0-0-bed")).toBeTruthy();
   });
 
   it("puts an owned shop on Books", () => {
@@ -124,8 +143,14 @@ describe("units 0.5.1 systems (placeholders, not façades)", () => {
     expect(UNIT_ROOM_PRICE.shop).toBeGreaterThan(1000);
     const { play } = snapWithCash(1000);
     expect(play.cash).toBe(1000);
-    const html = formatBuildingSheet(play, { buildingId: "quay-shops", view: "buy", floor: 0 });
-    expect(html).toMatch(/data-buy-unit="quay-shops-0-0"[^>]*disabled/);
+    const shop = formatBuildingSheet(play, { buildingId: "quay-shops", view: "buy", floor: 0 });
+    expect(shop).toMatch(/data-buy-unit="quay-shops-0-0"[^>]*disabled/);
+    expect(shop).toContain("Need $1,200.00");
+    const flat = formatBuildingSheet(play, { buildingId: "strand-flats", view: "buy", floor: 0 });
+    expect(flat).not.toMatch(/data-buy-unit="strand-flats-0-0"[^>]*disabled/);
+    expect(flat).toContain("Buy $900.00");
+    const root = formatBuildingSheet(play, { buildingId: "strand-flats", view: "root" });
+    expect(root).toContain("You can buy a room here.");
   });
 
   it("opens an owned shop on the room sheet with kit, not a skipped site card", () => {

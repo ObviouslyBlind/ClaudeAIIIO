@@ -1847,6 +1847,7 @@ function onPointer(ev) {
     const bid = block && block.userData && block.userData.buildingId;
     if (bid && chromeHud && chromeHud.openBuildingSheet) {
       chromeHud.openBuildingSheet(bid);
+      setStatus((block.userData.buildingName || "Building") + " · Buy a room.");
       return;
     }
   }
@@ -2448,7 +2449,9 @@ async function boot() {
   });
   unitBlocks = mountUnitBlocks({
     scene: harbourGroup || scene,
-    heightAt,
+    heightAt(x, z) {
+      return heightAt(specOf("south"), x, z);
+    },
   });
   chromeHud = mountChrome({
     setStatus,

@@ -60,7 +60,7 @@ Sales tax **8%**. Fruit net ≈ **$5.52** a sale. Pack COGS **$0.70** / unit.
 
 Cash chip (top right) expands to holdings. Click a placed cart for **Stock · Run · Upgrades · Stats**.
 
-Rooms inside harbour buildings are **Alpha 0.5.1**. Grey placeholder boxes near spawn. Tap a building to buy a room. Live spawn cash stays **$1,000** — a shop room is $1,200, so fruit first. Spec: [UNITS.md](UNITS.md).
+Rooms inside harbour buildings are **Alpha 0.5.1**. Grey placeholder boxes sit in the south spawn look. **Strand Flats is $900** — buyable with starter $1,000. A shop room is $1,200, so fruit first for Quay Shops. Tap a building name/$ tag. Spec: [UNITS.md](UNITS.md).
 
 ---
 
