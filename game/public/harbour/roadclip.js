@@ -284,7 +284,7 @@ export function circusArmDir(node, edge) {
 export function circusMergeFilletM(half, outer) {
   const h = Math.max(1.2, half || 0);
   const o = Math.max(h + 4, outer || 0);
-  return Math.min(10.5, o * 0.24, Math.max(6.5, h * 0.42 + 4.5));
+  return Math.min(14, o * 0.32, Math.max(7.5, h * 0.5 + 5));
 }
 
 /** Fillet radius, tangent station, and how far the join owns the arm. */

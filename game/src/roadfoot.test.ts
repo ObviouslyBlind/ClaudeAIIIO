@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createLandBoard } from "./land.ts";
 import { junctionPad } from "../public/harbour/roadnet.js";
 import { buildHubFootprint, buildCircusFootprint, clipPolylineToOutside, multiContains, segmentRing, unionGeoms, junctionContour, CIRCUS_ARM_STUB_M, biteRibbonWith, circleRing, swellRing } from "../public/harbour/roadfoot.js";
-import { circusArmDir, circusMeshRadii, circusMergeGeom, circusMergeRing } from "../public/harbour/roadclip.js";
+import { circusArmDir, circusMeshRadii, circusMergeGeom } from "../public/harbour/roadclip.js";
 import { carriagewayWidthM } from "../public/harbour/roadclass.js";
 
 describe("road hub footprints", () => {
@@ -229,7 +229,7 @@ describe("road hub footprints", () => {
     const n = graph.nodes.find((x) => x.id === "s-rab-harbour")!;
     const foot = buildCircusFootprint(graph, n);
     const { outer, inner } = circusMeshRadii(n.radius);
-    expect(multiContains(foot.tarmac, n.x, n.z), "stone island should be a hole").toBe(false);
+    expect(multiContains(foot.tarmac, n.x, n.z), "clover fills the heart").toBe(true);
     expect(foot.tarmac.length).toBe(1);
     const hwy = graph.edges.find(
       (e) => e.cls === "highway" && (e.a === n.id || e.b === n.id) && (e.a === "s-port" || e.b === "s-port"),
@@ -250,11 +250,11 @@ describe("road hub footprints", () => {
     expect(multiContains(foot.tarmac, n.x + qx * ((inner + outer) / 2), n.z + qz * ((inner + outer) / 2))).toBe(true);
     expect(inner).toBeGreaterThan(10);
     expect(CIRCUS_ARM_STUB_M).toBeLessThan(5);
-    expect(multiContains(foot.clip, n.x, n.z), "clip is the outer disc").toBe(true);
-    expect(multiContains(foot.clip, n.x + dx * (outer + 10), n.z + dz * (outer + 10)), "12 m grass stub").toBe(false);
+    expect(multiContains(foot.clip, n.x, n.z), "clip is the solid clover").toBe(true);
     const hwyHalf = carriagewayWidthM("highway") / 2;
     const g = circusMergeGeom(hwyHalf, outer);
-    const flare = circusMergeRing(n.x, n.z, dir, outer, hwyHalf, g.filletM);
+    expect(multiContains(foot.clip, n.x + dx * (g.reach + 6), n.z + dz * (g.reach + 6)), "12 m grass stub").toBe(false);
+    expect(multiContains(foot.tarmac, n.x + dx * (outer + 6), n.z + dz * (outer + 6)), "Hwy petal missed").toBe(true);
     const px = -dz;
     const pz = dx;
     const midA0 = -Math.PI / 2;
@@ -268,7 +268,7 @@ describe("road hub footprints", () => {
     const ax = mx + (chord - mx) * 0.4;
     const az = mz + (hwyHalf - mz) * 0.4;
     expect(az).toBeGreaterThan(hwyHalf);
-    expect(ringContains(flare, n.x + dx * ax + px * az, n.z + dz * ax + pz * az), "fillet missed Hwy armpit").toBe(true);
+    expect(multiContains(foot.tarmac, n.x + dx * ax + px * az, n.z + dz * ax + pz * az), "fillet missed Hwy armpit").toBe(true);
   });
 });
 

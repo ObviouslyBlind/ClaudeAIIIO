@@ -320,7 +320,7 @@ describe("paved street from spawn", () => {
     const node = map.graph.nodes.find((n) => n.id === "s-rab-harbour")!;
     const radii = circusMeshRadii(node.radius);
     const foot = buildCircusFootprint(map.graph, node);
-    expect(multiContains(foot.tarmac, harbour.x, harbour.z)).toBe(false);
+    expect(multiContains(foot.tarmac, harbour.x, harbour.z), "clover fills the heart; lawn sits on top").toBe(true);
     let nearestHwy = Infinity;
     for (const mesh of hwyMeshes) {
       const pos = mesh.geometry.attributes.position;
@@ -330,32 +330,18 @@ describe("paved street from spawn", () => {
         nearestHwy = Math.min(nearestHwy, d);
       }
     }
-    // Ribbons stop in the flare. Merge meshes own the ring face.
+    // Ribbons bite the clover kerb. Flares live in the circus mesh, not stickers.
     expect(CIRCUS_ARM_STUB_M).toBeLessThan(5);
-    expect(nearestHwy).toBeGreaterThan(radii.outer + 2);
-    expect(nearestHwy).toBeLessThan(radii.outer + 16);
-    const hwyMerges = added.filter(
-      (m) => m.userData.roadKind === "paved" && m.userData.roadName === "Island Hwy merge",
-    );
-    expect(hwyMerges.length).toBeGreaterThan(0);
-    let nearestHwyMerge = Infinity;
-    for (const mesh of hwyMerges) {
-      const pos = mesh.geometry.attributes.position;
-      for (let i = 0; i < pos.count; i++) {
-        nearestHwyMerge = Math.min(nearestHwyMerge, Math.hypot(pos.getX(i) - harbour.x, pos.getZ(i) - harbour.z));
-      }
-    }
-    expect(nearestHwyMerge, "Hwy merge missed the ring").toBeLessThan(radii.outer + 1.2);
-    expect(nearestHwyMerge).toBeGreaterThan(radii.inner - 1);
+    expect(nearestHwy).toBeGreaterThan(radii.outer - 1);
+    expect(nearestHwy).toBeLessThan(radii.outer + 18);
+    expect(added.filter((m) => / merge$/.test(String(m.userData.roadName || "")) && m.userData.roadKind === "paved").length).toBe(0);
     const circus = added.find(
       (m) => m.userData.roadName === "Harbour Circus" && m.userData.footprint,
     );
     expect(circus).toBeTruthy();
-    expect(circus!.geometry.parameters?.innerRadius).toBeCloseTo(radii.inner, 0);
-    expect(circus!.geometry.parameters?.outerRadius).toBeCloseTo(radii.outer, 0);
+    expect(circus!.geometry.parameters?.innerRadius).toBeUndefined();
     expect(circus!.material.map).toBeTruthy();
     expect(CIRCUS_RING_WIDTH_M).toBeGreaterThanOrEqual(carriagewayWidthM("highway"));
-    expect(added.filter((m) => / merge$/.test(String(m.userData.roadName || "")) && m.userData.roadKind === "paved").length).toBeGreaterThan(2);
     expect(added.filter((m) => / merge paint$/.test(String(m.userData.roadName || "")) && m.userData.roadKind === "paint").length).toBeGreaterThan(8);
     const island = added.find(
       (m) => m.userData.roadKind === "island" && /Harbour/.test(String(m.userData.label || "")),
@@ -388,20 +374,8 @@ describe("paved street from spawn", () => {
         nearestQuay = Math.min(nearestQuay, Math.hypot(pos.getX(i) - harbour.x, pos.getZ(i) - harbour.z));
       }
     }
-    expect(nearestQuay, "Quayward Rd missed Harbour Circus").toBeLessThan(radii.outer + 16);
+    expect(nearestQuay, "Quayward Rd missed Harbour Circus").toBeLessThan(radii.outer + 18);
     expect(nearestQuay).toBeGreaterThan(radii.inner - 0.6);
-    const quayMerges = added.filter(
-      (m) => m.userData.roadKind === "paved" && m.userData.roadName === "Quayward Rd merge",
-    );
-    expect(quayMerges.length).toBeGreaterThan(0);
-    let nearestQuayMerge = Infinity;
-    for (const mesh of quayMerges) {
-      const pos = mesh.geometry.attributes.position;
-      for (let i = 0; i < pos.count; i++) {
-        nearestQuayMerge = Math.min(nearestQuayMerge, Math.hypot(pos.getX(i) - harbour.x, pos.getZ(i) - harbour.z));
-      }
-    }
-    expect(nearestQuayMerge, "Quayward merge missed the ring").toBeLessThan(radii.outer + 1.2);
   });
 
   it("keeps stem paint off the through heart, and lets the through carriageway stay painted", () => {
