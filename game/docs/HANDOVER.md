@@ -62,7 +62,7 @@ South spawn. Tap-to-walk. RMB-hold orbit. No WASD.
 | Site card | Stock · Run · Upgrades · Stats. Hire $300. Play shifts while unhired. |
 | Hire | Left-rail Hire sheet, or Run tab on the cart. |
 | Account | #0002. Look swatches. Reset / delete. Cash chip expands to holdings. |
-| Units (0.5.1) | Placeholder grey boxes near South spawn. Tap a building → buy room / manage / buy land. Shop packer + till. Flat/office scout + lease. Market dest **This room** when you own a shop. Live spawn still **$1,000** (a room is $1,200 — grind first). |
+| Units (0.5.1) | Placeholder grey boxes near South spawn. Tap a building → buy room / manage / buy land. Shop kit is shelf/till/fridge on the **same** 0–10 siteScore. Packer + till. Flat/office: full kit then scout + lease. Market dest **This room** when you own a shop. Live spawn still **$1,000** (a room is $1,200 — grind first). |
 
 Starter: cash **$1000**. Pad **$750**. Fruit kit **$90**, pack **$14** / 20. Today fruit **$6**, tax **8%**. Melon and fry kits sit above starter cash. Hire after first sales.
 
@@ -74,7 +74,7 @@ Controls: primary tap/click walks or uses. Secondary long-press / right-click ex
 
 Working branch for this slice: **`cursor/units-gameplan-3924`**.
 
-Tests: `cd game && npm test` — **747 passed** (2026-08-20).
+Tests: `cd game && npm test` — **764 passed** (2026-08-20).
 
 ---
 
@@ -98,7 +98,7 @@ Tests: `cd game && npm test` — **747 passed** (2026-08-20).
 
 Do these in order unless the operator names a piece. Politics stay frozen. **Read the piece out before coding it.**
 
-1. **Finish 0.5.1 (buildings)** — play the placeholder loop on the live shard; Blender shells when the operator has files. Spec: [UNITS.md](UNITS.md).
+1. **Finish 0.5.1 (buildings)** — play the placeholder loop on the live shard (fruit grind to $1,200, tap a grey box, buy a room). Blender shells when the operator has files. Spec: [UNITS.md](UNITS.md).
 2. **Durable persist** — Postgres (PLAN step C). Restart must not wipe a mid-alpha shard once accounts exist. Alpha spawn wipe can stay until then.
 3. **Shopfit / farming / aggregates aisles** — only when that lot type exists. Honest empty until then.
 4. **North harbour pass** — sidewalks and kit, not a second sim.

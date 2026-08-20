@@ -5,7 +5,7 @@
  */
 
 import { findParcelAt, getPlot, isCartPad, ISLANDS, STARTER_CASH, sellPlot, type IslandId, type LandBoard, type Parcel } from "./land.ts";
-import { plotTrafficBand } from "./footTraffic.ts";
+import { plotTrafficBand, pointTrafficBand, type TrafficBand } from "./footTraffic.ts";
 import { roadsideDrop, type DropPoint } from "./roadside.ts";
 import { skuFitsPlot, type ZoneId } from "./zones.ts";
 import type { Visitor } from "./sim.ts";
@@ -31,7 +31,7 @@ import { createVisitorCart } from "./visitorCart.ts";
 import { clampLook, defaultLook } from "./look.ts";
 import { CART_FOOTPRINT_M, SNAP_PAD_M, snapPlacePose } from "../public/harbour/place-pose.js";
 import type { ListingTape } from "./stocks.ts";
-import { seedUnits, tickUnits, unitDeliveryTarget, unitsSnapshot, type BuildingLand, type HarbourUnit } from "./units.ts";
+import { seedUnits, tickUnits, unitDeliveryTarget, unitsSnapshot, buildingById, type BuildingLand, type HarbourUnit } from "./units.ts";
 
 export const FIRST_LOOP_NOTE = "South island. One visitor on this process.";
 
@@ -517,6 +517,33 @@ export function rivalsOnStreet(land: LandBoard, play: PlayState, plotId: string,
   return n;
 }
 
+function trafficForWork(
+  land: LandBoard,
+  play: PlayState,
+  row: { id: string; plotId: string },
+): TrafficBand {
+  const plot = getPlot(land, row.plotId);
+  if (plot) return plotTrafficBand(land, plot);
+  const unitSite = play.workSites.find((s) => s.id === row.id && s.unitId);
+  if (!unitSite?.unitId) return "red";
+  const unit = play.units.find((u) => u.id === unitSite.unitId);
+  const building = unit ? buildingById(unit.buildingId) : undefined;
+  if (!unit || !building) return "red";
+  return pointTrafficBand(land, "south", building.x, building.z);
+}
+
+function kitUpgradesForWork(
+  play: PlayState,
+  row: { id: string; upgraded?: boolean; upgrades?: string[] },
+): string[] {
+  const unitSite = play.workSites.find((s) => s.id === row.id && s.unitId);
+  if (unitSite?.unitId) {
+    const unit = play.units.find((u) => u.id === unitSite.unitId);
+    return unit ? [...unit.kit] : [];
+  }
+  return ownedUpgrades(row);
+}
+
 function scoreWork(
   land: LandBoard,
   play: PlayState,
@@ -531,15 +558,15 @@ function scoreWork(
     kind?: string;
   },
 ): SiteScore {
-  const plot = getPlot(land, row.plotId);
   const unitSite = play.workSites.find((s) => s.id === row.id && s.unitId);
-  const band = plot ? plotTrafficBand(land, plot) : unitSite ? "yellow" : "red";
+  const band = trafficForWork(land, play, row);
   const kind = cartKindById(row.kind) ? row.kind : "fruit";
+  const upgrades = kitUpgradesForWork(play, row);
   return scoreSite({
-    hired: row.hired,
+    hired: unitSite ? Boolean(unitSite.tillHired) : row.hired,
     stocked: row.stock >= 1,
-    upgraded: row.upgraded,
-    upgrades: ownedUpgrades(row),
+    upgraded: upgrades.length > 0,
+    upgrades,
     traffic: band,
     rivalsOnStreet: rivalsOnStreet(land, play, row.plotId, row.id),
     boostLeft: row.boostLeft,
@@ -1723,6 +1750,38 @@ export function buildBusinessBooks(
       projDay: 0,
     });
   }
+  for (const unit of play.units || []) {
+    if (unit.owner !== "visitor") continue;
+    if (unit.use === "shop") continue;
+    const lease = unit.lease;
+    const hoursPaid = lease && lease.lastPaidHour >= 0 ? lease.lastPaidHour : 0;
+    const rent = lease ? lease.rentPerHour : 0;
+    sites.push({
+      standId: `unit-${unit.id}`,
+      kind: unit.use,
+      label: unit.label,
+      siteClass: unit.use,
+      lotName: unit.label,
+      plotClass: null,
+      staffName: lease ? lease.tenantName : null,
+      hired: Boolean(lease),
+      attending: false,
+      sticker: rent,
+      todayPrice: rent,
+      stickerBand: lease ? "green" : "red",
+      priceTrend: "flat",
+      cogsEst: 0,
+      cogsSold: 0,
+      taxRate: 0,
+      netPerSale: rent,
+      worthPaper: UNIT_ROOM_PRICE[unit.use],
+      stock: 0,
+      unitsSold: hoursPaid,
+      perMinute: 0,
+      projHour: lease ? rent : 0,
+      projDay: lease ? roundMoney(rent * 24) : 0,
+    });
+  }
   return {
     mode: "PAPER",
     provenance: "SIMULATED",
@@ -1809,7 +1868,7 @@ export function playSnapshot(visitor: Visitor, land: LandBoard, taxRate?: number
       boostLeft: s.boostLeft || 0,
       stickerBand: band,
       stickerMul: stickerSellMul(band),
-      trafficBand: plot ? plotTrafficBand(land, plot) : "red",
+      trafficBand: trafficForWork(land, play, { id: s.id, plotId: s.plotId }),
     };
   });
   return {

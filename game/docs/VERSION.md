@@ -2,7 +2,7 @@
 
 PAPER / SIMULATED. No wallet.
 
-**Now: Alpha 0.5.1** — the **buildings push** (in progress). Scripts are in. Nothing is in the harbour camera yet. Operator mocks shells in Blender later.
+**Now: Alpha 0.5.1** — the **buildings push** (in progress). Sim + placeholder grey boxes + buy/manage sheets. Not Blender. Not done until a room is buyable on the live harbour.
 
 Always update this file and [HANDOVER.md](HANDOVER.md) in the same change.
 

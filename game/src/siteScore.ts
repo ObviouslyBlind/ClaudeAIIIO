@@ -4,7 +4,7 @@
  * PAPER / SIMULATED.
  */
 
-import { CART_UPGRADES } from "./economy.ts";
+import { CART_UPGRADES, UNIT_KIT } from "./economy.ts";
 
 export type SiteClass = "cart" | "shop" | "mine";
 export type TrafficBand = "green" | "yellow" | "red";
@@ -35,7 +35,10 @@ export const UPGRADE_APPEAL: SiteUpgradePart[] = CART_UPGRADES.map((u) => ({
 }));
 
 export function appealFor(id: string): number {
-  return UPGRADE_APPEAL.find((u) => u.id === id)?.points ?? 0;
+  const cart = UPGRADE_APPEAL.find((u) => u.id === id);
+  if (cart) return cart.points;
+  const kit = UNIT_KIT.find((row) => row.id === id);
+  return kit ? kit.appeal : 0;
 }
 
 export type SiteScoreInput = {
@@ -80,8 +83,9 @@ function upgradeParts(input: SiteScoreInput): SiteScorePart[] {
   const ids = Array.isArray(input.upgrades) ? input.upgrades : [];
   if (ids.length) {
     return ids.map((id) => {
-      const spec = UPGRADE_APPEAL.find((u) => u.id === id);
-      return { id, label: spec?.label || id, points: spec?.points ?? 0 };
+      const cart = UPGRADE_APPEAL.find((u) => u.id === id);
+      const kit = UNIT_KIT.find((row) => row.id === id);
+      return { id, label: cart?.label || kit?.label || id, points: appealFor(id) };
     });
   }
   return [{ id: "upgrade", label: "Upgraded", points: input.upgraded ? appealFor("fridge") : 0 }];

@@ -1,18 +1,22 @@
 import { describe, expect, it } from "vitest";
-import { createLandBoard } from "./land.ts";
+import { createLandBoard, leasePlot } from "./land.ts";
 import { createVisitor, createWorld } from "./sim.ts";
 import {
   BUILDING_LAND_PRICE,
-  HIRE_COST,
   UNIT_ROOM_PRICE,
   UNIT_SLICE_FAUCET,
 } from "./economy.ts";
 import { serializeShard, restoreShard } from "./persist.ts";
 import {
+  DELIVERY_WAIT_MS,
   hireStand,
   markArrived,
   orderMarket,
+  placeStand,
   playSnapshot,
+  recallStaleDeliveries,
+  stockStand,
+  takeAll,
   tickHotdogSales,
   tickPlay,
 } from "./firstLoop.ts";
@@ -30,6 +34,7 @@ import {
 const QUAY_LEFT = "quay-shops-0-0";
 const QUAY_RIGHT = "quay-shops-0-1";
 const STRAND = "strand-flats-0-0";
+const OFFICE = "harbour-offices-0-0";
 
 function ripeVisitor() {
   const land = createLandBoard();
@@ -112,11 +117,29 @@ describe("units scripts (alpha 0.5)", () => {
     expect(still!.items.reduce((n, i) => n + i.qty, 0)).toBe(crateQty);
   });
 
-  it("keeps the cart fruit loop on one hired vendor", () => {
+  it("keeps the cart fruit loop on one hired vendor after a room is owned", () => {
     const { land, visitor } = ripeVisitor();
     expect(buyRoom(visitor, QUAY_LEFT).ok).toBe(true);
-    expect(visitor.play.units.find((u) => u.id === QUAY_LEFT)?.owner).toBe("visitor");
-    expect(visitor.play.stands).toHaveLength(0);
+    const site = visitor.play.workSites.find((s) => s.unitId === QUAY_LEFT)!;
+    expect(hireStand(visitor, site.id).reason).toBe("unit_role");
+
+    const pad = land.plots.find((p) => p.class === "cart_pad" && !p.owner)!;
+    expect(leasePlot(land, visitor, pad.id).ok).toBe(true);
+    const order = orderMarket(visitor, land, { plotId: pad.id, skus: ["hotdog_cart", "hotdogs"] });
+    expect(order.ok).toBe(true);
+    if (!order.ok) return;
+    takeAll(visitor, order.delivery.id);
+    const placed = placeStand(visitor, land, pad.id);
+    expect(placed.ok).toBe(true);
+    if (!placed.ok) return;
+    expect(stockStand(visitor, placed.stand.id).ok).toBe(true);
+    expect(hireStand(visitor, placed.stand.id).ok).toBe(true);
+    const cash0 = visitor.cash;
+    for (let i = 0; i < 40; i++) tickHotdogSales(visitor, land);
+    expect(visitor.cash).toBeGreaterThan(cash0);
+    expect(placed.stand.unitsSold).toBeGreaterThan(0);
+    expect(placed.stand.hired).toBe(true);
+    expect(site.tillHired).toBe(false);
   });
 
   it("scouts a fitted flat and pays rent on the sim-hour clock", () => {
@@ -124,6 +147,7 @@ describe("units scripts (alpha 0.5)", () => {
     expect(buyRoom(visitor, STRAND).ok).toBe(true);
     expect(scoutTenant(visitor, STRAND).reason).toBe("no_takers");
     expect(fitUnitKit(visitor, STRAND, "bed").ok).toBe(true);
+    expect(scoutTenant(visitor, STRAND).reason).toBe("no_takers");
     expect(fitUnitKit(visitor, STRAND, "shower").ok).toBe(true);
     expect(fitUnitKit(visitor, STRAND, "sink").ok).toBe(true);
     const scouted = scoutTenant(visitor, STRAND);
@@ -133,6 +157,7 @@ describe("units scripts (alpha 0.5)", () => {
     const cash0 = visitor.cash;
     tickPlay(visitor, land, 150);
     expect(visitor.cash).toBeGreaterThan(cash0);
+    expect(playSnapshot(visitor, land).books.sites.some((s) => s.siteClass === "apartment" && s.hired)).toBe(true);
     tickPlay(visitor, land, 3 * 150);
     expect(visitor.play.units.find((u) => u.id === STRAND)?.lease).toBeNull();
   });
@@ -160,5 +185,77 @@ describe("units scripts (alpha 0.5)", () => {
     expect(restored.visitor.play.units.find((u) => u.id === QUAY_LEFT)?.owner).toBe("visitor");
     expect(restored.visitor.play.units.find((u) => u.id === QUAY_RIGHT)?.owner).toBeNull();
     expect(restored.visitor.play.units).toHaveLength(13);
+  });
+
+  it("skips ground rent when the visitor owns the dirt", () => {
+    const { land, visitor } = ripeVisitor();
+    expect(buyRoom(visitor, QUAY_LEFT).ok).toBe(true);
+    visitor.cash = BUILDING_LAND_PRICE;
+    expect(buyBuildingLand(visitor, "quay-shops").ok).toBe(true);
+    const cash0 = visitor.cash;
+    const bank0 = visitor.play.gameBank;
+    tickPlay(visitor, land, 3600);
+    expect(visitor.cash).toBe(cash0);
+    expect(visitor.play.gameBank).toBe(bank0);
+  });
+
+  it("scouts a fitted office on the same lease clock", () => {
+    const { land, visitor } = ripeVisitor();
+    expect(buyRoom(visitor, OFFICE).ok).toBe(true);
+    expect(scoutTenant(visitor, OFFICE).reason).toBe("no_takers");
+    expect(fitUnitKit(visitor, OFFICE, "desk").ok).toBe(true);
+    expect(scoutTenant(visitor, OFFICE).reason).toBe("no_takers");
+    expect(fitUnitKit(visitor, OFFICE, "cabinet").ok).toBe(true);
+    const scouted = scoutTenant(visitor, OFFICE);
+    expect(scouted.ok).toBe(true);
+    if (!scouted.ok) return;
+    expect(scouted.offer.tenantName).toMatch(/clerk|firm|Harbour/i);
+    expect(signLease(visitor, OFFICE, 6, 0).ok).toBe(true);
+    const cash0 = visitor.cash;
+    tickPlay(visitor, land, 150);
+    expect(visitor.cash).toBeGreaterThan(cash0);
+    const books = playSnapshot(visitor, land).books.sites.find((s) => s.standId === `unit-${OFFICE}`);
+    expect(books?.siteClass).toBe("office");
+    expect(books?.hired).toBe(true);
+  });
+
+  it("warehouses a stale unit crate after 60s", () => {
+    const { land, visitor } = ripeVisitor();
+    expect(buyRoom(visitor, QUAY_LEFT).ok).toBe(true);
+    const packed = orderMarket(visitor, land, { skus: ["hotdogs"], dest: "unit", unitId: QUAY_LEFT });
+    expect(packed.ok).toBe(true);
+    if (!packed.ok) return;
+    expect(markArrived(visitor, packed.delivery.id).ok).toBe(true);
+    const qty = packed.delivery.items.reduce((n, i) => n + i.qty, 0);
+    recallStaleDeliveries(visitor, Date.now() + DELIVERY_WAIT_MS + 1);
+    expect(visitor.play.deliveries.find((d) => d.id === packed.delivery.id)).toBeUndefined();
+    expect(visitor.play.warehouse.items.find((i) => i.kind === "hotdogs")?.qty).toBe(qty);
+  });
+
+  it("feeds shop kit into the existing siteScore, not a second meter", () => {
+    const { land, visitor } = ripeVisitor();
+    expect(buyRoom(visitor, QUAY_LEFT).ok).toBe(true);
+    const site = visitor.play.workSites.find((s) => s.unitId === QUAY_LEFT)!;
+    site.stock = 8;
+    site.tillHired = true;
+    site.hired = true;
+    const bare = playSnapshot(visitor, land).workSites.find((s) => s.unitId === QUAY_LEFT)!;
+    expect(fitUnitKit(visitor, QUAY_LEFT, "shelf").ok).toBe(true);
+    expect(fitUnitKit(visitor, QUAY_LEFT, "till").ok).toBe(true);
+    expect(fitUnitKit(visitor, QUAY_LEFT, "fridge").ok).toBe(true);
+    const fitted = playSnapshot(visitor, land).workSites.find((s) => s.unitId === QUAY_LEFT)!;
+    expect(fitted.parts.some((p) => p.id === "shelf" && p.points === 1)).toBe(true);
+    expect(fitted.parts.some((p) => p.id === "fridge" && p.points === 1.5)).toBe(true);
+    expect(fitted.desirability).toBeGreaterThan(bare.desirability);
+    expect(fitted.trafficBand).not.toBe("red");
+  });
+
+  it("puts two quay shops on two Books rows", () => {
+    const { land, visitor } = ripeVisitor();
+    expect(buyRoom(visitor, QUAY_LEFT).ok).toBe(true);
+    expect(buyRoom(visitor, QUAY_RIGHT).ok).toBe(true);
+    const shops = playSnapshot(visitor, land).books.sites.filter((s) => s.siteClass === "shop");
+    expect(shops).toHaveLength(2);
+    expect(shops.map((s) => s.label).sort()).toEqual(["Quay shop left", "Quay shop right"]);
   });
 });

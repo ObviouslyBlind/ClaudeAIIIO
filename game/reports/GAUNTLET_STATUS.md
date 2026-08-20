@@ -2,7 +2,7 @@
 
 **Mid-alpha.** The harbour loop (land → pad → fruit cart → hire → sticker → Books) is the ratchet base. Next pieces are **features on that base**, not a new foundation.
 
-Last logged piece: **buildings push (Alpha 0.5.1), headless sim only**. Politics frozen. Street carts grind remains the prior camera ratchet.
+Last logged piece: **buildings push (Alpha 0.5.1) systems**. Politics frozen. Street carts grind remains the prior camera ratchet. No pixel-critic swarm.
 
 Live map: [`../docs/HANDOVER.md`](../docs/HANDOVER.md). Do not restart the pixel-critic swarm unless a named piece is in a real Gauntlet Loop.
 
@@ -43,5 +43,12 @@ Ratchet: one-bar Price set with Optimal on today’s green.
 Headless bar: buy one Quay Shops room, sibling vacant, packer fills from the crate, till sells, fire packer and the crate sits. **PASS**.
 
 Systems camera bar: 13 placeholder boxes, Manage grey until owned, dest This room, shop Run has packer + till. Not Blender. Spec: [`../docs/UNITS.md`](../docs/UNITS.md).
+
+| Round | Bar | Result |
+|---|---|---|
+| U1 | Quay left buy, right vacant, packer then till, fire packer crate sits; cart fruit still sells | **PASS** (tests) |
+| U2 | Flat/office need full kit before scout; rent on sim-hour clock; ground rent $8 or skip if you own dirt | **PASS** (tests) |
+| U3 | Shop kit is siteScore parts (shelf/till/fridge). Ground-floor traffic band. Two quay shops = two Books rows. Stale unit crate warehouses. | **PASS** (tests) |
+| U4 | Manage opens the room sheet (kit + Open site card). Floor chips on manage. Placeholders only. | **PASS** (HUD tests) |
 
 Operator is the brake.

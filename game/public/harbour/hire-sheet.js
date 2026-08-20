@@ -26,6 +26,8 @@ export function listBusinesses(play) {
 export function businessType(site) {
   if (!site) return "Business";
   if (site.siteClass === "shop") return "Shop";
+  if (site.siteClass === "apartment") return "Flat";
+  if (site.siteClass === "office") return "Office";
   if (site.siteClass === "mine" || site.kind === "quarry" || site.kind === "aggregates") {
     return "Aggregates";
   }

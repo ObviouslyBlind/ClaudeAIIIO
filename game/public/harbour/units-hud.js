@@ -105,24 +105,34 @@ function paintBuy(building, play, floor) {
     ${others.length ? `<p class="whisper">Other vacant rooms in this building</p>${others.map(row).join("")}` : ""}`;
 }
 
-function paintManage(building, play) {
+function paintManage(building, play, floor) {
   const mine = (building.rooms || []).filter((r) => r.owner === "visitor");
   if (!mine.length) {
     return `
       <button type="button" class="ghost hire-back" data-unit-view="root">Back</button>
       <p class="whisper">Manage is grey until you own a room in this building.</p>`;
   }
-  return `
-    <button type="button" class="ghost hire-back" data-unit-view="root">Back</button>
-    ${mine
-      .map(
-        (r) => `
+  const floors = [...new Set((building.rooms || []).map((r) => r.floor))].sort((a, b) => a - b);
+  const viewFloor = floors.includes(floor) ? floor : floors[0];
+  const onFloor = mine.filter((r) => r.floor === viewFloor);
+  const others = mine.filter((r) => r.floor !== viewFloor);
+  const floorBtns = floors
+    .map(
+      (f) =>
+        `<button type="button" class="ghost${f === viewFloor ? " is-on" : ""}" data-unit-floor="${f}">${esc(floorName(f))}</button>`,
+    )
+    .join("");
+  const row = (r) => `
       <div class="inv-row">
         <span>${esc(r.label)} · ${esc(r.use)}</span>
         <button type="button" class="go" data-unit-room="${esc(r.id)}">Open</button>
-      </div>`,
-      )
-      .join("")}`;
+      </div>`;
+  return `
+    <button type="button" class="ghost hire-back" data-unit-view="root">Back</button>
+    <div class="dest-row">${floorBtns}</div>
+    <p class="whisper">${esc(floorName(viewFloor))}</p>
+    ${onFloor.map(row).join("")}
+    ${others.length ? `<p class="whisper">Other rooms you own</p>${others.map(row).join("")}` : ""}`;
 }
 
 function paintRoom(building, play, unitId) {
@@ -181,7 +191,7 @@ export function formatBuildingSheet(play, opts = {}) {
   const view = opts.view || "root";
   let body = paintRoot(building, play);
   if (view === "buy") body = paintBuy(building, play, opts.floor);
-  else if (view === "manage") body = paintManage(building, play);
+  else if (view === "manage") body = paintManage(building, play, opts.floor);
   else if (view === "room") body = paintRoom(building, play, opts.unitId);
   return `
     <div class="site-card" data-unit-building="${esc(building.id)}">

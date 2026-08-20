@@ -746,7 +746,7 @@ export function mountChrome(opts) {
     root.querySelectorAll("[data-unit-floor]").forEach((btn) => {
       btn.addEventListener("click", () => {
         unitFloor = Number(btn.getAttribute("data-unit-floor") || 0);
-        unitView = "buy";
+        if (unitView !== "buy" && unitView !== "manage") unitView = "buy";
         paintBuildingSheet(unitBuildingId);
       });
     });
@@ -769,12 +769,6 @@ export function mountChrome(opts) {
     root.querySelectorAll("[data-unit-room]").forEach((btn) => {
       btn.addEventListener("click", () => {
         unitRoomId = btn.getAttribute("data-unit-room") || "";
-        const site = findSite(unitRoomId);
-        if (site && site.unitId) {
-          unitView = "root";
-          paintStandMenu(site);
-          return;
-        }
         unitView = "room";
         paintBuildingSheet(unitBuildingId);
       });

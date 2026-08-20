@@ -196,6 +196,16 @@ export function canManageBuilding(play: PlayState, buildingId: string): boolean 
   return play.units.some((u) => u.buildingId === buildingId && u.owner === "visitor");
 }
 
+export function requiredKit(use: UnitUse): string[] {
+  return UNIT_KIT.filter((row) => row.use === use).map((row) => row.id);
+}
+
+/** Empty or partial kit = no takers. Bed+shower+sink / desk+cabinet = a tenant. */
+export function kitComplete(unit: HarbourUnit): boolean {
+  const need = requiredKit(unit.use);
+  return need.length > 0 && need.every((id) => unit.kit.includes(id));
+}
+
 export function unitDeliveryTarget(
   play: PlayState,
   unitId: string,
@@ -382,7 +392,7 @@ export function scoutTenant(
   if (!unit || unit.owner !== "visitor") return fail("not_yours");
   if (unit.use !== "apartment" && unit.use !== "office") return fail("not_lease");
   if (unit.lease) return fail("occupied");
-  if (!unit.kit.length) return fail("no_takers");
+  if (!kitComplete(unit)) return fail("no_takers");
   const offer: TenantOffer = {
     tenantId: unit.use === "office" ? "firm-harbour" : "npc-tenant",
     tenantName: unit.use === "office" ? "Harbour clerk" : "Quay tenant",

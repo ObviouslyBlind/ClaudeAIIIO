@@ -127,4 +127,33 @@ describe("units 0.5.1 systems (placeholders, not façades)", () => {
     const html = formatBuildingSheet(play, { buildingId: "quay-shops", view: "buy", floor: 0 });
     expect(html).toMatch(/data-buy-unit="quay-shops-0-0"[^>]*disabled/);
   });
+
+  it("opens an owned shop on the room sheet with kit, not a skipped site card", () => {
+    const { visitor, land } = snapWithCash();
+    expect(purchaseRoom(visitor, QUAY).ok).toBe(true);
+    const play = playSnapshot(visitor, land);
+    const html = formatBuildingSheet(play, { buildingId: "quay-shops", view: "room", unitId: QUAY });
+    expect(html).toContain("Shelf");
+    expect(html).toContain("Fridge");
+    expect(html).toContain("Till");
+    expect(html).toContain("Open site card");
+    expect(html).toContain("Packer fills the shelf");
+  });
+
+  it("kits and scouts a flat from manage", () => {
+    const { visitor, land } = snapWithCash();
+    expect(purchaseRoom(visitor, "strand-flats-0-0").ok).toBe(true);
+    const play = playSnapshot(visitor, land);
+    const manage = formatBuildingSheet(play, { buildingId: "strand-flats", view: "manage", floor: 0 });
+    expect(manage).toContain("Ground floor");
+    expect(manage).toContain('data-unit-room="strand-flats-0-0"');
+    const room = formatBuildingSheet(play, {
+      buildingId: "strand-flats",
+      view: "room",
+      unitId: "strand-flats-0-0",
+    });
+    expect(room).toContain("Bed");
+    expect(room).toContain("Scout tenants");
+    expect(room).toContain("Empty room = no takers");
+  });
 });
