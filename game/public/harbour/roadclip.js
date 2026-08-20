@@ -274,13 +274,23 @@ export function circusArmDir(node, edge) {
 }
 
 /**
- * Fillet between a radial kerb and the outer ring. Big enough to read as a
- * merge, short enough that it is a join, not a 50 m trumpet.
+ * Fillet between a radial kerb and the outer ring. Big enough that the
+ * clover reads as a merge from the play camera; small enough that a dual
+ * cannot swallow a 45° neighbour (Quayward).
  */
 export function circusMergeFilletM(half, outer) {
   const h = Math.max(1.2, half || 0);
   const o = Math.max(h + 4, outer || 0);
-  return Math.min(o * 0.3, Math.max(6.4, h * 0.62 + 4));
+  return Math.min(10.5, o * 0.24, Math.max(6.5, h * 0.42 + 4.5));
+}
+
+/** Fillet radius, tangent station, and how far the join owns the arm. */
+export function circusMergeGeom(half, outer) {
+  const h = Math.max(1.2, half || 0);
+  const R = Math.max(h + 2, outer || 0);
+  const F = circusMergeFilletM(h, R);
+  const xc = Math.sqrt(Math.max(1, (R + F) * (R + F) - (h + F) * (h + F)));
+  return { half: h, outer: R, filletM: F, xc, reach: xc + 6 };
 }
 
 function lerpAngle(a0, a1, t) {
@@ -342,7 +352,7 @@ export function circusMergeRing(cx, cz, dir, outer, half, filletM) {
   }
 
   const xc = Math.sqrt(Math.max(1, (R + F) * (R + F) - (h + F) * (h + F)));
-  const dFar = xc + 5.5;
+  const dFar = xc + 6;
   const scale = R / (R + F);
   const tAlong = xc * scale;
   const tLat = (h + F) * scale;

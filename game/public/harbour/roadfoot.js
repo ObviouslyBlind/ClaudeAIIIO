@@ -6,7 +6,7 @@
  */
 import polygonClipping from "./vendor/polygon-clipping.js";
 import { carriagewayWidthM, roadClassSpec } from "./roadclass.js";
-import { circusMeshRadii } from "./roadclip.js";
+import { circusArmDir, circusMeshRadii, circusMergeGeom } from "./roadclip.js";
 
 /** Keep in sync with SHOULDER_PAD_M in roads.js. */
 export const FOOT_SHOULDER_M = 2.2;
@@ -272,6 +272,37 @@ export function junctionContour(node, arms, extraHalf, steps, withFillets) {
   return closeRing(ring);
 }
 
+/**
+ * Circus outline: outer circle plus each paved arm, with a fillet disc
+ * in each kerb armpit. Same radial-max contour as a T/L hub, so the join
+ * is one kerb, not a ribbon slamming a RingGeometry.
+ */
+export function circusContour(node, arms, fillets, outer, steps) {
+  const n = steps || 256;
+  const hub = Math.max(8, outer || 0);
+  const ring = [];
+  for (let i = 0; i < n; i++) {
+    const ang = (i / n) * Math.PI * 2;
+    const ux = Math.cos(ang);
+    const uz = Math.sin(ang);
+    let r = hub;
+    for (const arm of arms || []) {
+      const along = ux * arm.dx + uz * arm.dz;
+      if (along <= 1e-4) continue;
+      const lateral = Math.abs(ux * arm.dz - uz * arm.dx);
+      const side = lateral <= 1e-5 ? Infinity : arm.half / lateral;
+      const front = arm.reach / along;
+      r = Math.max(r, Math.min(side, front));
+    }
+    for (const f of fillets || []) {
+      const hit = rayCircleFar(node.x, node.z, ux, uz, f.cx, f.cz, f.rad);
+      if (hit != null) r = Math.max(r, hit);
+    }
+    ring.push([snap(node.x + ux * r), snap(node.z + uz * r)]);
+  }
+  return closeRing(ring);
+}
+
 function rayCircleFar(ox, oz, ux, uz, cx, cz, rad) {
   const fx = ox - cx;
   const fz = oz - cz;
@@ -422,26 +453,53 @@ export function buildHubFootprint(graph, node, pad) {
 }
 
 /**
- * Circus clip. Drawn mesh is RingGeometry. No arm boxes — those were the
- * square edges in the grass. Duals circle-cut onto the outer face.
+ * One clover: circulatory ring plus flared arms. Ribbons bite on `clip`
+ * (the solid outline). Drawn tarmac is that outline minus the island hole.
+ * Not a RingGeometry with sticker aprons, and not 12 m grass boxes.
  */
 export function buildCircusFootprint(graph, node) {
   if (!graph || !node || !node.radius) {
-    return { tarmac: [], shoulder: [], sidewalk: [], clip: [], inner: 0, outer: 0 };
+    return { tarmac: [], shoulder: [], sidewalk: [], clip: [], inner: 0, outer: 0, reach: 0 };
   }
   const { outer, inner } = circusMeshRadii(node.radius);
   const cx = node.x;
   const cz = node.z;
-  const disc = [[circleRing(cx, cz, outer)]];
-  const grit = [[circleRing(cx, cz, outer + FOOT_SHOULDER_M)]];
-  const holed = diffGeoms(disc, [[circleRing(cx, cz, inner)]]);
+  const arms = [];
+  const fillets = [];
+  let reachMax = outer;
+  for (const e of graph.edges || []) {
+    if (e.a !== node.id && e.b !== node.id) continue;
+    if (!e.points || e.points.length < 2) continue;
+    const spec = roadClassSpec(e.cls);
+    if (spec.dirt) continue;
+    const dir = circusArmDir(node, e);
+    const half = carriagewayWidthM(e.cls) / 2;
+    const g = circusMergeGeom(half, outer);
+    reachMax = Math.max(reachMax, g.reach);
+    arms.push({ dx: dir.x, dz: dir.z, half, reach: g.reach });
+    const rx = dir.z;
+    const rz = -dir.x;
+    for (const sign of [-1, 1]) {
+      fillets.push({
+        cx: cx + dir.x * g.xc + rx * (half + g.filletM) * sign,
+        cz: cz + dir.z * g.xc + rz * (half + g.filletM) * sign,
+        rad: g.filletM,
+      });
+    }
+  }
+  const tarRing = circusContour(node, arms, fillets, outer);
+  const gritRing = swellRing(tarRing, FOOT_SHOULDER_M * 0.95);
+  const blob = [[tarRing]];
+  const holed = diffGeoms(blob, [[circleRing(cx, cz, inner, 64)]]);
   return {
-    tarmac: holed && holed.length ? holed : disc,
-    shoulder: diffGeoms(grit, disc),
+    tarmac: holed && holed.length ? holed : blob,
+    shoulder: gritRing ? diffGeoms([[gritRing]], blob) : [],
     sidewalk: [],
-    clip: disc,
+    clip: blob,
+    outerClip: gritRing ? [[gritRing]] : blob,
     inner,
     outer,
+    reach: reachMax,
   };
 }
 

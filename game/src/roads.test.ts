@@ -330,50 +330,32 @@ describe("paved street from spawn", () => {
         nearestHwy = Math.min(nearestHwy, d);
       }
     }
-    // Ribbons circle-cut onto the ring face (PathPhalt: road gives way).
+    // Ribbons stop on the clover; the circus mesh owns the flare.
     expect(CIRCUS_ARM_STUB_M).toBeLessThan(5);
-    expect(nearestHwy).toBeLessThan(radii.outer + 3);
-    expect(nearestHwy).toBeGreaterThan(radii.outer - 4);
+    expect(nearestHwy).toBeGreaterThan(radii.outer + 3);
+    expect(nearestHwy).toBeLessThan(radii.outer + 28);
     const circus = added.find(
-      (m) => m.userData.roadName === "Harbour Circus" && m.userData.footprint,
+      (m) => m.userData.roadName === "Harbour Circus" && m.userData.footprint && m.userData.roadKind === "paved",
     );
     expect(circus).toBeTruthy();
-    expect(circus!.geometry.parameters?.innerRadius).toBeCloseTo(radii.inner, 0);
-    expect(circus!.geometry.parameters?.outerRadius).toBeCloseTo(radii.outer, 0);
     expect(circus!.material.map).toBeTruthy();
-    expect(CIRCUS_RING_WIDTH_M).toBeGreaterThanOrEqual(carriagewayWidthM("highway"));
-    expect(added.filter((m) => / merge$/.test(String(m.userData.roadName || "")) && m.userData.roadKind === "paved").length).toBeGreaterThan(2);
-    expect(added.filter((m) => / merge paint$/.test(String(m.userData.roadName || "")) && m.userData.roadKind === "paint").length).toBeGreaterThan(8);
-    const hwyMerges = added.filter(
-      (m) => m.userData.roadKind === "paved" && String(m.userData.roadName || "") === "Island Hwy merge",
-    );
-    expect(hwyMerges.length).toBeGreaterThan(0);
-    let flared = false;
-    for (const mesh of hwyMerges) {
-      const pos = mesh.geometry.attributes.position;
-      let sx = 0;
-      let sz = 0;
-      for (let i = 0; i < pos.count; i++) {
-        sx += pos.getX(i);
-        sz += pos.getZ(i);
-      }
-      const n = Math.max(1, pos.count);
-      let dx = sx / n - harbour.x;
-      let dz = sz / n - harbour.z;
-      const len = Math.hypot(dx, dz) || 1;
-      dx /= len;
-      dz /= len;
-      const rx = dz;
-      const rz = -dx;
-      let mergeLat = 0;
-      for (let i = 0; i < pos.count; i++) {
-        const px = pos.getX(i) - harbour.x;
-        const pz = pos.getZ(i) - harbour.z;
-        mergeLat = Math.max(mergeLat, Math.abs(px * rx + pz * rz));
-      }
-      if (mergeLat > carriagewayWidthM("highway") / 2 + 0.5) flared = true;
+    expect(circus!.geometry.parameters?.innerRadius).toBeFalsy();
+    const cpos = circus!.geometry.attributes.position;
+    let cMin = Infinity;
+    let cMax = 0;
+    for (let i = 0; i < cpos.count; i++) {
+      const dx = cpos.getX(i) - harbour.x;
+      const dz = cpos.getZ(i) - harbour.z;
+      const d = Math.hypot(dx, dz);
+      cMin = Math.min(cMin, d);
+      cMax = Math.max(cMax, d);
     }
-    expect(flared, "Hwy merge should flare wider than the deck").toBe(true);
+    expect(cMin).toBeGreaterThan(radii.inner - 1.2);
+    expect(cMax).toBeGreaterThan(radii.outer + 8);
+    expect(CIRCUS_RING_WIDTH_M).toBeGreaterThanOrEqual(carriagewayWidthM("highway"));
+    expect(added.filter((m) => / merge paint$/.test(String(m.userData.roadName || "")) && m.userData.roadKind === "paint").length).toBeGreaterThan(8);
+    expect(added.filter((m) => / merge$/.test(String(m.userData.roadName || "")) && m.userData.roadKind === "paved").length).toBe(0);
+    expect(cMax, "circus clover should own the Hwy flare").toBeGreaterThan(carriagewayWidthM("highway") / 2 + radii.outer - 8);
     const island = added.find(
       (m) => m.userData.roadKind === "island" && /Harbour/.test(String(m.userData.label || "")),
     );
@@ -405,8 +387,8 @@ describe("paved street from spawn", () => {
         nearestQuay = Math.min(nearestQuay, Math.hypot(pos.getX(i) - harbour.x, pos.getZ(i) - harbour.z));
       }
     }
-    expect(nearestQuay, "Quayward Rd missed Harbour Circus").toBeLessThan(radii.outer + 3);
-    expect(nearestQuay).toBeGreaterThan(radii.inner - 0.6);
+    expect(nearestQuay, "Quayward Rd should stop on the clover").toBeGreaterThan(radii.outer + 3);
+    expect(nearestQuay).toBeLessThan(radii.outer + 28);
   });
 
   it("keeps stem paint off the through heart, and lets the through carriageway stay painted", () => {

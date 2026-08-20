@@ -7,7 +7,7 @@
  *
  * Runs are ribbons that overlap hub fills. A T/L is a filled hub (radial
  * contour + tangent kerb fillets) plus a round join disc at the node. A
- * circus is a RingGeometry; duals are circle-cut onto that face.
+ * circus is the same contour with a hole — ring plus flared arms.
  * That is PathPhalt / Curva / SeloSlav RoadJunctionBuilder — not CS2, not OSM.
  *
  * Island-wide Clipper union filled greens. Earcut of a holed circus keyhole
@@ -20,10 +20,10 @@
  *   way. The plate sits under so the meeting is one black shape.
  * - T/L inner kerb is a tangent fillet plus a round node disc, not a sand crotch.
  * - Stem paint stops at the through kerb. Through paint stays on the carriageway.
- * - Circus ribbon ends are bitten to the circle. Each arm gets a fillet
- *   flare (kerbs tangent to the outer ring) so the road merges into the
- *   circus, not a square cap or chord trapezoid in the grass. Ring width
- *   matches the highway deck. Give-way dashes sit on the entry.
+ * - A circus is one clover deck: circulatory ring plus flared arms with
+ *   kerb fillets, hole for the grass island. Ribbons stop on that outline
+ *   so the join is one kerb — same as a T/L hub. Give-way dashes sit on
+ *   the entry. Not a RingGeometry with sticker aprons.
  * - A circus is grit tarmac, concrete inner/outer kerbs, a grass island, and
  *   cream edge paint — not a pale stone puck.
  * - No circus arm boxes. 12 m stubs sat in the grass as extra black rectangles.
