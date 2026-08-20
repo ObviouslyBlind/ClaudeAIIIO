@@ -650,7 +650,7 @@ nav.dock.travel-dock {
 }
 .dest {
   flex: 1;
-  min-height: 36px;
+  min-height: 40px;
   padding: 0 8px;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -828,7 +828,7 @@ nav.dock.travel-dock {
 #order-veil {
   position: absolute;
   inset: 0;
-  z-index: 15;
+  z-index: 19;
   background: rgba(6, 16, 20, 0.45);
   cursor: pointer;
 }
@@ -838,7 +838,7 @@ nav.dock.travel-dock {
   top: 46%;
   transform: translate(-50%, -50%);
   width: min(340px, calc(100vw - 28px));
-  z-index: 18;
+  z-index: 20;
   padding: 16px 16px 14px;
   overflow-x: hidden;
   background: linear-gradient(180deg, #1a2e32 0%, var(--hull) 100%);
@@ -879,6 +879,11 @@ nav.dock.travel-dock {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+.order-pay .go:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  filter: none;
 }
 .order-pay .buy-loc.is-ask,
 #order-ask .buy-loc {
@@ -1636,6 +1641,27 @@ nav.dock.travel-dock {
 }
 .hire-site {
   width: 100%;
+}
+.pickup-cart {
+  display: block;
+  width: 100%;
+  min-height: 40px;
+  margin-top: 14px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 10px;
+  background: linear-gradient(180deg, var(--brass-hi), var(--btn));
+  color: #1a140c;
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  cursor: pointer;
+  box-shadow: var(--inset), 0 6px 14px rgba(0, 0, 0, 0.28);
+}
+.pickup-cart:hover,
+.pickup-cart:focus-visible {
+  filter: brightness(1.06);
 }
 .site-score {
   margin: 0 0 6px;

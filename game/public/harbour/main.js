@@ -2486,7 +2486,7 @@ async function boot() {
       hideCrateCard();
       if (chromeHud && chromeHud.hideBuyAsk) chromeHud.hideBuyAsk();
       ensurePlaceGhost();
-      placeGhost.show("cart");
+      placeGhost.show((chromeHud && chromeHud.getPlaceKit && chromeHud.getPlaceKit()) || "cart");
       refreshPlaceGhost();
     },
     onLook(look) {

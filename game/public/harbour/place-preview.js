@@ -1,9 +1,10 @@
 /**
- * Green place ghost on the dirt, above the lot fill, with a nose so yaw reads.
+ * Green cart ghost: the real stall mesh, unlit green, hovering above the pad.
  * Hold R to rotate. Sim still owns the place. PAPER / SIMULATED.
  */
 
 import * as THREE from "three";
+import { makeStreetCart } from "./cart.js";
 import {
   BUILDING_FOOTPRINT_M,
   CART_FOOTPRINT_M,
@@ -14,10 +15,8 @@ import {
   isPlaceRotateKey,
 } from "./place-pose.js";
 
-/** Parcel fill sits at +0.35 m. The ghost must clear that square. */
-export const PLACE_GHOST_LIFT_M = 0.62;
-const RAIL_T = 0.08;
-const RAIL_H = 0.12;
+/** Parcel fill sits at +0.35 m. Ghost cart floats clear of that square. */
+export const PLACE_GHOST_LIFT_M = 0.88;
 
 function skipRaycast(mesh) {
   mesh.raycast = () => {};
@@ -29,49 +28,103 @@ function paintMats(root, hex) {
   });
 }
 
-function makeFootprint(w, d, hex) {
-  const g = new THREE.Group();
-  const fillMat = new THREE.MeshBasicMaterial({
+function disposeTree(obj) {
+  const seenGeo = new Set();
+  const seenMat = new Set();
+  obj.traverse((child) => {
+    if (child.geometry && !seenGeo.has(child.geometry)) {
+      seenGeo.add(child.geometry);
+      child.geometry.dispose();
+    }
+    const mats = child.material ? [].concat(child.material) : [];
+    for (const m of mats) {
+      if (m && m.dispose && !seenMat.has(m)) {
+        seenMat.add(m);
+        m.dispose();
+      }
+    }
+  });
+}
+
+function ghostMat(hex, opacity) {
+  return new THREE.MeshBasicMaterial({
     color: hex,
     transparent: true,
-    opacity: 0.42,
-    depthTest: true,
+    opacity,
+    depthTest: false,
     depthWrite: false,
     side: THREE.DoubleSide,
+    blending: THREE.AdditiveBlending,
+    toneMapped: false,
   });
-  const railMat = new THREE.MeshBasicMaterial({
+}
+
+function edgeMat(hex) {
+  return new THREE.LineBasicMaterial({
     color: hex,
-    depthTest: true,
+    transparent: true,
+    opacity: 1,
+    depthTest: false,
     depthWrite: false,
+    blending: THREE.AdditiveBlending,
+    toneMapped: false,
   });
+}
+
+function lightUpCart(cart, hex) {
+  cart.name = "place-ghost-cart";
+  cart.position.y = PLACE_GHOST_LIFT_M;
+  cart.scale.setScalar(1.12);
+  cart.frustumCulled = false;
+  cart.traverse((obj) => {
+    if (!obj.isMesh || !obj.geometry) return;
+    skipRaycast(obj);
+    obj.castShadow = false;
+    obj.receiveShadow = false;
+    obj.frustumCulled = false;
+    obj.renderOrder = 20;
+    const canopy = obj.userData && obj.userData.part === "umbrella";
+    obj.material = ghostMat(hex, canopy ? 0.14 : 0.72);
+    const edges = new THREE.LineSegments(new THREE.EdgesGeometry(obj.geometry, 1), edgeMat(hex));
+    edges.name = "place-ghost-edge";
+    edges.renderOrder = 21;
+    edges.frustumCulled = false;
+    skipRaycast(edges);
+    obj.add(edges);
+  });
+  return cart;
+}
+
+function cartKindFrom(next) {
+  if (next === "melon_cart" || next === "watermelon") return "watermelon";
+  if (next === "fish_cart" || next === "fish_chips") return "fish_chips";
+  return "fruit";
+}
+
+function makeFootprint(w, d, hex) {
+  const g = new THREE.Group();
+  g.name = "place-ghost-building";
+  const fillMat = ghostMat(hex, 0.42);
+  const railMat = ghostMat(hex, 0.95);
   const fill = new THREE.Mesh(new THREE.PlaneGeometry(w, d), fillMat);
   fill.rotation.x = -Math.PI / 2;
   fill.position.y = PLACE_GHOST_LIFT_M;
-  fill.renderOrder = 9;
+  fill.renderOrder = 19;
   fill.name = "place-ghost-fill";
   skipRaycast(fill);
   g.add(fill);
-
   function rail(len, x, z, yaw) {
-    const m = new THREE.Mesh(new THREE.BoxGeometry(len, RAIL_H, RAIL_T), railMat.clone());
-    m.position.set(x, PLACE_GHOST_LIFT_M + RAIL_H / 2, z);
+    const m = new THREE.Mesh(new THREE.BoxGeometry(len, 0.12, 0.08), railMat.clone());
+    m.position.set(x, PLACE_GHOST_LIFT_M + 0.06, z);
     m.rotation.y = yaw;
-    m.renderOrder = 10;
+    m.renderOrder = 20;
     skipRaycast(m);
     g.add(m);
   }
-  rail(w + RAIL_T, 0, -d / 2, 0);
-  rail(w + RAIL_T, 0, d / 2, 0);
-  rail(d + RAIL_T, -w / 2, 0, Math.PI / 2);
-  rail(d + RAIL_T, w / 2, 0, Math.PI / 2);
-
-  const nose = new THREE.Mesh(new THREE.ConeGeometry(0.18, 0.46, 4), railMat.clone());
-  nose.rotation.x = Math.PI / 2;
-  nose.position.set(0, PLACE_GHOST_LIFT_M + 0.14, d / 2 + 0.28);
-  nose.renderOrder = 11;
-  nose.name = "place-ghost-nose";
-  skipRaycast(nose);
-  g.add(nose);
+  rail(w + 0.08, 0, -d / 2, 0);
+  rail(w + 0.08, 0, d / 2, 0);
+  rail(d + 0.08, -w / 2, 0, Math.PI / 2);
+  rail(d + 0.08, w / 2, 0, Math.PI / 2);
   return g;
 }
 
@@ -82,6 +135,7 @@ export function createPlacePreview(scene) {
   root.userData.mode = "PAPER";
   root.visible = false;
   root.frustumCulled = false;
+  root.renderOrder = 20;
   scene.add(root);
 
   let on = false;
@@ -99,18 +153,20 @@ export function createPlacePreview(scene) {
   function rebuild() {
     if (body) {
       root.remove(body);
-      body.traverse((obj) => {
-        if (obj.geometry) obj.geometry.dispose();
-        if (obj.material) obj.material.dispose();
-      });
+      disposeTree(body);
     }
-    const s = sizeOf();
-    body = makeFootprint(s.w, s.d, last.ok ? PLACE_GHOST_OK : PLACE_GHOST_BAD);
+    const hex = last.ok ? PLACE_GHOST_OK : PLACE_GHOST_BAD;
+    if (kind === "building") {
+      const s = BUILDING_FOOTPRINT_M;
+      body = makeFootprint(s.w, s.d, hex);
+    } else {
+      body = lightUpCart(makeStreetCart(cartKindFrom(kind)), hex);
+    }
     root.add(body);
   }
 
   function setKind(next) {
-    const k = next === "building" ? "building" : "cart";
+    const k = next === "building" ? "building" : next || "cart";
     if (k === kind && body) return;
     kind = k;
     rebuild();

@@ -195,6 +195,9 @@ describe("harbour chrome HUD", () => {
     expect(html).toContain('id="sell-ask"');
     expect(siteMenu).toContain("data-pickup-stand");
     expect(siteMenu).toContain("Pick up cart");
+    expect(siteMenu).toContain('class="pickup-cart"');
+    expect(css).toContain(".pickup-cart");
+    expect(css).toContain("text-transform: none");
     expect(chrome).toContain('id="land-close"');
     expect(chrome).toContain("onCloseLand");
     expect(chrome).toContain("onCloseStand");
@@ -255,7 +258,10 @@ describe("harbour chrome HUD", () => {
     expect(chrome).toContain("formatHireSheet");
     expect(chrome).toContain("/api/buy");
     expect(chrome).toContain("/api/shift/pack");
-    expect(chrome).toContain('let marketDest = "warehouse"');
+    expect(chrome).toContain('let marketDest = ""');
+    expect(chrome).toContain("pendingBasketPay");
+    expect(chrome).toContain("Where should this go?");
+    expect(chrome).toContain("Pick warehouse or bring to me");
     expect(chrome).toContain("Yellow van from the port.");
     expect(chrome).toContain("if (buyAsk && !buyAsk.hidden)");
     expect(chrome).toContain("ownedId");
@@ -268,7 +274,9 @@ describe("harbour chrome HUD", () => {
     expect(chrome).toContain("plotIsYours");
     expect(chrome).toContain('id="land-lease"');
     expect(chrome).toContain("order-label");
-    expect(chrome).toContain("dest: marketDest === \"road\" ? \"road\" : \"warehouse\"");
+    expect(chrome).toContain("dest: marketDest,");
+    expect(chrome).not.toContain("dest: marketDest === \"road\" ? \"road\" : \"warehouse\"");
+    expect(chrome).toContain('id="order-pay" ${canPay ? "" : "disabled"}');
     expect(chrome).toContain("data-order-dest");
     expect(chrome).toContain("getPose");
     expect(chrome).toContain("hideOrderAsk");
@@ -574,6 +582,9 @@ describe("harbour chrome HUD", () => {
     expect(stock).toContain("sticker-knob");
     expect(stock).toContain("left:50%");
     expect(stock).toContain("Optimal: $6.00");
+    expect(stock.match(/id="sticker-price"/g)?.length).toBe(1);
+    expect(stock.indexOf("Pick up cart")).toBeGreaterThan(stock.indexOf("sticker-today-line"));
+    expect(stock).toContain('class="pickup-cart"');
     expect(stock).not.toContain("sticker-seg");
     expect(stock).not.toContain("flex:23.3333");
     expect(stock).not.toContain("#c6f000 33.33%");

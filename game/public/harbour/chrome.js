@@ -68,7 +68,8 @@ export function mountChrome(opts) {
   let overlay = "world";
   let placing = false;
   let placingKit = "";
-  let marketDest = "warehouse";
+  let marketDest = "";
+  let pendingBasketPay = false;
   let accountWipe = "";
   let marketAisle = "street";
   let marketIsland = "south";
@@ -224,8 +225,9 @@ export function mountChrome(opts) {
   }
 
   function destLabel() {
-    if (marketDest === "road") return propertyName();
-    return "South warehouse";
+    if (marketDest === "road") return "Comes to you on the kerb";
+    if (marketDest === "warehouse") return "South warehouse";
+    return "Pick warehouse or bring to me";
   }
 
   function marketOpts() {
@@ -300,9 +302,10 @@ export function mountChrome(opts) {
   }
 
   function hideOrderAsk() {
-    orderSku = null;
     if (orderAsk) orderAsk.hidden = true;
     if (orderVeil) orderVeil.hidden = true;
+    orderSku = null;
+    pendingBasketPay = false;
   }
 
   function hideCrateAsk() {
@@ -345,42 +348,60 @@ export function mountChrome(opts) {
   }
 
   function paintOrderAsk() {
-    if (!orderAsk || !orderSku || !play) return;
-    const row = catalogSku(orderSku);
-    if (!row) {
+    if (!orderAsk || !play) return;
+    const basketMode = pendingBasketPay;
+    const row = orderSku ? catalogSku(orderSku) : null;
+    if (!basketMode && !row) {
       hideOrderAsk();
       return;
     }
-    const unit = Number(row.paperPrice) || 0;
-    const total = unit * orderQty;
+    const unit = row ? Number(row.paperPrice) || 0 : 0;
+    const total = basketMode ? null : unit * orderQty;
     const loc = destLabel();
     const waitS = Math.round(Number(play.deliveryWaitMs || 60000) / 1000);
+    const canPay = marketDest === "road" || marketDest === "warehouse";
     orderAsk.hidden = false;
     if (orderVeil) orderVeil.hidden = false;
-    orderAsk.innerHTML = `
-      <h2>Buy ${row.label}</h2>
-      <p class="order-unit">${money(unit)} each</p>
+    const title = basketMode ? "Where should this go?" : "Buy " + row.label;
+    const unitLine = basketMode ? "" : `<p class="order-unit">${money(unit)} each</p>`;
+    const qtyBlock = basketMode
+      ? ""
+      : `
       <p class="order-label">How many</p>
       <div class="order-qty">
         <button type="button" class="ghost" data-order-qty="-1" ${orderQty <= 1 ? "disabled" : ""}>−</button>
         <strong>${orderQty}</strong>
         <button type="button" class="ghost" data-order-qty="1" ${orderQty >= 10 ? "disabled" : ""}>+</button>
-      </div>
+      </div>`;
+    const payLabel = basketMode ? "Pay" : "Pay " + money(total);
+    orderAsk.innerHTML = `
+      <h2>${title}</h2>
+      ${unitLine}
+      ${qtyBlock}
       <p class="order-label">Where</p>
       <div class="dest-row">
-        <button type="button" class="dest ${marketDest === "road" ? "is-on" : ""}" data-order-dest="road">${propertyName()}</button>
+        <button type="button" class="dest ${marketDest === "road" ? "is-on" : ""}" data-order-dest="road">Bring to me</button>
         <button type="button" class="dest ${marketDest === "warehouse" ? "is-on" : ""}" data-order-dest="warehouse">Warehouse</button>
       </div>
       <div class="order-pay">
         <p class="buy-loc is-ask">${loc}${marketDest === "road" ? " · " + waitS + "s on the kerb" : ""}</p>
-        <button type="button" class="go" id="order-pay">Pay ${money(total)}</button>
+        <button type="button" class="go" id="order-pay" ${canPay ? "" : "disabled"}>${payLabel}</button>
         <button type="button" class="ghost" id="order-cancel">Cancel</button>
       </div>
     `;
-    orderAsk.querySelector("#order-pay")?.focus();
+    if (canPay) orderAsk.querySelector("#order-pay")?.focus();
   }
 
   async function submitOrder() {
+    if (marketDest !== "road" && marketDest !== "warehouse") {
+      paintOrderAsk();
+      return;
+    }
+    if (pendingBasketPay) {
+      await submitBasket();
+      hideOrderAsk();
+      return;
+    }
     if (!orderSku) return;
     const pose = typeof opts.getPose === "function" ? opts.getPose() : {};
     const selectedId = typeof opts.getPlotId === "function" ? opts.getPlotId() : "";
@@ -394,7 +415,7 @@ export function mountChrome(opts) {
       body: JSON.stringify({
         skus: [orderSku],
         island: "south",
-        dest: marketDest === "road" ? "road" : "warehouse",
+        dest: marketDest,
         qty: orderQty,
         x: pose && pose.x,
         z: pose && pose.z,
@@ -426,6 +447,11 @@ export function mountChrome(opts) {
   }
 
   async function submitBasket() {
+    if (marketDest !== "road" && marketDest !== "warehouse") {
+      pendingBasketPay = true;
+      paintOrderAsk();
+      return;
+    }
     if (!marketBasket.length) return;
     const pose = typeof opts.getPose === "function" ? opts.getPose() : {};
     const selectedId = typeof opts.getPlotId === "function" ? opts.getPlotId() : "";
@@ -446,7 +472,7 @@ export function mountChrome(opts) {
         body: JSON.stringify({
           skus,
           island: "south",
-          dest: marketDest === "road" ? "road" : "warehouse",
+          dest: marketDest,
           qty: 1,
           x: pose && pose.x,
           z: pose && pose.z,
@@ -484,13 +510,17 @@ export function mountChrome(opts) {
     marketBasket = [];
     marketView = "shop";
     const delivery = last && last.delivery;
-    if (delivery && delivery.dest === "road") {
+    if (marketDest === "road") {
       closePanels();
-      if (typeof opts.onOrder === "function") opts.onOrder(delivery);
+      if (delivery && typeof opts.onOrder === "function") opts.onOrder(delivery);
     } else {
       open("warehouse");
     }
-    if (opts.setStatus) opts.setStatus("Paid. In the South warehouse.");
+    if (opts.setStatus) {
+      opts.setStatus(
+        marketDest === "road" ? "Yellow van from the port." : "Paid. In the South warehouse.",
+      );
+    }
   }
 
   function paintFootLegend() {
@@ -526,7 +556,7 @@ export function mountChrome(opts) {
     closePanels();
     setPlaceHint("Tap your pad or YOURS lot. Hold R to rotate.", true);
     if (opts.setStatus) {
-      opts.setStatus("Green outline is the cart. Hold R to rotate, then tap the pad.");
+      opts.setStatus("Green cart is the ghost. Hold R to rotate, then tap the pad.");
     }
     if (opts.onPlaceMode) opts.onPlaceMode(true);
   }
@@ -575,7 +605,7 @@ export function mountChrome(opts) {
         </div>`;
               })
               .join("")
-          : "<p>Nothing stored. Marketplace Add Cart pays into this warehouse.</p>"
+          : "<p>Nothing stored. Buy from the marketplace, then pick Warehouse — or Bring to me for the kerb.</p>"
       }
     `;
   }
@@ -942,11 +972,16 @@ export function mountChrome(opts) {
         }
         orderSku = sku;
         orderQty = Math.max(1, Math.min(10, Number(line && line.qty) || 1));
+        pendingBasketPay = false;
+        marketDest = "";
         paintOrderAsk();
         return;
       }
       if (hit.hasAttribute("data-basket-pay")) {
-        await submitBasket();
+        pendingBasketPay = true;
+        orderSku = null;
+        marketDest = "";
+        paintOrderAsk();
         return;
       }
       if (hit.hasAttribute("data-island")) {
@@ -1000,11 +1035,14 @@ export function mountChrome(opts) {
       }
       if (hit.hasAttribute("data-dest")) {
         marketDest = hit.getAttribute("data-dest") === "road" ? "road" : "warehouse";
+        if (orderAsk && !orderAsk.hidden) paintOrderAsk();
         return;
       }
       if (hit.hasAttribute("data-order")) {
         orderSku = hit.getAttribute("data-order");
         orderQty = 1;
+        pendingBasketPay = false;
+        marketDest = "";
         paintOrderAsk();
         return;
       }
