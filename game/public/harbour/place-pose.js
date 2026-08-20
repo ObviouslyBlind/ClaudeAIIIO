@@ -4,7 +4,11 @@
  * PAPER / SIMULATED.
  */
 
-export const CART_FOOTPRINT_M = { w: 1.52, d: 0.96 };
+/**
+ * Ground stall, not the umbrella. Body 1.35×0.78, counter 1.42×0.86,
+ * ghost scale 1.12 → about 1.59×0.96. Keep this in sync with firstLoop.
+ */
+export const CART_FOOTPRINT_M = { w: 1.58, d: 1.02 };
 /** Catalogue buildings — ghost only until develop stores a pose. */
 export const BUILDING_FOOTPRINT_M = { w: 7.2, d: 6.4 };
 export const PLACE_ROTATE_RAD_PER_S = 1.35;
@@ -12,6 +16,8 @@ export const PLACE_GHOST_OK = 0x3dcc6e;
 export const PLACE_GHOST_BAD = 0xe25b6a;
 /** Street lots still allow the verge. Must match firstLoop PLACE_CORRIDOR_M. */
 export const PLACE_GHOST_CORRIDOR_M = 22;
+/** Pointer this close to a pad centroid binds to that pad, not a nearby lot. */
+export const SNAP_PAD_M = 5.5;
 
 export function isPlaceRotateKey(ev) {
   if (!ev) return false;
@@ -72,4 +78,34 @@ export function ghostFitsPlot(x, z, yaw, w, d, plot) {
   const pz = Number(plot.z);
   if (!Number.isFinite(px) || !Number.isFinite(pz)) return false;
   return Math.hypot(x - px, z - pz) <= PLACE_GHOST_CORRIDOR_M;
+}
+
+/**
+ * Pull a slightly-off pad tap onto the last pose that still fits the dirt.
+ * Far taps stay where they are and fail — do not steal a street lot.
+ */
+export function snapPlacePose(x, z, yaw, w, d, plot) {
+  const px = Number(x);
+  const pz = Number(z);
+  if (!plot) return { x: px, z: pz, ok: false };
+  if (plot.class !== "cart_pad") {
+    return { x: px, z: pz, ok: ghostFitsPlot(px, pz, yaw, w, d, plot) };
+  }
+  if (footprintInRing(px, pz, yaw, w, d, plot.ring)) return { x: px, z: pz, ok: true };
+  const cx = Number(plot.x);
+  const cz = Number(plot.z);
+  if (!Number.isFinite(cx) || !Number.isFinite(cz)) return { x: px, z: pz, ok: false };
+  if (!footprintInRing(cx, cz, yaw, w, d, plot.ring)) return { x: cx, z: cz, ok: false };
+  const dist = Math.hypot(px - cx, pz - cz);
+  if (dist > SNAP_PAD_M) return { x: px, z: pz, ok: false };
+  let lo = 0;
+  let hi = 1;
+  for (let i = 0; i < 14; i++) {
+    const mid = (lo + hi) / 2;
+    const sx = cx + (px - cx) * mid;
+    const sz = cz + (pz - cz) * mid;
+    if (footprintInRing(sx, sz, yaw, w, d, plot.ring)) lo = mid;
+    else hi = mid;
+  }
+  return { x: cx + (px - cx) * lo, z: cz + (pz - cz) * lo, ok: true };
 }

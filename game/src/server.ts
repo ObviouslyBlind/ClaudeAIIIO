@@ -57,10 +57,21 @@ import { ALPHA_PLAY_WIPE, ALPHA_WIPE_NOTE, alphaRestoreRefuse } from "./alpha.ts
 import { footTrafficSnapshot } from "./footTraffic.ts";
 import { completePackShift } from "./shiftBonus.ts";
 import { salesTaxRate } from "./statutes.ts";
+import { listingTape } from "./stocks.ts";
 
 function playPayload() {
+  const islandHud = hud(world, visitor);
   return {
-    ...playSnapshot(visitor, land, salesTaxRate(world.statutes)),
+    ...playSnapshot(visitor, land, salesTaxRate(world.statutes), {
+      moneySupply: islandHud.moneySupply,
+      goodsProducedWindow: islandHud.goodsProducedWindow,
+      priceIndex: islandHud.priceIndex,
+      priceIndexNorth: islandHud.priceIndexNorth,
+      priceIndexSouth: islandHud.priceIndexSouth,
+      landPriceIndex: islandHud.landPriceIndex,
+      ferrySpread: islandHud.ferrySpread,
+      listings: listingTape(world.stocks),
+    }),
     traffic: footTrafficSnapshot(land),
     cart: dumpCart(visitor.cart),
     lastPricesSouth: world.lastPriceSouth,

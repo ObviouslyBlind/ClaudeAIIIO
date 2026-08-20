@@ -3,9 +3,11 @@ import * as THREE from "three";
 import {
   CART_FOOTPRINT_M,
   PLACE_GHOST_OK,
+  SNAP_PAD_M,
   footprintInRing,
   ghostFitsPlot,
   isPlaceRotateKey,
+  snapPlacePose,
 } from "../public/harbour/place-pose.js";
 import { STREET_CART_MESH_COUNT } from "../public/harbour/cart.js";
 import { createPlacePreview } from "../public/harbour/place-preview.js";
@@ -43,6 +45,22 @@ describe("place pose", () => {
         z: 1.3,
       }),
     ).toBe(false);
+    const snapped = snapPlacePose(5.2, 1.3, 0, CART_FOOTPRINT_M.w, CART_FOOTPRINT_M.d, {
+      class: "cart_pad",
+      ring: padRing,
+      x: 3.6,
+      z: 1.3,
+    });
+    expect(snapped.ok).toBe(true);
+    expect(footprintInRing(snapped.x, snapped.z, 0, CART_FOOTPRINT_M.w, CART_FOOTPRINT_M.d, padRing)).toBe(true);
+    const far = snapPlacePose(40, 40, 0, CART_FOOTPRINT_M.w, CART_FOOTPRINT_M.d, {
+      class: "cart_pad",
+      ring: padRing,
+      x: 3.6,
+      z: 1.3,
+    });
+    expect(far.ok).toBe(false);
+    expect(SNAP_PAD_M).toBeGreaterThan(4);
   });
 
   it("lets a street lot stay green on the verge corridor", () => {

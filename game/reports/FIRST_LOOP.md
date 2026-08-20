@@ -36,7 +36,7 @@ Same card for a placed cart, a shop, and a mine.
 ## UI
 - Corners stay: cash top-right, viewers with it, Inv/Wh/Mkt/Staff on the left, travel dock at the bottom
 - Hover (or tap) the cash chip for holdings, where they sit, and what sold last minute.
-- Left **Carts** is a directory: kits to place, stock on you, carts on the kerb. Ops live on **that site**.
+- Left **Books** is the business terminal: kits to place (on you only), carts on the kerb, expand for P&L. Ops live on **that site**.
 - Click a placed cart, or your shop / mine, for the site menu.
 - Market lists name, price, Buy. Where it goes is chosen on the Pay card, not on the catalog.
 - Pay to the kerb: yellow van from the port, then a large green-lit crate. Tap it → **Take all** or **Close**. 60s then warehouse.
@@ -47,7 +47,7 @@ Same card for a placed cart, a shop, and a mine.
 3. If the kerb: van, then crate → Take all. Place from Carts. Tap **that** cart.
 4. Stock · Run (Hire $300 or Play) · Upgrades (Fridge ✓ then Sign → Awning → Lights → Stools) · Stats.
 5. Stats shows each upgrade’s appeal, Area, Sticker band, Sale every Ns, $ / min, Shift.
-6. Sales tax 20% goes to the island bank.
+6. Sales tax 8% goes to the island bank.
 
 ## Next map pass (not this slice)
 North harbour sidewalks / kit pieces.

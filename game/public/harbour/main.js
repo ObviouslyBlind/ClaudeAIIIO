@@ -37,6 +37,7 @@ import { mountCalendarHud } from "./calendar-hud.js";
 import { mountParcelMap, pointerToNdc } from "./parcel-map.js";
 import { mountLotTags } from "./lot-tags.js";
 import { createPlacePreview } from "./place-preview.js";
+import { CART_FOOTPRINT_M, SNAP_PAD_M, snapPlacePose } from "./place-pose.js";
 
 function ensureDockButton(id, label) {
   let btn = document.getElementById(id);
@@ -517,7 +518,11 @@ function refreshPlaceGhost() {
   const g = groundFromRay();
   if (!g) return;
   const plot = plotToPlace(null, g.x, g.z);
-  placeGhost.moveTo(g.x, g.y || 0, g.z, plot);
+  const yaw = placeGhost.yaw ? placeGhost.yaw() : 0;
+  const snap = snapPlacePose(g.x, g.z, yaw, CART_FOOTPRINT_M.w, CART_FOOTPRINT_M.d, plot);
+  const x = snap.ok ? snap.x : g.x;
+  const z = snap.ok ? snap.z : g.z;
+  placeGhost.moveTo(x, g.y || 0, z, plot);
 }
 
 function camRadiusForTags() {
@@ -578,21 +583,25 @@ async function placeCartOn(plot, x, z) {
     if (hint) hint.hidden = false;
     return;
   }
+  const poseX = pose && Number.isFinite(pose.x) ? pose.x : x;
+  const poseZ = pose && Number.isFinite(pose.z) ? pose.z : z;
   const res = await fetch("/api/inventory/place", {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ plotId: (plot && plot.id) || "", x, z, yaw, kitId: kitId || undefined }),
+    body: JSON.stringify({ plotId: (plot && plot.id) || "", x: poseX, z: poseZ, yaw, kitId: kitId || undefined }),
   });
   const data = await res.json();
   if (!res.ok) {
     const reason = data.reason || "fail";
-    if (reason === "already_placed" || reason === "no_cart") {
+    if (reason === "already_placed" || reason === "no_cart" || reason === "in_warehouse") {
       if (chromeHud) chromeHud.clearPlacing();
       if (chromeHud && chromeHud.setOverlay) chromeHud.setOverlay("world");
       setStatus(
         reason === "already_placed"
           ? "Cart is already on that lot. Tap the cart to stock it."
-          : "No cart in inventory.",
+          : reason === "in_warehouse"
+            ? "Warehouse has the kit. Bring to me, then Place."
+            : "No cart on you.",
       );
       const play = chromeHud && chromeHud.getPlay && chromeHud.getPlay();
       const stands = (play && play.stands) || [];
@@ -1007,17 +1016,26 @@ function plotToPlace(hitPlotId, x, z) {
     for (const p of map.plots || []) {
       if (minePlot(p) && p.ring && pointInRing(x, z, p.ring)) return p;
     }
+    let bestPad = null;
+    let bestPadD = SNAP_PAD_M;
     let best = null;
     let bestD = PLACE_CORRIDOR_M;
     for (const p of map.plots || []) {
       if (!minePlot(p) || p.island !== "south") continue;
-      if (p.class === "cart_pad") continue;
       const d = Math.hypot(x - p.x, z - p.z);
+      if (p.class === "cart_pad") {
+        if (d <= bestPadD) {
+          bestPad = p;
+          bestPadD = d;
+        }
+        continue;
+      }
       if (d <= bestD) {
         best = p;
         bestD = d;
       }
     }
+    if (bestPad) return bestPad;
     if (best) return best;
   }
   const sel = selected ? map.plots.find((p) => p.id === selected) : undefined;
@@ -2466,6 +2484,7 @@ async function boot() {
       setStatus("Fired.");
     },
     onPickedUp(standId) {
+      if (chromeHud && chromeHud.clearPlacing) chromeHud.clearPlacing();
       dropStand(standId);
       leaveStallCam();
       pruneStands(chromeHud && chromeHud.getPlay && chromeHud.getPlay());

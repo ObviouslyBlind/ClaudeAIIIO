@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { formatCartsBody } from "../public/harbour/carts-hud.js";
+import { formatBooksRail, formatBooksSheet } from "../public/harbour/books-hud.js";
 import { formatInventoryBody } from "../public/harbour/inventory-hud.js";
 import { formatSiteMenu, stickerTrackSegs, stickerBandGradient, stickerPct, stickerFromPct } from "../public/harbour/site-menu.js";
 import { formatAccountSheet } from "../public/harbour/account-sheet.js";
@@ -12,7 +12,8 @@ const css = readFileSync(new URL("../public/harbour/chrome.css", import.meta.url
 const pageCss = readFileSync(new URL("../public/harbour/style.css", import.meta.url), "utf8");
 const fonts = readFileSync(new URL("../public/harbour/chrome-fonts.css", import.meta.url), "utf8");
 const pack = readFileSync(new URL("../public/harbour/pack.js", import.meta.url), "utf8");
-const carts = readFileSync(new URL("../public/harbour/carts-hud.js", import.meta.url), "utf8");
+const booksHud = readFileSync(new URL("../public/harbour/books-hud.js", import.meta.url), "utf8");
+const carts = booksHud;
 const invHud = readFileSync(new URL("../public/harbour/inventory-hud.js", import.meta.url), "utf8");
 const siteMenu = readFileSync(new URL("../public/harbour/site-menu.js", import.meta.url), "utf8");
 
@@ -69,11 +70,11 @@ describe("harbour chrome HUD", () => {
     expect(html).toContain('data-panel="inventory"');
     expect(html).toContain('aria-label="Inventory"');
     expect(html).toContain('data-tip="Inventory"');
-    expect(html).toContain('data-panel="carts"');
-    expect(html).toContain('aria-label="Carts"');
-    expect(html).toContain('data-tip="Carts"');
-    expect(html).toContain('id="panel-carts"');
-    expect(html).toContain('id="carts-body"');
+    expect(html).toContain('data-panel="books"');
+    expect(html).toContain('aria-label="Books"');
+    expect(html).toContain('data-tip="Books"');
+    expect(html).toContain('id="panel-books"');
+    expect(html).toContain('id="books-body"');
     expect(html).toContain('data-panel="warehouse"');
     expect(html).toContain('data-panel="market"');
     expect(html).toContain('data-panel="employees"');
@@ -135,7 +136,7 @@ describe("harbour chrome HUD", () => {
     expect(css).toContain(".icon-chip");
     expect(css).toContain("[data-tip]");
     expect(css).toContain("pos-inv");
-    expect(css).toContain("pos-carts");
+    expect(css).toContain("pos-books");
     expect(css).toContain(".sku-buy");
     expect(css).toContain(".sheet-center");
     expect(css).toContain(".mp-search");
@@ -257,10 +258,10 @@ describe("harbour chrome HUD", () => {
     expect(chrome).not.toContain("Run it myself");
   });
 
-  it("keeps Carts as a directory; hire, train, stock, sticker, fridge live on that cart", () => {
-    expect(chrome).toContain("formatCartsBody");
+  it("keeps Books as a terminal; hire, train, stock, sticker, fridge live on that cart", () => {
+    expect(chrome).toContain("formatBooksBody");
     expect(chrome).toContain("formatInventoryBody");
-    expect(chrome).toContain("paintCarts");
+    expect(chrome).toContain("paintBooks");
     expect(invHud).toContain("On you");
     expect(invHud).toContain("<h2>Inventory</h2>");
     expect(carts).not.toContain("On you");
@@ -308,7 +309,7 @@ describe("harbour chrome HUD", () => {
     expect(chrome).toContain("data-sheet-hire");
     expect(chrome).not.toContain("first loop");
     expect(chrome).not.toContain("Stock cart");
-    expect(carts).toContain("Each placed cart has its own menu");
+    expect(carts).toContain("Place only from kits on you");
     expect(carts).toContain("data-open-stand");
     expect(carts).not.toContain("data-pack-start");
     expect(carts).not.toContain("data-stock");
@@ -333,8 +334,9 @@ describe("harbour chrome HUD", () => {
     expect(pack).toContain("Tap seeds");
     expect(chrome).toContain("No stock — load it from the warehouse first");
     expect(chrome).toContain("No sales — load stock from the warehouse");
-    expect(chrome).toContain('data-place="${r.kind}"');
+    expect(chrome).toContain("data-withdraw");
     expect(chrome).toContain("Bring to me");
+    expect(chrome).not.toContain('data-place="${r.kind}"');
     expect(css).toContain(".google-ph");
     expect(css).toContain("button.danger");
     expect(css).toContain(".look-swatch");
@@ -350,7 +352,7 @@ describe("harbour chrome HUD", () => {
     expect(css).toContain("pack-heat");
     expect(css).toContain("pack-wrap");
     expect(chrome).toContain("/api/stand/fuel");
-    const body = formatCartsBody({
+    const body = formatBooksRail({
       todayPrice: 6,
       cartNeeds: [{ id: "place", label: "Place the cart on your pad or YOURS lot. Hold R to rotate." }],
       catalog: [{ id: "hotdog_cart", aisle: "street_carts", role: "kit", label: "Fruit cart" }],
@@ -377,7 +379,7 @@ describe("harbour chrome HUD", () => {
     expect(bag).toContain("× 20");
     const emptyBag = formatInventoryBody({ inventory: [] });
     expect(emptyBag).toContain("Nothing on you");
-    const placed = formatCartsBody({
+    const placed = formatBooksRail({
       todayPrice: 6,
       catalog: [{ id: "hotdog_cart", aisle: "street_carts", role: "kit", label: "Fruit cart" }],
       inventory: [],
@@ -388,6 +390,70 @@ describe("harbour chrome HUD", () => {
     expect(placed).toMatch(/Fruit cart/);
     expect(placed).toMatch(/data-open-stand="stand-1"/);
     expect(placed).not.toMatch(/data-hire-person/);
+    const stored = formatBooksRail({
+      todayPrice: 6,
+      cartNeeds: [{ id: "place", label: "Warehouse has the kit. Bring to me, then Place." }],
+      catalog: [{ id: "hotdog_cart", aisle: "street_carts", role: "kit", label: "Fruit cart" }],
+      inventory: [],
+      stands: [],
+      warehouse: { items: [{ kind: "hotdog_cart", qty: 1 }] },
+    });
+    expect(stored).toContain("Bring to me");
+    expect(stored).toContain('data-withdraw="hotdog_cart"');
+    expect(stored).not.toMatch(/data-place="hotdog_cart"/);
+    expect(stored).toContain("Open books");
+    const sheet = formatBooksSheet({
+      cash: 1000,
+      books: {
+        sites: [
+          {
+            standId: "stand-1",
+            label: "Fruit cart",
+            lotName: "Pad 1",
+            plotClass: "cart_pad",
+            hired: true,
+            staffName: "Vendor",
+            sticker: 6,
+            todayPrice: 6,
+            stickerBand: "green",
+            priceTrend: "flat",
+            worthPaper: 104,
+            cogsEst: 0.7,
+            cogsSold: 5.6,
+            unitsSold: 8,
+            taxRate: 0.08,
+            netPerSale: 5.52,
+            perMinute: 18,
+            projHour: 1080,
+            projDay: 25920,
+          },
+        ],
+        listings: [{ id: "ferry_co", name: "Ferry Co", last: 12.02, prev: 12, chg: 0.02 }],
+        priceIndex: 1.02,
+        priceIndexNorth: 1.04,
+        priceIndexSouth: 1.0,
+        landPriceIndex: 1.01,
+        ferrySpread: 0.08,
+        moneySupply: 50000,
+        goodsProducedWindow: 4000,
+      },
+      catalog: [{ id: "hotdog_cart", aisle: "street_carts", role: "kit", label: "Fruit cart" }],
+      inventory: [],
+      warehouse: { items: [] },
+    });
+    expect(sheet).toContain("Books");
+    expect(sheet).toContain("COGS est.");
+    expect(sheet).toContain("Ferry Co");
+    expect(sheet).toContain("Price index");
+    expect(sheet).toContain("Proj. day");
+    expect(sheet).toContain("data-books-expand=\"0\"");
+    expect(chrome).toContain("data-books-expand");
+    expect(chrome).toContain("setBooksExpanded");
+    expect(chrome).toContain("Warehouse has the kit");
+    expect(main).toContain("in_warehouse");
+    expect(main).toContain("snapPlacePose");
+    expect(main).toContain("SNAP_PAD_M");
+    expect(main).not.toContain('if (p.class === "cart_pad") continue;');
     const menu = formatSiteMenu(
       {
         id: "stand-1",

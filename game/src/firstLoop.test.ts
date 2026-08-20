@@ -220,6 +220,15 @@ describe("South first loop", () => {
     expect(snap.stands[0]!.parts.some((p) => p.id === "fridge" && p.points === 1.5)).toBe(true);
     expect(snap.upgradeCatalog.some((u) => u.id === "lights" && u.appeal === 1.2)).toBe(true);
     expect(snap.upgradeCatalog.some((u) => u.id === "stools")).toBe(true);
+    expect(snap.books.mode).toBe("PAPER");
+    expect(snap.books.sites).toHaveLength(1);
+    expect(snap.books.sites[0]!.cogsEst).toBeCloseTo(CART_PRICES.fruit.pack / 20, 8);
+    expect(snap.books.sites[0]!.netPerSale).toBeCloseTo(HOTDOG_SALE_PRICE * (1 - SALES_TAX), 8);
+    expect(snap.books.sites[0]!.cogsSold).toBeCloseTo(CART_PRICES.fruit.pack / 20, 8);
+    expect(snap.books.sites[0]!.unitsSold).toBe(1);
+    expect(snap.books.sites[0]!.worthPaper).toBeGreaterThan(CART_PRICES.fruit.kit);
+    expect(snap.books.sites[0]!.staffName).toBe("Vendor");
+    expect(snap.books.salesTax).toBe(SALES_TAX);
   });
 
   it("lets you place the cart on the verge out toward the main road", () => {
@@ -286,6 +295,22 @@ describe("South first loop", () => {
     expect(placed.reason).toBe("off_pad");
     expect(visitor.play.inventory.find((r) => r.kind === "hotdog_cart")?.qty).toBe(before);
     expect(visitor.play.stands).toHaveLength(0);
+  });
+
+  it("snaps a slightly-off pad tap onto the dirt without taking a street lot", () => {
+    const land = createLandBoard();
+    const pad = land.plots.find((p) => p.class === "cart_pad" && !p.owner)!;
+    const visitor = createVisitor(1_000);
+    expect(leasePlot(land, visitor, pad.id).ok).toBe(true);
+    const order = orderMarket(visitor, land, { plotId: pad.id, skus: ["hotdog_cart"] });
+    expect(order.ok).toBe(true);
+    if (!order.ok) return;
+    takeAll(visitor, order.delivery.id);
+    const placed = placeStand(visitor, land, pad.id, { x: pad.x + 2.1, z: pad.z + 0.35, yaw: 0 });
+    expect(placed.ok).toBe(true);
+    if (!placed.ok) return;
+    expect(placed.stand.plotId).toBe(pad.id);
+    expect(Math.hypot(placed.stand.x - pad.x, placed.stand.z - pad.z)).toBeLessThan(2.2);
   });
 
   it("lets a kerb crate drop by a residential lot, but will not place a cart there", () => {
@@ -717,6 +742,9 @@ describe("South first loop", () => {
     const { land, visitor, plot } = leaseCheapSouth();
     const order = orderMarket(visitor, land, { skus: ["hotdog_cart", "hotdogs"], dest: "warehouse" });
     expect(order.ok).toBe(true);
+    expect(placeStand(visitor, land, plot.id).ok).toBe(false);
+    expect(placeStand(visitor, land, plot.id).reason).toBe("in_warehouse");
+    expect(withdrawWarehouse(visitor, "hotdog_cart").ok).toBe(true);
     const placed = placeStand(visitor, land, plot.id);
     expect(placed.ok).toBe(true);
     if (!placed.ok) return;
@@ -734,6 +762,7 @@ describe("South first loop", () => {
     const { land, visitor, plot } = leaseCheapSouth();
     const order = orderMarket(visitor, land, { skus: ["hotdog_cart"], dest: "warehouse" });
     expect(order.ok).toBe(true);
+    expect(withdrawWarehouse(visitor, "hotdog_cart").ok).toBe(true);
     const placed = placeStand(visitor, land, plot.id);
     expect(placed.ok).toBe(true);
     if (!placed.ok) return;
@@ -745,6 +774,8 @@ describe("South first loop", () => {
   it("resets the island save and keeps look; delete restores the default look", () => {
     const { land, visitor, plot } = leaseCheapSouth();
     expect(orderMarket(visitor, land, { skus: ["hotdog_cart"], dest: "warehouse" }).ok).toBe(true);
+    expect(placeStand(visitor, land, plot.id).ok).toBe(false);
+    expect(withdrawWarehouse(visitor, "hotdog_cart").ok).toBe(true);
     expect(placeStand(visitor, land, plot.id).ok).toBe(true);
     setVisitorLook(visitor, { skin: "deep", hair: "locs", shirt: "night" });
     expect(visitor.look.skin).toBe("deep");
@@ -764,6 +795,9 @@ describe("South first loop", () => {
   it("picks a cart up into the warehouse and sells leftover stock", () => {
     const { land, visitor, plot } = leaseCheapSouth();
     expect(orderMarket(visitor, land, { skus: ["hotdog_cart", "hotdogs"], dest: "warehouse" }).ok).toBe(true);
+    expect(placeStand(visitor, land, plot.id).ok).toBe(false);
+    expect(placeStand(visitor, land, plot.id).reason).toBe("in_warehouse");
+    expect(withdrawWarehouse(visitor, "hotdog_cart").ok).toBe(true);
     const placed = placeStand(visitor, land, plot.id);
     expect(placed.ok).toBe(true);
     if (!placed.ok) return;
@@ -775,6 +809,10 @@ describe("South first loop", () => {
     expect(visitor.play.stands).toHaveLength(0);
     expect(visitor.play.warehouse.items.find((i) => i.kind === "hotdog_cart")?.qty).toBe(1);
     expect(visitor.play.warehouse.items.find((i) => i.kind === "hotdogs")?.qty).toBeGreaterThan(0);
+    expect(placeStand(visitor, land, plot.id).ok).toBe(false);
+    expect(placeStand(visitor, land, plot.id).reason).toBe("in_warehouse");
+    expect(playSnapshot(visitor, land).cartNeeds[0]?.label).toMatch(/Bring to me/);
+    expect(withdrawWarehouse(visitor, "hotdog_cart").ok).toBe(true);
     expect(placeStand(visitor, land, plot.id).ok).toBe(true);
   });
 
@@ -782,6 +820,7 @@ describe("South first loop", () => {
     const { land, visitor, plot } = leaseCheapSouth();
     const paid = plot.price;
     expect(orderMarket(visitor, land, { skus: ["hotdog_cart"], dest: "warehouse" }).ok).toBe(true);
+    expect(withdrawWarehouse(visitor, "hotdog_cart").ok).toBe(true);
     expect(placeStand(visitor, land, plot.id).ok).toBe(true);
     const cash = visitor.cash;
     const sold = sellVisitorPlot(visitor, land, plot.id);

@@ -20,6 +20,8 @@ export type StockListing = {
   id: ListingId;
   name: string;
   lastPrice: number;
+  /** Last auction print. Same as lastPrice until the first clear. */
+  prevPrice: number;
   provenance: "PAPER";
 };
 
@@ -69,7 +71,7 @@ export function createStockBook(): StockBook {
     note: NOTE,
     auctionPeriodTicks: AUCTION_PERIOD_TICKS,
     lastClearTick: 0,
-    listings: OPENING.map((row) => ({ ...row, provenance: "PAPER" as const })),
+    listings: OPENING.map((row) => ({ ...row, prevPrice: row.lastPrice, provenance: "PAPER" as const })),
     pendingBias: {},
   };
 }
@@ -96,10 +98,32 @@ function clearAuction(book: StockBook, tick: number): void {
   const wiggle = auctionWiggle(tick);
   for (const listing of book.listings) {
     const bias = book.pendingBias[listing.id] ?? 0;
+    listing.prevPrice = listing.lastPrice;
     listing.lastPrice = clampPrice(listing.lastPrice + wiggle + bias);
   }
   book.pendingBias = {};
   book.lastClearTick = tick;
+}
+
+export type ListingTape = {
+  id: ListingId;
+  name: string;
+  last: number;
+  prev: number;
+  chg: number;
+  provenance: "PAPER";
+};
+
+/** HUD tape. last vs prev from the call auction. Not a live ticker. */
+export function listingTape(book: StockBook): ListingTape[] {
+  return book.listings.map((row) => ({
+    id: row.id,
+    name: row.name,
+    last: row.lastPrice,
+    prev: row.prevPrice,
+    chg: roundMoney(row.lastPrice - row.prevPrice),
+    provenance: "PAPER" as const,
+  }));
 }
 
 /**

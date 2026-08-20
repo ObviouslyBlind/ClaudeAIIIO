@@ -28,7 +28,8 @@ import {
 import { PACK_COOLDOWN_MS } from "./shiftBonus.ts";
 import { createVisitorCart } from "./visitorCart.ts";
 import { clampLook, defaultLook } from "./look.ts";
-import { CART_FOOTPRINT_M, footprintInRing } from "../public/harbour/place-pose.js";
+import { CART_FOOTPRINT_M, SNAP_PAD_M, snapPlacePose } from "../public/harbour/place-pose.js";
+import type { ListingTape } from "./stocks.ts";
 
 export const FIRST_LOOP_NOTE = "South island. One visitor on this process.";
 
@@ -231,12 +232,16 @@ export function skuLabel(kind: string): string {
   return cart ? cart.kitLabel : kind;
 }
 
+function hasPocketKit(play: PlayState): boolean {
+  return CART_KINDS.some((cart) => play.inventory.some((row) => row.kind === cart.kitId && row.qty > 0));
+}
+
+function hasWarehouseKit(play: PlayState): boolean {
+  return CART_KINDS.some((cart) => play.warehouse.items.some((row) => row.kind === cart.kitId && row.qty > 0));
+}
+
 function hasKit(play: PlayState): boolean {
-  return CART_KINDS.some(
-    (cart) =>
-      play.inventory.some((row) => row.kind === cart.kitId && row.qty > 0) ||
-      play.warehouse.items.some((row) => row.kind === cart.kitId && row.qty > 0),
-  );
+  return hasPocketKit(play) || hasWarehouseKit(play);
 }
 
 /** Metres from your lot toward the paved road where a cart may sit. */
@@ -283,10 +288,13 @@ export function standNeeds(stand: Stand, today = cartTodayPrice(stand.kind)): Ca
   return needs;
 }
 
-/** First-loop cart jobs, in order: buy → place → hire / stock / fridge / sticker. */
+/** First-loop cart jobs, in order: buy → withdraw → place → hire / stock / fridge / sticker. */
 export function cartLoopNeeds(play: PlayState, today = TODAY_PRICE): CartNeed[] {
   if (!play.stands.length && !hasKit(play)) {
     return [{ id: "buy", label: "Buy a street cart in Market." }];
+  }
+  if (!play.stands.length && !hasPocketKit(play) && hasWarehouseKit(play)) {
+    return [{ id: "place", label: "Warehouse has the kit. Bring to me, then Place." }];
   }
   if (!play.stands.length) {
     return [{ id: "place", label: "Place the cart on your pad or YOURS lot. Hold R to rotate." }];
@@ -334,6 +342,8 @@ export type Stand = {
   sellAcc: number;
   boostLeft: number;
   propaneLeft: number;
+  /** Lifetime units sold. COGS sold = this × pack unit. */
+  unitsSold: number;
   mode: "PAPER";
   provenance: "SIMULATED";
 };
@@ -358,6 +368,7 @@ export type WorkSite = {
   boostLeft: number;
   stockId: InvKind | null;
   games: string[];
+  unitsSold: number;
   mode: "PAPER";
   provenance: "SIMULATED";
 };
@@ -420,10 +431,12 @@ export function ensurePlay(visitor: Visitor): PlayState {
     if (!Array.isArray(stand.upgrades)) stand.upgrades = stand.upgraded ? ["fridge"] : [];
     if (!Number.isFinite(stand.boostLeft)) stand.boostLeft = 0;
     if (!Number.isFinite(stand.propaneLeft)) stand.propaneLeft = 0;
+    if (!Number.isFinite(stand.unitsSold)) stand.unitsSold = 0;
   }
   for (const site of play.workSites) {
     if (site.upgraded == null) site.upgraded = false;
     if (!Array.isArray(site.upgrades)) site.upgrades = site.upgraded ? ["fridge"] : [];
+    if (!Number.isFinite(site.unitsSold)) site.unitsSold = 0;
   }
   return play;
 }
@@ -562,6 +575,7 @@ export function syncWorkSites(play: PlayState, land: LandBoard): WorkSite[] {
         boostLeft: 0,
         stockId: cls === "shop" ? "hotdogs" : null,
         games: cls === "shop" ? SHOP_GAMES.slice() : MINE_GAMES.slice(),
+        unitsSold: 0,
         mode: "PAPER",
         provenance: "SIMULATED",
       };
@@ -779,8 +793,12 @@ export function sellShiftBurst(
   for (let i = 0; i < n; i++) earned = roundMoney(earned + sellOnce(play, found.row.stickerPrice));
   if (found.kind === "stand") {
     found.row.hotdogs = roundMoney(found.row.hotdogs - n);
+    found.row.unitsSold = roundMoney((found.row.unitsSold || 0) + n);
     if (isFryCart(found.row)) found.row.propaneLeft = roundMoney((found.row.propaneLeft || 0) - n);
-  } else found.row.stock = roundMoney(found.row.stock - n);
+  } else {
+    found.row.stock = roundMoney(found.row.stock - n);
+    found.row.unitsSold = roundMoney((found.row.unitsSold || 0) + n);
+  }
   visitor.cash = roundMoney(visitor.cash + earned);
   play.salesRing.push(earned);
   if (play.salesRing.length > INCOME_WINDOW) play.salesRing.shift();
@@ -813,7 +831,7 @@ function warehouseQty(play: PlayState, kind: InvKind): number {
 function takeKit(play: PlayState, kitId?: string): CartKind | null {
   const wanted = kitId ? CART_KINDS.filter((row) => row.kitId === kitId) : CART_KINDS;
   for (const cart of wanted) {
-    if (takeInv(play, cart.kitId, 1) || takeWarehouse(play, cart.kitId, 1)) return cart;
+    if (takeInv(play, cart.kitId, 1)) return cart;
   }
   return null;
 }
@@ -1109,11 +1127,20 @@ export function plotForPlace(
       if (isCartPad(at)) return at;
       return at;
     }
+    let bestPad: Parcel | null = null;
+    let bestPadD = SNAP_PAD_M;
     let best: Parcel | null = null;
     let bestD = Infinity;
     for (const p of land.plots) {
       if (p.island !== "south" || p.owner !== "visitor") continue;
-      if (isCartPad(p)) continue;
+      if (isCartPad(p)) {
+        const d = Math.hypot((x as number) - p.x, (z as number) - p.z);
+        if (d <= bestPadD) {
+          bestPadD = d;
+          bestPad = p;
+        }
+        continue;
+      }
       const drop = roadsideDrop(land.roads, "south", p.x, p.z);
       const dPlot = Math.hypot((x as number) - p.x, (z as number) - p.z);
       const dDrop = drop ? Math.hypot((x as number) - drop.x, (z as number) - drop.z) : Infinity;
@@ -1124,6 +1151,7 @@ export function plotForPlace(
         best = p;
       }
     }
+    if (bestPad) return bestPad;
     if (best && bestD <= PLACE_CORRIDOR_M) return best;
   }
   return null;
@@ -1140,10 +1168,11 @@ export function placeStand(
   if (!plot) return fail("not_yours");
   if (play.stands.some((s) => s.plotId === plot.id)) return fail("already_placed");
   const wanted = pose?.kitId ? CART_KINDS.filter((row) => row.kitId === pose.kitId) : CART_KINDS;
-  const peek = wanted.find(
-    (cart) => (play.inventory.find((r) => r.kind === cart.kitId)?.qty ?? 0) >= 1 || warehouseQty(play, cart.kitId) >= 1,
-  );
-  if (!peek) return fail("no_cart");
+  const peek = wanted.find((cart) => (play.inventory.find((r) => r.kind === cart.kitId)?.qty ?? 0) >= 1);
+  if (!peek) {
+    const stored = wanted.some((cart) => warehouseQty(play, cart.kitId) >= 1);
+    return fail(stored ? "in_warehouse" : "no_cart");
+  }
   const kitSku = sku(peek.kitId);
   if (kitSku) {
     const fit = skuFitsPlot(kitSku.zone, plot.zone);
@@ -1155,17 +1184,10 @@ export function placeStand(
   let x = tapX;
   let z = tapZ;
   if (isCartPad(plot)) {
-    const fits = (px: number, pz: number) =>
-      footprintInRing(px, pz, yaw, CART_FOOTPRINT_M.w, CART_FOOTPRINT_M.d, plot.ring);
-    if (fits(tapX, tapZ)) {
-      x = tapX;
-      z = tapZ;
-    } else if (!Number.isFinite(pose?.x) && !Number.isFinite(pose?.z) && fits(plot.x, plot.z)) {
-      x = plot.x;
-      z = plot.z;
-    } else {
-      return fail("off_pad");
-    }
+    const snapped = snapPlacePose(tapX, tapZ, yaw, CART_FOOTPRINT_M.w, CART_FOOTPRINT_M.d, plot);
+    if (!snapped.ok) return fail("off_pad");
+    x = snapped.x;
+    z = snapped.z;
   } else {
     const drop = roadsideDrop(land.roads, "south", plot.x, plot.z);
     const dPlot = Math.hypot(tapX - plot.x, tapZ - plot.z);
@@ -1196,6 +1218,7 @@ export function placeStand(
     sellAcc: 0,
     boostLeft: 0,
     propaneLeft: 0,
+    unitsSold: 0,
     mode: "PAPER",
     provenance: "SIMULATED",
   };
@@ -1396,6 +1419,7 @@ export function tickHotdogSales(visitor: Visitor, land: LandBoard): number {
       if (stand.sellAcc < need) break;
       stand.sellAcc -= need;
       stand.hotdogs = roundMoney(stand.hotdogs - 1);
+      stand.unitsSold = roundMoney((stand.unitsSold || 0) + 1);
       if (isFryCart(stand)) stand.propaneLeft = roundMoney((stand.propaneLeft || 0) - 1);
       if ((stand.boostLeft || 0) > 0) stand.boostLeft -= 1;
       earned = roundMoney(earned + sellOnce(play, stand.stickerPrice));
@@ -1423,6 +1447,7 @@ export function tickHotdogSales(visitor: Visitor, land: LandBoard): number {
       if (site.sellAcc < need) break;
       site.sellAcc -= need;
       site.stock = roundMoney(site.stock - 1);
+      site.unitsSold = roundMoney((site.unitsSold || 0) + 1);
       if ((site.boostLeft || 0) > 0) site.boostLeft -= 1;
       earned = roundMoney(earned + sellOnce(play, site.stickerPrice));
     }
@@ -1470,7 +1495,172 @@ export function tickPlay(
   return tickHotdogSales(visitor, land);
 }
 
-export function playSnapshot(visitor: Visitor, land: LandBoard, taxRate?: number) {
+export type PlayEcon = {
+  moneySupply?: number;
+  goodsProducedWindow?: number;
+  priceIndex?: number;
+  priceIndexNorth?: number;
+  priceIndexSouth?: number;
+  landPriceIndex?: number;
+  ferrySpread?: number;
+  listings?: ListingTape[];
+};
+
+export type SiteBookRow = {
+  standId: string;
+  kind: string;
+  label: string;
+  siteClass: string;
+  lotName: string | null;
+  plotClass: string | null;
+  staffName: string | null;
+  hired: boolean;
+  attending: boolean;
+  sticker: number;
+  todayPrice: number;
+  stickerBand: string;
+  priceTrend: "up" | "flat" | "down";
+  cogsEst: number;
+  cogsSold: number;
+  taxRate: number;
+  netPerSale: number;
+  worthPaper: number;
+  stock: number;
+  unitsSold: number;
+  perMinute: number;
+  projHour: number;
+  projDay: number;
+};
+
+export type BusinessBooks = {
+  mode: "PAPER";
+  provenance: "SIMULATED";
+  note: string;
+  sites: SiteBookRow[];
+  pocketKits: { kind: InvKind; label: string; qty: number }[];
+  warehouseKits: { kind: InvKind; label: string; qty: number }[];
+  listings: ListingTape[];
+  moneySupply: number | null;
+  priceIndex: number | null;
+  priceIndexNorth: number | null;
+  priceIndexSouth: number | null;
+  landPriceIndex: number | null;
+  ferrySpread: number | null;
+  goodsProducedWindow: number | null;
+  salesTax: number;
+  incomePerMinute: number;
+};
+
+export function packUnitCost(kind: CartKindId): number {
+  return roundMoney(CART_PRICES[kind].pack / HOTDOG_PACK_QTY);
+}
+
+export function siteWorthPaper(stand: Stand): number {
+  const cart = cartKindForStand(stand);
+  const kit = CART_PRICES[cart.id].kit;
+  const upgrades = SITE_UPGRADES.filter((u) => (stand.upgrades || []).includes(u.id)).reduce(
+    (sum, u) => sum + u.cost,
+    0,
+  );
+  const stock = (stand.hotdogs || 0) * packUnitCost(cart.id);
+  const gas =
+    isFryCart(stand) && (stand.propaneLeft || 0) > 0
+      ? roundMoney(PROPANE_PRICE * ((stand.propaneLeft || 0) / PROPANE_SALES))
+      : 0;
+  return roundMoney(kit + upgrades + stock + gas);
+}
+
+function kitStacks(rows: InvItem[]): { kind: InvKind; label: string; qty: number }[] {
+  return CART_KINDS.map((cart) => {
+    const qty = rows.find((r) => r.kind === cart.kitId)?.qty ?? 0;
+    return { kind: cart.kitId, label: cart.kitLabel, qty };
+  }).filter((row) => row.qty > 0);
+}
+
+function priceTrendOf(sticker: number, today: number): "up" | "flat" | "down" {
+  if (sticker > today + 0.005) return "up";
+  if (sticker < today - 0.005) return "down";
+  return "flat";
+}
+
+function siteBookFromStand(
+  stand: Stand,
+  land: LandBoard,
+  play: PlayState,
+  extras: {
+    label: string;
+    todayPrice: number;
+    stickerBand: string;
+    perMinute: number;
+    lotName: string | null;
+  },
+): SiteBookRow {
+  const cart = cartKindForStand(stand);
+  const plot = getPlot(land, stand.plotId);
+  const tax = cartTaxRate(play);
+  const cogsEst = packUnitCost(cart.id);
+  const unitsSold = Number(stand.unitsSold) || 0;
+  return {
+    standId: stand.id,
+    kind: cart.id,
+    label: extras.label,
+    siteClass: "cart",
+    lotName: extras.lotName,
+    plotClass: plot?.class ?? null,
+    staffName: stand.hired ? stand.staffName || "Vendor" : null,
+    hired: stand.hired,
+    attending: stand.attending,
+    sticker: stand.stickerPrice,
+    todayPrice: extras.todayPrice,
+    stickerBand: extras.stickerBand,
+    priceTrend: priceTrendOf(stand.stickerPrice, extras.todayPrice),
+    cogsEst,
+    cogsSold: roundMoney(unitsSold * cogsEst),
+    taxRate: tax,
+    netPerSale: roundMoney(stand.stickerPrice * (1 - tax)),
+    worthPaper: siteWorthPaper(stand),
+    stock: stand.hotdogs,
+    unitsSold,
+    perMinute: extras.perMinute,
+    projHour: roundMoney(extras.perMinute * 60),
+    projDay: roundMoney(extras.perMinute * 60 * 24),
+  };
+}
+
+export function buildBusinessBooks(
+  visitor: Visitor,
+  land: LandBoard,
+  standRows: { id: string; label: string; todayPrice: number; stickerBand: string; perMinute: number; lotName: string | null }[],
+  econ?: PlayEcon,
+): BusinessBooks {
+  const play = ensurePlay(visitor);
+  const sites: SiteBookRow[] = [];
+  for (const stand of play.stands) {
+    const extra = standRows.find((r) => r.id === stand.id);
+    if (!extra) continue;
+    sites.push(siteBookFromStand(stand, land, play, extra));
+  }
+  return {
+    mode: "PAPER",
+    provenance: "SIMULATED",
+    note: "PAPER books from the sim. Island listings are the 5-minute call auction. Not live.",
+    sites,
+    pocketKits: kitStacks(play.inventory),
+    warehouseKits: kitStacks(play.warehouse.items),
+    listings: (econ?.listings || []).map((row) => ({ ...row })),
+    moneySupply: econ?.moneySupply ?? null,
+    priceIndex: econ?.priceIndex ?? null,
+    priceIndexNorth: econ?.priceIndexNorth ?? null,
+    priceIndexSouth: econ?.priceIndexSouth ?? null,
+    landPriceIndex: econ?.landPriceIndex ?? null,
+    ferrySpread: econ?.ferrySpread ?? null,
+    goodsProducedWindow: econ?.goodsProducedWindow ?? null,
+    salesTax: play.salesTaxRate,
+    incomePerMinute: incomePerMinute(play),
+  };
+}
+
+export function playSnapshot(visitor: Visitor, land: LandBoard, taxRate?: number, econ?: PlayEcon) {
   const play = ensurePlay(visitor);
   if (Number.isFinite(taxRate)) play.salesTaxRate = Number(taxRate);
   syncWorkSites(play, land);
@@ -1609,5 +1799,18 @@ export function playSnapshot(visitor: Visitor, land: LandBoard, taxRate?: number
         x: p.x,
         z: p.z,
       })),
+    books: buildBusinessBooks(
+      visitor,
+      land,
+      stands.map((s) => ({
+        id: s.id,
+        label: s.label,
+        todayPrice: s.todayPrice,
+        stickerBand: s.stickerBand,
+        perMinute: s.perMinute,
+        lotName: s.lotName,
+      })),
+      econ,
+    ),
   };
 }

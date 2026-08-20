@@ -16,7 +16,7 @@ Hire $300 is already after the first fruit sales. Upgrades that push a cart from
 
 ## Buy path
 
-Marketplace **Add Cart** → pay → **South warehouse**. Kerb van stays an option on the pay sheet. Warehouse lists kits with Place, stock with Bring to me. Place puts the cart on a highway **cart pad** (or a YOURS street lot). A green outline follows the pointer; hold **R** to rotate before you tap. On a pad the whole footprint must sit on the dirt.
+Marketplace **Add Cart** → pay → dest sheet: **Bring to me** (kerb van) or **Warehouse**. Warehouse lists kits and stock with **Sell** / **Bring to me**. Place is only from a kit **on you** (Inventory or Books). Pickup packs the cart into the warehouse; it is not placeable until you withdraw. Place puts the cart on a highway **cart pad** (or a YOURS street lot). A green cart ghost follows the pointer and snaps to the pad dirt; hold **R** to rotate before you tap. On a pad the whole footprint must sit on the dirt.
 
 ## Mini-game sales
 

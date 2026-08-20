@@ -22,6 +22,7 @@ import { clampLook, defaultLook, type PlayerLook } from "./look.ts";
 import { VISITOR_ACCOUNT_NO } from "./economy.ts";
 import { islandAskMul, islandDemandMul, islandSupplyMul } from "./islandEconomy.ts";
 import { landAskIndex } from "./landPrice.ts";
+import { createStockBook, tickAuction, type StockBook } from "./stocks.ts";
 
 export {
   BOOK_ISLANDS,
@@ -68,6 +69,8 @@ export type World = {
   /** Rolling 3600-tick produced qty for the HUD "24h" analog in tests. */
   producedRing: number[];
   statutes: Statute[];
+  /** PLAN §3.8 PAPER call auction. Six island firms. Not a wallet ticker. */
+  stocks: StockBook;
 };
 
 export function createWorld(seed = 1): World {
@@ -101,6 +104,7 @@ export function createWorld(seed = 1): World {
     tradeCount: 0,
     producedRing: [],
     statutes: createStatuteCatalog(),
+    stocks: createStockBook(),
   };
 }
 
@@ -261,6 +265,7 @@ export function tick(world: World, visitor?: Visitor, land?: UpkeepLand): void {
   settleUnfilled(world);
   refreshIndex(world, visitor, land);
   world.tick += 1;
+  tickAuction(world.stocks, world.tick);
   if (visitor) tickStaff(world, visitor);
   if (visitor && land) {
     tickUpkeep(world, visitor, land);

@@ -61,6 +61,7 @@ describe("PAPER stock auction step K", () => {
     tickAuction(book, 300);
     expect(book.lastClearTick).toBe(300);
     expect(listingById(book, "ferry_co")?.lastPrice).not.toBe(open.ferry_co);
+    expect(listingById(book, "ferry_co")?.prevPrice).toBe(open.ferry_co);
 
     const afterFirst = snapshot(book);
     tickAuction(book, 300);

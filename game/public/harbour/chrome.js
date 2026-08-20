@@ -8,7 +8,7 @@ import { buyAskModel } from "./buy-ask.js";
 import { playPaperBuy } from "./paper-sfx.js";
 import { toggleViewer, isLotsViewer, footLevel } from "./overlays.js";
 import { mountPackShift } from "./pack.js";
-import { formatCartsBody } from "./carts-hud.js";
+import { formatBooksBody } from "./books-hud.js";
 import { formatInventoryBody } from "./inventory-hud.js";
 import { formatSiteMenu, gamesForSite, stickerFromPct } from "./site-menu.js";
 import { compactCash, fullCash } from "./cash-chip.js";
@@ -68,6 +68,7 @@ export function mountChrome(opts) {
   let openPanel = null;
   let overlay = "world";
   let placing = false;
+  let booksExpanded = false;
   let placingKit = "";
   let marketDest = "";
   let pendingBasketPay = false;
@@ -125,12 +126,15 @@ export function mountChrome(opts) {
 
   function syncSheetVeil() {
     if (!sheetVeil) return;
-    const sheet = openPanel === "market" || openPanel === "employees";
+    const sheet = openPanel === "market" || openPanel === "employees" || (openPanel === "books" && booksExpanded);
     sheetVeil.hidden = !sheet;
   }
 
   function closePanels() {
     openPanel = null;
+    booksExpanded = false;
+    const booksPanel = document.getElementById("panel-books");
+    if (booksPanel) booksPanel.classList.remove("sheet-center");
     root.querySelectorAll(".float-panel").forEach((p) => {
       p.classList.remove("is-open");
       p.hidden = true;
@@ -178,6 +182,14 @@ export function mountChrome(opts) {
       const search = document.getElementById("market-search");
       if (search) search.focus();
     }
+  }
+
+  function setBooksExpanded(on) {
+    booksExpanded = Boolean(on);
+    const panel = document.getElementById("panel-books");
+    if (panel) panel.classList.toggle("sheet-center", booksExpanded);
+    paintBooks();
+    syncSheetVeil();
   }
 
   function title(text) {
@@ -549,10 +561,10 @@ export function mountChrome(opts) {
     body.innerHTML = formatInventoryBody(play);
   }
 
-  function paintCarts() {
-    const body = document.getElementById("carts-body");
+  function paintBooks() {
+    const body = document.getElementById("books-body");
     if (!body || !play) return;
-    body.innerHTML = formatCartsBody(play);
+    body.innerHTML = formatBooksBody(play, booksExpanded);
   }
 
   function beginPlace(kitId) {
@@ -583,10 +595,6 @@ export function mountChrome(opts) {
     body.innerHTML = formatAccountSheet(play, { wipe: accountWipe });
   }
 
-  function isKitKind(kind) {
-    return ((play && play.catalog) || []).some((s) => s.id === kind && s.role === "kit");
-  }
-
   function paintWarehouse() {
     const body = document.getElementById("warehouse-body");
     if (!body || !play) return;
@@ -601,15 +609,10 @@ export function mountChrome(opts) {
           ? items
               .map((r) => {
                 const label = ((play.catalog || []).find((s) => s.id === r.kind) || {}).label || r.kind;
-                const kit = isKitKind(r.kind);
                 return `
         <div class="inv-row">
           <span>${label} × ${r.qty}</span>
-          ${
-            kit
-              ? `<div class="row-acts"><button type="button" class="ghost sell-wh" data-sell-wh="${r.kind}">Sell</button><button type="button" data-place="${r.kind}">Place</button></div>`
-              : `<div class="row-acts"><button type="button" class="ghost sell-wh" data-sell-wh="${r.kind}">Sell</button><button type="button" data-withdraw="${r.kind}">Bring to me</button></div>`
-          }
+          <div class="row-acts"><button type="button" class="ghost sell-wh" data-sell-wh="${r.kind}">Sell</button><button type="button" data-withdraw="${r.kind}">Bring to me</button></div>
         </div>`;
               })
               .join("")
@@ -689,7 +692,7 @@ export function mountChrome(opts) {
         const line = packLine(ok, data);
         if (play) play.lastShiftLine = line;
         if (openPanel === "inventory") paintInv();
-        if (openPanel === "carts") paintCarts();
+        if (openPanel === "books") paintBooks();
         const fresh = findSite(standId);
         if (fresh) paintStandMenu(fresh);
         if (opts.setStatus) opts.setStatus(line);
@@ -859,6 +862,10 @@ export function mountChrome(opts) {
         if (data && data.play) stampPlay(data.play);
         else paintPanels();
         dismissStandMenu();
+        placing = false;
+        placingKit = "";
+        setPlaceHint("", false);
+        if (opts.onPlaceMode) opts.onPlaceMode(false);
         if (ok && opts.onPickedUp) opts.onPickedUp(id);
         if (opts.setStatus) {
           opts.setStatus(ok ? "Cart in the South warehouse." : "Could not pick up: " + ((data && data.reason) || "fail"));
@@ -891,7 +898,7 @@ export function mountChrome(opts) {
   function paintPanels() {
     paintMarket();
     paintInv();
-    paintCarts();
+    paintBooks();
     paintWarehouse();
     paintStaff();
     paintAccount();
@@ -909,12 +916,18 @@ export function mountChrome(opts) {
     root.addEventListener("click", async (ev) => {
       const hit = ev.target && ev.target.closest
         ? ev.target.closest(
-            "[data-dest], [data-order], [data-buy], [data-place], [data-withdraw], [data-sell-wh], [data-open-stand], [data-order-qty], [data-order-dest], [data-aisle], [data-island], [data-sheet-close], [data-hire-pick], [data-hire-back], [data-sheet-hire], [data-add-cart], [data-market-cart], [data-basket-remove], [data-basket-buy], [data-basket-pay], [data-look], [data-wipe], [data-wipe-go], [data-wipe-cancel], #order-pay, #order-cancel",
+            "[data-dest], [data-order], [data-buy], [data-place], [data-withdraw], [data-sell-wh], [data-open-stand], [data-order-qty], [data-order-dest], [data-aisle], [data-island], [data-sheet-close], [data-books-expand], [data-hire-pick], [data-hire-back], [data-sheet-hire], [data-add-cart], [data-market-cart], [data-basket-remove], [data-basket-buy], [data-basket-pay], [data-look], [data-wipe], [data-wipe-go], [data-wipe-cancel], #order-pay, #order-cancel",
           )
         : null;
       if (!hit || (standMenu && standMenu.contains(hit))) return;
       if (hit.hasAttribute("data-sheet-close")) {
         closePanels();
+        return;
+      }
+      if (hit.hasAttribute("data-books-expand")) {
+        const on = hit.getAttribute("data-books-expand") !== "0";
+        if (openPanel !== "books") open("books");
+        setBooksExpanded(on);
         return;
       }
       if (hit.hasAttribute("data-aisle")) {
@@ -1143,7 +1156,14 @@ export function mountChrome(opts) {
         return;
       }
       if (hit.hasAttribute("data-place")) {
-        beginPlace(hit.getAttribute("data-place"));
+        const kind = hit.getAttribute("data-place");
+        const onYou = ((play && play.inventory) || []).some((r) => r.kind === kind && Number(r.qty) >= 1);
+        if (!onYou) {
+          if (opts.setStatus) opts.setStatus("Warehouse has the kit. Bring to me, then Place.");
+          open("warehouse");
+          return;
+        }
+        beginPlace(kind);
         return;
       }
       if (hit.hasAttribute("data-open-stand")) {

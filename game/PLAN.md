@@ -96,6 +96,8 @@ HUD, always on:
 
 Interest rate is a statute in the starter pack. The PM can table an amendment; the House passes money bills.
 
+Live numbers, starter loop, cart COGS, and how the Books terminal reads this machine: [ECONOMY.md](ECONOMY.md). Do not invent a second inflation HUD.
+
 ### 3.5 Curated laws the engine enforces
 
 **From Eco (laws as physics) + Oath of Office (session clock, global stats) + real planning codes (by-right vs discretionary).**
@@ -142,6 +144,8 @@ Full rank table is in section 7.
 - 6 listings. **5-minute call auction**. No shorting, no leverage in beta.
 - Listings: North Steel, South Grain, Ferry Co, Island Bank, Construction Co, plus one player firm that crossed a size gate.
 - A tariff amendment moves Ferry Co on the next auction, including while it is still on the floor.
+
+The harbour **Books** terminal shows these six last prints plus the visitor’s own cart P&L (sticker vs today, COGS, worth). That cart is not a seventh listing until a firm crosses the size gate. See [ECONOMY.md](ECONOMY.md).
 
 ### 3.9 3D that survives a phone
 
