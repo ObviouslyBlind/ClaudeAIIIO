@@ -1,8 +1,8 @@
 # Units — rooms inside a building
 
-PAPER / SIMULATED. Spec draft for the next harbour slice. **Do not implement until this file is accepted.**
+PAPER / SIMULATED. **Accepted spec.** Alpha **0.5** is the scripts for this loop. Version: [VERSION.md](VERSION.md). Live status: [HANDOVER.md](HANDOVER.md).
 
-You can own a **unit** (a room, or several rooms) without owning the dirt under the whole building. The building already exists. The sim owns cash, stock, leases, staff, and prices. The browser is a camera.
+The sim owns cash, stock, leases, staff, and prices. The browser is a camera. Buildings are grey boxes until we mock them in **Blender**. Do not spend a design pass on façades, dollhouse chrome, or unique meshes.
 
 Live loop today: [PLAY.md](PLAY.md). Catalog and job graph: [MARKETPLACE.md](../MARKETPLACE.md). Land plots: [LAND.md](../LAND.md). Kernel: [FOUNDATION.md](../FOUNDATION.md). Money: [ECONOMY.md](../ECONOMY.md).
 
@@ -14,51 +14,53 @@ Borrow the *systems*. Do not copy clients, Earth, OSM, or another game’s UI.
 
 | Game | What to steal | What to leave |
 |---|---|---|
-| **Eco** | A shop is furniture in a **room**. It sells while you are logged out. Housing score comes from furniture tags in a room, not from walking every tile. | Player-minted currencies, block-built homesteads, skill XP from beds. |
-| **Albion houses** | Furniture **tier** caps what you may place. Laborers work the house while you are away. The house is a site with an admin sheet. | Private islands, laborer journals, city plot taxes. |
-| **EVE offices** | You rent a **slot in a building you do not own**. The station exists either way. Rent is a bill on a clock. Hangars are rooms with access, not a walkable mesh. | 30-day real bills, corp hangar roles, medical clones. |
-| **World of Fate / Capital Rift genre** | You claim a **building that is already in the world**, then run something inside it. Indoors is not broadcast. Save rows include buildings and leases. | Real-Earth footprints, OSM, their client, their protocol. |
-| **Project Highrise / SimTower** | One building, **floors**, mixed use (shop / apartment / office). Tenants pay by appeal. The owner of the tower is not the tenant of every room. | Elevators, HVAC, you-are-the-landlord-of-90-floors. We are a tenant of one unit first. |
-| **Two Point Hospital** | A room has a **type**, a minimum kit, and a staff slot. Prestige is furniture. Jobs are assigned to that room. The sim walks the patients. | Hospital comedy, drawing room polygons, diagnosis trees. |
-| **Recettear** | Display + furniture change **who shows up and how often**. The till can run without you haggling every sale (vendors). | Atmosphere gaudy/plain chart, weekly debt, dungeon crawling. |
-| **Foxhole factories** | You queue work; the building **ticks without you**. Pickup is later. | War crates, squad reservations. |
-| **Our carts** | Appeal 0–10, hire, stock, upgrades, foot traffic, Books, same delivery crate. Offline sales already exist. | Do not invent a second score. |
+| **Eco** | A shop is furniture in a **room**. It sells while you are logged out. | Player-minted currencies, block-built homesteads. |
+| **Albion houses** | Furniture **tier** caps what you may place. Laborers work the house while you are away. | Private islands, laborer journals. |
+| **EVE offices** | You rent a **slot in a building you do not own**. Rent is a bill on a clock. | 30-day real bills, corp hangars. |
+| **World of Fate / Capital Rift genre** | You claim a **building that is already in the world**, then run something inside it. | Real-Earth footprints, OSM, their client, their protocol. |
+| **Project Highrise / SimTower** | One building, **floors**, mixed use. The owner of the tower is not the tenant of every room. | Elevators, HVAC, 90-floor landlord sim. |
+| **Two Point Hospital** | A room has a **type**, a minimum kit, and a staff slot. | Drawing room polygons, diagnosis trees. |
+| **Recettear** | Display + furniture change **who shows up**. The till can run without you. | Weekly debt, dungeon crawling. |
+| **Foxhole factories** | You queue work; the building **ticks without you**. | War crates, squad reservations. |
+| **Our carts** | Appeal 0–10, hire, stock, upgrades, foot traffic, Books, same delivery crate. | Do not invent a second score. |
 
-The pattern that survives: **site → designated use → kit nodes → staff jobs → sim demand**. Pretty mesh is last.
+The pattern that survives: **site → designated use → kit nodes → staff jobs → sim demand**. Pretty mesh is last. Operator will mock a few simple buildings in Blender; the scripts do not wait on that.
 
 ---
 
 ## What already exists here
 
-Do not rebuild these.
+Do not rebuild these. Do not rename leftover `hotdog_*` identifiers this pass.
 
 - **Plots** are dirt. Pads are carts-only. Street lots are dear. `developPlot` already has house / shop / farm uses.
-- **Carts** already sell. `siteScore` is 0–10 from hire + stock + upgrades + traffic. Rivals cap the score.
-- **Marketplace** already has empty **Shopfit** and **Hospitality** aisles. Honest empty until this slice places kit.
-- **Logistics** is already specified as nodes + jobs. A packer is the shop version of a quarry truck.
-- **Interior.js** is a first-person walk-in of a dressed Caribbean house. That is **not** the unit camera. Leave it parked. Do not dress it for this test.
+- **Carts** already sell fruit / melon / fry from `stand.hotdogs`. One cart flag `hired` both auto-stocks and sells.
+- **WorkSite** already exists for a developed shop plot (street lots $2,400 — starter cannot buy).
+- **Marketplace** already has empty Shopfit / Hospitality aisles. Honest empty until kit SKUs exist.
+- **Logistics** is already nodes + jobs. A packer is the shop version of a quarry truck, on the **existing** 1 Hz clock.
+- Three staff systems stay unmerged: cart/site `hireStand`, leftover `staff.ts` payday, `labour.ts` mill slots.
 - **Kernel** still has one `visitor`, in-memory persist, spawn wipe. Units must round-trip in the persist blob even if restore stays refused on the live visitor.
-- **Calendar:** 1 Hz. One sim day = **3600 ticks** = one real hour. Tenant “hours” are **sim hours**, not wall-clock days.
+- **Calendar:** 1 Hz. One sim day = **3600 ticks** = one real hour. Tenant “hours” are **sim hours**.
 
 ---
 
-## The test building (placeholder)
+## The test block
 
-One authored building on South, near spawn, **not** a street lease the player buys as dirt.
+Four authored **buildings** on South, near spawn. Each room is a grey box. You buy rooms one at a time. The dirt under a building is a **separate**, expensive landlord buy.
 
-Three grey boxes stacked:
-
-| Floor | Use (locked) | Unit | Camera |
+| Building | Floors | Rooms (each buyable) | Locked use |
 |---|---|---|---|
-| Ground | **shop** | one room | dollhouse, tilted |
-| First | **apartment** | one room | same |
-| Second | **office** | one room | same |
+| **Quay Shops** | 1 | 2 side-by-side ground rooms | shop, shop |
+| **Strand Flats** | 2 | 2 rooms per floor (4 flats) | apartment |
+| **Harbour Offices** | 2 | 2 rooms per floor (4 offices) | office |
+| **Mixed House** | 3 | 1 room per floor (3 rooms) | shop / apartment / office |
 
-Grey boxes are the product for this pass. Kit is also grey boxes (shelf, fridge, till, bed, shower, sink, desk, cabinet). No CSG, no wallpaper pack, no unique minigames.
+That is **4 buildings, 13 rooms**. $10,000 (slice faucet in tests) should buy **one or two rooms** and kit them, not the block, and **not** the dirt.
 
-The **game** is the building owner. Uses are marked on the floors. The player cannot rezone ground into an apartment this pass.
+Grey boxes are the product for the camera later. Kit is also grey boxes (shelf, fridge, till, bed, shower, sink, desk, cabinet). No CSG, no wallpaper pack, no unique minigames. **Blender meshes are a later version.** Alpha 0.5 is scripts only.
 
-Starter cash for this slice: **$10,000** PAPER (test faucet). Cart pads stay $750. Label the extra cash as a slice faucet, not a second economy.
+Use is marked **per room**, not per building. Two shops in Quay Shops are two businesses: you can buy the left room and leave the right vacant. The player cannot rezone a shop room into a flat this pass.
+
+Live spawn cash stays **$1,000** (cart loop). Unit tests use a **$10,000** PAPER faucet. Do not change `STARTER_CASH`.
 
 ---
 
@@ -66,31 +68,33 @@ Starter cash for this slice: **$10,000** PAPER (test faucet). Cart pads stay $75
 
 | Layer | Question | This pass |
 |---|---|---|
-| **Plot** | Who owns the dirt? | Game / NPC. Player does not buy this plot. |
-| **Building** | Who owns the shell? | Game. Later: a player landlord. |
-| **Unit** | Who owns this room? | The visitor, after **Buy**. |
+| **Plot (dirt)** | Who owns the land under the shell? | **Buyable, very expensive.** Owner is landlord of the shell: ground rent / cut. Does **not** run packer or till. $10k must not afford this (ask **$15,000**). |
+| **Building shell** | Who owns the box? | Game, until someone buys the dirt. Owning every room ≠ owning the building. |
+| **Unit (room)** | Who owns this room? | The visitor, after **Buy**. Cheap. $10k buys one or two rooms + kit. |
 
-A unit is a kernel fact: unique id, parent building id, floor index, designated use, owner, kit list, staff slots, stock, books line.
+A unit is a sim fact: unique id, parent **building** id, **floor** index, **room** index on that floor, designated use, owner, kit list, staff slots, stock, books line.
 
-You may buy **one or several** units. This test has three. Buying all three is allowed if cash holds.
+You may buy **one room, several rooms in one building, or rooms across buildings**. Vacant rooms stay listed.
 
-**Manage** is grey until you own at least one unit in that building.
+**Manage** is grey on a building until you own at least one room in **that** building. Manage on Mixed House does not unlock Strand Flats.
 
-Designated use is set by the building owner (here: the game). The tenant fits out that use. They do not flip a shop into a flat.
+Designated use is set per room. The tenant fits out that use. They do not flip a shop into a flat.
 
 ---
 
-## Camera and menu (one control scheme)
+## Camera and menu (later — not 0.5)
 
 Primary = tap / left click. Secondary = long-press / right click. No WASD. No virtual stick.
 
-1. Tap the stacked boxes in the harbour → small menu on the building.
-2. **View ground floor / first floor / second floor.** Opens a **dollhouse** of that floor: tilted 3D, RMB-hold orbit, 360 around the box. Not first-person walk. Not a second island.
-3. Submenu: **Buy units** · **Manage units** (grey if you own none).
-4. Buy: each vacant unit, use badge, ask price. Tap → pay → you own it. Cash is $.
-5. Manage: only units you own. Use is already shop / apartment / office. Actions depend on use.
+Do **not** build the dollhouse this version. Scripts first. When the camera comes:
 
-Indoor **presence** stays off. The dollhouse is a camera on sim facts, same as Books. Other players do not need your furniture mesh.
+1. Tap **one building** → small menu on that shell.
+2. **View floor** (only floors that exist). Rooms on the floor are separate grey boxes. Not first-person walk.
+3. Submenu: **Buy rooms** · **Manage rooms** (grey if you own none in this building) · **Buy this land**.
+4. Buy: one vacant room → pay → you own **that room**. Neighbours stay listed.
+5. Manage: only rooms you own in this building.
+
+Indoor presence stays off. Reuse existing sheets. Site card = cart tabs; shop Run has **two** hires (packer, till).
 
 ---
 
@@ -98,34 +102,36 @@ Indoor **presence** stays off. The dollhouse is a camera on sim facts, same as B
 
 Every unit is a **site** with **nodes** and **jobs**. Same Books row shape as a cart. Appeal is `siteScore` (extend parts; do not fork a second 0–10).
 
-### Shop (ground)
+### Shop (Quay Shops both rooms; Mixed House ground)
 
-Kit (placeholder boxes): **shelf**, **fridge**, **till**. Later: upgrades of those three, still Shopfit aisle.
+Kit (placeholder): **shelf**, **fridge**, **till**. Two shop rooms are two businesses: two tills, two packers, two Books rows.
 
-Jobs:
+Jobs (existing clock, not a new engine):
 
 | Job | Node A → B | Who |
 |---|---|---|
-| **Packer** | Delivery crate (same market van / kerb box) → shelf | Hire. Unhired = stock sits in the crate / backstock and does not sell. |
+| **Packer** | Arrived crate → shelf (`stock`) | Hire. Unhired = crate sits. |
 | **Till** | Shelf → customer cash | Hire. Unhired = no sales, even if shelves are full. |
 
-Shoppers are the **existing foot-traffic NPCs**. They do not need a new walker. Ground-floor traffic band feeds `siteScore` the way a cart street does.
+Surgical rule: new job rules **only if** `workSite.unitId` is set. Carts keep one `hired` + `autoStockStand`. Plot-based `WorkSite`s keep the old blob. **Do not** call `autoStockWork` on unit shops (it bypasses the crate).
 
-Manage sheet: goods sold, PAPER revenue, tax, wages, stock, appeal, $/min. Same Books facts, not a second inflation HUD.
+`Delivery.dest` adds **`unit`** beside warehouse / road / cart. Order dest = this room; crate on that unit’s kerb. `recallStaleDeliveries` still warehouses after 60s.
 
-### Apartment (first)
+Shoppers are the **existing foot-traffic NPCs**. Ground-floor traffic band feeds `siteScore`.
+
+### Apartment (Strand Flats all four; Mixed House first)
 
 Kit: **bed**, **shower**, **sink**. No till. No packer.
 
-**Scout tenants** is a manage action, not a hire. The sim offers NPC tenants. You sign a **PAPER lease**: **3 / 6 / 24 / 48 sim hours**.
+**Scout tenants** is a manage action, not a hire. Sign a **PAPER lease**: **3 / 6 / 24 / 48 sim hours**.
 
-At 1 Hz, 24 sim hours = one sim day = **3600 ticks** = one real hour. So 3h ≈ 7.5 real minutes, 48h ≈ two real hours. That is long enough to prove the clock and short enough to watch. Do not use wall-clock 48 hours for this test.
+At 1 Hz, 24 sim hours = one sim day = **3600 ticks** = one real hour. So 3h ≈ 7.5 real minutes, 48h ≈ two real hours.
 
-Rent scales with appeal (kit placed). Empty grey room = low rent or no takers. Bed+shower+sink = higher. Vacancy when the lease ends unless you re-sign.
+Rent scales with kit. Empty grey room = no takers. Bed+shower+sink = a tenant. Vacancy when the lease ends unless you re-sign. Rent ticks like warehouse $5/day (a clock, not a cutscene).
 
-### Office (second)
+### Office (Harbour Offices all four; Mixed House second)
 
-Kit: **desk**, **filing cabinet**. Same scout + lease clock as the apartment. Tenants are NPC firms, not residents. Rent scales with appeal. No shoppers, no till. A clerk hire is **not** this pass.
+Kit: **desk**, **filing cabinet**. Same scout + lease clock. Tenants are NPC firms. No shoppers, no till. A clerk hire is **not** this pass.
 
 ---
 
@@ -134,39 +140,51 @@ Kit: **desk**, **filing cabinet**. Same scout + lease clock as the apartment. Te
 | | Shop | Apartment / office |
 |---|---|---|
 | Faucet | NPC buys from stock at sticker, tax carved first | NPC rent on the lease clock |
-| Sinks | Kit, hire, restock, sales tax | Kit, (optional later: building fee) |
-| Fail states | No packer / no till / empty shelf → no sales | No kit / low appeal → no tenant or cheap tenant |
+| Sinks | Kit, hire, restock, sales tax, ground rent if you do not own the dirt | Kit, ground rent |
+| Fail states | No packer / no till / empty shelf → no sales | No kit → no tenant |
 
-Unit asks: cheap enough that $10,000 can buy one floor and kit it, not all three fully staffed on minute one. Exact numbers land in [ECONOMY.md](../ECONOMY.md) when we implement — not here as fake SKUs.
+Asks (law in [ECONOMY.md](../ECONOMY.md)):
 
-Carts stay the street loop. Units do not replace pads.
+| Thing | PAPER |
+|---|---|
+| Shop room | $1,200 |
+| Apartment room | $900 |
+| Office room | $1,100 |
+| Building dirt | $15,000 |
+| Packer or till hire | $300 each |
+| Ground rent | $8 / owned unit / sim day, to the land owner, or the game bank if unowned |
+
+Carts stay the street loop. Units do not replace pads. Leftover names (`tickHotdogSales`, `stand.hotdogs`, `hotdog_cart`) stay; fruit is what players sell.
 
 ---
 
-## Build order (when we build)
+## Proof (headless bar)
 
-Sim first. Camera second. No mesh pass before the tick moves money.
+Buy Quay Shops room 0, leave room 1 vacant. Fruit pack dest = that unit. Hire packer only → shelf fills, cash frozen. Hire till → existing sell loop pays. Fire packer → crate sits. Cart pad + fruit + one vendor still matches today’s tests.
 
-1. **Kernel unit table** — unique ids, parent building, floor, use, owner. Persist blob round-trip. Tests with zero 3D.
-2. **Buy / manage intents** — HTTP. Manage grey until owned. Cash $10,000 faucet for the slice.
-3. **Shop jobs** — packer + till on the existing delivery crate. Sales while the owner is “logged out” (headless ticks).
-4. **Apartment + office leases** — 3/6/24/48 sim hours, appeal from placed kit, scout tenants.
-5. **Dollhouse camera** — three grey boxes, floor picker, RMB orbit, tap unit. Placeholder kit boxes.
-6. **Books row** — each owned unit on the terminal beside carts.
+---
 
-Stop after 5 if the critic can buy a floor, place two grey boxes, hire a packer, and watch cash move.
+## Version cut
 
-**Not this pass:** player-designed buildings, rezoning, landlord-of-the-shell, quarry, farming aisle, interiors you walk, North kit, politics, Postgres (still PLAN C; blob must still store units).
+| Version | What |
+|---|---|
+| **0.5** | This spec + sim scripts (`units.ts`). Tests. Persist blob round-trip. HTTP intents. **No 3D, no Blender, no dollhouse.** |
+| **0.5.1** | This scripts slice, once tests pass. |
+| Later | Dollhouse camera, Blender shells, Books rows, Shopfit SKUs from inventory. |
+
+**Not this pass:** quarry, farming aisle, rezoning, walking interiors, WASD, a Job class, walking NPCs with boxes, renaming hotdog fields, merging `staff.ts` / `labour.ts`, politics, Postgres (blob must still store units), Capital Rift clone.
 
 ---
 
 ## Do not
 
+- Spend a week on façades — Blender mock-ups come from the operator
 - Clone Capital Rift / Eco / Highrise UI
-- Fake Shopfit SKUs you cannot place (three shop boxes, two apartment, two office — that is the catalog)
+- Fake Shopfit SKUs you cannot place
 - A second logistics engine for packers
 - A second appeal meter
 - Left-click hop, WASD, or walking the dollhouse
 - Wall-clock tenant leases
-- Place kit from the warehouse (inventory / Bring to me, same as carts)
+- Place kit from the warehouse (inventory / Bring to me, same as carts — kit cash-buy is the scripts stand-in until Shopfit SKUs exist)
 - Unfreeze House / Senate / councils
+- Change live `STARTER_CASH` to $10,000

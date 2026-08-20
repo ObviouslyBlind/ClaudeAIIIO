@@ -17,6 +17,20 @@ describe("documentation library", () => {
     expect(index).toContain("[../FOUNDATION.md](../FOUNDATION.md)");
     expect(index).toContain("[../BACKEND.md](../BACKEND.md)");
     expect(index).toContain("[UNITS.md](UNITS.md)");
+    expect(index).toContain("[VERSION.md](VERSION.md)");
+  });
+
+  it("versions the shard from alpha 0.5 and always hands over", () => {
+    const version = md("docs/VERSION.md");
+    expect(version).toContain("# 2Isles version");
+    expect(version).toMatch(/Alpha 0\.5/);
+    expect(version).toContain("Beta");
+    expect(version).toContain("1.0");
+    expect(version).toContain("HANDOVER.md");
+    const units = md("docs/UNITS.md");
+    expect(units).toContain("Accepted spec");
+    expect(units).toContain("Blender");
+    expect(units).not.toMatch(/Do not implement until this file is accepted/);
   });
 
   it("handover names the live loop and does not unfreeze politics", () => {
@@ -27,6 +41,9 @@ describe("documentation library", () => {
     expect(handover).toContain("trycloudflare.com");
     expect(handover).toContain("Politics frozen");
     expect(handover).toContain("inventory only");
+    expect(handover).toContain("VERSION.md");
+    expect(handover).toMatch(/Alpha 0\.5/);
+    expect(handover).toContain("Blender");
     expect(handover).not.toMatch(/House \/ Senate .* this slice/i);
   });
 

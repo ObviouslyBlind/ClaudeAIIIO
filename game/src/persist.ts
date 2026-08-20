@@ -15,6 +15,7 @@ import { setStatuteSlider, statuteById } from "./statutes.ts";
 import type { StaffSlot } from "./staff.ts";
 import type { VisitorOrder } from "./orders.ts";
 import { dumpCart, restoreCart, type CartLine } from "./visitorCart.ts";
+import { ensurePlay, type PlayState } from "./firstLoop.ts";
 import {
   KERNEL_VERSION,
   dumpEvents,
@@ -45,6 +46,7 @@ export type ShardBlob = {
     cart: CartLine[];
     staffSlots: StaffSlot[];
     visitorOrders: VisitorOrder[];
+    play?: PlayState | null;
   };
   statutes: {
     sales_tax: { rate: number };
@@ -155,6 +157,7 @@ function readBlob(raw: unknown): ShardBlob | null {
       cart: restoreCart(v.cart),
       staffSlots: restoreStaffSlots(v.staffSlots),
       visitorOrders: restoreVisitorOrders(v.visitorOrders),
+      play: v.play && typeof v.play === "object" ? (v.play as PlayState) : null,
     },
     statutes: { sales_tax: { rate } },
     landAsks: readLandAsks(b.landAsks),
@@ -177,6 +180,7 @@ export function serializeShard(input: ShardInput): ShardBlob {
       cart: dumpCart(input.visitor.cart),
       staffSlots: dumpStaffSlots(input.visitor.staffSlots),
       visitorOrders: dumpVisitorOrders(input.visitor),
+      play: input.visitor.play ?? null,
     },
     statutes: {
       sales_tax: { rate: salesTaxSlider(input.world) },
@@ -220,6 +224,10 @@ export function restoreShard(raw: unknown): RestoreResult {
   visitor.cart = blob.visitor.cart;
   visitor.staffSlots = blob.visitor.staffSlots;
   applyVisitorOrders(world, visitor, blob.visitor.visitorOrders);
+  if (blob.visitor.play) {
+    visitor.play = blob.visitor.play;
+    ensurePlay(visitor);
+  }
 
   return { ok: true, world, land, visitor, events: restoreEvents(blob.events) };
 }

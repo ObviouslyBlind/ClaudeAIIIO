@@ -58,6 +58,15 @@ import { footTrafficSnapshot } from "./footTraffic.ts";
 import { completePackShift } from "./shiftBonus.ts";
 import { salesTaxRate } from "./statutes.ts";
 import { listingTape } from "./stocks.ts";
+import {
+  buyBuildingLand,
+  buyRoom,
+  fireUnitRole,
+  fitUnitKit,
+  hireUnitRole,
+  scoutTenant,
+  signLease,
+} from "./units.ts";
 
 function playPayload() {
   const islandHud = hud(world, visitor);
@@ -253,6 +262,55 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "GET" && url.pathname === "/api/play") {
     json(res, 200, playPayload());
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/unit/buy") {
+    const body = await readJsonBody(req);
+    const result = buyRoom(visitor, String(body?.unitId ?? ""));
+    json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/building/land") {
+    const body = await readJsonBody(req);
+    const result = buyBuildingLand(visitor, String(body?.buildingId ?? ""));
+    json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/unit/hire") {
+    const body = await readJsonBody(req);
+    const result = hireUnitRole(visitor, String(body?.unitId ?? ""), String(body?.role ?? ""));
+    json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/unit/fire") {
+    const body = await readJsonBody(req);
+    const result = fireUnitRole(visitor, String(body?.unitId ?? ""), String(body?.role ?? ""));
+    json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/unit/kit") {
+    const body = await readJsonBody(req);
+    const result = fitUnitKit(visitor, String(body?.unitId ?? ""), String(body?.kitId ?? ""));
+    json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/unit/scout") {
+    const body = await readJsonBody(req);
+    const result = scoutTenant(visitor, String(body?.unitId ?? ""));
+    json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/unit/lease") {
+    const body = await readJsonBody(req);
+    const result = signLease(visitor, String(body?.unitId ?? ""), Number(body?.hours), world.tick);
+    json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
     return;
   }
 

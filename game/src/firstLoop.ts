@@ -30,6 +30,7 @@ import { createVisitorCart } from "./visitorCart.ts";
 import { clampLook, defaultLook } from "./look.ts";
 import { CART_FOOTPRINT_M, SNAP_PAD_M, snapPlacePose } from "../public/harbour/place-pose.js";
 import type { ListingTape } from "./stocks.ts";
+import { seedUnits, tickUnits, unitDeliveryTarget, unitsSnapshot, type BuildingLand, type HarbourUnit } from "./units.ts";
 
 export const FIRST_LOOP_NOTE = "South island. One visitor on this process.";
 
@@ -317,7 +318,8 @@ export type Delivery = {
   status: "en_route" | "arrived" | "stored";
   drop: DropPoint | null;
   arrivedAtMs: number | null;
-  dest: "warehouse" | "road" | "cart";
+  dest: "warehouse" | "road" | "cart" | "unit";
+  unitId?: string;
   mode: "PAPER";
   provenance: "SIMULATED";
 };
@@ -369,6 +371,14 @@ export type WorkSite = {
   stockId: InvKind | null;
   games: string[];
   unitsSold: number;
+  unitId?: string;
+  buildingId?: string;
+  floor?: number;
+  room?: number;
+  packerHired?: boolean;
+  tillHired?: boolean;
+  packerStaffId?: string | null;
+  packerStaffName?: string | null;
   mode: "PAPER";
   provenance: "SIMULATED";
 };
@@ -380,6 +390,8 @@ export type PlayState = {
   salesRing: number[];
   warehouse: Warehouse;
   workSites: WorkSite[];
+  units: HarbourUnit[];
+  buildingLands: BuildingLand[];
   gameBank: number;
   nextId: number;
   salesTaxRate: number;
@@ -387,7 +399,7 @@ export type PlayState = {
 };
 
 export function createPlayState(): PlayState {
-  return {
+  return seedUnits({
     inventory: [],
     deliveries: [],
     stands: [],
@@ -399,11 +411,13 @@ export function createPlayState(): PlayState {
       lastRentDay: -1,
     },
     workSites: [],
+    units: [],
+    buildingLands: [],
     gameBank: 0,
     nextId: 1,
     salesTaxRate: LAUNCH_SALES_TAX,
     salesTaxCollected: 0,
-  };
+  });
 }
 
 export function ensurePlay(visitor: Visitor): PlayState {
@@ -421,6 +435,7 @@ export function ensurePlay(visitor: Visitor): PlayState {
   if (!Number.isFinite(play.salesTaxRate)) play.salesTaxRate = LAUNCH_SALES_TAX;
   if (!Number.isFinite(play.salesTaxCollected)) play.salesTaxCollected = 0;
   if (!play.workSites) play.workSites = [];
+  seedUnits(play);
   for (const stand of play.stands) {
     const mapped = KIND_FIX[String(stand.kind)];
     if (mapped) stand.kind = mapped;
@@ -437,6 +452,8 @@ export function ensurePlay(visitor: Visitor): PlayState {
     if (site.upgraded == null) site.upgraded = false;
     if (!Array.isArray(site.upgrades)) site.upgrades = site.upgraded ? ["fridge"] : [];
     if (!Number.isFinite(site.unitsSold)) site.unitsSold = 0;
+    if (site.packerHired == null) site.packerHired = false;
+    if (site.tillHired == null) site.tillHired = Boolean(site.unitId) ? site.hired : false;
   }
   return play;
 }
@@ -514,7 +531,8 @@ function scoreWork(
   },
 ): SiteScore {
   const plot = getPlot(land, row.plotId);
-  const band = plot ? plotTrafficBand(land, plot) : "red";
+  const unitSite = play.workSites.find((s) => s.id === row.id && s.unitId);
+  const band = plot ? plotTrafficBand(land, plot) : unitSite ? "yellow" : "red";
   const kind = cartKindById(row.kind) ? row.kind : "fruit";
   return scoreSite({
     hired: row.hired,
@@ -588,7 +606,7 @@ export function syncWorkSites(play: PlayState, land: LandBoard): WorkSite[] {
       if (!Number.isFinite(site.boostLeft)) site.boostLeft = 0;
     }
   }
-  play.workSites = play.workSites.filter((s) => live.has(s.plotId));
+  play.workSites = play.workSites.filter((s) => Boolean(s.unitId) || live.has(s.plotId));
   return play.workSites;
 }
 
@@ -680,6 +698,7 @@ function autoStockStand(play: PlayState, stand: Stand, visitor?: Visitor): void 
 }
 
 function autoStockWork(play: PlayState, site: WorkSite, visitor?: Visitor): void {
+  if (site.unitId) return;
   if (!site.hired) return;
   let room = Math.max(0, site.storageCap - site.stock);
   if (room <= 0) return;
@@ -807,7 +826,12 @@ export function sellShiftBurst(
 
 function siteNeeds(site: WorkSite, today = TODAY_PRICE): CartNeed[] {
   const needs: CartNeed[] = [];
-  if (!site.hired) needs.push({ id: "hire", label: "Hire" });
+  if (site.unitId) {
+    if (!site.packerHired) needs.push({ id: "packer", label: "Hire packer" });
+    if (!site.tillHired) needs.push({ id: "till", label: "Hire till" });
+  } else if (!site.hired) {
+    needs.push({ id: "hire", label: "Hire" });
+  }
   if (site.siteClass === "shop" && Number(site.stock) < 1) needs.push({ id: "stock", label: "Stock" });
   if (!site.upgraded) needs.push({ id: "fridge", label: "Fridge" });
   if (Math.abs(Number(site.stickerPrice) - today) > 0.01) {
@@ -883,11 +907,13 @@ export function orderMarket(
   if (island !== "south") return fail("south_only");
 
   const destRaw = body.dest != null ? String(body.dest) : "";
-  const dest: "warehouse" | "road" | "cart" =
+  const dest: "warehouse" | "road" | "cart" | "unit" =
     destRaw === "cart" || destRaw === "pocket" || destRaw === "inventory"
       ? "cart"
       : destRaw === "warehouse" || destRaw === "store"
         ? "warehouse"
+        : destRaw === "unit"
+          ? "unit"
         : destRaw === "road"
           ? "road"
           : body.plotId
@@ -914,6 +940,7 @@ export function orderMarket(
   const dropX = Number(body.x);
   const dropZ = Number(body.z);
   let plot: Parcel | null = null;
+  let unitTarget: ReturnType<typeof unitDeliveryTarget> = null;
   if (dest === "road") {
     const named = body.plotId != null && String(body.plotId) !== "" ? String(body.plotId) : "";
     if (named) {
@@ -922,6 +949,10 @@ export function orderMarket(
     } else {
       plot = nearestVisitorPlot(land, dropX, dropZ);
     }
+  }
+  if (dest === "unit") {
+    unitTarget = unitDeliveryTarget(play, String(body.unitId ?? body.plotId ?? ""));
+    if (!unitTarget) return fail("not_yours");
   }
 
   if (visitor.cash < paid) return fail("no_cash");
@@ -961,8 +992,20 @@ export function orderMarket(
     return ok({ delivery, paid, stored: true as const });
   }
 
-  const atX = Number.isFinite(dropX) ? dropX : plot ? plot.x : ISLANDS.south.port.x;
-  const atZ = Number.isFinite(dropZ) ? dropZ : plot ? plot.z : ISLANDS.south.port.z;
+  const atX = Number.isFinite(dropX)
+    ? dropX
+    : dest === "unit" && unitTarget
+      ? unitTarget.x
+      : plot
+        ? plot.x
+        : ISLANDS.south.port.x;
+  const atZ = Number.isFinite(dropZ)
+    ? dropZ
+    : dest === "unit" && unitTarget
+      ? unitTarget.z
+      : plot
+        ? plot.z
+        : ISLANDS.south.port.z;
   const drop = roadsideDrop(land.roads, "south", atX, atZ);
   if (!drop) {
     visitor.cash = roundMoney(visitor.cash + paid);
@@ -971,12 +1014,13 @@ export function orderMarket(
   const delivery: Delivery = {
     id: `del-${play.nextId++}`,
     island: "south",
-    plotId: plot?.id ?? "road",
+    plotId: dest === "unit" && unitTarget ? unitTarget.plotId : plot?.id ?? "road",
     items,
     status: "en_route",
     drop,
     arrivedAtMs: null,
-    dest: "road",
+    dest: dest === "unit" ? "unit" : "road",
+    unitId: dest === "unit" && unitTarget ? unitTarget.unitId : undefined,
     mode: "PAPER",
     provenance: "SIMULATED",
   };
@@ -1303,6 +1347,7 @@ export function hireStand(
   const play = ensurePlay(visitor);
   const found = findStandOrSite(play, standId);
   if (!found) return fail("no_stand");
+  if (found.kind === "site" && found.row.unitId) return fail("unit_role");
   if (found.row.hired) return fail("already_hired");
   if (visitor.cash < HIRE_COST) return fail("no_cash");
   visitor.cash = roundMoney(visitor.cash - HIRE_COST);
@@ -1324,6 +1369,7 @@ export function fireStand(
   const play = ensurePlay(visitor);
   const found = findStandOrSite(play, standId);
   if (!found) return fail("no_stand");
+  if (found.kind === "site" && found.row.unitId) return fail("unit_role");
   if (!found.row.hired) return fail("not_hired");
   found.row.hired = false;
   found.row.staffId = null;
@@ -1373,7 +1419,7 @@ export function upgradeStand(
   }
   if (found.row.hired) {
     if (found.kind === "stand") autoStockStand(play, found.row, visitor);
-    else autoStockWork(play, found.row, visitor);
+    else if (!found.row.unitId) autoStockWork(play, found.row, visitor);
   }
   if (found.kind === "stand") return ok({ stand: found.row });
   return ok({ site: found.row });
@@ -1427,9 +1473,12 @@ export function tickHotdogSales(visitor: Visitor, land: LandBoard): number {
   }
 
   for (const site of play.workSites) {
-    autoStockWork(play, site, visitor);
-    if (site.stock < 1 || !site.hired) continue;
-    if (!getPlot(land, site.plotId)) continue;
+    if (!site.unitId) autoStockWork(play, site, visitor);
+    if (site.stock < 1) continue;
+    if (site.unitId) {
+      if (!site.tillHired) continue;
+    } else if (!site.hired) continue;
+    if (!site.unitId && !getPlot(land, site.plotId)) continue;
     site.sellAcc += 1;
     while (site.stock >= 1) {
       const need = sellTicksAt(
@@ -1492,6 +1541,7 @@ export function tickPlay(
   play.salesTaxRate = taxRate;
   recallStaleDeliveries(visitor, nowMs);
   tickWarehouseRent(visitor, tick);
+  tickUnits(visitor, tick);
   return tickHotdogSales(visitor, land);
 }
 
@@ -1763,6 +1813,7 @@ export function playSnapshot(visitor: Visitor, land: LandBoard, taxRate?: number
     stands,
     sites: [...stands, ...work],
     workSites: work,
+    units: unitsSnapshot(play),
     leases: land.plots.filter((p) => p.owner === "visitor").map((p) => ({
       id: p.id,
       name: p.name,

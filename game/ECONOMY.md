@@ -93,7 +93,30 @@ Island listings on that sheet are the six PLAN firms. Last print moves on auctio
 
 ---
 
-## 5. What this is allowed to become
+## 5. Units (Alpha 0.5)
+
+Rooms inside authored buildings. Spec: [`docs/UNITS.md`](docs/UNITS.md). Live spawn stays **$1,000**. Unit tests use a **$10,000** faucet. Dirt under a building is a landlord buy, not a starter buy.
+
+| Thing | PAPER |
+|---|---|
+| Shop room | $1,200 |
+| Apartment room | $900 |
+| Office room | $1,100 |
+| Building dirt | $15,000 |
+| Packer hire | $300 |
+| Till hire | $300 |
+| Ground rent | $8 / owned unit / sim day |
+| Shop kit | shelf $70, till $90, fridge $180 |
+| Apartment kit | bed $80, shower $90, sink $60 |
+| Office kit | desk $100, filing cabinet $80 |
+
+Lease lengths: **3 / 6 / 24 / 48 sim hours**. Empty rooms have no tenants. Kit on the room is what makes rent.
+
+Cart leftover names (`hotdog_*`) stay. Fruit is what the till sells.
+
+---
+
+## 6. What this is allowed to become
 
 Keep one economy. Tie new verbs to the same books.
 
@@ -107,7 +130,7 @@ Do not: a wallet ticker, Colyseus rooms for prices, a second “stock market” 
 
 ---
 
-## 6. Verify
+## 7. Verify
 
 ```bash
 cd game

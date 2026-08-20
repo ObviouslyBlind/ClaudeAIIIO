@@ -6,10 +6,11 @@ PAPER / SIMULATED. No wallet. One shard. The sim owns cash, plots, staff, and pr
 |---|---|
 | Public name | **2Isles** (this repo still says Two Harbors in older specs; same game) |
 | Status | **Mid-alpha** — harbour loop is the base; features go on top |
+| Version | **Alpha 0.5** — see [VERSION.md](VERSION.md) |
 | Politics | Frozen until the harbour loop is honest |
 | Money | PAPER / SIMULATED |
 
-Live status: [HANDOVER.md](HANDOVER.md). Player loop: [PLAY.md](PLAY.md).
+Live status: [HANDOVER.md](HANDOVER.md). Player loop: [PLAY.md](PLAY.md). Version: [VERSION.md](VERSION.md).
 
 ---
 
@@ -18,6 +19,7 @@ Live status: [HANDOVER.md](HANDOVER.md). Player loop: [PLAY.md](PLAY.md).
 | You want | Read |
 |---|---|
 | Play the live shard | [HANDOVER.md](HANDOVER.md) |
+| Which version we are on | [VERSION.md](VERSION.md) |
 | How the loop works | [PLAY.md](PLAY.md) |
 | Money, COGS, inflation, listings | [../ECONOMY.md](../ECONOMY.md) |
 | Long-range spec | [../PLAN.md](../PLAN.md) |
@@ -38,7 +40,8 @@ These files are law. New work extends them; it does not start a second design.
 | [ECONOMY.md](../ECONOMY.md) | Faucets, sinks, land inflation, cart books, six PAPER listings. |
 | [MARKETPLACE.md](../MARKETPLACE.md) | Catalog aisles and the one logistics engine. |
 | [LAND.md](../LAND.md) | Parcels, pads, lease inflation. |
-| [UNITS.md](UNITS.md) | Rooms inside a building. Shop / apartment / office. Spec draft, not built. |
+| [UNITS.md](UNITS.md) | Rooms inside a building. Shop / apartment / office. Alpha 0.5 scripts. |
+| [VERSION.md](VERSION.md) | Alpha 0.5 → 0.5.1 after each successful slice. Beta is 1.0. |
 
 ---
 

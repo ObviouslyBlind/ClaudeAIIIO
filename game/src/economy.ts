@@ -73,3 +73,22 @@ export const STORAGE_UPGRADE_COST = CART_UPGRADES[0]!.cost;
 
 export const OWNER_ACCOUNT_NO = 1;
 export const VISITOR_ACCOUNT_NO = 2;
+
+/** Unit tests / slice faucet. Live spawn stays STARTER_CASH. */
+export const UNIT_SLICE_FAUCET = 10_000;
+export const UNIT_ROOM_PRICE = { shop: 1_200, apartment: 900, office: 1_100 } as const;
+export const BUILDING_LAND_PRICE = 15_000;
+export const GROUND_RENT_PER_UNIT_DAY = 8;
+export const PACKER_MOVE_PER_TICK = 2;
+export const LEASE_HOURS = [3, 6, 24, 48] as const;
+export const TICKS_PER_SIM_HOUR = 150;
+export const UNIT_KIT = [
+  { id: "shelf", label: "Shelf", use: "shop", cost: 70 },
+  { id: "till", label: "Till", use: "shop", cost: 90 },
+  { id: "fridge", label: "Fridge", use: "shop", cost: 180 },
+  { id: "bed", label: "Bed", use: "apartment", cost: 80 },
+  { id: "shower", label: "Shower", use: "apartment", cost: 90 },
+  { id: "sink", label: "Sink", use: "apartment", cost: 60 },
+  { id: "desk", label: "Desk", use: "office", cost: 100 },
+  { id: "cabinet", label: "Filing cabinet", use: "office", cost: 80 },
+] as const;
