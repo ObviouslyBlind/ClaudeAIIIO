@@ -375,8 +375,19 @@ describe("paved street from spawn", () => {
         nearestQuay = Math.min(nearestQuay, Math.hypot(pos.getX(i) - harbour.x, pos.getZ(i) - harbour.z));
       }
     }
-    expect(nearestQuay, "Quayward Rd missed Harbour Circus").toBeLessThan(radii.outer + 18);
+    expect(nearestQuay, "Quayward Rd missed Harbour Circus").toBeLessThan(radii.enter + 3);
     expect(nearestQuay).toBeGreaterThan(radii.inner - 0.6);
+    const quayGrit = added.filter(
+      (m) => m.userData.roadKind === "shoulder" && m.userData.roadName === "Quayward Rd",
+    );
+    let nearestQuayGrit = Infinity;
+    for (const mesh of quayGrit) {
+      const pos = mesh.geometry.attributes.position;
+      for (let i = 0; i < pos.count; i++) {
+        nearestQuayGrit = Math.min(nearestQuayGrit, Math.hypot(pos.getX(i) - harbour.x, pos.getZ(i) - harbour.z));
+      }
+    }
+    expect(nearestQuayGrit, "grit V onto the ring").toBeGreaterThan(radii.outer - 0.5);
   });
 
   it("keeps stem paint off the through heart, and lets the through carriageway stay painted", () => {

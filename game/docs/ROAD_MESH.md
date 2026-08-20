@@ -24,8 +24,9 @@
  * - T/L inner kerb is a tangent fillet plus a round node disc, not a sand crotch.
  * - Stem paint stops at the through kerb. Through paint stays on the carriageway.
  * - Circus ribbon ends run onto the black ring. The drawn join is the doughnut
- *   plus that overlap. Circular paint and a grass lawn sit in the hole. Do not
- *   Clipper-union, clover-clip, or fillet-sticker the circus.
+ *   plus that overlap. Grit and walks stop on the outer rim so they cannot
+ *   draw a grey V into the circle. Circular paint and a grass lawn sit in the
+ *   hole. Do not Clipper-union, clover-clip, or fillet-sticker the circus.
  * - A circus is grit tarmac, concrete inner/outer kerbs, a grass island, and
  *   cream edge paint — not a pale stone puck.
  * - No circus arm boxes. 12 m stubs sat in the grass as extra black rectangles.

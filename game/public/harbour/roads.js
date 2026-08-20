@@ -5,6 +5,7 @@ import { addQuadXZ, junctionKerbQuads } from "./roadjoin.js";
 import { buildHubFootprint, buildCircusFootprint, clipPolylineToOutside, multiContains, FOOT_SHOULDER_M, biteRibbonWith } from "./roadfoot.js";
 import {
   circusesFromGraph,
+  clipPolylineOutsideCircuses,
   enterCircusRings,
 } from "./roadclip.js";
 
@@ -452,10 +453,11 @@ function drawPaved(scene, spec, road, heightAt, graph, hubs, circuses) {
   if (pts.length < 2) return;
   const cls = classOf(road);
   const width = roadClassSpec(cls).carriageM;
-  const runs = clipRuns(pts, null, circuses, 1.6, road.edgeId);
+  const tarRuns = clipRuns(pts, null, circuses, 1.6, road.edgeId);
+  const gritRuns = clipRunsAtCircusRim(pts, null, circuses, 1.6, road.edgeId);
   const paintRuns = clipRuns(pts, hubs, paintCircuses(circuses), 0, road.edgeId);
-  drawClippedRuns(scene, spec, road, heightAt, runs, width + SHOULDER_PAD_M, SHOULDER, "shoulder", {}, -0.03, Infinity, null, circuses);
-  drawClippedRuns(scene, spec, road, heightAt, runs, width, ASPHALT, "paved", {}, 0, Infinity, null, circuses);
+  drawClippedRuns(scene, spec, road, heightAt, gritRuns, width + SHOULDER_PAD_M, SHOULDER, "shoulder", {}, -0.03, Infinity, null, circuses);
+  drawClippedRuns(scene, spec, road, heightAt, tarRuns, width, ASPHALT, "paved", {}, 0, Infinity, null, circuses);
   drawRoundJoins(scene, spec, road, heightAt, width, circuses);
   drawLanePaint(scene, spec, road, heightAt, paintRuns, width, false, 1);
 }
@@ -541,6 +543,18 @@ function clipRuns(pts, hubs, circuses, overlapM = 1.6, edgeId, alwaysClip) {
   for (const run of afterHubs) {
     if (!run || run.length < 2) continue;
     out.push(...enterCircusRings(run, circuses));
+  }
+  return out.filter((r) => r && r.length >= 2);
+}
+
+/** Grit and walks stop on the outer rim. Only black tarmac runs onto the ring. */
+function clipRunsAtCircusRim(pts, hubs, circuses, overlapM = 1.6, edgeId, alwaysClip) {
+  const afterHubs = clipToJoins(pts, hubs, overlapM, edgeId, alwaysClip);
+  if (!circuses || !circuses.length) return afterHubs;
+  const out = [];
+  for (const run of afterHubs) {
+    if (!run || run.length < 2) continue;
+    out.push(...clipPolylineOutsideCircuses(run, circuses));
   }
   return out.filter((r) => r && r.length >= 2);
 }
@@ -772,7 +786,7 @@ function drawSidewalks(scene, spec, road, heightAt, graph, hubs, circuses) {
   for (const side of [-1, 1]) {
     const offsetPts = offsetPolyline(pts, offset * side);
     const pieces = hasJoins
-      ? clipRuns(offsetPts, hubs, circuses, 0, road.edgeId, true)
+      ? clipRunsAtCircusRim(offsetPts, hubs, circuses, 0, road.edgeId, true)
       : splitRuns(omitInsidePads(offsetPts, graph, walk + 0.8), 10);
     drawClippedRuns(scene, spec, road, heightAt, pieces, walk, SIDEWALK, "sidewalk", {}, 0, Infinity, hubs, circuses);
   }
@@ -791,13 +805,14 @@ function drawHighway(scene, spec, road, heightAt, graph, hubs, circuses) {
   const deck = carriagewayWidthM(cls);
   const lane = s.medianM / 2 + s.carriageM / 2;
   const name = road.name || "Island Hwy";
-  const runs = clipRuns(pts, null, circuses, 1.6, road.edgeId);
+  const tarRuns = clipRuns(pts, null, circuses, 1.6, road.edgeId);
+  const gritRuns = clipRunsAtCircusRim(pts, null, circuses, 1.6, road.edgeId);
   drawClippedRuns(
     scene,
     spec,
     { ...road, name: name + " shoulder" },
     heightAt,
-    runs,
+    gritRuns,
     deck + SHOULDER_PAD_M,
     SHOULDER,
     "shoulder",
@@ -807,14 +822,14 @@ function drawHighway(scene, spec, road, heightAt, graph, hubs, circuses) {
     null,
     circuses,
   );
-  drawClippedRuns(scene, spec, road, heightAt, runs, deck, ASPHALT, "paved", {}, 0, Infinity, null, circuses);
+  drawClippedRuns(scene, spec, road, heightAt, tarRuns, deck, ASPHALT, "paved", {}, 0, Infinity, null, circuses);
   drawRoundJoins(scene, spec, road, heightAt, deck, circuses);
   drawClippedRuns(
     scene,
     spec,
     { ...road, name: name + " median" },
     heightAt,
-    runs,
+    tarRuns,
     MEDIAN_STRIPE_M,
     MEDIAN,
     "median",
@@ -968,7 +983,7 @@ function drawCircusJoins(scene, map, specOf, heightAt, joins) {
       1,
     );
     const doughnut = addCircusRing(
-      scene, x, y + TARMAC_TOP_M, z,
+      scene, x, y + RIBBON_LIFT_M, z,
       inner, outer,
       ASPHALT, "paved",
       { ...base, roadName: name },
