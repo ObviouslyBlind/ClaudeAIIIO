@@ -1311,7 +1311,7 @@ export function mountChrome(opts) {
   bindCashDock();
   bindChromeActions();
 
-  setOverlay("lots");
+  setOverlay("world");
 
   return {
     stop() {

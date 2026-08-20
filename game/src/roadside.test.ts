@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createLandBoard } from "./land.ts";
-import { roadsideDrop, SHOULDER_M } from "./roadside.ts";
+import { dropOffsetM, roadsideDrop, SHOULDER_LIP_M } from "./roadside.ts";
+import { carriagewayWidthM } from "./roadGraph.ts";
 import { KIND, VIEWERS } from "./labels.ts";
 
 describe("roadside drop (PAPER)", () => {
@@ -15,9 +16,20 @@ describe("roadside drop (PAPER)", () => {
     const offPlot = Math.hypot(drop!.x - plot!.x, drop!.z - plot!.z);
     expect(offPlot).toBeGreaterThan(2);
     const offCurb = Math.hypot(drop!.x - drop!.curbX, drop!.z - drop!.curbZ);
-    expect(offCurb).toBeCloseTo(SHOULDER_M, 5);
+    const road = land.roads.find((r) => r.island === "south" && r.name === drop!.roadName);
+    expect(offCurb).toBeCloseTo(dropOffsetM(road), 5);
     const away = Math.hypot(drop!.awayX - drop!.curbX, drop!.awayZ - drop!.curbZ);
     expect(away).toBeGreaterThan(20);
+  });
+
+  it("puts a highway crate past the dual tarmac, not in a live lane", () => {
+    const land = createLandBoard();
+    const pad = land.plots.find((p) => p.class === "cart_pad");
+    expect(pad).toBeTruthy();
+    const drop = roadsideDrop(land.roads, "south", pad!.x, pad!.z);
+    expect(drop).toBeTruthy();
+    const off = Math.hypot(drop!.x - drop!.curbX, drop!.z - drop!.curbZ);
+    expect(off).toBeGreaterThan(carriagewayWidthM("highway") / 2 + SHOULDER_LIP_M - 0.05);
   });
 });
 

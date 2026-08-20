@@ -3,10 +3,18 @@
  * PAPER / SIMULATED. Shared by the first-loop order and the harbour van.
  */
 
+import { carriagewayWidthM } from "./roadGraph.ts";
 import type { IslandId, Road } from "./land.ts";
 
-/** Metres from road centreline onto the grass lip (paved half-width ~3.6). */
+/** Extra metres past the tarmac edge onto grass. */
+export const SHOULDER_LIP_M = 1.8;
+/** Legacy street lip from centreline. Prefer dropOffsetM(road). */
 export const SHOULDER_M = 5.6;
+
+export function dropOffsetM(road?: { cls?: string; lanes?: number } | null): number {
+  const cls = road?.cls || (road?.lanes === 4 ? "highway" : "street");
+  return carriagewayWidthM(cls as "highway" | "avenue" | "street" | "lane" | "track") / 2 + SHOULDER_LIP_M;
+}
 /** Metres the van keeps driving after the drop. */
 export const DRIVE_AWAY_M = 110;
 
@@ -95,8 +103,9 @@ export function roadsideDrop(
   const tlen = Math.hypot(tx, tz) || 1;
   let rx = tz / tlen;
   let rz = -tx / tlen;
-  const toward = (best.hit.x + rx * SHOULDER_M - x) ** 2 + (best.hit.z + rz * SHOULDER_M - z) ** 2;
-  const away = (best.hit.x - rx * SHOULDER_M - x) ** 2 + (best.hit.z - rz * SHOULDER_M - z) ** 2;
+  const off = dropOffsetM(best.road);
+  const toward = (best.hit.x + rx * off - x) ** 2 + (best.hit.z + rz * off - z) ** 2;
+  const away = (best.hit.x - rx * off - x) ** 2 + (best.hit.z - rz * off - z) ** 2;
   if (away < toward) {
     rx = -rx;
     rz = -rz;
@@ -105,8 +114,8 @@ export function roadsideDrop(
   return {
     curbX: best.hit.x,
     curbZ: best.hit.z,
-    x: best.hit.x + rx * SHOULDER_M,
-    z: best.hit.z + rz * SHOULDER_M,
+    x: best.hit.x + rx * off,
+    z: best.hit.z + rz * off,
     awayX: ahead.x,
     awayZ: ahead.z,
     roadName: best.road.name || "Harbour Rd",

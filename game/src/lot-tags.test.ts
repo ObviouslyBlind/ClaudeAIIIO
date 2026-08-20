@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
-import { ndcToLayer, pickTagPlots, TAG_POOL, TAG_RADIUS_LOTS_M, tagKindFor, tagLabelFor } from "../public/harbour/lot-tags.js";
+import { ndcToLayer, pickTagPlots, TAG_MAP_CAM_M, TAG_POOL, tagKindFor, tagLabelFor, tagWorldScale } from "../public/harbour/lot-tags.js";
 
 const main = readFileSync(new URL("../public/harbour/main.js", import.meta.url), "utf8");
 const tags = readFileSync(new URL("../public/harbour/lot-tags.js", import.meta.url), "utf8");
@@ -20,6 +20,7 @@ describe("lot tags (PAPER)", () => {
     expect(main).toContain("userLeftStall");
     expect(main).toContain("taxi.hopOut");
     expect(main).toContain("lotTags.clickables");
+    expect(main).toContain("camRadiusForTags");
     expect(tags).toContain("depthTest: true");
     expect(tags).toContain("depthWrite: false");
     expect(tags).toContain("TAG_Y_M");
@@ -50,17 +51,23 @@ describe("lot tags (PAPER)", () => {
     expect(picked.some((x) => x.plot.id === "far-buy")).toBe(false);
   });
 
-  it("keeps Lots $ bars nearby, not the whole island", () => {
-    expect(TAG_POOL).toBeLessThanOrEqual(8);
-    expect(TAG_RADIUS_LOTS_M).toBeGreaterThanOrEqual(100);
-    expect(TAG_RADIUS_LOTS_M).toBeLessThanOrEqual(180);
+  it("keeps close Lots $ bars nearby, then opens the highway when zoomed out", () => {
+    expect(TAG_POOL).toBeGreaterThanOrEqual(8);
+    expect(TAG_POOL).toBeLessThanOrEqual(16);
     const plots = [
       { id: "far-buy", owner: null, price: 40, x: 800, z: 0 },
       { id: "near-buy", owner: null, price: 40, x: 20, z: 0 },
     ];
-    const picked = pickTagPlots(plots, { x: 0, z: 0 }, "lots", 8);
-    expect(picked.some((x) => x.plot.id === "near-buy")).toBe(true);
-    expect(picked.some((x) => x.plot.id === "far-buy")).toBe(false);
+    const near = pickTagPlots(plots, { x: 0, z: 0 }, "lots", 8, false, { camRadius: 8 });
+    expect(near.some((x) => x.plot.id === "near-buy")).toBe(true);
+    expect(near.some((x) => x.plot.id === "far-buy")).toBe(false);
+    const far = pickTagPlots(plots, { x: 0, z: 0 }, "world", 12, false, { camRadius: 400, viewRadius: 1200 });
+    expect(far.some((x) => x.plot.id === "far-buy")).toBe(true);
+    expect(TAG_MAP_CAM_M).toBeGreaterThan(40);
+    const close = tagWorldScale(8);
+    const wide = tagWorldScale(400);
+    expect(close.w).toBeLessThan(wide.w);
+    expect(close.w).toBeLessThanOrEqual(3.2);
   });
 
   it("shows PLACE on your lot only while placing", () => {
@@ -69,7 +76,8 @@ describe("lot tags (PAPER)", () => {
       { id: "buy", owner: null, price: 40, x: 20, z: 0 },
     ];
     const idle = pickTagPlots(plots, { x: 0, z: 0 }, "lots", 8, false);
-    expect(idle.every((x) => x.kind === "buy")).toBe(true);
+    expect(idle.some((x) => x.kind === "yours")).toBe(true);
+    expect(idle.some((x) => x.kind === "buy")).toBe(true);
     const placing = pickTagPlots(plots, { x: 0, z: 0 }, "lots", 8, true);
     expect(placing).toHaveLength(1);
     expect(placing[0].plot.id).toBe("yours");
@@ -85,7 +93,7 @@ describe("lot tags (PAPER)", () => {
     expect(yours).toHaveLength(1);
     expect(yours[0].plot.id).toBe("yours");
     expect(yours[0].kind).toBe("yours");
-    expect(pickTagPlots(plots, { x: 0, z: 0 }, "world", 8, false)).toEqual([]);
+    expect(pickTagPlots(plots, { x: 0, z: 0 }, "world", 8, false).some((x) => x.kind === "yours")).toBe(true);
   });
 
   it("maps NDC onto the canvas box", () => {

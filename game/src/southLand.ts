@@ -347,6 +347,8 @@ function lotsAlong(
 export const CART_PAD_FRONT_M = 7.2;
 export const CART_PAD_DEPTH_M = 2.6;
 export const CART_PAD_STEP_M = 8;
+/** Metres past the dual tarmac edge (grit ~2.2 m + grass). */
+export const CART_PAD_PAST_TARMAC_M = 4.6;
 
 /** Tiny $750 cart pads packed on the Island Hwy verge. Not house lots. */
 function nearCircus(x: number, z: number): boolean {
@@ -363,7 +365,8 @@ function seedHighwayCartPads(
 ): void {
   const hwys = roads.filter((r) => r.name === "Island Hwy" && !r.roundabout && r.cls === "highway");
   const half = carriagewayWidthM("highway") / 2;
-  const setback = half + 0.55;
+  /** Past tarmac and grey grit, onto grass — not on the carriageway. */
+  const setback = half + CART_PAD_PAST_TARMAC_M;
   const front = CART_PAD_FRONT_M;
   const depth = CART_PAD_DEPTH_M;
   const step = CART_PAD_STEP_M;

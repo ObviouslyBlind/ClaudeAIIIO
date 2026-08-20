@@ -4,9 +4,16 @@
  */
 
 import { pathAlongPolyline, projectOnPolyline } from "./taxi.js";
+import { carriagewayWidthM } from "./roadclass.js";
 
+export const SHOULDER_LIP_M = 1.8;
 export const SHOULDER_M = 5.6;
 export const DRIVE_AWAY_M = 110;
+
+export function dropOffsetM(road) {
+  const cls = (road && road.cls) || (road && road.lanes === 4 ? "highway" : "street");
+  return carriagewayWidthM(cls) / 2 + SHOULDER_LIP_M;
+}
 
 function pointAhead(points, fromAlong, extra) {
   const last = points[points.length - 1];
@@ -46,10 +53,9 @@ export function roadsideDrop(roads, island, x, z) {
   const tlen = Math.hypot(tx, tz) || 1;
   let rx = tz / tlen;
   let rz = -tx / tlen;
-  const toward =
-    (best.hit.x + rx * SHOULDER_M - x) ** 2 + (best.hit.z + rz * SHOULDER_M - z) ** 2;
-  const other =
-    (best.hit.x - rx * SHOULDER_M - x) ** 2 + (best.hit.z - rz * SHOULDER_M - z) ** 2;
+  const off = dropOffsetM(best.road);
+  const toward = (best.hit.x + rx * off - x) ** 2 + (best.hit.z + rz * off - z) ** 2;
+  const other = (best.hit.x - rx * off - x) ** 2 + (best.hit.z - rz * off - z) ** 2;
   if (other < toward) {
     rx = -rx;
     rz = -rz;
@@ -58,8 +64,8 @@ export function roadsideDrop(roads, island, x, z) {
   return {
     curbX: best.hit.x,
     curbZ: best.hit.z,
-    x: best.hit.x + rx * SHOULDER_M,
-    z: best.hit.z + rz * SHOULDER_M,
+    x: best.hit.x + rx * off,
+    z: best.hit.z + rz * off,
     awayX: ahead.x,
     awayZ: ahead.z,
     roadName: best.road.name || "Harbour Rd",

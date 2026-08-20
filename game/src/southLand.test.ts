@@ -143,8 +143,8 @@ describe("South land (no buildings)", () => {
     const half = carriagewayWidthM("highway") / 2;
     for (const p of pads) {
       const d = Math.min(...hwys.map((h) => distToPolyline(h.points, p.x, p.z)));
-      expect(d).toBeGreaterThan(half + 0.2);
-      expect(d).toBeLessThan(half + 6);
+      expect(d).toBeGreaterThan(half + 3.2);
+      expect(d).toBeLessThan(half + 10);
     }
     let packed = false;
     for (let i = 0; i < pads.length && !packed; i++) {

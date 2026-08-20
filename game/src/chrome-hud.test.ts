@@ -172,7 +172,7 @@ describe("harbour chrome HUD", () => {
     expect(chrome).toContain("toggleViewer");
     expect(chrome).toContain("isLotsViewer");
     expect(chrome).toContain("is-yours");
-    expect(chrome).toContain('setOverlay("lots")');
+    expect(chrome).toContain('setOverlay("world")');
     expect(css).toContain(".chip.is-on.is-yours");
     expect(html).toContain("Lots to buy. Vacant $ bars");
     expect(main).toContain("function siteAtTap");
@@ -180,6 +180,8 @@ describe("harbour chrome HUD", () => {
     expect(main).toContain("function paintHoldingGlow");
     expect(main).toContain('p.name === "vendor"');
     expect(main).toContain("isLotsViewer(viewer) && tapPt");
+    expect(main).toContain('topKind !== "road"');
+    expect(main).toContain("camRadiusForTags");
     expect(chrome).toContain("paintBuyAsk");
     expect(chrome).not.toContain("near-lease");
     expect(css).not.toContain(".chip.is-buy-lot");

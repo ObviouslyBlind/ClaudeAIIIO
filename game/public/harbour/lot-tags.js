@@ -3,21 +3,25 @@
  * Depth-tested billboards — carts and buildings cover them.
  * Vacant: tap opens the buy-ask. Yours: inspect. Placing: PLACE.
  *
- * World overlay: no signs (Lots chip owns them).
- * Lots: a few nearby vacant prices, not the whole highway.
- * Placing: PLACE on yours only.
+ * YOURS stays on in World. Zoom out (Lots or a high camera) shows pad $ tags.
+ * Close-up scale stays small. Placing: PLACE on yours only.
  */
 
 import * as THREE from "three";
 
-export const TAG_POOL = 6;
-/** Metres. One stretch of street, not every Quayward $ lot. */
+export const TAG_POOL = 12;
+export const TAG_POOL_FAR = 96;
+/** Metres. Close walk: one stretch of street. Zoom-out grows this. */
 export const TAG_RADIUS_M = 140;
 export const TAG_RADIUS_LOTS_M = 140;
+/** Camera radius where vacant $ pads spread across the view. */
+export const TAG_MAP_CAM_M = 72;
 /** Planted on the dirt, not a HUD plate. */
 export const TAG_Y_M = 1.15;
 export const TAG_W_M = 4.2;
 export const TAG_H_M = 1.15;
+export const TAG_W_MIN_M = 2.4;
+export const TAG_W_MAX_M = 16;
 
 export function tagKindFor(plot) {
   if (!plot) return "none";
@@ -39,31 +43,69 @@ export function tagLabelFor(plot, placing = false) {
   return "";
 }
 
-export function pickTagPlots(plots, player, overlay, limit = TAG_POOL, placing = false) {
-  const lotsOn = overlay === "lots" || overlay === "yours";
-  const radius = lotsOn || placing ? TAG_RADIUS_LOTS_M : TAG_RADIUS_M;
+export function tagViewRadiusM(camRadius) {
+  const r = Number(camRadius) || 8;
+  return Math.max(TAG_RADIUS_M, r * 2.6);
+}
+
+export function tagPoolForRadius(camRadius) {
+  const r = Number(camRadius) || 8;
+  if (r < 40) return TAG_POOL;
+  if (r < TAG_MAP_CAM_M) return 28;
+  if (r < 220) return 56;
+  return TAG_POOL_FAR;
+}
+
+/** World metres. Grows with zoom-out; clamped so close-up YOURS is not a billboard. */
+export function tagWorldScale(camRadius) {
+  const r = Math.max(6, Number(camRadius) || 8);
+  const w = Math.min(TAG_W_MAX_M, Math.max(TAG_W_MIN_M, r * 0.072));
+  return { w, h: w * (TAG_H_M / TAG_W_M) };
+}
+
+export function pickTagPlots(plots, player, overlay, limit = TAG_POOL, placing = false, opts = {}) {
+  const camR = Number(opts.camRadius);
+  const mapView = Number.isFinite(camR) && camR >= TAG_MAP_CAM_M;
+  const radius = Number(opts.viewRadius) || tagViewRadiusM(Number.isFinite(camR) ? camR : 8);
   const r2 = radius * radius;
-  const out = [];
+  const yours = [];
+  const buy = [];
   for (const p of plots || []) {
     const kind = tagKindFor(p);
-    if (kind === "none") continue;
-    if (placing) {
-      if (kind !== "yours") continue;
-    } else if (overlay === "lots") {
-      if (kind !== "buy") continue;
-    } else if (overlay === "yours") {
-      if (kind !== "yours") continue;
-    } else {
-      continue;
-    }
+    if (kind === "none" || kind === "taken") continue;
     const dx = p.x - player.x;
     const dz = p.z - player.z;
     const d2 = dx * dx + dz * dz;
+    if (kind === "yours") {
+      yours.push({ plot: p, d2, kind });
+      continue;
+    }
     if (d2 > r2) continue;
-    out.push({ plot: p, d2, kind });
+    if (kind === "buy") buy.push({ plot: p, d2, kind });
   }
-  out.sort((a, b) => a.d2 - b.d2);
-  return out.slice(0, limit);
+  yours.sort((a, b) => a.d2 - b.d2);
+  buy.sort((a, b) => a.d2 - b.d2);
+
+  if (placing) return yours.slice(0, limit);
+
+  const wantYours = true;
+  const wantBuy = overlay === "lots" || mapView;
+  const onlyYours = overlay === "yours" && !mapView;
+  const out = [];
+  if (wantYours && (overlay === "lots" || overlay === "yours" || overlay === "world" || mapView)) {
+    for (const row of yours) {
+      if (out.length >= limit) break;
+      out.push(row);
+    }
+  }
+  if (onlyYours) return out;
+  if (wantBuy) {
+    for (const row of buy) {
+      if (out.length >= limit) break;
+      out.push(row);
+    }
+  }
+  return out;
 }
 
 export function ndcToLayer(ndc, rect) {
@@ -156,9 +198,15 @@ export function mountLotTags({ worldAdd, heightAt, specOf, getPlots }) {
     }
   }
 
-  function tick(playerPos, dt = 0.016, overlay = "world", placing = false) {
+  function tick(playerPos, dt = 0.016, overlay = "world", placing = false, camRadius = 8) {
     placingMode = Boolean(placing);
-    const showTags = overlay === "lots" || overlay === "yours" || placingMode;
+    const radius = tagViewRadiusM(camRadius);
+    const poolN = tagPoolForRadius(camRadius);
+    if (!placingMode && (overlay === "foot" || overlay === "minerals")) {
+      hideAll();
+      return;
+    }
+    const showTags = overlay === "lots" || overlay === "yours" || overlay === "world" || placingMode || camRadius >= TAG_MAP_CAM_M;
     if (!showTags) {
       hideAll();
       return;
@@ -166,20 +214,26 @@ export function mountLotTags({ worldAdd, heightAt, specOf, getPlots }) {
     clock -= dt;
     if (clock <= 0) {
       clock = 0.2;
-      shownCache = pickTagPlots(getPlots(), playerPos, overlay, TAG_POOL, placingMode);
+      shownCache = pickTagPlots(getPlots(), playerPos, overlay, poolN, placingMode, { camRadius, viewRadius: radius });
     }
-    for (let i = 0; i < TAG_POOL; i++) {
-      const rec = spriteAt(i);
-      const slot = shownCache[i];
-      if (!slot) {
-        rec.sprite.visible = false;
-        rec.sprite.userData.plotId = null;
+    const scale = tagWorldScale(camRadius);
+    const used = shownCache.length;
+    for (let i = 0; i < Math.max(used, pool.length); i++) {
+      if (i >= used) {
+        const rec = pool[i];
+        if (rec && rec.sprite) {
+          rec.sprite.visible = false;
+          rec.sprite.userData.plotId = null;
+        }
         continue;
       }
+      const rec = spriteAt(i);
+      const slot = shownCache[i];
       const p = slot.plot;
       const spec = specOf && specOf(p.island);
       const y = (spec && heightAt ? heightAt(spec, p.x, p.z) : 1) + TAG_Y_M;
       rec.sprite.position.set(p.x, y, p.z);
+      rec.sprite.scale.set(scale.w, scale.h, 1);
       const text = tagLabelFor(p, placingMode);
       const key = p.id + ":" + text;
       if (rec.text !== key) {

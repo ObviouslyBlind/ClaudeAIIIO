@@ -517,7 +517,12 @@ function refreshPlaceGhost() {
   const g = groundFromRay();
   if (!g) return;
   const plot = plotToPlace(null, g.x, g.z);
-  placeGhost.moveTo(g.x, (g.y || 0) + 0.04, g.z, plot);
+  placeGhost.moveTo(g.x, g.y || 0, g.z, plot);
+}
+
+function camRadiusForTags() {
+  const st = playCam && typeof playCam.getState === "function" ? playCam.getState() : null;
+  return st && Number.isFinite(st.radius) ? st.radius : 8;
 }
 
 function cheapestDevelop() {
@@ -694,7 +699,7 @@ function syncCrateMesh(delivery) {
   if (!Number.isFinite(x) || !Number.isFinite(z)) return;
   const island = (plot && plot.island) || delivery.island || "south";
   const mesh = makeCrate();
-  mesh.position.set(x, heightAt(specOf(island), x, z), z);
+  mesh.position.set(x, heightAt(specOf(island), x, z) + 0.22, z);
   mesh.name = `crate:${delivery.id}`;
   mesh.userData.deliveryId = delivery.id;
   mesh.userData.plotId = plot ? plot.id : "";
@@ -702,6 +707,7 @@ function syncCrateMesh(delivery) {
   mesh.userData.label = "delivery crate";
   mesh.userData.layer = "logistics";
   mesh.userData.roadName = drop && drop.roadName;
+  mesh.renderOrder = 6;
   worldAdd(mesh);
   crateMeshes.set(delivery.id, mesh);
 }
@@ -1812,15 +1818,18 @@ function onPointer(ev) {
     return;
   }
   if (isLotsViewer(viewer) && tapPt) {
-    const p = findParcelAt(tapPt.x, tapPt.z);
-    if (p && !p.owner && viewer === "lots" && pointInRing(tapPt.x, tapPt.z, p.ring)) {
-      askToBuy(p);
-      return;
-    }
-    if (p && p.owner && pointInRing(tapPt.x, tapPt.z, p.ring)) {
-      if (viewer !== "yours" || p.owner === "visitor") {
-        showLandCard(p);
+    const topKind = hits[0] && hits[0].object && hits[0].object.userData && hits[0].object.userData.kind;
+    if (topKind !== "road") {
+      const p = findParcelAt(tapPt.x, tapPt.z);
+      if (p && !p.owner && viewer === "lots" && pointInRing(tapPt.x, tapPt.z, p.ring)) {
+        askToBuy(p);
         return;
+      }
+      if (p && p.owner && pointInRing(tapPt.x, tapPt.z, p.ring)) {
+        if (viewer !== "yours" || p.owner === "visitor") {
+          showLandCard(p);
+          return;
+        }
       }
     }
   }
@@ -2037,6 +2046,7 @@ function tick(dt) {
       dt,
       viewerMode(),
       Boolean(chromeHud && chromeHud.isPlacing && chromeHud.isPlacing()),
+      camRadiusForTags(),
     );
   }
   inspectNearbyLand();

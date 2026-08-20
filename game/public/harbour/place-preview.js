@@ -1,6 +1,6 @@
 /**
- * Green place ghost. Follows the pointer. Hold R to yaw before tap.
- * Sim still owns the place. PAPER / SIMULATED.
+ * Green place ghost on the dirt, above the lot fill, with a nose so yaw reads.
+ * Hold R to rotate. Sim still owns the place. PAPER / SIMULATED.
  */
 
 import * as THREE from "three";
@@ -14,33 +14,75 @@ import {
   isPlaceRotateKey,
 } from "./place-pose.js";
 
-function rectLoop(w, d) {
-  const hw = w / 2;
-  const hd = d / 2;
-  const pts = [
-    new THREE.Vector3(-hw, 0.08, -hd),
-    new THREE.Vector3(hw, 0.08, -hd),
-    new THREE.Vector3(hw, 0.08, hd),
-    new THREE.Vector3(-hw, 0.08, hd),
-    new THREE.Vector3(-hw, 0.08, -hd),
-  ];
-  return new THREE.BufferGeometry().setFromPoints(pts);
+/** Parcel fill sits at +0.35 m. The ghost must clear that square. */
+export const PLACE_GHOST_LIFT_M = 0.62;
+const RAIL_T = 0.08;
+const RAIL_H = 0.12;
+
+function skipRaycast(mesh) {
+  mesh.raycast = () => {};
+}
+
+function paintMats(root, hex) {
+  root.traverse((obj) => {
+    if (obj.material && obj.material.color) obj.material.color.setHex(hex);
+  });
+}
+
+function makeFootprint(w, d, hex) {
+  const g = new THREE.Group();
+  const fillMat = new THREE.MeshBasicMaterial({
+    color: hex,
+    transparent: true,
+    opacity: 0.42,
+    depthTest: true,
+    depthWrite: false,
+    side: THREE.DoubleSide,
+  });
+  const railMat = new THREE.MeshBasicMaterial({
+    color: hex,
+    depthTest: true,
+    depthWrite: false,
+  });
+  const fill = new THREE.Mesh(new THREE.PlaneGeometry(w, d), fillMat);
+  fill.rotation.x = -Math.PI / 2;
+  fill.position.y = PLACE_GHOST_LIFT_M;
+  fill.renderOrder = 9;
+  fill.name = "place-ghost-fill";
+  skipRaycast(fill);
+  g.add(fill);
+
+  function rail(len, x, z, yaw) {
+    const m = new THREE.Mesh(new THREE.BoxGeometry(len, RAIL_H, RAIL_T), railMat.clone());
+    m.position.set(x, PLACE_GHOST_LIFT_M + RAIL_H / 2, z);
+    m.rotation.y = yaw;
+    m.renderOrder = 10;
+    skipRaycast(m);
+    g.add(m);
+  }
+  rail(w + RAIL_T, 0, -d / 2, 0);
+  rail(w + RAIL_T, 0, d / 2, 0);
+  rail(d + RAIL_T, -w / 2, 0, Math.PI / 2);
+  rail(d + RAIL_T, w / 2, 0, Math.PI / 2);
+
+  const nose = new THREE.Mesh(new THREE.ConeGeometry(0.18, 0.46, 4), railMat.clone());
+  nose.rotation.x = Math.PI / 2;
+  nose.position.set(0, PLACE_GHOST_LIFT_M + 0.14, d / 2 + 0.28);
+  nose.renderOrder = 11;
+  nose.name = "place-ghost-nose";
+  skipRaycast(nose);
+  g.add(nose);
+  return g;
 }
 
 export function createPlacePreview(scene) {
-  const mat = new THREE.LineBasicMaterial({
-    color: PLACE_GHOST_OK,
-    transparent: true,
-    opacity: 0.95,
-    depthTest: false,
-  });
-  const line = new THREE.Line(rectLoop(CART_FOOTPRINT_M.w, CART_FOOTPRINT_M.d), mat);
-  line.name = "place-ghost";
-  line.userData.kind = "place-ghost";
-  line.userData.mode = "PAPER";
-  line.visible = false;
-  line.renderOrder = 8;
-  scene.add(line);
+  const root = new THREE.Group();
+  root.name = "place-ghost";
+  root.userData.kind = "place-ghost";
+  root.userData.mode = "PAPER";
+  root.visible = false;
+  root.frustumCulled = false;
+  scene.add(root);
 
   let on = false;
   let kind = "cart";
@@ -48,20 +90,28 @@ export function createPlacePreview(scene) {
   let rotateHeld = false;
   let last = { x: 0, z: 0, ok: false };
   let lastPlot = null;
+  let body = null;
 
   function sizeOf() {
     return kind === "building" ? BUILDING_FOOTPRINT_M : CART_FOOTPRINT_M;
   }
 
   function rebuild() {
+    if (body) {
+      root.remove(body);
+      body.traverse((obj) => {
+        if (obj.geometry) obj.geometry.dispose();
+        if (obj.material) obj.material.dispose();
+      });
+    }
     const s = sizeOf();
-    line.geometry.dispose();
-    line.geometry = rectLoop(s.w, s.d);
+    body = makeFootprint(s.w, s.d, last.ok ? PLACE_GHOST_OK : PLACE_GHOST_BAD);
+    root.add(body);
   }
 
   function setKind(next) {
     const k = next === "building" ? "building" : "cart";
-    if (k === kind) return;
+    if (k === kind && body) return;
     kind = k;
     rebuild();
   }
@@ -70,21 +120,22 @@ export function createPlacePreview(scene) {
     on = true;
     setKind(nextKind);
     yaw = 0;
-    line.visible = true;
+    root.rotation.y = 0;
+    root.visible = true;
   }
 
   function hide() {
     on = false;
     rotateHeld = false;
     lastPlot = null;
-    line.visible = false;
+    root.visible = false;
   }
 
   function paint() {
     const s = sizeOf();
     last.ok = Boolean(ghostFitsPlot(last.x, last.z, yaw, s.w, s.d, lastPlot));
-    line.rotation.y = yaw;
-    mat.color.setHex(last.ok ? PLACE_GHOST_OK : PLACE_GHOST_BAD);
+    root.rotation.y = yaw;
+    if (body) paintMats(body, last.ok ? PLACE_GHOST_OK : PLACE_GHOST_BAD);
   }
 
   function pose() {
@@ -96,9 +147,10 @@ export function createPlacePreview(scene) {
     last.x = x;
     last.z = z;
     lastPlot = plot || null;
-    line.position.set(x, y, z);
+    root.position.set(x, y, z);
+    if (!body) rebuild();
     paint();
-    line.visible = true;
+    root.visible = true;
     return pose();
   }
 
