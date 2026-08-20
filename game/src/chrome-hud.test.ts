@@ -171,7 +171,7 @@ describe("harbour chrome HUD", () => {
     expect(chrome).toContain("bindCashDock");
     expect(chrome).toContain("compactCash");
     expect(html).toContain('id="balance"');
-    expect(html).toMatch(/id="balance"[^>]*>\$1,000</);
+    expect(html).toMatch(/id="balance"[^>]*>\$10,000</);
     expect(html).toContain('id="balance-full"');
     expect(html).toContain('id="cash-ledger"');
     expect(main).toContain("#cash-dock");
