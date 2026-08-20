@@ -3,7 +3,14 @@ import { ROAD_CLASSES, roadClassSpec, carriagewayWidthM } from "./roadclass.js";
 import { junctionPad, pointInJunctionPad } from "./roadnet.js";
 import { addQuadXZ, junctionKerbQuads } from "./roadjoin.js";
 import { buildHubFootprint, buildCircusFootprint, clipPolylineToOutside, multiContains, FOOT_SHOULDER_M, biteRibbonWith, circleRing } from "./roadfoot.js";
-import { circusesFromGraph, clipPolylineOutsideCircuses } from "./roadclip.js";
+import {
+  circusesFromGraph,
+  clipPolylineOutsideCircuses,
+  circusArmDir,
+  circusMergeFilletM,
+  circusMergeRing,
+  circusGiveWayRings,
+} from "./roadclip.js";
 
 /** Concrete lip. Dark grit (0x3f3c36) sat next to black tarmac and vanished. */
 export const SHOULDER = 0x9aa0a6;
@@ -954,52 +961,28 @@ function drawJunctions(scene, map, specOf, heightAt) {
   }
 }
 
-function circusArmDir(node, edge) {
-  const pts = edge.points;
-  const fromA = edge.a === node.id;
-  const a = fromA ? pts[0] : pts[pts.length - 1];
-  const b = fromA ? pts[1] : pts[pts.length - 2];
-  const dx = b.x - a.x;
-  const dz = b.z - a.z;
-  const len = Math.hypot(dx, dz) || 1;
-  return { x: dx / len, z: dz / len };
-}
-
 /**
- * Trapezoid from the ring chord out along the road. Fills the square-cap
- * seam so a dual dumps into the circus as one tarmac, not two tapes in grass.
+ * Fillet flare from the arm into the ring. Straight kerbs hitting the
+ * circle still read as a dump even when the ribbon is circle-cut.
  */
 function addCircusMerge(scene, spec, heightAt, node, edge, outer) {
   if (!edge || !edge.points || edge.points.length < 2) return;
   if (roadClassSpec(edge.cls).dirt) return;
   const dir = circusArmDir(node, edge);
   const half = carriagewayWidthM(edge.cls) / 2;
-  const cap = Math.min(half, outer * 0.9);
-  const dRing = Math.sqrt(Math.max(1, outer * outer - cap * cap));
-  const dFar = outer + 16;
-  const rx = dir.z;
-  const rz = -dir.x;
-  const at = (d, h, sign) => [
-    node.x + dir.x * d + rx * h * sign,
-    node.z + dir.z * d + rz * h * sign,
-  ];
-  const ring = [
-    at(dRing, cap, -1),
-    at(dRing, cap, 1),
-    at(dFar, half, 1),
-    at(dFar, half, -1),
-  ];
-  ring.push(ring[0]);
-  const grit = [
-    at(dRing, cap + FOOT_SHOULDER_M * 0.5, -1),
-    at(dRing, cap + FOOT_SHOULDER_M * 0.5, 1),
-    at(dFar, half + FOOT_SHOULDER_M * 0.5, 1),
-    at(dFar, half + FOOT_SHOULDER_M * 0.5, -1),
-  ];
-  grit.push(grit[0]);
+  const fillet = circusMergeFilletM(half, outer);
+  const ring = circusMergeRing(node.x, node.z, dir, outer, half, fillet);
+  const grit = circusMergeRing(
+    node.x,
+    node.z,
+    dir,
+    outer + FOOT_SHOULDER_M * 0.45,
+    half + FOOT_SHOULDER_M * 0.55,
+    fillet + 0.7,
+  );
   const mid = {
-    x: node.x + dir.x * ((dRing + dFar) / 2),
-    z: node.z + dir.z * ((dRing + dFar) / 2),
+    x: node.x + dir.x * (outer + 8),
+    z: node.z + dir.z * (outer + 8),
   };
   const y0 = heightAt(spec, mid.x, mid.z);
   const label = (edge.name || "road") + " merge";
@@ -1017,6 +1000,16 @@ function addCircusMerge(scene, spec, heightAt, node, edge, outer) {
     widthM: half * 2,
     mode: "PAPER",
   }, 2);
+  const marks = circusGiveWayRings(node.x, node.z, dir, outer, half);
+  for (const mark of marks) {
+    addMultiPolygonMesh(scene, [[mark]], y0 + TARMAC_TOP_M + 0.06, PAINT, {
+      island: node.island,
+      roadKind: "paint",
+      roadName: label + " paint",
+      widthM: PAINT_WIDTH_M,
+      mode: "PAPER",
+    }, 4);
+  }
 }
 
 function drawCircusMerges(scene, map, specOf, heightAt, node, outer) {

@@ -5,12 +5,16 @@ import {
   clipPolylineOutsideCircle,
   clipPolylineOutsideCircuses,
   circusesFromGraph,
+  circusArmDir,
+  circusGiveWayRings,
+  circusMergeFilletM,
+  circusMergeRing,
   enterCircusRings,
   segmentCircleHits,
   snapPolylineEndToCircle,
 } from "../public/harbour/roadclip.js";
 import { offsetPolyline } from "../public/harbour/roads.js";
-import { laneOffsetM } from "../public/harbour/roadclass.js";
+import { carriagewayWidthM, laneOffsetM } from "../public/harbour/roadclass.js";
 
 describe("circus circle clip", () => {
   it("cuts a radial run on the circle and drops the interior", () => {
@@ -102,3 +106,101 @@ describe("circus circle clip", () => {
     expect(chains[0]!.length).toBeGreaterThan(2);
   });
 });
+
+function ringContains(ring: number[][], x: number, z: number) {
+  const pts = ring.slice();
+  if (
+    pts.length > 1 &&
+    pts[0]![0] === pts[pts.length - 1]![0] &&
+    pts[0]![1] === pts[pts.length - 1]![1]
+  ) {
+    pts.pop();
+  }
+  let inside = false;
+  const n = pts.length;
+  for (let i = 0, j = n - 1; i < n; i++) {
+    const a = pts[i]!;
+    const b = pts[j]!;
+    const zi = a[1]!;
+    const zj = b[1]!;
+    if ((zi > z) !== (zj > z)) {
+      const xi = a[0]!;
+      const xj = b[0]!;
+      if (x < ((xj - xi) * (z - zi)) / (zj - zi) + xi) inside = !inside;
+    }
+    j = i;
+  }
+  return inside;
+}
+
+describe("circus merge flares", () => {
+  it("fillets a dual into the ring instead of a chord trapezoid", () => {
+    const outer = 42;
+    const half = carriagewayWidthM("highway") / 2;
+    const dir = { x: 1, z: 0 };
+    const ring = circusMergeRing(0, 0, dir, outer, half);
+    const F = circusMergeFilletM(half, outer);
+    expect(F).toBeGreaterThan(8);
+    let maxLat = 0;
+    let onCircle = 0;
+    for (const p of ring) {
+      maxLat = Math.max(maxLat, Math.abs(p[1]!));
+      const d = Math.hypot(p[0]!, p[1]!);
+      if (Math.abs(d - outer) < 0.35) onCircle += 1;
+    }
+    expect(maxLat).toBeGreaterThan(half + 0.8);
+    expect(onCircle).toBeGreaterThan(4);
+
+    const xc = Math.sqrt((outer + F) ** 2 - (half + F) ** 2);
+    const midA = lerpHalf(-Math.PI / 2, Math.atan2(-(half + F), -xc));
+    const mx = xc + Math.cos(midA) * F;
+    const mz = half + F + Math.sin(midA) * F;
+    const px = Math.sqrt(outer * outer - half * half);
+    const nx = mx + (px - mx) * 0.45;
+    const nz = mz + (half - mz) * 0.45;
+    expect(nz).toBeGreaterThan(half);
+    expect(ringContains(ring, nx, nz), "fillet missed the kerb armpit").toBe(true);
+    expect(ringContains(ring, 80, 0)).toBe(false);
+    expect(ringContains(ring, 0, 0)).toBe(false);
+    expect(circusGiveWayRings(0, 0, dir, outer, half).length).toBeGreaterThan(4);
+  });
+
+  it("flares Island Hwy into Harbour Circus on the live graph", () => {
+    const map = createLandBoard();
+    const node = map.graph.nodes.find((n) => n.id === "s-rab-harbour")!;
+    const edge = map.graph.edges.find(
+      (e) => e.name === "Island Hwy" && e.cls === "highway" && (e.a === node.id || e.b === node.id) && (e.a === "s-port" || e.b === "s-port"),
+    )!;
+    const { outer } = circusMeshRadii(node.radius);
+    const half = carriagewayWidthM("highway") / 2;
+    const dir = circusArmDir(node, edge);
+    const ring = circusMergeRing(node.x, node.z, dir, outer, half);
+    const rx = dir.z;
+    const rz = -dir.x;
+    let maxLat = 0;
+    for (const p of ring) {
+      const dx = p[0]! - node.x;
+      const dz = p[1]! - node.z;
+      maxLat = Math.max(maxLat, Math.abs(dx * rx + dz * rz));
+    }
+    expect(maxLat).toBeGreaterThan(half + 0.8);
+    const F = circusMergeFilletM(half, outer);
+    const xc = Math.sqrt((outer + F) ** 2 - (half + F) ** 2);
+    const midA = lerpHalf(-Math.PI / 2, Math.atan2(-(half + F), -xc));
+    const along = xc + Math.cos(midA) * F;
+    const lat = half + F + Math.sin(midA) * F;
+    const px = Math.sqrt(outer * outer - half * half);
+    const a = along + (px - along) * 0.45;
+    const b = lat + (half - lat) * 0.45;
+    const x = node.x + dir.x * a + rx * b;
+    const z = node.z + dir.z * a + rz * b;
+    expect(ringContains(ring, x, z), "Harbour Circus merge missed the Hwy armpit").toBe(true);
+  });
+});
+
+function lerpHalf(a0: number, a1: number) {
+  let d = a1 - a0;
+  while (d > Math.PI) d -= Math.PI * 2;
+  while (d < -Math.PI) d += Math.PI * 2;
+  return a0 + d * 0.5;
+}

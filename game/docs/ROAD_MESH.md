@@ -20,9 +20,10 @@
  *   way. The plate sits under so the meeting is one black shape.
  * - T/L inner kerb is a tangent fillet plus a round node disc, not a sand crotch.
  * - Stem paint stops at the through kerb. Through paint stays on the carriageway.
- * - Circus ribbon ends are bitten to the circle. Each arm gets a chord
- *   apron so the dual merges into the ring, not a square cap in the grass.
- *   Ring width matches the highway deck.
+ * - Circus ribbon ends are bitten to the circle. Each arm gets a fillet
+ *   flare (kerbs tangent to the outer ring) so the road merges into the
+ *   circus, not a square cap or chord trapezoid in the grass. Ring width
+ *   matches the highway deck. Give-way dashes sit on the entry.
  * - A circus is grit tarmac, concrete inner/outer kerbs, a grass island, and
  *   cream edge paint — not a pale stone puck.
  * - No circus arm boxes. 12 m stubs sat in the grass as extra black rectangles.

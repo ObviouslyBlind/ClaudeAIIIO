@@ -343,6 +343,37 @@ describe("paved street from spawn", () => {
     expect(circus!.material.map).toBeTruthy();
     expect(CIRCUS_RING_WIDTH_M).toBeGreaterThanOrEqual(carriagewayWidthM("highway"));
     expect(added.filter((m) => / merge$/.test(String(m.userData.roadName || "")) && m.userData.roadKind === "paved").length).toBeGreaterThan(2);
+    expect(added.filter((m) => / merge paint$/.test(String(m.userData.roadName || "")) && m.userData.roadKind === "paint").length).toBeGreaterThan(8);
+    const hwyMerges = added.filter(
+      (m) => m.userData.roadKind === "paved" && String(m.userData.roadName || "") === "Island Hwy merge",
+    );
+    expect(hwyMerges.length).toBeGreaterThan(0);
+    let flared = false;
+    for (const mesh of hwyMerges) {
+      const pos = mesh.geometry.attributes.position;
+      let sx = 0;
+      let sz = 0;
+      for (let i = 0; i < pos.count; i++) {
+        sx += pos.getX(i);
+        sz += pos.getZ(i);
+      }
+      const n = Math.max(1, pos.count);
+      let dx = sx / n - harbour.x;
+      let dz = sz / n - harbour.z;
+      const len = Math.hypot(dx, dz) || 1;
+      dx /= len;
+      dz /= len;
+      const rx = dz;
+      const rz = -dx;
+      let mergeLat = 0;
+      for (let i = 0; i < pos.count; i++) {
+        const px = pos.getX(i) - harbour.x;
+        const pz = pos.getZ(i) - harbour.z;
+        mergeLat = Math.max(mergeLat, Math.abs(px * rx + pz * rz));
+      }
+      if (mergeLat > carriagewayWidthM("highway") / 2 + 0.5) flared = true;
+    }
+    expect(flared, "Hwy merge should flare wider than the deck").toBe(true);
     const island = added.find(
       (m) => m.userData.roadKind === "island" && /Harbour/.test(String(m.userData.label || "")),
     );

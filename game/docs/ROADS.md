@@ -41,7 +41,7 @@ See `reports/THREEJS_ROADS.md` and `docs/ROAD_MESH.md`.
 - Local paved **runs** are ribbons that overlap hub fills. A **T/L** is a filled hub plus a round join at the node. Ribbons do not stop short in the sand.
 - Offset sidewalks are densified and clipped out of the hub. Stem paint stops at the through kerb.
 - Quayward Loop is a **rectangle**. Quayward Rd hits the north edge at **45°** from Harbour Circus.
-- A **circus** is a `RingGeometry` (the join surface) plus a stone island. Duals are **circle-cut onto the outer face**. Short lips cover the chord. Do not earcut a holed Clipper keyhole; do not draw 12 m black rectangles into the grass.
+- A **circus** is a `RingGeometry` (the join surface) plus a grass island. Duals are **circle-cut onto the outer face**. Each arm **fillet-flares** into the ring (kerb tangent to the outer circle) with give-way dashes on the entry. Do not earcut a holed Clipper keyhole; do not draw 12 m black rectangles into the grass.
 - Dual carriageway: one black deck (both lanes + median). Paint marks the lanes. Taxi, vans, and AI cars follow graph nodes slightly above the deck — they do not sit on the mesh.
 
 ## Routing

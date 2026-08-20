@@ -251,3 +251,153 @@ export function circusesFromGraph(graph) {
   }
   return out;
 }
+
+/**
+ * Unit direction from the circus centre out along a paved arm.
+ * Graph edges start on the kerb, not the centre — use centre→kerb so the
+ * flare is radial to the ring.
+ */
+export function circusArmDir(node, edge) {
+  if (!node || !edge || !edge.points || edge.points.length < 2) return { x: 1, z: 0 };
+  const pts = edge.points;
+  const fromA = edge.a === node.id;
+  const a = fromA ? pts[0] : pts[pts.length - 1];
+  const b = fromA ? pts[1] : pts[pts.length - 2];
+  let dx = a.x - node.x;
+  let dz = a.z - node.z;
+  if (Math.hypot(dx, dz) < 1) {
+    dx = b.x - node.x;
+    dz = b.z - node.z;
+  }
+  const len = Math.hypot(dx, dz) || 1;
+  return { x: dx / len, z: dz / len };
+}
+
+/**
+ * Fillet between a radial kerb and the outer ring. Big enough to read as a
+ * merge, short enough that it is a join, not a 50 m trumpet.
+ */
+export function circusMergeFilletM(half, outer) {
+  const h = Math.max(1.2, half || 0);
+  const o = Math.max(h + 4, outer || 0);
+  return Math.min(o * 0.3, Math.max(6.4, h * 0.62 + 4));
+}
+
+function lerpAngle(a0, a1, t) {
+  let d = a1 - a0;
+  while (d > Math.PI) d -= Math.PI * 2;
+  while (d < -Math.PI) d += Math.PI * 2;
+  return a0 + d * t;
+}
+
+function appendLocalArc(ring, world, cx, cz, r, a0, a1, steps) {
+  const n = Math.max(2, steps | 0);
+  for (let i = 1; i <= n; i++) {
+    const a = lerpAngle(a0, a1, i / n);
+    ring.push(world(cx + Math.cos(a) * r, cz + Math.sin(a) * r));
+  }
+}
+
+function closeXy(ring) {
+  if (!ring.length) return ring;
+  const a = ring[0];
+  const b = ring[ring.length - 1];
+  if (a[0] === b[0] && a[1] === b[1]) return ring;
+  ring.push([a[0], a[1]]);
+  return ring;
+}
+
+/**
+ * Closed [x,z] flare: road rectangle plus two kerb fillets tangent to the
+ * outer circus circle. Replaces a chord trapezoid, which still read as a
+ * square dump into the doughnut.
+ *
+ * @param {number} cx
+ * @param {number} cz
+ * @param {{ x: number, z: number }} dir  away from the circus along the arm
+ * @param {number} outer
+ * @param {number} half
+ * @param {number} [filletM]
+ * @returns {number[][]}
+ */
+export function circusMergeRing(cx, cz, dir, outer, half, filletM) {
+  const ox = dir && Number.isFinite(dir.x) ? dir.x : 1;
+  const oz = dir && Number.isFinite(dir.z) ? dir.z : 0;
+  const len = Math.hypot(ox, oz) || 1;
+  const dx = ox / len;
+  const dz = oz / len;
+  const rx = dz;
+  const rz = -dx;
+  const h = Math.max(1.2, half || 0);
+  const R = Math.max(h + 2, outer || 0);
+  let F = filletM == null ? circusMergeFilletM(h, R) : filletM;
+  if (!(F > 0.4)) F = circusMergeFilletM(h, R);
+  const world = (along, lat) => [cx + dx * along + rx * lat, cz + dz * along + rz * lat];
+
+  if (R <= h + 0.4) {
+    const cap = Math.min(h, R * 0.9);
+    const dRing = Math.sqrt(Math.max(1, R * R - cap * cap));
+    const dFar = R + 16;
+    return closeXy([world(dRing, -cap), world(dRing, cap), world(dFar, h), world(dFar, -h)]);
+  }
+
+  const xc = Math.sqrt(Math.max(1, (R + F) * (R + F) - (h + F) * (h + F)));
+  const dFar = xc + 5.5;
+  const scale = R / (R + F);
+  const tAlong = xc * scale;
+  const tLat = (h + F) * scale;
+  const aLineR = -Math.PI / 2;
+  const aCircR = Math.atan2(-(h + F), -xc);
+  const aCircL = Math.atan2(h + F, -xc);
+  const aLineL = Math.PI / 2;
+  const angR = Math.atan2(tLat, tAlong);
+  const angL = -angR;
+
+  const ring = [];
+  ring.push(world(dFar, -h));
+  ring.push(world(dFar, h));
+  ring.push(world(xc, h));
+  appendLocalArc(ring, world, xc, h + F, F, aLineR, aCircR, 10);
+  appendLocalArc(ring, world, 0, 0, R, angR, angL, 12);
+  appendLocalArc(ring, world, xc, -(h + F), F, aCircL, aLineL, 10);
+  return closeXy(ring);
+}
+
+/**
+ * Give-way dashes across the arm, on the ring face. Reads as an entry, not
+ * a through-road that happens to hit a circle.
+ *
+ * @returns {number[][][]} closed rings
+ */
+export function circusGiveWayRings(cx, cz, dir, outer, half) {
+  const ox = dir && Number.isFinite(dir.x) ? dir.x : 1;
+  const oz = dir && Number.isFinite(dir.z) ? dir.z : 0;
+  const len = Math.hypot(ox, oz) || 1;
+  const dx = ox / len;
+  const dz = oz / len;
+  const rx = dz;
+  const rz = -dx;
+  const h = Math.max(1.2, half || 0);
+  const R = Math.max(h + 2, outer || 0);
+  const along = R + 0.9;
+  const thick = 0.42;
+  const dash = 1.22;
+  const gap = 0.48;
+  const inset = Math.min(1.5, h * 0.2);
+  const p = (a, lat) => [cx + dx * a + rx * lat, cz + dz * a + rz * lat];
+  const rings = [];
+  let lat = -h + inset;
+  const end = h - inset;
+  while (lat + dash <= end + 0.02) {
+    const a = lat;
+    const b = lat + dash;
+    rings.push(closeXy([
+      p(along - thick / 2, a),
+      p(along + thick / 2, a),
+      p(along + thick / 2, b),
+      p(along - thick / 2, b),
+    ]));
+    lat += dash + gap;
+  }
+  return rings;
+}
