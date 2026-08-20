@@ -1,9 +1,8 @@
 /**
  * Launch PAPER prices. SIMULATED. The sim owns these numbers.
  *
- * Land is scarce and generally expensive. $1000 buys a highway pad and a
- * fruit cart, not a street lease and not the dearer carts.
- * Sales tax is one statute rate for books, stalls, and carts.
+ * Land is scarce. Live spawn is $10,000: rooms and kit fit; $15,000 dirt does not.
+ * A highway pad is still $750. Sales tax is one statute rate for books, stalls, and carts.
  */
 
 /** Launch sales-tax statute. PLAN §3.4 sink. NPC-NPC fills recycle as wages. */
@@ -26,8 +25,8 @@ export const LAND_GLOBAL_BUMP = 0.004;
 export const LAND_ASK_CAP_MUL = 4;
 
 /**
- * Fruit is the start. Watermelon and fry kits sit above starter cash so the
- * first pad + fruit shift is required. Fry stays under the South street floor.
+ * Fruit is the cheap first cart. Watermelon and fry kits also fit $10,000 spawn.
+ * Fry stays under the South street floor. Building dirt does not fit spawn.
  */
 export const CART_PRICES = {
   fruit: { kit: 90, pack: 14, sale: 6 },

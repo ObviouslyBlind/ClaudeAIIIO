@@ -32,7 +32,7 @@ Place the cart on the pad dirt. A green cart ghost follows the pointer and snaps
 | Watermelon | $1,150 | ×20 $22 | $8 | Melon slice, Seed spit |
 | Fish and chips | $1,850 | ×20 $28 + propane $18 | $11 | Fry run, Basket pull, Wrap ticket |
 
-Fruit is the start (pad + kit + pack ≈ $854). Melon and fry sit above starter cash. Hire **$300** after the first fruit sales. Fridge **$180**, then Sign → Awning → Lights → Stools.
+Fruit is the cheap first cart (pad + kit + pack ≈ $854). Melon **$1,150** and fry **$1,850** also fit **$10,000**. Building dirt does not (**$15,000**). Hire **$300**. Fridge **$180**, then Sign → Awning → Lights → Stools.
 
 Sales tax **8%**. Fruit net ≈ **$5.52** a sale. Pack COGS **$0.70** / unit.
 

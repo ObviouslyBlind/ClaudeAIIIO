@@ -50,7 +50,7 @@ describe("documentation library", () => {
 
   it("play loop carries current starter prices", () => {
     const play = md("docs/PLAY.md");
-    expect(play).toContain("$1,000");
+    expect(play).toContain("$10,000");
     expect(play).toContain("$750");
     expect(play).toContain("$90");
     expect(play).toContain("8%");

@@ -25,7 +25,7 @@ PLAN §3.2–3.8 and §9–11 already named the machine:
 | Cart grind as the player firm | PLAN §9 step 1–3 | `firstLoop.ts`, highway pads **$750** |
 | Dual-island last prints | PLAN §3.3 | `lastPrice` / `lastPriceSouth` on `createWorld` |
 
-GitHub on this tree already argued the numbers in the land-econ, fry-cart, cart-pads, cash-ledger, and cart-grind PRs: land is dear on purpose, fruit is the only starter kit that fits **$1000**, warehouse is a dock not a second shop, and stickers are a band against a dictated today price — not a seventh public listing.
+GitHub on this tree already argued the numbers in the land-econ, fry-cart, cart-pads, cash-ledger, and cart-grind PRs: land is dear on purpose, warehouse is a dock not a second shop, and stickers are a band against a dictated today price — not a seventh public listing. Live spawn is **$10,000** so rooms and kit fit; **$15,000** building dirt does not.
 
 A player cart is **not** one of the six island listings. “Stock price” on your fruit stall means sticker vs today, plus COGS from the pack catalog. Player-firm listing is PLAN’s size gate (step E / K), later.
 
@@ -42,15 +42,16 @@ Spawn cash **$10,000**. Alpha wipe on harbour spawn / hard-refresh.
 | Fruit pack ×20 | $14 → **$0.70 / unit COGS** | yes |
 | Hire | $300 | after first fruit sales |
 | Fridge | $180 | grind |
-| Watermelon kit | $1,150 | no |
-| Fish and chips kit | $1,850 | no |
-| South street lot floor | $2,400 | no |
-| North street floor | $6,800 | no |
+| Watermelon kit | $1,150 | yes |
+| Fish and chips kit | $1,850 | yes |
+| South street lot floor | $2,400 | yes |
+| North street floor | $6,800 | yes |
+| Building dirt | $15,000 | no |
 | Warehouse rent | $5 / sim day while occupied | sink |
 
 Today / sticker fruit **$6**. Tax **8%**. Net **$5.52** a sale. Pack COGS **$0.70**. Gross margin about **$4.82** before hire and pad.
 
-A pad + fruit kit + one pack is about **$854**. Hire waits on the till. Melon and fry sit above starter cash so the first honest hour is: lease a pad, Bring to me, Place, stock, hire or Play.
+A pad + fruit kit + one pack is about **$854**. Hire waits on the till. Melon and fry also fit **$10,000**. Building dirt does not. The first honest hour can still be: lease a pad, Bring to me, Place, stock, hire or Play — or buy a room.
 
 Warehouse is storage. **Place consumes inventory only.** Pickup packs the kit (and leftover stock) into the warehouse. Bring to me, then Place.
 
@@ -58,7 +59,7 @@ Warehouse is storage. **Place consumes inventory only.** Pickup packs the kit (a
 
 ## 3. How money moves
 
-**Faucets.** NPC bids on the 12 goods; NPC wages; tiny new-player cash (starter $1000 is the launch faucet). Cart sales pay the visitor from the sticker; tax is carved off first.
+**Faucets.** NPC bids on the 12 goods; NPC wages; new-player cash (starter **$10,000** is the live faucet). Cart sales pay the visitor from the sticker; tax is carved off first.
 
 **Sinks.** Sales tax (statute, launch 8%) into the island bank / ledger sink. Land upkeep. Warehouse $5/day. Hire $300. Catalog buys (kits, packs, propane, upgrades). Planning fees later.
 

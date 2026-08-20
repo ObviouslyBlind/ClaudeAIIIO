@@ -729,7 +729,7 @@ describe("South first loop", () => {
     expect(fuelStand(visitor, "stand-missing").reason).toBe("no_stand");
   });
 
-  it("keeps watermelon and fry kits above starter cash", () => {
+  it("keeps watermelon and fry kits above $1,000 PAPER", () => {
     const land = createLandBoard();
     const visitor = createVisitor(1_000);
     expect(orderMarket(visitor, land, { skus: ["melon_cart"], dest: "warehouse" }).ok).toBe(false);
