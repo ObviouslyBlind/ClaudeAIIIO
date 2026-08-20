@@ -3,6 +3,7 @@ import { createLandBoard } from "./land.ts";
 import { junctionPad } from "../public/harbour/roadnet.js";
 import { buildHubFootprint, buildCircusFootprint, clipPolylineToOutside, multiContains, segmentRing, unionGeoms, junctionContour, CIRCUS_ARM_STUB_M, biteRibbonWith, circleRing, swellRing } from "../public/harbour/roadfoot.js";
 import { circusArmDir, circusMeshRadii } from "../public/harbour/roadclip.js";
+import { carriagewayWidthM } from "../public/harbour/roadclass.js";
 
 describe("road hub footprints", () => {
   it("bites a square ribbon end into a circular kerb instead of leaving a chord", () => {

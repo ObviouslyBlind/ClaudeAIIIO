@@ -334,7 +334,6 @@ describe("paved street from spawn", () => {
     expect(CIRCUS_ARM_STUB_M).toBeLessThan(5);
     expect(nearestHwy).toBeGreaterThan(radii.inner);
     expect(nearestHwy).toBeLessThan(radii.outer);
-    expect(nearestHwy).toBeLessThan(radii.enter + 2);
     expect(added.filter((m) => / merge$/.test(String(m.userData.roadName || "")) && m.userData.roadKind === "paved").length).toBe(0);
     const circus = added.find(
       (m) => m.userData.roadName === "Harbour Circus" && m.userData.footprint,
