@@ -14,7 +14,7 @@ Doc map: [README.md](README.md) · spec: [../PLAN.md](../PLAN.md) · play: [PLAY
 
 Operator plays from the public URL, not localhost.
 
-**https://editing-quilt-fly-edwards.trycloudflare.com/**
+**https://physics-sitting-scholar-fridge.trycloudflare.com/**
 
 ```bash
 cd game
