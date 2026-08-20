@@ -9,7 +9,7 @@ import { playPaperBuy } from "./paper-sfx.js";
 import { toggleViewer, isLotsViewer, footLevel } from "./overlays.js";
 import { mountPackShift } from "./pack.js";
 import { formatCartsBody } from "./carts-hud.js";
-import { formatSiteMenu, gamesForSite } from "./site-menu.js";
+import { formatSiteMenu, gamesForSite, stickerFromPct } from "./site-menu.js";
 import { compactCash, fullCash } from "./cash-chip.js";
 import { formatCashLedger } from "./cash-ledger.js";
 import {
@@ -699,8 +699,11 @@ export function mountChrome(opts) {
             ? play.todayPrice
             : 6,
       );
+      const dollarMin = Number(priceEl.getAttribute("data-min") || 1);
+      const dollarMax = Number(priceEl.getAttribute("data-max") || 16);
       const paintRead = () => {
-        const v = Number(priceEl.value);
+        const pct = Number(priceEl.value);
+        const v = stickerFromPct(pct, todayN, dollarMin, dollarMax);
         const d = Math.abs(v - todayN);
         const today = d < 0.01;
         const near = !today && d <= 1.5;
@@ -717,18 +720,16 @@ export function mountChrome(opts) {
         const slide = priceEl.closest(".sticker-slide");
         if (slide) slide.setAttribute("data-tone", today ? "today" : near ? "near" : "far");
         const knob = slide && slide.querySelector("[data-sticker-knob]");
-        const lo = Number(priceEl.min);
-        const hi = Number(priceEl.max);
-        const span = hi - lo;
-        if (knob && span > 0) knob.style.left = `${((v - lo) / span) * 100}%`;
+        if (knob) knob.style.left = `${pct}%`;
       };
       paintRead();
       priceEl.addEventListener("input", paintRead);
       priceEl.addEventListener("change", async () => {
+        const v = stickerFromPct(Number(priceEl.value), todayN, dollarMin, dollarMax);
         await readJson("/api/stand/price", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ standId: live.id, price: Number(priceEl.value) }),
+          body: JSON.stringify({ standId: live.id, price: v }),
         });
         paintTop();
       });

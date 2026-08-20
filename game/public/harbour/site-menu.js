@@ -109,61 +109,53 @@ export function stickerTrackSegs(today, min = 1, max = 16) {
 }
 
 const HEAT = {
-  red: "#c41e2a",
-  orange: "#ff7a18",
-  yellow: "#ffd400",
-  lime: "#c6f000",
+  red: "#b71c1c",
+  orange: "#ff6d00",
+  amber: "#ffab00",
+  yellow: "#ffee58",
+  lime: "#c6ff00",
 };
 
-function optimalMarkClass(pct) {
-  if (pct < 18) return " is-start";
-  if (pct > 82) return " is-end";
-  return "";
+/** Visual % along the bar. Today is always the centre, like the PRICE SET heat-map. */
+export function stickerPct(price, today, min = 1, max = 16) {
+  const p = Number(price);
+  const t = Number(today);
+  const lo = Number(min);
+  const hi = Number(max);
+  if (!Number.isFinite(p) || !Number.isFinite(t)) return 50;
+  if (p <= t) {
+    const span = t - lo;
+    if (!(span > 0)) return 50;
+    return (50 * (p - lo)) / span;
+  }
+  const span = hi - t;
+  if (!(span > 0)) return 50;
+  return 50 + (50 * (p - t)) / span;
 }
 
-function heatToday(todayOrSegs, min, max) {
-  if (!Array.isArray(todayOrSegs)) return Number(todayOrSegs);
-  const g = todayOrSegs.find((s) => s.tone === "green");
-  const span = Number(max) - Number(min);
-  if (!g || !(span > 0)) return (Number(min) + Number(max)) / 2;
-  return Number(min) + ((g.left + g.width / 2) / 100) * span;
+export function stickerFromPct(pct, today, min = 1, max = 16) {
+  const u = Math.max(0, Math.min(100, Number(pct)));
+  const t = Number(today);
+  const lo = Number(min);
+  const hi = Number(max);
+  let v;
+  if (u <= 50) {
+    const span = t - lo;
+    v = span > 0 ? lo + (u / 50) * span : t;
+  } else {
+    const span = hi - t;
+    v = span > 0 ? t + ((u - 50) / 50) * span : t;
+  }
+  const snapped = Math.round(v * 2) / 2;
+  return Math.max(lo, Math.min(hi, snapped));
 }
 
 /**
- * Smooth red → orange → yellow → lime → yellow → orange → red,
- * peaked on today (not the $1–$16 midpoint).
+ * Fixed heat-map: red → orange → yellow → lime → yellow → orange → red.
+ * Lime sits in the middle; today is mapped to that centre.
  */
-export function stickerBandGradient(todayOrSegs, min = 1, max = 16) {
-  const t = heatToday(todayOrSegs, min, max);
-  const lo = Number(min);
-  const hi = Number(max);
-  const span = hi - lo;
-  if (!(span > 0) || !Number.isFinite(t)) return HEAT.red;
-  const pct = (v) => Math.max(0, Math.min(100, ((v - lo) / span) * 100));
-  const raw = [
-    [0, HEAT.red],
-    [pct(t - 3.8), HEAT.red],
-    [pct(t - 2.4), HEAT.orange],
-    [pct(t - 1.5), HEAT.yellow],
-    [pct(t - 0.55), HEAT.lime],
-    [pct(t), HEAT.lime],
-    [pct(t + 0.55), HEAT.lime],
-    [pct(t + 1.5), HEAT.yellow],
-    [pct(t + 2.4), HEAT.orange],
-    [pct(t + 3.8), HEAT.red],
-    [100, HEAT.red],
-  ];
-  const stops = [];
-  for (const [p, c] of raw) {
-    const last = stops[stops.length - 1];
-    if (last && p < last.p + 0.05) {
-      last.c = c;
-      last.p = p < last.p ? last.p : p;
-      continue;
-    }
-    stops.push({ p, c });
-  }
-  return `linear-gradient(90deg, ${stops.map((s) => `${s.c} ${s.p.toFixed(2)}%`).join(", ")})`;
+export function stickerBandGradient() {
+  return `linear-gradient(90deg, ${HEAT.red} 0%, ${HEAT.orange} 18%, ${HEAT.amber} 30%, ${HEAT.yellow} 40%, ${HEAT.lime} 47%, ${HEAT.lime} 53%, ${HEAT.yellow} 60%, ${HEAT.amber} 70%, ${HEAT.orange} 82%, ${HEAT.red} 100%)`;
 }
 
 function stockBand(have, cap) {
@@ -193,9 +185,7 @@ function paintStock(site, play) {
   const propane = Number(site && site.propaneLeft) || 0;
   const invGas = ((play && play.inventory) || []).find((r) => r.kind === "propane")?.qty || 0;
   const whGas = ((play && play.warehouse && play.warehouse.items) || []).find((r) => r.kind === "propane")?.qty || 0;
-  const span = max - min;
-  const mark = ((todayN - min) / span) * 100;
-  const knob = ((sticker - min) / span) * 100;
+  const vis = stickerPct(sticker, todayN, min, max);
   const tone = stickerToneAttr(vs);
   const mine = site.siteClass === "mine";
   const hired = Boolean(site.hired);
@@ -240,12 +230,12 @@ function paintStock(site, play) {
         <p class="sticker-read ${vs}"><span data-sticker-out>${money(sticker)}</span><small> per unit</small></p>
       </div>
       <div class="sticker-track">
-        <i class="sticker-band" aria-hidden="true" style="background-image:${stickerBandGradient(todayN, min, max)}"></i>
-        <i class="sticker-mark" style="left:${mark}%"></i>
-        <i class="sticker-knob" data-sticker-knob style="left:${knob}%"></i>
-        <input id="sticker-price" type="range" min="${min}" max="${max}" step="0.5" value="${sticker}" />
+        <i class="sticker-band" aria-hidden="true"></i>
+        <i class="sticker-mark" style="left:50%"></i>
+        <i class="sticker-knob" data-sticker-knob style="left:${vis}%"></i>
+        <input id="sticker-price" type="range" min="0" max="100" step="0.5" value="${vis}" data-min="${min}" data-max="${max}" data-today="${todayN}" />
       </div>
-      <p class="sticker-today-line"><span class="sticker-today${optimalMarkClass(mark)}" style="left:${mark}%">Optimal: ${money(todayN)}</span></p>
+      <p class="sticker-today-line"><span class="sticker-today" style="left:50%">Optimal: ${money(todayN)}</span></p>
     </div>
   `;
 }
