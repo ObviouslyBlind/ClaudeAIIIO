@@ -33,12 +33,26 @@ export const PAINT_YELLOW = 0xe0b03a;
 export const PAINT_WIDTH_M = 0.36;
 export const PAINT_DASH_M = 8;
 export const PAINT_GAP_M = 5.5;
-export const ASPHALT_TILE_M = 6;
+export const ASPHALT_TILE_M = 16;
 
 function hash2(x, y) {
-  let n = Math.imul(x, 374761393) + Math.imul(y, 668265263);
+  let n = Math.imul(x | 0, 374761393) + Math.imul(y | 0, 668265263);
   n = Math.imul(n ^ (n >>> 13), 1274126177);
   return ((n ^ (n >>> 16)) >>> 0) / 4294967296;
+}
+
+function valueNoise(x, y) {
+  const x0 = Math.floor(x);
+  const y0 = Math.floor(y);
+  const fx = x - x0;
+  const fy = y - y0;
+  const sx = fx * fx * (3 - 2 * fx);
+  const sy = fy * fy * (3 - 2 * fy);
+  const a = hash2(x0, y0);
+  const b = hash2(x0 + 1, y0);
+  const c = hash2(x0, y0 + 1);
+  const d = hash2(x0 + 1, y0 + 1);
+  return a + (b - a) * sx + (c - a) * sy + (a - b - c + d) * sx * sy;
 }
 
 let asphaltTex = null;
@@ -49,9 +63,10 @@ function asphaltMap() {
   for (let y = 0; y < s; y++) {
     for (let x = 0; x < s; x++) {
       const i = (y * s + x) * 4;
-      const n = hash2(x, y);
-      const speck = hash2(x * 3, y * 5) > 0.9 ? -28 : 0;
-      const b = Math.max(80, Math.min(255, 150 + n * 70 + speck));
+      const n = valueNoise(x / 18, y / 18);
+      const grain = hash2(x, y);
+      const speck = hash2(x * 3, y * 5) > 0.88 ? -36 : 0;
+      const b = Math.max(70, Math.min(255, 128 + n * 90 + grain * 28 + speck));
       data[i] = b;
       data[i + 1] = b;
       data[i + 2] = Math.max(70, b - 8);
@@ -82,7 +97,7 @@ function roadMaterial(color, roadKind, extra = {}) {
   if (hit && !extra.emissive) return hit;
   const mat = new THREE.MeshStandardMaterial({
     color,
-    roughness: paint ? 0.42 : kerb ? 0.86 : 0.9,
+    roughness: paint ? 0.42 : kerb ? 0.86 : 0.78,
     metalness: 0,
     map: tarmac || kerb ? asphaltMap() : null,
     emissive: paint ? color : 0x000000,
