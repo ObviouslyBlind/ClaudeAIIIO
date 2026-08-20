@@ -1,5 +1,5 @@
 /**
- * Site mini-game. Client-only timing. Skip never cuts hired output.
+ * Site mini-game. Client-only timing. The clock runs out; there is no skip.
  * A finished shift asks the sim to sell a handful at once.
  * Tap only. No WASD.
  */
@@ -90,7 +90,6 @@ export function mountPackShift() {
   const slots = el("pack-slots");
   const clock = el("pack-clock");
   const hitsEl = el("pack-hits");
-  const closeBtn = el("pack-close");
   const badge = root && root.querySelector(".pack-badge");
   const hint = el("pack-hint");
   if (!root || !slots) {
@@ -312,8 +311,6 @@ export function mountPackShift() {
   function close() {
     finish(false);
   }
-
-  if (closeBtn) closeBtn.addEventListener("click", close);
 
   return { open, close };
 }

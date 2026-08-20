@@ -105,6 +105,8 @@ describe("harbour chrome HUD", () => {
     expect(css).not.toContain(".walk-status");
     expect(html).toContain('id="storage-fee"');
     expect(html).toContain('id="pack-shift"');
+    expect(html).not.toContain('id="pack-close"');
+    expect(html).not.toContain(">Skip</button>");
     expect(html).not.toContain('id="btn-menu"');
     expect(html).not.toContain('id="btn-pack"');
     expect(html).not.toContain('id="cart-line"');
@@ -286,6 +288,7 @@ describe("harbour chrome HUD", () => {
     expect(pack).toContain("GOLD_WIDTH_END");
     expect(pack).toContain("HEAT_CYCLE_MS");
     expect(pack).toContain("PULL_LOCK_MS");
+    expect(pack).not.toContain("pack-close");
     expect(pack).toContain("Tap when the fry is gold");
     expect(pack).toContain("Paper, then fish, then chips");
     expect(pack).toContain('return "sort"');
@@ -602,8 +605,9 @@ describe("harbour chrome HUD", () => {
     expect(css).not.toContain(".sticker-zone");
     expect(css).not.toContain(".sticker-rail");
     expect(css).not.toContain(".sticker-seg.is-red");
-    expect(css).toContain(".sticker-read.is-near");
-    expect(css).toContain(".sticker-read.is-far");
+    expect(css).toContain(".sticker-read.is-today { color: #c6ff00; }");
+    expect(css).toContain(".sticker-read.is-near { color: #ffee58; }");
+    expect(css).toContain(".sticker-read.is-far { color: #ff6d00; }");
     expect(css).toContain("#c6ff00");
     expect(css).toContain("#b71c1c");
     expect(css).toContain("#ff6d00");
