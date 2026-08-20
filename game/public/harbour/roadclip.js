@@ -3,12 +3,10 @@
  *
  * Graph edges already stop on the kerb ring. Dual ribbons sit a lane-offset
  * off that centreline, so they used to end in the sand beside the ring.
- * The drawn ribbon stops in the flare's straight rectangle; the flare owns
- * the ring face. Do not circle-cut the prism onto the doughnut — that left
- * a square wall on the ring. Do not Clipper-union flares into the doughnut.
+ * Draw the doughnut as a RingGeometry. Extend the black ribbon onto that
+ * ring and stop before the grass island. Do not Clipper-union, clover-clip,
+ * or fillet-sticker the join.
  */
-
-import { carriagewayWidthM } from "./roadclass.js";
 
 /** Metres past the graph kerb. Duals hit this circle face-on instead of beside it. */
 export const CIRCUS_OUTER_PAD_M = 8;
@@ -27,12 +25,11 @@ export function circusMeshRadii(kerbR) {
   const kerb = kerbR || 34;
   const outer = kerb + CIRCUS_OUTER_PAD_M;
   const inner = Math.max(6, outer - CIRCUS_RING_WIDTH_M);
-  const half = carriagewayWidthM("highway") / 2;
   return {
     kerb,
     outer,
     inner,
-    clip: circusRibbonClipR(half, outer),
+    clip: outer,
     enter: inner + CIRCUS_ENTER_PAD_M,
   };
 }

@@ -66,10 +66,10 @@ PathPhalt / Curva / medieval-settlement, mapped onto our graph:
 |---|---|
 | Run (street, avenue, dual) | Ribbon (`drawRibbon`) plus PathPhalt cream/kraft **lane paint**. Dual = one filled deck across both lanes and the median, round joins at corners, thin median stripe. Cars drive the graph above the mesh. |
 | T / L | Filled hub polygon plus a round node disc. Tarmac **overlaps** the hub. Paint and walks still cut. |
-| Circus | One clover contour (circle + filleted arms), same as a T/L. Ribbons bite that kerb. Circular paint and a grass lawn on top. **Do not** Clipper-union flares into a doughnut. **Do not** `ShapeGeometry` a holed Clipper keyhole. |
+| Circus | RingGeometry doughnut. Ribbons extend onto that ring and stop before the grass island. Circular paint and a grass lawn in the hole. **Do not** Clipper-union flares into a doughnut. **Do not** clover-clip the ring. **Do not** `ShapeGeometry` a holed Clipper keyhole. |
 | Legal turns | 15 / 30 / 45 / 90° (`ROAD_TURN_DEG`). Treat as kit cases, not a continuous CS2 compiler. |
 
-Clip polygon for a circus is the **clover outline** (radial-max of the ring plus arm fillets). Drawing a Clipper union of disc + flares punched sliver holes in the doughnut. The lawn sits on the filled heart instead.
+Clip radius for a circus is the **outer disc**. Drawing a Clipper union of disc + flares punched sliver holes in the doughnut. Clover-clipping the ring ate the roundabout. Ribbons overlap the ring instead.
 
 ## Do not
 

@@ -320,7 +320,7 @@ describe("paved street from spawn", () => {
     const node = map.graph.nodes.find((n) => n.id === "s-rab-harbour")!;
     const radii = circusMeshRadii(node.radius);
     const foot = buildCircusFootprint(map.graph, node);
-    expect(multiContains(foot.tarmac, harbour.x, harbour.z), "clover fills the heart; lawn sits on top").toBe(true);
+    expect(multiContains(foot.tarmac, harbour.x, harbour.z), "doughnut keeps a hole; lawn sits in it").toBe(false);
     let nearestHwy = Infinity;
     for (const mesh of hwyMeshes) {
       const pos = mesh.geometry.attributes.position;
@@ -330,19 +330,21 @@ describe("paved street from spawn", () => {
         nearestHwy = Math.min(nearestHwy, d);
       }
     }
-    // Ribbons bite the clover kerb. Flares live in the circus mesh, not stickers.
+    // Black ribbon runs onto the black ring. Overlap is the join.
     expect(CIRCUS_ARM_STUB_M).toBeLessThan(5);
-    expect(nearestHwy).toBeGreaterThan(radii.outer - 1);
-    expect(nearestHwy).toBeLessThan(radii.outer + 18);
+    expect(nearestHwy).toBeGreaterThan(radii.inner);
+    expect(nearestHwy).toBeLessThan(radii.outer);
+    expect(nearestHwy).toBeLessThan(radii.enter + 2);
     expect(added.filter((m) => / merge$/.test(String(m.userData.roadName || "")) && m.userData.roadKind === "paved").length).toBe(0);
     const circus = added.find(
       (m) => m.userData.roadName === "Harbour Circus" && m.userData.footprint,
     );
     expect(circus).toBeTruthy();
-    expect(circus!.geometry.parameters?.innerRadius).toBeUndefined();
+    expect(circus!.geometry.parameters?.innerRadius).toBeCloseTo(radii.inner, 5);
+    expect(circus!.geometry.parameters?.outerRadius).toBeCloseTo(radii.outer, 5);
     expect(circus!.material.map).toBeTruthy();
     expect(CIRCUS_RING_WIDTH_M).toBeGreaterThanOrEqual(carriagewayWidthM("highway"));
-    expect(added.filter((m) => / merge paint$/.test(String(m.userData.roadName || "")) && m.userData.roadKind === "paint").length).toBeGreaterThan(8);
+    expect(added.filter((m) => / merge paint$/.test(String(m.userData.roadName || "")) && m.userData.roadKind === "paint").length).toBe(0);
     const island = added.find(
       (m) => m.userData.roadKind === "island" && /Harbour/.test(String(m.userData.label || "")),
     );

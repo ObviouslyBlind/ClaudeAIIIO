@@ -7,9 +7,10 @@
  *
  * Runs are ribbons that overlap hub fills. A T/L is a filled hub (radial
  * contour + tangent kerb fillets) plus a round join disc at the node. A
- * circus is one clover contour (circle plus filleted arms), same as a T/L.
- * Ribbons bite that kerb. Do not Clipper-union flares into a doughnut —
- * that punched sliver holes and killed the roundabout.
+ * circus is a RingGeometry doughnut. Ribbons extend onto that ring and
+ * stop before the grass island. Overlap is the join. Do not Clipper-union
+ * flares into a doughnut, clover-clip the ring, or fillet-sticker the face —
+ * those ate the roundabout.
  * That is PathPhalt / Curva / SeloSlav RoadJunctionBuilder — not CS2, not OSM.
  *
  * Island-wide Clipper union filled greens. Earcut of a holed circus keyhole
@@ -22,9 +23,9 @@
  *   way. The plate sits under so the meeting is one black shape.
  * - T/L inner kerb is a tangent fillet plus a round node disc, not a sand crotch.
  * - Stem paint stops at the through kerb. Through paint stays on the carriageway.
- * - Circus ribbon ends bite the clover outline. The drawn join is one contour
- *   (ring plus filleted arms). Circular paint and a grass lawn sit on top so it
- *   still reads as a roundabout. Do not Clipper-union or Clipper-hole the clover.
+ * - Circus ribbon ends run onto the black ring. The drawn join is the doughnut
+ *   plus that overlap. Circular paint and a grass lawn sit in the hole. Do not
+ *   Clipper-union, clover-clip, or fillet-sticker the circus.
  * - A circus is grit tarmac, concrete inner/outer kerbs, a grass island, and
  *   cream edge paint — not a pale stone puck.
  * - No circus arm boxes. 12 m stubs sat in the grass as extra black rectangles.

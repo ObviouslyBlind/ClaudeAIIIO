@@ -6,7 +6,7 @@
  */
 import polygonClipping from "./vendor/polygon-clipping.js";
 import { carriagewayWidthM, roadClassSpec } from "./roadclass.js";
-import { circusMeshRadii, circusArmDir, circusMergeGeom } from "./roadclip.js";
+import { circusMeshRadii } from "./roadclip.js";
 
 /** Keep in sync with SHOULDER_PAD_M in roads.js. */
 export const FOOT_SHOULDER_M = 2.2;
@@ -453,9 +453,8 @@ export function buildHubFootprint(graph, node, pad) {
 }
 
 /**
- * One clover: circulatory disc plus filleted arms. Ribbons bite on `clip`
- * (the solid outline). Drawn tarmac is that same blob — the lawn sits on
- * the heart. Clipper-holing the clover punched slivers in the ring.
+ * Circus clip is the outer disc. Drawn mesh is a RingGeometry doughnut.
+ * Ribbons run onto that ring; they are not bitten to a clover outline.
  */
 export function buildCircusFootprint(graph, node) {
   if (!graph || !node || !node.radius) {
@@ -464,41 +463,18 @@ export function buildCircusFootprint(graph, node) {
   const { outer, inner } = circusMeshRadii(node.radius);
   const cx = node.x;
   const cz = node.z;
-  const arms = [];
-  const fillets = [];
-  let reachMax = outer;
-  for (const e of graph.edges || []) {
-    if (e.a !== node.id && e.b !== node.id) continue;
-    if (!e.points || e.points.length < 2) continue;
-    const spec = roadClassSpec(e.cls);
-    if (spec.dirt) continue;
-    const dir = circusArmDir(node, e);
-    const half = carriagewayWidthM(e.cls) / 2;
-    const g = circusMergeGeom(half, outer);
-    reachMax = Math.max(reachMax, g.reach);
-    arms.push({ dx: dir.x, dz: dir.z, half, reach: g.reach });
-    const rx = dir.z;
-    const rz = -dir.x;
-    for (const sign of [-1, 1]) {
-      fillets.push({
-        cx: cx + dir.x * g.xc + rx * (half + g.filletM) * sign,
-        cz: cz + dir.z * g.xc + rz * (half + g.filletM) * sign,
-        rad: g.filletM,
-      });
-    }
-  }
-  const tarRing = circusContour(node, arms, fillets, outer);
-  const gritRing = swellRing(tarRing, FOOT_SHOULDER_M * 0.95);
-  const blob = [[tarRing]];
+  const disc = [[circleRing(cx, cz, outer, 96)]];
+  const grit = [[circleRing(cx, cz, outer + FOOT_SHOULDER_M, 96)]];
+  const holed = diffGeoms(disc, [[circleRing(cx, cz, inner, 64)]]);
   return {
-    tarmac: blob,
-    shoulder: gritRing ? [[gritRing]] : [],
+    tarmac: holed && holed.length ? holed : disc,
+    shoulder: diffGeoms(grit, disc),
     sidewalk: [],
-    clip: blob,
-    outerClip: gritRing ? [[gritRing]] : blob,
+    clip: disc,
+    outerClip: grit,
     inner,
     outer,
-    reach: reachMax,
+    reach: outer,
   };
 }
 
