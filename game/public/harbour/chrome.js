@@ -9,6 +9,7 @@ import { playPaperBuy } from "./paper-sfx.js";
 import { toggleViewer, isLotsViewer, footLevel } from "./overlays.js";
 import { mountPackShift } from "./pack.js";
 import { formatCartsBody } from "./carts-hud.js";
+import { formatInventoryBody } from "./inventory-hud.js";
 import { formatSiteMenu, gamesForSite, stickerFromPct } from "./site-menu.js";
 import { compactCash, fullCash } from "./cash-chip.js";
 import { formatCashLedger } from "./cash-ledger.js";
@@ -545,6 +546,12 @@ export function mountChrome(opts) {
   function paintInv() {
     const body = document.getElementById("inv-body");
     if (!body || !play) return;
+    body.innerHTML = formatInventoryBody(play);
+  }
+
+  function paintCarts() {
+    const body = document.getElementById("carts-body");
+    if (!body || !play) return;
     body.innerHTML = formatCartsBody(play);
   }
 
@@ -682,6 +689,7 @@ export function mountChrome(opts) {
         const line = packLine(ok, data);
         if (play) play.lastShiftLine = line;
         if (openPanel === "inventory") paintInv();
+        if (openPanel === "carts") paintCarts();
         const fresh = findSite(standId);
         if (fresh) paintStandMenu(fresh);
         if (opts.setStatus) opts.setStatus(line);
@@ -883,6 +891,7 @@ export function mountChrome(opts) {
   function paintPanels() {
     paintMarket();
     paintInv();
+    paintCarts();
     paintWarehouse();
     paintStaff();
     paintAccount();

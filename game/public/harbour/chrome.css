@@ -567,6 +567,7 @@ nav.dock.travel-dock {
   color: var(--muted);
 }
 .float-panel.pos-inv,
+.float-panel.pos-carts,
 .float-panel.pos-warehouse,
 .float-panel.pos-market,
 .float-panel.pos-staff {
@@ -574,17 +575,23 @@ nav.dock.travel-dock {
   transform: translateX(6px);
 }
 .float-panel.pos-inv.is-open,
+.float-panel.pos-carts.is-open,
 .float-panel.pos-warehouse.is-open,
 .float-panel.pos-market.is-open,
 .float-panel.pos-staff.is-open {
   transform: translateX(0);
 }
 .float-panel.pos-inv {
-  top: calc(50% - (2 * var(--rail-size) + 1.5 * var(--rail-gap)));
+  top: calc(50% - (2.5 * var(--rail-size) + 2 * var(--rail-gap)));
   width: min(340px, calc(100vw - 24px));
   max-height: min(72vh, 640px);
 }
-.float-panel.pos-warehouse { top: calc(50% - (1 * var(--rail-size) + 0.5 * var(--rail-gap))); }
+.float-panel.pos-carts {
+  top: calc(50% - (1.5 * var(--rail-size) + 1 * var(--rail-gap)));
+  width: min(340px, calc(100vw - 24px));
+  max-height: min(72vh, 640px);
+}
+.float-panel.pos-warehouse { top: calc(50% - (0.5 * var(--rail-size))); }
 .float-panel.pos-market { top: calc(50% + (0.5 * var(--rail-gap))); }
 .float-panel.pos-staff { top: calc(50% + (1 * var(--rail-size) + 1.5 * var(--rail-gap))); }
 .chrome-tr .float-panel {
@@ -2177,6 +2184,7 @@ nav.dock.travel-dock {
     border-radius: 12px;
   }
   .float-panel.pos-inv,
+  .float-panel.pos-carts,
   .float-panel.pos-warehouse { left: calc(var(--rail-size) + 12px); }
   .float-panel.sheet-center {
     width: calc(100vw - 16px);

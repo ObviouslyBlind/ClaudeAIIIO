@@ -822,7 +822,8 @@ async function takeCrate(deliveryId) {
     return;
   }
   hideCrateCard();
-  if (chromeHud) chromeHud.refresh();
+  if (data.play && chromeHud && typeof chromeHud.applyPlay === "function") chromeHud.applyPlay(data.play);
+  if (chromeHud && typeof chromeHud.open === "function") chromeHud.open("inventory");
   setStatus("In your inventory. Open Inv → Place in world.");
 }
 

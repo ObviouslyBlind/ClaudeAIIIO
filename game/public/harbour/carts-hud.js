@@ -64,16 +64,6 @@ export function formatCartsBody(play) {
     })
     .join("");
 
-  const stockRows = rows.filter((r) => !isKit(play, r.kind) && r.qty > 0);
-  const stockHtml = stockRows.length
-    ? stockRows
-        .map(
-          (r) =>
-            `<div class="inv-row"><span>${kindLabel(play, r.kind)} × ${r.qty}</span><span>on you</span></div>`,
-        )
-        .join("")
-    : "";
-
   const whKits = kinds
     .map((id) => {
       const qty = kitQty(wh.items, id);
@@ -115,7 +105,6 @@ export function formatCartsBody(play) {
     ${needsHtml}
     <h3 class="sheet-kicker">To place</h3>
     ${kitHtml}
-    ${stockHtml ? `<h3 class="sheet-kicker">On you</h3>${stockHtml}` : ""}
     <h3 class="sheet-kicker">On the kerb</h3>
     ${standsHtml}
   `;

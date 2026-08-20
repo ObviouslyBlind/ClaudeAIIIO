@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { formatCartsBody } from "../public/harbour/carts-hud.js";
+import { formatInventoryBody } from "../public/harbour/inventory-hud.js";
 import { formatSiteMenu, stickerTrackSegs, stickerBandGradient, stickerPct, stickerFromPct } from "../public/harbour/site-menu.js";
 import { formatAccountSheet } from "../public/harbour/account-sheet.js";
 
@@ -12,6 +13,7 @@ const pageCss = readFileSync(new URL("../public/harbour/style.css", import.meta.
 const fonts = readFileSync(new URL("../public/harbour/chrome-fonts.css", import.meta.url), "utf8");
 const pack = readFileSync(new URL("../public/harbour/pack.js", import.meta.url), "utf8");
 const carts = readFileSync(new URL("../public/harbour/carts-hud.js", import.meta.url), "utf8");
+const invHud = readFileSync(new URL("../public/harbour/inventory-hud.js", import.meta.url), "utf8");
 const siteMenu = readFileSync(new URL("../public/harbour/site-menu.js", import.meta.url), "utf8");
 
 describe("harbour chrome HUD", () => {
@@ -65,11 +67,16 @@ describe("harbour chrome HUD", () => {
     expect(chips).not.toContain("Leaderboard");
     expect(chips).not.toContain('data-panel="account"');
     expect(html).toContain('data-panel="inventory"');
+    expect(html).toContain('aria-label="Inventory"');
+    expect(html).toContain('data-tip="Inventory"');
+    expect(html).toContain('data-panel="carts"');
+    expect(html).toContain('aria-label="Carts"');
+    expect(html).toContain('data-tip="Carts"');
+    expect(html).toContain('id="panel-carts"');
+    expect(html).toContain('id="carts-body"');
     expect(html).toContain('data-panel="warehouse"');
     expect(html).toContain('data-panel="market"');
     expect(html).toContain('data-panel="employees"');
-    expect(html).toContain('aria-label="Carts"');
-    expect(html).toContain('data-tip="Carts"');
     expect(html).toContain('data-tip="Warehouse"');
     expect(html).toContain('data-tip="Marketplace"');
     expect(html).toContain('aria-label="Marketplace"');
@@ -81,6 +88,8 @@ describe("harbour chrome HUD", () => {
     expect(main).toContain("Go to Port to use Ferry");
     expect(chrome).toContain('root.querySelectorAll("[data-panel]")');
     expect(html).toContain('id="panel-inventory"');
+    expect(html).toContain('id="inv-body"');
+    expect(main).toContain('chromeHud.open("inventory")');
     expect(html).toContain('id="panel-market"');
     expect(html).toContain("sheet-center");
     expect(html).toContain('id="sheet-veil"');
@@ -126,6 +135,7 @@ describe("harbour chrome HUD", () => {
     expect(css).toContain(".icon-chip");
     expect(css).toContain("[data-tip]");
     expect(css).toContain("pos-inv");
+    expect(css).toContain("pos-carts");
     expect(css).toContain(".sku-buy");
     expect(css).toContain(".sheet-center");
     expect(css).toContain(".mp-search");
@@ -249,7 +259,11 @@ describe("harbour chrome HUD", () => {
 
   it("keeps Carts as a directory; hire, train, stock, sticker, fridge live on that cart", () => {
     expect(chrome).toContain("formatCartsBody");
-    expect(carts).toContain("On you");
+    expect(chrome).toContain("formatInventoryBody");
+    expect(chrome).toContain("paintCarts");
+    expect(invHud).toContain("On you");
+    expect(invHud).toContain("<h2>Inventory</h2>");
+    expect(carts).not.toContain("On you");
     expect(carts).not.toContain("Pockets");
     expect(chrome).toContain("formatMarketplace");
     expect(chrome).toContain("marketplaceScrollHtml");
@@ -349,6 +363,20 @@ describe("harbour chrome HUD", () => {
     expect(body).toMatch(/Place the cart/);
     expect(body).toMatch(/data-place="hotdog_cart"/);
     expect(body).not.toMatch(/data-stock/);
+    const bag = formatInventoryBody({
+      catalog: [{ id: "hotdog_cart", aisle: "street_carts", role: "kit", label: "Fruit cart" }],
+      inventory: [
+        { kind: "hotdog_cart", qty: 1 },
+        { kind: "hotdogs", qty: 20 },
+      ],
+    });
+    expect(bag).toContain("Inventory");
+    expect(bag).toContain("Fruit cart × 1");
+    expect(bag).toContain('data-place="hotdog_cart"');
+    expect(bag).toContain("on you");
+    expect(bag).toContain("× 20");
+    const emptyBag = formatInventoryBody({ inventory: [] });
+    expect(emptyBag).toContain("Nothing on you");
     const placed = formatCartsBody({
       todayPrice: 6,
       catalog: [{ id: "hotdog_cart", aisle: "street_carts", role: "kit", label: "Fruit cart" }],
