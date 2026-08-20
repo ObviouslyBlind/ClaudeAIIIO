@@ -82,9 +82,9 @@ Tests: `cd game && npm test` — **739 passed** (2026-08-20).
 
 Do these in order unless the operator names a piece. Politics stay frozen.
 
-1. **Shops that sell** — developed shop lots use the same site card and books row; stocker jobs from [MARKETPLACE.md](../MARKETPLACE.md).
-2. **Durable persist** — Postgres (PLAN step C). Restart must not wipe a mid-alpha shard once accounts exist. Alpha spawn wipe can stay until then.
-3. **Interiors you can buy into** — NPC town rooms as PAPER units, before player-designed buildings.
+1. **Units** — rooms in a game-owned building (shop / apartment / office). Placeholder boxes. Spec: [UNITS.md](UNITS.md). Do not implement until that file is accepted.
+2. **Shops that sell** — the ground-floor unit is the first shop; stocker jobs from [MARKETPLACE.md](../MARKETPLACE.md).
+3. **Durable persist** — Postgres (PLAN step C). Restart must not wipe a mid-alpha shard once accounts exist. Alpha spawn wipe can stay until then.
 4. **Shopfit / farming / aggregates aisles** — only when that lot type exists. Honest empty until then.
 5. **North harbour pass** — sidewalks and kit, not a second sim.
 6. **Player listing** — seventh PAPER tape row after a size gate. Not a wallet ticker.

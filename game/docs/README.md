@@ -38,6 +38,7 @@ These files are law. New work extends them; it does not start a second design.
 | [ECONOMY.md](../ECONOMY.md) | Faucets, sinks, land inflation, cart books, six PAPER listings. |
 | [MARKETPLACE.md](../MARKETPLACE.md) | Catalog aisles and the one logistics engine. |
 | [LAND.md](../LAND.md) | Parcels, pads, lease inflation. |
+| [UNITS.md](UNITS.md) | Rooms inside a building. Shop / apartment / office. Spec draft, not built. |
 
 ---
 

@@ -16,6 +16,7 @@ describe("documentation library", () => {
     expect(index).toContain("[../ECONOMY.md](../ECONOMY.md)");
     expect(index).toContain("[../FOUNDATION.md](../FOUNDATION.md)");
     expect(index).toContain("[../BACKEND.md](../BACKEND.md)");
+    expect(index).toContain("[UNITS.md](UNITS.md)");
   });
 
   it("handover names the live loop and does not unfreeze politics", () => {
