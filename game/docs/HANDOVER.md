@@ -58,7 +58,7 @@ Controls: primary tap/click walks or uses. Secondary long-press / right-click ex
 
 ## Branch
 
-Working branch for this mid-alpha slice: **`cursor/highway-pads-1949`**.
+Default branch: **`main`** at `624e26f` (2Isles mid-alpha, merged from `#57`).
 
 Tests: `cd game && npm test` — **739 passed** (2026-08-20).
 
