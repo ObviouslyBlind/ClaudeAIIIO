@@ -8,7 +8,9 @@ import {
   circusArmDir,
   circusGiveWayRings,
   circusMergeFilletM,
+  circusMergeGeom,
   circusMergeRing,
+  circusRibbonClipR,
   enterCircusRings,
   segmentCircleHits,
   snapPolylineEndToCircle,
@@ -74,13 +76,18 @@ describe("circus circle clip", () => {
     expect(near).toBeLessThan(outer);
   });
 
-  it("circle-cuts an offset dual onto the outer ring face for drawing", () => {
+  it("stops an offset dual in the flare, not as a square wall on the ring", () => {
     const map = createLandBoard();
     const node = map.graph.nodes.find((n) => n.id === "s-rab-harbour")!;
     const edge = map.graph.edges.find(
       (e) => e.name === "Island Hwy" && e.cls === "highway" && (e.a === node.id || e.b === node.id) && (e.a === "s-port" || e.b === "s-port"),
     )!;
     const { clip, outer } = circusMeshRadii(node.radius);
+    const half = carriagewayWidthM("highway") / 2;
+    const g = circusMergeGeom(half, outer);
+    expect(clip).toBeGreaterThan(outer + 2);
+    expect(clip).toBeLessThan(g.reach);
+    expect(circusRibbonClipR(half, outer)).toBeCloseTo(clip, 5);
     const lane = laneOffsetM("highway");
     const chains = clipPolylineOutsideCircuses(
       offsetPolyline(edge.points, lane),
@@ -92,8 +99,11 @@ describe("circus circle clip", () => {
     const d1 = Math.hypot(ch[ch.length - 1]!.x - node.x, ch[ch.length - 1]!.z - node.z);
     const near = Math.min(d0, d1);
     expect(near).toBeCloseTo(clip, 0);
-    expect(near).toBeGreaterThan(outer - 3);
-    expect(near).toBeLessThan(outer + 1);
+    expect(near).toBeGreaterThan(outer + 2);
+    expect(near).toBeLessThan(g.reach);
+    const ring = circusMergeRing(0, 0, { x: 1, z: 0 }, outer, half);
+    expect(ringContains(ring, clip, 0), "splice sits outside the flare").toBe(true);
+    expect(ringContains(ring, outer + 0.4, 0)).toBe(true);
   });
 
   it("clips every south circus in one pass without eating the whole highway", () => {

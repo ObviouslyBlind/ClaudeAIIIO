@@ -66,10 +66,10 @@ PathPhalt / Curva / medieval-settlement, mapped onto our graph:
 |---|---|
 | Run (street, avenue, dual) | Ribbon (`drawRibbon`) plus PathPhalt cream/kraft **lane paint**. Dual = one filled deck across both lanes and the median, round joins at corners, thin median stripe. Cars drive the graph above the mesh. |
 | T / L | Filled hub polygon plus a round node disc. Tarmac **overlaps** the hub. Paint and walks still cut. |
-| Circus | `RingGeometry` is the node surface. Duals **circle-cut onto the outer face**. Short lip caps at each arm — not 12 m black rectangles in the grass. Stone island in the hole. **Do not** `ShapeGeometry` a holed Clipper keyhole. |
+| Circus | `RingGeometry` is the node surface. Duals **stop in the arm flare** so the prism wall is not the ring face. Fillet flares at each arm — not 12 m black rectangles in the grass. Stone island in the hole. **Do not** `ShapeGeometry` a holed Clipper keyhole. |
 | Legal turns | 15 / 30 / 45 / 90° (`ROAD_TURN_DEG`). Treat as kit cases, not a continuous CS2 compiler. |
 
-Clip polygon for a circus is the **outer circle**, not a union of ring + long stubs. Circle clip already lived in `roadclip.js` and was never called from `makeRoads` — that is why the duals still died on the arm boxes.
+Clip polygon for a circus is the **flare splice circle** (outside the ring, inside the flare rectangle), not a union of ring + long stubs. Drawing the Clipper union of disc + flares punched sliver holes in the doughnut.
 
 ## Do not
 

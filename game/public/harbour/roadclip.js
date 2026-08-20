@@ -3,15 +3,17 @@
  *
  * Graph edges already stop on the kerb ring. Dual ribbons sit a lane-offset
  * off that centreline, so they used to end in the sand beside the ring.
- * Clip each drawn polyline to the *outer* tarmac circle (CS2-style: the
- * node owns the join; the edge stops at the node boundary). Do not fake
- * the join with arm discs, and do not chord the stone island.
+ * The drawn ribbon stops in the flare's straight rectangle; the flare owns
+ * the ring face. Do not circle-cut the prism onto the doughnut — that left
+ * a square wall on the ring. Do not Clipper-union flares into the doughnut.
  */
+
+import { carriagewayWidthM } from "./roadclass.js";
 
 /** Metres past the graph kerb. Duals hit this circle face-on instead of beside it. */
 export const CIRCUS_OUTER_PAD_M = 8;
-/** Ribbons tuck this far under the ring so a 1-px sand seam cannot show. */
-export const CIRCUS_OVERLAP_M = 2.2;
+/** Ribbon ends this far past the fillet tangent, inside the flare rectangle. */
+export const CIRCUS_FLARE_SPLICE_M = 4;
 /** Circulatory asphalt width — as fat as Island Hwy so duals merge, not dump into a thin doughnut. */
 export const CIRCUS_RING_WIDTH_M = 26;
 /** Stop this far outside the stone island so duals sit on the ring, not the kerb. */
@@ -25,11 +27,12 @@ export function circusMeshRadii(kerbR) {
   const kerb = kerbR || 34;
   const outer = kerb + CIRCUS_OUTER_PAD_M;
   const inner = Math.max(6, outer - CIRCUS_RING_WIDTH_M);
+  const half = carriagewayWidthM("highway") / 2;
   return {
     kerb,
     outer,
     inner,
-    clip: Math.max(inner + 1, outer - CIRCUS_OVERLAP_M),
+    clip: circusRibbonClipR(half, outer),
     enter: inner + CIRCUS_ENTER_PAD_M,
   };
 }
@@ -291,6 +294,18 @@ export function circusMergeGeom(half, outer) {
   const F = circusMergeFilletM(h, R);
   const xc = Math.sqrt(Math.max(1, (R + F) * (R + F) - (h + F) * (h + F)));
   return { half: h, outer: R, filletM: F, xc, reach: xc + 6 };
+}
+
+/**
+ * Where a drawn ribbon must stop so its square prism wall sits inside the
+ * flare, not on the outer ring. The flare mesh owns the last metres and
+ * the tangent kerb.
+ */
+export function circusRibbonClipR(half, outer) {
+  const g = circusMergeGeom(half, outer);
+  const splice = g.xc + CIRCUS_FLARE_SPLICE_M;
+  const lid = g.reach - 1.2;
+  return Math.max(g.outer + 3.2, Math.min(splice, lid));
 }
 
 function lerpAngle(a0, a1, t) {

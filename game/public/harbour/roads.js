@@ -2,12 +2,13 @@ import * as THREE from "three";
 import { ROAD_CLASSES, roadClassSpec, carriagewayWidthM } from "./roadclass.js";
 import { junctionPad, pointInJunctionPad } from "./roadnet.js";
 import { addQuadXZ, junctionKerbQuads } from "./roadjoin.js";
-import { buildHubFootprint, buildCircusFootprint, clipPolylineToOutside, multiContains, FOOT_SHOULDER_M, biteRibbonWith, circleRing } from "./roadfoot.js";
+import { buildHubFootprint, buildCircusFootprint, clipPolylineToOutside, multiContains, FOOT_SHOULDER_M, biteRibbonWith } from "./roadfoot.js";
 import {
   circusesFromGraph,
   clipPolylineOutsideCircuses,
   circusArmDir,
   circusMergeFilletM,
+  circusMergeGeom,
   circusMergeRing,
   circusGiveWayRings,
 } from "./roadclip.js";
@@ -320,7 +321,7 @@ export const HIGHWAY_LANE_OFFSET_M = 8;
 export const HIGHWAY_MEDIAN_M = 8;
 /**
  * Safety: skip ribbon faces across a gap this wide. Circus joins are no
- * longer this skip — they are a circle clip in roadclip.js.
+ * longer this skip — they are a flare splice in roadclip.js.
  */
 export const HIGHWAY_RAB_SKIP_M = 40;
 /** Stone disc inside the circulatory ring. Fallback when a node has no radius. */
@@ -389,7 +390,9 @@ function drawablePoints(road) {
 function joinKeepout(x, z, circuses, half) {
   for (const c of circuses || []) {
     const outer = c.outer || c.clip || 0;
-    if (outer > 0 && Math.hypot(x - c.x, z - c.z) < outer + Math.max(2, half * 0.15)) return true;
+    if (!(outer > 0)) continue;
+    const reach = circusMergeGeom(Math.max(2, half || 13), outer).reach + 2;
+    if (Math.hypot(x - c.x, z - c.z) < reach) return true;
   }
   return false;
 }
@@ -535,8 +538,8 @@ function clipToJoins(pts, joins, overlapM = 1.6, edgeId, alwaysClip) {
 }
 
 /**
- * PathPhalt/Curva: T/L is a filled hub polygon; a circus is a circle.
- * Offset duals must hit the ring face. Through arms are not hub-clipped.
+ * PathPhalt/Curva: T/L is a filled hub polygon; a circus flare owns the
+ * ring face. Ribbons stop in that flare so the prism wall is not the join.
  */
 function clipRuns(pts, hubs, circuses, overlapM = 1.6, edgeId, alwaysClip) {
   const afterHubs = clipToJoins(pts, hubs, overlapM, edgeId, alwaysClip);
@@ -553,7 +556,6 @@ function paintCircuses(circuses) {
   return (circuses || []).map((c) => ({
     ...c,
     clipPoly: null,
-    clip: (c.outer || c.clip || 0) + 0.3,
   }));
 }
 
@@ -625,14 +627,9 @@ function isThroughEdge(pad, edgeId) {
 
 function joinCutterAt(p, hubs, circuses, roadKind, edgeId) {
   if (!p) return null;
-  for (const c of circuses || []) {
-    const outer = c.outer || c.clip;
-    if (!(outer > 0)) continue;
-    const d = Math.hypot(p.x - c.x, p.z - c.z);
-    if (d > outer + 14 || d < (c.inner || 8) * 0.4) continue;
-    const r = roadKind === "shoulder" ? outer + FOOT_SHOULDER_M : outer;
-    return [[circleRing(c.x, c.z, r, 64)]];
-  }
+  // Circus flares own the ring face. Biting the prism with the outer
+  // circle left a square wall on the doughnut; do not extend a stub in.
+  void circuses;
   for (const h of hubs || []) {
     const n = h.node;
     if (!n) continue;
@@ -664,7 +661,7 @@ function drawBittenStub(scene, spec, road, heightAt, stub, cutter, widthM, color
 
 /**
  * Strip body plus a join-bitten stub. The prism's square cap is the chord;
- * biting an overlap into the hub/circus makes the kerb the join outline.
+ * biting an overlap into the hub makes the kerb the join outline.
  */
 function drawClippedRuns(scene, spec, road, heightAt, runs, widthM, color, roadKind, matOpts, yLift, skipGap, hubs, circuses) {
   const hasJoins = (hubs && hubs.length) || (circuses && circuses.length);
@@ -796,7 +793,7 @@ function drawSidewalks(scene, spec, road, heightAt, graph, hubs, circuses) {
 /**
  * One filled dual deck. Cars drive the graph a few centimetres above it,
  * so the camera can paint a continuous black road instead of two tapes.
- * Circus ends are still circle-bitten so the stone island stays a hole.
+ * Circus ends stop in the flare; the ring stays a doughnut with a hole.
  */
 function drawHighway(scene, spec, road, heightAt, graph, hubs, circuses) {
   const cls = classOf(road);
@@ -964,6 +961,7 @@ function drawJunctions(scene, map, specOf, heightAt) {
 /**
  * Smooth flare from the arm into the ring. Not Clipper-unioned with the
  * doughnut — that exploded into sliver holes and killed the roundabout.
+ * Sits a hair above the ribbon so it lids the prism wall in the splice.
  */
 function addCircusMerge(scene, spec, heightAt, node, edge, outer) {
   if (!edge || !edge.points || edge.points.length < 2) return;
@@ -986,14 +984,14 @@ function addCircusMerge(scene, spec, heightAt, node, edge, outer) {
   };
   const y0 = heightAt(spec, mid.x, mid.z);
   const label = (edge.name || "road") + " merge";
-  addMultiPolygonMesh(scene, [[grit]], y0 + 0.13, SHOULDER, {
+  addMultiPolygonMesh(scene, [[grit]], y0 + 0.15, SHOULDER, {
     island: node.island,
     roadKind: "shoulder",
     roadName: label,
     widthM: half * 2 + FOOT_SHOULDER_M,
     mode: "PAPER",
   }, 1);
-  addMultiPolygonMesh(scene, [[ring]], y0 + TARMAC_TOP_M, ASPHALT, {
+  addMultiPolygonMesh(scene, [[ring]], y0 + TARMAC_TOP_M + 0.03, ASPHALT, {
     island: node.island,
     roadKind: "paved",
     roadName: label,
@@ -1307,7 +1305,7 @@ function drawLegacyJoins(scene, map, specOf, heightAt) {
 /**
  * Draw `/api/map` roads. Runs are ribbons that overlap hub fills.
  * A T/L is a filled hub plus round joins. A circus is a RingGeometry
- * plus smooth arm flares; duals circle-cut onto the ring.
+ * plus smooth arm flares; duals stop in those flares, not on the ring face.
  */
 export function makeRoads(map, helpers) {
   const { scene, specOf, heightAt } = helpers;

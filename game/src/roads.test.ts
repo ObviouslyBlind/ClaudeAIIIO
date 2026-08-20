@@ -330,10 +330,23 @@ describe("paved street from spawn", () => {
         nearestHwy = Math.min(nearestHwy, d);
       }
     }
-    // Ribbons circle-cut onto the ring face. Flares are extra meshes, not a clover clip.
+    // Ribbons stop in the flare. Merge meshes own the ring face.
     expect(CIRCUS_ARM_STUB_M).toBeLessThan(5);
-    expect(nearestHwy).toBeLessThan(radii.outer + 3);
-    expect(nearestHwy).toBeGreaterThan(radii.outer - 4);
+    expect(nearestHwy).toBeGreaterThan(radii.outer + 2);
+    expect(nearestHwy).toBeLessThan(radii.outer + 16);
+    const hwyMerges = added.filter(
+      (m) => m.userData.roadKind === "paved" && m.userData.roadName === "Island Hwy merge",
+    );
+    expect(hwyMerges.length).toBeGreaterThan(0);
+    let nearestHwyMerge = Infinity;
+    for (const mesh of hwyMerges) {
+      const pos = mesh.geometry.attributes.position;
+      for (let i = 0; i < pos.count; i++) {
+        nearestHwyMerge = Math.min(nearestHwyMerge, Math.hypot(pos.getX(i) - harbour.x, pos.getZ(i) - harbour.z));
+      }
+    }
+    expect(nearestHwyMerge, "Hwy merge missed the ring").toBeLessThan(radii.outer + 1.2);
+    expect(nearestHwyMerge).toBeGreaterThan(radii.inner - 1);
     const circus = added.find(
       (m) => m.userData.roadName === "Harbour Circus" && m.userData.footprint,
     );
@@ -375,8 +388,20 @@ describe("paved street from spawn", () => {
         nearestQuay = Math.min(nearestQuay, Math.hypot(pos.getX(i) - harbour.x, pos.getZ(i) - harbour.z));
       }
     }
-    expect(nearestQuay, "Quayward Rd missed Harbour Circus").toBeLessThan(radii.outer + 3);
+    expect(nearestQuay, "Quayward Rd missed Harbour Circus").toBeLessThan(radii.outer + 16);
     expect(nearestQuay).toBeGreaterThan(radii.inner - 0.6);
+    const quayMerges = added.filter(
+      (m) => m.userData.roadKind === "paved" && m.userData.roadName === "Quayward Rd merge",
+    );
+    expect(quayMerges.length).toBeGreaterThan(0);
+    let nearestQuayMerge = Infinity;
+    for (const mesh of quayMerges) {
+      const pos = mesh.geometry.attributes.position;
+      for (let i = 0; i < pos.count; i++) {
+        nearestQuayMerge = Math.min(nearestQuayMerge, Math.hypot(pos.getX(i) - harbour.x, pos.getZ(i) - harbour.z));
+      }
+    }
+    expect(nearestQuayMerge, "Quayward merge missed the ring").toBeLessThan(radii.outer + 1.2);
   });
 
   it("keeps stem paint off the through heart, and lets the through carriageway stay painted", () => {

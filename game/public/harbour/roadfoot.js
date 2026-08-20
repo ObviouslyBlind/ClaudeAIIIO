@@ -454,6 +454,7 @@ export function buildHubFootprint(graph, node, pad) {
 
 /**
  * Circus clip. Drawn mesh is RingGeometry plus per-arm flare meshes.
+ * Ribbons stop in the flare; the doughnut stays a RingGeometry.
  * Do not Clipper-union those: overlapping fillet arcs explode into slivers.
  */
 export function buildCircusFootprint(graph, node) {
