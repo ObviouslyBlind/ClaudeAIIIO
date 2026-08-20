@@ -108,6 +108,27 @@ export function stickerTrackSegs(today, min = 1, max = 16) {
   return segs;
 }
 
+const SEG_FILL = { red: "#c45a3a", yellow: "#e2c04a", green: "#5fe3a0" };
+
+/** Hard R-Y-G-Y-R stops. Same colour on both sides of a stop so it does not rainbow. */
+export function stickerBandGradient(segs) {
+  if (!segs.length) return SEG_FILL.red;
+  const hair = 0.5;
+  const stops = [];
+  segs.forEach((s, i) => {
+    const c = SEG_FILL[s.tone] || SEG_FILL.red;
+    let a = s.left;
+    const b = s.left + s.width;
+    if (i > 0) {
+      stops.push(`#0c1416 ${a.toFixed(2)}%`);
+      a += hair;
+      stops.push(`#0c1416 ${a.toFixed(2)}%`);
+    }
+    stops.push(`${c} ${a.toFixed(2)}%`, `${c} ${b.toFixed(2)}%`);
+  });
+  return `linear-gradient(90deg, ${stops.join(", ")})`;
+}
+
 function stockBand(have, cap) {
   const r = have / Math.max(cap, 1);
   if (r <= 0.25) return "is-low";
@@ -140,6 +161,7 @@ function paintStock(site, play) {
   const knob = ((sticker - min) / span) * 100;
   const segs = stickerTrackSegs(todayN, min, max);
   const tone = stickerToneAttr(vs);
+  const good = segs.find((s) => s.tone === "green");
   const mine = site.siteClass === "mine";
   const hired = Boolean(site.hired);
   const loaders =
@@ -180,18 +202,15 @@ function paintStock(site, play) {
     <p class="sticker-label">Price</p>
     <div class="sticker-slide" data-tone="${tone}">
       <span class="sticker-read ${vs}" data-sticker-out>${money(sticker)}</span>
-      <div class="sticker-band" aria-hidden="true">${segs
-        .map(
-          (s) =>
-            `<span class="sticker-seg is-${s.tone}" style="flex:${s.width.toFixed(4)} 0 0"></span>`,
-        )
-        .join("")}</div>
       <div class="sticker-track">
-        <i class="sticker-rail" aria-hidden="true"></i>
+        <i class="sticker-band" aria-hidden="true" style="background:${stickerBandGradient(segs)}"></i>
+        ${good ? `<i class="sticker-good" style="left:${good.left}%;width:${good.width}%"></i>` : ""}
         <i class="sticker-mark" style="left:${mark}%"></i>
         <i class="sticker-knob" data-sticker-knob style="left:${knob}%"></i>
         <input id="sticker-price" type="range" min="${min}" max="${max}" step="0.5" value="${sticker}" />
       </div>
+      <p class="sticker-today-line"><span class="sticker-today" style="left:${mark}%">Today ${money(todayN)}</span></p>
+      <div class="sticker-ends"><span>$1</span><span>$16</span></div>
     </div>
   `;
 }
