@@ -53,11 +53,31 @@ function roomLine(r) {
   return `${esc(r.label)} · ${esc(r.use)} · ${who} · ${money(r.price)}`;
 }
 
-function paintRoot(building, play) {
+function floorsOf(building) {
+  return [...new Set((building.rooms || []).map((r) => r.floor))].sort((a, b) => a - b);
+}
+
+function activeFloor(building, floor) {
+  const floors = floorsOf(building);
+  return floors.includes(floor) ? floor : floors[0];
+}
+
+function floorChips(building, viewFloor) {
+  return floorsOf(building)
+    .map(
+      (f) =>
+        `<button type="button" class="ghost${f === viewFloor ? " is-on" : ""}" data-unit-floor="${f}">${esc(floorName(f))}</button>`,
+    )
+    .join("");
+}
+
+function paintRoot(building, play, floor) {
   const cash = Number(play && play.cash) || 0;
   const landOwned = building.landOwner === "visitor";
   const canLand = !landOwned && cash >= Number(building.landPrice);
   const manageOff = !building.canManage;
+  const viewFloor = activeFloor(building, floor);
+  const onFloor = (building.rooms || []).filter((r) => r.floor === viewFloor);
   const vacant = (building.rooms || []).filter((r) => r.owner !== "visitor");
   const ask = vacant.reduce((m, r) => Math.min(m, Number(r.price) || Infinity), Infinity);
   const hint =
@@ -76,25 +96,18 @@ function paintRoot(building, play) {
         ${landOwned ? "You own this land" : "Buy this land " + money(building.landPrice)}
       </button>
     </div>
+    <div class="dest-row">${floorChips(building, viewFloor)}</div>
+    <p class="whisper">${esc(floorName(viewFloor))}</p>
     <ul class="unit-list">
-      ${(building.rooms || [])
-        .map((r) => `<li>${roomLine(r)}</li>`)
-        .join("")}
+      ${onFloor.map((r) => `<li>${roomLine(r)}</li>`).join("")}
     </ul>`;
 }
 
 function paintBuy(building, play, floor) {
-  const floors = [...new Set((building.rooms || []).map((r) => r.floor))].sort((a, b) => a - b);
-  const viewFloor = floors.includes(floor) ? floor : floors[0];
+  const viewFloor = activeFloor(building, floor);
   const onFloor = (building.rooms || []).filter((r) => r.floor === viewFloor);
   const others = (building.rooms || []).filter((r) => r.floor !== viewFloor && !r.owner);
   const cash = Number(play && play.cash) || 0;
-  const floorBtns = floors
-    .map(
-      (f) =>
-        `<button type="button" class="ghost${f === viewFloor ? " is-on" : ""}" data-unit-floor="${f}">${esc(floorName(f))}</button>`,
-    )
-    .join("");
   const row = (r) => {
     const owned = r.owner === "visitor";
     const can = !owned && cash >= Number(r.price);
@@ -108,7 +121,7 @@ function paintBuy(building, play, floor) {
   };
   return `
     <button type="button" class="ghost hire-back" data-unit-view="root">Back</button>
-    <div class="dest-row">${floorBtns}</div>
+    <div class="dest-row">${floorChips(building, viewFloor)}</div>
     <p class="whisper">${esc(floorName(viewFloor))}</p>
     ${onFloor.map(row).join("")}
     ${others.length ? `<p class="whisper">Other vacant rooms in this building</p>${others.map(row).join("")}` : ""}`;
@@ -121,16 +134,9 @@ function paintManage(building, play, floor) {
       <button type="button" class="ghost hire-back" data-unit-view="root">Back</button>
       <p class="whisper">Manage is grey until you own a room in this building.</p>`;
   }
-  const floors = [...new Set((building.rooms || []).map((r) => r.floor))].sort((a, b) => a - b);
-  const viewFloor = floors.includes(floor) ? floor : floors[0];
+  const viewFloor = activeFloor(building, floor);
   const onFloor = mine.filter((r) => r.floor === viewFloor);
   const others = mine.filter((r) => r.floor !== viewFloor);
-  const floorBtns = floors
-    .map(
-      (f) =>
-        `<button type="button" class="ghost${f === viewFloor ? " is-on" : ""}" data-unit-floor="${f}">${esc(floorName(f))}</button>`,
-    )
-    .join("");
   const row = (r) => `
       <div class="inv-row">
         <span>${esc(r.label)} · ${esc(r.use)}</span>
@@ -138,7 +144,7 @@ function paintManage(building, play, floor) {
       </div>`;
   return `
     <button type="button" class="ghost hire-back" data-unit-view="root">Back</button>
-    <div class="dest-row">${floorBtns}</div>
+    <div class="dest-row">${floorChips(building, viewFloor)}</div>
     <p class="whisper">${esc(floorName(viewFloor))}</p>
     ${onFloor.map(row).join("")}
     ${others.length ? `<p class="whisper">Other rooms you own</p>${others.map(row).join("")}` : ""}`;
@@ -167,10 +173,20 @@ function paintRoom(building, play, unitId) {
     .join("");
   if (unit.use === "shop") {
     const site = ((play && play.workSites) || []).find((s) => s.unitId === unit.id);
+    const cost = money(play && play.hireCost != null ? play.hireCost : 300);
+    const packer = site && site.packerHired
+      ? `<div class="inv-row"><span>${esc(site.packerStaffName || "Packer")}</span><button type="button" class="ghost" data-unit-fire="${esc(unit.id)}" data-unit-role="packer">Fire packer</button></div>`
+      : `<button type="button" class="go" data-unit-hire="${esc(unit.id)}" data-unit-role="packer">Hire packer ${cost}</button>`;
+    const till = site && site.tillHired
+      ? `<div class="inv-row"><span>${esc(site.staffName || "Till")}</span><button type="button" class="ghost" data-unit-fire="${esc(unit.id)}" data-unit-role="till">Fire till</button></div>`
+      : `<button type="button" class="go" data-unit-hire="${esc(unit.id)}" data-unit-role="till">Hire till ${cost}</button>`;
     return `
       <button type="button" class="ghost hire-back" data-unit-view="manage">Back</button>
       <p class="whisper">Shop. Packer fills the shelf. Till sells.</p>
       ${kitRows}
+      ${packer}
+      ${till}
+      <p class="whisper">Unhired packer = crate sits. Unhired till = no sales.</p>
       <button type="button" class="go" data-open-stand="${esc(site ? site.id : "")}" ${site ? "" : "disabled"}>Open site card</button>`;
   }
   const hours = unitsSnap(play).leaseHours || [3, 6, 24, 48];
@@ -198,7 +214,7 @@ export function formatBuildingSheet(play, opts = {}) {
   const building = findBuilding(play, opts.buildingId);
   if (!building) return `<div class="site-card"><p>No building.</p></div>`;
   const view = opts.view || "root";
-  let body = paintRoot(building, play);
+  let body = paintRoot(building, play, opts.floor);
   if (view === "buy") body = paintBuy(building, play, opts.floor);
   else if (view === "manage") body = paintManage(building, play, opts.floor);
   else if (view === "room") body = paintRoom(building, play, opts.unitId);

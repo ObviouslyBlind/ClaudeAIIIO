@@ -62,7 +62,7 @@ South spawn. Tap-to-walk. RMB-hold orbit. No WASD.
 | Site card | Stock · Run · Upgrades · Stats. Hire $300. Play shifts while unhired. |
 | Hire | Left-rail Hire sheet, or Run tab on the cart. |
 | Account | #0002. Look swatches. Reset / delete. Cash chip expands to holdings. |
-| Units (0.5.1) | Grey boxes **in the spawn look**. Spawn **$10,000** — shop $1,200, flat $900, dirt $15,000. Tap the name/$ tag. Kit is small grey boxes. Packer + till. Scout + lease. Dest **This room** when you own a shop. |
+| Units (0.5.1) | Four grey shells **inland of Island Hwy**, in the spawn look, not stacked. Spawn **$10,000** — shop $1,200, flat $900, dirt $15,000. Tap the name/$ tag. Floor chips on the sheet. Kit is small grey boxes. Packer + till. Scout + lease. Dest **This room** when you own a shop. |
 
 Starter: cash **$10,000**. Pad **$750**. Fruit kit **$90**, pack **$14** / 20. Today fruit **$6**, tax **8%**. A shop room is **$1,200**. Building dirt is **$15,000**. Hire **$300**.
 

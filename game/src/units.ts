@@ -77,16 +77,17 @@ export type BuildingSpec = {
 const SHOP_STOCK: InvKind[] = ["hotdogs", "melon", "fish_chips"];
 
 /**
- * First-frame cluster, inland of Island Hwy, in the south spawn look.
- * Strand Flats ($900) is closest. Spawn is $10,000 so a shop is buyable too.
+ * First-frame row, inland of Island Hwy (past the dual + cart pads), in the
+ * south spawn look. Strand Flats ($900) is closest. Do not stack the four
+ * shells on top of each other — Quay Shops must read as its own box.
  */
 export const UNIT_BUILDINGS: BuildingSpec[] = [
   {
     id: "strand-flats",
     name: "Strand Flats",
     floors: 2,
-    x: SOUTH_PORT.x + 28,
-    z: SOUTH_PORT.z + 10,
+    x: SOUTH_PORT.x + 13,
+    z: SOUTH_PORT.z + 38,
     rooms: [
       { floor: 0, room: 0, use: "apartment", label: "Strand flat G-L" },
       { floor: 0, room: 1, use: "apartment", label: "Strand flat G-R" },
@@ -95,22 +96,11 @@ export const UNIT_BUILDINGS: BuildingSpec[] = [
     ],
   },
   {
-    id: "quay-shops",
-    name: "Quay Shops",
-    floors: 1,
-    x: SOUTH_PORT.x + 44,
-    z: SOUTH_PORT.z + 12,
-    rooms: [
-      { floor: 0, room: 0, use: "shop", label: "Quay shop left" },
-      { floor: 0, room: 1, use: "shop", label: "Quay shop right" },
-    ],
-  },
-  {
     id: "mixed-house",
     name: "Mixed House",
     floors: 3,
-    x: SOUTH_PORT.x + 34,
-    z: SOUTH_PORT.z + 22,
+    x: SOUTH_PORT.x + 25,
+    z: SOUTH_PORT.z + 48,
     rooms: [
       { floor: 0, room: 0, use: "shop", label: "Mixed house shop" },
       { floor: 1, room: 0, use: "apartment", label: "Mixed house flat" },
@@ -118,11 +108,22 @@ export const UNIT_BUILDINGS: BuildingSpec[] = [
     ],
   },
   {
+    id: "quay-shops",
+    name: "Quay Shops",
+    floors: 1,
+    x: SOUTH_PORT.x + 38,
+    z: SOUTH_PORT.z + 58,
+    rooms: [
+      { floor: 0, room: 0, use: "shop", label: "Quay shop left" },
+      { floor: 0, room: 1, use: "shop", label: "Quay shop right" },
+    ],
+  },
+  {
     id: "harbour-offices",
     name: "Harbour Offices",
     floors: 2,
-    x: SOUTH_PORT.x + 52,
-    z: SOUTH_PORT.z + 22,
+    x: SOUTH_PORT.x + 50,
+    z: SOUTH_PORT.z + 68,
     rooms: [
       { floor: 0, room: 0, use: "office", label: "Harbour office G-L" },
       { floor: 0, room: 1, use: "office", label: "Harbour office G-R" },

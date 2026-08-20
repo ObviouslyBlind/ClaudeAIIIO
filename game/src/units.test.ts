@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createLandBoard, leasePlot, STARTER_CASH } from "./land.ts";
-import { southSpawnPad } from "./southGeom.ts";
+import { SOUTH_PORT, southSpawnPad } from "./southGeom.ts";
 import { createVisitor, createWorld } from "./sim.ts";
 import {
   BUILDING_LAND_PRICE,
@@ -56,6 +56,38 @@ describe("units scripts (alpha 0.5)", () => {
     expect(Math.hypot(strand.x - spawn.x, strand.z - spawn.z)).toBeLessThan(40);
     for (const b of UNIT_BUILDINGS) {
       expect(Math.hypot(b.x - spawn.x, b.z - spawn.z)).toBeLessThan(80);
+    }
+    for (let i = 0; i < UNIT_BUILDINGS.length; i++) {
+      for (let j = i + 1; j < UNIT_BUILDINGS.length; j++) {
+        const a = UNIT_BUILDINGS[i]!;
+        const b = UNIT_BUILDINGS[j]!;
+        expect(Math.hypot(a.x - b.x, a.z - b.z)).toBeGreaterThan(14);
+      }
+    }
+    const land = createLandBoard();
+    const hwy = land.roads.find(
+      (r) =>
+        r.name === "Island Hwy" &&
+        r.cls === "highway" &&
+        r.points.some((p) => Math.hypot(p.x - SOUTH_PORT.x, p.z - SOUTH_PORT.z) < 8),
+    );
+    expect(hwy).toBeTruthy();
+    const pts = hwy!.points;
+    for (const b of UNIT_BUILDINGS) {
+      let min = Infinity;
+      for (let i = 0; i < pts.length - 1; i++) {
+        const ax = pts[i]!.x;
+        const az = pts[i]!.z;
+        const bx = pts[i + 1]!.x;
+        const bz = pts[i + 1]!.z;
+        const dx = bx - ax;
+        const dz = bz - az;
+        const l2 = dx * dx + dz * dz || 1;
+        let t = ((b.x - ax) * dx + (b.z - az) * dz) / l2;
+        t = Math.max(0, Math.min(1, t));
+        min = Math.min(min, Math.hypot(b.x - (ax + t * dx), b.z - (az + t * dz)));
+      }
+      expect(min).toBeGreaterThan(18);
     }
   });
 

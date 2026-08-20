@@ -50,5 +50,6 @@ Systems camera bar: 13 placeholder boxes, Manage grey until owned, dest This roo
 | U2 | Flat/office need full kit before scout; rent on sim-hour clock; ground rent $8 or skip if you own dirt | **PASS** (tests) |
 | U3 | Shop kit is siteScore parts (shelf/till/fridge). Ground-floor traffic band. Two quay shops = two Books rows. Stale unit crate warehouses. | **PASS** (tests) |
 | U5 | Spawn look: Strand Flats $900 tag, tap, buy a room | **PASS** (live harbour) |
+| U6 | Four distinct shells inland of Island Hwy in the spawn look; floor chips on the building sheet | **WIP** |
 
 Operator is the brake.

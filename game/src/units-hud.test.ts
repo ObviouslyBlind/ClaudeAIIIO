@@ -43,6 +43,8 @@ describe("units 0.5.1 systems (placeholders, not façades)", () => {
     expect(html).toContain("Buy this land");
     expect(html).toContain("$15,000.00");
     expect(html).toMatch(/data-buy-land="quay-shops"[^>]*disabled/);
+    expect(html).toContain("Ground floor");
+    expect(html).toContain('data-unit-floor="0"');
   });
 
   it("sells one quay room and leaves the sibling vacant", () => {
@@ -58,6 +60,15 @@ describe("units 0.5.1 systems (placeholders, not façades)", () => {
     expect(buy).toContain(floorName(0));
     const root = formatBuildingSheet(play, { buildingId: "quay-shops", view: "root" });
     expect(root).not.toMatch(/data-unit-view="manage"[^>]*disabled/);
+    const mixed = formatBuildingSheet(play, { buildingId: "mixed-house", view: "root", floor: 0 });
+    expect(mixed).toContain("Ground floor");
+    expect(mixed).toContain("First floor");
+    expect(mixed).toContain("Second floor");
+    expect(mixed).toContain("Mixed house shop");
+    expect(mixed).not.toContain("Mixed house office");
+    const upstairs = formatBuildingSheet(play, { buildingId: "mixed-house", view: "root", floor: 2 });
+    expect(upstairs).toContain("Mixed house office");
+    expect(upstairs).not.toContain("Mixed house shop");
   });
 
   it("offers This room as a market dest only for owned shop units", () => {
@@ -163,6 +174,9 @@ describe("units 0.5.1 systems (placeholders, not façades)", () => {
     expect(html).toContain("Shelf");
     expect(html).toContain("Fridge");
     expect(html).toContain("Till");
+    expect(html).toContain("Hire packer");
+    expect(html).toContain("Hire till");
+    expect(html).toContain('data-unit-hire="');
     expect(html).toContain("Open site card");
     expect(html).toContain("Packer fills the shelf");
   });

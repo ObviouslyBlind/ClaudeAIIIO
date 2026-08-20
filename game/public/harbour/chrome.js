@@ -746,7 +746,6 @@ export function mountChrome(opts) {
     root.querySelectorAll("[data-unit-floor]").forEach((btn) => {
       btn.addEventListener("click", () => {
         unitFloor = Number(btn.getAttribute("data-unit-floor") || 0);
-        if (unitView !== "buy" && unitView !== "manage") unitView = "buy";
         paintBuildingSheet(unitBuildingId);
       });
     });
@@ -800,6 +799,28 @@ export function mountChrome(opts) {
           hours: Number(btn.getAttribute("data-hours")),
         });
         if (opts.setStatus) opts.setStatus(ok ? "Lease signed." : "Could not sign: " + ((data && data.reason) || "fail"));
+        paintBuildingSheet(unitBuildingId);
+      });
+    });
+    root.querySelectorAll("[data-unit-hire]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        if (btn.disabled) return;
+        const { ok, data } = await postUnit("/api/unit/hire", {
+          unitId: btn.getAttribute("data-unit-hire"),
+          role: btn.getAttribute("data-unit-role"),
+        });
+        if (opts.setStatus) opts.setStatus(ok ? "Hired." : "Could not hire: " + ((data && data.reason) || "fail"));
+        paintBuildingSheet(unitBuildingId);
+      });
+    });
+    root.querySelectorAll("[data-unit-fire]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        if (btn.disabled) return;
+        const { ok, data } = await postUnit("/api/unit/fire", {
+          unitId: btn.getAttribute("data-unit-fire"),
+          role: btn.getAttribute("data-unit-role"),
+        });
+        if (opts.setStatus) opts.setStatus(ok ? "Fired." : "Could not fire: " + ((data && data.reason) || "fail"));
         paintBuildingSheet(unitBuildingId);
       });
     });
