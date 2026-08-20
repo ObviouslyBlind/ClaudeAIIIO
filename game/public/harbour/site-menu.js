@@ -224,6 +224,9 @@ function paintStock(site, play) {
     <p class="stock-num ${stockBand(have, cap)}">${Math.round(have)}<small>/${cap}</small></p>
     ${loaders}
     ${propaneBlock}
+    ${(site.siteClass || "cart") === "cart"
+      ? `<button type="button" class="ghost" data-pickup-stand="${esc(site.id)}">Pick up cart</button>`
+      : ""}
     <div class="sticker-slide" data-tone="${tone}">
       <div class="sticker-head">
         <p class="sticker-label">Price set</p>

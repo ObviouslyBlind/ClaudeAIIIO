@@ -8,6 +8,7 @@ import {
   heightAt,
   ISLANDS,
   leasePlot,
+  sellPlot,
   DEVELOP_COST,
   isStarterPlot,
   pickStarterPlotAt,
@@ -171,6 +172,27 @@ describe("harbour land board", () => {
 
     const again = developPlot(board, visitor, vacant.id, "stall");
     expect(again.ok).toBe(false);
+  });
+
+  it("sells a visitor lot back for the ask and clears the building", () => {
+    const board = createLandBoard();
+    const vacant = board.plots
+      .filter((p) => !p.owner && p.class === "by_right")
+      .sort((a, b) => a.price - b.price)[0]!;
+    const visitor = createVisitor(vacant.price + DEVELOP_COST + 40);
+    const leased = leasePlot(board, visitor, vacant.id);
+    expect(leased.ok).toBe(true);
+    if (!leased.ok) return;
+    expect(developPlot(board, visitor, vacant.id, "house").ok).toBe(true);
+    const cash = visitor.cash;
+    const sold = sellPlot(board, visitor, vacant.id);
+    expect(sold.ok).toBe(true);
+    if (!sold.ok) return;
+    expect(sold.refunded).toBe(leased.paid);
+    expect(visitor.cash).toBeCloseTo(cash + leased.paid, 4);
+    expect(vacant.owner).toBeNull();
+    expect(vacant.use).toBeNull();
+    expect(sellPlot(board, visitor, vacant.id).ok).toBe(false);
   });
 
   it("refuses a lease that would leave too little PAPER to develop", () => {

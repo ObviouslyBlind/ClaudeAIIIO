@@ -3,8 +3,9 @@
  * Depth-tested billboards — carts and buildings cover them.
  * Vacant: tap opens the buy-ask. Yours: inspect. Placing: PLACE.
  *
- * YOURS stays on in World. Zoom out (Lots or a high camera) shows pad $ tags.
- * Close-up scale stays small. Placing: PLACE on yours only.
+ * YOURS stays on in World. Lots to buy shows vacant $ tags.
+ * Your lots never shows prices. World never shows buy $.
+ * Close-up scale stays small. Zoom-out tags grow with camera radius.
  */
 
 import * as THREE from "three";
@@ -21,7 +22,7 @@ export const TAG_Y_M = 1.15;
 export const TAG_W_M = 4.2;
 export const TAG_H_M = 1.15;
 export const TAG_W_MIN_M = 2.4;
-export const TAG_W_MAX_M = 16;
+export const TAG_W_MAX_M = 88;
 
 export function tagKindFor(plot) {
   if (!plot) return "none";
@@ -59,13 +60,12 @@ export function tagPoolForRadius(camRadius) {
 /** World metres. Grows with zoom-out; clamped so close-up YOURS is not a billboard. */
 export function tagWorldScale(camRadius) {
   const r = Math.max(6, Number(camRadius) || 8);
-  const w = Math.min(TAG_W_MAX_M, Math.max(TAG_W_MIN_M, r * 0.072));
+  const w = Math.min(TAG_W_MAX_M, Math.max(TAG_W_MIN_M, TAG_W_MIN_M + (r - 8) * 0.14));
   return { w, h: w * (TAG_H_M / TAG_W_M) };
 }
 
 export function pickTagPlots(plots, player, overlay, limit = TAG_POOL, placing = false, opts = {}) {
   const camR = Number(opts.camRadius);
-  const mapView = Number.isFinite(camR) && camR >= TAG_MAP_CAM_M;
   const radius = Number(opts.viewRadius) || tagViewRadiusM(Number.isFinite(camR) ? camR : 8);
   const r2 = radius * radius;
   const yours = [];
@@ -89,10 +89,10 @@ export function pickTagPlots(plots, player, overlay, limit = TAG_POOL, placing =
   if (placing) return yours.slice(0, limit);
 
   const wantYours = true;
-  const wantBuy = overlay === "lots" || mapView;
-  const onlyYours = overlay === "yours" && !mapView;
+  const wantBuy = overlay === "lots";
+  const onlyYours = overlay === "yours" || overlay === "world";
   const out = [];
-  if (wantYours && (overlay === "lots" || overlay === "yours" || overlay === "world" || mapView)) {
+  if (wantYours && (overlay === "lots" || overlay === "yours" || overlay === "world")) {
     for (const row of yours) {
       if (out.length >= limit) break;
       out.push(row);
@@ -156,6 +156,8 @@ export function mountLotTags({ worldAdd, heightAt, specOf, getPlots }) {
   let placingMode = false;
   let shownCache = [];
   let clock = 0;
+  let lastOverlay = "";
+  let lastPlacing = false;
   const root = typeof document !== "undefined" ? document.getElementById("lot-tags") : null;
   if (root) root.hidden = true;
 
@@ -202,11 +204,17 @@ export function mountLotTags({ worldAdd, heightAt, specOf, getPlots }) {
     placingMode = Boolean(placing);
     const radius = tagViewRadiusM(camRadius);
     const poolN = tagPoolForRadius(camRadius);
+    if (overlay !== lastOverlay || placingMode !== lastPlacing) {
+      lastOverlay = overlay;
+      lastPlacing = placingMode;
+      clock = 0;
+      shownCache = [];
+    }
     if (!placingMode && (overlay === "foot" || overlay === "minerals")) {
       hideAll();
       return;
     }
-    const showTags = overlay === "lots" || overlay === "yours" || overlay === "world" || placingMode || camRadius >= TAG_MAP_CAM_M;
+    const showTags = overlay === "lots" || overlay === "yours" || overlay === "world" || placingMode;
     if (!showTags) {
       hideAll();
       return;

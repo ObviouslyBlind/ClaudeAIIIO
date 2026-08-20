@@ -40,6 +40,9 @@ import {
   tickWarehouseRent,
   upgradeStand,
   withdrawWarehouse,
+  sellWarehouse,
+  pickupStand,
+  sellVisitorPlot,
   sellShiftBurst,
   resetVisitorPlay,
   setVisitorLook,
@@ -756,5 +759,54 @@ describe("South first loop", () => {
     expect(visitor.look.skin).toBe("sand");
     expect(visitor.look.hair).toBe("short");
     expect(visitor.accountNo).toBe(2);
+  });
+
+  it("picks a cart up into the warehouse and sells leftover stock", () => {
+    const { land, visitor, plot } = leaseCheapSouth();
+    expect(orderMarket(visitor, land, { skus: ["hotdog_cart", "hotdogs"], dest: "warehouse" }).ok).toBe(true);
+    const placed = placeStand(visitor, land, plot.id);
+    expect(placed.ok).toBe(true);
+    if (!placed.ok) return;
+    expect(stockStand(visitor, placed.stand.id, 0, "warehouse").ok).toBe(true);
+    expect(visitor.play.warehouse.items.find((i) => i.kind === "hotdog_cart")).toBeUndefined();
+    const packed = pickupStand(visitor, land, placed.stand.id);
+    expect(packed.ok).toBe(true);
+    if (!packed.ok) return;
+    expect(visitor.play.stands).toHaveLength(0);
+    expect(visitor.play.warehouse.items.find((i) => i.kind === "hotdog_cart")?.qty).toBe(1);
+    expect(visitor.play.warehouse.items.find((i) => i.kind === "hotdogs")?.qty).toBeGreaterThan(0);
+    expect(placeStand(visitor, land, plot.id).ok).toBe(true);
+  });
+
+  it("sells the lot, packs the cart, and refunds the tile", () => {
+    const { land, visitor, plot } = leaseCheapSouth();
+    const paid = plot.price;
+    expect(orderMarket(visitor, land, { skus: ["hotdog_cart"], dest: "warehouse" }).ok).toBe(true);
+    expect(placeStand(visitor, land, plot.id).ok).toBe(true);
+    const cash = visitor.cash;
+    const sold = sellVisitorPlot(visitor, land, plot.id);
+    expect(sold.ok).toBe(true);
+    if (!sold.ok) return;
+    expect(sold.refunded).toBe(paid);
+    expect(sold.packed).toBe(1);
+    expect(plot.owner).toBeNull();
+    expect(visitor.play.stands).toHaveLength(0);
+    expect(visitor.play.warehouse.items.find((i) => i.kind === "hotdog_cart")?.qty).toBe(1);
+    expect(visitor.cash).toBeCloseTo(cash + paid, 4);
+  });
+
+  it("sells warehouse stock at the catalog PAPER price after a confirm", () => {
+    const { land, visitor } = leaseCheapSouth();
+    expect(orderMarket(visitor, land, { skus: ["hotdog_cart"], dest: "warehouse" }).ok).toBe(true);
+    const cash = visitor.cash;
+    const sold = sellWarehouse(visitor, "hotdog_cart");
+    expect(sold.ok).toBe(true);
+    if (!sold.ok) return;
+    expect(sold.paid).toBe(CART_PRICES.fruit.kit);
+    expect(visitor.cash).toBeCloseTo(cash + CART_PRICES.fruit.kit, 4);
+    expect(visitor.play.warehouse.items.find((i) => i.kind === "hotdog_cart")).toBeUndefined();
+    const empty = sellWarehouse(visitor, "hotdog_cart");
+    expect(empty.ok).toBe(false);
+    if (!empty.ok) expect(empty.reason).toBe("empty_warehouse");
   });
 });

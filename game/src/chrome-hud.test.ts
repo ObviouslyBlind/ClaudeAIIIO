@@ -189,6 +189,12 @@ describe("harbour chrome HUD", () => {
     expect(chrome).toContain('id="buy-ask-yes"');
     expect(chrome).toContain('id="buy-ask-no"');
     expect(chrome).toContain('id="land-lease"');
+    expect(chrome).toContain('id="land-sell"');
+    expect(chrome).toContain("data-sell-wh");
+    expect(chrome).toContain("Are you sure you want to sell from the warehouse?");
+    expect(html).toContain('id="sell-ask"');
+    expect(siteMenu).toContain("data-pickup-stand");
+    expect(siteMenu).toContain("Pick up cart");
     expect(chrome).toContain('id="land-close"');
     expect(chrome).toContain("onCloseLand");
     expect(chrome).toContain("onCloseStand");

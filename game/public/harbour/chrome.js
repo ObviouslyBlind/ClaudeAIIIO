@@ -56,6 +56,7 @@ export function mountChrome(opts) {
   const onlineEl = document.getElementById("online");
   const landCard = document.getElementById("land-card");
   const buyAsk = document.getElementById("buy-ask");
+  const sellAsk = document.getElementById("sell-ask");
   const standVeil = document.getElementById("stand-veil");
   const standMenu = document.getElementById("stand-menu");
   const crateAsk = document.getElementById("crate-ask");
@@ -568,8 +569,8 @@ export function mountChrome(opts) {
           <span>${label} × ${r.qty}</span>
           ${
             kit
-              ? `<button type="button" data-place="${r.kind}">Place</button>`
-              : `<button type="button" data-withdraw="${r.kind}">Bring to me</button>`
+              ? `<div class="row-acts"><button type="button" class="ghost sell-wh" data-sell-wh="${r.kind}">Sell</button><button type="button" data-place="${r.kind}">Place</button></div>`
+              : `<div class="row-acts"><button type="button" class="ghost sell-wh" data-sell-wh="${r.kind}">Sell</button><button type="button" data-withdraw="${r.kind}">Bring to me</button></div>`
           }
         </div>`;
               })
@@ -807,6 +808,23 @@ export function mountChrome(opts) {
         if (ok && opts.onFired) opts.onFired(id);
       });
     }
+    const pickupBtn = standMenu.querySelector("[data-pickup-stand]");
+    if (pickupBtn) {
+      pickupBtn.addEventListener("click", async () => {
+        const id = pickupBtn.getAttribute("data-pickup-stand");
+        const { ok, data } = await readJson("/api/stand/pickup", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ standId: id }),
+        });
+        if (data && data.play) stampPlay(data.play);
+        dismissStandMenu();
+        if (ok && opts.onPickedUp) opts.onPickedUp(id);
+        if (opts.setStatus) {
+          opts.setStatus(ok ? "Cart in the South warehouse." : "Could not pick up: " + ((data && data.reason) || "fail"));
+        }
+      });
+    }
     standMenu.querySelectorAll("[data-upgrade]").forEach((btn) => {
       btn.addEventListener("click", async () => {
         const { data } = await readJson("/api/stand/upgrade", {
@@ -850,7 +868,7 @@ export function mountChrome(opts) {
     root.addEventListener("click", async (ev) => {
       const hit = ev.target && ev.target.closest
         ? ev.target.closest(
-            "[data-dest], [data-order], [data-buy], [data-place], [data-withdraw], [data-open-stand], [data-order-qty], [data-order-dest], [data-aisle], [data-island], [data-sheet-close], [data-hire-pick], [data-hire-back], [data-sheet-hire], [data-add-cart], [data-market-cart], [data-basket-remove], [data-basket-buy], [data-basket-pay], [data-look], [data-wipe], [data-wipe-go], [data-wipe-cancel], #order-pay, #order-cancel",
+            "[data-dest], [data-order], [data-buy], [data-place], [data-withdraw], [data-sell-wh], [data-open-stand], [data-order-qty], [data-order-dest], [data-aisle], [data-island], [data-sheet-close], [data-hire-pick], [data-hire-back], [data-sheet-hire], [data-add-cart], [data-market-cart], [data-basket-remove], [data-basket-buy], [data-basket-pay], [data-look], [data-wipe], [data-wipe-go], [data-wipe-cancel], #order-pay, #order-cancel",
           )
         : null;
       if (!hit || (standMenu && standMenu.contains(hit))) return;
@@ -1094,6 +1112,10 @@ export function mountChrome(opts) {
         await refreshPlay(data);
         return;
       }
+      if (hit.hasAttribute("data-sell-wh")) {
+        paintWarehouseSellAsk(hit.getAttribute("data-sell-wh"));
+        return;
+      }
     });
     root.addEventListener("toggle", (ev) => {
       const fold = ev.target;
@@ -1191,6 +1213,49 @@ export function mountChrome(opts) {
     }
   }
 
+  function hideSellAsk() {
+    if (sellAsk) sellAsk.hidden = true;
+  }
+
+  function paintWarehouseSellAsk(kind) {
+    if (!sellAsk || !kind) return;
+    const sku = ((play && play.catalog) || []).find((s) => s.id === kind) || { id: kind, label: kind, paperPrice: 0, qty: 1 };
+    const have = ((((play && play.warehouse) || {}).items) || []).find((r) => r.kind === kind);
+    const qty = Number(have && have.qty) || 0;
+    const unit = Number(sku.paperPrice) / Math.max(1, Number(sku.qty) || 1);
+    const paid = qty * unit;
+    sellAsk.hidden = false;
+    sellAsk.innerHTML = `
+      <h2>Sell from the warehouse?</h2>
+      <p class="buy-ask-name">Are you sure you want to sell from the warehouse?</p>
+      <p class="price">${sku.label || kind} × ${qty}</p>
+      <p class="buy-ask-name">${money(paid)} PAPER</p>
+      <div class="land-row">
+        <button type="button" class="take-all" id="sell-ask-yes">Yes, sell</button>
+        <button type="button" class="take-all" id="sell-ask-no">No</button>
+      </div>
+    `;
+    const yes = sellAsk.querySelector("#sell-ask-yes");
+    const no = sellAsk.querySelector("#sell-ask-no");
+    if (yes) {
+      yes.addEventListener("click", async () => {
+        hideSellAsk();
+        const { ok, data } = await readJson("/api/warehouse/sell", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ kind }),
+        });
+        await refreshPlay(data);
+        if (opts.setStatus) {
+          opts.setStatus(
+            ok ? "Sold from the warehouse · " + money((data && data.paid) || paid) : "Could not sell: " + ((data && data.reason) || "fail"),
+          );
+        }
+      });
+    }
+    if (no) no.addEventListener("click", hideSellAsk);
+  }
+
   function plotIsYours(plot) {
     if (!plot || !plot.id) return false;
     const leases = (play && play.leases) || [];
@@ -1209,9 +1274,26 @@ export function mountChrome(opts) {
     const crate = extras && extras.crate;
     const roadside = extras && extras.roadside;
     const title = roadside ? "Roadside crate" : plotDisplayName(plot);
-    const yours = !roadside && plotIsYours(plot);
+    const yours = !roadside && (plotIsYours(plot) || plot.owner === "visitor");
     const taken = !roadside && !yours && Boolean(plot.owner) && plot.owner !== "visitor";
     const vacant = !roadside && !yours && !taken;
+    const stand = extras && extras.stand;
+    const confirmSell = extras && extras.confirmSell;
+    if (confirmSell && yours) {
+      landCard.innerHTML = `
+        <h2>Sell this lot?</h2>
+        <p class="lease-note">Are you sure you want to sell this lot? Your cart will go to the warehouse.</p>
+        <div class="land-row">
+          <button type="button" class="take-all" id="land-sell-yes">Yes, sell</button>
+          <button type="button" class="take-all" id="land-sell-no">No</button>
+        </div>
+      `;
+      const yes = landCard.querySelector("#land-sell-yes");
+      const no = landCard.querySelector("#land-sell-no");
+      if (yes && extras.onSell) yes.addEventListener("click", () => extras.onSell());
+      if (no) no.addEventListener("click", () => paintLand(plot, { ...extras, confirmSell: false }));
+      return;
+    }
     const price = roadside
       ? ""
       : vacant
@@ -1228,6 +1310,8 @@ export function mountChrome(opts) {
           ? ""
           : `<div class="land-row"><button type="button" class="take-all" id="land-close">Close</button></div>`
       }
+      ${yours && extras && extras.onSell ? `<button type="button" class="ghost land-sell" id="land-sell">Sell lot</button>` : ""}
+      ${yours && stand && extras && extras.onPickup ? `<button type="button" id="land-pickup">Pick up cart</button>` : ""}
       ${crate ? `<button type="button" class="take-all" id="land-take">Take all</button>` : ""}
       ${roadside ? `<button type="button" class="take-all" id="land-close">Close</button>` : ""}
     `;
@@ -1248,6 +1332,14 @@ export function mountChrome(opts) {
         landCard.hidden = true;
         extras.onTake();
       });
+    }
+    const sellBtn = landCard.querySelector("#land-sell");
+    if (sellBtn && extras && extras.onSell) {
+      sellBtn.addEventListener("click", () => paintLand(plot, { ...extras, confirmSell: true }));
+    }
+    const pickupBtn = landCard.querySelector("#land-pickup");
+    if (pickupBtn && extras && extras.onPickup) {
+      pickupBtn.addEventListener("click", () => extras.onPickup());
     }
   }
 
@@ -1300,6 +1392,10 @@ export function mountChrome(opts) {
   }
   document.addEventListener("keydown", (ev) => {
     if (ev.key !== "Escape") return;
+    if (sellAsk && !sellAsk.hidden) {
+      hideSellAsk();
+      return;
+    }
     if (orderAsk && !orderAsk.hidden) {
       hideOrderAsk();
       return;
@@ -1336,6 +1432,7 @@ export function mountChrome(opts) {
     hideBuyAsk() {
       if (buyAsk) buyAsk.hidden = true;
     },
+    hideSellAsk,
     hideCrateAsk,
     paintCrateAsk,
     hideOrderAsk,

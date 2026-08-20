@@ -829,6 +829,24 @@ export function developPlot(
   return { ok: true, paid: cost, plot };
 }
 
+/** Refund the ask and vacate. Caller packs any cart first. */
+export function sellPlot(
+  board: LandBoard,
+  visitor: Visitor,
+  plotId: string,
+): { ok: true; refunded: number; plot: Parcel } | { ok: false; reason: string } {
+  const plot = getPlot(board, plotId);
+  if (!plot) return { ok: false, reason: "no_plot" };
+  if (plot.owner !== "visitor") return { ok: false, reason: "not_yours" };
+  const refunded = plot.price;
+  visitor.cash = Math.round((visitor.cash + refunded) * 10000) / 10000;
+  plot.owner = null;
+  plot.use = null;
+  if (isCartPad(plot)) plot.price = CART_PAD_PRICE;
+  pinCartPadAsks(board.plots);
+  return { ok: true, refunded, plot };
+}
+
 /** Same formula the harbour client uses. Keep in sync with public/harbour/main.js */
 export function heightAt(spec: IslandSpec, x: number, z: number): number {
   const dx = (x - spec.cx) / spec.rx;

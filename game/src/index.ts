@@ -27,6 +27,7 @@ export { simDay, nextGeneralDay, calendarHud } from "./calendar.ts";
 export {
   createLandBoard,
   leasePlot,
+  sellPlot,
   developPlot,
   landSnapshot,
   isCartPad,

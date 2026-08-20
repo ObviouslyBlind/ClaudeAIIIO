@@ -61,13 +61,26 @@ describe("lot tags (PAPER)", () => {
     const near = pickTagPlots(plots, { x: 0, z: 0 }, "lots", 8, false, { camRadius: 8 });
     expect(near.some((x) => x.plot.id === "near-buy")).toBe(true);
     expect(near.some((x) => x.plot.id === "far-buy")).toBe(false);
-    const far = pickTagPlots(plots, { x: 0, z: 0 }, "world", 12, false, { camRadius: 400, viewRadius: 1200 });
+    const far = pickTagPlots(plots, { x: 0, z: 0 }, "lots", 12, false, { camRadius: 400, viewRadius: 1200 });
     expect(far.some((x) => x.plot.id === "far-buy")).toBe(true);
     expect(TAG_MAP_CAM_M).toBeGreaterThan(40);
     const close = tagWorldScale(8);
     const wide = tagWorldScale(400);
     expect(close.w).toBeLessThan(wide.w);
     expect(close.w).toBeLessThanOrEqual(3.2);
+    expect(wide.w).toBeGreaterThanOrEqual(48);
+  });
+
+  it("Your lots and World never keep vacant $ bars after the Lots cycle", () => {
+    const plots = [
+      { id: "yours", owner: "visitor", price: 32, x: 10, z: 0 },
+      { id: "buy", owner: null, price: 40, x: 20, z: 0 },
+    ];
+    const yoursFar = pickTagPlots(plots, { x: 0, z: 0 }, "yours", 12, false, { camRadius: 400, viewRadius: 1200 });
+    expect(yoursFar.every((x) => x.kind === "yours")).toBe(true);
+    expect(yoursFar.some((x) => x.kind === "buy")).toBe(false);
+    const worldFar = pickTagPlots(plots, { x: 0, z: 0 }, "world", 12, false, { camRadius: 400, viewRadius: 1200 });
+    expect(worldFar.some((x) => x.kind === "buy")).toBe(false);
   });
 
   it("shows PLACE on your lot only while placing", () => {

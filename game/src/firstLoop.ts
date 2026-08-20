@@ -4,7 +4,7 @@
  * on that cart. Cash is $. One shared island warehouse on the dock.
  */
 
-import { findParcelAt, getPlot, isCartPad, ISLANDS, STARTER_CASH, type IslandId, type LandBoard, type Parcel } from "./land.ts";
+import { findParcelAt, getPlot, isCartPad, ISLANDS, STARTER_CASH, sellPlot, type IslandId, type LandBoard, type Parcel } from "./land.ts";
 import { plotTrafficBand } from "./footTraffic.ts";
 import { roadsideDrop, type DropPoint } from "./roadside.ts";
 import { skuFitsPlot, type ZoneId } from "./zones.ts";
@@ -1001,6 +1001,71 @@ export function withdrawWarehouse(
   if (!takeWarehouse(play, kind, want)) return fail("empty_warehouse");
   addInv(play, kind, want);
   return ok({ inventory: play.inventory.map((row) => ({ ...row })) });
+}
+
+/** Sell warehouse stock at catalog PAPER unit price. Caller confirms in the HUD. */
+export function sellWarehouse(
+  visitor: Visitor,
+  kind: string,
+  qty = 0,
+): LoopOk<{ kind: InvKind; qty: number; paid: number }> | LoopFail {
+  if (!isKnownSku(kind)) return fail("unknown_sku");
+  const play = ensurePlay(visitor);
+  const row = sku(kind);
+  if (!row) return fail("unknown_sku");
+  const have = warehouseQty(play, kind);
+  const want = qty > 0 ? Math.min(qty, have) : have;
+  if (want <= 0) return fail("empty_warehouse");
+  if (!takeWarehouse(play, kind, want)) return fail("empty_warehouse");
+  const unit = row.paperPrice / Math.max(1, row.qty);
+  const paid = roundMoney(want * unit);
+  visitor.cash = roundMoney(visitor.cash + paid);
+  return ok({ kind, qty: want, paid });
+}
+
+/** Pack a placed cart into the island warehouse. Fires hired staff. Land stays yours. */
+export function pickupStand(
+  visitor: Visitor,
+  _land: LandBoard,
+  standId: string,
+): LoopOk<{ standId: string; kitId: InvKind; stock: number }> | LoopFail {
+  const play = ensurePlay(visitor);
+  const idx = play.stands.findIndex((s) => s.id === standId);
+  if (idx < 0) return fail("no_stand");
+  const stand = play.stands[idx]!;
+  if (stand.hired) {
+    stand.hired = false;
+    stand.staffId = null;
+    stand.staffName = null;
+    stand.attending = false;
+  }
+  const cart = cartKindForStand(stand);
+  addWarehouse(play, cart.kitId, 1);
+  if (stand.hotdogs > 0) addWarehouse(play, cart.stockId, stand.hotdogs);
+  if (isFryCart(stand) && (stand.propaneLeft || 0) > 0) addWarehouse(play, "propane", 1);
+  play.stands.splice(idx, 1);
+  return ok({ standId, kitId: cart.kitId, stock: stand.hotdogs });
+}
+
+/** Pack any cart on the lot into the warehouse, then refund the tile. */
+export function sellVisitorPlot(
+  visitor: Visitor,
+  land: LandBoard,
+  plotId: string,
+): LoopOk<{ refunded: number; packed: number; plotId: string }> | LoopFail {
+  const plot = getPlot(land, plotId);
+  if (!plot) return fail("no_plot");
+  if (plot.owner !== "visitor") return fail("not_yours");
+  const play = ensurePlay(visitor);
+  const onLot = play.stands.filter((s) => s.plotId === plot.id);
+  for (const stand of onLot) {
+    const packed = pickupStand(visitor, land, stand.id);
+    if (!packed.ok) return packed;
+  }
+  const sold = sellPlot(land, visitor, plot.id);
+  if (!sold.ok) return fail(sold.reason);
+  syncWorkSites(play, land);
+  return ok({ refunded: sold.refunded, packed: onLot.length, plotId: plot.id });
 }
 
 export function tickWarehouseRent(visitor: Visitor, tick: number): number {

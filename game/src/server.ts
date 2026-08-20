@@ -37,6 +37,7 @@ import {
   markArrived,
   orderMarket,
   placeStand,
+  pickupStand,
   playSnapshot,
   setStandPrice,
   stockStand,
@@ -44,12 +45,15 @@ import {
   takeAll,
   upgradeStand,
   withdrawWarehouse,
+  sellWarehouse,
+  sellVisitorPlot,
   ensurePlay,
   isKnownSku,
   resetVisitorPlay,
   setVisitorLook,
   sellShiftBurst,
 } from "./firstLoop.ts";
+import { ALPHA_PLAY_WIPE, ALPHA_WIPE_NOTE, alphaRestoreRefuse } from "./alpha.ts";
 import { footTrafficSnapshot } from "./footTraffic.ts";
 import { completePackShift } from "./shiftBonus.ts";
 import { salesTaxRate } from "./statutes.ts";
@@ -205,6 +209,10 @@ const server = createServer(async (req, res) => {
   }
 
   if (req.method === "POST" && url.pathname === "/api/persist/restore") {
+    if (ALPHA_PLAY_WIPE) {
+      json(res, 400, alphaRestoreRefuse());
+      return;
+    }
     const result = restoreLive(() => persist.lastBlob, {
       setWorld: (next) => {
         world = next;
@@ -374,6 +382,25 @@ const server = createServer(async (req, res) => {
     return;
   }
 
+  if (req.method === "POST" && url.pathname === "/api/warehouse/sell") {
+    const body = await readJsonBody(req);
+    const kind = String(body?.kind ?? "");
+    if (!isKnownSku(kind)) {
+      json(res, 400, { ok: false, reason: "unknown_sku", play: playPayload() });
+      return;
+    }
+    const result = sellWarehouse(visitor, kind, Number(body?.qty ?? 0));
+    json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/stand/pickup") {
+    const body = await readJsonBody(req);
+    const result = pickupStand(visitor, land, String(body?.standId ?? ""));
+    json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
+    return;
+  }
+
   if (req.method === "POST" && url.pathname === "/api/look") {
     const body = await readJsonBody(req);
     const look = setVisitorLook(visitor, body && typeof body === "object" ? body : {});
@@ -383,13 +410,15 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "POST" && url.pathname === "/api/play/reset") {
     resetVisitorPlay(land, visitor, "reset");
-    json(res, 200, { ok: true, play: playPayload() });
+    persist.lastBlob = null;
+    json(res, 200, { ok: true, play: playPayload(), note: ALPHA_WIPE_NOTE });
     return;
   }
 
   if (req.method === "POST" && url.pathname === "/api/play/delete") {
     resetVisitorPlay(land, visitor, "delete");
-    json(res, 200, { ok: true, play: playPayload() });
+    persist.lastBlob = null;
+    json(res, 200, { ok: true, play: playPayload(), note: ALPHA_WIPE_NOTE });
     return;
   }
 
@@ -415,6 +444,21 @@ const server = createServer(async (req, res) => {
         plotId: result.plot.id,
       });
     }
+    json(res, result.ok ? 200 : 400, {
+      ...result,
+      snapshot: staffMapSnapshot(land, visitor),
+      play: playPayload(),
+    });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/plot/sell") {
+    const body = await readJsonBody(req);
+    if (!body) {
+      json(res, 400, { ok: false, reason: "bad_json" });
+      return;
+    }
+    const result = sellVisitorPlot(visitor, land, String(body.plotId ?? ""));
     json(res, result.ok ? 200 : 400, {
       ...result,
       snapshot: staffMapSnapshot(land, visitor),
