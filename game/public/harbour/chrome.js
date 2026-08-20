@@ -707,9 +707,12 @@ export function mountChrome(opts) {
         const far = d > 1.5;
         if (priceOut) {
           priceOut.textContent = money(v);
-          priceOut.classList.toggle("is-today", today);
-          priceOut.classList.toggle("is-near", near);
-          priceOut.classList.toggle("is-far", far);
+          const read = priceOut.closest(".sticker-read");
+          if (read) {
+            read.classList.toggle("is-today", today);
+            read.classList.toggle("is-near", near);
+            read.classList.toggle("is-far", far);
+          }
         }
         const slide = priceEl.closest(".sticker-slide");
         if (slide) slide.setAttribute("data-tone", today ? "today" : near ? "near" : "far");

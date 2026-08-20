@@ -1696,55 +1696,78 @@ nav.dock.travel-dock {
 .stock-num.is-full { color: var(--green); }
 .sticker-slide {
   display: grid;
-  gap: 6px;
+  gap: 4px;
   margin-top: 12px;
 }
+.sticker-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.sticker-head .sticker-label {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
 .sticker-read {
-  font-size: 28px;
+  margin: 0;
+  font-size: 18px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   color: var(--muted);
   line-height: 1;
+  text-align: right;
+}
+.sticker-read small {
+  margin-left: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--muted);
 }
 .sticker-read.is-today { color: var(--green); }
-.sticker-read.is-near { color: #e2c04a; }
-.sticker-read.is-far { color: #c45a3a; }
-.sticker-slide[data-tone="today"] { --sticker-thumb: var(--green); }
-.sticker-slide[data-tone="near"] { --sticker-thumb: #e2c04a; }
-.sticker-slide[data-tone="far"] { --sticker-thumb: #c45a3a; }
+.sticker-read.is-near { color: #f0cc3a; }
+.sticker-read.is-far { color: #c43a3a; }
+.sticker-slide[data-tone="today"] { --sticker-thumb: #f4f1e6; }
+.sticker-slide[data-tone="near"] { --sticker-thumb: #f4f1e6; }
+.sticker-slide[data-tone="far"] { --sticker-thumb: #f4f1e6; }
 .sticker-track {
   position: relative;
-  height: 34px;
+  height: 32px;
 }
 .sticker-band {
   position: absolute;
   left: 0;
   right: 0;
   top: 50%;
-  height: 16px;
+  height: 12px;
   display: flex;
   flex-direction: row;
   gap: 1px;
   overflow: hidden;
-  border-radius: 999px;
+  border-radius: 3px;
   pointer-events: none;
   z-index: 0;
   transform: translateY(-50%);
   background: #0c1416;
-  box-shadow: inset 0 1px 0 rgba(244, 241, 230, 0.12), 0 0 0 1px #0c1416;
+  box-shadow: inset 0 1px 0 rgba(244, 241, 230, 0.1), 0 0 0 1px #0c1416;
 }
 .sticker-seg {
   display: block;
   height: 100%;
   min-width: 0;
 }
-.sticker-seg.is-red { background: #be3d3d; }
-.sticker-seg.is-yellow { background: #edc84a; }
+.sticker-seg.is-red { background: #c43a3a; }
+.sticker-seg.is-yellow { background: #f0cc3a; }
 .sticker-seg.is-green { background: var(--green); }
 .sticker-today-line {
   position: relative;
   height: 16px;
-  margin: 0;
+  margin: 2px 0 0;
 }
 .sticker-today {
   position: absolute;
@@ -1752,19 +1775,15 @@ nav.dock.travel-dock {
   transform: translateX(-50%);
   font-size: 11px;
   font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   color: var(--green);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
   pointer-events: none;
 }
-.sticker-ends {
-  display: flex;
-  justify-content: space-between;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--muted);
-  font-variant-numeric: tabular-nums;
-}
+.sticker-today.is-start { transform: none; }
+.sticker-today.is-end { transform: translateX(-100%); }
 .upg-row small {
   margin-left: 6px;
   font-size: 12px;
@@ -1777,7 +1796,7 @@ nav.dock.travel-dock {
 .sticker-knob {
   position: absolute;
   top: 50%;
-  width: 5px;
+  width: 6px;
   height: 26px;
   border-radius: 1px;
   background: #f4f1e6;
@@ -1911,7 +1930,7 @@ nav.dock.travel-dock {
   transform: translateX(-50%);
   pointer-events: none;
 }
-#stand-menu .sticker-label { margin-top: 12px; }
+#stand-menu .sticker-head .sticker-label { margin-top: 0; }
 .price-readout {
   display: flex;
   align-items: baseline;

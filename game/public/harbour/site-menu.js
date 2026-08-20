@@ -108,7 +108,13 @@ export function stickerTrackSegs(today, min = 1, max = 16) {
   return segs;
 }
 
-const SEG_FILL = { red: "#c45a3a", yellow: "#e2c04a", green: "#5fe3a0" };
+const SEG_FILL = { red: "#c43a3a", yellow: "#f0cc3a", green: "#5fe3a0" };
+
+function optimalMarkClass(pct) {
+  if (pct < 18) return " is-start";
+  if (pct > 82) return " is-end";
+  return "";
+}
 
 /** Hard R-Y-G-Y-R stops. Same colour on both sides of a stop so it does not rainbow. */
 export function stickerBandGradient(segs) {
@@ -198,9 +204,11 @@ function paintStock(site, play) {
     <p class="stock-num ${stockBand(have, cap)}">${Math.round(have)}<small>/${cap}</small></p>
     ${loaders}
     ${propaneBlock}
-    <p class="sticker-label">Price</p>
     <div class="sticker-slide" data-tone="${tone}">
-      <span class="sticker-read ${vs}" data-sticker-out>${money(sticker)}</span>
+      <div class="sticker-head">
+        <p class="sticker-label">Price set</p>
+        <p class="sticker-read ${vs}"><span data-sticker-out>${money(sticker)}</span><small> per unit</small></p>
+      </div>
       <div class="sticker-track">
         <i class="sticker-band" aria-hidden="true">${segs
           .map(
@@ -212,8 +220,7 @@ function paintStock(site, play) {
         <i class="sticker-knob" data-sticker-knob style="left:${knob}%"></i>
         <input id="sticker-price" type="range" min="${min}" max="${max}" step="0.5" value="${sticker}" />
       </div>
-      <p class="sticker-today-line"><span class="sticker-today" style="left:${mark}%">Today ${money(todayN)}</span></p>
-      <div class="sticker-ends"><span>$1</span><span>$16</span></div>
+      <p class="sticker-today-line"><span class="sticker-today${optimalMarkClass(mark)}" style="left:${mark}%">Optimal ${money(todayN)}</span></p>
     </div>
   `;
 }
