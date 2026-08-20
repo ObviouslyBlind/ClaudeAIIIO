@@ -21,6 +21,8 @@
  * - T/L inner kerb is a tangent fillet plus a round node disc, not a sand crotch.
  * - Stem paint stops at the through kerb. Through paint stays on the carriageway.
  * - Circus ribbon ends are bitten to the circle. Paint stops short of the ring.
+ * - A circus is grit tarmac, concrete inner/outer kerbs, a grass island, and
+ *   cream edge paint — not a pale stone puck.
  * - No circus arm boxes. 12 m stubs sat in the grass as extra black rectangles.
  * - Legal turns: 15 / 30 / 45 / 90°. Kit cases, not a continuous CS2 compiler.
  */

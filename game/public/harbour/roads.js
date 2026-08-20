@@ -110,6 +110,43 @@ function roadMaterial(color, roadKind, extra = {}) {
   if (!extra.emissive) matByKey.set(key, mat);
   return mat;
 }
+/** Same green as the bush field — a lawn, not a sand cake. */
+export const CIRCUS_LAWN = 0x4f7d3a;
+const CIRCUS_SEGS = 96;
+const CIRCUS_KERB_M = 0.7;
+
+function setRingRoadUVs(geo, inner, outer) {
+  const pos = geo.attributes.position;
+  const uv = geo.attributes.uv;
+  const mid = (inner + outer) / 2;
+  const around = (Math.PI * 2 * Math.max(1, mid)) / ASPHALT_TILE_M;
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i);
+    const y = pos.getY(i);
+    const r = Math.hypot(x, y);
+    let ang = Math.atan2(y, x);
+    if (ang < 0) ang += Math.PI * 2;
+    uv.setXY(i, (ang / (Math.PI * 2)) * around, (r - inner) / ASPHALT_TILE_M);
+  }
+  uv.needsUpdate = true;
+}
+
+function addCircusRing(scene, x, y, z, inner, outer, color, roadKind, userData, renderOrder) {
+  const r0 = Math.max(0.2, inner);
+  const r1 = Math.max(r0 + 0.05, outer);
+  const geo = new THREE.RingGeometry(r0, r1, CIRCUS_SEGS);
+  setRingRoadUVs(geo, r0, r1);
+  const mesh = new THREE.Mesh(geo, roadMaterial(color, roadKind));
+  mesh.rotation.x = -Math.PI / 2;
+  mesh.position.set(x, y, z);
+  mesh.castShadow = false;
+  mesh.receiveShadow = true;
+  mesh.renderOrder = renderOrder;
+  mesh.userData = { kind: "road", mode: "PAPER", ...userData, roadKind };
+  if (userData.roadName) mesh.name = `road:${userData.island}:${userData.roadName}`;
+  scene.add(mesh);
+  return mesh;
+}
 export const SIDEWALK_WIDTH_M = 2.8;
 /** Local T-stubs and town lanes — narrower than the arterial. */
 export const LOCAL_WIDTH_M = ROAD_CLASSES.lane.carriageM;
@@ -925,47 +962,68 @@ function drawCircusJoins(scene, map, specOf, heightAt, joins) {
     const y = heightAt(spec, node.x, node.z);
     const inner = foot.inner || 24;
     const outer = foot.outer || 42;
+    const islandR = Math.max(3.2, inner - CIRCUS_KERB_M);
     const base = { island: node.island, footprint: true, label: node.name || "Circus" };
     const name = node.name || "Circus";
+    const x = node.x;
+    const z = node.z;
 
-    // Ring is the join. No arm boxes — those were square edges in the grass.
-    const grit = new THREE.Mesh(
-      new THREE.RingGeometry(inner, outer + FOOT_SHOULDER_M, 64),
-      roadMaterial(SHOULDER, "shoulder"),
+    addCircusRing(
+      scene, x, y + 0.13, z,
+      outer, outer + FOOT_SHOULDER_M,
+      SHOULDER, "shoulder",
+      { ...base, roadName: name + " hub" },
+      1,
     );
-    grit.rotation.x = -Math.PI / 2;
-    grit.position.set(node.x, y + 0.13, node.z);
-    grit.castShadow = false;
-    grit.receiveShadow = true;
-    grit.userData = { kind: "road", mode: "PAPER", ...base, roadKind: "shoulder", roadName: name + " hub" };
-    scene.add(grit);
-
-    const ring = new THREE.Mesh(
-      new THREE.RingGeometry(inner, outer, 64),
-      roadMaterial(ASPHALT, "paved"),
+    const ring = addCircusRing(
+      scene, x, y + TARMAC_TOP_M, z,
+      inner, outer,
+      ASPHALT, "paved",
+      { ...base, roadName: name },
+      2,
     );
-    ring.rotation.x = -Math.PI / 2;
-    ring.position.set(node.x, y + TARMAC_TOP_M, node.z);
-    ring.castShadow = false;
-    ring.receiveShadow = true;
-    ring.renderOrder = 2;
-    ring.userData = { kind: "road", mode: "PAPER", ...base, roadKind: "paved", roadName: name };
     ring.name = `road:${node.island}:${name}`;
-    scene.add(ring);
 
-    const disc = new THREE.Mesh(
-      new THREE.CylinderGeometry(Math.max(4, inner - 0.25), Math.max(4, inner - 0.25), 0.36, 24),
-      new THREE.MeshLambertMaterial({ color: STONE }),
+    addCircusRing(
+      scene, x, y + TARMAC_TOP_M + 0.05, z,
+      islandR, inner + 0.08,
+      SHOULDER, "shoulder",
+      { ...base, footprint: false, roadName: name + " kerb" },
+      3,
     );
-    disc.position.set(node.x, y + 0.18, node.z);
-    disc.castShadow = false;
-    disc.receiveShadow = true;
-    disc.userData.kind = "road";
-    disc.userData.roadKind = "island";
-    disc.userData.island = node.island;
-    disc.userData.label = (node.name || "Roundabout") + " island";
-    disc.userData.mode = "PAPER";
-    scene.add(disc);
+
+    const lawn = new THREE.Mesh(
+      new THREE.CircleGeometry(Math.max(2.8, islandR - 0.04), CIRCUS_SEGS),
+      new THREE.MeshStandardMaterial({ color: CIRCUS_LAWN, roughness: 0.95, metalness: 0 }),
+    );
+    lawn.rotation.x = -Math.PI / 2;
+    lawn.position.set(x, y + 0.32, z);
+    lawn.castShadow = false;
+    lawn.receiveShadow = true;
+    lawn.userData = {
+      kind: "road",
+      mode: "PAPER",
+      island: node.island,
+      roadKind: "island",
+      label: (node.name || "Roundabout") + " island",
+    };
+    scene.add(lawn);
+
+    const lip = 0.28;
+    addCircusRing(
+      scene, x, y + TARMAC_TOP_M + 0.06, z,
+      inner + lip, inner + lip + PAINT_WIDTH_M,
+      PAINT, "paint",
+      { island: node.island, roadName: name + " paint", label: name },
+      4,
+    );
+    addCircusRing(
+      scene, x, y + TARMAC_TOP_M + 0.06, z,
+      outer - lip - PAINT_WIDTH_M, outer - lip,
+      PAINT, "paint",
+      { island: node.island, roadName: name + " paint", label: name },
+      4,
+    );
   }
 }
 

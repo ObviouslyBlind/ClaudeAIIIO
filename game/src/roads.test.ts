@@ -19,6 +19,7 @@ import {
   PAINT_WIDTH_M,
   PAINT_YELLOW,
   SHOULDER,
+  CIRCUS_LAWN,
   STONE,
   makeRoads,
   spawnCameraOffset,
@@ -339,7 +340,18 @@ describe("paved street from spawn", () => {
     expect(circus).toBeTruthy();
     expect(circus!.geometry.parameters?.innerRadius).toBeCloseTo(radii.inner, 0);
     expect(circus!.geometry.parameters?.outerRadius).toBeCloseTo(radii.outer, 0);
+    expect(circus!.material.map).toBeTruthy();
     expect(added.filter((m) => m.userData.roadName === "Harbour Circus arm").length).toBe(0);
+    const island = added.find(
+      (m) => m.userData.roadKind === "island" && /Harbour/.test(String(m.userData.label || "")),
+    );
+    expect(island).toBeTruthy();
+    expect(island!.material.color.getHex()).toBe(CIRCUS_LAWN);
+    expect(lum(CIRCUS_LAWN)).toBeGreaterThan(lum(ASPHALT));
+    const circusPaint = added.filter(
+      (m) => m.userData.roadKind === "paint" && String(m.userData.roadName || "").startsWith("Harbour Circus"),
+    );
+    expect(circusPaint.length).toBeGreaterThanOrEqual(2);
     const hwyShoulder = added.filter(
       (m) => m.userData.roadKind === "shoulder" && String(m.userData.roadName || "").startsWith("Island Hwy"),
     );
