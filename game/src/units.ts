@@ -86,8 +86,8 @@ export const UNIT_BUILDINGS: BuildingSpec[] = [
     id: "strand-flats",
     name: "Strand Flats",
     floors: 2,
-    x: SOUTH_PORT.x + 13,
-    z: SOUTH_PORT.z + 38,
+    x: SOUTH_PORT.x + 11,
+    z: SOUTH_PORT.z + 32,
     rooms: [
       { floor: 0, room: 0, use: "apartment", label: "Strand flat G-L" },
       { floor: 0, room: 1, use: "apartment", label: "Strand flat G-R" },
@@ -99,8 +99,8 @@ export const UNIT_BUILDINGS: BuildingSpec[] = [
     id: "mixed-house",
     name: "Mixed House",
     floors: 3,
-    x: SOUTH_PORT.x + 25,
-    z: SOUTH_PORT.z + 48,
+    x: SOUTH_PORT.x + 17,
+    z: SOUTH_PORT.z + 49,
     rooms: [
       { floor: 0, room: 0, use: "shop", label: "Mixed house shop" },
       { floor: 1, room: 0, use: "apartment", label: "Mixed house flat" },
@@ -111,8 +111,8 @@ export const UNIT_BUILDINGS: BuildingSpec[] = [
     id: "quay-shops",
     name: "Quay Shops",
     floors: 1,
-    x: SOUTH_PORT.x + 38,
-    z: SOUTH_PORT.z + 58,
+    x: SOUTH_PORT.x + 36,
+    z: SOUTH_PORT.z + 52,
     rooms: [
       { floor: 0, room: 0, use: "shop", label: "Quay shop left" },
       { floor: 0, room: 1, use: "shop", label: "Quay shop right" },
@@ -122,8 +122,8 @@ export const UNIT_BUILDINGS: BuildingSpec[] = [
     id: "harbour-offices",
     name: "Harbour Offices",
     floors: 2,
-    x: SOUTH_PORT.x + 50,
-    z: SOUTH_PORT.z + 68,
+    x: SOUTH_PORT.x + 42,
+    z: SOUTH_PORT.z + 69,
     rooms: [
       { floor: 0, room: 0, use: "office", label: "Harbour office G-L" },
       { floor: 0, room: 1, use: "office", label: "Harbour office G-R" },

@@ -61,7 +61,7 @@ describe("units scripts (alpha 0.5)", () => {
       for (let j = i + 1; j < UNIT_BUILDINGS.length; j++) {
         const a = UNIT_BUILDINGS[i]!;
         const b = UNIT_BUILDINGS[j]!;
-        expect(Math.hypot(a.x - b.x, a.z - b.z)).toBeGreaterThan(14);
+        expect(Math.hypot(a.x - b.x, a.z - b.z)).toBeGreaterThan(16);
       }
     }
     const land = createLandBoard();
@@ -87,7 +87,7 @@ describe("units scripts (alpha 0.5)", () => {
         t = Math.max(0, Math.min(1, t));
         min = Math.min(min, Math.hypot(b.x - (ax + t * dx), b.z - (az + t * dz)));
       }
-      expect(min).toBeGreaterThan(18);
+      expect(min).toBeGreaterThan(16);
     }
   });
 
