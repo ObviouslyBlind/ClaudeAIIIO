@@ -26,4 +26,6 @@ One shard. The sim owns cash, plots, staff, and prices. The browser is a camera.
 
 ## Play
 `cd game && npm run play` then `npm run play:laptop` for a laptop/phone URL.
-South spawn. Click a $ tag to buy. Lots overlay: click the lot dirt. Restart wipes.
+South spawn. Click a $ tag to buy. Lots overlay: click the lot dirt.
+
+**Alpha wipe.** We are in alpha. Every harbour spawn is a fresh visitor: starter cash, no leases, no stands, no warehouse, no cart lines. Do not restore `persist.lastBlob` onto the live visitor. `POST /api/persist/restore` is refused. A hard-refresh / spawn wipes this visitor even if the play process stayed up. Play restart also wipes. Do not reseat purchases from a previous session.

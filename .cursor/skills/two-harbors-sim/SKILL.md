@@ -20,6 +20,7 @@ Prove it with tests: fast-forward thousands of ticks with **zero players**. Pric
 - One control scheme later: primary = tap/left click, secondary = long-press/right click. No WASD, no virtual stick.
 - Do not clone Capital Rift. Original islands, original UI, original code.
 - Impeccable is installed for later UI work. Do not run `/impeccable craft` on the sim. Use it when we build Hansard, market sheet, or the 3D HUD.
+- **Alpha wipe.** Harbour spawn is a fresh visitor (starter cash, no leases, no stands, no warehouse). Do not restore `persist.lastBlob` onto the live visitor. Refuse `POST /api/persist/restore`. Hard-refresh / spawn wipes even if the play process stayed up.
 
 ## Stack
 

@@ -29,3 +29,4 @@ If a mesh is off-cell, it is not in the scene. Interest comes from the server; t
 - Rendering both islands at once
 - Trusting local simulation for cash or stock
 - Running `/impeccable craft` on `game/src/sim.ts`
+- Restoring a previous visitor’s purchases on harbour spawn while we are in alpha. Spawn is a wipe.

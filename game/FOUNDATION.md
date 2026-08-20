@@ -78,6 +78,6 @@ npm test
 
 Kernel tests must show: unique plot ids, zero overlapping rings, a developed house surviving a serialize/restore **blob** (for later Postgres), minerals catalog listing ore, 500 player records with bounded interest queries.
 
-**Play restart wipes.** That is the rule while we iterate. There is no Restore button on the live sheet. A house you place stays for that play process, then dies when play restarts.
+**Alpha wipe.** We are in alpha. Every harbour spawn is a fresh visitor: starter cash, no leases, no stands, no warehouse. Do not restore `persist.lastBlob` onto the live visitor. `POST /api/persist/restore` is refused. Hard-refresh / spawn wipes this visitor even if the play process stayed up. Play restart also wipes. There is no Restore button on the live sheet. A house you place is for this spawn only.
 
 Play: `npm run play` binds `0.0.0.0:8787`. On Cursor Desktop, plug icon → forward **8787** → Open in browser. The cursor.com/agents website cannot open that port on your laptop.
