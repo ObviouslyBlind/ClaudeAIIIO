@@ -105,4 +105,35 @@ describe("cash hover ledger (PAPER)", () => {
     expect(model.runningMin).toBe(0);
     expect(formatCashLedger({ cash: 1000, leases: [], sites: [], inventory: [] })).toContain("No land");
   });
+
+  it("moves a picked-up cart off the lot and into the warehouse stash", () => {
+    const play = {
+      cash: 250,
+      incomePerMinute: 0,
+      leases: [{ id: "pad-1", name: "12 Island Hwy", island: "south", class: "cart_pad" }],
+      sites: [],
+      stands: [],
+      catalog: [{ id: "hotdog_cart", role: "kit", aisle: "street_carts", label: "Fruit cart" }],
+      warehouse: {
+        island: "south",
+        items: [{ kind: "hotdog_cart", qty: 1 }, { kind: "hotdogs", qty: 8 }],
+        occupied: true,
+        feePerDay: 5,
+      },
+    };
+    const model = cashLedgerModel(play);
+    expect(model.holdings).toHaveLength(1);
+    expect(model.holdings[0].title).toBe("Cart pad");
+    expect(model.holdings[0].note).toBe("Empty");
+    expect(model.holdings[0].earning).toBe(false);
+    expect(model.stash).toHaveLength(1);
+    expect(model.stash[0].title).toBe("Fruit cart");
+    expect(model.stash[0].name).toBe("In South warehouse");
+    expect(model.warehouseFee).toBe(5);
+    const html = formatCashLedger(play);
+    expect(html).toContain("Fruit cart");
+    expect(html).toContain("In South warehouse");
+    expect(html).toContain("Empty");
+    expect(html).not.toContain("Hired");
+  });
 });

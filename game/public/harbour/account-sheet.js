@@ -30,6 +30,25 @@ function swatches(kind, rows, on) {
     .join("");
 }
 
+function isCartKit(play, kind) {
+  const row = ((play && play.catalog) || []).find((s) => s.id === kind);
+  if (row) return row.role === "kit" || row.aisle === "street_carts";
+  return String(kind).endsWith("_cart") || kind === "hotdog_cart";
+}
+
+function kitQty(play, rows) {
+  return (rows || []).reduce((n, r) => n + (isCartKit(play, r.kind) ? Number(r.qty) || 0 : 0), 0);
+}
+
+function cartsOnKerb(play) {
+  return ((play && play.stands) || []).filter((s) => (s.siteClass || "cart") === "cart").length;
+}
+
+function countLabel(n, one, many) {
+  const v = Math.max(0, Number(n) || 0);
+  return v + " " + (v === 1 ? one : many);
+}
+
 function wipeCopy(step) {
   if (step === "reset-1") {
     return {
@@ -66,6 +85,9 @@ export function formatAccountSheet(play, opts = {}) {
   const look = clampLook(play && play.look);
   const tag = (play && play.accountTag) || "#0002";
   const taxPct = Math.round((Number(play && play.salesTax) || 0.08) * 100);
+  const kerb = cartsOnKerb(play);
+  const stored = kitQty(play, play && play.warehouse && play.warehouse.items);
+  const lots = ((play && play.leases) || []).length;
   const wipe = wipeCopy(opts.wipe);
   const confirm = wipe
     ? `
@@ -85,6 +107,9 @@ export function formatAccountSheet(play, opts = {}) {
     <p class="whisper">#0001 is the owner. You are the next account on this shard.</p>
     <div class="stand-row"><span>Balance</span><strong>${money(play && play.cash)}</strong></div>
     <div class="stand-row"><span>Income</span><strong>${money(play && play.incomePerMinute)}/min</strong></div>
+    <div class="stand-row"><span>On the kerb</span><strong>${countLabel(kerb, "cart", "carts")}</strong></div>
+    <div class="stand-row"><span>Warehouse</span><strong>${stored ? countLabel(stored, "cart", "carts") : "Empty"}</strong></div>
+    <div class="stand-row"><span>Lots</span><strong>${lots ? countLabel(lots, "lot", "lots") : "None"}</strong></div>
     <p class="whisper">Sales tax ${taxPct}% is already in every sale.</p>
     <p class="look-label">Hair</p>
     <div class="look-row">${swatches("hair", HAIR_STYLES, look.hair)}</div>

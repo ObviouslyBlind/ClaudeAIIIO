@@ -188,6 +188,7 @@ export function mountChrome(opts) {
     playGen += 1;
     play = data;
     paintTop();
+    paintPanels();
     if (typeof opts.onPlay === "function") opts.onPlay(play);
     return true;
   }
@@ -848,6 +849,7 @@ export function mountChrome(opts) {
           body: JSON.stringify({ standId: id }),
         });
         if (data && data.play) stampPlay(data.play);
+        else paintPanels();
         dismissStandMenu();
         if (ok && opts.onPickedUp) opts.onPickedUp(id);
         if (opts.setStatus) {

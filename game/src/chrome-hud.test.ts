@@ -269,6 +269,7 @@ describe("harbour chrome HUD", () => {
     expect(chrome).not.toContain("opts.lease(id)");
     expect(chrome).toContain("applyPlay");
     expect(chrome).toContain("stampPlay");
+    expect(chrome).toContain("play = data;\n    paintTop();\n    paintPanels();");
     expect(chrome).toContain("playGen");
     expect(chrome).toContain("if (gen !== playGen) return");
     expect(chrome).toContain("plotIsYours");
@@ -681,6 +682,35 @@ describe("harbour chrome HUD", () => {
       accountTag: "#0002",
       look: { hair: "short", skin: "sand", shirt: "sea", jacket: "brass", pants: "moss" },
     });
+    expect(htmlSheet).toContain("Balance");
+    expect(htmlSheet).toContain("On the kerb");
+    expect(htmlSheet).toContain("0 carts");
+    expect(htmlSheet).toContain("Warehouse");
+    expect(htmlSheet).toContain("Empty");
+    expect(htmlSheet).toContain("Lots");
+    expect(htmlSheet).toContain("None");
+    const placed = formatAccountSheet({
+      cash: 1_000,
+      incomePerMinute: 0,
+      accountTag: "#0002",
+      stands: [{ id: "stand-1", siteClass: "cart" }],
+      leases: [{ id: "pad-1" }],
+      warehouse: { items: [] },
+    });
+    expect(placed).toContain("1 cart");
+    expect(placed).toContain("1 lot");
+    expect(placed).toContain(">Empty<");
+    const packed = formatAccountSheet({
+      cash: 1_000,
+      incomePerMinute: 0,
+      accountTag: "#0002",
+      stands: [],
+      leases: [{ id: "pad-1" }],
+      warehouse: { items: [{ kind: "hotdog_cart", qty: 1 }, { kind: "hotdogs", qty: 8 }] },
+    });
+    expect(packed).toContain("0 carts");
+    expect(packed).toContain("1 cart");
+    expect(packed).not.toMatch(/Warehouse[\s\S]*Empty/);
     expect(htmlSheet).toContain("Google · signed in");
     expect(htmlSheet).toContain("placeholder");
     expect(htmlSheet).toContain("#0002");
