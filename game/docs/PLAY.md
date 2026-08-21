@@ -60,7 +60,7 @@ Sales tax **8%**. Fruit net ≈ **$5.52** a sale. Pack COGS **$0.70** / unit.
 
 Cash chip (top right) expands to holdings. Click a placed cart for **Stock · Run · Upgrades · Stats**.
 
-Rooms inside harbour buildings are **Alpha 0.5.1**. Grey placeholder boxes sit in the south spawn look. Spawn is **$10,000** — a shop is $1,200, a flat is $900, dirt is $15,000. Tap a building name/$ tag. **View ground / first / second floor** opens a dollhouse of that floor (RMB-hold orbit, 360 around the box). Close returns to the harbour. Spec: [UNITS.md](UNITS.md).
+Rooms inside harbour buildings are **Alpha 0.5.1**. Grey placeholder boxes sit in the south spawn look. Spawn is **$10,000** — a shop is $1,200, a flat is $900, dirt is $15,000. Turn **Properties** on for $ / YOURS signs above the shells. Tap a sign. **Floor: G** with arrows opens a dollhouse of that floor (RMB-hold orbit, 360 around the box). Vacant rooms are green buy tiles. Close returns to the harbour. Spec: [UNITS.md](UNITS.md).
 
 ---
 

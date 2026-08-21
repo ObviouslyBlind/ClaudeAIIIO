@@ -2,7 +2,7 @@
 
 PAPER / SIMULATED. No wallet.
 
-**Now: Alpha 0.5.1** — the **buildings push**, playable. Spawn **$10,000**. Grey boxes in the spawn look. Dollhouse camera on a floor (RMB-hold orbit). Not Blender.
+**Now: Alpha 0.5.1** — the **buildings push**, playable. Spawn **$10,000**. Grey boxes in the spawn look. Properties chip + dollhouse camera on a floor (RMB-hold orbit). Not Blender.
 
 Always update this file and [HANDOVER.md](HANDOVER.md) in the same change.
 

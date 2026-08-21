@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import * as THREE from "three";
 import {
   findBuilding,
+  floorLetter,
   floorName,
   formatBuildingSheet,
   formatOrderDests,
@@ -10,6 +11,7 @@ import {
 import { formatSiteMenu } from "../public/harbour/site-menu.js";
 import { formatHireSheet, listBusinesses, peopleLine } from "../public/harbour/hire-sheet.js";
 import { mountUnitBlocks, roomBoxCount } from "../public/harbour/unit-blocks.js";
+import { createKitMesh } from "../public/harbour/unit-kit.js";
 import { createVisitor } from "./sim.ts";
 import { createLandBoard } from "./land.ts";
 import { UNIT_ROOM_PRICE, UNIT_SLICE_FAUCET } from "./economy.ts";
@@ -34,19 +36,22 @@ describe("units 0.5.1 systems (placeholders, not façades)", () => {
     expect(findBuilding(play, "quay-shops")?.name).toBe("Quay Shops");
   });
 
-  it("keeps Manage grey until you own a room in that building", () => {
+  it("keeps vacant rooms as green buy tiles until you own one", () => {
     const { play } = snapWithCash();
     const html = formatBuildingSheet(play, { buildingId: "quay-shops", view: "root" });
     expect(html).toContain("Quay Shops");
-    expect(html).toContain("data-unit-view=\"buy\"");
-    expect(html).toMatch(/data-unit-view="manage"[^>]*disabled/);
+    expect(html).toContain("buy-tile");
+    expect(html).toContain(`data-buy-unit="${QUAY}"`);
+    expect(html).not.toContain("data-unit-room=");
     expect(html).toContain("Buy this land");
     expect(html).toContain("$15,000.00");
     expect(html).toMatch(/data-buy-land="quay-shops"[^>]*disabled/);
-    expect(html).toContain("Ground floor");
-    expect(html).toContain("View Ground floor");
+    expect(html).toContain("Floor:");
+    expect(html).toContain(`<b>${floorLetter(0)}</b>`);
+    expect(html).toContain("data-floor-dir");
+    expect(html).not.toContain("View Ground floor");
     expect(html).toContain("RMB-hold orbit");
-    expect(html).toContain('data-unit-floor="0"');
+    expect(floorName(0)).toBe("Ground floor");
   });
 
   it("sells one quay room and leaves the sibling vacant", () => {
@@ -56,19 +61,20 @@ describe("units 0.5.1 systems (placeholders, not façades)", () => {
     expect(play.units.buildings.find((b) => b.id === "quay-shops")?.canManage).toBe(true);
     expect(play.units.buildings.find((b) => b.id === "strand-flats")?.canManage).toBe(false);
     const buy = formatBuildingSheet(play, { buildingId: "quay-shops", view: "buy", floor: 0 });
-    expect(buy).toContain(`data-buy-unit="${QUAY}"`);
+    expect(buy).toContain(`data-unit-room="${QUAY}"`);
     expect(buy).toContain("Owned");
     expect(buy).toContain(`data-buy-unit="${QUAY_RIGHT}"`);
-    expect(buy).toContain(floorName(0));
+    expect(buy).toContain(`<b>${floorLetter(0)}</b>`);
     const root = formatBuildingSheet(play, { buildingId: "quay-shops", view: "root" });
-    expect(root).not.toMatch(/data-unit-view="manage"[^>]*disabled/);
+    expect(root).toContain(`data-unit-room="${QUAY}"`);
+    expect(root).toContain("own-tile");
     const mixed = formatBuildingSheet(play, { buildingId: "mixed-house", view: "root", floor: 0 });
-    expect(mixed).toContain("Ground floor");
-    expect(mixed).toContain("First floor");
-    expect(mixed).toContain("Second floor");
+    expect(mixed).toContain(`<b>G</b>`);
+    expect(mixed).toContain("data-floor-dir");
     expect(mixed).toContain("Mixed house shop");
     expect(mixed).not.toContain("Mixed house office");
     const upstairs = formatBuildingSheet(play, { buildingId: "mixed-house", view: "root", floor: 2 });
+    expect(upstairs).toContain(`<b>2</b>`);
     expect(upstairs).toContain("Mixed house office");
     expect(upstairs).not.toContain("Mixed house shop");
   });
@@ -124,9 +130,13 @@ describe("units 0.5.1 systems (placeholders, not façades)", () => {
     const quay = scene.getObjectByName("unit-" + QUAY);
     expect(quay.userData.kind).toBe("unit-block");
     expect(quay.userData.buildingId).toBe("quay-shops");
-    expect(blocks.clickables().length).toBeGreaterThanOrEqual(13);
+    expect(blocks.clickables()).toHaveLength(0);
     expect(scene.getObjectByName("unit-label-strand-flats")).toBeTruthy();
-    expect(scene.getObjectByName("unit-pad-quay-shops")).toBeTruthy();
+    expect(scene.getObjectByName("unit-label-strand-flats").visible).toBe(false);
+    expect(scene.getObjectByName("unit-pad-quay-shops")).toBeFalsy();
+    blocks.setViewer({ propertiesOn: true, overlay: "world" });
+    expect(scene.getObjectByName("unit-label-strand-flats").visible).toBe(true);
+    expect(blocks.clickables().length).toBeGreaterThanOrEqual(13);
     const yaw = play.units.buildings.find((b) => b.id === "quay-shops").yaw;
     expect(quay.rotation.y).toBeCloseTo(yaw, 5);
     const right = scene.getObjectByName("unit-" + QUAY_RIGHT);
@@ -148,7 +158,11 @@ describe("units 0.5.1 systems (placeholders, not façades)", () => {
     const scene = new THREE.Scene();
     const blocks = mountUnitBlocks({ scene, heightAt: () => 1.28 });
     blocks.sync(play);
-    expect(scene.getObjectByName("unit-kit-strand-flats-0-0-bed")).toBeTruthy();
+    const bed = scene.getObjectByName("unit-kit-strand-flats-0-0-bed");
+    expect(bed).toBeTruthy();
+    expect(bed.children.length).toBeGreaterThan(4);
+    const lone = createKitMesh("fridge");
+    expect(lone.children.length).toBeGreaterThan(3);
   });
 
   it("puts an owned shop on Books", () => {
@@ -165,7 +179,8 @@ describe("units 0.5.1 systems (placeholders, not façades)", () => {
     expect(play.cash).toBe(10_000);
     const shop = formatBuildingSheet(play, { buildingId: "quay-shops", view: "buy", floor: 0 });
     expect(shop).not.toMatch(/data-buy-unit="quay-shops-0-0"[^>]*disabled/);
-    expect(shop).toContain("Buy $1,200.00");
+    expect(shop).toContain("$1,200.00");
+    expect(shop).toContain("buy-tile");
     const root = formatBuildingSheet(play, { buildingId: "quay-shops", view: "root" });
     expect(root).toContain("You can buy a room here.");
     expect(root).toMatch(/data-buy-land="quay-shops"[^>]*disabled/);
@@ -194,7 +209,8 @@ describe("units 0.5.1 systems (placeholders, not façades)", () => {
     expect(purchaseRoom(visitor, "strand-flats-0-0").ok).toBe(true);
     const play = playSnapshot(visitor, land);
     const manage = formatBuildingSheet(play, { buildingId: "strand-flats", view: "manage", floor: 0 });
-    expect(manage).toContain("Ground floor");
+    expect(manage).toContain(`<b>G</b>`);
+    expect(manage).toContain("data-floor-dir");
     expect(manage).toContain('data-unit-room="strand-flats-0-0"');
     const room = formatBuildingSheet(play, {
       buildingId: "strand-flats",

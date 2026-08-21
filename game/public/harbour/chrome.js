@@ -6,7 +6,7 @@
 import { plotDisplayName } from "./parcel-map.js";
 import { buyAskModel } from "./buy-ask.js";
 import { playPaperBuy } from "./paper-sfx.js";
-import { toggleViewer, isLotsViewer, footLevel } from "./overlays.js";
+import { toggleViewer, isLotsViewer, footLevel, viewerCaption, viewerHint } from "./overlays.js";
 import { mountPackShift } from "./pack.js";
 import { formatBooksBody } from "./books-hud.js";
 import { formatInventoryBody } from "./inventory-hud.js";
@@ -105,29 +105,50 @@ export function mountChrome(opts) {
   const HINTS = {
     world: "World: tap the dirt to walk. Green line is the path.",
     lots: "Lots to buy. Vacant $ bars. Click Lots again for your lots.",
-    yours: "Your lots and buildings. Click Lots again to hide.",
+    yours: "Your Lots. Click Lots again to hide.",
     foot: "Foot traffic: High (green) / Moderate (yellow) / Low (red) on each named road.",
     minerals: "Minerals are not in yet.",
   };
 
-  function setOverlay(id) {
-    overlay = id;
+  let propertiesOn = false;
+
+  function paintViewerChrome() {
     root.querySelectorAll("[data-overlay]").forEach((b) => {
       const key = b.getAttribute("data-overlay");
-      const on = key === "lots" ? isLotsViewer(id) : key === id;
+      const on = key === "lots" ? isLotsViewer(overlay) : key === overlay;
       b.classList.toggle("is-on", on);
       if (key === "lots") {
-        b.classList.toggle("is-yours", id === "yours");
-        const label = id === "yours" ? "Your lots" : id === "lots" ? "Lots to buy" : "Lots";
+        b.classList.toggle("is-yours", overlay === "yours");
+        const label = isLotsViewer(overlay) ? viewerCaption(overlay, propertiesOn) : "Lots";
         b.setAttribute("aria-label", label);
         b.setAttribute("data-tip", label);
       }
     });
+    const propBtn = root.querySelector('[data-toggle="properties"]');
+    if (propBtn) {
+      propBtn.classList.toggle("is-on", propertiesOn);
+      propBtn.setAttribute("aria-pressed", propertiesOn ? "true" : "false");
+    }
+    const text = viewerHint(overlay, propertiesOn) || HINTS[overlay] || HINTS.world;
     const hint = document.getElementById("viewer-hint");
-    if (hint) hint.textContent = HINTS[id] || HINTS.world;
-    if (opts.setStatus) opts.setStatus(HINTS[id] || HINTS.world);
+    if (hint) hint.textContent = text;
+    if (opts.setStatus) opts.setStatus(text);
+  }
+
+  function setOverlay(id) {
+    overlay = id;
+    paintViewerChrome();
     if (opts.onOverlay) opts.onOverlay(id);
     paintFootLegend();
+  }
+
+  function setPropertiesOn(on) {
+    const next = Boolean(on);
+    if (next === propertiesOn) return;
+    propertiesOn = next;
+    if (!propertiesOn) dismissStandMenu();
+    paintViewerChrome();
+    if (opts.onProperties) opts.onProperties(propertiesOn);
   }
 
   function syncSheetVeil() {
@@ -754,9 +775,16 @@ export function mountChrome(opts) {
         paintBuildingSheet(unitBuildingId);
       });
     });
-    root.querySelectorAll("[data-unit-floor]").forEach((btn) => {
+    root.querySelectorAll("[data-floor-dir]").forEach((btn) => {
       btn.addEventListener("click", () => {
-        unitFloor = Number(btn.getAttribute("data-unit-floor") || 0);
+        if (btn.disabled) return;
+        const dir = Number(btn.getAttribute("data-floor-dir"));
+        if (!Number.isFinite(dir) || dir === 0) return;
+        const building = findBuilding(play, unitBuildingId);
+        const floors = [...new Set((building?.rooms || []).map((r) => Number(r.floor) || 0))].sort((a, b) => a - b);
+        const min = floors[0] ?? 0;
+        const max = floors[floors.length - 1] ?? 0;
+        unitFloor = Math.max(min, Math.min(max, unitFloor + dir));
         paintBuildingSheet(unitBuildingId);
       });
     });
@@ -1417,6 +1445,11 @@ export function mountChrome(opts) {
       setOverlay(toggleViewer(overlay, btn.getAttribute("data-overlay")));
     });
   });
+  root.querySelectorAll('[data-toggle="properties"]').forEach((btn) => {
+    btn.addEventListener("click", () => {
+      setPropertiesOn(!propertiesOn);
+    });
+  });
 
   async function poll() {
     const gen = playGen;
@@ -1695,6 +1728,8 @@ export function mountChrome(opts) {
     },
     getPlay: () => play,
     setOverlay,
+    isPropertiesOn: () => propertiesOn,
+    setPropertiesOn,
     open,
     closePanels,
     hideBuyAsk() {

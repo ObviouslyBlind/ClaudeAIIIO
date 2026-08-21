@@ -56,7 +56,7 @@ Four authored **buildings** on South, near spawn. Each room is a grey box. You b
 
 That is **4 buildings, 13 rooms**. $10,000 (slice faucet in tests) should buy **one or two rooms** and kit them, not the block, and **not** the dirt.
 
-Grey boxes are the product for the camera later. Kit is also grey boxes (shelf, fridge, till, bed, shower, sink, desk, cabinet). No CSG, no wallpaper pack, no unique minigames. **Blender meshes are a later version.** Alpha 0.5 is scripts only.
+Grey boxes are the product for the camera later. Kit is constructed furniture (shelf, fridge, till, bed, shower, sink, desk, cabinet). No CSG, no wallpaper pack, no unique minigames. **Blender meshes are a later version.** Alpha 0.5 is scripts only.
 
 Use is marked **per room**, not per building. Two shops in Quay Shops are two businesses: you can buy the left room and leave the right vacant. The player cannot rezone a shop room into a flat this pass.
 
@@ -90,16 +90,25 @@ Primary = tap / left click. Secondary = long-press / right click. No WASD. No vi
 
 Grey boxes in the harbour are the **systems camera**. Not Blender.
 
-1. Tap **one building** (placeholder boxes / name tag) → sheet on that shell, and the **dollhouse** of the current floor.
-2. **View ground / first / second floor** opens a **dollhouse of that floor**: tilted 3D, **RMB-hold orbit, 360 around the box**. Not first-person walk. Not a second island. No WASD. No left-click hop.
-3. **Buy rooms** · **Manage rooms** (grey if you own none in this building) · **Buy this land**.
+**Properties** is a viewer chip, off by default. With it off you cannot open a building. With it on, lot-style **$ / YOURS** signs sit way above each shell (same lots language; the dirt is just a lot — no extra pad). World + Properties still shows those signs so you can find a building while walking.
+
+Lots chip copy with the Properties toggle:
+
+| Lots mode | Properties off | Properties on |
+|---|---|---|
+| vacant | **Lots to buy** | **Lots and properties to buy** |
+| yours | **Your Lots** | **Your Properties** |
+
+1. Turn **Properties** on. Tap a **$** sign (or the shell) → compact sheet under the viewers, and the **dollhouse** of the current floor.
+2. **Floor: G** with up/down arrows switches the dollhouse floor: tilted 3D, **RMB-hold orbit, 360 around the box**. Not first-person walk. Not a second island. No WASD. No left-click hop.
+3. Vacant rooms are **green buy tiles**. Hover lights them. Owned rooms are quieter Open tiles. **Buy this land** stays a small ghost ($15,000).
 4. Buy: one vacant room → pay → you own **that room**. Neighbours stay listed. Tap a room in the dollhouse to buy or manage that unit.
-5. Manage: only rooms you own. Shop Run has packer + till. Flat/office: kit, scout, lease.
-6. Close the sheet → harbour follow camera. Cutaway restores the stacked boxes.
+5. Open a room you own. Shop Run has packer + till. Flat/office: kit, scout, lease.
+6. Close the sheet (or turn Properties off) → harbour follow camera. Cutaway restores the stacked boxes.
 
 Indoor **presence** stays off. Dollhouse is a camera on sim facts (same as Books). Reuse existing sheets. Marketplace dest adds **This room** when you own a shop unit.
 
-Placeholder kit boxes sit on the open floor slab. No CSG, no wallpaper. Stop when the critic can buy a floor, place two grey boxes, hire a packer, and watch cash move.
+Kit in the open floor is constructed furniture (shelf, fridge, till, bed, shower, sink, desk, cabinet) in the cart Lambert language. No CSG, no wallpaper, no `interior.js`. Stop when the critic can buy a floor, see a bed/till, hire a packer, and watch cash move.
 
 ---
 

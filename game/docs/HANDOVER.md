@@ -6,7 +6,7 @@ Public name **2Isles**. Spec still says Two Harbors in places; same game.
 
 **Mid-alpha (2026-08-20).** The harbour loop is the base. We build features on it. We do not reopen the foundation, clone Capital Rift, or unfreeze House / Senate / councils / elections.
 
-**Version: Alpha 0.5.1** — the **buildings push**, **playable**. Spawn **$10,000**. Grey boxes in the spawn look. Dollhouse camera on a floor. Not Blender. [VERSION.md](VERSION.md). Beta is **1.0**.
+**Version: Alpha 0.5.1** — the **buildings push**, **playable**. Spawn **$10,000**. Grey boxes in the spawn look. Properties chip + dollhouse camera on a floor. Not Blender. [VERSION.md](VERSION.md). Beta is **1.0**.
 
 Doc map: [README.md](README.md) · spec: [../PLAN.md](../PLAN.md) · play: [PLAY.md](PLAY.md) · money: [../ECONOMY.md](../ECONOMY.md) · units: [UNITS.md](UNITS.md)
 
@@ -64,7 +64,7 @@ South spawn. Tap-to-walk. RMB-hold orbit. No WASD.
 | Site card | Stock · Run · Upgrades · Stats. Hire $300. Play shifts while unhired. |
 | Hire | Left-rail Hire sheet, or Run tab on the cart. |
 | Account | #0002. Look swatches. Reset / delete. Cash chip expands to holdings. |
-| Units (0.5.1) | Four grey shells **inland of Island Hwy**, in the spawn look. Spawn **$10,000**. Tap the name/$ tag. **Dollhouse camera**: floor chips open that floor (open-top rooms, floors above hidden), **RMB-hold orbit 360 around the box**. Tap a room to buy/manage. Close returns to harbour follow. Kit is small grey boxes. Packer + till. Scout + lease. Dest **This room** when you own a shop. |
+| Units (0.5.1) | Four grey shells **inland of Island Hwy**, in the spawn look. Spawn **$10,000**. **Properties** chip: $ / YOURS signs way above the shells (same lots tags; dirt is just a lot). Compact sheet: **Floor: G** stepper, green buy tiles. **Dollhouse**: RMB-hold orbit 360 around the floor. Close or Properties-off returns to harbour follow. Kit is constructed furniture. Packer + till. Scout + lease. Dest **This room** when you own a shop. |
 
 Starter: cash **$10,000**. Pad **$750**. Fruit kit **$90**, pack **$14** / 20. Today fruit **$6**, tax **8%**. A shop room is **$1,200**. Building dirt is **$15,000**. Hire **$300**.
 

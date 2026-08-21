@@ -1844,7 +1844,7 @@ function onPointer(ev) {
       return;
     }
   }
-  if (unitHit) {
+  if (unitHit && chromeHud && chromeHud.isPropertiesOn && chromeHud.isPropertiesOn()) {
     const block = objectWithKind(unitHit.object, "unit-block");
     const bid = block && block.userData && block.userData.buildingId;
     const uid = block && block.userData && block.userData.unitId;
@@ -2549,7 +2549,18 @@ async function boot() {
     onOverlay(id) {
       const play = chromeHud && typeof chromeHud.getPlay === "function" ? chromeHud.getPlay() : null;
       if (overlays) overlays.setMode(id, play, map);
+      if (unitBlocks && typeof unitBlocks.setViewer === "function") {
+        unitBlocks.setViewer({
+          overlay: id,
+          propertiesOn: chromeHud && chromeHud.isPropertiesOn ? chromeHud.isPropertiesOn() : false,
+        });
+      }
       paintHoldingGlow(id);
+    },
+    onProperties(on) {
+      if (unitBlocks && typeof unitBlocks.setViewer === "function") {
+        unitBlocks.setViewer({ overlay: viewerMode(), propertiesOn: Boolean(on) });
+      }
     },
     onPlaceMode(on) {
       if (!on) {
@@ -2569,7 +2580,13 @@ async function boot() {
     onPlay(play) {
       if (play && play.look) dressPlayer(player, play.look);
       if (overlays) overlays.refresh(play, map);
-      if (unitBlocks) unitBlocks.sync(play);
+      if (unitBlocks) {
+        unitBlocks.sync(play);
+        unitBlocks.setViewer({
+          overlay: viewerMode(),
+          propertiesOn: chromeHud && chromeHud.isPropertiesOn ? chromeHud.isPropertiesOn() : false,
+        });
+      }
       pruneCrates(play);
       pruneStands(play);
       for (const d of play.deliveries || []) {

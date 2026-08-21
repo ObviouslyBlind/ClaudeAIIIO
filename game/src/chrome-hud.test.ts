@@ -60,6 +60,8 @@ describe("harbour chrome HUD", () => {
     expect(tr.indexOf('id="viewers"')).toBeLessThan(tr.indexOf('data-overlay="lots"'));
     const chips = html.slice(html.indexOf('id="viewers"'), html.indexOf('id="panel-account"'));
     expect(chips).toContain('data-overlay="lots"');
+    expect(chips).toContain('data-toggle="properties"');
+    expect(chips).toContain('aria-label="Properties"');
     expect(chips).toContain('data-overlay="foot"');
     expect(chips).toContain('aria-label="Lots to buy"');
     expect(chips).toContain('data-tip="Lots to buy"');
@@ -182,10 +184,17 @@ describe("harbour chrome HUD", () => {
     expect(chrome).toContain("buyAskModel");
     expect(chrome).toContain("toggleViewer");
     expect(chrome).toContain("isLotsViewer");
+    expect(chrome).toContain("viewerCaption");
+    expect(chrome).toContain("isPropertiesOn");
+    expect(chrome).toContain('data-toggle="properties"');
     expect(chrome).toContain("is-yours");
     expect(chrome).toContain('setOverlay("world")');
     expect(css).toContain(".chip.is-on.is-yours");
+    expect(css).toContain(".buy-tile");
+    expect(css).toContain(".floor-step");
+    expect(css).toContain("#stand-menu:has([data-unit-building])");
     expect(html).toContain("Lots to buy. Vacant $ bars");
+    expect(main).toContain("isPropertiesOn");
     expect(main).toContain("function siteAtTap");
     expect(main).toContain("STAND_TAP_M");
     expect(main).toContain("function paintHoldingGlow");

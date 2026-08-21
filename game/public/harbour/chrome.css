@@ -1644,6 +1644,13 @@ nav.dock.travel-dock {
   z-index: 14;
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55), var(--inset);
 }
+#stand-menu:has([data-unit-building]) {
+  top: max(96px, calc(env(safe-area-inset-top) + 84px));
+  bottom: auto;
+  width: min(300px, calc(100vw - 24px));
+  max-height: min(72vh, 540px);
+  border-radius: 12px;
+}
 .site-card {
   display: flex;
   flex-direction: column;
@@ -1664,6 +1671,194 @@ nav.dock.travel-dock {
   padding-left: 1.1em;
   font-size: 13px;
   line-height: 1.45;
+}
+.floor-step {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 4px 0 10px;
+  padding: 4px 6px 4px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: linear-gradient(180deg, #152226 0%, var(--hull) 100%);
+  box-shadow: var(--inset);
+}
+.floor-step-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.floor-step-label b {
+  font-family: "Big Shoulders Display", "Arial Narrow", sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--brass-hi);
+  margin-left: 6px;
+}
+.floor-step-arrows {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.floor-step-btn {
+  width: 28px;
+  height: 16px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--brass-hi);
+  cursor: pointer;
+}
+.floor-step-btn svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.floor-step-btn:hover,
+.floor-step-btn:focus-visible {
+  color: var(--ink);
+  background: rgba(240, 213, 164, 0.16);
+}
+.floor-step-btn:disabled {
+  opacity: 0.28;
+  cursor: default;
+  background: transparent;
+}
+.buy-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 0 10px;
+}
+.buy-tile,
+.own-tile {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto auto;
+  column-gap: 10px;
+  width: 100%;
+  margin: 0;
+  padding: 10px 12px;
+  text-align: left;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: var(--inset), 0 4px 10px rgba(0, 0, 0, 0.22);
+}
+.buy-tile {
+  border: 1px solid rgba(95, 227, 160, 0.55);
+  background: rgba(95, 227, 160, 0.18);
+  color: var(--ink);
+}
+.buy-tile:hover,
+.buy-tile:focus-visible {
+  background: rgba(95, 227, 160, 0.4);
+  border-color: var(--green);
+  box-shadow: var(--inset), 0 6px 14px rgba(0, 0, 0, 0.3);
+}
+.buy-tile:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+  box-shadow: var(--inset);
+}
+.own-tile {
+  border: 1px solid var(--line);
+  background: rgba(21, 34, 38, 0.78);
+  color: var(--ink);
+}
+.own-tile:hover,
+.own-tile:focus-visible {
+  border-color: var(--brass-hi);
+  color: var(--brass-hi);
+}
+.buy-tile-name {
+  grid-column: 1;
+  font-family: "Big Shoulders Display", "Arial Narrow", sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.1;
+}
+.buy-tile-meta {
+  grid-column: 1;
+  margin-top: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.buy-tile .buy-tile-meta {
+  color: #9fe9c4;
+}
+.buy-tile-price {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  color: var(--green);
+}
+.own-tile .buy-tile-price {
+  color: var(--brass-hi);
+}
+#stand-menu .go {
+  min-height: 36px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--green);
+  color: #0b1a10;
+  font-weight: 700;
+  cursor: pointer;
+}
+#stand-menu .go:hover,
+#stand-menu .go:focus-visible {
+  filter: brightness(1.08);
+}
+#stand-menu .go:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  filter: none;
+}
+#stand-menu .ghost,
+#stand-menu .unit-land {
+  min-height: 32px;
+  width: 100%;
+  margin: 0 0 8px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(21, 34, 38, 0.72);
+  color: var(--muted);
+  font-weight: 700;
+  cursor: pointer;
+}
+#stand-menu .ghost:hover,
+#stand-menu .unit-land:hover,
+#stand-menu .ghost:focus-visible,
+#stand-menu .unit-land:focus-visible {
+  border-color: var(--brass-hi);
+  color: var(--brass-hi);
+}
+#stand-menu .unit-land:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+#stand-menu .hire-back {
+  width: auto;
+  min-height: 28px;
+  margin-bottom: 8px;
 }
 .site-tabs {
   display: grid;

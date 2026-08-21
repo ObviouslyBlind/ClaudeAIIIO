@@ -24,6 +24,12 @@ export function floorName(i) {
   return "Second floor";
 }
 
+export function floorLetter(i) {
+  const n = Number(i) || 0;
+  if (n <= 0) return "G";
+  return String(n);
+}
+
 export function unitsSnap(play) {
   return (play && play.units) || { buildings: [], kit: [], leaseHours: [3, 6, 24, 48] };
 }
@@ -48,11 +54,6 @@ function kitForUse(play, use) {
   return (unitsSnap(play).kit || []).filter((k) => k.use === use);
 }
 
-function roomLine(r) {
-  const who = r.owner === "visitor" ? "Yours" : "Vacant";
-  return `${esc(r.label)} · ${esc(r.use)} · ${who} · ${money(r.price)}`;
-}
-
 function floorsOf(building) {
   return [...new Set((building.rooms || []).map((r) => r.floor))].sort((a, b) => a - b);
 }
@@ -62,20 +63,49 @@ function activeFloor(building, floor) {
   return floors.includes(floor) ? floor : floors[0];
 }
 
-function floorChips(building, viewFloor) {
-  return floorsOf(building)
-    .map(
-      (f) =>
-        `<button type="button" class="ghost${f === viewFloor ? " is-on" : ""}" data-unit-floor="${f}">View ${esc(floorName(f))}</button>`,
-    )
-    .join("");
+function floorStepper(building, viewFloor) {
+  const floors = floorsOf(building);
+  const min = floors[0] ?? 0;
+  const max = floors[floors.length - 1] ?? 0;
+  const downOff = viewFloor <= min ? "disabled" : "";
+  const upOff = viewFloor >= max ? "disabled" : "";
+  return `
+    <div class="floor-step" role="group" aria-label="Floor">
+      <span class="floor-step-label">Floor: <b>${esc(floorLetter(viewFloor))}</b></span>
+      <span class="floor-step-arrows">
+        <button type="button" class="floor-step-btn" data-floor-dir="1" aria-label="Floor up" ${upOff}>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 14l6-6 6 6"/></svg>
+        </button>
+        <button type="button" class="floor-step-btn" data-floor-dir="-1" aria-label="Floor down" ${downOff}>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 10l6 6 6-6"/></svg>
+        </button>
+      </span>
+    </div>`;
+}
+
+function buyTile(r, cash) {
+  const owned = r.owner === "visitor";
+  if (owned) {
+    return `
+      <button type="button" class="own-tile" data-unit-room="${esc(r.id)}">
+        <span class="buy-tile-name">${esc(r.label)}</span>
+        <span class="buy-tile-meta">${esc(r.use)} · Owned</span>
+        <span class="buy-tile-price">Open</span>
+      </button>`;
+  }
+  const can = cash >= Number(r.price);
+  return `
+    <button type="button" class="buy-tile" data-buy-unit="${esc(r.id)}" ${can ? "" : "disabled"}>
+      <span class="buy-tile-name">${esc(r.label)}</span>
+      <span class="buy-tile-meta">${esc(r.use)} · vacant</span>
+      <span class="buy-tile-price">${can ? money(r.price) : "Need " + money(r.price)}</span>
+    </button>`;
 }
 
 function paintRoot(building, play, floor) {
   const cash = Number(play && play.cash) || 0;
   const landOwned = building.landOwner === "visitor";
   const canLand = !landOwned && cash >= Number(building.landPrice);
-  const manageOff = !building.canManage;
   const viewFloor = activeFloor(building, floor);
   const onFloor = (building.rooms || []).filter((r) => r.floor === viewFloor);
   const vacant = (building.rooms || []).filter((r) => r.owner !== "visitor");
@@ -86,21 +116,16 @@ function paintRoot(building, play, floor) {
       : ask < Infinity
         ? "Need " + money(ask) + " for a room here. Spawn is $10,000. Building dirt is $15,000."
         : "No vacant rooms.";
+  const tiles = onFloor.map((r) => buyTile(r, cash)).join("");
   return `
     <p class="whisper">${building.floors} floor${building.floors === 1 ? "" : "s"} · ${building.rooms.length} rooms · PAPER</p>
     <p class="whisper">${esc(hint)}</p>
-    <div class="unit-actions">
-      <button type="button" class="go" data-unit-view="buy">Buy rooms</button>
-      <button type="button" class="go" data-unit-view="manage" ${manageOff ? "disabled" : ""}>Manage rooms</button>
-      <button type="button" class="go" data-buy-land="${esc(building.id)}" ${canLand ? "" : "disabled"}>
-        ${landOwned ? "You own this land" : "Buy this land " + money(building.landPrice)}
-      </button>
-    </div>
-    <div class="dest-row">${floorChips(building, viewFloor)}</div>
-    <p class="whisper">${esc(floorName(viewFloor))} · RMB-hold orbit around this floor. Close returns to the harbour.</p>
-    <ul class="unit-list">
-      ${onFloor.map((r) => `<li>${roomLine(r)}</li>`).join("")}
-    </ul>`;
+    ${floorStepper(building, viewFloor)}
+    <div class="buy-grid">${tiles}</div>
+    <button type="button" class="unit-land" data-buy-land="${esc(building.id)}" ${canLand ? "" : "disabled"}>
+      ${landOwned ? "You own this land" : "Buy this land " + money(building.landPrice)}
+    </button>
+    <p class="whisper">RMB-hold orbit around this floor. Close returns to the harbour.</p>`;
 }
 
 function paintBuy(building, play, floor) {
@@ -108,23 +133,12 @@ function paintBuy(building, play, floor) {
   const onFloor = (building.rooms || []).filter((r) => r.floor === viewFloor);
   const others = (building.rooms || []).filter((r) => r.floor !== viewFloor && !r.owner);
   const cash = Number(play && play.cash) || 0;
-  const row = (r) => {
-    const owned = r.owner === "visitor";
-    const can = !owned && cash >= Number(r.price);
-    return `
-      <div class="inv-row">
-        <span>${esc(r.label)} · ${esc(r.use)}</span>
-        <button type="button" class="go" data-buy-unit="${esc(r.id)}" ${can ? "" : "disabled"}>
-          ${owned ? "Owned" : can ? "Buy " + money(r.price) : "Need " + money(r.price)}
-        </button>
-      </div>`;
-  };
   return `
     <button type="button" class="ghost hire-back" data-unit-view="root">Back</button>
-    <div class="dest-row">${floorChips(building, viewFloor)}</div>
-    <p class="whisper">${esc(floorName(viewFloor))} · RMB-hold orbit around this floor.</p>
-    ${onFloor.map(row).join("")}
-    ${others.length ? `<p class="whisper">Other vacant rooms in this building</p>${others.map(row).join("")}` : ""}`;
+    ${floorStepper(building, viewFloor)}
+    <p class="whisper">RMB-hold orbit around this floor.</p>
+    <div class="buy-grid">${onFloor.map((r) => buyTile(r, cash)).join("")}</div>
+    ${others.length ? `<p class="whisper">Other vacant rooms in this building</p><div class="buy-grid">${others.map((r) => buyTile(r, cash)).join("")}</div>` : ""}`;
 }
 
 function paintManage(building, play, floor) {
@@ -132,22 +146,18 @@ function paintManage(building, play, floor) {
   if (!mine.length) {
     return `
       <button type="button" class="ghost hire-back" data-unit-view="root">Back</button>
-      <p class="whisper">Manage is grey until you own a room in this building.</p>`;
+      <p class="whisper">Open a room you own from the green list.</p>`;
   }
   const viewFloor = activeFloor(building, floor);
   const onFloor = mine.filter((r) => r.floor === viewFloor);
   const others = mine.filter((r) => r.floor !== viewFloor);
-  const row = (r) => `
-      <div class="inv-row">
-        <span>${esc(r.label)} · ${esc(r.use)}</span>
-        <button type="button" class="go" data-unit-room="${esc(r.id)}">Open</button>
-      </div>`;
+  const cash = Number(play && play.cash) || 0;
   return `
     <button type="button" class="ghost hire-back" data-unit-view="root">Back</button>
-    <div class="dest-row">${floorChips(building, viewFloor)}</div>
-    <p class="whisper">${esc(floorName(viewFloor))} · RMB-hold orbit around this floor.</p>
-    ${onFloor.map(row).join("")}
-    ${others.length ? `<p class="whisper">Other rooms you own</p>${others.map(row).join("")}` : ""}`;
+    ${floorStepper(building, viewFloor)}
+    <p class="whisper">RMB-hold orbit around this floor.</p>
+    <div class="buy-grid">${onFloor.map((r) => buyTile(r, cash)).join("")}</div>
+    ${others.length ? `<p class="whisper">Other rooms you own</p><div class="buy-grid">${others.map((r) => buyTile(r, cash)).join("")}</div>` : ""}`;
 }
 
 function paintRoom(building, play, unitId) {

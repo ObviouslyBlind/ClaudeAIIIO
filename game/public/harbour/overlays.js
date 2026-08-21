@@ -25,8 +25,8 @@ export const VIEWERS = {
   },
   yours: {
     id: "yours",
-    label: "Your lots",
-    hint: "Your lots and buildings. Click Lots again to hide.",
+    label: "Your Lots",
+    hint: "Your Lots. Click Lots again to hide.",
   },
   foot: {
     id: "foot",
@@ -62,6 +62,36 @@ export function cycleLots(current) {
 
 export function isLotsViewer(id) {
   return id === "lots" || id === "yours";
+}
+
+/**
+ * Lots chip copy. Properties is a separate toggle, not a viewer mode.
+ *   lots  + off → Lots to buy
+ *   lots  + on  → Lots and properties to buy
+ *   yours + off → Your Lots
+ *   yours + on  → Your Properties
+ */
+export function viewerCaption(overlay, propertiesOn) {
+  const props = Boolean(propertiesOn);
+  if (overlay === "lots") return props ? "Lots and properties to buy" : "Lots to buy";
+  if (overlay === "yours") return props ? "Your Properties" : "Your Lots";
+  return (VIEWERS[overlay] && VIEWERS[overlay].label) || "World";
+}
+
+export function viewerHint(overlay, propertiesOn) {
+  const props = Boolean(propertiesOn);
+  if (overlay === "lots") {
+    return props
+      ? "Lots and properties to buy. Vacant $ bars on dirt and buildings."
+      : VIEWERS.lots.hint;
+  }
+  if (overlay === "yours") {
+    return props ? "Your Properties. Green YOURS on lots and buildings you own." : VIEWERS.yours.hint;
+  }
+  if (props && overlay === "world") {
+    return "World. Properties on — $ signs above buildings. Tap a building to buy a room.";
+  }
+  return (VIEWERS[overlay] && VIEWERS[overlay].hint) || VIEWERS.world.hint;
 }
 
 const BAND_COLOR = {
