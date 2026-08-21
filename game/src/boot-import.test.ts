@@ -85,6 +85,8 @@ describe("harbour boot import graph", () => {
     expect(src).toContain("openUnitSheet");
     expect(src).toContain("mountUnitBlocks");
     expect(src).toContain('from "./unit-dollhouse.js"');
+    expect(src).toContain('from "./quay-people.js"');
+    expect(src).toContain("mountQuayPeople");
     expect(src).toContain("dollhouseCam");
     expect(src).toContain("playCam.pause");
     expect(src).not.toContain("function inspectLandAt");

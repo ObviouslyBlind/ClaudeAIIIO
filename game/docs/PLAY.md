@@ -55,12 +55,20 @@ Sales tax **8%**. Fruit net ≈ **$5.52** a sale. Pack COGS **$0.70** / unit.
 | Inventory | What is on you. Place kits here. |
 | Books | Business terminal. Compact list; **Open books** expands to P&L, island listings, inflation. |
 | Warehouse | Dock storage. Sell / Bring to me. $5/day while occupied. |
-| Marketplace | Catalog. Street is live. Other aisles honest empty. |
+| Marketplace | Catalog. Street, **Shopfit**, and **Hospitality** are live. Farming / Machinery stay honest empty. |
 | Hire | Staff onto a site. |
 
 Cash chip (top right) expands to holdings. Click a placed cart for **Stock · Run · Upgrades · Stats**.
 
-Rooms inside harbour buildings are **Alpha 0.5.1**. Three grey shells sit on lots next to the $750 spawn pads. Live today is still the compact sheet. The **accepted loop** (split menus, confirm buy, enter the room, place from inventory, tenant profiles) is [UNITS.md](UNITS.md) — not live until that overhaul ships. Spawn **$10,000**. A shop is $1,200, a flat is $900. Dirt under a building is **$15,000** and is a separate landlord buy you cannot afford at spawn.
+Rooms inside harbour buildings are **Alpha 0.5.1**. Three grey shells sit next to the $750 spawn pads. **Lots** is dirt and pads. **Properties** is buildings and rooms — it does not turn on from Lots. **Landlord** is the $15,000 dirt under a shell; spawn cannot afford it and you do not need it to run a room.
+
+Buy a room: Properties on (or tap a house $), point at a vacant grey box so it goes green, confirm “Buy Strand flat G-L for $900?”. The camera **enters that room**. **Exit room** is the only dump — harbour taps, Lots, and Hide do not reset it.
+
+Empty rooms are legal. Marketplace **Shopfit** / **Hospitality** → Bring to me → Inventory **Place** on that floor (Hold **R**). Pickup packs to the warehouse. **Scout** on a flat or office returns 1–3 tenant profiles (poor / mid / high from placed furniture). Sign the profile; no 3/6/24/48 picker. Books shows the rent line or “Empty room · $0. Scout a tenant.”
+
+South quay has walkers. A signed tenant is a body in that room while you are inside.
+
+Spawn **$10,000**. A shop is $1,200, a flat is $900, an office is $1,100. Dirt under a building is **$15,000**.
 
 ---
 

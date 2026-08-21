@@ -79,16 +79,18 @@ export const UNIT_ROOM_PRICE = { shop: 1_200, apartment: 900, office: 1_100 } as
 export const BUILDING_LAND_PRICE = 15_000;
 export const GROUND_RENT_PER_UNIT_DAY = 8;
 export const PACKER_MOVE_PER_TICK = 2;
-export const LEASE_HOURS = [3, 6, 24, 48] as const;
+/** Tenant term is a profile roll, not a 3/6/24/48 picker. 1 sim week = 168 hours. */
+export const LEASE_HOURS_MIN = 3;
+export const LEASE_HOURS_MAX = 168;
 export const TICKS_PER_SIM_HOUR = 150;
 /** Shop kit feeds the same 0–10 siteScore as cart fridge/sign. Not a second meter. */
 export const UNIT_KIT = [
-  { id: "shelf", label: "Shelf", use: "shop", cost: 70, appeal: 1.0 },
-  { id: "till", label: "Till", use: "shop", cost: 90, appeal: 1.0 },
-  { id: "fridge", label: "Fridge", use: "shop", cost: 180, appeal: 1.5 },
-  { id: "bed", label: "Bed", use: "apartment", cost: 80, appeal: 0 },
-  { id: "shower", label: "Shower", use: "apartment", cost: 90, appeal: 0 },
-  { id: "sink", label: "Sink", use: "apartment", cost: 60, appeal: 0 },
-  { id: "desk", label: "Desk", use: "office", cost: 100, appeal: 0 },
-  { id: "cabinet", label: "Filing cabinet", use: "office", cost: 80, appeal: 0 },
+  { id: "shelf", label: "Shelf", use: "shop", cost: 70, appeal: 1.0, aisle: "shopfit" },
+  { id: "till", label: "Till", use: "shop", cost: 90, appeal: 1.0, aisle: "shopfit" },
+  { id: "fridge", label: "Fridge", use: "shop", cost: 180, appeal: 1.5, aisle: "shopfit" },
+  { id: "bed", label: "Bed", use: "apartment", cost: 80, appeal: 1.2, aisle: "hospitality" },
+  { id: "shower", label: "Shower", use: "apartment", cost: 90, appeal: 1.2, aisle: "hospitality" },
+  { id: "sink", label: "Sink", use: "apartment", cost: 60, appeal: 1.0, aisle: "hospitality" },
+  { id: "desk", label: "Desk", use: "office", cost: 100, appeal: 1.5, aisle: "hospitality" },
+  { id: "cabinet", label: "Filing cabinet", use: "office", cost: 80, appeal: 1.2, aisle: "hospitality" },
 ] as const;

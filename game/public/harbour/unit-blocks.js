@@ -15,6 +15,7 @@ export const ROOM_H = 3.2;
 export const GAP = 0.45;
 const VACANT = 0xc6c6c6;
 const OWNED = 0xe8e8e8;
+const SELECT = 0x3dcc6a;
 const TAG_W = 4.2;
 const TAG_H = 1.15;
 /** Metres above the roof to the bottom of the $ bar. */
@@ -117,6 +118,7 @@ function stampUnit(obj, building, r, part, floor) {
   obj.userData.part = part;
   obj.userData.buildingId = building.id;
   obj.userData.buildingName = building.name;
+  obj.userData.owned = r ? r.owner === "visitor" : false;
   if (r) obj.userData.unitId = r.id;
   if (floor != null) obj.userData.floor = floor;
 }
@@ -176,10 +178,54 @@ function addTag(group, building, x, y, z) {
   group.add(sprite);
 }
 
-function localXZ(yaw, lx, lz) {
+export function localXZ(yaw, lx, lz) {
   const c = Math.cos(yaw);
   const s = Math.sin(yaw);
   return { x: lx * c - lz * s, z: lx * s + lz * c };
+}
+
+export function roomOnFloor(building, room) {
+  const floor = Number(room && room.floor) || 0;
+  const floorRooms = (building.rooms || []).filter((r) => (Number(r.floor) || 0) === floor);
+  const id = room && room.id;
+  let i = floorRooms.findIndex((r) => r.id === id);
+  if (i < 0) i = Math.max(0, Number(room && room.room) || 0);
+  return { floorRooms, i, n: floorRooms.length || 1, floor };
+}
+
+export function roomWorldPose(building, room, heightAt) {
+  const yaw = Number(building && building.yaw) || 0;
+  const { i, n, floor } = roomOnFloor(building, room || {});
+  const xOff = (i - (n - 1) / 2) * (ROOM_W + GAP);
+  const at = localXZ(yaw, xOff, 0);
+  const x = Number(building && building.x) + at.x;
+  const z = Number(building && building.z) + at.z;
+  const y0 = groundY(heightAt, x, z);
+  return {
+    x,
+    z,
+    yaw,
+    y: y0 + floor * (ROOM_H + GAP) + ROOM_H * 0.42,
+    floorY: y0 + floor * (ROOM_H + GAP),
+    unitId: room && room.id,
+    buildingId: building && building.id,
+    floor,
+  };
+}
+
+export function roomFloorRing(pose) {
+  const hw = ROOM_W / 2 - 0.16;
+  const hd = ROOM_D / 2 - 0.16;
+  const corners = [
+    [-hw, -hd],
+    [hw, -hd],
+    [hw, hd],
+    [-hw, hd],
+  ];
+  return corners.map(([lx, lz]) => {
+    const at = localXZ(pose.yaw, lx, lz);
+    return [pose.x + at.x, pose.z + at.z];
+  });
 }
 
 function shellMat(color) {
@@ -262,6 +308,21 @@ function kitSpread(ids) {
   });
 }
 
+function addTenantBody() {
+  const g = new THREE.Group();
+  const mat = (c) => new THREE.MeshLambertMaterial({ color: c, emissive: c, emissiveIntensity: 0.18 });
+  const torso = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.62, 0.24), mat(0x3a5a48));
+  torso.position.y = 0.95;
+  const head = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.28, 0.28), mat(0xe8d4b8));
+  head.position.y = 1.4;
+  const legs = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.7, 0.2), mat(0x2a2e32));
+  legs.position.y = 0.35;
+  g.add(torso, head, legs);
+  g.userData.kind = "unit-block";
+  g.userData.part = "tenant";
+  return g;
+}
+
 export function mountUnitBlocks(opts) {
   const scene = opts.scene;
   const heightAt = opts.heightAt || (() => 0);
@@ -270,15 +331,26 @@ export function mountUnitBlocks(opts) {
   if (scene) scene.add(group);
   let cutaway = null;
   let propertiesOn = false;
+  let propertiesMode = "off";
   let overlay = "world";
+  let highlightId = "";
 
   function propertiesLive() {
-    return propertiesOn || overlay === "lots" || overlay === "yours";
+    return propertiesMode === "sale" || propertiesMode === "yours" || propertiesOn;
+  }
+
+  function landlordLive() {
+    return overlay === "landlord";
+  }
+
+  function tagsLive() {
+    return propertiesLive() || landlordLive();
   }
 
   function tagShouldShow(d) {
+    if (landlordLive()) return true;
     if (!propertiesLive()) return false;
-    if (overlay === "yours") return d.tagKind === "yours";
+    if (propertiesMode === "yours" || overlay === "yours") return d.tagKind === "yours";
     return true;
   }
 
@@ -288,6 +360,14 @@ export function mountUnitBlocks(opts) {
       if (!d || d.kind !== "unit-block") return;
       if (d.part === "tag") {
         o.visible = !view && tagShouldShow(d);
+        return;
+      }
+      if (d.part === "tenant") {
+        if (!view) {
+          o.visible = false;
+          return;
+        }
+        o.visible = d.buildingId === view.buildingId && (!view.unitId || d.unitId === view.unitId);
         return;
       }
       if (!view) {
@@ -314,9 +394,34 @@ export function mountUnitBlocks(opts) {
 
   function setViewer(next) {
     if (next && typeof next.propertiesOn === "boolean") propertiesOn = next.propertiesOn;
+    if (next && next.propertiesMode) {
+      propertiesMode = next.propertiesMode;
+      propertiesOn = propertiesMode === "sale" || propertiesMode === "yours";
+    }
     if (next && next.overlay) overlay = next.overlay;
+    if (next && Object.prototype.hasOwnProperty.call(next, "highlightId")) {
+      highlightId = next.highlightId || "";
+    }
     applyCutawayToGroup(cutaway);
-    return { propertiesOn, overlay };
+    paintHighlight();
+    return { propertiesOn, overlay, propertiesMode, highlightId };
+  }
+
+  function paintHighlight() {
+    group.traverse((o) => {
+      const d = o.userData;
+      if (!d || d.kind !== "unit-block") return;
+      if (d.part !== "shell" && d.part !== "cutaway") return;
+      if (!o.material || !o.material.color) return;
+      if (d.part === "cutaway" && o.isLineSegments) return;
+      const id = d.unitId;
+      if (!id) return;
+      const owned = d.owned;
+      let hex = owned ? OWNED : VACANT;
+      if (highlightId && id === highlightId) hex = SELECT;
+      o.material.color.setHex(hex);
+      if (o.material.emissive) o.material.emissive.setHex(hex);
+    });
   }
 
   function sync(play) {
@@ -359,6 +464,15 @@ export function mountUnitBlocks(opts) {
           group.add(mesh);
           addCutawayRoom(group, b, r, b.x + at.x, y, b.z + at.z, yaw, color);
           rooms += 1;
+          if (r.lease) {
+            const tenant = addTenantBody();
+            tenant.position.set(b.x + at.x, y0 + floor * (ROOM_H + GAP) + 0.14, b.z + at.z);
+            tenant.rotation.y = yaw;
+            tenant.name = "unit-tenant-" + r.id;
+            tenant.visible = false;
+            stampTree(tenant, b, r, "tenant", floor);
+            group.add(tenant);
+          }
           const kit = Array.isArray(r.kit) ? r.kit : [];
           const floorY = y0 + floor * (ROOM_H + GAP) + 0.14;
           kitSpread(kit).forEach((slot) => {
@@ -376,13 +490,23 @@ export function mountUnitBlocks(opts) {
       addTag(group, b, b.x, roofY + TAG_ABOVE_M, b.z);
     }
     applyCutawayToGroup(cutaway);
+    paintHighlight();
     return rooms;
   }
 
   function applyCutaway(view) {
-    cutaway = view && view.buildingId != null ? { buildingId: view.buildingId, floor: Number(view.floor) || 0 } : null;
+    cutaway = view && view.buildingId != null
+      ? { buildingId: view.buildingId, floor: Number(view.floor) || 0, unitId: view.unitId || "" }
+      : null;
     applyCutawayToGroup(cutaway);
+    paintHighlight();
     return cutaway;
+  }
+
+  function highlight(unitId) {
+    highlightId = unitId || "";
+    paintHighlight();
+    return highlightId;
   }
 
   return {
@@ -390,13 +514,17 @@ export function mountUnitBlocks(opts) {
     sync,
     applyCutaway,
     setViewer,
+    highlight,
     isPropertiesOn: () => propertiesOn,
     getCutaway: () => cutaway,
+    getHighlight: () => highlightId,
     clickables() {
-      if (!propertiesLive()) return [];
+      if (!propertiesLive() && !landlordLive()) return [];
       const out = [];
       group.traverse((o) => {
-        if (o.userData && o.userData.kind === "unit-block" && o.visible !== false) out.push(o);
+        if (o.userData && o.userData.kind === "unit-block" && o.userData.part !== "tenant" && o.visible !== false) {
+          out.push(o);
+        }
       });
       return out;
     },

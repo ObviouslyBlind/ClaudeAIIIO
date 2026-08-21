@@ -5,6 +5,7 @@
 
 import * as THREE from "three";
 import { makeStreetCart } from "./cart.js";
+import { createKitMesh, KIT_FOOTPRINT } from "./unit-kit.js";
 import {
   BUILDING_FOOTPRINT_M,
   CART_FOOTPRINT_M,
@@ -12,6 +13,7 @@ import {
   PLACE_GHOST_OK,
   PLACE_ROTATE_RAD_PER_S,
   ghostFitsPlot,
+  ghostFitsRoom,
   isPlaceRotateKey,
 } from "./place-pose.js";
 
@@ -95,6 +97,17 @@ function lightUpCart(cart, hex) {
   return cart;
 }
 
+function furnitureFootprint(kind) {
+  return KIT_FOOTPRINT[kind] || null;
+}
+
+function sizeOfKind(kind) {
+  const furn = furnitureFootprint(kind);
+  if (furn) return { w: furn.w, d: furn.d };
+  if (kind === "building") return BUILDING_FOOTPRINT_M;
+  return CART_FOOTPRINT_M;
+}
+
 function cartKindFrom(next) {
   if (next === "melon_cart" || next === "watermelon") return "watermelon";
   if (next === "fish_cart" || next === "fish_chips") return "fish_chips";
@@ -147,7 +160,7 @@ export function createPlacePreview(scene) {
   let body = null;
 
   function sizeOf() {
-    return kind === "building" ? BUILDING_FOOTPRINT_M : CART_FOOTPRINT_M;
+    return sizeOfKind(kind);
   }
 
   function rebuild() {
@@ -156,9 +169,21 @@ export function createPlacePreview(scene) {
       disposeTree(body);
     }
     const hex = last.ok ? PLACE_GHOST_OK : PLACE_GHOST_BAD;
+    const furn = furnitureFootprint(kind);
     if (kind === "building") {
       const s = BUILDING_FOOTPRINT_M;
       body = makeFootprint(s.w, s.d, hex);
+    } else if (furn) {
+      body = createKitMesh(kind);
+      body.traverse((obj) => {
+        if (!obj.isMesh || !obj.geometry) return;
+        skipRaycast(obj);
+        obj.castShadow = false;
+        obj.receiveShadow = false;
+        obj.frustumCulled = false;
+        obj.renderOrder = 20;
+        obj.material = ghostMat(hex, 0.72);
+      });
     } else {
       body = lightUpCart(makeStreetCart(cartKindFrom(kind)), hex);
     }
@@ -189,7 +214,9 @@ export function createPlacePreview(scene) {
 
   function paint() {
     const s = sizeOf();
-    last.ok = Boolean(ghostFitsPlot(last.x, last.z, yaw, s.w, s.d, lastPlot));
+    last.ok = lastPlot && lastPlot.roomFloor
+      ? Boolean(ghostFitsRoom(last.x, last.z, yaw, s.w, s.d, lastPlot))
+      : Boolean(ghostFitsPlot(last.x, last.z, yaw, s.w, s.d, lastPlot));
     root.rotation.y = yaw;
     if (body) paintMats(body, last.ok ? PLACE_GHOST_OK : PLACE_GHOST_BAD);
   }

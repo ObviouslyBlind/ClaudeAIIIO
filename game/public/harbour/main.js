@@ -36,10 +36,12 @@ import { mountStaffHud } from "./staff-hud.js";
 import { mountCalendarHud } from "./calendar-hud.js";
 import { mountParcelMap, pointerToNdc } from "./parcel-map.js";
 import { mountLotTags } from "./lot-tags.js";
-import { mountUnitBlocks } from "./unit-blocks.js";
+import { mountUnitBlocks, roomFloorRing, roomWorldPose } from "./unit-blocks.js";
 import { createDollhouseCamera } from "./unit-dollhouse.js";
 import { createPlacePreview } from "./place-preview.js";
 import { CART_FOOTPRINT_M, SNAP_PAD_M, snapPlacePose } from "./place-pose.js";
+import { KIT_FOOTPRINT } from "./unit-kit.js";
+import { mountQuayPeople } from "./quay-people.js";
 
 function ensureDockButton(id, label) {
   let btn = document.getElementById(id);
@@ -510,6 +512,30 @@ function nearParcel(p) {
   );
 }
 
+function furnitureFoot(kind) {
+  return KIT_FOOTPRINT[kind] || null;
+}
+
+function lockedRoom() {
+  return chromeHud && chromeHud.isRoomLocked && chromeHud.isRoomLocked();
+}
+
+function placeRoomTarget() {
+  if (!lockedRoom()) return null;
+  const playNow = chromeHud && chromeHud.getPlay && chromeHud.getPlay();
+  const unitId = chromeHud && chromeHud.getPlaceUnitId ? chromeHud.getPlaceUnitId() : "";
+  if (!unitId || !playNow) return null;
+  const buildings = (playNow.units && playNow.units.buildings) || [];
+  for (const b of buildings) {
+    const room = (b.rooms || []).find((r) => r.id === unitId);
+    if (room) {
+      const pose = roomWorldPose(b, room, (x, z) => heightAt(specOf("south"), x, z));
+      return { ...pose, ring: roomFloorRing(pose), roomFloor: true, id: unitId };
+    }
+  }
+  return null;
+}
+
 function ensurePlaceGhost() {
   if (!placeGhost) placeGhost = createPlacePreview(worldScene());
   return placeGhost;
@@ -520,8 +546,16 @@ function refreshPlaceGhost() {
   raycaster.setFromCamera(pointer, camera);
   const g = groundFromRay();
   if (!g) return;
-  const plot = plotToPlace(null, g.x, g.z);
+  const kitId = chromeHud && chromeHud.getPlaceKit ? chromeHud.getPlaceKit() : "";
+  const furn = furnitureFoot(kitId);
+  const room = furn ? placeRoomTarget() : null;
   const yaw = placeGhost.yaw ? placeGhost.yaw() : 0;
+  if (room) {
+    const fp = furn || CART_FOOTPRINT_M;
+    placeGhost.moveTo(g.x, room.floorY, g.z, room);
+    return;
+  }
+  const plot = plotToPlace(null, g.x, g.z);
   const snap = snapPlacePose(g.x, g.z, yaw, CART_FOOTPRINT_M.w, CART_FOOTPRINT_M.d, plot);
   const x = snap.ok ? snap.x : g.x;
   const z = snap.ok ? snap.z : g.z;
@@ -578,6 +612,42 @@ async function placeCartOn(plot, x, z) {
   const kitId = chromeHud && chromeHud.getPlaceKit ? chromeHud.getPlaceKit() : "";
   const pose = placeGhost && typeof placeGhost.pose === "function" ? placeGhost.pose() : null;
   const yaw = pose && Number.isFinite(pose.yaw) ? pose.yaw : 0;
+  const furn = furnitureFoot(kitId);
+  if (furn) {
+    const room = placeRoomTarget();
+    const unitId = room && room.id;
+    if (!unitId) {
+      setStatus("Enter a room you own, then Place.");
+      return;
+    }
+    if (pose && pose.ok === false) {
+      setStatus("Stay on this room's floor.");
+      return;
+    }
+    const res = await fetch("/api/unit/place", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ unitId, kitId }),
+    });
+    const data = await res.json();
+    if (chromeHud && typeof chromeHud.applyPlay === "function" && data.play) chromeHud.applyPlay(data.play);
+    if (!res.ok) {
+      const reason = data.reason || "fail";
+      setStatus(
+        reason === "in_warehouse"
+          ? "Warehouse has the kit. Bring to me, then Place."
+          : reason === "wrong_use"
+            ? "That piece does not belong in this room."
+            : reason === "no_kit"
+              ? "Kit is not on you."
+              : "Could not place: " + reason,
+      );
+      return;
+    }
+    if (chromeHud) chromeHud.clearPlacing();
+    setStatus("Placed in the room.");
+    return;
+  }
   if (plot && plot.class === "cart_pad" && pose && pose.ok === false) {
     setStatus("Stay inside the pad.");
     const line = document.getElementById("place-hint-text");
@@ -1702,11 +1772,14 @@ function walkPoint(hits) {
 }
 
 function showLandCard(p) {
-  if (p && p.buildingId && chromeHud && chromeHud.openBuildingSheet) {
-    if (chromeHud.setPropertiesOn) chromeHud.setPropertiesOn(true);
-    chromeHud.openBuildingSheet(p.buildingId);
-    setStatus((p.name || "Building") + " · rooms.");
-    return true;
+  if (lockedRoom()) return true;
+  if (p && p.buildingId) {
+    if (isLotsViewer(viewerMode())) return false;
+    if (chromeHud && chromeHud.openBuildingSheet) {
+      chromeHud.openBuildingSheet(p.buildingId);
+      setStatus((p.name || "Building") + " · rooms.");
+      return true;
+    }
   }
   if (!p || !map || !chromeHud || !chromeHud.paintLand) return false;
   landPinned = true;
@@ -1735,11 +1808,18 @@ function showLandCard(p) {
 
 function askToBuy(p) {
   if (!p) return;
-  if (p.buildingId && chromeHud && chromeHud.openBuildingSheet) {
-    if (chromeHud.setPropertiesOn) chromeHud.setPropertiesOn(true);
-    chromeHud.openBuildingSheet(p.buildingId);
-    setStatus((p.name || "Building") + " · Buy a room.");
-    return;
+  if (lockedRoom()) return;
+  if (p.buildingId) {
+    if (viewerMode() === "landlord" && chromeHud && chromeHud.openLandlordSheet) {
+      chromeHud.openLandlordSheet();
+      return;
+    }
+    if (isLotsViewer(viewerMode())) return;
+    if (chromeHud && chromeHud.openBuildingSheet) {
+      chromeHud.openBuildingSheet(p.buildingId);
+      setStatus((p.name || "Building") + " · Buy a room.");
+      return;
+    }
   }
   if (!p) return;
   const prev = selected && map ? map.plots.find((row) => row.id === selected) : null;
@@ -1861,8 +1941,13 @@ function onPointer(ev) {
     const block = objectWithKind(unitHit.object, "unit-block");
     const bid = block && block.userData && block.userData.buildingId;
     const uid = block && block.userData && block.userData.unitId;
-    if (dollhouseCam && dollhouseCam.isActive() && uid && chromeHud && chromeHud.openUnitSheet) {
+    if (lockedRoom()) {
+      if (uid && chromeHud.getPlaceUnitId && uid === chromeHud.getPlaceUnitId()) return;
+      return;
+    }
+    if (uid && chromeHud && chromeHud.openUnitSheet) {
       chromeHud.openUnitSheet(bid, uid);
+      if (unitBlocks && unitBlocks.highlight) unitBlocks.highlight(uid);
       setStatus((block.userData.buildingName || "Building") + " · room.");
       return;
     }
@@ -1871,6 +1956,9 @@ function onPointer(ev) {
       setStatus((block.userData.buildingName || "Building") + " · Buy a room.");
       return;
     }
+  }
+  if (lockedRoom() || (dollhouseCam && dollhouseCam.isLocked && dollhouseCam.isLocked())) {
+    return;
   }
   if (dollhouseCam && dollhouseCam.isActive()) {
     return;
@@ -2478,6 +2566,12 @@ async function boot() {
       return heightAt(specOf("south"), x, z);
     },
   });
+  mountQuayPeople({
+    scene: harbourGroup || scene,
+    heightAt,
+    specOf,
+    getPos: () => player.position,
+  });
   chromeHud = mountChrome({
     setStatus,
     getPose: () => ({ x: player.position.x, z: player.position.z }),
@@ -2487,12 +2581,16 @@ async function boot() {
       openStandMenu(id);
     },
     onCloseStand() {
+      if (lockedRoom()) return;
       leaveStallCam();
     },
     onDollhouse(view) {
       if (!view) {
-        if (unitBlocks) unitBlocks.applyCutaway(null);
-        if (dollhouseCam) dollhouseCam.exit();
+        if (unitBlocks) {
+          unitBlocks.applyCutaway(null);
+          if (unitBlocks.highlight) unitBlocks.highlight("");
+        }
+        if (dollhouseCam) dollhouseCam.exit(true);
         if (playCam && typeof playCam.resume === "function") playCam.resume();
         return;
       }
@@ -2504,11 +2602,27 @@ async function boot() {
           (playNow.units.buildings || []).find((b) => b.id === view.buildingId));
       if (!building) return;
       stallFollow = false;
+      walking = false;
+      walkWaypoints = [];
       if (playCam && typeof playCam.pause === "function") playCam.pause();
-      if (unitBlocks) unitBlocks.applyCutaway(view);
-      if (dollhouseCam) {
-        dollhouseCam.enter(building, view.floor, (x, z) => heightAt(specOf("south"), x, z));
+      const room =
+        view.room ||
+        (view.unitId && (building.rooms || []).find((r) => r.id === view.unitId));
+      if (unitBlocks) {
+        unitBlocks.applyCutaway({ buildingId: building.id, floor: view.floor, unitId: view.unitId });
+        if (unitBlocks.highlight) unitBlocks.highlight(view.unitId || "");
       }
+      const ht = (x, z) => heightAt(specOf("south"), x, z);
+      if (dollhouseCam) {
+        dollhouseCam.enter(building, view.floor, ht, room, Boolean(view.locked));
+      }
+      if (room && view.locked) {
+        const pose = roomWorldPose(building, room, ht);
+        player.position.set(pose.x, pose.floorY + PLAYER_SOLE_M, pose.z);
+      }
+    },
+    onHighlight(unitId) {
+      if (unitBlocks && unitBlocks.highlight) unitBlocks.highlight(unitId || "");
     },
     onCloseLand: closeLandCard,
     onLeased(snapshot) {
@@ -2566,13 +2680,18 @@ async function boot() {
         unitBlocks.setViewer({
           overlay: id,
           propertiesOn: chromeHud && chromeHud.isPropertiesOn ? chromeHud.isPropertiesOn() : false,
+          propertiesMode: chromeHud && chromeHud.propertiesMode ? chromeHud.propertiesMode() : "off",
         });
       }
       paintHoldingGlow(id);
     },
-    onProperties(on) {
+    onProperties(on, mode) {
       if (unitBlocks && typeof unitBlocks.setViewer === "function") {
-        unitBlocks.setViewer({ overlay: viewerMode(), propertiesOn: Boolean(on) });
+        unitBlocks.setViewer({
+          overlay: viewerMode(),
+          propertiesOn: Boolean(on),
+          propertiesMode: mode || (on ? "sale" : "off"),
+        });
       }
     },
     onPlaceMode(on) {
@@ -2598,6 +2717,7 @@ async function boot() {
         unitBlocks.setViewer({
           overlay: viewerMode(),
           propertiesOn: chromeHud && chromeHud.isPropertiesOn ? chromeHud.isPropertiesOn() : false,
+          propertiesMode: chromeHud && chromeHud.propertiesMode ? chromeHud.propertiesMode() : "off",
         });
       }
       pruneCrates(play);
@@ -2649,9 +2769,20 @@ async function boot() {
 canvas.addEventListener("pointerup", onPointer);
 canvas.addEventListener("click", onPointer);
 canvas.addEventListener("pointermove", (ev) => {
-  if (!(chromeHud && chromeHud.isPlacing && chromeHud.isPlacing())) return;
   aimPointer(ev);
-  refreshPlaceGhost();
+  if (chromeHud && chromeHud.isPlacing && chromeHud.isPlacing()) {
+    refreshPlaceGhost();
+    return;
+  }
+  if (lockedRoom()) return;
+  if (!(chromeHud && chromeHud.isPropertiesOn && chromeHud.isPropertiesOn())) return;
+  if (chromeHud.propertiesMode && chromeHud.propertiesMode() === "yours") return;
+  raycaster.setFromCamera(pointer, camera);
+  const hits = raycaster.intersectObjects(unitBlocks ? unitBlocks.clickables() : [], true);
+  const hit = hits.find((h) => objectWithKind(h.object, "unit-block"));
+  const block = hit && objectWithKind(hit.object, "unit-block");
+  const uid = block && block.userData && block.userData.unitId;
+  if (unitBlocks && unitBlocks.highlight) unitBlocks.highlight(uid || "");
 });
 window.addEventListener("keydown", (ev) => {
   if (placeGhost && placeGhost.onKeyDown(ev)) return;

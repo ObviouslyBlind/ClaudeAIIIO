@@ -64,6 +64,9 @@ import {
   fireUnitRole,
   fitUnitKit,
   hireUnitRole,
+  isFurnitureKit,
+  placeUnitKit,
+  pickupUnitKit,
   scoutTenant,
   signLease,
 } from "./units.ts";
@@ -309,7 +312,21 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "POST" && url.pathname === "/api/unit/lease") {
     const body = await readJsonBody(req);
-    const result = signLease(visitor, String(body?.unitId ?? ""), Number(body?.hours), world.tick);
+    const result = signLease(visitor, String(body?.unitId ?? ""), String(body?.tenantId ?? ""), world.tick);
+    json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/unit/place") {
+    const body = await readJsonBody(req);
+    const result = placeUnitKit(visitor, String(body?.unitId ?? ""), String(body?.kitId ?? ""));
+    json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/unit/pickup") {
+    const body = await readJsonBody(req);
+    const result = pickupUnitKit(visitor, String(body?.unitId ?? ""), String(body?.kitId ?? ""));
     json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
     return;
   }
@@ -341,12 +358,17 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "POST" && url.pathname === "/api/inventory/place") {
     const body = await readJsonBody(req);
-    const result = placeStand(visitor, land, String(body?.plotId ?? ""), {
-      x: Number(body?.x),
-      z: Number(body?.z),
-      kitId: body?.kitId ? String(body.kitId) : undefined,
-      yaw: Number(body?.yaw),
-    });
+    const kitId = body?.kitId ? String(body.kitId) : "";
+    const unitId = body?.unitId ? String(body.unitId) : "";
+    const result =
+      unitId || isFurnitureKit(kitId)
+        ? placeUnitKit(visitor, unitId, kitId)
+        : placeStand(visitor, land, String(body?.plotId ?? ""), {
+            x: Number(body?.x),
+            z: Number(body?.z),
+            kitId: kitId || undefined,
+            yaw: Number(body?.yaw),
+          });
     json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
     return;
   }

@@ -8,7 +8,8 @@ import {
   GROUND_RENT_PER_UNIT_DAY,
   HIRE_COST,
   HOTDOG_SALE_PRICE,
-  LEASE_HOURS,
+  LEASE_HOURS_MAX,
+  LEASE_HOURS_MIN,
   PACKER_MOVE_PER_TICK,
   TICKS_PER_SIM_HOUR,
   UNIT_KIT,
@@ -16,12 +17,13 @@ import {
 } from "./economy.ts";
 import { TICKS_PER_SIM_DAY } from "./calendar.ts";
 import { UNIT_PRECINCT, UNIT_ROW_YAW, unitLotPose, unitPlotId } from "./unitPrecinct.ts";
+import { appealFor } from "./siteScore.ts";
 import type { Delivery, InvKind, LoopFail, LoopOk, PlayState, WorkSite } from "./firstLoop.ts";
 
 export const UNITS_NOTE = "PAPER units. SIMULATED. Rooms inside a building.";
 
 export type UnitUse = "shop" | "apartment" | "office";
-export type LeaseHours = (typeof LEASE_HOURS)[number];
+export type TenantBand = "poor" | "mid" | "high";
 export type UnitRole = "packer" | "till";
 
 export type UnitVisitor = { cash: number; play: PlayState };
@@ -29,16 +31,21 @@ export type UnitVisitor = { cash: number; play: PlayState };
 export type UnitLease = {
   tenantId: string;
   tenantName: string;
-  hours: LeaseHours;
+  who: string;
+  band: TenantBand;
+  hours: number;
   startTick: number;
   endTick: number;
   rentPerHour: number;
   lastPaidHour: number;
 };
 
-export type TenantOffer = {
+export type TenantProfile = {
   tenantId: string;
   tenantName: string;
+  who: string;
+  band: TenantBand;
+  hours: number;
   rentPerHour: number;
 };
 
@@ -52,7 +59,7 @@ export type HarbourUnit = {
   owner: "visitor" | null;
   kit: string[];
   lease: UnitLease | null;
-  offer: TenantOffer | null;
+  offers: TenantProfile[];
   price: number;
   mode: "PAPER";
   provenance: "SIMULATED";
@@ -139,7 +146,7 @@ function emptyUnit(building: BuildingSpec, spec: BuildingSpec["rooms"][number]):
     owner: null,
     kit: [],
     lease: null,
-    offer: null,
+    offers: [],
     price: UNIT_ROOM_PRICE[spec.use],
     mode: "PAPER",
     provenance: "SIMULATED",
@@ -153,6 +160,10 @@ export function buildingById(id: string): BuildingSpec | undefined {
 export function seedUnits(play: PlayState): PlayState {
   if (!play.units) play.units = [];
   if (!play.buildingLands) play.buildingLands = [];
+  if (!play.warehouse) {
+    play.warehouse = { items: [], feePerDay: 5, island: "south", lastRentDay: -1 };
+  }
+  if (!play.inventory) play.inventory = [];
   for (const building of UNIT_BUILDINGS) {
     if (!play.buildingLands.some((row) => row.buildingId === building.id)) {
       play.buildingLands.push({
@@ -167,12 +178,29 @@ export function seedUnits(play: PlayState): PlayState {
       if (!play.units.some((u) => u.id === id)) play.units.push(emptyUnit(building, spec));
     }
   }
+  for (const unit of play.units) normalizeUnit(unit);
   return play;
+}
+
+function normalizeUnit(unit: HarbourUnit): HarbourUnit {
+  if (!Array.isArray(unit.offers)) unit.offers = [];
+  if (!Array.isArray(unit.kit)) unit.kit = [];
+  return unit;
 }
 
 export function getUnit(play: PlayState, unitId: string): HarbourUnit | undefined {
   seedUnits(play);
-  return play.units.find((u) => u.id === unitId);
+  const unit = play.units.find((u) => u.id === unitId);
+  return unit ? normalizeUnit(unit) : undefined;
+}
+
+export function isFurnitureKit(kind: string): boolean {
+  return UNIT_KIT.some((row) => row.id === kind);
+}
+
+export function furnitureAisle(kind: string): "shopfit" | "hospitality" | null {
+  const row = UNIT_KIT.find((k) => k.id === kind);
+  return row ? row.aisle : null;
 }
 
 export function canManageBuilding(play: PlayState, buildingId: string): boolean {
@@ -184,10 +212,87 @@ export function requiredKit(use: UnitUse): string[] {
   return UNIT_KIT.filter((row) => row.use === use).map((row) => row.id);
 }
 
-/** Empty or partial kit = no takers. Bed+shower+sink / desk+cabinet = a tenant. */
+/** Kit checklist is not a scout gate. Empty rooms still draw poor profiles. */
 export function kitComplete(unit: HarbourUnit): boolean {
   const need = requiredKit(unit.use);
   return need.length > 0 && need.every((id) => unit.kit.includes(id));
+}
+
+export function unitKitAppeal(unit: HarbourUnit): number {
+  return roundMoney((unit.kit || []).reduce((n, id) => n + appealFor(id), 0));
+}
+
+export function tenantBandFromAppeal(appeal: number): TenantBand {
+  if (appeal >= 2.5) return "high";
+  if (appeal >= 1) return "mid";
+  return "poor";
+}
+
+function hash32(s: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619);
+  return h >>> 0;
+}
+
+function rngFrom(seed: number): () => number {
+  let s = seed >>> 0;
+  return () => {
+    s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
+    return s / 4294967296;
+  };
+}
+
+function pickRange(rand: () => number, lo: number, hi: number): number {
+  return lo + Math.floor(rand() * (hi - lo + 1));
+}
+
+const TENANT_POOL: Record<UnitUse, Record<TenantBand, { name: string; who: string }[]>> = {
+  apartment: {
+    poor: [
+      { name: "Jo Kettle", who: "Dock clerk on short hours" },
+      { name: "Ned Pallet", who: "Night watch on the quay" },
+    ],
+    mid: [
+      { name: "Mina Quay", who: "Student over the shops" },
+      { name: "Reed Cart", who: "Ferry ticket clerk" },
+    ],
+    high: [
+      { name: "P. Vellum", who: "Small firm, long lease" },
+      { name: "Isla Bollard", who: "Harbour accountant" },
+    ],
+  },
+  office: {
+    poor: [
+      { name: "Solo clerk", who: "One-desk ledger" },
+      { name: "Night ledger", who: "After-hours bookkeeping" },
+    ],
+    mid: [
+      { name: "Strand ledger", who: "Two-person firm" },
+      { name: "Quay filings", who: "Harbour paperwork" },
+    ],
+    high: [
+      { name: "Harbour clerk", who: "Harbour firm, week-long" },
+      { name: "Channel & Co.", who: "Small shipping office" },
+    ],
+  },
+  shop: {
+    poor: [],
+    mid: [],
+    high: [],
+  },
+};
+
+function hoursForBand(band: TenantBand, rand: () => number): number {
+  if (band === "poor") return pickRange(rand, LEASE_HOURS_MIN, 24);
+  if (band === "mid") return pickRange(rand, 12, 72);
+  return pickRange(rand, 48, LEASE_HOURS_MAX);
+}
+
+function rentForBand(band: TenantBand, use: UnitUse, appeal: number, rand: () => number): number {
+  const office = use === "office" ? 0.6 : 0;
+  if (band === "poor") return roundMoney(0.5 + office + rand() * 1.0);
+  if (band === "mid") return roundMoney(1.6 + office + appeal * 0.4 + rand() * 1.4);
+  return roundMoney(4 + office + appeal * 0.8 + rand() * 3);
 }
 
 export function unitDeliveryTarget(
@@ -346,6 +451,25 @@ export function fireUnitRole(
   return ok({ site, role: "till" });
 }
 
+function takeInvKit(play: PlayState, kitId: InvKind, qty = 1): boolean {
+  const have = play.inventory.find((row) => row.kind === kitId);
+  if (!have || have.qty < qty) return false;
+  have.qty = roundMoney(have.qty - qty);
+  if (have.qty <= 0) play.inventory.splice(play.inventory.indexOf(have), 1);
+  return true;
+}
+
+function warehouseHas(play: PlayState, kitId: InvKind): boolean {
+  return (play.warehouse.items.find((row) => row.kind === kitId)?.qty ?? 0) >= 1;
+}
+
+function addWarehouseKit(play: PlayState, kitId: InvKind, qty = 1): void {
+  const have = play.warehouse.items.find((row) => row.kind === kitId);
+  if (have) have.qty = roundMoney(have.qty + qty);
+  else play.warehouse.items.push({ kind: kitId, qty, mode: "PAPER", provenance: "SIMULATED" });
+}
+
+/** Test helper: cash-buy kit into the room. Live play Places from inventory. */
 export function fitUnitKit(
   visitor: UnitVisitor,
   unitId: string,
@@ -365,54 +489,104 @@ export function fitUnitKit(
   return ok({ unit });
 }
 
-function rentPerHour(unit: HarbourUnit): number {
-  const base = unit.use === "office" ? 3 : 2;
-  return roundMoney(base + unit.kit.length * 1.5);
+/** Place a Shopfit / Hospitality piece from inventory onto an owned room. */
+export function placeUnitKit(
+  visitor: UnitVisitor,
+  unitId: string,
+  kitId: string,
+): LoopOk<{ unit: HarbourUnit }> | LoopFail {
+  const play = seedUnits(visitor.play);
+  const unit = getUnit(play, unitId);
+  if (!unit || unit.owner !== "visitor") return fail("not_yours");
+  const spec = UNIT_KIT.find((row) => row.id === kitId);
+  if (!spec) return fail("unknown_kit");
+  if (spec.use !== unit.use) return fail("wrong_use");
+  if (unit.kit.includes(kitId)) return fail("already_fitted");
+  const kind = kitId as InvKind;
+  if (!takeInvKit(play, kind)) {
+    return fail(warehouseHas(play, kind) ? "in_warehouse" : "no_kit");
+  }
+  unit.kit = [...unit.kit, kitId];
+  return ok({ unit });
+}
+
+export function pickupUnitKit(
+  visitor: UnitVisitor,
+  unitId: string,
+  kitId: string,
+): LoopOk<{ unit: HarbourUnit; kitId: string }> | LoopFail {
+  const play = seedUnits(visitor.play);
+  const unit = getUnit(play, unitId);
+  if (!unit || unit.owner !== "visitor") return fail("not_yours");
+  if (!unit.kit.includes(kitId)) return fail("not_fitted");
+  unit.kit = unit.kit.filter((id) => id !== kitId);
+  addWarehouseKit(play, kitId as InvKind);
+  return ok({ unit, kitId });
 }
 
 export function scoutTenant(
   visitor: UnitVisitor,
   unitId: string,
-): LoopOk<{ unit: HarbourUnit; offer: TenantOffer }> | LoopFail {
+): LoopOk<{ unit: HarbourUnit; offers: TenantProfile[] }> | LoopFail {
   const play = seedUnits(visitor.play);
   const unit = getUnit(play, unitId);
   if (!unit || unit.owner !== "visitor") return fail("not_yours");
   if (unit.use !== "apartment" && unit.use !== "office") return fail("not_lease");
   if (unit.lease) return fail("occupied");
-  if (!kitComplete(unit)) return fail("no_takers");
-  const offer: TenantOffer = {
-    tenantId: unit.use === "office" ? "firm-harbour" : "npc-tenant",
-    tenantName: unit.use === "office" ? "Harbour clerk" : "Quay tenant",
-    rentPerHour: rentPerHour(unit),
-  };
-  unit.offer = offer;
-  return ok({ unit, offer });
+  const appeal = unitKitAppeal(unit);
+  const band = tenantBandFromAppeal(appeal);
+  const rand = rngFrom(hash32(`${unit.id}:${unit.kit.join(",")}:${band}`));
+  const pool = TENANT_POOL[unit.use][band];
+  const n = 1 + Math.floor(rand() * 3);
+  const offers: TenantProfile[] = [];
+  const used = new Set<string>();
+  for (let i = 0; i < n; i++) {
+    let pick = pool[Math.floor(rand() * pool.length)]!;
+    let guard = 0;
+    while (used.has(pick.name) && guard < 6) {
+      pick = pool[Math.floor(rand() * pool.length)]!;
+      guard += 1;
+    }
+    used.add(pick.name);
+    offers.push({
+      tenantId: `${unit.id}-${band}-${i}`,
+      tenantName: pick.name,
+      who: pick.who,
+      band,
+      hours: hoursForBand(band, rand),
+      rentPerHour: rentForBand(band, unit.use, appeal, rand),
+    });
+  }
+  unit.offers = offers;
+  return ok({ unit, offers });
 }
 
 export function signLease(
   visitor: UnitVisitor,
   unitId: string,
-  hours: number,
+  tenantId: string,
   tick = 0,
 ): LoopOk<{ unit: HarbourUnit; lease: UnitLease }> | LoopFail {
   const play = seedUnits(visitor.play);
   const unit = getUnit(play, unitId);
   if (!unit || unit.owner !== "visitor") return fail("not_yours");
-  if (!unit.offer) return fail("no_offer");
   if (unit.lease) return fail("occupied");
-  if (!(LEASE_HOURS as readonly number[]).includes(hours)) return fail("bad_hours");
-  const leaseHours = hours as LeaseHours;
+  const profile = (unit.offers || []).find((row) => row.tenantId === tenantId);
+  if (!profile) return fail("no_offer");
+  if (profile.hours < LEASE_HOURS_MIN || profile.hours > LEASE_HOURS_MAX) return fail("bad_hours");
   const lease: UnitLease = {
-    tenantId: unit.offer.tenantId,
-    tenantName: unit.offer.tenantName,
-    hours: leaseHours,
+    tenantId: profile.tenantId,
+    tenantName: profile.tenantName,
+    who: profile.who,
+    band: profile.band,
+    hours: profile.hours,
     startTick: tick,
-    endTick: tick + leaseHours * TICKS_PER_SIM_HOUR,
-    rentPerHour: unit.offer.rentPerHour,
+    endTick: tick + profile.hours * TICKS_PER_SIM_HOUR,
+    rentPerHour: profile.rentPerHour,
     lastPaidHour: -1,
   };
   unit.lease = lease;
-  unit.offer = null;
+  unit.offers = [];
   return ok({ unit, lease });
 }
 
@@ -500,7 +674,7 @@ export function unitsSnapshot(play: PlayState) {
     mode: "PAPER" as const,
     provenance: "SIMULATED" as const,
     note: UNITS_NOTE,
-    leaseHours: [...LEASE_HOURS],
+    leaseHours: { min: LEASE_HOURS_MIN, max: LEASE_HOURS_MAX },
     kit: UNIT_KIT.map((row) => ({ ...row })),
     roomPrice: { ...UNIT_ROOM_PRICE },
     landPrice: BUILDING_LAND_PRICE,
@@ -521,6 +695,8 @@ export function unitsSnapshot(play: PlayState) {
         rooms: rooms.map((u) => ({
           ...u,
           vacant: !u.owner,
+          appeal: unitKitAppeal(u),
+          band: tenantBandFromAppeal(unitKitAppeal(u)),
         })),
       };
     }),

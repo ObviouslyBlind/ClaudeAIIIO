@@ -61,6 +61,7 @@ describe("harbour chrome HUD", () => {
     const chips = html.slice(html.indexOf('id="viewers"'), html.indexOf('id="panel-account"'));
     expect(chips).toContain('data-overlay="lots"');
     expect(chips).toContain('data-toggle="properties"');
+    expect(chips).toContain('data-overlay="landlord"');
     expect(chips).toContain('aria-label="Properties"');
     expect(chips).toContain('data-overlay="foot"');
     expect(chips).toContain('aria-label="Lots to buy"');
@@ -183,10 +184,19 @@ describe("harbour chrome HUD", () => {
     expect(chrome).toContain("plotDisplayName");
     expect(chrome).toContain("buyAskModel");
     expect(chrome).toContain("toggleViewer");
+    expect(chrome).toContain("cycleProperties");
     expect(chrome).toContain("isLotsViewer");
     expect(chrome).toContain("viewerCaption");
     expect(chrome).toContain("isPropertiesOn");
-    expect(chrome).toContain("isLotsViewer(id) && !propertiesOn");
+    expect(chrome).toContain("cyclePropertiesChip");
+    expect(html).toContain('data-overlay="landlord"');
+    expect(html).toContain('aria-label="Landlord"');
+    expect(chrome).toContain("unitAskModel");
+    expect(chrome).toContain("landAskModel");
+    expect(chrome).toContain("paintUnitAsk");
+    expect(chrome).toContain("data-ask-unit");
+    expect(chrome).toContain("data-exit-room");
+    expect(chrome).toContain("roomLocked");
     expect(main).toContain("openBuildingSheet");
     expect(main).toContain("p.buildingId");
     expect(chrome).toContain('data-toggle="properties"');

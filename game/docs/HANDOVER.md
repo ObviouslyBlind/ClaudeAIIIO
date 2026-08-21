@@ -6,7 +6,7 @@ Public name **2Isles**. Spec still says Two Harbors in places; same game.
 
 **Mid-alpha (2026-08-20).** The harbour loop is the base. We build features on it. We do not reopen the foundation, clone Capital Rift, or unfreeze House / Senate / councils / elections.
 
-**Version: Alpha 0.5.1** — the **buildings push**, **playable**. Spawn **$10,000**. Grey boxes in the spawn look. Properties chip + dollhouse camera on a floor. Not Blender. [VERSION.md](VERSION.md). Beta is **1.0**.
+**Version: Alpha 0.5.1** — the **buildings push**, **playable**. Spawn **$10,000**. Split Lots / Properties / Landlord. Confirm buy, enter that room, Place from inventory, tenant profiles, South quay walkers. Not Blender. [VERSION.md](VERSION.md). Beta is **1.0**.
 
 Doc map: [README.md](README.md) · spec: [../PLAN.md](../PLAN.md) · play: [PLAY.md](PLAY.md) · money: [../ECONOMY.md](../ECONOMY.md) · units: [UNITS.md](UNITS.md)
 
@@ -18,7 +18,7 @@ You are a game dev. Work the task that is set. Do not deviate. Gauntlet loops un
 
 **Read every feature out in this file before implementing it.** Do not jump to 3D, Blender, or dollhouse chrome because it looks like content.
 
-Visual buildings: the operator will mock a few simple shells in **Blender**. Do not spend a design pass on façades. **0.5.1 is the whole buildings push** — sim, grey boxes, manage sheets, **dollhouse camera** (RMB-hold orbit around a floor). Blender files when the operator has them.
+Visual buildings: the operator will mock a few simple shells in **Blender**. Do not spend a design pass on façades. **0.5.1 is the whole buildings push** — sim, grey boxes, confirm buy, **enter that room**, Place from inventory, tenant profiles, South walkers, **dollhouse camera** (RMB-hold orbit around that flat). Blender files when the operator has them.
 
 Always update this handover when the live loop, version, play URL, or next piece changes.
 
@@ -64,7 +64,7 @@ South spawn. Tap-to-walk. RMB-hold orbit. No WASD.
 | Site card | Stock · Run · Upgrades · Stats. Hire $300. Play shifts while unhired. |
 | Hire | Left-rail Hire sheet, or Run tab on the cart. |
 | Account | #0002. Look swatches. Reset / delete. Cash chip expands to holdings. |
-| Units (0.5.1) | Three grey shells on **buyable lots** next to the **$750 spawn pads** (1 / 2 / 3 storeys). Spawn **$10,000**. Click **Lots** → **Lots and properties to buy**. $ / YOURS signs way above the shells. Compact sheet: **Floor: G** stepper, green buy tiles. **Dollhouse**: RMB-hold orbit. Kit is constructed furniture. |
+| Units (0.5.1) | Three grey shells next to the **$750 spawn pads**. **Lots** is dirt and pads only. **Properties** cycles for-sale → your rooms (does **not** turn on from Lots). **Landlord** is the $15,000 dirt confirm — spawn cannot afford it and does not need it. Point at a vacant room: that box goes green; buy is a confirm; camera **enters that room**. **Exit room** is the only dump. Shopfit / Hospitality Place from inventory. Scout returns 1–3 tenant profiles. South quay walkers. |
 
 Starter: cash **$10,000**. Pad **$750**. Fruit kit **$90**, pack **$14** / 20. Today fruit **$6**, tax **8%**. A shop room is **$1,200**. Building dirt is **$15,000**. Hire **$300**.
 
@@ -100,11 +100,10 @@ Tests: `cd game && npm test` — **775 passed** (2026-08-21).
 
 Do these in order unless the operator names a piece. Politics stay frozen. **Read the piece out before coding it.**
 
-1. **Units overhaul (spec in UNITS.md, not live yet)** — split Lots / Properties / Landlord. Confirm buy. Green-light the 3D room. Camera enters that flat and stays until Exit. Place furniture from inventory. Tenant profiles. South quay walkers. Do not ship another kitchen-sink sheet.
-2. **Blender shells** — when the operator has files. Do not design façades in code.
-3. **Durable persist** — Postgres (PLAN step C). Restart must not wipe a mid-alpha shard once accounts exist. Alpha spawn wipe can stay until then.
-4. **North harbour pass** — sidewalks and kit, not a second sim.
-5. **Player listing** — seventh PAPER tape row after a size gate. Not a wallet ticker.
+1. **Blender shells** — when the operator has files. Do not design façades in code. The room loop is live; do not ship another kitchen-sink sheet.
+2. **Durable persist** — Postgres (PLAN step C). Restart must not wipe a mid-alpha shard once accounts exist. Alpha spawn wipe can stay until then.
+3. **North harbour pass** — sidewalks and kit, not a second sim.
+4. **Player listing** — seventh PAPER tape row after a size gate. Not a wallet ticker.
 
 Known polish (not the product next): road hub hairlines at a few South joins. Do not “fix” with island-wide CSG. See [ROADS.md](ROADS.md) and [ROAD_MESH.md](ROAD_MESH.md).
 

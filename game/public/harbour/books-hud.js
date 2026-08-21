@@ -57,6 +57,10 @@ function trendWord(row) {
 }
 
 function staffLine(row) {
+  if (row && (row.siteClass === "apartment" || row.siteClass === "office")) {
+    if (row.hired) return (row.staffName || "Tenant") + " · rent";
+    return "Empty room · $0. Scout a tenant.";
+  }
   if (row && row.hired) return row.staffName || "Vendor";
   if (row && row.attending) return "You · on the stall";
   return "No staff — hire on the cart";
@@ -104,6 +108,8 @@ function siteRailCard(row) {
     <article class="cart-stand" data-stand="${esc(row.standId)}">
       <h3 class="sheet-kicker">${esc(row.label)}</h3>
       <p class="whisper">${esc(row.lotName || "your lot")} · ${money(row.perMinute)}/min</p>
+      ${row.rentNote ? `<p class="whisper">${esc(row.rentNote)}</p>` : ""}
+      ${row.vacantNote ? `<p class="whisper">${esc(row.vacantNote)}</p>` : ""}
       <div class="inv-row">
         <span>${esc(staffLine(row))}</span>
         <button type="button" class="go" data-open-stand="${esc(row.standId)}">Open</button>

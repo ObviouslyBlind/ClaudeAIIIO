@@ -2,15 +2,18 @@ import { describe, expect, it } from "vitest";
 import * as THREE from "three";
 import { createLandBoard, ISLANDS } from "./land.ts";
 import { BAND_LEVEL, footTrafficSnapshot } from "./footTraffic.ts";
-import { VIEWERS, createOverlays, cycleLots, footLevel, isLotsViewer, toggleViewer, viewerCaption, viewerHint } from "../public/harbour/overlays.js";
+import { VIEWERS, createOverlays, cycleLots, cycleProperties, footLevel, isLotsViewer, isLandlordViewer, propertiesCaption, toggleViewer, viewerCaption, viewerHint } from "../public/harbour/overlays.js";
 
 describe("foot-traffic viewer (PAPER)", () => {
   it("exposes viewers including Lots to buy and Your lots", () => {
-    expect(Object.keys(VIEWERS)).toEqual(["world", "lots", "yours", "foot", "logistics", "minerals"]);
+    expect(Object.keys(VIEWERS)).toEqual(["world", "lots", "yours", "foot", "logistics", "minerals", "landlord"]);
     expect(VIEWERS.lots.label).toBe("Lots to buy");
     expect(VIEWERS.yours.label).toBe("Your Lots");
+    expect(VIEWERS.landlord.label).toBe("Landlord");
     expect(VIEWERS.foot.label).toBe("Foot traffic");
     expect(VIEWERS.minerals.label).toBe("Minerals");
+    expect(isLandlordViewer("landlord")).toBe(true);
+    expect(isLandlordViewer("lots")).toBe(false);
   });
 
   it("names red Low, yellow Moderate, green High — not danger", () => {
@@ -38,14 +41,22 @@ describe("foot-traffic viewer (PAPER)", () => {
     expect(toggleViewer("world", "world")).toBe("world");
   });
 
-  it("names Lots vs Properties captions from the Properties toggle", () => {
+  it("names Lots vs Properties captions without mixing the two chips", () => {
     expect(viewerCaption("lots", false)).toBe("Lots to buy");
-    expect(viewerCaption("lots", true)).toBe("Lots and properties to buy");
+    expect(viewerCaption("lots", true)).toBe("Lots to buy");
     expect(viewerCaption("yours", false)).toBe("Your Lots");
-    expect(viewerCaption("yours", true)).toBe("Your Properties");
+    expect(viewerCaption("yours", true)).toBe("Your Lots");
+    expect(viewerCaption("landlord")).toBe("Landlord");
+    expect(viewerCaption("world", "sale")).toBe("Properties for sale");
+    expect(viewerCaption("world", "yours")).toBe("Your rooms");
     expect(viewerCaption("world", true)).toBe("World");
-    expect(viewerHint("lots", true)).toMatch(/properties to buy/i);
-    expect(viewerHint("world", true)).toMatch(/Properties on/);
+    expect(viewerHint("lots", true)).toMatch(/Vacant \$ bars/);
+    expect(viewerHint("world", "sale")).toMatch(/grey box goes green/i);
+    expect(cycleProperties("off")).toBe("sale");
+    expect(cycleProperties("sale")).toBe("yours");
+    expect(cycleProperties("yours")).toBe("off");
+    expect(propertiesCaption("sale")).toBe("Properties for sale");
+    expect(propertiesCaption("yours")).toBe("Your rooms");
   });
 
   it("paints a named green/yellow/red ribbon on each paved road", () => {
@@ -90,7 +101,7 @@ describe("foot-traffic viewer (PAPER)", () => {
   it("Your lots outlines only visitor parcels, not vacant buy dirt", () => {
     const scene = new THREE.Scene();
     const land = createLandBoard();
-    const south = land.plots.find((p) => p.island === "south" && p.ring && p.ring.length >= 3)!;
+    const south = land.plots.find((p) => p.island === "south" && p.ring && p.ring.length >= 3 && !p.buildingId)!;
     south.owner = "visitor";
     const overlays = createOverlays({
       scene,

@@ -23,6 +23,7 @@ import {
   PROPANE_PRICE,
   PROPANE_SALES,
   STORAGE_UPGRADE_COST,
+  UNIT_KIT,
   UNIT_ROOM_PRICE,
   VISITOR_ACCOUNT_NO,
 } from "./economy.ts";
@@ -75,7 +76,15 @@ export type InvKind =
   | "melon"
   | "fish_cart"
   | "fish_chips"
-  | "propane";
+  | "propane"
+  | "shelf"
+  | "till"
+  | "fridge"
+  | "bed"
+  | "shower"
+  | "sink"
+  | "desk"
+  | "cabinet";
 
 export type CartKind = {
   id: CartKindId;
@@ -128,7 +137,7 @@ export type InvItem = {
   provenance: "SIMULATED";
 };
 
-export type MarketAisle = "street_carts" | "stock";
+export type MarketAisle = "street_carts" | "stock" | "shopfit" | "hospitality";
 
 export type CatalogSku = {
   id: InvKind;
@@ -139,7 +148,7 @@ export type CatalogSku = {
   qty: number;
   note: string;
   zone: ZoneId;
-  cartKind: CartKindId;
+  cartKind?: CartKindId;
   role: "kit" | "stock";
 };
 
@@ -153,6 +162,16 @@ export const MARKET_AISLES: { id: MarketAisle; label: string; note: string }[] =
     id: "stock",
     label: "Stock",
     note: "Packs for a cart you already placed. Fry carts also need a propane canister.",
+  },
+  {
+    id: "shopfit",
+    label: "Shopfit",
+    note: "Shelf, till, fridge. Place in a shop room you own.",
+  },
+  {
+    id: "hospitality",
+    label: "Hospitality",
+    note: "Bed, shower, sink, desk, cabinet. Place in a flat or office you own.",
   },
 ];
 
@@ -195,6 +214,20 @@ export const MARKET_CATALOG: CatalogSku[] = [
     cartKind: "fish_chips",
     role: "stock",
   },
+  ...UNIT_KIT.map((row) => ({
+    id: row.id as InvKind,
+    aisle: row.aisle as MarketAisle,
+    aisleLabel: row.aisle === "shopfit" ? "Shopfit" : "Hospitality",
+    label: row.label,
+    paperPrice: row.cost,
+    qty: 1,
+    note:
+      row.aisle === "shopfit"
+        ? "Place in a shop room you own. Inventory Place, not a Fit button."
+        : "Place in a flat or office you own. Inventory Place, not a Fit button.",
+    zone: "commercial" as const,
+    role: "kit" as const,
+  })),
 ];
 
 export function cartTodayPrice(kind: string | undefined): number {
@@ -1607,8 +1640,8 @@ export type SiteBookRow = {
   stock: number;
   unitsSold: number;
   perMinute: number;
-  projHour: number;
-  projDay: number;
+  vacantNote?: string | null;
+  rentNote?: string | null;
 };
 
 export type BusinessBooks = {
@@ -1650,10 +1683,16 @@ export function siteWorthPaper(stand: Stand): number {
 }
 
 function kitStacks(rows: InvItem[]): { kind: InvKind; label: string; qty: number }[] {
-  return CART_KINDS.map((cart) => {
-    const qty = rows.find((r) => r.kind === cart.kitId)?.qty ?? 0;
-    return { kind: cart.kitId, label: cart.kitLabel, qty };
-  }).filter((row) => row.qty > 0);
+  const kinds = [
+    ...CART_KINDS.map((cart) => ({ kind: cart.kitId, label: cart.kitLabel })),
+    ...UNIT_KIT.map((row) => ({ kind: row.id as InvKind, label: row.label })),
+  ];
+  return kinds
+    .map((row) => {
+      const qty = rows.find((r) => r.kind === row.kind)?.qty ?? 0;
+      return { kind: row.kind, label: row.label, qty };
+    })
+    .filter((row) => row.qty > 0);
 }
 
 function priceTrendOf(sticker: number, today: number): "up" | "flat" | "down" {
@@ -1781,6 +1820,10 @@ export function buildBusinessBooks(
       perMinute: 0,
       projHour: lease ? rent : 0,
       projDay: lease ? roundMoney(rent * 24) : 0,
+      vacantNote: lease ? null : "Empty room · $0 until a tenant signs.",
+      rentNote: lease
+        ? `${lease.tenantName} · ${lease.hours} sim hours · $${lease.rentPerHour.toFixed(2)}/hour`
+        : "No tenant. Scout from the room.",
     });
   }
   return {

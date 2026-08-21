@@ -58,6 +58,9 @@ describe("documentation library", () => {
     expect(play).toContain("$90");
     expect(play).toContain("8%");
     expect(play).toContain("$180");
+    expect(play).toContain("Landlord");
+    expect(play).toContain("Shopfit");
+    expect(play).toContain("Exit room");
     expect(play).not.toContain("20%");
   });
 

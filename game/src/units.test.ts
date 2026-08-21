@@ -4,6 +4,7 @@ import { SOUTH_PORT, southSpawnPad } from "./southGeom.ts";
 import { createVisitor, createWorld } from "./sim.ts";
 import {
   BUILDING_LAND_PRICE,
+  TICKS_PER_SIM_HOUR,
   UNIT_ROOM_PRICE,
   UNIT_SLICE_FAUCET,
 } from "./economy.ts";
@@ -28,6 +29,8 @@ import {
   fireUnitRole,
   fitUnitKit,
   hireUnitRole,
+  pickupUnitKit,
+  placeUnitKit,
   scoutTenant,
   signLease,
 } from "./units.ts";
@@ -53,6 +56,7 @@ describe("units scripts (alpha 0.5)", () => {
     const land = createLandBoard();
     const snap = playSnapshot(visitor, land);
     expect(snap.units.buildings).toHaveLength(3);
+    expect(snap.units.leaseHours).toEqual({ min: 3, max: 168 });
     expect(UNIT_BUILDINGS.map((b) => b.floors)).toEqual([1, 2, 3]);
     const spawn = southSpawnPad();
     const quay = UNIT_BUILDINGS.find((b) => b.id === "quay-shops")!;
@@ -200,24 +204,60 @@ describe("units scripts (alpha 0.5)", () => {
     expect(site.tillHired).toBe(false);
   });
 
-  it("scouts a fitted flat and pays rent on the sim-hour clock", () => {
+  it("scouts poor profiles on an empty flat and pays rent on the signed hours", () => {
     const { land, visitor } = ripeVisitor();
     expect(buyRoom(visitor, STRAND).ok).toBe(true);
-    expect(scoutTenant(visitor, STRAND).reason).toBe("no_takers");
+    const empty = scoutTenant(visitor, STRAND);
+    expect(empty.ok).toBe(true);
+    if (!empty.ok) return;
+    expect(empty.offers.length).toBeGreaterThanOrEqual(1);
+    expect(empty.offers.length).toBeLessThanOrEqual(3);
+    expect(empty.offers.every((o) => o.band === "poor")).toBe(true);
+    expect(empty.offers.every((o) => o.hours >= 3 && o.hours <= 24)).toBe(true);
+    expect(empty.offers.every((o) => o.who && o.tenantId)).toBe(true);
+    const booksEmpty = playSnapshot(visitor, land).books.sites.find((s) => s.standId === `unit-${STRAND}`);
+    expect(booksEmpty?.vacantNote).toMatch(/Empty room/);
+    expect(booksEmpty?.rentNote).toMatch(/Scout/);
+
     expect(fitUnitKit(visitor, STRAND, "bed").ok).toBe(true);
-    expect(scoutTenant(visitor, STRAND).reason).toBe("no_takers");
+    const mid = scoutTenant(visitor, STRAND);
+    expect(mid.ok).toBe(true);
+    if (!mid.ok) return;
+    expect(mid.offers.every((o) => o.band === "mid")).toBe(true);
+
     expect(fitUnitKit(visitor, STRAND, "shower").ok).toBe(true);
     expect(fitUnitKit(visitor, STRAND, "sink").ok).toBe(true);
-    const scouted = scoutTenant(visitor, STRAND);
-    expect(scouted.ok).toBe(true);
-    if (!scouted.ok) return;
-    expect(signLease(visitor, STRAND, 3, 0).ok).toBe(true);
+    const high = scoutTenant(visitor, STRAND);
+    expect(high.ok).toBe(true);
+    if (!high.ok) return;
+    expect(high.offers.every((o) => o.band === "high")).toBe(true);
+    expect(high.offers.every((o) => o.hours >= 48 && o.hours <= 168)).toBe(true);
+    const pick = high.offers[0]!;
+    expect(signLease(visitor, STRAND, pick.tenantId, 0).ok).toBe(true);
     const cash0 = visitor.cash;
-    tickPlay(visitor, land, 150);
+    tickPlay(visitor, land, TICKS_PER_SIM_HOUR);
     expect(visitor.cash).toBeGreaterThan(cash0);
-    expect(playSnapshot(visitor, land).books.sites.some((s) => s.siteClass === "apartment" && s.hired)).toBe(true);
-    tickPlay(visitor, land, 3 * 150);
+    const books = playSnapshot(visitor, land).books.sites.find((s) => s.siteClass === "apartment" && s.hired);
+    expect(books).toBeTruthy();
+    expect(books?.rentNote).toMatch(/sim hours/);
+    tickPlay(visitor, land, pick.hours * TICKS_PER_SIM_HOUR);
     expect(visitor.play.units.find((u) => u.id === STRAND)?.lease).toBeNull();
+  });
+
+  it("places furniture from inventory, not the warehouse", () => {
+    const { visitor } = ripeVisitor();
+    expect(buyRoom(visitor, STRAND).ok).toBe(true);
+    expect(placeUnitKit(visitor, STRAND, "bed").reason).toBe("no_kit");
+    visitor.play.warehouse.items.push({ kind: "bed", qty: 1, mode: "PAPER", provenance: "SIMULATED" });
+    expect(placeUnitKit(visitor, STRAND, "bed").reason).toBe("in_warehouse");
+    visitor.play.warehouse.items = [];
+    visitor.play.inventory.push({ kind: "bed", qty: 1, mode: "PAPER", provenance: "SIMULATED" });
+    expect(placeUnitKit(visitor, STRAND, "bed").ok).toBe(true);
+    expect(visitor.play.inventory.find((i) => i.kind === "bed")).toBeUndefined();
+    expect(visitor.play.units.find((u) => u.id === STRAND)?.kit).toContain("bed");
+    expect(pickupUnitKit(visitor, STRAND, "bed").ok).toBe(true);
+    expect(visitor.play.warehouse.items.find((i) => i.kind === "bed")?.qty).toBe(1);
+    expect(visitor.play.units.find((u) => u.id === STRAND)?.kit).not.toContain("bed");
   });
 
   it("charges ground rent to the game bank when the dirt is unowned", () => {
@@ -260,21 +300,26 @@ describe("units scripts (alpha 0.5)", () => {
   it("scouts a fitted office on the same lease clock", () => {
     const { land, visitor } = ripeVisitor();
     expect(buyRoom(visitor, OFFICE).ok).toBe(true);
-    expect(scoutTenant(visitor, OFFICE).reason).toBe("no_takers");
+    const empty = scoutTenant(visitor, OFFICE);
+    expect(empty.ok).toBe(true);
+    if (!empty.ok) return;
+    expect(empty.offers.every((o) => o.band === "poor")).toBe(true);
     expect(fitUnitKit(visitor, OFFICE, "desk").ok).toBe(true);
-    expect(scoutTenant(visitor, OFFICE).reason).toBe("no_takers");
     expect(fitUnitKit(visitor, OFFICE, "cabinet").ok).toBe(true);
     const scouted = scoutTenant(visitor, OFFICE);
     expect(scouted.ok).toBe(true);
     if (!scouted.ok) return;
-    expect(scouted.offer.tenantName).toMatch(/clerk|firm|Harbour/i);
-    expect(signLease(visitor, OFFICE, 6, 0).ok).toBe(true);
+    expect(scouted.offers[0]!.tenantName).toMatch(/clerk|Harbour|Channel|ledger|filings|firm/i);
+    expect(scouted.offers.every((o) => o.band === "high")).toBe(true);
+    const pick = scouted.offers[0]!;
+    expect(signLease(visitor, OFFICE, pick.tenantId, 0).ok).toBe(true);
     const cash0 = visitor.cash;
-    tickPlay(visitor, land, 150);
+    tickPlay(visitor, land, TICKS_PER_SIM_HOUR);
     expect(visitor.cash).toBeGreaterThan(cash0);
     const books = playSnapshot(visitor, land).books.sites.find((s) => s.standId === `unit-${OFFICE}`);
     expect(books?.siteClass).toBe("office");
     expect(books?.hired).toBe(true);
+    expect(books?.rentNote).toMatch(pick.tenantName);
   });
 
   it("warehouses a stale unit crate after 60s", () => {

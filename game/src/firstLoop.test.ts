@@ -512,7 +512,7 @@ describe("South first loop", () => {
   it("lists fruit, watermelon, and fish-and-chips carts, and stocks only that cart's pack", () => {
     const { land, visitor, plot } = leaseCheapSouth();
     expect(CART_KINDS.map((c) => c.id)).toEqual(["fruit", "watermelon", "fish_chips"]);
-    expect(MARKET_CATALOG.filter((s) => s.role === "kit").map((s) => s.label)).toEqual([
+    expect(MARKET_CATALOG.filter((s) => s.aisle === "street_carts").map((s) => s.label)).toEqual([
       "Fruit cart",
       "Watermelon cart",
       "Fish and chips cart",

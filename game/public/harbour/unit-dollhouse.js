@@ -5,7 +5,7 @@ import {
   RMB,
   sphericalToCartesian,
 } from "./camera.js";
-import { GAP, ROOM_H } from "./unit-blocks.js";
+import { GAP, ROOM_H, roomWorldPose } from "./unit-blocks.js";
 
 /**
  * Unit dollhouse camera. Orbits the floor box — not the player, not interior.js.
@@ -22,6 +22,8 @@ export function dollhouseZoomRadius(radius, deltaY) {
   return Math.max(DOLLHOUSE_ZOOM_MIN_M, Math.min(DOLLHOUSE_ZOOM_MAX_M, next));
 }
 
+export const DOLLHOUSE_ROOM_RADIUS_M = 11;
+
 export function floorTarget(building, floor, heightAt) {
   const x = Number(building && building.x) || 0;
   const z = Number(building && building.z) || 0;
@@ -37,6 +39,20 @@ export function floorTarget(building, floor, heightAt) {
     z,
     buildingId: building && building.id,
     floor: f,
+    unitId: "",
+  };
+}
+
+export function roomTarget(building, room, heightAt) {
+  if (!building || !room) return floorTarget(building, room && room.floor, heightAt);
+  const pose = roomWorldPose(building, room, heightAt);
+  return {
+    x: pose.x,
+    y: pose.y,
+    z: pose.z,
+    buildingId: pose.buildingId,
+    floor: pose.floor,
+    unitId: pose.unitId || room.id,
   };
 }
 
@@ -78,6 +94,7 @@ export function tickDollhouse(camera, target, state, dt, tmp) {
 export function createDollhouseCamera({ camera, canvas }) {
   const tmp = new THREE.Vector3();
   let active = false;
+  let locked = false;
   let target = null;
   let state = createDollhouseOrbit(null);
 
@@ -137,20 +154,35 @@ export function createDollhouseCamera({ camera, canvas }) {
   }
 
   return {
-    enter(building, floor, heightAt) {
-      const next = floorTarget(building, floor, heightAt);
-      const same = active && target && target.buildingId === next.buildingId;
+    enter(building, floor, heightAt, room, lock) {
+      const next = room ? roomTarget(building, room, heightAt) : floorTarget(building, floor, heightAt);
+      const same =
+        active &&
+        target &&
+        target.buildingId === next.buildingId &&
+        (target.unitId || "") === (next.unitId || "");
       target = next;
-      if (!same) state = createDollhouseOrbit(building);
+      if (!same) {
+        state = createDollhouseOrbit(building);
+        if (room) state.radius = DOLLHOUSE_ROOM_RADIUS_M;
+      }
       active = true;
+      if (lock) locked = true;
       tickDollhouse(camera, target, { ...state, dragging: true }, 1, tmp);
     },
-    exit() {
+    exit(force) {
+      if (locked && !force) return false;
+      locked = false;
       active = false;
       target = null;
       if (state.dragging) state = { ...state, dragging: false };
+      return true;
+    },
+    unlock() {
+      locked = false;
     },
     isActive: () => active,
+    isLocked: () => locked,
     getState: () => state,
     getTarget: () => target,
     tick(dt) {

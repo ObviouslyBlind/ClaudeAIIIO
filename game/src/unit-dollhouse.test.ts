@@ -7,6 +7,7 @@ import {
   createDollhouseOrbit,
   DOLLHOUSE_PITCH,
   DOLLHOUSE_RADIUS_M,
+  DOLLHOUSE_ROOM_RADIUS_M,
   dollhouseZoomRadius,
   DOLLHOUSE_ZOOM_MAX_M,
   DOLLHOUSE_ZOOM_MIN_M,
@@ -181,5 +182,21 @@ describe("unit dollhouse camera", () => {
     expect(bed.visible).toBe(true);
     expect(scene.getObjectByName("unit-strand-flats-1-0").visible).toBe(false);
     expect(scene.getObjectByName("unit-cutaway-strand-flats-0-0").visible).toBe(true);
+  });
+
+  it("locks the room camera until Exit room is forced", () => {
+    const cam = fakeCam();
+    const dh = createDollhouseCamera({ camera: cam, canvas: null });
+    const building = { id: "strand-flats", x: 10, z: 20, yaw: 0 };
+    const room = { id: "strand-flats-0-0", floor: 0, room: 0 };
+    dh.enter(building, 0, () => 1, room, true);
+    expect(dh.isActive()).toBe(true);
+    expect(dh.isLocked()).toBe(true);
+    expect(dh.getState().radius).toBe(DOLLHOUSE_ROOM_RADIUS_M);
+    expect(dh.exit()).toBe(false);
+    expect(dh.isActive()).toBe(true);
+    expect(dh.exit(true)).toBe(true);
+    expect(dh.isActive()).toBe(false);
+    expect(dh.isLocked()).toBe(false);
   });
 });

@@ -16,7 +16,7 @@ import { createVisitor } from "./sim.ts";
 import { createLandBoard } from "./land.ts";
 import { UNIT_ROOM_PRICE, UNIT_SLICE_FAUCET } from "./economy.ts";
 import { playSnapshot } from "./firstLoop.ts";
-import { buyRoom as purchaseRoom, fitUnitKit, UNIT_BUILDINGS } from "./units.ts";
+import { buyRoom as purchaseRoom, fitUnitKit, scoutTenant, signLease, UNIT_BUILDINGS } from "./units.ts";
 import { southSpawnPad } from "./southGeom.ts";
 
 const QUAY = "quay-shops-0-0";
@@ -38,22 +38,31 @@ describe("units 0.5.1 systems (placeholders, not façades)", () => {
     expect(play.units.buildings.every((b) => b.plotId && b.plotId.startsWith("south-unit-"))).toBe(true);
   });
 
-  it("keeps vacant rooms as green buy tiles until you own one", () => {
+  it("keeps vacant rooms as confirm tiles, not instant buys or landlord dirt", () => {
     const { play } = snapWithCash();
     const html = formatBuildingSheet(play, { buildingId: "quay-shops", view: "root" });
     expect(html).toContain("Quay Shops");
     expect(html).toContain("buy-tile");
-    expect(html).toContain(`data-buy-unit="${QUAY}"`);
-    expect(html).not.toContain("data-unit-room=");
-    expect(html).toContain("Buy this land");
-    expect(html).toContain("$15,000.00");
-    expect(html).toMatch(/data-buy-land="quay-shops"[^>]*disabled/);
+    expect(html).toContain(`data-ask-unit="${QUAY}"`);
+    expect(html).not.toContain("data-buy-unit=");
+    expect(html).not.toContain("data-buy-land=");
+    expect(html).not.toContain("Buy this land");
+    expect(html).toContain("Buy is a confirm");
     expect(html).toContain("Floor:");
     expect(html).toContain(`<b>${floorLetter(0)}</b>`);
     expect(html).toContain("data-floor-dir");
     expect(html).not.toContain("View Ground floor");
     expect(html).toContain("RMB-hold orbit");
     expect(floorName(0)).toBe("Ground floor");
+    const landlord = formatBuildingSheet(play, { view: "landlord" });
+    expect(landlord).toContain("Landlord");
+    expect(landlord).toContain("$15,000.00");
+    expect(landlord).toContain('data-ask-land="quay-shops"');
+    expect(landlord).toMatch(/data-ask-land="quay-shops"[^>]*disabled/);
+    expect(landlord).toContain("You do not need this to run a room");
+    const pointed = formatBuildingSheet(play, { buildingId: "quay-shops", view: "sale", unitId: QUAY });
+    expect(pointed).toContain("buy-tile is-on");
+    expect(pointed).toContain("Selected");
   });
 
   it("sells one quay room and leaves the sibling vacant", () => {
@@ -63,12 +72,12 @@ describe("units 0.5.1 systems (placeholders, not façades)", () => {
     expect(play.units.buildings.find((b) => b.id === "quay-shops")?.canManage).toBe(true);
     expect(play.units.buildings.find((b) => b.id === "strand-flats")?.canManage).toBe(false);
     const buy = formatBuildingSheet(play, { buildingId: "quay-shops", view: "buy", floor: 0 });
-    expect(buy).toContain(`data-unit-room="${QUAY}"`);
+    expect(buy).toContain(`data-enter-unit="${QUAY}"`);
     expect(buy).toContain("Owned");
-    expect(buy).toContain(`data-buy-unit="${QUAY_RIGHT}"`);
+    expect(buy).toContain(`data-ask-unit="${QUAY_RIGHT}"`);
     expect(buy).toContain(`<b>${floorLetter(0)}</b>`);
     const root = formatBuildingSheet(play, { buildingId: "quay-shops", view: "root" });
-    expect(root).toContain(`data-unit-room="${QUAY}"`);
+    expect(root).toContain(`data-enter-unit="${QUAY}"`);
     expect(root).toContain("own-tile");
     const mixed = formatBuildingSheet(play, { buildingId: "mixed-house", view: "root", floor: 0 });
     expect(mixed).toContain(`<b>G</b>`);
@@ -140,7 +149,10 @@ describe("units 0.5.1 systems (placeholders, not façades)", () => {
     expect(scene.getObjectByName("unit-label-strand-flats").visible).toBe(true);
     expect(blocks.clickables().length).toBeGreaterThanOrEqual(9);
     blocks.setViewer({ propertiesOn: false, overlay: "lots" });
-    expect(blocks.clickables().length).toBeGreaterThanOrEqual(9);
+    expect(blocks.clickables()).toHaveLength(0);
+    blocks.highlight(QUAY);
+    expect(blocks.getHighlight()).toBe(QUAY);
+    expect(quay.material.color.getHex()).toBe(0x3dcc6a);
     expect(TAG_DEPTH_TEST).toBe(false);
     expect(TAG_ABOVE_M).toBeGreaterThan(3);
     const tag = scene.getObjectByName("unit-label-strand-flats");
@@ -174,6 +186,24 @@ describe("units 0.5.1 systems (placeholders, not façades)", () => {
     expect(lone.children.length).toBeGreaterThan(3);
   });
 
+  it("plants a tenant body in a signed room", () => {
+    const { visitor, land } = snapWithCash();
+    expect(purchaseRoom(visitor, "strand-flats-0-0").ok).toBe(true);
+    const scouted = scoutTenant(visitor, "strand-flats-0-0");
+    expect(scouted.ok).toBe(true);
+    if (!scouted.ok) return;
+    expect(signLease(visitor, "strand-flats-0-0", scouted.offers[0].tenantId, 0).ok).toBe(true);
+    const play = playSnapshot(visitor, land);
+    const scene = new THREE.Scene();
+    const blocks = mountUnitBlocks({ scene, heightAt: () => 1.28 });
+    blocks.sync(play);
+    const tenant = scene.getObjectByName("unit-tenant-strand-flats-0-0");
+    expect(tenant).toBeTruthy();
+    expect(tenant.visible).toBe(false);
+    blocks.applyCutaway({ buildingId: "strand-flats", floor: 0, unitId: "strand-flats-0-0" });
+    expect(tenant.visible).toBe(true);
+  });
+
   it("puts an owned shop on Books", () => {
     const { visitor, land } = snapWithCash();
     expect(purchaseRoom(visitor, QUAY).ok).toBe(true);
@@ -187,14 +217,14 @@ describe("units 0.5.1 systems (placeholders, not façades)", () => {
     const { play } = snapWithCash(10_000);
     expect(play.cash).toBe(10_000);
     const shop = formatBuildingSheet(play, { buildingId: "quay-shops", view: "buy", floor: 0 });
-    expect(shop).not.toMatch(/data-buy-unit="quay-shops-0-0"[^>]*disabled/);
+    expect(shop).not.toMatch(/data-ask-unit="quay-shops-0-0"[^>]*disabled/);
     expect(shop).toContain("$1,200.00");
     expect(shop).toContain("buy-tile");
     const root = formatBuildingSheet(play, { buildingId: "quay-shops", view: "root" });
-    expect(root).toContain("You can buy a room here.");
-    expect(root).toMatch(/data-buy-land="quay-shops"[^>]*disabled/);
+    expect(root).toContain("Point at a vacant room");
+    expect(root).not.toContain("data-buy-land=");
     const broke = formatBuildingSheet(snapWithCash(1000).play, { buildingId: "quay-shops", view: "buy", floor: 0 });
-    expect(broke).toMatch(/data-buy-unit="quay-shops-0-0"[^>]*disabled/);
+    expect(broke).toMatch(/data-ask-unit="quay-shops-0-0"[^>]*disabled/);
     expect(broke).toContain("Need $1,200.00");
   });
 
@@ -203,14 +233,15 @@ describe("units 0.5.1 systems (placeholders, not façades)", () => {
     expect(purchaseRoom(visitor, QUAY).ok).toBe(true);
     const play = playSnapshot(visitor, land);
     const html = formatBuildingSheet(play, { buildingId: "quay-shops", view: "room", unitId: QUAY });
-    expect(html).toContain("Shelf");
-    expect(html).toContain("Fridge");
-    expect(html).toContain("Till");
+    expect(html).toContain("Shopfit");
+    expect(html).toContain("Inventory Place");
+    expect(html).not.toContain("data-fit-kit");
     expect(html).toContain("Hire packer");
     expect(html).toContain("Hire till");
     expect(html).toContain('data-unit-hire="');
     expect(html).toContain("Open site card");
-    expect(html).toContain("Packer fills the shelf");
+    expect(html).toContain("Unhired packer");
+    expect(html).toContain("data-exit-room");
   });
 
   it("kits and scouts a flat from manage", () => {
@@ -220,14 +251,17 @@ describe("units 0.5.1 systems (placeholders, not façades)", () => {
     const manage = formatBuildingSheet(play, { buildingId: "strand-flats", view: "manage", floor: 0 });
     expect(manage).toContain(`<b>G</b>`);
     expect(manage).toContain("data-floor-dir");
-    expect(manage).toContain('data-unit-room="strand-flats-0-0"');
+    expect(manage).toContain('data-enter-unit="strand-flats-0-0"');
     const room = formatBuildingSheet(play, {
       buildingId: "strand-flats",
       view: "room",
       unitId: "strand-flats-0-0",
     });
-    expect(room).toContain("Bed");
     expect(room).toContain("Scout tenants");
-    expect(room).toContain("Empty room = no takers");
+    expect(room).toContain("Empty room still scouts poor profiles");
+    expect(room).not.toContain("data-fit-kit");
+    expect(room).not.toContain("Empty room = no takers");
+    expect(room).toContain("data-exit-room");
+    expect(room).toContain("Place furniture from inventory");
   });
 });

@@ -43,6 +43,11 @@ export const VIEWERS = {
     label: "Minerals",
     hint: "Minerals are not in yet.",
   },
+  landlord: {
+    id: "landlord",
+    label: "Landlord",
+    hint: "Buy the dirt under a building for $15,000. You do not need this to run a room. Spawn cannot afford it.",
+  },
 };
 
 /** Clicking an already-on viewer (Foot, …) hides it and returns to World. */
@@ -64,33 +69,50 @@ export function isLotsViewer(id) {
   return id === "lots" || id === "yours";
 }
 
+export function isLandlordViewer(id) {
+  return id === "landlord";
+}
+
+/** Properties chip: for sale → yours → off. Independent of Lots. */
+export function cycleProperties(mode) {
+  if (mode === "sale") return "yours";
+  if (mode === "yours") return "off";
+  return "sale";
+}
+
+export function isPropertiesOn(mode) {
+  return mode === "sale" || mode === "yours";
+}
+
+export function propertiesCaption(mode) {
+  if (mode === "yours") return "Your rooms";
+  if (mode === "sale") return "Properties for sale";
+  return "Properties";
+}
+
+export function propertiesHint(mode) {
+  if (mode === "yours") return "Your rooms. Enter, Place, Tenants, Hire. No buy tiles.";
+  if (mode === "sale") return "Properties for sale. Point at a vacant room — that grey box goes green. Buy is a confirm.";
+  return "Properties. Buildings and rooms. Does not turn on from Lots.";
+}
+
 /**
- * Lots chip copy. Properties is a separate toggle, not a viewer mode.
- *   lots  + off → Lots to buy
- *   lots  + on  → Lots and properties to buy
- *   yours + off → Your Lots
- *   yours + on  → Your Properties
+ * Lots chip copy. Properties is a separate chip and never mixes in.
  */
 export function viewerCaption(overlay, propertiesOn) {
-  const props = Boolean(propertiesOn);
-  if (overlay === "lots") return props ? "Lots and properties to buy" : "Lots to buy";
-  if (overlay === "yours") return props ? "Your Properties" : "Your Lots";
+  if (overlay === "lots") return "Lots to buy";
+  if (overlay === "yours") return "Your Lots";
+  if (overlay === "landlord") return "Landlord";
+  if (overlay === "world" && propertiesOn === "sale") return "Properties for sale";
+  if (overlay === "world" && propertiesOn === "yours") return "Your rooms";
   return (VIEWERS[overlay] && VIEWERS[overlay].label) || "World";
 }
 
 export function viewerHint(overlay, propertiesOn) {
-  const props = Boolean(propertiesOn);
-  if (overlay === "lots") {
-    return props
-      ? "Lots and properties to buy. Vacant $ bars on dirt and buildings."
-      : VIEWERS.lots.hint;
-  }
-  if (overlay === "yours") {
-    return props ? "Your Properties. Green YOURS on lots and buildings you own." : VIEWERS.yours.hint;
-  }
-  if (props && overlay === "world") {
-    return "World. Properties on — $ signs above buildings. Tap a building to buy a room.";
-  }
+  if (overlay === "lots") return VIEWERS.lots.hint;
+  if (overlay === "yours") return VIEWERS.yours.hint;
+  if (overlay === "landlord") return VIEWERS.landlord.hint;
+  if (propertiesOn === "sale" || propertiesOn === "yours") return propertiesHint(propertiesOn);
   return (VIEWERS[overlay] && VIEWERS[overlay].hint) || VIEWERS.world.hint;
 }
 
@@ -300,6 +322,7 @@ export function createOverlays({ scene, heightAt, specOf, getMap }) {
     const want = filter === "yours" ? "yours" : "buy";
     const plots = ((map && map.plots) || []).filter((p) => {
       if (p.island !== "south" || !p.ring || p.ring.length < 3) return false;
+      if (p.buildingId) return false;
       if (want === "yours") return p.owner === "visitor";
       return !p.owner || p.owner === "visitor";
     });

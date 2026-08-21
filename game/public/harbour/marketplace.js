@@ -40,8 +40,8 @@ export const MARKET_SHEET_AISLES = [
   {
     id: "shopfit",
     label: "Shopfit",
-    live: false,
-    soon: "Shelves, till, fridge, counter, backstock — when you own a shop. A stocker fills shelves the same way a truck fills a pile.",
+    live: true,
+    blurb: "Shelf, till, fridge. Place in a shop room you own.",
   },
   {
     id: "farming",
@@ -52,8 +52,8 @@ export const MARKET_SHEET_AISLES = [
   {
     id: "hospitality",
     label: "Hospitality",
-    live: false,
-    soon: "Beds, kitchen, lobby, rooms — when you own a house or hotel. Kit that sits inside, not a second map.",
+    live: true,
+    blurb: "Bed, shower, sink, desk, cabinet. Place in a flat or office you own.",
   },
   {
     id: "machinery",
@@ -133,11 +133,11 @@ function foldBlock(id, title, inner, open) {
 function streetBody(play, q, folds) {
   const catalog = play.catalog || [];
   const kits = filterSkus(
-    catalog.filter((s) => s.aisle === "street_carts" || s.role === "kit"),
+    catalog.filter((s) => s.aisle === "street_carts"),
     q,
   );
   const stock = filterSkus(
-    catalog.filter((s) => s.aisle === "stock" || s.role === "stock"),
+    catalog.filter((s) => s.aisle === "stock"),
     q,
   );
   const prices = play.lastPricesSouth || {};
@@ -166,6 +166,18 @@ function streetBody(play, q, folds) {
     return `<p class="mp-empty">Nothing on Street matches that search.</p>`;
   }
   return bits.join("");
+}
+
+function aisleKitBody(play, q, folds, aisleId, title) {
+  const catalog = play.catalog || [];
+  const kits = filterSkus(
+    catalog.filter((s) => s.aisle === aisleId),
+    q,
+  );
+  if (!kits.length) {
+    return `<p class="mp-empty">Nothing in ${esc(title)} matches that search.</p>`;
+  }
+  return foldBlock(aisleId, title, kits.map(skuBuyRow).join(""), foldOpen(folds, aisleId, Boolean(needle(q))));
 }
 
 function soonBody(aisle, q) {
@@ -285,6 +297,8 @@ export function marketplaceScrollHtml(play, opts = {}) {
   const view = opts.view === "basket" ? "basket" : "shop";
   if (view === "basket") return basketBody(play || {}, opts.basket || []);
   if (island === "north") return northBody();
+  if (aisle.id === "shopfit") return aisleKitBody(play || {}, query, opts.folds || {}, "shopfit", "Shopfit");
+  if (aisle.id === "hospitality") return aisleKitBody(play || {}, query, opts.folds || {}, "hospitality", "Hospitality");
   if (aisle.live) return streetBody(play || {}, query, opts.folds || {});
   return soonBody(aisle, query);
 }
