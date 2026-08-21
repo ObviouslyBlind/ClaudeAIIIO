@@ -51,6 +51,6 @@ Systems camera bar: 13 placeholder boxes, Manage grey until owned, dest This roo
 | U3 | Shop kit is siteScore parts (shelf/till/fridge). Ground-floor traffic band. Two quay shops = two Books rows. Stale unit crate warehouses. | **PASS** (tests) |
 | U5 | Spawn look: Strand Flats $900 tag, tap, buy a room | **PASS** (live harbour) |
 | U6 | Four distinct shells inland of Island Hwy in the spawn look; floor chips on the building sheet | **PASS** (live harbour) |
-| U7 | Dollhouse of a floor: open-top rooms, floors above hidden, RMB-hold orbit 360 around the box, not interior.js | **queued** |
+| U7 | Dollhouse of a floor: open-top rooms, floors above hidden, RMB-hold orbit 360 around the box, not interior.js | **PASS** (live harbour, Strand Flats) |
 
 Operator is the brake.
