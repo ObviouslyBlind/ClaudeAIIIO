@@ -17,7 +17,12 @@ const VACANT = 0xc6c6c6;
 const OWNED = 0xe8e8e8;
 const TAG_W = 4.2;
 const TAG_H = 1.15;
-const TAG_ABOVE_M = 4.8;
+/** Metres above the roof to the bottom of the $ bar. */
+export const TAG_ABOVE_M = 4.8;
+/** Shells must not eat the sign. Lot dirt tags still depth-test. */
+export const TAG_DEPTH_TEST = false;
+const TAG_CANVAS_W = 192;
+const TAG_CANVAS_H = 64;
 const WALL_T = 0.12;
 
 export function roomBoxCount(buildings) {
@@ -40,27 +45,41 @@ function paintLotTag(canvas, text, kind) {
   const h = canvas.height;
   ctx.clearRect(0, 0, w, h);
   const yours = kind === "yours";
+  const stroke = 4;
+  const pad = stroke / 2 + 2;
+  const r = 12;
+  const x0 = pad;
+  const y0 = pad;
+  const x1 = w - pad;
+  const y1 = h - pad;
   ctx.fillStyle = yours ? "rgba(47,138,76,0.94)" : "rgba(24,30,20,0.9)";
-  const r = 14;
   ctx.beginPath();
-  ctx.moveTo(r, 0);
-  ctx.lineTo(w - r, 0);
-  ctx.arcTo(w, 0, w, r, r);
-  ctx.lineTo(w, h - r);
-  ctx.arcTo(w, h, w - r, h, r);
-  ctx.lineTo(r, h);
-  ctx.arcTo(0, h, 0, h - r, r);
-  ctx.lineTo(0, r);
-  ctx.arcTo(0, 0, r, 0, r);
+  ctx.moveTo(x0 + r, y0);
+  ctx.lineTo(x1 - r, y0);
+  ctx.arcTo(x1, y0, x1, y0 + r, r);
+  ctx.lineTo(x1, y1 - r);
+  ctx.arcTo(x1, y1, x1 - r, y1, r);
+  ctx.lineTo(x0 + r, y1);
+  ctx.arcTo(x0, y1, x0, y1 - r, r);
+  ctx.lineTo(x0, y0 + r);
+  ctx.arcTo(x0, y0, x0 + r, y0, r);
+  ctx.closePath();
   ctx.fill();
   ctx.strokeStyle = yours ? "#5fe3a0" : "rgba(244,242,234,0.28)";
-  ctx.lineWidth = 4;
+  ctx.lineWidth = stroke;
   ctx.stroke();
   ctx.fillStyle = "#f4f2ea";
-  ctx.font = "700 28px 'Segoe UI', system-ui, sans-serif";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText(text, w / 2, h / 2 + 1);
+  let size = 32;
+  const label = String(text);
+  const maxW = x1 - x0 - 16;
+  ctx.font = "700 " + size + "px 'Segoe UI', system-ui, sans-serif";
+  while (size > 18 && ctx.measureText && ctx.measureText(label).width > maxW) {
+    size -= 2;
+    ctx.font = "700 " + size + "px 'Segoe UI', system-ui, sans-serif";
+  }
+  ctx.fillText(label, w / 2, h / 2 + 1);
 }
 
 function cheapestVacant(building) {
@@ -112,30 +131,44 @@ function addTag(group, building, x, y, z) {
   const text = tagLabelOf(building);
   const hit = new THREE.Mesh(
     new THREE.BoxGeometry(TAG_W, TAG_H, 0.12),
-    new THREE.MeshBasicMaterial({ color: 0x181e14, transparent: true, opacity: 0.01 }),
+    new THREE.MeshBasicMaterial({
+      color: 0x181e14,
+      transparent: true,
+      opacity: 0.01,
+      depthTest: TAG_DEPTH_TEST,
+      depthWrite: false,
+    }),
   );
-  hit.position.set(x, y, z);
+  hit.position.set(x, y + TAG_H / 2, z);
   hit.name = "unit-label-" + building.id;
+  hit.renderOrder = 2;
+  hit.frustumCulled = false;
   stampUnit(hit, building, null, "tag");
   hit.userData.tagKind = kind;
   group.add(hit);
   if (typeof document === "undefined") return;
   const canvas = document.createElement("canvas");
-  canvas.width = 160;
-  canvas.height = 56;
+  canvas.width = TAG_CANVAS_W;
+  canvas.height = TAG_CANVAS_H;
   paintLotTag(canvas, text, kind);
   const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.minFilter = THREE.LinearFilter;
   texture.needsUpdate = true;
   const sprite = new THREE.Sprite(
     new THREE.SpriteMaterial({
       map: texture,
-      depthTest: true,
+      depthTest: TAG_DEPTH_TEST,
       depthWrite: false,
       transparent: true,
+      sizeAttenuation: true,
     }),
   );
+  sprite.center.set(0.5, 0);
   sprite.position.set(x, y, z);
   sprite.scale.set(TAG_W, TAG_H, 1);
+  sprite.renderOrder = 2;
+  sprite.frustumCulled = false;
   sprite.name = "unit-sprite-" + building.id;
   stampUnit(sprite, building, null, "tag");
   sprite.userData.tagKind = kind;

@@ -10,7 +10,7 @@ import {
 } from "../public/harbour/units-hud.js";
 import { formatSiteMenu } from "../public/harbour/site-menu.js";
 import { formatHireSheet, listBusinesses, peopleLine } from "../public/harbour/hire-sheet.js";
-import { mountUnitBlocks, roomBoxCount } from "../public/harbour/unit-blocks.js";
+import { mountUnitBlocks, roomBoxCount, TAG_ABOVE_M, TAG_DEPTH_TEST } from "../public/harbour/unit-blocks.js";
 import { createKitMesh } from "../public/harbour/unit-kit.js";
 import { createVisitor } from "./sim.ts";
 import { createLandBoard } from "./land.ts";
@@ -141,6 +141,11 @@ describe("units 0.5.1 systems (placeholders, not façades)", () => {
     expect(blocks.clickables().length).toBeGreaterThanOrEqual(9);
     blocks.setViewer({ propertiesOn: false, overlay: "lots" });
     expect(blocks.clickables().length).toBeGreaterThanOrEqual(9);
+    expect(TAG_DEPTH_TEST).toBe(false);
+    expect(TAG_ABOVE_M).toBeGreaterThan(3);
+    const tag = scene.getObjectByName("unit-label-strand-flats");
+    expect(tag.material.depthTest).toBe(false);
+    expect(tag.position.y).toBeGreaterThan(quay.position.y + 3);
     const yaw = play.units.buildings.find((b) => b.id === "quay-shops").yaw;
     expect(quay.rotation.y).toBeCloseTo(yaw, 5);
     const right = scene.getObjectByName("unit-" + QUAY_RIGHT);
