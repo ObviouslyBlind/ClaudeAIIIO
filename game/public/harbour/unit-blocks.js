@@ -11,9 +11,9 @@ export const ROOM_D = 5;
 export const ROOM_H = 3.2;
 export const GAP = 0.45;
 const KIT = 0.7;
-const VACANT = 0x7a7a7a;
-const OWNED = 0xc4c4c4;
-const KIT_GREY = 0xb0b0b0;
+const VACANT = 0xc6c6c6;
+const OWNED = 0xe8e8e8;
+const KIT_GREY = 0xd8d8d8;
 const TAG_W = 5.2;
 const TAG_H = 1.35;
 const WALL_T = 0.12;
@@ -127,8 +127,26 @@ function localXZ(yaw, lx, lz) {
   return { x: lx * c - lz * s, z: lx * s + lz * c };
 }
 
+function shellMat(color) {
+  return new THREE.MeshLambertMaterial({ color, emissive: color, emissiveIntensity: 0.22 });
+}
+
 function wallMat(color) {
-  return new THREE.MeshLambertMaterial({ color, side: THREE.DoubleSide });
+  return new THREE.MeshLambertMaterial({ color, emissive: color, emissiveIntensity: 0.18, side: THREE.DoubleSide });
+}
+
+function addEdges(mesh, color = 0x2a2a2a) {
+  const edges = new THREE.LineSegments(
+    new THREE.EdgesGeometry(mesh.geometry),
+    new THREE.LineBasicMaterial({ color }),
+  );
+  edges.userData.kind = mesh.userData.kind;
+  edges.userData.part = mesh.userData.part;
+  edges.userData.buildingId = mesh.userData.buildingId;
+  edges.userData.buildingName = mesh.userData.buildingName;
+  edges.userData.unitId = mesh.userData.unitId;
+  edges.userData.floor = mesh.userData.floor;
+  mesh.add(edges);
 }
 
 function addCutawayRoom(group, building, r, worldX, worldY, worldZ, yaw, color) {
@@ -142,6 +160,7 @@ function addCutawayRoom(group, building, r, worldX, worldY, worldZ, yaw, color) 
   const slab = new THREE.Mesh(new THREE.BoxGeometry(ROOM_W, 0.14, ROOM_D), wallMat(color));
   slab.position.y = -ROOM_H / 2 + 0.07;
   stampUnit(slab, building, r, "cutaway", Number(r.floor) || 0);
+  addEdges(slab);
   g.add(slab);
 
   const wallH = ROOM_H * 0.9;
@@ -156,6 +175,7 @@ function addCutawayRoom(group, building, r, worldX, worldY, worldZ, yaw, color) 
     const mesh = new THREE.Mesh(new THREE.BoxGeometry(w.w, wallH, w.d), wallMat(color));
     mesh.position.set(w.x, wallY, w.z);
     stampUnit(mesh, building, r, "cutaway", Number(r.floor) || 0);
+    addEdges(mesh);
     g.add(mesh);
   }
   group.add(g);
@@ -246,7 +266,7 @@ export function mountUnitBlocks(opts) {
           const color = r.owner === "visitor" ? OWNED : VACANT;
           const mesh = new THREE.Mesh(
             new THREE.BoxGeometry(ROOM_W, ROOM_H, ROOM_D),
-            new THREE.MeshLambertMaterial({ color }),
+            shellMat(color),
           );
           mesh.position.set(b.x + at.x, y, b.z + at.z);
           mesh.rotation.y = yaw;
@@ -254,6 +274,7 @@ export function mountUnitBlocks(opts) {
           mesh.receiveShadow = true;
           mesh.name = "unit-" + r.id;
           stampUnit(mesh, b, r, "shell", floor);
+          addEdges(mesh);
           group.add(mesh);
           addCutawayRoom(group, b, r, b.x + at.x, y, b.z + at.z, yaw, color);
           rooms += 1;
