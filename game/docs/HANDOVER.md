@@ -76,7 +76,7 @@ Controls: primary tap/click walks or uses. Secondary long-press / right-click ex
 
 Working branch for this slice: **`cursor/units-gameplan-3924`**. PR: **https://github.com/ObviouslyBlind/ClaudeAIIIO/pull/60**.
 
-Tests: `cd game && npm test` — **781 passed** (2026-08-21).
+Tests: `cd game && npm test` — **782 passed** (2026-08-21).
 
 ---
 

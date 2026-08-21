@@ -248,7 +248,7 @@ describe("units 0.5.1 systems (placeholders, not façades)", () => {
     expect(html).toContain('data-unit-hire="');
     expect(html).toContain("Open site card");
     expect(html).toContain("Unhired packer");
-    expect(html).toContain("not a Shopfit SKU");
+    expect(html).toContain("Not a Shopfit SKU");
     expect(html).not.toContain("data-exit-room");
   });
 
