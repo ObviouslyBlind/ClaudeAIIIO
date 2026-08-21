@@ -30,7 +30,7 @@ When you report to the operator, **always send the public play URL and the PR**.
 
 Operator plays from the public URL, not localhost.
 
-**https://informal-purse-minds-loading.trycloudflare.com/**
+**https://prominent-ratio-strike-beginners.trycloudflare.com/**
 
 ```bash
 cd game
