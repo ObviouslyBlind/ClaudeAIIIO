@@ -6,7 +6,7 @@ Public name **2Isles**. Spec still says Two Harbors in places; same game.
 
 **Mid-alpha (2026-08-20).** The harbour loop is the base. We build features on it. We do not reopen the foundation, clone Capital Rift, or unfreeze House / Senate / councils / elections.
 
-**Version: Alpha 0.5.1** — the **buildings push**, **playable**. Spawn **$10,000**. Grey boxes in the spawn look. Not Blender. [VERSION.md](VERSION.md). Beta is **1.0**.
+**Version: Alpha 0.5.1** — the **buildings push**, **playable**. Spawn **$10,000**. Grey boxes in the spawn look. Dollhouse camera on a floor. Not Blender. [VERSION.md](VERSION.md). Beta is **1.0**.
 
 Doc map: [README.md](README.md) · spec: [../PLAN.md](../PLAN.md) · play: [PLAY.md](PLAY.md) · money: [../ECONOMY.md](../ECONOMY.md) · units: [UNITS.md](UNITS.md)
 
@@ -18,7 +18,7 @@ You are a game dev. Work the task that is set. Do not deviate. Gauntlet loops un
 
 **Read every feature out in this file before implementing it.** Do not jump to 3D, Blender, or dollhouse chrome because it looks like content.
 
-Visual buildings: the operator will mock a few simple shells in **Blender**. Do not spend a design pass on façades. **0.5.1 is the whole buildings push** — sim, then grey boxes in the harbour, then manage sheets. Blender files when the operator has them.
+Visual buildings: the operator will mock a few simple shells in **Blender**. Do not spend a design pass on façades. **0.5.1 is the whole buildings push** — sim, grey boxes, manage sheets, **dollhouse camera** (RMB-hold orbit around a floor). Blender files when the operator has them.
 
 Always update this handover when the live loop, version, play URL, or next piece changes.
 
@@ -62,7 +62,7 @@ South spawn. Tap-to-walk. RMB-hold orbit. No WASD.
 | Site card | Stock · Run · Upgrades · Stats. Hire $300. Play shifts while unhired. |
 | Hire | Left-rail Hire sheet, or Run tab on the cart. |
 | Account | #0002. Look swatches. Reset / delete. Cash chip expands to holdings. |
-| Units (0.5.1) | Four grey shells **inland of Island Hwy**, in the spawn look, not stacked. Spawn **$10,000** — shop $1,200, flat $900, dirt $15,000. Tap the name/$ tag. Floor chips on the sheet. Kit is small grey boxes. Packer + till. Scout + lease. Dest **This room** when you own a shop. |
+| Units (0.5.1) | Four grey shells **inland of Island Hwy**, in the spawn look. Spawn **$10,000**. Tap the name/$ tag. **Dollhouse camera**: floor chips open that floor (open-top rooms, floors above hidden), **RMB-hold orbit 360 around the box**. Tap a room to buy/manage. Close returns to harbour follow. Kit is small grey boxes. Packer + till. Scout + lease. Dest **This room** when you own a shop. |
 
 Starter: cash **$10,000**. Pad **$750**. Fruit kit **$90**, pack **$14** / 20. Today fruit **$6**, tax **8%**. A shop room is **$1,200**. Building dirt is **$15,000**. Hire **$300**.
 
@@ -74,7 +74,7 @@ Controls: primary tap/click walks or uses. Secondary long-press / right-click ex
 
 Working branch for this slice: **`cursor/units-gameplan-3924`**.
 
-Tests: `cd game && npm test` — **766 passed** (2026-08-20).
+Tests: `cd game && npm test` — **772 passed** (2026-08-21).
 
 ---
 
@@ -83,7 +83,7 @@ Tests: `cd game && npm test` — **766 passed** (2026-08-20).
 | Lane | Where |
 |---|---|
 | Sim / first loop | `src/server.ts`, `src/firstLoop.ts`, `src/economy.ts` |
-| Units HUD | `public/harbour/units-hud.js`, `unit-blocks.js` |
+| Units HUD | `public/harbour/units-hud.js`, `unit-blocks.js`, `unit-dollhouse.js` |
 | Books / HUD | `public/harbour/books-hud.js`, `chrome.js`, `index.html` |
 | Place | `public/harbour/place-pose.js`, `place-preview.js`, `main.js` |
 | Stocks | `src/stocks.ts` (wired on `createWorld`) |

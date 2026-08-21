@@ -37,6 +37,7 @@ import { mountCalendarHud } from "./calendar-hud.js";
 import { mountParcelMap, pointerToNdc } from "./parcel-map.js";
 import { mountLotTags } from "./lot-tags.js";
 import { mountUnitBlocks } from "./unit-blocks.js";
+import { createDollhouseCamera } from "./unit-dollhouse.js";
 import { createPlacePreview } from "./place-preview.js";
 import { CART_FOOTPRINT_M, SNAP_PAD_M, snapPlacePose } from "./place-pose.js";
 
@@ -1486,6 +1487,7 @@ const playCam = createPlayCamera({
   getPlayer: () => player.position,
   getIslandId: () => islandId,
 });
+const dollhouseCam = createDollhouseCamera({ camera, canvas });
 
 function snapCamera() {
   playCam.snap();
@@ -1845,11 +1847,20 @@ function onPointer(ev) {
   if (unitHit) {
     const block = objectWithKind(unitHit.object, "unit-block");
     const bid = block && block.userData && block.userData.buildingId;
+    const uid = block && block.userData && block.userData.unitId;
+    if (dollhouseCam && dollhouseCam.isActive() && uid && chromeHud && chromeHud.openUnitSheet) {
+      chromeHud.openUnitSheet(bid, uid);
+      setStatus((block.userData.buildingName || "Building") + " · room.");
+      return;
+    }
     if (bid && chromeHud && chromeHud.openBuildingSheet) {
       chromeHud.openBuildingSheet(bid);
       setStatus((block.userData.buildingName || "Building") + " · Buy a room.");
       return;
     }
+  }
+  if (dollhouseCam && dollhouseCam.isActive()) {
+    return;
   }
   if (isLotsViewer(viewer) && tapPt) {
     const topKind = hits[0] && hits[0].object && hits[0].object.userData && hits[0].object.userData.kind;
@@ -2173,7 +2184,8 @@ function tick(dt) {
     userLeftStall = true;
     stallFollow = false;
   }
-  if (!applyFollowStall()) playCam.tick(dt);
+  if (dollhouseCam && dollhouseCam.isActive()) dollhouseCam.tick(dt);
+  else if (!applyFollowStall()) playCam.tick(dt);
   sun.position.set(player.position.x + 180, 260, player.position.z + 80);
   sun.target.position.copy(player.position);
   sun.target.updateMatrixWorld();
@@ -2190,7 +2202,7 @@ function startLoop() {
     } catch (err) {
       console.error(err);
     }
-    applyFollowStall();
+    if (!(dollhouseCam && dollhouseCam.isActive())) applyFollowStall();
     renderer.render(scene, camera);
   });
 }
@@ -2463,6 +2475,25 @@ async function boot() {
     },
     onCloseStand() {
       leaveStallCam();
+    },
+    onDollhouse(view) {
+      if (!view) {
+        if (unitBlocks) unitBlocks.applyCutaway(null);
+        if (dollhouseCam) dollhouseCam.exit();
+        if (playCam && typeof playCam.resume === "function") playCam.resume();
+        return;
+      }
+      stallFollow = false;
+      if (playCam && typeof playCam.pause === "function") playCam.pause();
+      const playNow = chromeHud && chromeHud.getPlay && chromeHud.getPlay();
+      const building =
+        playNow &&
+        playNow.units &&
+        (playNow.units.buildings || []).find((b) => b.id === view.buildingId);
+      if (unitBlocks) unitBlocks.applyCutaway(view);
+      if (dollhouseCam && building) {
+        dollhouseCam.enter(building, view.floor, (x, z) => heightAt(specOf("south"), x, z));
+      }
     },
     onCloseLand: closeLandCard,
     onLeased(snapshot) {

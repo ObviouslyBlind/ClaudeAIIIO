@@ -22,7 +22,7 @@ import {
 } from "./marketplace.js";
 import { formatHireSheet } from "./hire-sheet.js";
 import { formatAccountSheet } from "./account-sheet.js";
-import { formatBuildingSheet, formatOrderDests, ownedShopUnits } from "./units-hud.js";
+import { findBuilding, formatBuildingSheet, formatOrderDests, ownedShopUnits } from "./units-hud.js";
 
 export const POLL_MS = 1000;
 
@@ -152,6 +152,15 @@ export function mountChrome(opts) {
     syncSheetVeil();
   }
 
+  function leaveDollhouse() {
+    if (typeof opts.onDollhouse === "function") opts.onDollhouse(null);
+  }
+
+  function enterDollhouse() {
+    if (!unitBuildingId || typeof opts.onDollhouse !== "function") return;
+    opts.onDollhouse({ buildingId: unitBuildingId, floor: unitFloor });
+  }
+
   function dismissStandMenu() {
     if (standMenu) standMenu.hidden = true;
     if (standVeil) standVeil.hidden = true;
@@ -160,6 +169,7 @@ export function mountChrome(opts) {
     unitBuildingId = "";
     unitView = "root";
     unitRoomId = "";
+    leaveDollhouse();
     if (wasOpen && typeof opts.onCloseStand === "function") opts.onCloseStand();
   }
 
@@ -837,7 +847,7 @@ export function mountChrome(opts) {
     openSiteId = null;
     unitBuildingId = id;
     standMenu.hidden = false;
-    if (standVeil) standVeil.hidden = false;
+    if (standVeil) standVeil.hidden = true;
     standMenu.innerHTML = formatBuildingSheet(play, {
       buildingId: id,
       view: unitView,
@@ -845,6 +855,7 @@ export function mountChrome(opts) {
       unitId: unitRoomId,
     });
     bindUnitSheet(standMenu);
+    enterDollhouse();
     standMenu.querySelectorAll("[data-open-stand]").forEach((btn) => {
       btn.addEventListener("click", () => {
         const site = findSite(btn.getAttribute("data-open-stand"));
@@ -860,6 +871,8 @@ export function mountChrome(opts) {
       return;
     }
     closePanels();
+    if (unitBuildingId) leaveDollhouse();
+    unitBuildingId = "";
     openSiteId = stand.id;
     standMenu.hidden = false;
     if (standVeil) standVeil.hidden = false;
@@ -1700,8 +1713,19 @@ export function mountChrome(opts) {
       unitRoomId = "";
       paintBuildingSheet(buildingId);
     },
+    openUnitSheet(buildingId, unitId) {
+      const building = findBuilding(play, buildingId);
+      const room = building && (building.rooms || []).find((r) => r.id === unitId);
+      unitView = room && room.owner === "visitor" ? "room" : "buy";
+      unitFloor = room ? Number(room.floor) || 0 : 0;
+      unitRoomId = unitId || "";
+      paintBuildingSheet(buildingId);
+    },
     hideStandMenu() {
       dismissStandMenu();
+    },
+    isDollhouseOpen() {
+      return Boolean(unitBuildingId && standMenu && !standMenu.hidden);
     },
   };
 }

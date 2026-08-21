@@ -3,18 +3,20 @@ import * as THREE from "three";
 /**
  * Placeholder unit blocks. Grey boxes for systems. Not Blender façades.
  * Kit is also grey boxes (shelf, fridge, till, bed, shower, sink, desk, cabinet).
+ * Dollhouse cutaway: open-top rooms on the viewed floor, hide floors above.
  */
 
-const ROOM_W = 6;
-const ROOM_D = 5;
-const ROOM_H = 3.2;
-const GAP = 0.45;
+export const ROOM_W = 6;
+export const ROOM_D = 5;
+export const ROOM_H = 3.2;
+export const GAP = 0.45;
 const KIT = 0.7;
 const VACANT = 0x7a7a7a;
 const OWNED = 0xc4c4c4;
 const KIT_GREY = 0xb0b0b0;
 const TAG_W = 5.2;
 const TAG_H = 1.35;
+const WALL_T = 0.12;
 
 export function roomBoxCount(buildings) {
   let n = 0;
@@ -44,7 +46,7 @@ function paintTag(canvas, title, sub) {
   ctx.lineTo(w, h - r);
   ctx.arcTo(w, h, w - r, h, r);
   ctx.lineTo(r, h);
-  ctx.arcTo(0, h, 0, h - r, r);
+  ctx.arcTo(0, h, 0, r, r);
   ctx.lineTo(0, r);
   ctx.arcTo(0, 0, r, 0, r);
   ctx.fill();
@@ -79,6 +81,15 @@ function tagSub(building) {
   return "$" + Math.round(p).toLocaleString("en-US");
 }
 
+function stampUnit(obj, building, r, part, floor) {
+  obj.userData.kind = "unit-block";
+  obj.userData.part = part;
+  obj.userData.buildingId = building.id;
+  obj.userData.buildingName = building.name;
+  if (r) obj.userData.unitId = r.id;
+  if (floor != null) obj.userData.floor = floor;
+}
+
 function addTag(group, building, x, y, z) {
   const hit = new THREE.Mesh(
     new THREE.BoxGeometry(TAG_W, TAG_H, 0.12),
@@ -86,9 +97,7 @@ function addTag(group, building, x, y, z) {
   );
   hit.position.set(x, y, z);
   hit.name = "unit-label-" + building.id;
-  hit.userData.kind = "unit-block";
-  hit.userData.buildingId = building.id;
-  hit.userData.buildingName = building.name;
+  stampUnit(hit, building, null, "tag");
   group.add(hit);
   if (typeof document === "undefined") return;
   const canvas = document.createElement("canvas");
@@ -108,9 +117,7 @@ function addTag(group, building, x, y, z) {
   sprite.position.set(x, y, z);
   sprite.scale.set(TAG_W, TAG_H, 1);
   sprite.name = "unit-sprite-" + building.id;
-  sprite.userData.kind = "unit-block";
-  sprite.userData.buildingId = building.id;
-  sprite.userData.buildingName = building.name;
+  stampUnit(sprite, building, null, "tag");
   group.add(sprite);
 }
 
@@ -120,22 +127,100 @@ function localXZ(yaw, lx, lz) {
   return { x: lx * c - lz * s, z: lx * s + lz * c };
 }
 
+function wallMat(color) {
+  return new THREE.MeshLambertMaterial({ color, side: THREE.DoubleSide });
+}
+
+function addCutawayRoom(group, building, r, worldX, worldY, worldZ, yaw, color) {
+  const g = new THREE.Group();
+  g.name = "unit-cutaway-" + r.id;
+  g.position.set(worldX, worldY, worldZ);
+  g.rotation.y = yaw;
+  g.visible = false;
+  stampUnit(g, building, r, "cutaway", Number(r.floor) || 0);
+
+  const slab = new THREE.Mesh(new THREE.BoxGeometry(ROOM_W, 0.14, ROOM_D), wallMat(color));
+  slab.position.y = -ROOM_H / 2 + 0.07;
+  stampUnit(slab, building, r, "cutaway", Number(r.floor) || 0);
+  g.add(slab);
+
+  const wallH = ROOM_H * 0.9;
+  const wallY = -ROOM_H / 2 + 0.14 + wallH / 2;
+  const walls = [
+    { w: ROOM_W, d: WALL_T, x: 0, z: -ROOM_D / 2 + WALL_T / 2 },
+    { w: ROOM_W, d: WALL_T, x: 0, z: ROOM_D / 2 - WALL_T / 2 },
+    { w: WALL_T, d: ROOM_D, x: -ROOM_W / 2 + WALL_T / 2, z: 0 },
+    { w: WALL_T, d: ROOM_D, x: ROOM_W / 2 - WALL_T / 2, z: 0 },
+  ];
+  for (const w of walls) {
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(w.w, wallH, w.d), wallMat(color));
+    mesh.position.set(w.x, wallY, w.z);
+    stampUnit(mesh, building, r, "cutaway", Number(r.floor) || 0);
+    g.add(mesh);
+  }
+  group.add(g);
+}
+
+function disposeObject(obj) {
+  obj.traverse((ch) => {
+    if (ch.geometry) ch.geometry.dispose();
+    if (ch.material) {
+      const mats = Array.isArray(ch.material) ? ch.material : [ch.material];
+      for (const m of mats) {
+        if (m.map) m.map.dispose();
+        m.dispose();
+      }
+    }
+  });
+}
+
+function applyCutawayToGroup(group, view) {
+  group.traverse((o) => {
+    const d = o.userData;
+    if (!d || d.kind !== "unit-block") return;
+    if (d.part === "pad") {
+      o.visible = true;
+      return;
+    }
+    if (!view) {
+      o.visible = d.part !== "cutaway";
+      return;
+    }
+    if (d.buildingId !== view.buildingId) {
+      o.visible = d.part !== "cutaway";
+      return;
+    }
+    if (d.part === "tag") {
+      o.visible = false;
+      return;
+    }
+    const f = Number(d.floor);
+    if (Number.isFinite(f) && f > Number(view.floor)) {
+      o.visible = false;
+      return;
+    }
+    if (f === Number(view.floor)) {
+      if (d.part === "shell") o.visible = false;
+      else o.visible = true;
+      return;
+    }
+    o.visible = d.part !== "cutaway";
+  });
+}
+
 export function mountUnitBlocks(opts) {
   const scene = opts.scene;
   const heightAt = opts.heightAt || (() => 0);
   const group = new THREE.Group();
   group.name = "unit-blocks";
   if (scene) scene.add(group);
+  let cutaway = null;
 
   function sync(play) {
     while (group.children.length) {
       const ch = group.children[0];
       group.remove(ch);
-      if (ch.geometry) ch.geometry.dispose();
-      if (ch.material) {
-        if (ch.material.map) ch.material.map.dispose();
-        ch.material.dispose();
-      }
+      disposeObject(ch);
     }
     const buildings = (play && play.units && play.units.buildings) || [];
     let rooms = 0;
@@ -158,20 +243,19 @@ export function mountUnitBlocks(opts) {
           const y = y0 + ROOM_H / 2 + floor * (ROOM_H + GAP);
           roofY = Math.max(roofY, y + ROOM_H / 2);
           const at = localXZ(yaw, xOff, 0);
+          const color = r.owner === "visitor" ? OWNED : VACANT;
           const mesh = new THREE.Mesh(
             new THREE.BoxGeometry(ROOM_W, ROOM_H, ROOM_D),
-            new THREE.MeshLambertMaterial({ color: r.owner === "visitor" ? OWNED : VACANT }),
+            new THREE.MeshLambertMaterial({ color }),
           );
           mesh.position.set(b.x + at.x, y, b.z + at.z);
           mesh.rotation.y = yaw;
           mesh.castShadow = true;
           mesh.receiveShadow = true;
           mesh.name = "unit-" + r.id;
-          mesh.userData.kind = "unit-block";
-          mesh.userData.buildingId = b.id;
-          mesh.userData.buildingName = b.name;
-          mesh.userData.unitId = r.id;
+          stampUnit(mesh, b, r, "shell", floor);
           group.add(mesh);
+          addCutawayRoom(group, b, r, b.x + at.x, y, b.z + at.z, yaw, color);
           rooms += 1;
           const kit = Array.isArray(r.kit) ? r.kit : [];
           kit.forEach((id, k) => {
@@ -184,10 +268,7 @@ export function mountUnitBlocks(opts) {
             bit.position.set(b.x + kitAt.x, y0 + floor * (ROOM_H + GAP) + KIT / 2 + 0.08, b.z + kitAt.z);
             bit.rotation.y = yaw;
             bit.name = "unit-kit-" + r.id + "-" + id;
-            bit.userData.kind = "unit-block";
-            bit.userData.buildingId = b.id;
-            bit.userData.buildingName = b.name;
-            bit.userData.unitId = r.id;
+            stampUnit(bit, b, r, "kit", floor);
             bit.userData.kitId = id;
             group.add(bit);
           });
@@ -201,22 +282,29 @@ export function mountUnitBlocks(opts) {
       pad.rotation.y = yaw;
       pad.receiveShadow = true;
       pad.name = "unit-pad-" + b.id;
-      pad.userData.kind = "unit-block";
-      pad.userData.buildingId = b.id;
-      pad.userData.buildingName = b.name;
+      stampUnit(pad, b, null, "pad");
       group.add(pad);
       addTag(group, b, b.x, roofY + 1.1, b.z);
     }
+    applyCutawayToGroup(group, cutaway);
     return rooms;
+  }
+
+  function applyCutaway(view) {
+    cutaway = view && view.buildingId != null ? { buildingId: view.buildingId, floor: Number(view.floor) || 0 } : null;
+    applyCutawayToGroup(group, cutaway);
+    return cutaway;
   }
 
   return {
     group,
     sync,
+    applyCutaway,
+    getCutaway: () => cutaway,
     clickables() {
       const out = [];
       group.traverse((o) => {
-        if (o.userData && o.userData.kind === "unit-block") out.push(o);
+        if (o.userData && o.userData.kind === "unit-block" && o.visible !== false) out.push(o);
       });
       return out;
     },

@@ -86,15 +86,20 @@ Designated use is set per room. The tenant fits out that use. They do not flip a
 
 Primary = tap / left click. Secondary = long-press / right click. No WASD. No virtual stick.
 
-Grey boxes in the harbour are the **systems camera**. Not Blender. Not a dollhouse orbit.
+`interior.js` is a first-person walk-in of a dressed Caribbean house. **That is not the unit camera. Leave it parked. Do not dress it for this test.**
 
-1. Tap **one building** (placeholder boxes) → sheet on that shell.
-2. Floor chips filter the room list (Ground / First / Second). Rooms stay facts, not a walkable interior.
+Grey boxes in the harbour are the **systems camera**. Not Blender.
+
+1. Tap **one building** (placeholder boxes / name tag) → sheet on that shell, and the **dollhouse** of the current floor.
+2. **View ground / first / second floor** opens a **dollhouse of that floor**: tilted 3D, **RMB-hold orbit, 360 around the box**. Not first-person walk. Not a second island. No WASD. No left-click hop.
 3. **Buy rooms** · **Manage rooms** (grey if you own none in this building) · **Buy this land**.
-4. Buy: one vacant room → pay → you own **that room**. Neighbours stay listed.
+4. Buy: one vacant room → pay → you own **that room**. Neighbours stay listed. Tap a room in the dollhouse to buy or manage that unit.
 5. Manage: only rooms you own. Shop Run has packer + till. Flat/office: kit, scout, lease.
+6. Close the sheet → harbour follow camera. Cutaway restores the stacked boxes.
 
-Indoor presence stays off. Reuse existing sheets. Marketplace dest adds **This room** when you own a shop unit.
+Indoor **presence** stays off. Dollhouse is a camera on sim facts (same as Books). Reuse existing sheets. Marketplace dest adds **This room** when you own a shop unit.
+
+Placeholder kit boxes sit on the open floor slab. No CSG, no wallpaper. Stop when the critic can buy a floor, place two grey boxes, hire a packer, and watch cash move.
 
 ---
 
@@ -169,7 +174,7 @@ Buy Quay Shops room 0, leave room 1 vacant. Fruit pack dest = that unit. Hire pa
 | Version | What |
 |---|---|
 | **0.5** | Spec start. |
-| **0.5.1** | **The whole buildings push, playable.** Sim, grey boxes you can tap, manage. Spawn **$10,000**. Blender shells when the operator has files. |
+| **0.5.1** | **The whole buildings push, playable.** Sim, grey boxes you can tap, manage, **dollhouse camera** (RMB-hold orbit around a floor). Spawn **$10,000**. Blender shells when the operator has files. |
 
 **Not this pass:** quarry, farming aisle, rezoning, walking interiors, WASD, a Job class, walking NPCs with boxes, renaming hotdog fields, merging `staff.ts` / `labour.ts`, politics, Postgres (blob must still store units), Capital Rift clone.
 

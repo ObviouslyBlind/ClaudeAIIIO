@@ -82,7 +82,11 @@ describe("harbour boot import graph", () => {
     expect(src).not.toContain('viewer === "world" || viewer === "lots"');
     expect(src).toContain("unit-block");
     expect(src).toContain("openBuildingSheet");
+    expect(src).toContain("openUnitSheet");
     expect(src).toContain("mountUnitBlocks");
+    expect(src).toContain('from "./unit-dollhouse.js"');
+    expect(src).toContain("dollhouseCam");
+    expect(src).toContain("playCam.pause");
     expect(src).not.toContain("function inspectLandAt");
     expect(src).not.toContain("intersectObjects(root.children, true)");
   });

@@ -2,7 +2,7 @@
 
 PAPER / SIMULATED. No wallet.
 
-**Now: Alpha 0.5.1** — the **buildings push**, playable. Spawn **$10,000**. Grey boxes in the spawn look. Not Blender.
+**Now: Alpha 0.5.1** — the **buildings push**, playable. Spawn **$10,000**. Grey boxes in the spawn look. Dollhouse camera on a floor (RMB-hold orbit). Not Blender.
 
 Always update this file and [HANDOVER.md](HANDOVER.md) in the same change.
 
@@ -24,4 +24,4 @@ Read the next feature out in [HANDOVER.md](HANDOVER.md) **before** writing code 
 | Version | Date | What |
 |---|---|---|
 | 0.5 | 2026-08-20 | Start of the buildings push. Spec accepted. |
-| 0.5.1 | 2026-08-20 | **This push, playable.** Spawn **$10,000**. Sim + grey boxes + buy/manage. Dirt $15,000. Blender shells later. |
+| 0.5.1 | 2026-08-20 | **This push, playable.** Spawn **$10,000**. Sim + grey boxes + buy/manage + dollhouse camera. Dirt $15,000. Blender shells later. |

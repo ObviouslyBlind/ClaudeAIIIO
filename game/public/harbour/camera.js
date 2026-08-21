@@ -252,8 +252,10 @@ export function tickCamera(camera, player, state, islandId, dt, tmp) {
 export function createPlayCamera({ camera, canvas, getPlayer, getIslandId }) {
   const tmp = new THREE.Vector3();
   let state = createOrbitState(spawnCameraOffset(getIslandId()));
+  let paused = false;
 
   function onDown(ev) {
+    if (paused) return;
     if (ev.pointerType === "touch") return;
     if (ev.button !== RMB) return;
     ev.preventDefault();
@@ -267,7 +269,7 @@ export function createPlayCamera({ camera, canvas, getPlayer, getIslandId }) {
   }
 
   function onMove(ev) {
-    if (!state.dragging) return;
+    if (paused || !state.dragging) return;
     if (ev.pointerType === "touch") return;
     state = handleOrbitPointer(state, {
       type: "move",
@@ -278,6 +280,7 @@ export function createPlayCamera({ camera, canvas, getPlayer, getIslandId }) {
   }
 
   function onUp(ev) {
+    if (paused) return;
     if (ev.button !== RMB) return;
     state = handleOrbitPointer(state, {
       type: "up",
@@ -291,6 +294,7 @@ export function createPlayCamera({ camera, canvas, getPlayer, getIslandId }) {
   }
 
   function onWheel(ev) {
+    if (paused) return;
     ev.preventDefault();
     state = { ...state, radius: zoomRadius(state.radius, ev.deltaY), orbited: true };
   }
@@ -344,7 +348,17 @@ export function createPlayCamera({ camera, canvas, getPlayer, getIslandId }) {
   }
 
   function tick(dt) {
+    if (paused) return;
     tickCamera(camera, getPlayer(), state, getIslandId(), dt, tmp);
+  }
+
+  function pause() {
+    paused = true;
+    if (state.dragging) state = { ...state, dragging: false };
+  }
+
+  function resume() {
+    paused = false;
   }
 
   return {
@@ -354,5 +368,8 @@ export function createPlayCamera({ camera, canvas, getPlayer, getIslandId }) {
     followWalk,
     followRide,
     getState: () => state,
+    pause,
+    resume,
+    isPaused: () => paused,
   };
 }

@@ -44,6 +44,8 @@ describe("units 0.5.1 systems (placeholders, not façades)", () => {
     expect(html).toContain("$15,000.00");
     expect(html).toMatch(/data-buy-land="quay-shops"[^>]*disabled/);
     expect(html).toContain("Ground floor");
+    expect(html).toContain("View Ground floor");
+    expect(html).toContain("RMB-hold orbit");
     expect(html).toContain('data-unit-floor="0"');
   });
 

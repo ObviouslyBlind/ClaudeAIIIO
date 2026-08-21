@@ -1,5 +1,5 @@
 /**
- * Units sheets. Systems only — grey-box facts, not a dollhouse.
+ * Units sheets. Systems facts for the dollhouse camera.
  * PAPER / SIMULATED.
  */
 
@@ -66,7 +66,7 @@ function floorChips(building, viewFloor) {
   return floorsOf(building)
     .map(
       (f) =>
-        `<button type="button" class="ghost${f === viewFloor ? " is-on" : ""}" data-unit-floor="${f}">${esc(floorName(f))}</button>`,
+        `<button type="button" class="ghost${f === viewFloor ? " is-on" : ""}" data-unit-floor="${f}">View ${esc(floorName(f))}</button>`,
     )
     .join("");
 }
@@ -97,7 +97,7 @@ function paintRoot(building, play, floor) {
       </button>
     </div>
     <div class="dest-row">${floorChips(building, viewFloor)}</div>
-    <p class="whisper">${esc(floorName(viewFloor))}</p>
+    <p class="whisper">${esc(floorName(viewFloor))} · RMB-hold orbit around this floor. Close returns to the harbour.</p>
     <ul class="unit-list">
       ${onFloor.map((r) => `<li>${roomLine(r)}</li>`).join("")}
     </ul>`;
@@ -122,7 +122,7 @@ function paintBuy(building, play, floor) {
   return `
     <button type="button" class="ghost hire-back" data-unit-view="root">Back</button>
     <div class="dest-row">${floorChips(building, viewFloor)}</div>
-    <p class="whisper">${esc(floorName(viewFloor))}</p>
+    <p class="whisper">${esc(floorName(viewFloor))} · RMB-hold orbit around this floor.</p>
     ${onFloor.map(row).join("")}
     ${others.length ? `<p class="whisper">Other vacant rooms in this building</p>${others.map(row).join("")}` : ""}`;
 }
@@ -145,7 +145,7 @@ function paintManage(building, play, floor) {
   return `
     <button type="button" class="ghost hire-back" data-unit-view="root">Back</button>
     <div class="dest-row">${floorChips(building, viewFloor)}</div>
-    <p class="whisper">${esc(floorName(viewFloor))}</p>
+    <p class="whisper">${esc(floorName(viewFloor))} · RMB-hold orbit around this floor.</p>
     ${onFloor.map(row).join("")}
     ${others.length ? `<p class="whisper">Other rooms you own</p>${others.map(row).join("")}` : ""}`;
 }

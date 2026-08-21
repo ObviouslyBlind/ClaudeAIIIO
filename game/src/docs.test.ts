@@ -31,6 +31,9 @@ describe("documentation library", () => {
     const units = md("docs/UNITS.md");
     expect(units).toContain("Accepted spec");
     expect(units).toContain("Blender");
+    expect(units).toContain("dollhouse");
+    expect(units).toContain("RMB-hold orbit");
+    expect(units).not.toMatch(/Not a dollhouse orbit/);
     expect(units).not.toMatch(/Do not implement until this file is accepted/);
   });
 
