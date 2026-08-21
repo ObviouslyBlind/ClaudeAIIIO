@@ -100,9 +100,9 @@ Tests: `cd game && npm test` — **775 passed** (2026-08-21).
 
 Do these in order unless the operator names a piece. Politics stay frozen. **Read the piece out before coding it.**
 
-1. **Blender shells** — when the operator has files. Do not design façades in code. Spec: [UNITS.md](UNITS.md).
-2. **Durable persist** — Postgres (PLAN step C). Restart must not wipe a mid-alpha shard once accounts exist. Alpha spawn wipe can stay until then.
-3. **Shopfit / farming / aggregates aisles** — only when that lot type exists. Honest empty until then.
+1. **Units overhaul (spec in UNITS.md, not live yet)** — split Lots / Properties / Landlord. Confirm buy. Green-light the 3D room. Camera enters that flat and stays until Exit. Place furniture from inventory. Tenant profiles. South quay walkers. Do not ship another kitchen-sink sheet.
+2. **Blender shells** — when the operator has files. Do not design façades in code.
+3. **Durable persist** — Postgres (PLAN step C). Restart must not wipe a mid-alpha shard once accounts exist. Alpha spawn wipe can stay until then.
 4. **North harbour pass** — sidewalks and kit, not a second sim.
 5. **Player listing** — seventh PAPER tape row after a size gate. Not a wallet ticker.
 

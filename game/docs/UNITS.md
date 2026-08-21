@@ -2,7 +2,7 @@
 
 PAPER / SIMULATED. **Accepted spec.** Alpha **0.5** is the scripts for this loop. Version: [VERSION.md](VERSION.md). Live status: [HANDOVER.md](HANDOVER.md).
 
-The sim owns cash, stock, leases, staff, and prices. The browser is a camera. Buildings are grey boxes until we mock them in **Blender**. Do not spend a design pass on façades, dollhouse chrome, or unique meshes.
+The sim owns cash, stock, leases, staff, and prices. The browser is a camera. Buildings are grey boxes until we mock them in **Blender**. Do not spend a design pass on façades.
 
 Live loop today: [PLAY.md](PLAY.md). Catalog and job graph: [MARKETPLACE.md](../MARKETPLACE.md). Land plots: [LAND.md](../LAND.md). Kernel: [FOUNDATION.md](../FOUNDATION.md). Money: [ECONOMY.md](../ECONOMY.md).
 
@@ -53,7 +53,7 @@ Three authored **buildings** on South, each on a **plot** next to the $750 cart 
 | **Strand Flats** | 2 | 2 rooms per floor (4 flats) | apartment |
 | **Mixed House** | 3 | 1 room per floor (3 rooms) | shop / apartment / office |
 
-That is **3 buildings, 9 rooms**, on **buyable lots** next to the $750 spawn pads. $10,000 (slice faucet in tests) should buy **one or two rooms** and kit them, not the block, and **not** the dirt.
+That is **3 buildings, 9 rooms**, on **buyable lots** next to the $750 spawn pads. $10,000 buys **one or two empty rooms**. Furniture is placed from inventory, like a cart. Dirt is **$15,000** and is a different buy.
 
 Grey boxes are the product for the camera later. Kit is constructed furniture (shelf, fridge, till, bed, shower, sink, desk, cabinet). No CSG, no wallpaper pack, no unique minigames. **Blender meshes are a later version.** Alpha 0.5 is scripts only.
 
@@ -69,7 +69,7 @@ Live spawn cash is **$10,000**. That buys one or two rooms and kit, not the $15,
 |---|---|---|
 | **Plot (dirt)** | Who owns the land under the shell? | **Buyable, very expensive.** Owner is landlord of the shell: ground rent / cut. Does **not** run packer or till. $10k must not afford this (ask **$15,000**). |
 | **Building shell** | Who owns the box? | Game, until someone buys the dirt. Owning every room ≠ owning the building. |
-| **Unit (room)** | Who owns this room? | The visitor, after **Buy**. Cheap. $10k buys one or two rooms + kit. |
+| **Unit (room)** | Who owns this room? | The visitor, after **Buy**. Cheap. $10k buys one or two **empty** rooms. Furniture is extra. |
 
 A unit is a sim fact: unique id, parent **building** id, **floor** index, **room** index on that floor, designated use, owner, kit list, staff slots, stock, books line.
 
@@ -81,33 +81,81 @@ Designated use is set per room. The tenant fits out that use. They do not flip a
 
 ---
 
-## Camera and menu (placeholders)
+## Camera and menus (the product)
 
 Primary = tap / left click. Secondary = long-press / right click. No WASD. No virtual stick.
 
-`interior.js` is a first-person walk-in of a dressed Caribbean house. **That is not the unit camera. Leave it parked. Do not dress it for this test.**
+`interior.js` is a first-person walk-in of a dressed Caribbean house. **Leave it parked.** The room camera is the existing **dollhouse**: you teleport into the room, **RMB-hold orbit**, tap to use. Not walking. Not a second island.
 
-Grey boxes in the harbour are the **systems camera**. Not Blender.
+Grey boxes in the harbour are the systems camera. Not Blender.
 
-**Properties** is a viewer chip. Clicking **Lots** turns it on, so the caption is **Lots and properties to buy** and you can tap a house. Buildings sit on lots next to the $750 pads — same lots $ language, sign way above the shell. World still uses the Properties chip to find buildings while walking.
+Live 0.5.1 shipped a **one-sheet click service** (Lots turns Properties on, green buy tiles spend cash, Fit kit buttons, scout after a checklist). That is the wrong loop. This section is the replacement. Do not keep the kitchen-sink building sheet.
 
-Lots chip copy with the Properties toggle:
+### Three menus, three verbs
 
-| Lots mode | Properties off | Properties on |
+| Menu | What it is | What it is not |
 |---|---|---|
-| vacant | **Lots to buy** | **Lots and properties to buy** |
-| yours | **Your Lots** | **Your Properties** |
+| **Lots** | Dirt and $750 pads. Same buy-ask as today. | Houses. Rooms. Furniture. |
+| **Properties** | Buildings and rooms. Own chip. Does **not** turn on from Lots. | Pads. Landlord dirt. |
+| **Landlord** | Buy the **dirt under the whole shell** for **$15,000**. Own confirm. | A ghost button on the room sheet. |
 
-1. Turn **Properties** on. Tap a **$** sign (or the shell) → compact sheet under the viewers, and the **dollhouse** of the current floor.
-2. **Floor: G** with up/down arrows switches the dollhouse floor: tilted 3D, **RMB-hold orbit, 360 around the box**. Not first-person walk. Not a second island. No WASD. No left-click hop.
-3. Vacant rooms are **green buy tiles**. Hover lights them. Owned rooms are quieter Open tiles. **Buy this land** stays a small ghost ($15,000).
-4. Buy: one vacant room → pay → you own **that room**. Neighbours stay listed. Tap a room in the dollhouse to buy or manage that unit.
-5. Open a room you own. Shop Run has packer + till. Flat/office: kit, scout, lease.
-6. Close the sheet (or turn Properties off) → harbour follow camera. Cutaway restores the stacked boxes.
+Spawn is **$10,000**. The landlord ask is **$15,000**. The card must say you cannot afford it, and that you do **not** need the dirt to run a room.
 
-Indoor **presence** stays off. Dollhouse is a camera on sim facts (same as Books). Reuse existing sheets. Marketplace dest adds **This room** when you own a shop unit.
+### Buy a room (harder than a tile)
 
-Kit in the open floor is constructed furniture (shelf, fridge, till, bed, shower, sink, desk, cabinet) in the cart Lambert language. No CSG, no wallpaper, no `interior.js`. Stop when the critic can buy a floor, see a bed/till, hire a packer, and watch cash move.
+1. **Properties** on, or tap a house **$**. Opens **For sale**, not Manage, not Kit, not Land.
+2. Point at a vacant room. That **grey box goes green in the world** (and in the dollhouse). Sisters stay grey. The sheet names that room and the ask.
+3. Buy is a **confirm**, same shape as the lot buy-ask: “Buy Strand flat G-L for $900?” One more tap spends. Green tile must not debit cash by itself.
+4. On confirm the **camera enters that room**. Body teleports onto that floor box. RMB-hold orbit around **that** flat, not the whole storey.
+
+### Inside a room you own
+
+The room starts **empty**. Furniture is not a button.
+
+Same place loop as a cart:
+
+1. Marketplace **Shopfit** (and Hospitality for flats) sells the SKUs. Pay → **Bring to me** → kit is **on you**.
+2. Inventory → **Place**. Green ghost. Hold **R** to rotate. The footprint must sit on **this room’s floor**.
+3. Place consumes inventory only. Warehouse cannot Place.
+4. Pickup packs the piece back to the warehouse. The room stays yours.
+
+Kit meshes stay the constructed Lambert set (shelf, fridge, till, bed, shower, sink, desk, cabinet). No CSG. No `interior.js`.
+
+**Enter room** is a camera lock. **Exit room** is the only dump. Tapping harbour dirt, Lots, or another $ must **not** reset the camera.
+
+### Your rooms
+
+A second Properties sheet (cycle like Lots → Yours): only rooms you own. Enter, Place, Tenants, Hire (shops). No buy tiles. No $15,000.
+
+---
+
+## Tenants (profiles, not a kit gate)
+
+Appeal is still `siteScore` (extend parts; do not fork a 0–10). It comes from **furniture you placed**, not from a Fit checklist. An empty room is allowed. It draws **poor** tenants: short hours, low rent. More / better pieces draw a better band.
+
+**Scout** is its own **Tenants** menu on a room you own. It is not Hire.
+
+Scout returns **1–3 profiles**. Each profile has:
+
+| Field | What |
+|---|---|
+| Name | NPC name |
+| Who | One line (dock clerk, student, small firm, …) |
+| Band | poor / mid / high, from that room’s appeal |
+| Hours | Random. Floor **3 sim hours**. Ceiling **1 sim week** (7 sim days = **168 sim hours** = **7 real hours** at 1 Hz). Poor rolls short. High rolls long. |
+| Pay | Rent per sim hour. Poor low, high high. |
+
+You pick one profile and sign. No 3 / 6 / 24 / 48 picker. The profile **is** the term. Rent ticks on the sim clock. Vacancy when it ends unless you scout again.
+
+Shops do not use this for sales. Shops still Hire packer + till and sell stock. Tenants are flats and offices.
+
+---
+
+## People you can see
+
+Outdoor walkers today seed on **North** only. South spawn sees cars, not people. This pass seeds a handful of **South quay walkers** on the same presence clock.
+
+A signed tenant is visible **in that room** while you are inside it (a body in the box). Indoor presence stays off the shard broadcast. Not WASD. Not a walking interior.
 
 ---
 
@@ -134,17 +182,13 @@ Shoppers are the **existing foot-traffic NPCs**. Ground-floor traffic band feeds
 
 ### Apartment (Strand Flats all four; Mixed House first)
 
-Kit: **bed**, **shower**, **sink**. No till. No packer.
+Place **bed**, **shower**, **sink** from inventory if you want appeal. No till. No packer. Empty is legal; it only changes who scouts.
 
-**Scout tenants** is a manage action, not a hire. Sign a **PAPER lease**: **3 / 6 / 24 / 48 sim hours**.
+Tenants: profiles, hours, pay — see **Tenants** above. Rent ticks like warehouse $5/day (a clock, not a cutscene).
 
-At 1 Hz, 24 sim hours = one sim day = **3600 ticks** = one real hour. So 3h ≈ 7.5 real minutes, 48h ≈ two real hours.
+### Office (Mixed House second)
 
-Rent scales with kit. Empty grey room = no takers. Bed+shower+sink = a tenant. Vacancy when the lease ends unless you re-sign. Rent ticks like warehouse $5/day (a clock, not a cutscene).
-
-### Office (Harbour Offices all four; Mixed House second)
-
-Kit: **desk**, **filing cabinet**. Same scout + lease clock. Tenants are NPC firms. No shoppers, no till. A clerk hire is **not** this pass.
+Place **desk**, **filing cabinet**. Same scout + lease clock. Tenants are NPC firms. No shoppers, no till. A clerk hire is **not** this pass.
 
 ---
 
@@ -154,7 +198,7 @@ Kit: **desk**, **filing cabinet**. Same scout + lease clock. Tenants are NPC fir
 |---|---|---|
 | Faucet | NPC buys from stock at sticker, tax carved first | NPC rent on the lease clock |
 | Sinks | Kit, hire, restock, sales tax, ground rent if you do not own the dirt | Kit, ground rent |
-| Fail states | No packer / no till / empty shelf → no sales | No kit → no tenant |
+| Fail states | No packer / no till / empty shelf → no sales | No signed tenant → no rent. Empty room still scouts poor profiles. |
 
 Asks (law in [ECONOMY.md](../ECONOMY.md)):
 
@@ -173,7 +217,21 @@ Carts stay the street loop. Units do not replace pads. Leftover names (`tickHotd
 
 ## Proof (headless bar)
 
-Buy Quay Shops room 0, leave room 1 vacant. Fruit pack dest = that unit. Hire packer only → shelf fills, cash frozen. Hire till → existing sell loop pays. Fire packer → crate sits. Cart pad + fruit + one vendor still matches today’s tests.
+Buy Quay Shops room 0, leave room 1 vacant. Place shelf from inventory (not a Fit button). Fruit pack dest = that unit. Hire packer only → shelf fills, cash frozen. Hire till → existing sell loop pays. Fire packer → crate sits. Cart pad + fruit + one vendor still matches today’s tests.
+
+Buy a Strand flat. Scout on an empty room returns a poor profile. Place bed. Scout can return a better band. Sign. Cash rises on the lease clock. Books shows the rent line.
+
+---
+
+## Build order (when this ships — not this commit)
+
+Do not boil the ocean. One pass at a time, tests green, play restart.
+
+1. **Camera lock** — Enter room / Exit room. Harbour taps do not dump the camera. Buy confirm moves the camera onto that flat.
+2. **Menus** — Lots is dirt only. Properties is houses. Landlord is the $15,000 confirm with honest copy. Green-light the 3D room under the pointer.
+3. **Place** — Shopfit SKUs buy like a cart. Inventory Place ghost on the room floor. Kill Fit-kit buttons.
+4. **Tenants** — Scout returns profiles. Appeal from placed kit. Hours 3 … 168 sim hours. Books shows the rent line.
+5. **People** — South quay walkers. Tenant body in a signed room while you are inside.
 
 ---
 
@@ -182,9 +240,9 @@ Buy Quay Shops room 0, leave room 1 vacant. Fruit pack dest = that unit. Hire pa
 | Version | What |
 |---|---|
 | **0.5** | Spec start. |
-| **0.5.1** | **The whole buildings push, playable.** Sim, grey boxes you can tap, manage, **dollhouse camera** (RMB-hold orbit around a floor). Spawn **$10,000**. Blender shells when the operator has files. |
+| **0.5.1** | **The whole buildings push.** Grey boxes, buy a room, **enter that room**, place from inventory, tenant profiles, South walkers. Dollhouse camera (RMB-hold orbit). Spawn **$10,000**. Blender shells when the operator has files. |
 
-**Not this pass:** quarry, farming aisle, rezoning, walking interiors, WASD, a Job class, walking NPCs with boxes, renaming hotdog fields, merging `staff.ts` / `labour.ts`, politics, Postgres (blob must still store units), Capital Rift clone.
+**Not this pass:** quarry, farming aisle, rezoning, WASD, `interior.js` walk, a Job class, renaming hotdog fields, merging `staff.ts` / `labour.ts`, politics, Postgres (blob must still store units), Capital Rift clone, mixing Lots / Properties / Landlord into one sheet.
 
 ---
 
@@ -192,11 +250,14 @@ Buy Quay Shops room 0, leave room 1 vacant. Fruit pack dest = that unit. Hire pa
 
 - Spend a week on façades — Blender mock-ups come from the operator
 - Clone Capital Rift / Eco / Highrise UI
-- Fake Shopfit SKUs you cannot place
+- Fake Shopfit SKUs you cannot place — Shopfit items must Place into an owned room
 - A second logistics engine for packers
 - A second appeal meter
-- Left-click hop, WASD, or walking the dollhouse
+- Left-click hop, WASD, or walking `interior.js`
+- Instant green buy tiles, Fit-kit cash buttons, or auto-turning Properties on from Lots
 - Wall-clock tenant leases
-- Place kit from the warehouse (inventory / Bring to me, same as carts — kit cash-buy is the scripts stand-in until Shopfit SKUs exist)
+- Place kit from the warehouse
+- Dump the room camera on a harbour tap
 - Unfreeze House / Senate / councils
 - Drop live `STARTER_CASH` back to $1,000 while 0.5.1 is the play
+- Call this 0.5.2
