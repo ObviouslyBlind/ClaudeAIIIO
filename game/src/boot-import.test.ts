@@ -89,6 +89,8 @@ describe("harbour boot import graph", () => {
     expect(src).toContain("mountQuayPeople");
     expect(src).toContain("dollhouseCam");
     expect(src).toContain("playCam.pause");
+    expect(src).toContain("buildingKerbPose");
+    expect(src).toContain("takeCrateTap");
     expect(src).not.toContain("function inspectLandAt");
     expect(src).not.toContain("intersectObjects(root.children, true)");
   });

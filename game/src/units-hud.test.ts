@@ -7,10 +7,11 @@ import {
   formatBuildingSheet,
   formatOrderDests,
   ownedShopUnits,
+  ownsBuildingDirt,
 } from "../public/harbour/units-hud.js";
 import { formatSiteMenu } from "../public/harbour/site-menu.js";
 import { formatHireSheet, listBusinesses, peopleLine } from "../public/harbour/hire-sheet.js";
-import { mountUnitBlocks, roomBoxCount, TAG_ABOVE_M, TAG_DEPTH_TEST } from "../public/harbour/unit-blocks.js";
+import { buildingKerbPose, KERB_DUMP_M, mountUnitBlocks, roomBoxCount, TAG_ABOVE_M, TAG_DEPTH_TEST } from "../public/harbour/unit-blocks.js";
 import { createKitMesh } from "../public/harbour/unit-kit.js";
 import { createVisitor } from "./sim.ts";
 import { createLandBoard } from "./land.ts";
@@ -53,6 +54,11 @@ describe("units 0.5.1 systems (placeholders, not façades)", () => {
     expect(html).toContain("data-floor-dir");
     expect(html).not.toContain("View Ground floor");
     expect(html).toContain("RMB-hold orbit");
+    expect(html).toContain("Buy the dirt · $15,000");
+    expect(html).toContain('data-ask-land="quay-shops"');
+    expect(html).toContain("bottom of the screen");
+    expect(html).not.toContain("data-exit-room");
+    expect(ownsBuildingDirt(play)).toBe(false);
     expect(floorName(0)).toBe("Ground floor");
     const landlord = formatBuildingSheet(play, { view: "landlord" });
     expect(landlord).toContain("Landlord");
@@ -112,11 +118,12 @@ describe("units 0.5.1 systems (placeholders, not façades)", () => {
     const site = play.workSites.find((s) => s.unitId === QUAY);
     expect(site).toBeTruthy();
     const html = formatSiteMenu(site, play, "run");
-    expect(html).toContain("Hire packer");
-    expect(html).toContain("Hire till");
+    expect(html).toContain("Hire a packer");
+    expect(html).toContain("Hire a till worker");
     expect(html).toContain('data-unit-role="packer"');
     expect(html).toContain('data-unit-role="till"');
     expect(html).toContain("crate sits");
+    expect(html).toContain("not Shopfit furniture");
   });
 
   it("lists the unit shop on Hire with two roles", () => {
@@ -127,8 +134,8 @@ describe("units 0.5.1 systems (placeholders, not façades)", () => {
     expect(listBusinesses(play).some((s) => s.unitId === QUAY)).toBe(true);
     expect(peopleLine(site)).toBe("No one hired");
     const html = formatHireSheet(play, { selectedId: site.id });
-    expect(html).toContain("Hire packer");
-    expect(html).toContain("Hire till");
+    expect(html).toContain("Hire a packer");
+    expect(html).toContain("Hire a till worker");
   });
 
   it("plants nine placeholder boxes with unit-block picks", () => {
@@ -236,12 +243,13 @@ describe("units 0.5.1 systems (placeholders, not façades)", () => {
     expect(html).toContain("Shopfit");
     expect(html).toContain("Inventory Place");
     expect(html).not.toContain("data-fit-kit");
-    expect(html).toContain("Hire packer");
-    expect(html).toContain("Hire till");
+    expect(html).toContain("Hire a packer");
+    expect(html).toContain("Hire a till worker");
     expect(html).toContain('data-unit-hire="');
     expect(html).toContain("Open site card");
     expect(html).toContain("Unhired packer");
-    expect(html).toContain("data-exit-room");
+    expect(html).toContain("not a Shopfit SKU");
+    expect(html).not.toContain("data-exit-room");
   });
 
   it("kits and scouts a flat from manage", () => {
@@ -261,7 +269,18 @@ describe("units 0.5.1 systems (placeholders, not façades)", () => {
     expect(room).toContain("Empty room still scouts poor profiles");
     expect(room).not.toContain("data-fit-kit");
     expect(room).not.toContain("Empty room = no takers");
-    expect(room).toContain("data-exit-room");
+    expect(room).not.toContain("data-exit-room");
     expect(room).toContain("Place furniture from inventory");
+  });
+
+  it("dumps a body onto the kerb in front of the shell, toward the port", () => {
+    const quay = UNIT_BUILDINGS.find((b) => b.id === "quay-shops");
+    const pose = buildingKerbPose(quay, () => 1.28);
+    expect(Math.hypot(pose.x - quay.x, pose.z - quay.z)).toBeCloseTo(KERB_DUMP_M, 5);
+    const port = { x: -2280, z: 7280 };
+    const at = Math.hypot(pose.x - port.x, pose.z - port.z);
+    const centre = Math.hypot(quay.x - port.x, quay.z - port.z);
+    expect(at).toBeLessThan(centre);
+    expect(pose.y).toBe(1.28);
   });
 });

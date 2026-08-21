@@ -58,7 +58,7 @@ export function peopleLine(site) {
   if (site && site.unitId) {
     const bits = [];
     if (site.packerHired) bits.push(site.packerStaffName || "Packer");
-    if (site.tillHired) bits.push(site.staffName || "Till");
+    if (site.tillHired) bits.push(site.staffName || "Till worker");
     return bits.length ? bits.join(" · ") : "No one hired";
   }
   if (site && site.hired) return site.staffName || "Vendor";
@@ -103,10 +103,10 @@ function detailBody(play, site) {
   let hireBtn = "";
   if (site.unitId) {
     if (!site.packerHired) {
-      hireBtn += `<button type="button" class="go" data-unit-hire="${esc(site.unitId)}" data-unit-role="packer">Hire packer ${money(cost)}</button>`;
+      hireBtn += `<button type="button" class="go" data-unit-hire="${esc(site.unitId)}" data-unit-role="packer">Hire a packer ${money(cost)}</button>`;
     }
     if (!site.tillHired) {
-      hireBtn += `<button type="button" class="go" data-unit-hire="${esc(site.unitId)}" data-unit-role="till">Hire till ${money(cost)}</button>`;
+      hireBtn += `<button type="button" class="go" data-unit-hire="${esc(site.unitId)}" data-unit-role="till">Hire a till worker ${money(cost)}</button>`;
     }
   } else if (!site.hired) {
     hireBtn = `<button type="button" class="go" data-sheet-hire="${esc(site.id)}">Hire ${money(cost)}</button>`;

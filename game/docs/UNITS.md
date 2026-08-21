@@ -97,7 +97,7 @@ Live 0.5.1 shipped a **one-sheet click service** (Lots turns Properties on, gree
 |---|---|---|
 | **Lots** | Dirt and $750 pads. Same buy-ask as today. | Houses. Rooms. Furniture. |
 | **Properties** | Buildings and rooms. Own chip. Does **not** turn on from Lots. | Pads. Landlord dirt. |
-| **Landlord** | Buy the **dirt under the whole shell** for **$15,000**. Own confirm. | A ghost button on the room sheet. |
+| **Landlord** | Chip **only after you own dirt under a shell**. Lists the $15,000 dirt you already bought. Buy dirt from the Properties sale sheet or secondary on the grey box. | A spawn viewer. A reason to exist before you own dirt. |
 
 Spawn is **$10,000**. The landlord ask is **$15,000**. The card must say you cannot afford it, and that you do **not** need the dirt to run a room.
 
@@ -121,7 +121,9 @@ Same place loop as a cart:
 
 Kit meshes stay the constructed Lambert set (shelf, fridge, till, bed, shower, sink, desk, cabinet). No CSG. No `interior.js`.
 
-**Enter room** is a camera lock. **Exit room** is the only dump. Tapping harbour dirt, Lots, or another $ must **not** reset the camera.
+**Enter room** is a camera lock. **Exit room** is a big HUD button at the bottom of the screen. Hide / Close only hides the sheet. Exit dumps the body onto the kerb in front of the shell — not back onto the floor box. Harbour taps while locked toast **Exit room**; they do not dump the camera.
+
+Crate tap hits the kerb crate **before** grey boxes or Lots dirt. Logistics overlay is not required. Unlocked sale preview must not swallow harbour walk or crate taps.
 
 ### Your rooms
 
@@ -147,7 +149,7 @@ Scout returns **1–3 profiles**. Each profile has:
 
 You pick one profile and sign. No 3 / 6 / 24 / 48 picker. The profile **is** the term. Rent ticks on the sim clock. Vacancy when it ends unless you scout again.
 
-Shops do not use this for sales. Shops still Hire packer + till and sell stock. Tenants are flats and offices.
+Shops do not use this for sales. Shops still Hire a packer and a till worker ($300 people, not Shopfit SKUs) and sell stock. The Shopfit Till is a counter you Place. Tenants are flats and offices.
 
 ---
 
@@ -227,7 +229,7 @@ Buy a Strand flat. Scout on an empty room returns a poor profile. Place bed. Sco
 
 Do not boil the ocean. One pass at a time, tests green, play restart.
 
-1. **Camera lock** — Enter room / Exit room. Harbour taps do not dump the camera. Buy confirm moves the camera onto that flat.
+1. **Camera lock** — Enter room / Exit room (bottom HUD). Harbour taps do not dump the camera; they toast Exit room. Exit teleports onto the kerb. Crate tap before grey boxes.
 2. **Menus** — Lots is dirt only. Properties is houses. Landlord is the $15,000 confirm with honest copy. Green-light the 3D room under the pointer.
 3. **Place** — Shopfit SKUs buy like a cart. Inventory Place ghost on the room floor. Kill Fit-kit buttons.
 4. **Tenants** — Scout returns profiles. Appeal from placed kit. Hours 3 … 168 sim hours. Books shows the rent line.
@@ -258,6 +260,7 @@ Do not boil the ocean. One pass at a time, tests green, play restart.
 - Wall-clock tenant leases
 - Place kit from the warehouse
 - Dump the room camera on a harbour tap
+- Show the Landlord chip before the visitor owns building dirt
 - Unfreeze House / Senate / councils
 - Drop live `STARTER_CASH` back to $1,000 while 0.5.1 is the play
 - Call this 0.5.2

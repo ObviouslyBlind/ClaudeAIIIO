@@ -64,7 +64,7 @@ South spawn. Tap-to-walk. RMB-hold orbit. No WASD.
 | Site card | Stock · Run · Upgrades · Stats. Hire $300. Play shifts while unhired. |
 | Hire | Left-rail Hire sheet, or Run tab on the cart. |
 | Account | #0002. Look swatches. Reset / delete. Cash chip expands to holdings. |
-| Units (0.5.1) | Three grey shells next to the **$750 spawn pads**. **Lots** is dirt and pads only. **Properties** cycles for-sale → your rooms (does **not** turn on from Lots). **Landlord** is the $15,000 dirt confirm — spawn cannot afford it and does not need it. Point at a vacant room: that box goes green; buy is a confirm; camera **enters that room**. **Exit room** is the only dump. Shopfit / Hospitality Place from inventory. Scout returns 1–3 tenant profiles. South quay walkers. |
+| Units (0.5.1) | Three grey shells next to the **$750 spawn pads**. **Lots** is dirt and pads only. **Properties** cycles for-sale → your rooms (does **not** turn on from Lots). **Landlord** chip appears only after you own dirt under a shell. Buy dirt from the Properties sale sheet or secondary on the grey box. Point at a vacant room: that box goes green; buy is a confirm; camera **enters that room**. **Exit room** is the bottom HUD; it dumps you on the kerb. Crate tap beats grey boxes. Packer / till worker are people. Shopfit / Hospitality Place from inventory. Scout returns 1–3 tenant profiles. South quay walkers. |
 
 Starter: cash **$10,000**. Pad **$750**. Fruit kit **$90**, pack **$14** / 20. Today fruit **$6**, tax **8%**. A shop room is **$1,200**. Building dirt is **$15,000**. Hire **$300**.
 

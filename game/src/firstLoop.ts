@@ -888,8 +888,8 @@ export function sellShiftBurst(
 function siteNeeds(site: WorkSite, today = TODAY_PRICE): CartNeed[] {
   const needs: CartNeed[] = [];
   if (site.unitId) {
-    if (!site.packerHired) needs.push({ id: "packer", label: "Hire packer" });
-    if (!site.tillHired) needs.push({ id: "till", label: "Hire till" });
+    if (!site.packerHired) needs.push({ id: "packer", label: "Hire a packer" });
+    if (!site.tillHired) needs.push({ id: "till", label: "Hire a till worker" });
   } else if (!site.hired) {
     needs.push({ id: "hire", label: "Hire" });
   }

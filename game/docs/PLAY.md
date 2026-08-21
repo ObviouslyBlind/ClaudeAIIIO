@@ -60,9 +60,11 @@ Sales tax **8%**. Fruit net ≈ **$5.52** a sale. Pack COGS **$0.70** / unit.
 
 Cash chip (top right) expands to holdings. Click a placed cart for **Stock · Run · Upgrades · Stats**.
 
-Rooms inside harbour buildings are **Alpha 0.5.1**. Three grey shells sit next to the $750 spawn pads. **Lots** is dirt and pads. **Properties** is buildings and rooms — it does not turn on from Lots. **Landlord** is the $15,000 dirt under a shell; spawn cannot afford it and you do not need it to run a room.
+Rooms inside harbour buildings are **Alpha 0.5.1**. Three grey shells sit next to the $750 spawn pads. **Lots** is dirt and pads. **Properties** is buildings and rooms — it does not turn on from Lots. **Landlord** is hidden until you own the dirt under a shell. Buy that dirt from the Properties sale sheet (or long-press / right-click the grey box). Spawn cannot afford $15,000 and you do not need the dirt to run a room.
 
-Buy a room: Properties on (or tap a house $), point at a vacant grey box so it goes green, confirm “Buy Strand flat G-L for $900?”. The camera **enters that room**. **Exit room** is the only dump — harbour taps, Lots, and Hide do not reset it.
+Buy a room: Properties on (or tap a house $), point at a vacant grey box so it goes green, confirm “Buy Strand flat G-L for $900?”. The camera **enters that room**. **Exit room** is the big button at the bottom of the screen. Hide does not dump. Exit puts you on the kerb. Harbour taps while inside toast Exit room.
+
+A crate on the kerb is a tap on the crate — it wins over the grey box. Hire a packer / till worker are **people** ($300), not furniture. The Shopfit Till is a counter you Place.
 
 Empty rooms are legal. Marketplace **Shopfit** / **Hospitality** → Bring to me → Inventory **Place** on that floor (Hold **R**). Pickup packs to the warehouse. **Scout** on a flat or office returns 1–3 tenant profiles (poor / mid / high from placed furniture). Sign the profile; no 3/6/24/48 picker. Books shows the rent line or “Empty room · $0. Scout a tenant.”
 

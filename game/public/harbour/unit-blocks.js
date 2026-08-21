@@ -13,6 +13,8 @@ export const ROOM_W = 6;
 export const ROOM_D = 5;
 export const ROOM_H = 3.2;
 export const GAP = 0.45;
+/** Metres from the shell centre onto the highway kerb / pad verge. */
+export const KERB_DUMP_M = 16;
 const VACANT = 0xc6c6c6;
 const OWNED = 0xe8e8e8;
 const SELECT = 0x3dcc6a;
@@ -211,6 +213,28 @@ export function roomWorldPose(building, room, heightAt) {
     buildingId: building && building.id,
     floor,
   };
+}
+
+/** Harbour kerb in front of a shell — toward the port, not inside the box. */
+export function buildingKerbPose(building, heightAt) {
+  const x0 = Number(building && building.x) || 0;
+  const z0 = Number(building && building.z) || 0;
+  const yaw = Number(building && building.yaw) || 0;
+  const alongX = Math.cos(yaw);
+  const alongZ = Math.sin(yaw);
+  let px = -alongZ;
+  let pz = alongX;
+  const portX = -2280;
+  const portZ = 7280;
+  const toward = Math.hypot(x0 + px * KERB_DUMP_M - portX, z0 + pz * KERB_DUMP_M - portZ);
+  const away = Math.hypot(x0 - px * KERB_DUMP_M - portX, z0 - pz * KERB_DUMP_M - portZ);
+  if (toward > away) {
+    px = -px;
+    pz = -pz;
+  }
+  const x = x0 + px * KERB_DUMP_M;
+  const z = z0 + pz * KERB_DUMP_M;
+  return { x, y: groundY(heightAt, x, z), z };
 }
 
 export function roomFloorRing(pose) {

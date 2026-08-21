@@ -30,7 +30,7 @@ import {
 } from "./marketplace.js";
 import { formatHireSheet } from "./hire-sheet.js";
 import { formatAccountSheet } from "./account-sheet.js";
-import { findBuilding, findUnit, formatBuildingSheet, formatOrderDests, ownedShopUnits } from "./units-hud.js";
+import { findBuilding, findUnit, formatBuildingSheet, formatOrderDests, ownedShopUnits, ownsBuildingDirt } from "./units-hud.js";
 
 export const POLL_MS = 1000;
 
@@ -121,6 +121,16 @@ export function mountChrome(opts) {
 
   let propertiesMode = "off";
 
+  function paintLandlordChip() {
+    root.querySelectorAll('[data-overlay="landlord"]').forEach((b) => {
+      const show = ownsBuildingDirt(play);
+      b.hidden = !show;
+      b.setAttribute("aria-label", "Landlord");
+      b.setAttribute("data-tip", "Landlord");
+      if (!show && overlay === "landlord") overlay = "world";
+    });
+  }
+
   function paintViewerChrome() {
     root.querySelectorAll("[data-overlay]").forEach((b) => {
       const key = b.getAttribute("data-overlay");
@@ -133,8 +143,11 @@ export function mountChrome(opts) {
         b.setAttribute("data-tip", label);
       }
       if (key === "landlord") {
+        const show = ownsBuildingDirt(play);
+        b.hidden = !show;
         b.setAttribute("aria-label", "Landlord");
         b.setAttribute("data-tip", "Landlord");
+        if (!show && overlay === "landlord") overlay = "world";
       }
     });
     const propBtn = root.querySelector('[data-toggle="properties"]');
@@ -154,6 +167,10 @@ export function mountChrome(opts) {
   }
 
   function setOverlay(id) {
+    if (id === "landlord" && !ownsBuildingDirt(play)) {
+      if (opts.setStatus) opts.setStatus("Buy the dirt under a building first.");
+      return;
+    }
     overlay = id;
     paintViewerChrome();
     if (opts.onOverlay) opts.onOverlay(id);
@@ -223,7 +240,15 @@ export function mountChrome(opts) {
   function leaveDollhouse(force) {
     if (roomLocked && !force) return;
     roomLocked = false;
+    paintExitRoom();
     if (typeof opts.onDollhouse === "function") opts.onDollhouse(null);
+  }
+
+  /** Unlocked sale preview dumps when you walk. Locked rooms stay until Exit room. */
+  function dumpPreview() {
+    if (roomLocked) return false;
+    leaveDollhouse();
+    return true;
   }
 
   function enterDollhouse(lock) {
@@ -240,15 +265,25 @@ export function mountChrome(opts) {
       room,
       locked: roomLocked,
     });
+    paintExitRoom();
   }
 
   function exitRoom() {
+    const building = findBuilding(play, unitBuildingId);
     roomLocked = false;
     unitRoomId = "";
     unitView = propertiesMode === "yours" ? "yours-all" : "sale";
+    if (typeof opts.onExitRoom === "function") opts.onExitRoom(building);
     leaveDollhouse(true);
     dismissStandMenu();
-    if (opts.setStatus) opts.setStatus("Back on the harbour.");
+    paintExitRoom();
+    if (opts.setStatus) opts.setStatus("Back on the kerb.");
+  }
+
+  function paintExitRoom() {
+    const btn = document.getElementById("exit-room");
+    if (!btn) return;
+    btn.hidden = !roomLocked;
   }
 
   function dismissStandMenu() {
@@ -313,6 +348,7 @@ export function mountChrome(opts) {
     play = data;
     paintTop();
     paintPanels();
+    paintLandlordChip();
     if (typeof opts.onPlay === "function") opts.onPlay(play);
     return true;
   }
@@ -1686,7 +1722,10 @@ export function mountChrome(opts) {
       buyAsk.hidden = true;
       const { ok, data } = await postUnit("/api/building/land", { buildingId: building.id });
       if (opts.setStatus) opts.setStatus(ok ? "You own the dirt." : "Could not buy land: " + ((data && data.reason) || "fail"));
-      paintBuildingSheet("landlord");
+      if (!ok) return;
+      paintLandlordChip();
+      if (unitView === "landlord" || unitBuildingId === "landlord") paintBuildingSheet("landlord");
+      else if (unitBuildingId) paintBuildingSheet(unitBuildingId);
     });
   }
 
@@ -1831,6 +1870,14 @@ export function mountChrome(opts) {
       if (opts.setStatus) opts.setStatus("Place cancelled.");
     });
   }
+  const exitRoomBtn = document.getElementById("exit-room");
+  if (exitRoomBtn) {
+    exitRoomBtn.addEventListener("click", (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      if (roomLocked) exitRoom();
+    });
+  }
   function bindCashDock() {
     if (!cashDock || !cashPlate) return;
     function setOpen(on) {
@@ -1910,7 +1957,9 @@ export function mountChrome(opts) {
     getPlaceUnitId: () => (roomLocked ? unitRoomId : ""),
     setPropertiesOn,
     cycleProperties: cyclePropertiesChip,
+    dumpPreview,
     exitRoom,
+    paintLandAsk,
     open,
     closePanels,
     hideBuyAsk() {

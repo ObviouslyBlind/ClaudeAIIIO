@@ -250,11 +250,11 @@ function paintRun(site, play) {
   if (site.unitId) {
     const packer = site.packerHired
       ? `<div class="inv-row"><span>${esc(site.packerStaffName || "Packer")}</span><button type="button" class="ghost" data-unit-fire="${esc(site.unitId)}" data-unit-role="packer">Fire packer</button></div>`
-      : `<button type="button" class="go hire-site" data-unit-hire="${esc(site.unitId)}" data-unit-role="packer">Hire packer ${money(cost)}</button>`;
+      : `<button type="button" class="go hire-site" data-unit-hire="${esc(site.unitId)}" data-unit-role="packer">Hire a packer ${money(cost)}</button>`;
     const till = site.tillHired
-      ? `<div class="inv-row"><span>${esc(site.staffName || "Till")}</span><button type="button" class="ghost" data-unit-fire="${esc(site.unitId)}" data-unit-role="till">Fire till</button></div>`
-      : `<button type="button" class="go hire-site" data-unit-hire="${esc(site.unitId)}" data-unit-role="till">Hire till ${money(cost)}</button>`;
-    return `${last}${packer}${till}<p class="whisper">Packer moves the crate onto the shelf. Till sells. Unhired packer = crate sits.</p>`;
+      ? `<div class="inv-row"><span>${esc(site.staffName || "Till worker")}</span><button type="button" class="ghost" data-unit-fire="${esc(site.unitId)}" data-unit-role="till">Fire till worker</button></div>`
+      : `<button type="button" class="go hire-site" data-unit-hire="${esc(site.unitId)}" data-unit-role="till">Hire a till worker ${money(cost)}</button>`;
+    return `${last}${packer}${till}<p class="whisper">A packer and a till worker are people ($300), not Shopfit furniture. Packer unpacks the crate. Till worker sells. Unhired packer = crate sits.</p>`;
   }
   if (site.hired) {
     return `

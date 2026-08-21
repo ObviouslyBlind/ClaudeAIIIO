@@ -36,7 +36,7 @@ import { mountStaffHud } from "./staff-hud.js";
 import { mountCalendarHud } from "./calendar-hud.js";
 import { mountParcelMap, pointerToNdc } from "./parcel-map.js";
 import { mountLotTags } from "./lot-tags.js";
-import { mountUnitBlocks, roomFloorRing, roomWorldPose } from "./unit-blocks.js";
+import { buildingKerbPose, mountUnitBlocks, roomFloorRing, roomWorldPose } from "./unit-blocks.js";
 import { createDollhouseCamera } from "./unit-dollhouse.js";
 import { createPlacePreview } from "./place-preview.js";
 import { CART_FOOTPRINT_M, SNAP_PAD_M, snapPlacePose } from "./place-pose.js";
@@ -193,6 +193,9 @@ const takenCrates = new Set();
 const PLACE_CORRIDOR_M = 22;
 const propsBuilt = new Set();
 let rmbDown = null;
+let longPress = null;
+let skipPrimaryUntil = 0;
+const LONG_PRESS_MS = 480;
 
 const player = new THREE.Mesh(
   new THREE.CapsuleGeometry(0.55, 1.15, 4, 8),
@@ -474,7 +477,7 @@ function aimPointer(ev) {
 }
 
 const HUD_BLOCK =
-  "nav, a, button, #taxi-map, #ferry-ticket, #catalog-picker, .float-panel, #land-card, #buy-ask, #sell-ask, #crate-ask, #order-veil, #order-ask, #stand-veil, #stand-menu, #sheet-veil, #place-hint, #menu-stack, #pack-shift, .lot-tag, #lot-tags, #cash-dock, .cash-plate, .cash-ledger";
+  "nav, a, button, #taxi-map, #ferry-ticket, #catalog-picker, .float-panel, #land-card, #buy-ask, #sell-ask, #crate-ask, #order-veil, #order-ask, #stand-veil, #stand-menu, #sheet-veil, #place-hint, #play-toast, #exit-room, #menu-stack, #pack-shift, .lot-tag, #lot-tags, #cash-dock, .cash-plate, .cash-ledger";
 
 const walkPlane = new THREE.Plane();
 const walkHit = new THREE.Vector3();
@@ -1673,6 +1676,7 @@ function goTo(x, z) {
   userLeftStall = true;
   stallFollow = false;
   islandId = nearestIsland(dest.x, dest.z);
+  if (chromeHud && chromeHud.dumpPreview) chromeHud.dumpPreview();
   dismissLooseLandUi();
   if (playCam && typeof playCam.followWalk === "function") playCam.followWalk();
   paintWalkPath();
@@ -1890,10 +1894,118 @@ function inspectNearbyLand() {
   );
 }
 
+function crateFromRay() {
+  const crates = [...crateMeshes.values()].filter(Boolean);
+  if (!crates.length) return null;
+  const hits = raycaster.intersectObjects(crates, true);
+  const hit = hits[0];
+  return hit ? objectWithKind(hit.object, "crate") : null;
+}
+
+function takeCrateTap() {
+  const crate = crateFromRay();
+  const id = crate && crate.userData && crate.userData.deliveryId;
+  return Boolean(id && showCrateCard(id));
+}
+
+function buildingFromPlay(id) {
+  const play = chromeHud && chromeHud.getPlay && chromeHud.getPlay();
+  return ((play && play.units && play.units.buildings) || []).find((b) => b.id === id) || null;
+}
+
+function inspectHarbour(ev) {
+  if (lockedRoom() || (dollhouseCam && dollhouseCam.isLocked && dollhouseCam.isLocked())) {
+    setStatus("Exit room");
+    return true;
+  }
+  aimPointer(ev);
+  raycaster.setFromCamera(pointer, camera);
+  const hits = raycaster.intersectObjects(clickTargets(), true);
+  const standHit = hits.find((h) => objectWithStand(h.object));
+  if (standHit) {
+    const obj = objectWithStand(standHit.object);
+    if (obj) {
+      openStandMenu(obj.userData.standId);
+      return true;
+    }
+  }
+  const unitHit = hits.find((h) => objectWithKind(h.object, "unit-block"));
+  if (unitHit) {
+    const block = objectWithKind(unitHit.object, "unit-block");
+    const bid = block && block.userData && block.userData.buildingId;
+    const building = bid ? buildingFromPlay(bid) : null;
+    if (building && building.landOwner !== "visitor" && chromeHud && chromeHud.paintLandAsk) {
+      chromeHud.paintLandAsk(building);
+      setStatus((building.name || "Building") + " · buy the dirt.");
+      return true;
+    }
+    if (bid && chromeHud && chromeHud.openBuildingSheet) {
+      chromeHud.openBuildingSheet(bid);
+      setStatus((block.userData.buildingName || "Building") + " · rooms.");
+      return true;
+    }
+  }
+  const tap = walkPoint(hits);
+  let tapPt = tap && tap.point;
+  if (!tapPt) {
+    const g = groundFromRay();
+    if (g) tapPt = { x: g.x, y: g.y, z: g.z };
+  }
+  if (tapPt) {
+    const p = findParcelAt(tapPt.x, tapPt.z);
+    if (p && !p.owner) {
+      askToBuy(p);
+      return true;
+    }
+    if (p) {
+      showLandCard(p);
+      return true;
+    }
+  }
+  return false;
+}
+
+function clearLongPress() {
+  if (longPress && longPress.timer) clearTimeout(longPress.timer);
+  longPress = null;
+}
+
+function startLongPress(ev) {
+  clearLongPress();
+  const pointerId = ev.pointerId;
+  const x = ev.clientX;
+  const y = ev.clientY;
+  longPress = {
+    x,
+    y,
+    timer: setTimeout(() => {
+      longPress = null;
+      skipPrimaryUntil = Date.now() + 500;
+      inspectHarbour(ev);
+    }, LONG_PRESS_MS),
+  };
+  const move = (mv) => {
+    if (mv.pointerId !== pointerId) return;
+    if (Math.hypot(mv.clientX - x, mv.clientY - y) > 12) clearLongPress();
+  };
+  const up = (uv) => {
+    if (uv.pointerId !== pointerId) return;
+    window.removeEventListener("pointermove", move, true);
+    window.removeEventListener("pointerup", up, true);
+    window.removeEventListener("pointercancel", up, true);
+    clearLongPress();
+  };
+  window.addEventListener("pointermove", move, true);
+  window.addEventListener("pointerup", up, true);
+  window.addEventListener("pointercancel", up, true);
+}
+
 function onPointer(ev) {
+  if (Date.now() < skipPrimaryUntil) return;
   if (ev.button != null && ev.button !== 0) return;
   if (taxi && typeof taxi.mapOpen === "function" && taxi.mapOpen()) return;
   const placing = Boolean(chromeHud && chromeHud.isPlacing && chromeHud.isPlacing());
+  if (ev.target.closest && ev.target.closest("#exit-room, #place-cancel")) return;
   if (ev.target.closest && ev.target.closest(HUD_BLOCK) && !placing) return;
   if (Date.now() - lastTap < 180) return;
   lastTap = Date.now();
@@ -1910,7 +2022,6 @@ function onPointer(ev) {
   const viewer = viewerMode();
   const hits = raycaster.intersectObjects(clickTargets(), true);
   const standHit = hits.find((h) => objectWithStand(h.object));
-  const crateHit = hits.find((h) => objectWithKind(h.object, "crate"));
   const vanHit = hits.find((h) => objectWithKind(h.object, "van"));
   const padHit = hits.find((h) => objectWithKind(h.object, "logistics-pad"));
   const buildingHit = hits.find((h) => objectWithKind(h.object, "building"));
@@ -1937,12 +2048,15 @@ function onPointer(ev) {
       return;
     }
   }
+  // Crate on the kerb wins over grey boxes and Lots dirt. Ray crates alone so a shell cannot swallow the tap.
+  if (!lockedRoom() && takeCrateTap()) return;
   if (unitHit && chromeHud && chromeHud.isPropertiesOn && chromeHud.isPropertiesOn()) {
     const block = objectWithKind(unitHit.object, "unit-block");
     const bid = block && block.userData && block.userData.buildingId;
     const uid = block && block.userData && block.userData.unitId;
     if (lockedRoom()) {
       if (uid && chromeHud.getPlaceUnitId && uid === chromeHud.getPlaceUnitId()) return;
+      setStatus("Exit room");
       return;
     }
     if (uid && chromeHud && chromeHud.openUnitSheet) {
@@ -1958,9 +2072,7 @@ function onPointer(ev) {
     }
   }
   if (lockedRoom() || (dollhouseCam && dollhouseCam.isLocked && dollhouseCam.isLocked())) {
-    return;
-  }
-  if (dollhouseCam && dollhouseCam.isActive()) {
+    setStatus("Exit room");
     return;
   }
   if (isLotsViewer(viewer) && tapPt) {
@@ -1983,11 +2095,6 @@ function onPointer(ev) {
   if (nearSite) {
     openStandMenu(nearSite.id, nearSite);
     return;
-  }
-  if (crateHit) {
-    const crate = objectWithKind(crateHit.object, "crate");
-    const id = crate && crate.userData.deliveryId;
-    if (id && showCrateCard(id)) return;
   }
   const tagObj =
     isLotsViewer(viewer) && hits[0] ? objectWithKind(hits[0].object, "parcel-label") : null;
@@ -2584,6 +2691,20 @@ async function boot() {
       if (lockedRoom()) return;
       leaveStallCam();
     },
+    onExitRoom(building) {
+      walking = false;
+      walkWaypoints = [];
+      gaitDist = 0;
+      lastWalkDest = null;
+      if (walkPath) walkPath.hide();
+      stallFollow = false;
+      if (building) {
+        const ht = (x, z) => heightAt(specOf("south"), x, z);
+        const pose = buildingKerbPose(building, ht);
+        player.position.set(pose.x, pose.y + PLAYER_SOLE_M, pose.z);
+        islandId = nearestIsland(pose.x, pose.z);
+      }
+    },
     onDollhouse(view) {
       if (!view) {
         if (unitBlocks) {
@@ -2592,6 +2713,7 @@ async function boot() {
         }
         if (dollhouseCam) dollhouseCam.exit(true);
         if (playCam && typeof playCam.resume === "function") playCam.resume();
+        if (playCam && typeof playCam.followWalk === "function") playCam.followWalk({ force: true });
         return;
       }
       const playNow = chromeHud && chromeHud.getPlay && chromeHud.getPlay();
@@ -2795,9 +2917,13 @@ window.addEventListener(
   (ev) => {
     if (ev.button != null && ev.button !== 0) return;
     if (ev.target && ev.target.closest && ev.target.closest(HUD_BLOCK)) return;
-    if (ev.target === canvas || (ev.target && ev.target.closest && ev.target.closest("#chrome"))) {
+    const onWorld = ev.target === canvas || (ev.target && ev.target.closest && ev.target.closest("#chrome"));
+    if (!onWorld) return;
+    if (chromeHud && chromeHud.isPlacing && chromeHud.isPlacing()) {
       onPointer(ev);
+      return;
     }
+    startLongPress(ev);
   },
   true,
 );
@@ -2821,15 +2947,7 @@ canvas.addEventListener("pointerup", (ev) => {
   rmbDown = null;
   if (dt > 280 || dist > 10) return;
   if (ev.target.closest && ev.target.closest(HUD_BLOCK)) return;
-  aimPointer(ev);
-  raycaster.setFromCamera(pointer, camera);
-  const hits = raycaster.intersectObjects(clickTargets(), true);
-  const standHit = hits.find((h) => objectWithStand(h.object));
-  if (standHit) {
-    const obj = objectWithStand(standHit.object);
-    if (obj) openStandMenu(obj.userData.standId);
-    return;
-  }
+  inspectHarbour(ev);
 });
 if (btnLease) {
   btnLease.addEventListener("click", () => {

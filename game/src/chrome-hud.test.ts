@@ -191,6 +191,14 @@ describe("harbour chrome HUD", () => {
     expect(chrome).toContain("cyclePropertiesChip");
     expect(html).toContain('data-overlay="landlord"');
     expect(html).toContain('aria-label="Landlord"');
+    expect(html).toMatch(/data-overlay="landlord"[^>]*hidden/);
+    expect(html).toContain('id="exit-room"');
+    expect(css).toContain("#exit-room");
+    expect(chrome).toContain("ownsBuildingDirt");
+    expect(chrome).toContain('getElementById("exit-room")');
+    expect(chrome).toContain("onExitRoom");
+    expect(chrome).toContain("dumpPreview");
+    expect(chrome).toContain("paintLandlordChip");
     expect(chrome).toContain("unitAskModel");
     expect(chrome).toContain("landAskModel");
     expect(chrome).toContain("paintUnitAsk");
@@ -198,6 +206,15 @@ describe("harbour chrome HUD", () => {
     expect(chrome).toContain("data-exit-room");
     expect(chrome).toContain("roomLocked");
     expect(main).toContain("openBuildingSheet");
+    expect(main).toContain("buildingKerbPose");
+    expect(main).toContain("onExitRoom");
+    expect(main).toContain("takeCrateTap");
+    expect(main).toContain("Crate on the kerb wins");
+    expect(main).toContain("inspectHarbour");
+    expect(main.indexOf("Crate on the kerb wins")).toBeLessThan(
+      main.indexOf("if (unitHit && chromeHud && chromeHud.isPropertiesOn"),
+    );
+    expect(main).toContain('setStatus("Exit room")');
     expect(main).toContain("p.buildingId");
     expect(chrome).toContain('data-toggle="properties"');
     expect(chrome).toContain("is-yours");

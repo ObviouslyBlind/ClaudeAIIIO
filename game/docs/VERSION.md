@@ -24,4 +24,4 @@ Read the next feature out in [HANDOVER.md](HANDOVER.md) **before** writing code 
 | Version | Date | What |
 |---|---|---|
 | 0.5 | 2026-08-20 | Start of the buildings push. Spec accepted. |
-| 0.5.1 | 2026-08-21 | **This push, playable.** Spawn **$10,000**. Split menus, confirm buy, enter room, Place from inventory, tenant profiles, South walkers. Dirt $15,000. Blender shells later. |
+| 0.5.1 | 2026-08-21 | **This push, playable.** Spawn **$10,000**. Split menus, confirm buy, enter room, Place from inventory, tenant profiles, South walkers. Dirt $15,000. Exit room dumps on the kerb. Landlord chip after dirt is owned. Blender shells later. |

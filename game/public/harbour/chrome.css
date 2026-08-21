@@ -62,6 +62,7 @@ html, body {
 #sheet-veil,
 #place-hint,
 #play-toast,
+#exit-room,
 .cash-dock,
 .cash-plate,
 .cash-ledger {
@@ -1493,6 +1494,32 @@ nav.dock.travel-dock {
   font-weight: 800;
 }
 #place-hint[hidden] { display: none !important; }
+#exit-room {
+  position: absolute;
+  left: 50%;
+  bottom: calc(18px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 24;
+  min-height: 56px;
+  min-width: min(280px, calc(100vw - 32px));
+  padding: 12px 28px;
+  border: 1px solid var(--brass-hi);
+  border-radius: 12px;
+  background: linear-gradient(180deg, #5fe3a0 0%, #3dcc6a 100%);
+  color: #061418;
+  font-family: "Big Shoulders Display", "Red Hat Text", sans-serif;
+  font-weight: 800;
+  font-size: clamp(22px, 4.2vw, 32px);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  box-shadow: var(--shadow), var(--inset);
+  pointer-events: auto;
+}
+#exit-room:hover,
+#exit-room:focus-visible {
+  background: linear-gradient(180deg, #7af0b4 0%, #5fe3a0 100%);
+}
+#exit-room[hidden] { display: none !important; }
 #play-toast {
   position: absolute;
   left: 50%;

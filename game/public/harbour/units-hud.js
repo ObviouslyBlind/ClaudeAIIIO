@@ -56,6 +56,10 @@ export function ownedUnits(play) {
   return out;
 }
 
+export function ownsBuildingDirt(play) {
+  return (unitsSnap(play).buildings || []).some((b) => b.landOwner === "visitor");
+}
+
 export function findBuilding(play, buildingId) {
   return (unitsSnap(play).buildings || []).find((b) => b.id === buildingId) || null;
 }
@@ -129,14 +133,19 @@ function paintSale(building, play, floor, selectedId) {
     : ask < Infinity && cash >= ask
       ? "Point at a vacant room. That grey box goes green. Buy is a confirm."
       : ask < Infinity
-        ? "Need " + money(ask) + " for a room here. Spawn is $10,000. Building dirt is Landlord, $15,000."
+        ? "Need " + money(ask) + " for a room here. Spawn is $10,000. Dirt under this shell is $15,000 — you do not need it to run a room."
         : "No vacant rooms.";
+  const dirt = building.landOwner === "visitor"
+    ? `<p class="whisper">You own the dirt under this shell.</p>`
+    : `<p class="whisper">Dirt under this shell is $15,000. You do not need it to run a room.</p>
+       <button type="button" class="ghost" data-ask-land="${esc(building.id)}">Buy the dirt · $15,000</button>`;
   return `
     <p class="whisper">${building.floors} floor${building.floors === 1 ? "" : "s"} · ${building.rooms.length} rooms · PAPER</p>
     <p class="whisper">${esc(hint)}</p>
     ${floorStepper(building, viewFloor)}
     <div class="buy-grid">${onFloor.map((r) => saleTile(r, cash, selectedId)).join("")}</div>
-    <p class="whisper">RMB-hold orbit around this floor. Exit room is the only dump.</p>`;
+    ${dirt}
+    <p class="whisper">RMB-hold orbit around this floor. Exit room is on the bottom of the screen.</p>`;
 }
 
 function paintYours(building, play, floor) {
@@ -218,18 +227,19 @@ function paintRoom(building, play, unitId) {
     const cost = money(play && play.hireCost != null ? play.hireCost : 300);
     const packer = site && site.packerHired
       ? `<div class="inv-row"><span>${esc(site.packerStaffName || "Packer")}</span><button type="button" class="ghost" data-unit-fire="${esc(unit.id)}" data-unit-role="packer">Fire packer</button></div>`
-      : `<button type="button" class="go" data-unit-hire="${esc(unit.id)}" data-unit-role="packer">Hire packer ${cost}</button>`;
+      : `<button type="button" class="go" data-unit-hire="${esc(unit.id)}" data-unit-role="packer">Hire a packer ${cost}</button>`;
     const till = site && site.tillHired
-      ? `<div class="inv-row"><span>${esc(site.staffName || "Till")}</span><button type="button" class="ghost" data-unit-fire="${esc(unit.id)}" data-unit-role="till">Fire till</button></div>`
-      : `<button type="button" class="go" data-unit-hire="${esc(unit.id)}" data-unit-role="till">Hire till ${cost}</button>`;
+      ? `<div class="inv-row"><span>${esc(site.staffName || "Till worker")}</span><button type="button" class="ghost" data-unit-fire="${esc(unit.id)}" data-unit-role="till">Fire till worker</button></div>`
+      : `<button type="button" class="go" data-unit-hire="${esc(unit.id)}" data-unit-role="till">Hire a till worker ${cost}</button>`;
     return `
-      <button type="button" class="ghost hire-back" data-exit-room>Exit room</button>
       <p class="whisper">Shop. Marketplace Shopfit → Bring to me → Inventory Place. Hold R to rotate.</p>
       <p class="whisper">${esc(kitLine)}</p>
       ${pickup}
       ${packer}
+      <p class="whisper">A packer is a person. They unpack the kerb crate onto the shelf. Not a Shopfit SKU.</p>
       ${till}
-      <p class="whisper">Unhired packer = crate sits. Unhired till = no sales.</p>
+      <p class="whisper">A till worker is a person. They sell from the shelf. The Shopfit Till is a counter you Place.</p>
+      <p class="whisper">Unhired packer = crate sits. Unhired till worker = no sales.</p>
       <button type="button" class="go" data-open-stand="${esc(site ? site.id : "")}" ${site ? "" : "disabled"}>Open site card</button>`;
   }
   const lease = unit.lease;
@@ -241,7 +251,6 @@ function paintRoom(building, play, unitId) {
       : `<button type="button" class="go" data-scout-unit="${esc(unit.id)}">Scout tenants</button>
          <p class="whisper">Empty room still scouts poor profiles. No 3/6/24/48 picker — the profile is the term.</p>`;
   return `
-    <button type="button" class="ghost hire-back" data-exit-room>Exit room</button>
     <p class="whisper">${esc(unit.use)}. ${esc(kitLine)}</p>
     ${pickup}
     ${leaseBlock}`;
