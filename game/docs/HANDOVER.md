@@ -22,6 +22,8 @@ Visual buildings: the operator will mock a few simple shells in **Blender**. Do 
 
 Always update this handover when the live loop, version, play URL, or next piece changes.
 
+When you report to the operator, **always send the public play URL and the PR**. Never the PR alone.
+
 ---
 
 ## Play
@@ -72,7 +74,7 @@ Controls: primary tap/click walks or uses. Secondary long-press / right-click ex
 
 ## Branch
 
-Working branch for this slice: **`cursor/units-gameplan-3924`**.
+Working branch for this slice: **`cursor/units-gameplan-3924`**. PR: **https://github.com/ObviouslyBlind/ClaudeAIIIO/pull/60**.
 
 Tests: `cd game && npm test` — **773 passed** (2026-08-21).
 
