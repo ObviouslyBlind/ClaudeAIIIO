@@ -124,6 +124,12 @@ describe("units 0.5.1 systems (placeholders, not façades)", () => {
     expect(quay.userData.buildingId).toBe("quay-shops");
     expect(blocks.clickables().length).toBeGreaterThanOrEqual(13);
     expect(scene.getObjectByName("unit-label-strand-flats")).toBeTruthy();
+    expect(scene.getObjectByName("unit-pad-quay-shops")).toBeTruthy();
+    const yaw = play.units.buildings.find((b) => b.id === "quay-shops").yaw;
+    expect(quay.rotation.y).toBeCloseTo(yaw, 5);
+    const right = scene.getObjectByName("unit-" + QUAY_RIGHT);
+    const along = Math.hypot(right.position.x - quay.position.x, right.position.z - quay.position.z);
+    expect(along).toBeGreaterThan(5);
   });
 
   it("sits the test block next to south spawn and plants kit boxes", () => {

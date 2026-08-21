@@ -114,6 +114,12 @@ function addTag(group, building, x, y, z) {
   group.add(sprite);
 }
 
+function localXZ(yaw, lx, lz) {
+  const c = Math.cos(yaw);
+  const s = Math.sin(yaw);
+  return { x: lx * c - lz * s, z: lx * s + lz * c };
+}
+
 export function mountUnitBlocks(opts) {
   const scene = opts.scene;
   const heightAt = opts.heightAt || (() => 0);
@@ -135,6 +141,7 @@ export function mountUnitBlocks(opts) {
     let rooms = 0;
     for (const b of buildings) {
       const y0 = groundY(heightAt, b.x, b.z);
+      const yaw = Number(b.yaw) || 0;
       const byFloor = new Map();
       for (const r of b.rooms || []) {
         const f = Number(r.floor) || 0;
@@ -142,17 +149,21 @@ export function mountUnitBlocks(opts) {
         byFloor.get(f).push(r);
       }
       let roofY = y0;
+      let maxSpan = ROOM_W;
       for (const [floor, floorRooms] of byFloor) {
         floorRooms.forEach((r, i) => {
           const n = floorRooms.length;
           const xOff = (i - (n - 1) / 2) * (ROOM_W + GAP);
+          maxSpan = Math.max(maxSpan, Math.abs(xOff) * 2 + ROOM_W);
           const y = y0 + ROOM_H / 2 + floor * (ROOM_H + GAP);
           roofY = Math.max(roofY, y + ROOM_H / 2);
+          const at = localXZ(yaw, xOff, 0);
           const mesh = new THREE.Mesh(
             new THREE.BoxGeometry(ROOM_W, ROOM_H, ROOM_D),
             new THREE.MeshLambertMaterial({ color: r.owner === "visitor" ? OWNED : VACANT }),
           );
-          mesh.position.set(b.x + xOff, y, b.z);
+          mesh.position.set(b.x + at.x, y, b.z + at.z);
+          mesh.rotation.y = yaw;
           mesh.castShadow = true;
           mesh.receiveShadow = true;
           mesh.name = "unit-" + r.id;
@@ -169,7 +180,9 @@ export function mountUnitBlocks(opts) {
               new THREE.MeshLambertMaterial({ color: KIT_GREY }),
             );
             const kx = xOff + (k - (kit.length - 1) / 2) * (KIT + 0.15);
-            bit.position.set(b.x + kx, y0 + floor * (ROOM_H + GAP) + KIT / 2 + 0.08, b.z + ROOM_D * 0.22);
+            const kitAt = localXZ(yaw, kx, ROOM_D * 0.22);
+            bit.position.set(b.x + kitAt.x, y0 + floor * (ROOM_H + GAP) + KIT / 2 + 0.08, b.z + kitAt.z);
+            bit.rotation.y = yaw;
             bit.name = "unit-kit-" + r.id + "-" + id;
             bit.userData.kind = "unit-block";
             bit.userData.buildingId = b.id;
@@ -180,6 +193,18 @@ export function mountUnitBlocks(opts) {
           });
         });
       }
+      const pad = new THREE.Mesh(
+        new THREE.BoxGeometry(maxSpan + 1.2, 0.18, ROOM_D + 1.4),
+        new THREE.MeshLambertMaterial({ color: 0x6a5e48 }),
+      );
+      pad.position.set(b.x, y0 + 0.08, b.z);
+      pad.rotation.y = yaw;
+      pad.receiveShadow = true;
+      pad.name = "unit-pad-" + b.id;
+      pad.userData.kind = "unit-block";
+      pad.userData.buildingId = b.id;
+      pad.userData.buildingName = b.name;
+      group.add(pad);
       addTag(group, b, b.x, roofY + 1.1, b.z);
     }
     return rooms;

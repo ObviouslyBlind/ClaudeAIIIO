@@ -15,7 +15,7 @@ import {
   UNIT_ROOM_PRICE,
 } from "./economy.ts";
 import { TICKS_PER_SIM_DAY } from "./calendar.ts";
-import { SOUTH_PORT } from "./southGeom.ts";
+import { SOUTH_HIGHWAY_NODES, SOUTH_PORT } from "./southGeom.ts";
 import type { Delivery, InvKind, LoopFail, LoopOk, PlayState, WorkSite } from "./firstLoop.ts";
 
 export const UNITS_NOTE = "PAPER units. SIMULATED. Rooms inside a building.";
@@ -75,6 +75,11 @@ export type BuildingSpec = {
 };
 
 const SHOP_STOCK: InvKind[] = ["hotdogs", "melon", "fish_chips"];
+
+/** Align room width with Island Hwy so four shells read as a street, not a world-axis pile. */
+const _hwy0 = SOUTH_HIGHWAY_NODES[0]!;
+const _hwy1 = SOUTH_HIGHWAY_NODES[1]!;
+export const UNIT_ROW_YAW = Math.atan2(_hwy1.z - _hwy0.z, _hwy1.x - _hwy0.x);
 
 /**
  * First-frame row, inland of Island Hwy (past the dual + cart pads), in the
@@ -531,6 +536,7 @@ export function unitsSnapshot(play: PlayState) {
         floors: b.floors,
         x: b.x,
         z: b.z,
+        yaw: UNIT_ROW_YAW,
         landOwner: land.owner,
         landPrice: land.price,
         canManage: rooms.some((u) => u.owner === "visitor"),
