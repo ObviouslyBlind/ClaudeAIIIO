@@ -74,7 +74,7 @@ Controls: primary tap/click walks or uses. Secondary long-press / right-click ex
 
 Working branch for this slice: **`cursor/units-gameplan-3924`**.
 
-Tests: `cd game && npm test` — **772 passed** (2026-08-21).
+Tests: `cd game && npm test` — **773 passed** (2026-08-21).
 
 ---
 
