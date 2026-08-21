@@ -3,6 +3,7 @@ import * as THREE from "three";
 import { handleOrbitPointer, RMB, sphericalToCartesian } from "../public/harbour/camera.js";
 import { mountUnitBlocks, ROOM_H } from "../public/harbour/unit-blocks.js";
 import {
+  createDollhouseCamera,
   createDollhouseOrbit,
   DOLLHOUSE_PITCH,
   DOLLHOUSE_RADIUS_M,
@@ -96,6 +97,22 @@ describe("unit dollhouse camera", () => {
     expect(cam.position.z - target.z).toBeCloseTo(-(p0.z - target.z), 5);
     expect(cam.lx).toBe(target.x);
     expect(cam.lz).toBe(target.z);
+  });
+
+  it("snaps onto the floor box on enter, not a lerp from the player", () => {
+    const cam = fakeCam();
+    cam.position.set(0, 2, 0);
+    const dh = createDollhouseCamera({ camera: cam, canvas: null });
+    const building = { id: "mixed-house", x: 40, z: 80, yaw: 0 };
+    dh.enter(building, 0, () => 1);
+    expect(dh.isActive()).toBe(true);
+    const t = dh.getTarget();
+    const o = sphericalToCartesian(dh.getState());
+    expect(cam.position.x).toBeCloseTo(t.x + o.x, 5);
+    expect(cam.position.y).toBeCloseTo(t.y + o.y, 5);
+    expect(cam.position.z).toBeCloseTo(t.z + o.z, 5);
+    expect(cam.lx).toBe(t.x);
+    expect(cam.lz).toBe(t.z);
   });
 
   it("clamps dollhouse zoom around the floor, not harbour 650 m", () => {

@@ -158,7 +158,8 @@ export function mountChrome(opts) {
 
   function enterDollhouse() {
     if (!unitBuildingId || typeof opts.onDollhouse !== "function") return;
-    opts.onDollhouse({ buildingId: unitBuildingId, floor: unitFloor });
+    const building = findBuilding(play, unitBuildingId);
+    opts.onDollhouse({ buildingId: unitBuildingId, floor: unitFloor, building });
   }
 
   function dismissStandMenu() {

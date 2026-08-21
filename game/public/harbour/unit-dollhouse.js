@@ -143,6 +143,7 @@ export function createDollhouseCamera({ camera, canvas }) {
       target = next;
       if (!same) state = createDollhouseOrbit(building);
       active = true;
+      tickDollhouse(camera, target, { ...state, dragging: true }, 1, tmp);
     },
     exit() {
       active = false;

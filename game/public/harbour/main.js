@@ -2483,15 +2483,17 @@ async function boot() {
         if (playCam && typeof playCam.resume === "function") playCam.resume();
         return;
       }
-      stallFollow = false;
-      if (playCam && typeof playCam.pause === "function") playCam.pause();
       const playNow = chromeHud && chromeHud.getPlay && chromeHud.getPlay();
       const building =
-        playNow &&
-        playNow.units &&
-        (playNow.units.buildings || []).find((b) => b.id === view.buildingId);
+        view.building ||
+        (playNow &&
+          playNow.units &&
+          (playNow.units.buildings || []).find((b) => b.id === view.buildingId));
+      if (!building) return;
+      stallFollow = false;
+      if (playCam && typeof playCam.pause === "function") playCam.pause();
       if (unitBlocks) unitBlocks.applyCutaway(view);
-      if (dollhouseCam && building) {
+      if (dollhouseCam) {
         dollhouseCam.enter(building, view.floor, (x, z) => heightAt(specOf("south"), x, z));
       }
     },
