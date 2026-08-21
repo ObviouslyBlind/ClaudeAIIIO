@@ -73,6 +73,7 @@ export function ghostFitsPlot(x, z, yaw, w, d, plot) {
   if (plot.class === "cart_pad") {
     return footprintInRing(x, z, yaw, w, d, plot.ring);
   }
+  if (plot.buildingId) return false;
   if (plot.ring && footprintInRing(x, z, yaw, w, d, plot.ring)) return true;
   const px = Number(plot.x);
   const pz = Number(plot.z);

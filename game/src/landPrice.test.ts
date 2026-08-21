@@ -36,7 +36,12 @@ describe("PAPER land asks and lease inflation", () => {
     const board = createLandBoard();
     const pad = board.plots.find((p) => p.class === "cart_pad" && !p.owner)!;
     const street = board.plots.find(
-      (p) => p.island === "south" && p.band === "street" && p.class === "by_right" && !p.owner,
+      (p) =>
+        p.island === "south" &&
+        p.band === "street" &&
+        p.class === "by_right" &&
+        !p.owner &&
+        !p.buildingId,
     )!;
     const frozen = street.price;
     const otherPad = board.plots.find((p) => p.class === "cart_pad" && p.id !== pad.id && !p.owner)!;
@@ -53,7 +58,12 @@ describe("PAPER land asks and lease inflation", () => {
     expect(pads.length).toBeGreaterThan(2);
     expect(pads.every((p) => p.price === 750 && p.seedPrice === 750)).toBe(true);
     const street = board.plots.find(
-      (p) => p.island === "south" && p.band === "street" && p.class === "by_right" && !p.owner,
+      (p) =>
+        p.island === "south" &&
+        p.band === "street" &&
+        p.class === "by_right" &&
+        !p.owner &&
+        !p.buildingId,
     )!;
     expect(leasePlot(board, createVisitor(80_000), street.id).ok).toBe(true);
     const still = board.plots.filter((p) => p.class === "cart_pad");
@@ -70,7 +80,12 @@ describe("PAPER land asks and lease inflation", () => {
     const board = createLandBoard();
     const visitor = createVisitor(80_000);
     const southStreet = board.plots.filter(
-      (p) => p.island === "south" && p.band === "street" && !p.owner && p.class === "by_right",
+      (p) =>
+        p.island === "south" &&
+        p.band === "street" &&
+        !p.owner &&
+        !p.buildingId &&
+        p.class === "by_right",
     );
     const byStreet = new Map<string, typeof southStreet>();
     for (const p of southStreet) {
@@ -102,7 +117,7 @@ describe("PAPER land asks and lease inflation", () => {
     const board = createLandBoard();
     const visitor = createVisitor(80_000);
     const plot = board.plots.find(
-      (p) => p.island === "south" && !p.owner && p.class === "by_right",
+      (p) => p.island === "south" && !p.owner && !p.buildingId && p.class === "by_right",
     )!;
     const other = board.plots.find((p) => p.id !== plot.id && !p.owner)!;
     const frozen = other.price;

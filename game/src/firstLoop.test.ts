@@ -51,7 +51,12 @@ import {
 function leaseCheapSouth() {
   const land = createLandBoard();
   const plot = land.plots.find(
-    (p) => p.island === "south" && !p.owner && p.band === "street" && p.class === "by_right",
+    (p) =>
+      p.island === "south" &&
+      !p.owner &&
+      !p.buildingId &&
+      p.band === "street" &&
+      p.class === "by_right",
   );
   expect(plot).toBeTruthy();
   const visitor = createVisitor(plot!.price + 800);
@@ -89,7 +94,8 @@ describe("South first loop", () => {
         !p.owner &&
         p.band === "street" &&
         p.class === "by_right" &&
-        Math.hypot(p.x - ISLANDS.south.port.x, p.z - ISLANDS.south.port.z) < 80,
+        !p.buildingId &&
+        Math.hypot(p.x - ISLANDS.south.port.x, p.z - ISLANDS.south.port.z) < 120,
     );
     expect(near).toBeTruthy();
     expect(near!.price).toBeGreaterThan(1_000);
@@ -121,7 +127,12 @@ describe("South first loop", () => {
     const land = createLandBoard();
     const visitor = createVisitor(1_000);
     const vacant = land.plots.find(
-      (p) => p.island === "south" && !p.owner && p.band === "street" && p.class === "by_right",
+      (p) =>
+        p.island === "south" &&
+        !p.owner &&
+        !p.buildingId &&
+        p.band === "street" &&
+        p.class === "by_right",
     );
     expect(vacant).toBeTruthy();
     const stolen = orderMarket(visitor, land, { plotId: vacant!.id, skus: ["hotdog_cart"], dest: "road" });
@@ -531,7 +542,13 @@ describe("South first loop", () => {
     const land = createLandBoard();
     const visitor = createVisitor(80_000);
     const plot = land.plots.find(
-      (p) => p.island === "south" && !p.owner && p.band === "street" && p.class === "by_right" && p.zone === "commercial",
+      (p) =>
+        p.island === "south" &&
+        !p.owner &&
+        !p.buildingId &&
+        p.band === "street" &&
+        p.class === "by_right" &&
+        p.zone === "commercial",
     );
     expect(plot).toBeTruthy();
     expect(leasePlot(land, visitor, plot!.id).ok).toBe(true);

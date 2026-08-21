@@ -70,7 +70,7 @@ describe("PAPER planning board step F", () => {
 
   it("fail does not place a building; pass only sets passed (queue)", () => {
     const land = createLandBoard();
-    const plot = land.plots.find((p) => !p.owner && !p.use)!;
+    const plot = land.plots.find((p) => !p.owner && !p.use && !p.buildingId)!;
     expect(plot.use).toBeNull();
 
     const failBoard = createPlanningBoard();

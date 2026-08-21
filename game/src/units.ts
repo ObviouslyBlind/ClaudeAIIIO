@@ -15,7 +15,7 @@ import {
   UNIT_ROOM_PRICE,
 } from "./economy.ts";
 import { TICKS_PER_SIM_DAY } from "./calendar.ts";
-import { SOUTH_HIGHWAY_NODES, SOUTH_PORT } from "./southGeom.ts";
+import { UNIT_PRECINCT, UNIT_ROW_YAW, unitLotPose, unitPlotId } from "./unitPrecinct.ts";
 import type { Delivery, InvKind, LoopFail, LoopOk, PlayState, WorkSite } from "./firstLoop.ts";
 
 export const UNITS_NOTE = "PAPER units. SIMULATED. Rooms inside a building.";
@@ -71,72 +71,46 @@ export type BuildingSpec = {
   floors: number;
   x: number;
   z: number;
+  plotId: string;
   rooms: { floor: number; room: number; use: UnitUse; label: string }[];
 };
 
 const SHOP_STOCK: InvKind[] = ["hotdogs", "melon", "fish_chips"];
 
-/** Align room width with Island Hwy so four shells read as a street, not a world-axis pile. */
-const _hwy0 = SOUTH_HIGHWAY_NODES[0]!;
-const _hwy1 = SOUTH_HIGHWAY_NODES[1]!;
-export const UNIT_ROW_YAW = Math.atan2(_hwy1.z - _hwy0.z, _hwy1.x - _hwy0.x);
+const UNIT_ROOMS: Record<string, BuildingSpec["rooms"]> = {
+  "quay-shops": [
+    { floor: 0, room: 0, use: "shop", label: "Quay shop left" },
+    { floor: 0, room: 1, use: "shop", label: "Quay shop right" },
+  ],
+  "strand-flats": [
+    { floor: 0, room: 0, use: "apartment", label: "Strand flat G-L" },
+    { floor: 0, room: 1, use: "apartment", label: "Strand flat G-R" },
+    { floor: 1, room: 0, use: "apartment", label: "Strand flat 1-L" },
+    { floor: 1, room: 1, use: "apartment", label: "Strand flat 1-R" },
+  ],
+  "mixed-house": [
+    { floor: 0, room: 0, use: "shop", label: "Mixed house shop" },
+    { floor: 1, room: 0, use: "apartment", label: "Mixed house flat" },
+    { floor: 2, room: 0, use: "office", label: "Mixed house office" },
+  ],
+};
 
 /**
- * First-frame row, inland of Island Hwy (past the dual + cart pads), in the
- * south spawn look. Strand Flats ($900) is closest. Do not stack the four
- * shells on top of each other — Quay Shops must read as its own box.
+ * Three shells on buyable lots next to the $750 spawn pads.
+ * 1 / 2 / 3 storeys in a row. Dirt is the lot; rooms are separate buys.
  */
-export const UNIT_BUILDINGS: BuildingSpec[] = [
-  {
-    id: "strand-flats",
-    name: "Strand Flats",
-    floors: 2,
-    x: SOUTH_PORT.x + 11,
-    z: SOUTH_PORT.z + 32,
-    rooms: [
-      { floor: 0, room: 0, use: "apartment", label: "Strand flat G-L" },
-      { floor: 0, room: 1, use: "apartment", label: "Strand flat G-R" },
-      { floor: 1, room: 0, use: "apartment", label: "Strand flat 1-L" },
-      { floor: 1, room: 1, use: "apartment", label: "Strand flat 1-R" },
-    ],
-  },
-  {
-    id: "mixed-house",
-    name: "Mixed House",
-    floors: 3,
-    x: SOUTH_PORT.x + 17,
-    z: SOUTH_PORT.z + 49,
-    rooms: [
-      { floor: 0, room: 0, use: "shop", label: "Mixed house shop" },
-      { floor: 1, room: 0, use: "apartment", label: "Mixed house flat" },
-      { floor: 2, room: 0, use: "office", label: "Mixed house office" },
-    ],
-  },
-  {
-    id: "quay-shops",
-    name: "Quay Shops",
-    floors: 1,
-    x: SOUTH_PORT.x + 36,
-    z: SOUTH_PORT.z + 52,
-    rooms: [
-      { floor: 0, room: 0, use: "shop", label: "Quay shop left" },
-      { floor: 0, room: 1, use: "shop", label: "Quay shop right" },
-    ],
-  },
-  {
-    id: "harbour-offices",
-    name: "Harbour Offices",
-    floors: 2,
-    x: SOUTH_PORT.x + 42,
-    z: SOUTH_PORT.z + 69,
-    rooms: [
-      { floor: 0, room: 0, use: "office", label: "Harbour office G-L" },
-      { floor: 0, room: 1, use: "office", label: "Harbour office G-R" },
-      { floor: 1, room: 0, use: "office", label: "Harbour office 1-L" },
-      { floor: 1, room: 1, use: "office", label: "Harbour office 1-R" },
-    ],
-  },
-];
+export const UNIT_BUILDINGS: BuildingSpec[] = UNIT_PRECINCT.map((row) => {
+  const pose = unitLotPose(row.index);
+  return {
+    id: row.id,
+    name: row.name,
+    floors: row.floors,
+    x: pose.x,
+    z: pose.z,
+    plotId: unitPlotId(row.id),
+    rooms: UNIT_ROOMS[row.id]!,
+  };
+});
 
 function roundMoney(n: number): number {
   return Math.round(n * 10000) / 10000;
@@ -298,6 +272,7 @@ export function buyRoom(
 export function buyBuildingLand(
   visitor: UnitVisitor,
   buildingId: string,
+  plots?: { buildingId?: string; owner: string | null }[],
 ): LoopOk<{ land: BuildingLand }> | LoopFail {
   const play = seedUnits(visitor.play);
   if (!buildingById(buildingId)) return fail("no_building");
@@ -308,6 +283,8 @@ export function buyBuildingLand(
   visitor.cash = roundMoney(visitor.cash - land.price);
   play.gameBank = roundMoney((play.gameBank || 0) + land.price);
   land.owner = "visitor";
+  const plot = (plots || []).find((p) => p.buildingId === buildingId);
+  if (plot) plot.owner = "visitor";
   return ok({ land });
 }
 
@@ -536,6 +513,7 @@ export function unitsSnapshot(play: PlayState) {
         floors: b.floors,
         x: b.x,
         z: b.z,
+        plotId: b.plotId,
         yaw: UNIT_ROW_YAW,
         landOwner: land.owner,
         landPrice: land.price,

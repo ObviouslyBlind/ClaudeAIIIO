@@ -137,6 +137,10 @@ export function mountChrome(opts) {
 
   function setOverlay(id) {
     overlay = id;
+    if (isLotsViewer(id) && !propertiesOn) {
+      propertiesOn = true;
+      if (opts.onProperties) opts.onProperties(true);
+    }
     paintViewerChrome();
     if (opts.onOverlay) opts.onOverlay(id);
     paintFootLegend();

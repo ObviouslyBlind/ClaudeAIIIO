@@ -64,7 +64,7 @@ South spawn. Tap-to-walk. RMB-hold orbit. No WASD.
 | Site card | Stock · Run · Upgrades · Stats. Hire $300. Play shifts while unhired. |
 | Hire | Left-rail Hire sheet, or Run tab on the cart. |
 | Account | #0002. Look swatches. Reset / delete. Cash chip expands to holdings. |
-| Units (0.5.1) | Four grey shells **inland of Island Hwy**, in the spawn look. Spawn **$10,000**. **Properties** chip: $ / YOURS signs way above the shells (same lots tags; dirt is just a lot). Compact sheet: **Floor: G** stepper, green buy tiles. **Dollhouse**: RMB-hold orbit 360 around the floor. Close or Properties-off returns to harbour follow. Kit is constructed furniture. Packer + till. Scout + lease. Dest **This room** when you own a shop. |
+| Units (0.5.1) | Three grey shells on **buyable lots** next to the **$750 spawn pads** (1 / 2 / 3 storeys). Spawn **$10,000**. Click **Lots** → **Lots and properties to buy**. $ / YOURS signs way above the shells. Compact sheet: **Floor: G** stepper, green buy tiles. **Dollhouse**: RMB-hold orbit. Kit is constructed furniture. |
 
 Starter: cash **$10,000**. Pad **$750**. Fruit kit **$90**, pack **$14** / 20. Today fruit **$6**, tax **8%**. A shop room is **$1,200**. Building dirt is **$15,000**. Hire **$300**.
 
@@ -76,7 +76,7 @@ Controls: primary tap/click walks or uses. Secondary long-press / right-click ex
 
 Working branch for this slice: **`cursor/units-gameplan-3924`**. PR: **https://github.com/ObviouslyBlind/ClaudeAIIIO/pull/60**.
 
-Tests: `cd game && npm test` — **774 passed** (2026-08-21).
+Tests: `cd game && npm test` — **775 passed** (2026-08-21).
 
 ---
 

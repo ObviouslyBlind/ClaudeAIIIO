@@ -35,7 +35,7 @@ import {
 const QUAY_LEFT = "quay-shops-0-0";
 const QUAY_RIGHT = "quay-shops-0-1";
 const STRAND = "strand-flats-0-0";
-const OFFICE = "harbour-offices-0-0";
+const OFFICE = "mixed-house-2-0";
 
 function ripeVisitor() {
   const land = createLandBoard();
@@ -44,18 +44,28 @@ function ripeVisitor() {
 }
 
 describe("units scripts (alpha 0.5)", () => {
-  it("authors four buildings and thirteen rooms", () => {
+  it("authors three buildings and nine rooms on lots next to spawn", () => {
     const { visitor } = ripeVisitor();
     const rooms = UNIT_BUILDINGS.flatMap((b) => b.rooms);
-    expect(UNIT_BUILDINGS).toHaveLength(4);
-    expect(rooms).toHaveLength(13);
-    expect(visitor.play.units).toHaveLength(13);
-    expect(playSnapshot(visitor, createLandBoard()).units.buildings).toHaveLength(4);
+    expect(UNIT_BUILDINGS).toHaveLength(3);
+    expect(rooms).toHaveLength(9);
+    expect(visitor.play.units).toHaveLength(9);
+    const land = createLandBoard();
+    const snap = playSnapshot(visitor, land);
+    expect(snap.units.buildings).toHaveLength(3);
+    expect(UNIT_BUILDINGS.map((b) => b.floors)).toEqual([1, 2, 3]);
     const spawn = southSpawnPad();
-    const strand = UNIT_BUILDINGS.find((b) => b.id === "strand-flats");
-    expect(Math.hypot(strand.x - spawn.x, strand.z - spawn.z)).toBeLessThan(40);
+    const quay = UNIT_BUILDINGS.find((b) => b.id === "quay-shops")!;
+    expect(Math.hypot(quay.x - spawn.x, quay.z - spawn.z)).toBeLessThan(40);
     for (const b of UNIT_BUILDINGS) {
       expect(Math.hypot(b.x - spawn.x, b.z - spawn.z)).toBeLessThan(80);
+      expect(b.plotId).toBe("south-unit-" + b.id);
+      const plot = land.plots.find((p) => p.id === b.plotId);
+      expect(plot).toBeTruthy();
+      expect(plot!.buildingId).toBe(b.id);
+      expect(plot!.price).toBe(BUILDING_LAND_PRICE);
+      expect(Math.hypot(plot!.x - b.x, plot!.z - b.z)).toBeLessThan(1);
+      expect(leasePlot(land, visitor, plot!.id).reason).toBe("building_lot");
     }
     for (let i = 0; i < UNIT_BUILDINGS.length; i++) {
       for (let j = i + 1; j < UNIT_BUILDINGS.length; j++) {
@@ -64,7 +74,6 @@ describe("units scripts (alpha 0.5)", () => {
         expect(Math.hypot(a.x - b.x, a.z - b.z)).toBeGreaterThan(16);
       }
     }
-    const land = createLandBoard();
     const hwy = land.roads.find(
       (r) =>
         r.name === "Island Hwy" &&
@@ -116,8 +125,10 @@ describe("units scripts (alpha 0.5)", () => {
       false,
     );
     visitor.cash = BUILDING_LAND_PRICE;
-    expect(buyBuildingLand(visitor, "quay-shops").ok).toBe(true);
+    const board = createLandBoard();
+    expect(buyBuildingLand(visitor, "quay-shops", board.plots).ok).toBe(true);
     expect(visitor.play.buildingLands.find((b) => b.buildingId === "quay-shops")?.owner).toBe("visitor");
+    expect(board.plots.find((p) => p.buildingId === "quay-shops")?.owner).toBe("visitor");
   });
 
   it("fills a quay shop from the crate only when a packer is hired, and sells only with a till", () => {
@@ -231,7 +242,7 @@ describe("units scripts (alpha 0.5)", () => {
     if (!restored.ok) return;
     expect(restored.visitor.play.units.find((u) => u.id === QUAY_LEFT)?.owner).toBe("visitor");
     expect(restored.visitor.play.units.find((u) => u.id === QUAY_RIGHT)?.owner).toBeNull();
-    expect(restored.visitor.play.units).toHaveLength(13);
+    expect(restored.visitor.play.units).toHaveLength(9);
   });
 
   it("skips ground rent when the visitor owns the dirt", () => {

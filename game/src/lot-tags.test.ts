@@ -35,6 +35,7 @@ describe("lot tags (PAPER)", () => {
     expect(tagLabelFor({ owner: "visitor" }, true)).toBe("PLACE");
     expect(tagKindFor({ owner: "npc" })).toBe("taken");
     expect(tagLabelFor({ owner: "npc" })).toBe("TAKEN");
+    expect(tagKindFor({ owner: null, price: 15000, buildingId: "quay-shops" })).toBe("none");
   });
 
   it("prefers nearby vacant buy tags", () => {

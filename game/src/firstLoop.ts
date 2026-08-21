@@ -1238,6 +1238,7 @@ export function placeStand(
   const play = ensurePlay(visitor);
   const plot = plotForPlace(land, plotId, pose?.x, pose?.z);
   if (!plot) return fail("not_yours");
+  if (plot.buildingId) return fail("building_lot");
   if (play.stands.some((s) => s.plotId === plot.id)) return fail("already_placed");
   const wanted = pose?.kitId ? CART_KINDS.filter((row) => row.kitId === pose.kitId) : CART_KINDS;
   const peek = wanted.find((cart) => (play.inventory.find((r) => r.kind === cart.kitId)?.qty ?? 0) >= 1);
@@ -1925,6 +1926,7 @@ export function playSnapshot(visitor: Visitor, land: LandBoard, taxRate?: number
         (p) =>
           p.island === "south" &&
           !p.owner &&
+          !p.buildingId &&
           (p.class === "by_right" || p.class === "cart_pad") &&
           (p.band === "street" || p.class === "cart_pad"),
       )

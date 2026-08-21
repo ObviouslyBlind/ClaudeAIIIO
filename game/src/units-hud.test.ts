@@ -29,11 +29,13 @@ function snapWithCash(cash = UNIT_SLICE_FAUCET) {
 }
 
 describe("units 0.5.1 systems (placeholders, not façades)", () => {
-  it("lists four buildings and thirteen rooms on the play snapshot", () => {
+  it("lists three buildings and nine rooms on the play snapshot", () => {
     const { play } = snapWithCash();
-    expect(play.units.buildings).toHaveLength(4);
-    expect(play.units.buildings.flatMap((b) => b.rooms)).toHaveLength(13);
+    expect(play.units.buildings).toHaveLength(3);
+    expect(play.units.buildings.flatMap((b) => b.rooms)).toHaveLength(9);
     expect(findBuilding(play, "quay-shops")?.name).toBe("Quay Shops");
+    expect(play.units.buildings.map((b) => b.floors)).toEqual([1, 2, 3]);
+    expect(play.units.buildings.every((b) => b.plotId && b.plotId.startsWith("south-unit-"))).toBe(true);
   });
 
   it("keeps vacant rooms as green buy tiles until you own one", () => {
@@ -120,12 +122,12 @@ describe("units 0.5.1 systems (placeholders, not façades)", () => {
     expect(html).toContain("Hire till");
   });
 
-  it("plants thirteen placeholder boxes with unit-block picks", () => {
+  it("plants nine placeholder boxes with unit-block picks", () => {
     const { play } = snapWithCash();
     const scene = new THREE.Scene();
     const blocks = mountUnitBlocks({ scene, heightAt: () => 1.28 });
-    expect(blocks.sync(play)).toBe(13);
-    expect(roomBoxCount(play.units.buildings)).toBe(13);
+    expect(blocks.sync(play)).toBe(9);
+    expect(roomBoxCount(play.units.buildings)).toBe(9);
     expect(scene.getObjectByName("unit-blocks")).toBeTruthy();
     const quay = scene.getObjectByName("unit-" + QUAY);
     expect(quay.userData.kind).toBe("unit-block");
@@ -136,7 +138,9 @@ describe("units 0.5.1 systems (placeholders, not façades)", () => {
     expect(scene.getObjectByName("unit-pad-quay-shops")).toBeFalsy();
     blocks.setViewer({ propertiesOn: true, overlay: "world" });
     expect(scene.getObjectByName("unit-label-strand-flats").visible).toBe(true);
-    expect(blocks.clickables().length).toBeGreaterThanOrEqual(13);
+    expect(blocks.clickables().length).toBeGreaterThanOrEqual(9);
+    blocks.setViewer({ propertiesOn: false, overlay: "lots" });
+    expect(blocks.clickables().length).toBeGreaterThanOrEqual(9);
     const yaw = play.units.buildings.find((b) => b.id === "quay-shops").yaw;
     expect(quay.rotation.y).toBeCloseTo(yaw, 5);
     const right = scene.getObjectByName("unit-" + QUAY_RIGHT);
@@ -149,8 +153,8 @@ describe("units 0.5.1 systems (placeholders, not façades)", () => {
     for (const b of UNIT_BUILDINGS) {
       expect(Math.hypot(b.x - spawn.x, b.z - spawn.z)).toBeLessThan(80);
     }
-    const strand = UNIT_BUILDINGS.find((b) => b.id === "strand-flats");
-    expect(Math.hypot(strand.x - spawn.x, strand.z - spawn.z)).toBeLessThan(40);
+    const quay = UNIT_BUILDINGS.find((b) => b.id === "quay-shops");
+    expect(Math.hypot(quay.x - spawn.x, quay.z - spawn.z)).toBeLessThan(40);
     const { visitor, land } = snapWithCash();
     expect(purchaseRoom(visitor, "strand-flats-0-0").ok).toBe(true);
     expect(fitUnitKit(visitor, "strand-flats-0-0", "bed").ok).toBe(true);

@@ -1702,6 +1702,12 @@ function walkPoint(hits) {
 }
 
 function showLandCard(p) {
+  if (p && p.buildingId && chromeHud && chromeHud.openBuildingSheet) {
+    if (chromeHud.setPropertiesOn) chromeHud.setPropertiesOn(true);
+    chromeHud.openBuildingSheet(p.buildingId);
+    setStatus((p.name || "Building") + " · rooms.");
+    return true;
+  }
   if (!p || !map || !chromeHud || !chromeHud.paintLand) return false;
   landPinned = true;
   const prev = selected ? map.plots.find((row) => row.id === selected) : null;
@@ -1728,6 +1734,13 @@ function showLandCard(p) {
 }
 
 function askToBuy(p) {
+  if (!p) return;
+  if (p.buildingId && chromeHud && chromeHud.openBuildingSheet) {
+    if (chromeHud.setPropertiesOn) chromeHud.setPropertiesOn(true);
+    chromeHud.openBuildingSheet(p.buildingId);
+    setStatus((p.name || "Building") + " · Buy a room.");
+    return;
+  }
   if (!p) return;
   const prev = selected && map ? map.plots.find((row) => row.id === selected) : null;
   selected = p.id;

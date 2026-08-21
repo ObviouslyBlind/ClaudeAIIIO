@@ -99,7 +99,7 @@ function applyLandAsks(land: LandBoard, asks: { id: string; price: number }[]): 
 }
 
 function visitorLeaseIds(land: LandBoard): string[] {
-  return land.plots.filter((p) => p.owner === "visitor").map((p) => p.id);
+  return land.plots.filter((p) => p.owner === "visitor" && !p.buildingId).map((p) => p.id);
 }
 
 function visitorDevelops(land: LandBoard): DevelopedPlot[] {
@@ -227,6 +227,11 @@ export function restoreShard(raw: unknown): RestoreResult {
   if (blob.visitor.play) {
     visitor.play = blob.visitor.play;
     ensurePlay(visitor);
+  }
+  for (const row of visitor.play?.buildingLands || []) {
+    if (row.owner !== "visitor") continue;
+    const plot = land.plots.find((p) => p.buildingId === row.buildingId);
+    if (plot) plot.owner = "visitor";
   }
 
   return { ok: true, world, land, visitor, events: restoreEvents(blob.events) };

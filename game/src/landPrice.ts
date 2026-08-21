@@ -4,6 +4,7 @@
  */
 
 import {
+  BUILDING_LAND_PRICE,
   CART_PAD_PRICE,
   LAND_ASK_CAP_MUL,
   LAND_FLOOR,
@@ -26,6 +27,7 @@ export type AskPlot = {
   price: number;
   seedPrice: number;
   class?: string;
+  buildingId?: string;
 };
 
 function roundAsk(n: number): number {
@@ -68,23 +70,32 @@ function isCartPadAsk(plot: AskPlot): boolean {
   return plot.class === "cart_pad";
 }
 
-/** Cart pads are a fixed $750 ask. Inflation never moves them. */
+function isBuildingLotAsk(plot: AskPlot): boolean {
+  return Boolean(plot.buildingId);
+}
+
+/** Cart pads are a fixed $750 ask. Building lots stay $15,000. Inflation never moves them. */
 export function pinCartPadAsks(plots: AskPlot[]): void {
   for (const p of plots) {
-    if (!isCartPadAsk(p)) continue;
-    p.price = CART_PAD_PRICE;
-    p.seedPrice = CART_PAD_PRICE;
+    if (isCartPadAsk(p)) {
+      p.price = CART_PAD_PRICE;
+      p.seedPrice = CART_PAD_PRICE;
+    }
+    if (isBuildingLotAsk(p)) {
+      p.price = BUILDING_LAND_PRICE;
+      p.seedPrice = BUILDING_LAND_PRICE;
+    }
   }
 }
 
 /** Raise vacant asks after a lease. Restore passes inflate: false.
  *  Cart pads stay $750 and do not bump street / field asks. */
 export function inflateAsksAfterLease(plots: AskPlot[], bought: AskPlot): void {
-  if (!isCartPadAsk(bought)) {
+  if (!isCartPadAsk(bought) && !isBuildingLotAsk(bought)) {
     for (const other of plots) {
       if (other.id === bought.id) continue;
       if (other.owner) continue;
-      if (isCartPadAsk(other)) continue;
+      if (isCartPadAsk(other) || isBuildingLotAsk(other)) continue;
       const next = other.price * (1 + bumpFor(bought, other));
       other.price = capAsk(other, next);
     }
@@ -98,7 +109,7 @@ export function landAskIndex(plots: AskPlot[]): number {
   let den = 0;
   for (const p of plots) {
     if (p.owner) continue;
-    if (isCartPadAsk(p)) continue;
+    if (isCartPadAsk(p) || isBuildingLotAsk(p)) continue;
     const seed = p.seedPrice > 0 ? p.seedPrice : p.price;
     if (seed <= 0) continue;
     num += p.price / seed;

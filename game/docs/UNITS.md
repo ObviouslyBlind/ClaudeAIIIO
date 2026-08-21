@@ -45,16 +45,15 @@ Do not rebuild these. Do not rename leftover `hotdog_*` identifiers this pass.
 
 ## The test block
 
-Four authored **buildings** on South, near spawn. Each room is a grey box. You buy rooms one at a time. The dirt under a building is a **separate**, expensive landlord buy.
+Three authored **buildings** on South, each on a **plot** next to the $750 cart pads. Each room is a grey box. You buy rooms one at a time. The dirt under a building is a **separate**, expensive landlord buy.
 
 | Building | Floors | Rooms (each buyable) | Locked use |
 |---|---|---|---|
 | **Quay Shops** | 1 | 2 side-by-side ground rooms | shop, shop |
 | **Strand Flats** | 2 | 2 rooms per floor (4 flats) | apartment |
-| **Harbour Offices** | 2 | 2 rooms per floor (4 offices) | office |
 | **Mixed House** | 3 | 1 room per floor (3 rooms) | shop / apartment / office |
 
-That is **4 buildings, 13 rooms**. $10,000 (slice faucet in tests) should buy **one or two rooms** and kit them, not the block, and **not** the dirt.
+That is **3 buildings, 9 rooms**, on **buyable lots** next to the $750 spawn pads. $10,000 (slice faucet in tests) should buy **one or two rooms** and kit them, not the block, and **not** the dirt.
 
 Grey boxes are the product for the camera later. Kit is constructed furniture (shelf, fridge, till, bed, shower, sink, desk, cabinet). No CSG, no wallpaper pack, no unique minigames. **Blender meshes are a later version.** Alpha 0.5 is scripts only.
 
@@ -90,7 +89,7 @@ Primary = tap / left click. Secondary = long-press / right click. No WASD. No vi
 
 Grey boxes in the harbour are the **systems camera**. Not Blender.
 
-**Properties** is a viewer chip, off by default. With it off you cannot open a building. With it on, lot-style **$ / YOURS** signs sit way above each shell (same lots language; the dirt is just a lot — no extra pad). World + Properties still shows those signs so you can find a building while walking.
+**Properties** is a viewer chip. Clicking **Lots** turns it on, so the caption is **Lots and properties to buy** and you can tap a house. Buildings sit on lots next to the $750 pads — same lots $ language, sign way above the shell. World still uses the Properties chip to find buildings while walking.
 
 Lots chip copy with the Properties toggle:
 

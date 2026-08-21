@@ -239,8 +239,12 @@ export function mountUnitBlocks(opts) {
   let propertiesOn = false;
   let overlay = "world";
 
+  function propertiesLive() {
+    return propertiesOn || overlay === "lots" || overlay === "yours";
+  }
+
   function tagShouldShow(d) {
-    if (!propertiesOn) return false;
+    if (!propertiesLive()) return false;
     if (overlay === "yours") return d.tagKind === "yours";
     return true;
   }
@@ -356,7 +360,7 @@ export function mountUnitBlocks(opts) {
     isPropertiesOn: () => propertiesOn,
     getCutaway: () => cutaway,
     clickables() {
-      if (!propertiesOn) return [];
+      if (!propertiesLive()) return [];
       const out = [];
       group.traverse((o) => {
         if (o.userData && o.userData.kind === "unit-block" && o.visible !== false) out.push(o);

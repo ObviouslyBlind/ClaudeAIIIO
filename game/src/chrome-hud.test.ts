@@ -186,6 +186,9 @@ describe("harbour chrome HUD", () => {
     expect(chrome).toContain("isLotsViewer");
     expect(chrome).toContain("viewerCaption");
     expect(chrome).toContain("isPropertiesOn");
+    expect(chrome).toContain("isLotsViewer(id) && !propertiesOn");
+    expect(main).toContain("openBuildingSheet");
+    expect(main).toContain("p.buildingId");
     expect(chrome).toContain('data-toggle="properties"');
     expect(chrome).toContain("is-yours");
     expect(chrome).toContain('setOverlay("world")');

@@ -274,7 +274,7 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "POST" && url.pathname === "/api/building/land") {
     const body = await readJsonBody(req);
-    const result = buyBuildingLand(visitor, String(body?.buildingId ?? ""));
+    const result = buyBuildingLand(visitor, String(body?.buildingId ?? ""), land.plots);
     json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
     return;
   }
