@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { askMoney, buyAskModel } from "../public/harbour/buy-ask.js";
+import { askMoney, buyAskModel, landAskModel, unitAskModel } from "../public/harbour/buy-ask.js";
 
 describe("buy-ask (PAPER)", () => {
   it("asks before a vacant lot is bought", () => {
@@ -35,5 +35,30 @@ describe("buy-ask (PAPER)", () => {
     });
     expect(model?.question).toBe("Do you want to buy this cart pad?");
     expect(model?.priceLabel).toBe("$750");
+  });
+
+  it("asks before a vacant room is bought", () => {
+    const model = unitAskModel({
+      id: "strand-flats-0-0",
+      label: "Strand flat G-L",
+      price: 900,
+      owner: null,
+      use: "apartment",
+    });
+    expect(model?.question).toBe("Buy Strand flat G-L for $900?");
+    expect(model?.yes).toBe("Yes, buy");
+    expect(unitAskModel({ id: "x", owner: "visitor", price: 900, label: "Taken" })).toBeNull();
+  });
+
+  it("asks for landlord dirt with honest cannot-afford copy", () => {
+    const model = landAskModel({ id: "quay-shops", name: "Quay Shops", landPrice: 15000, landOwner: null }, 10000);
+    expect(model?.question).toBe("Buy the dirt under Quay Shops for $15,000?");
+    expect(model?.name).toMatch(/do not need this/i);
+    expect(model?.disabled).toBe(true);
+    expect(model?.yes).toBe("Need $15,000");
+    const rich = landAskModel({ id: "quay-shops", name: "Quay Shops", landPrice: 15000, landOwner: null }, 15000);
+    expect(rich?.disabled).toBe(false);
+    expect(rich?.yes).toBe("Yes, buy");
+    expect(landAskModel({ landOwner: "visitor", name: "Quay Shops", landPrice: 15000 })).toBeNull();
   });
 });

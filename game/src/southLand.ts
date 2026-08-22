@@ -1,6 +1,6 @@
 /**
  * South island road network, empty town footprints, beach and field lots.
- * Zero buildings. NPC town seeding stays North-only.
+ * Three authored building lots sit next to the spawn pads. NPC town seeding stays North-only.
  *
  * Roads are authored as a graph (see roadGraph.ts): every junction is a node
  * and every edge physically ends on its nodes. Nothing is "near" anything —
@@ -37,6 +37,7 @@ import {
 import { zoneForBand } from "./zones.ts";
 import { plotAsk } from "./landPrice.ts";
 import { CART_PAD_PRICE } from "./economy.ts";
+import { UNIT_LOT_PRICE, UNIT_PRECINCT, unitLotRing, unitPlotId } from "./unitPrecinct.ts";
 import type { IslandSpec, Parcel, PlotBand, PlotClass, Ring, Road, TaxiStop } from "./land.ts";
 
 export type SouthBuilt = {
@@ -263,6 +264,8 @@ type PushOpts = {
   price?: number;
   name?: string;
   idPrefix?: string;
+  id?: string;
+  buildingId?: string;
 };
 
 function pushParcel(out: Parcel[], ring: Ring, opts: PushOpts): boolean {
@@ -278,7 +281,7 @@ function pushParcel(out: Parcel[], ring: Ring, opts: PushOpts): boolean {
   if (area < minA || area > SOUTH_MAX_LOT_M2) return false;
   const portDist = Math.hypot(c.x - SOUTH_PORT.x, c.z - SOUTH_PORT.z);
   const band = opts.band;
-  const id = `${opts.idPrefix ?? `south-${band}`}-${out.length}`;
+  const id = opts.id ?? `${opts.idPrefix ?? `south-${band}`}-${out.length}`;
   const street = opts.street;
   const price = opts.price ?? priceOf(area, band, portDist);
   const name =
@@ -301,6 +304,7 @@ function pushParcel(out: Parcel[], ring: Ring, opts: PushOpts): boolean {
     name,
     deposit: null,
     zone: opts.zone ?? zoneForBand(band),
+    buildingId: opts.buildingId,
   });
   return true;
 }
@@ -400,6 +404,25 @@ function seedHighwayCartPads(
   }
 }
 
+/** Three buyable building lots next to the $750 spawn pads. 1 / 2 / 3 storeys. */
+function seedUnitLots(lots: Parcel[], base: Omit<PushOpts, "street" | "band">): void {
+  for (const row of UNIT_PRECINCT) {
+    pushParcel(lots, unitLotRing(row.index), {
+      ...base,
+      street: "Island Hwy",
+      band: "street",
+      zone: "commercial",
+      cls: "by_right",
+      minArea: 90,
+      price: UNIT_LOT_PRICE,
+      name: row.name,
+      id: unitPlotId(row.id),
+      buildingId: row.id,
+      skipRoads: true,
+    });
+  }
+}
+
 /** One by-right commercial street lot within ~80 m of the south quay. */
 function seedPortStreetLot(
   lots: Parcel[],
@@ -414,7 +437,7 @@ function seedPortStreetLot(
   if (!hwy) return;
   const setback = clearanceFor(hwy) + 2;
   const front = 16;
-  for (const dist of [40, 48, 36, 56, 64, 72]) {
+  for (const dist of [40, 48, 36, 56, 64, 72, 88, 96, 28, 104]) {
     const st = stationAt(hwy.points, dist);
     if (!st) continue;
     const sa = offsetBy(st.at, { x: -st.dir.x, z: -st.dir.z }, front / 2);
@@ -818,6 +841,8 @@ export function buildSouthLand(spec: IslandSpec, heightAt: HeightFn): SouthBuilt
   plazaAt(lots, saltwind, "Saltwind", base, 30, 16);
   plazaAt(lots, ashPass, "Ash Pass", base, 20, 20);
   plazaAt(lots, eastHaven, "East Haven", base, 24, 20);
+
+  seedUnitLots(lots, base);
 
   // One cheap street stall next to the south pad. Quayward $ lots sit ~350 m
   // inland; without this the spawn camera never sees a buyable $ tag.

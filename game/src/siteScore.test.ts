@@ -109,4 +109,20 @@ describe("site desirability", () => {
     expect(siteClassForUse("factory")).toBe("mine");
     expect(siteClassForUse("cart")).toBeNull();
   });
+
+  it("counts shop room kit as the same 0–10 parts as cart fridge", () => {
+    const s = scoreSite({
+      hired: true,
+      stocked: true,
+      upgraded: true,
+      upgrades: ["shelf", "till", "fridge"],
+      traffic: "green",
+      rivalsOnStreet: 0,
+      baseGrade: 1,
+    });
+    expect(s.parts.find((p) => p.id === "shelf")?.points).toBe(1);
+    expect(s.parts.find((p) => p.id === "till")?.points).toBe(1);
+    expect(s.parts.find((p) => p.id === "fridge")?.points).toBe(1.5);
+    expect(s.score).toBe(8);
+  });
 });

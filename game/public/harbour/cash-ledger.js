@@ -195,7 +195,7 @@ export function formatCashLedger(play) {
   const taxPct = Math.round(m.tax * 100);
   let body;
   if (m.empty) {
-    body = `<p class="cash-ledger-empty">No land, no cart on the kerb. A highway pad is $750. Street lots cost more than starter cash. You make $0.00 a minute until something sells.</p>`;
+    body = `<p class="cash-ledger-empty">No land, no cart on the kerb. Spawn is $10,000. A highway pad is $750. Building dirt is $15,000. You make $0.00 a minute until something sells.</p>`;
   } else {
     body = `<table>
       <thead>

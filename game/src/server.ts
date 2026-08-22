@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import { extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { GOOD_IDS } from "./goods.ts";
-import { createLandBoard, developPlot, leasePlot } from "./land.ts";
+import { createLandBoard, developPlot, leasePlot, STARTER_CASH } from "./land.ts";
 import { parseLandUse } from "./buildings.ts";
 import { buyAtIsland } from "./buy.ts";
 import { sellAtIsland } from "./sell.ts";
@@ -58,6 +58,18 @@ import { footTrafficSnapshot } from "./footTraffic.ts";
 import { completePackShift } from "./shiftBonus.ts";
 import { salesTaxRate } from "./statutes.ts";
 import { listingTape } from "./stocks.ts";
+import {
+  buyBuildingLand,
+  buyRoom,
+  fireUnitRole,
+  fitUnitKit,
+  hireUnitRole,
+  isFurnitureKit,
+  placeUnitKit,
+  pickupUnitKit,
+  scoutTenant,
+  signLease,
+} from "./units.ts";
 
 function playPayload() {
   const islandHud = hud(world, visitor);
@@ -89,7 +101,7 @@ const publicDir = join(root, "public");
 const port = Number(process.env.PORT ?? 8787);
 
 let world = createWorld(7);
-let visitor = createVisitor(1_000);
+let visitor = createVisitor(STARTER_CASH);
 let land = createLandBoard();
 let events = createEventLog();
 const presence = createPresence();
@@ -256,6 +268,69 @@ const server = createServer(async (req, res) => {
     return;
   }
 
+  if (req.method === "POST" && url.pathname === "/api/unit/buy") {
+    const body = await readJsonBody(req);
+    const result = buyRoom(visitor, String(body?.unitId ?? ""));
+    json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/building/land") {
+    const body = await readJsonBody(req);
+    const result = buyBuildingLand(visitor, String(body?.buildingId ?? ""), land.plots);
+    json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/unit/hire") {
+    const body = await readJsonBody(req);
+    const result = hireUnitRole(visitor, String(body?.unitId ?? ""), String(body?.role ?? ""));
+    json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/unit/fire") {
+    const body = await readJsonBody(req);
+    const result = fireUnitRole(visitor, String(body?.unitId ?? ""), String(body?.role ?? ""));
+    json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/unit/kit") {
+    const body = await readJsonBody(req);
+    const result = fitUnitKit(visitor, String(body?.unitId ?? ""), String(body?.kitId ?? ""));
+    json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/unit/scout") {
+    const body = await readJsonBody(req);
+    const result = scoutTenant(visitor, String(body?.unitId ?? ""));
+    json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/unit/lease") {
+    const body = await readJsonBody(req);
+    const result = signLease(visitor, String(body?.unitId ?? ""), String(body?.tenantId ?? ""), world.tick);
+    json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/unit/place") {
+    const body = await readJsonBody(req);
+    const result = placeUnitKit(visitor, String(body?.unitId ?? ""), String(body?.kitId ?? ""));
+    json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/unit/pickup") {
+    const body = await readJsonBody(req);
+    const result = pickupUnitKit(visitor, String(body?.unitId ?? ""), String(body?.kitId ?? ""));
+    json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
+    return;
+  }
+
   if (req.method === "POST" && url.pathname === "/api/market/order") {
     const body = await readJsonBody(req);
     if (!body) {
@@ -283,12 +358,17 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "POST" && url.pathname === "/api/inventory/place") {
     const body = await readJsonBody(req);
-    const result = placeStand(visitor, land, String(body?.plotId ?? ""), {
-      x: Number(body?.x),
-      z: Number(body?.z),
-      kitId: body?.kitId ? String(body.kitId) : undefined,
-      yaw: Number(body?.yaw),
-    });
+    const kitId = body?.kitId ? String(body.kitId) : "";
+    const unitId = body?.unitId ? String(body.unitId) : "";
+    const result =
+      unitId || isFurnitureKit(kitId)
+        ? placeUnitKit(visitor, unitId, kitId)
+        : placeStand(visitor, land, String(body?.plotId ?? ""), {
+            x: Number(body?.x),
+            z: Number(body?.z),
+            kitId: kitId || undefined,
+            yaw: Number(body?.yaw),
+          });
     json(res, result.ok ? 200 : 400, { ...result, play: playPayload() });
     return;
   }

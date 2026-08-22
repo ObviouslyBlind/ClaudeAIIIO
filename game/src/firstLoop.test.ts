@@ -51,7 +51,12 @@ import {
 function leaseCheapSouth() {
   const land = createLandBoard();
   const plot = land.plots.find(
-    (p) => p.island === "south" && !p.owner && p.band === "street" && p.class === "by_right",
+    (p) =>
+      p.island === "south" &&
+      !p.owner &&
+      !p.buildingId &&
+      p.band === "street" &&
+      p.class === "by_right",
   );
   expect(plot).toBeTruthy();
   const visitor = createVisitor(plot!.price + 800);
@@ -89,7 +94,8 @@ describe("South first loop", () => {
         !p.owner &&
         p.band === "street" &&
         p.class === "by_right" &&
-        Math.hypot(p.x - ISLANDS.south.port.x, p.z - ISLANDS.south.port.z) < 80,
+        !p.buildingId &&
+        Math.hypot(p.x - ISLANDS.south.port.x, p.z - ISLANDS.south.port.z) < 120,
     );
     expect(near).toBeTruthy();
     expect(near!.price).toBeGreaterThan(1_000);
@@ -121,7 +127,12 @@ describe("South first loop", () => {
     const land = createLandBoard();
     const visitor = createVisitor(1_000);
     const vacant = land.plots.find(
-      (p) => p.island === "south" && !p.owner && p.band === "street" && p.class === "by_right",
+      (p) =>
+        p.island === "south" &&
+        !p.owner &&
+        !p.buildingId &&
+        p.band === "street" &&
+        p.class === "by_right",
     );
     expect(vacant).toBeTruthy();
     const stolen = orderMarket(visitor, land, { plotId: vacant!.id, skus: ["hotdog_cart"], dest: "road" });
@@ -501,7 +512,7 @@ describe("South first loop", () => {
   it("lists fruit, watermelon, and fish-and-chips carts, and stocks only that cart's pack", () => {
     const { land, visitor, plot } = leaseCheapSouth();
     expect(CART_KINDS.map((c) => c.id)).toEqual(["fruit", "watermelon", "fish_chips"]);
-    expect(MARKET_CATALOG.filter((s) => s.role === "kit").map((s) => s.label)).toEqual([
+    expect(MARKET_CATALOG.filter((s) => s.aisle === "street_carts").map((s) => s.label)).toEqual([
       "Fruit cart",
       "Watermelon cart",
       "Fish and chips cart",
@@ -531,7 +542,13 @@ describe("South first loop", () => {
     const land = createLandBoard();
     const visitor = createVisitor(80_000);
     const plot = land.plots.find(
-      (p) => p.island === "south" && !p.owner && p.band === "street" && p.class === "by_right" && p.zone === "commercial",
+      (p) =>
+        p.island === "south" &&
+        !p.owner &&
+        !p.buildingId &&
+        p.band === "street" &&
+        p.class === "by_right" &&
+        p.zone === "commercial",
     );
     expect(plot).toBeTruthy();
     expect(leasePlot(land, visitor, plot!.id).ok).toBe(true);
@@ -729,7 +746,7 @@ describe("South first loop", () => {
     expect(fuelStand(visitor, "stand-missing").reason).toBe("no_stand");
   });
 
-  it("keeps watermelon and fry kits above starter cash", () => {
+  it("keeps watermelon and fry kits above $1,000 PAPER", () => {
     const land = createLandBoard();
     const visitor = createVisitor(1_000);
     expect(orderMarket(visitor, land, { skus: ["melon_cart"], dest: "warehouse" }).ok).toBe(false);

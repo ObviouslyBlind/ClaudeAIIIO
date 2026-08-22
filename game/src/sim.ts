@@ -298,7 +298,8 @@ export type Visitor = {
   play: PlayState;
 };
 
-export function createVisitor(cash = 1_000): Visitor {
+/** Keep default in sync with land.STARTER_CASH. */
+export function createVisitor(cash = 10_000): Visitor {
   const stock = {} as Record<GoodId, number>;
   for (const id of GOOD_IDS) stock[id] = 0;
   return {

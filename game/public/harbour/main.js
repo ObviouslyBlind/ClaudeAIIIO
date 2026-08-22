@@ -36,8 +36,12 @@ import { mountStaffHud } from "./staff-hud.js";
 import { mountCalendarHud } from "./calendar-hud.js";
 import { mountParcelMap, pointerToNdc } from "./parcel-map.js";
 import { mountLotTags } from "./lot-tags.js";
+import { buildingKerbPose, mountUnitBlocks, roomFloorRing, roomWorldPose } from "./unit-blocks.js";
+import { createDollhouseCamera } from "./unit-dollhouse.js";
 import { createPlacePreview } from "./place-preview.js";
 import { CART_FOOTPRINT_M, SNAP_PAD_M, snapPlacePose } from "./place-pose.js";
+import { KIT_FOOTPRINT } from "./unit-kit.js";
+import { mountQuayPeople } from "./quay-people.js";
 
 function ensureDockButton(id, label) {
   let btn = document.getElementById(id);
@@ -170,6 +174,7 @@ let catalogPicker = null;
 let staffHud = null;
 let parcelMap = null;
 let lotTags = null;
+let unitBlocks = null;
 let placeGhost = null;
 let propsMod = null;
 let chromeHud = null;
@@ -188,6 +193,9 @@ const takenCrates = new Set();
 const PLACE_CORRIDOR_M = 22;
 const propsBuilt = new Set();
 let rmbDown = null;
+let longPress = null;
+let skipPrimaryUntil = 0;
+const LONG_PRESS_MS = 480;
 
 const player = new THREE.Mesh(
   new THREE.CapsuleGeometry(0.55, 1.15, 4, 8),
@@ -469,7 +477,7 @@ function aimPointer(ev) {
 }
 
 const HUD_BLOCK =
-  "nav, a, button, #taxi-map, #ferry-ticket, #catalog-picker, .float-panel, #land-card, #buy-ask, #sell-ask, #crate-ask, #order-veil, #order-ask, #stand-veil, #stand-menu, #sheet-veil, #place-hint, #menu-stack, #pack-shift, .lot-tag, #lot-tags, #cash-dock, .cash-plate, .cash-ledger";
+  "nav, a, button, #taxi-map, #ferry-ticket, #catalog-picker, .float-panel, #land-card, #buy-ask, #sell-ask, #crate-ask, #order-veil, #order-ask, #stand-veil, #stand-menu, #sheet-veil, #place-hint, #play-toast, #exit-room, #menu-stack, #pack-shift, .lot-tag, #lot-tags, #cash-dock, .cash-plate, .cash-ledger";
 
 const walkPlane = new THREE.Plane();
 const walkHit = new THREE.Vector3();
@@ -507,6 +515,30 @@ function nearParcel(p) {
   );
 }
 
+function furnitureFoot(kind) {
+  return KIT_FOOTPRINT[kind] || null;
+}
+
+function lockedRoom() {
+  return chromeHud && chromeHud.isRoomLocked && chromeHud.isRoomLocked();
+}
+
+function placeRoomTarget() {
+  if (!lockedRoom()) return null;
+  const playNow = chromeHud && chromeHud.getPlay && chromeHud.getPlay();
+  const unitId = chromeHud && chromeHud.getPlaceUnitId ? chromeHud.getPlaceUnitId() : "";
+  if (!unitId || !playNow) return null;
+  const buildings = (playNow.units && playNow.units.buildings) || [];
+  for (const b of buildings) {
+    const room = (b.rooms || []).find((r) => r.id === unitId);
+    if (room) {
+      const pose = roomWorldPose(b, room, (x, z) => heightAt(specOf("south"), x, z));
+      return { ...pose, ring: roomFloorRing(pose), roomFloor: true, id: unitId };
+    }
+  }
+  return null;
+}
+
 function ensurePlaceGhost() {
   if (!placeGhost) placeGhost = createPlacePreview(worldScene());
   return placeGhost;
@@ -517,8 +549,16 @@ function refreshPlaceGhost() {
   raycaster.setFromCamera(pointer, camera);
   const g = groundFromRay();
   if (!g) return;
-  const plot = plotToPlace(null, g.x, g.z);
+  const kitId = chromeHud && chromeHud.getPlaceKit ? chromeHud.getPlaceKit() : "";
+  const furn = furnitureFoot(kitId);
+  const room = furn ? placeRoomTarget() : null;
   const yaw = placeGhost.yaw ? placeGhost.yaw() : 0;
+  if (room) {
+    const fp = furn || CART_FOOTPRINT_M;
+    placeGhost.moveTo(g.x, room.floorY, g.z, room);
+    return;
+  }
+  const plot = plotToPlace(null, g.x, g.z);
   const snap = snapPlacePose(g.x, g.z, yaw, CART_FOOTPRINT_M.w, CART_FOOTPRINT_M.d, plot);
   const x = snap.ok ? snap.x : g.x;
   const z = snap.ok ? snap.z : g.z;
@@ -575,6 +615,42 @@ async function placeCartOn(plot, x, z) {
   const kitId = chromeHud && chromeHud.getPlaceKit ? chromeHud.getPlaceKit() : "";
   const pose = placeGhost && typeof placeGhost.pose === "function" ? placeGhost.pose() : null;
   const yaw = pose && Number.isFinite(pose.yaw) ? pose.yaw : 0;
+  const furn = furnitureFoot(kitId);
+  if (furn) {
+    const room = placeRoomTarget();
+    const unitId = room && room.id;
+    if (!unitId) {
+      setStatus("Enter a room you own, then Place.");
+      return;
+    }
+    if (pose && pose.ok === false) {
+      setStatus("Stay on this room's floor.");
+      return;
+    }
+    const res = await fetch("/api/unit/place", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ unitId, kitId }),
+    });
+    const data = await res.json();
+    if (chromeHud && typeof chromeHud.applyPlay === "function" && data.play) chromeHud.applyPlay(data.play);
+    if (!res.ok) {
+      const reason = data.reason || "fail";
+      setStatus(
+        reason === "in_warehouse"
+          ? "Warehouse has the kit. Bring to me, then Place."
+          : reason === "wrong_use"
+            ? "That piece does not belong in this room."
+            : reason === "no_kit"
+              ? "Kit is not on you."
+              : "Could not place: " + reason,
+      );
+      return;
+    }
+    if (chromeHud) chromeHud.clearPlacing();
+    setStatus("Placed in the room.");
+    return;
+  }
   if (plot && plot.class === "cart_pad" && pose && pose.ok === false) {
     setStatus("Stay inside the pad.");
     const line = document.getElementById("place-hint-text");
@@ -1446,7 +1522,7 @@ function addParcel(p) {
 export const SPAWN_PARCEL_M = 420;
 /** Keep in sync with game/src/land.ts STARTER_SNAP_M */
 const STARTER_SNAP_M = 40;
-const STARTER_CASH = 1000;
+const STARTER_CASH = 10000;
 
 function starterLotOn(p, islandId) {
   const spec = specOf(islandId);
@@ -1484,6 +1560,7 @@ const playCam = createPlayCamera({
   getPlayer: () => player.position,
   getIslandId: () => islandId,
 });
+const dollhouseCam = createDollhouseCamera({ camera, canvas });
 
 function snapCamera() {
   playCam.snap();
@@ -1599,6 +1676,7 @@ function goTo(x, z) {
   userLeftStall = true;
   stallFollow = false;
   islandId = nearestIsland(dest.x, dest.z);
+  if (chromeHud && chromeHud.dumpPreview) chromeHud.dumpPreview();
   dismissLooseLandUi();
   if (playCam && typeof playCam.followWalk === "function") playCam.followWalk();
   paintWalkPath();
@@ -1679,6 +1757,9 @@ function clickTargets() {
   if (lotTags && typeof lotTags.clickables === "function") {
     objs.push(...lotTags.clickables());
   }
+  if (unitBlocks && typeof unitBlocks.clickables === "function") {
+    objs.push(...unitBlocks.clickables());
+  }
   return objs.filter(Boolean);
 }
 
@@ -1695,6 +1776,15 @@ function walkPoint(hits) {
 }
 
 function showLandCard(p) {
+  if (lockedRoom()) return true;
+  if (p && p.buildingId) {
+    if (isLotsViewer(viewerMode())) return false;
+    if (chromeHud && chromeHud.openBuildingSheet) {
+      chromeHud.openBuildingSheet(p.buildingId);
+      setStatus((p.name || "Building") + " · rooms.");
+      return true;
+    }
+  }
   if (!p || !map || !chromeHud || !chromeHud.paintLand) return false;
   landPinned = true;
   const prev = selected ? map.plots.find((row) => row.id === selected) : null;
@@ -1721,6 +1811,20 @@ function showLandCard(p) {
 }
 
 function askToBuy(p) {
+  if (!p) return;
+  if (lockedRoom()) return;
+  if (p.buildingId) {
+    if (viewerMode() === "landlord" && chromeHud && chromeHud.openLandlordSheet) {
+      chromeHud.openLandlordSheet();
+      return;
+    }
+    if (isLotsViewer(viewerMode())) return;
+    if (chromeHud && chromeHud.openBuildingSheet) {
+      chromeHud.openBuildingSheet(p.buildingId);
+      setStatus((p.name || "Building") + " · Buy a room.");
+      return;
+    }
+  }
   if (!p) return;
   const prev = selected && map ? map.plots.find((row) => row.id === selected) : null;
   selected = p.id;
@@ -1790,10 +1894,118 @@ function inspectNearbyLand() {
   );
 }
 
+function crateFromRay() {
+  const crates = [...crateMeshes.values()].filter(Boolean);
+  if (!crates.length) return null;
+  const hits = raycaster.intersectObjects(crates, true);
+  const hit = hits[0];
+  return hit ? objectWithKind(hit.object, "crate") : null;
+}
+
+function takeCrateTap() {
+  const crate = crateFromRay();
+  const id = crate && crate.userData && crate.userData.deliveryId;
+  return Boolean(id && showCrateCard(id));
+}
+
+function buildingFromPlay(id) {
+  const play = chromeHud && chromeHud.getPlay && chromeHud.getPlay();
+  return ((play && play.units && play.units.buildings) || []).find((b) => b.id === id) || null;
+}
+
+function inspectHarbour(ev) {
+  if (lockedRoom() || (dollhouseCam && dollhouseCam.isLocked && dollhouseCam.isLocked())) {
+    setStatus("Exit room");
+    return true;
+  }
+  aimPointer(ev);
+  raycaster.setFromCamera(pointer, camera);
+  const hits = raycaster.intersectObjects(clickTargets(), true);
+  const standHit = hits.find((h) => objectWithStand(h.object));
+  if (standHit) {
+    const obj = objectWithStand(standHit.object);
+    if (obj) {
+      openStandMenu(obj.userData.standId);
+      return true;
+    }
+  }
+  const unitHit = hits.find((h) => objectWithKind(h.object, "unit-block"));
+  if (unitHit) {
+    const block = objectWithKind(unitHit.object, "unit-block");
+    const bid = block && block.userData && block.userData.buildingId;
+    const building = bid ? buildingFromPlay(bid) : null;
+    if (building && building.landOwner !== "visitor" && chromeHud && chromeHud.paintLandAsk) {
+      chromeHud.paintLandAsk(building);
+      setStatus((building.name || "Building") + " · buy the dirt.");
+      return true;
+    }
+    if (bid && chromeHud && chromeHud.openBuildingSheet) {
+      chromeHud.openBuildingSheet(bid);
+      setStatus((block.userData.buildingName || "Building") + " · rooms.");
+      return true;
+    }
+  }
+  const tap = walkPoint(hits);
+  let tapPt = tap && tap.point;
+  if (!tapPt) {
+    const g = groundFromRay();
+    if (g) tapPt = { x: g.x, y: g.y, z: g.z };
+  }
+  if (tapPt) {
+    const p = findParcelAt(tapPt.x, tapPt.z);
+    if (p && !p.owner) {
+      askToBuy(p);
+      return true;
+    }
+    if (p) {
+      showLandCard(p);
+      return true;
+    }
+  }
+  return false;
+}
+
+function clearLongPress() {
+  if (longPress && longPress.timer) clearTimeout(longPress.timer);
+  longPress = null;
+}
+
+function startLongPress(ev) {
+  clearLongPress();
+  const pointerId = ev.pointerId;
+  const x = ev.clientX;
+  const y = ev.clientY;
+  longPress = {
+    x,
+    y,
+    timer: setTimeout(() => {
+      longPress = null;
+      skipPrimaryUntil = Date.now() + 500;
+      inspectHarbour(ev);
+    }, LONG_PRESS_MS),
+  };
+  const move = (mv) => {
+    if (mv.pointerId !== pointerId) return;
+    if (Math.hypot(mv.clientX - x, mv.clientY - y) > 12) clearLongPress();
+  };
+  const up = (uv) => {
+    if (uv.pointerId !== pointerId) return;
+    window.removeEventListener("pointermove", move, true);
+    window.removeEventListener("pointerup", up, true);
+    window.removeEventListener("pointercancel", up, true);
+    clearLongPress();
+  };
+  window.addEventListener("pointermove", move, true);
+  window.addEventListener("pointerup", up, true);
+  window.addEventListener("pointercancel", up, true);
+}
+
 function onPointer(ev) {
+  if (Date.now() < skipPrimaryUntil) return;
   if (ev.button != null && ev.button !== 0) return;
   if (taxi && typeof taxi.mapOpen === "function" && taxi.mapOpen()) return;
   const placing = Boolean(chromeHud && chromeHud.isPlacing && chromeHud.isPlacing());
+  if (ev.target.closest && ev.target.closest("#exit-room, #place-cancel")) return;
   if (ev.target.closest && ev.target.closest(HUD_BLOCK) && !placing) return;
   if (Date.now() - lastTap < 180) return;
   lastTap = Date.now();
@@ -1810,10 +2022,10 @@ function onPointer(ev) {
   const viewer = viewerMode();
   const hits = raycaster.intersectObjects(clickTargets(), true);
   const standHit = hits.find((h) => objectWithStand(h.object));
-  const crateHit = hits.find((h) => objectWithKind(h.object, "crate"));
   const vanHit = hits.find((h) => objectWithKind(h.object, "van"));
   const padHit = hits.find((h) => objectWithKind(h.object, "logistics-pad"));
   const buildingHit = hits.find((h) => objectWithKind(h.object, "building"));
+  const unitHit = hits.find((h) => objectWithKind(h.object, "unit-block"));
   const plotHit = hits.find(
     (h) => h.object.userData.kind === "plot" || h.object.userData.kind === "plot-line",
   );
@@ -1836,6 +2048,33 @@ function onPointer(ev) {
       return;
     }
   }
+  // Crate on the kerb wins over grey boxes and Lots dirt. Ray crates alone so a shell cannot swallow the tap.
+  if (!lockedRoom() && takeCrateTap()) return;
+  if (unitHit && chromeHud && chromeHud.isPropertiesOn && chromeHud.isPropertiesOn()) {
+    const block = objectWithKind(unitHit.object, "unit-block");
+    const bid = block && block.userData && block.userData.buildingId;
+    const uid = block && block.userData && block.userData.unitId;
+    if (lockedRoom()) {
+      if (uid && chromeHud.getPlaceUnitId && uid === chromeHud.getPlaceUnitId()) return;
+      setStatus("Exit room");
+      return;
+    }
+    if (uid && chromeHud && chromeHud.openUnitSheet) {
+      chromeHud.openUnitSheet(bid, uid);
+      if (unitBlocks && unitBlocks.highlight) unitBlocks.highlight(uid);
+      setStatus((block.userData.buildingName || "Building") + " · room.");
+      return;
+    }
+    if (bid && chromeHud && chromeHud.openBuildingSheet) {
+      chromeHud.openBuildingSheet(bid);
+      setStatus((block.userData.buildingName || "Building") + " · Buy a room.");
+      return;
+    }
+  }
+  if (lockedRoom() || (dollhouseCam && dollhouseCam.isLocked && dollhouseCam.isLocked())) {
+    setStatus("Exit room");
+    return;
+  }
   if (isLotsViewer(viewer) && tapPt) {
     const topKind = hits[0] && hits[0].object && hits[0].object.userData && hits[0].object.userData.kind;
     if (topKind !== "road" && topKind !== "street-cart" && topKind !== "hotdog-cart") {
@@ -1856,11 +2095,6 @@ function onPointer(ev) {
   if (nearSite) {
     openStandMenu(nearSite.id, nearSite);
     return;
-  }
-  if (crateHit) {
-    const crate = objectWithKind(crateHit.object, "crate");
-    const id = crate && crate.userData.deliveryId;
-    if (id && showCrateCard(id)) return;
   }
   const tagObj =
     isLotsViewer(viewer) && hits[0] ? objectWithKind(hits[0].object, "parcel-label") : null;
@@ -2158,7 +2392,8 @@ function tick(dt) {
     userLeftStall = true;
     stallFollow = false;
   }
-  if (!applyFollowStall()) playCam.tick(dt);
+  if (dollhouseCam && dollhouseCam.isActive()) dollhouseCam.tick(dt);
+  else if (!applyFollowStall()) playCam.tick(dt);
   sun.position.set(player.position.x + 180, 260, player.position.z + 80);
   sun.target.position.copy(player.position);
   sun.target.updateMatrixWorld();
@@ -2175,7 +2410,7 @@ function startLoop() {
     } catch (err) {
       console.error(err);
     }
-    applyFollowStall();
+    if (!(dollhouseCam && dollhouseCam.isActive())) applyFollowStall();
     renderer.render(scene, camera);
   });
 }
@@ -2432,6 +2667,18 @@ async function boot() {
     specOf,
     getMap: () => map,
   });
+  unitBlocks = mountUnitBlocks({
+    scene: harbourGroup || scene,
+    heightAt(x, z) {
+      return heightAt(specOf("south"), x, z);
+    },
+  });
+  mountQuayPeople({
+    scene: harbourGroup || scene,
+    heightAt,
+    specOf,
+    getPos: () => player.position,
+  });
   chromeHud = mountChrome({
     setStatus,
     getPose: () => ({ x: player.position.x, z: player.position.z }),
@@ -2441,7 +2688,63 @@ async function boot() {
       openStandMenu(id);
     },
     onCloseStand() {
+      if (lockedRoom()) return;
       leaveStallCam();
+    },
+    onExitRoom(building) {
+      walking = false;
+      walkWaypoints = [];
+      gaitDist = 0;
+      lastWalkDest = null;
+      if (walkPath) walkPath.hide();
+      stallFollow = false;
+      if (building) {
+        const ht = (x, z) => heightAt(specOf("south"), x, z);
+        const pose = buildingKerbPose(building, ht);
+        player.position.set(pose.x, pose.y + PLAYER_SOLE_M, pose.z);
+        islandId = nearestIsland(pose.x, pose.z);
+      }
+    },
+    onDollhouse(view) {
+      if (!view) {
+        if (unitBlocks) {
+          unitBlocks.applyCutaway(null);
+          if (unitBlocks.highlight) unitBlocks.highlight("");
+        }
+        if (dollhouseCam) dollhouseCam.exit(true);
+        if (playCam && typeof playCam.resume === "function") playCam.resume();
+        if (playCam && typeof playCam.followWalk === "function") playCam.followWalk({ force: true });
+        return;
+      }
+      const playNow = chromeHud && chromeHud.getPlay && chromeHud.getPlay();
+      const building =
+        view.building ||
+        (playNow &&
+          playNow.units &&
+          (playNow.units.buildings || []).find((b) => b.id === view.buildingId));
+      if (!building) return;
+      stallFollow = false;
+      walking = false;
+      walkWaypoints = [];
+      if (playCam && typeof playCam.pause === "function") playCam.pause();
+      const room =
+        view.room ||
+        (view.unitId && (building.rooms || []).find((r) => r.id === view.unitId));
+      if (unitBlocks) {
+        unitBlocks.applyCutaway({ buildingId: building.id, floor: view.floor, unitId: view.unitId });
+        if (unitBlocks.highlight) unitBlocks.highlight(view.unitId || "");
+      }
+      const ht = (x, z) => heightAt(specOf("south"), x, z);
+      if (dollhouseCam) {
+        dollhouseCam.enter(building, view.floor, ht, room, Boolean(view.locked));
+      }
+      if (room && view.locked) {
+        const pose = roomWorldPose(building, room, ht);
+        player.position.set(pose.x, pose.floorY + PLAYER_SOLE_M, pose.z);
+      }
+    },
+    onHighlight(unitId) {
+      if (unitBlocks && unitBlocks.highlight) unitBlocks.highlight(unitId || "");
     },
     onCloseLand: closeLandCard,
     onLeased(snapshot) {
@@ -2495,7 +2798,23 @@ async function boot() {
     onOverlay(id) {
       const play = chromeHud && typeof chromeHud.getPlay === "function" ? chromeHud.getPlay() : null;
       if (overlays) overlays.setMode(id, play, map);
+      if (unitBlocks && typeof unitBlocks.setViewer === "function") {
+        unitBlocks.setViewer({
+          overlay: id,
+          propertiesOn: chromeHud && chromeHud.isPropertiesOn ? chromeHud.isPropertiesOn() : false,
+          propertiesMode: chromeHud && chromeHud.propertiesMode ? chromeHud.propertiesMode() : "off",
+        });
+      }
       paintHoldingGlow(id);
+    },
+    onProperties(on, mode) {
+      if (unitBlocks && typeof unitBlocks.setViewer === "function") {
+        unitBlocks.setViewer({
+          overlay: viewerMode(),
+          propertiesOn: Boolean(on),
+          propertiesMode: mode || (on ? "sale" : "off"),
+        });
+      }
     },
     onPlaceMode(on) {
       if (!on) {
@@ -2515,6 +2834,14 @@ async function boot() {
     onPlay(play) {
       if (play && play.look) dressPlayer(player, play.look);
       if (overlays) overlays.refresh(play, map);
+      if (unitBlocks) {
+        unitBlocks.sync(play);
+        unitBlocks.setViewer({
+          overlay: viewerMode(),
+          propertiesOn: chromeHud && chromeHud.isPropertiesOn ? chromeHud.isPropertiesOn() : false,
+          propertiesMode: chromeHud && chromeHud.propertiesMode ? chromeHud.propertiesMode() : "off",
+        });
+      }
       pruneCrates(play);
       pruneStands(play);
       for (const d of play.deliveries || []) {
@@ -2564,9 +2891,20 @@ async function boot() {
 canvas.addEventListener("pointerup", onPointer);
 canvas.addEventListener("click", onPointer);
 canvas.addEventListener("pointermove", (ev) => {
-  if (!(chromeHud && chromeHud.isPlacing && chromeHud.isPlacing())) return;
   aimPointer(ev);
-  refreshPlaceGhost();
+  if (chromeHud && chromeHud.isPlacing && chromeHud.isPlacing()) {
+    refreshPlaceGhost();
+    return;
+  }
+  if (lockedRoom()) return;
+  if (!(chromeHud && chromeHud.isPropertiesOn && chromeHud.isPropertiesOn())) return;
+  if (chromeHud.propertiesMode && chromeHud.propertiesMode() === "yours") return;
+  raycaster.setFromCamera(pointer, camera);
+  const hits = raycaster.intersectObjects(unitBlocks ? unitBlocks.clickables() : [], true);
+  const hit = hits.find((h) => objectWithKind(h.object, "unit-block"));
+  const block = hit && objectWithKind(hit.object, "unit-block");
+  const uid = block && block.userData && block.userData.unitId;
+  if (unitBlocks && unitBlocks.highlight) unitBlocks.highlight(uid || "");
 });
 window.addEventListener("keydown", (ev) => {
   if (placeGhost && placeGhost.onKeyDown(ev)) return;
@@ -2579,9 +2917,13 @@ window.addEventListener(
   (ev) => {
     if (ev.button != null && ev.button !== 0) return;
     if (ev.target && ev.target.closest && ev.target.closest(HUD_BLOCK)) return;
-    if (ev.target === canvas || (ev.target && ev.target.closest && ev.target.closest("#chrome"))) {
+    const onWorld = ev.target === canvas || (ev.target && ev.target.closest && ev.target.closest("#chrome"));
+    if (!onWorld) return;
+    if (chromeHud && chromeHud.isPlacing && chromeHud.isPlacing()) {
       onPointer(ev);
+      return;
     }
+    startLongPress(ev);
   },
   true,
 );
@@ -2605,15 +2947,7 @@ canvas.addEventListener("pointerup", (ev) => {
   rmbDown = null;
   if (dt > 280 || dist > 10) return;
   if (ev.target.closest && ev.target.closest(HUD_BLOCK)) return;
-  aimPointer(ev);
-  raycaster.setFromCamera(pointer, camera);
-  const hits = raycaster.intersectObjects(clickTargets(), true);
-  const standHit = hits.find((h) => objectWithStand(h.object));
-  if (standHit) {
-    const obj = objectWithStand(standHit.object);
-    if (obj) openStandMenu(obj.userData.standId);
-    return;
-  }
+  inspectHarbour(ev);
 });
 if (btnLease) {
   btnLease.addEventListener("click", () => {

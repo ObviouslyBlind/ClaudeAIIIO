@@ -5,7 +5,7 @@
  */
 
 import { findParcelAt, getPlot, isCartPad, ISLANDS, STARTER_CASH, sellPlot, type IslandId, type LandBoard, type Parcel } from "./land.ts";
-import { plotTrafficBand } from "./footTraffic.ts";
+import { plotTrafficBand, pointTrafficBand, type TrafficBand } from "./footTraffic.ts";
 import { roadsideDrop, type DropPoint } from "./roadside.ts";
 import { skuFitsPlot, type ZoneId } from "./zones.ts";
 import type { Visitor } from "./sim.ts";
@@ -23,6 +23,8 @@ import {
   PROPANE_PRICE,
   PROPANE_SALES,
   STORAGE_UPGRADE_COST,
+  UNIT_KIT,
+  UNIT_ROOM_PRICE,
   VISITOR_ACCOUNT_NO,
 } from "./economy.ts";
 import { PACK_COOLDOWN_MS } from "./shiftBonus.ts";
@@ -30,6 +32,7 @@ import { createVisitorCart } from "./visitorCart.ts";
 import { clampLook, defaultLook } from "./look.ts";
 import { CART_FOOTPRINT_M, SNAP_PAD_M, snapPlacePose } from "../public/harbour/place-pose.js";
 import type { ListingTape } from "./stocks.ts";
+import { seedUnits, tickUnits, unitDeliveryTarget, unitsSnapshot, buildingById, type BuildingLand, type HarbourUnit } from "./units.ts";
 
 export const FIRST_LOOP_NOTE = "South island. One visitor on this process.";
 
@@ -73,7 +76,15 @@ export type InvKind =
   | "melon"
   | "fish_cart"
   | "fish_chips"
-  | "propane";
+  | "propane"
+  | "shelf"
+  | "till"
+  | "fridge"
+  | "bed"
+  | "shower"
+  | "sink"
+  | "desk"
+  | "cabinet";
 
 export type CartKind = {
   id: CartKindId;
@@ -126,7 +137,7 @@ export type InvItem = {
   provenance: "SIMULATED";
 };
 
-export type MarketAisle = "street_carts" | "stock";
+export type MarketAisle = "street_carts" | "stock" | "shopfit" | "hospitality";
 
 export type CatalogSku = {
   id: InvKind;
@@ -137,7 +148,7 @@ export type CatalogSku = {
   qty: number;
   note: string;
   zone: ZoneId;
-  cartKind: CartKindId;
+  cartKind?: CartKindId;
   role: "kit" | "stock";
 };
 
@@ -151,6 +162,16 @@ export const MARKET_AISLES: { id: MarketAisle; label: string; note: string }[] =
     id: "stock",
     label: "Stock",
     note: "Packs for a cart you already placed. Fry carts also need a propane canister.",
+  },
+  {
+    id: "shopfit",
+    label: "Shopfit",
+    note: "Shelf, till, fridge. Place in a shop room you own.",
+  },
+  {
+    id: "hospitality",
+    label: "Hospitality",
+    note: "Bed, shower, sink, desk, cabinet. Place in a flat or office you own.",
   },
 ];
 
@@ -193,6 +214,20 @@ export const MARKET_CATALOG: CatalogSku[] = [
     cartKind: "fish_chips",
     role: "stock",
   },
+  ...UNIT_KIT.map((row) => ({
+    id: row.id as InvKind,
+    aisle: row.aisle as MarketAisle,
+    aisleLabel: row.aisle === "shopfit" ? "Shopfit" : "Hospitality",
+    label: row.label,
+    paperPrice: row.cost,
+    qty: 1,
+    note:
+      row.aisle === "shopfit"
+        ? "Place in a shop room you own. Inventory Place, not a Fit button."
+        : "Place in a flat or office you own. Inventory Place, not a Fit button.",
+    zone: "commercial" as const,
+    role: "kit" as const,
+  })),
 ];
 
 export function cartTodayPrice(kind: string | undefined): number {
@@ -317,7 +352,8 @@ export type Delivery = {
   status: "en_route" | "arrived" | "stored";
   drop: DropPoint | null;
   arrivedAtMs: number | null;
-  dest: "warehouse" | "road" | "cart";
+  dest: "warehouse" | "road" | "cart" | "unit";
+  unitId?: string;
   mode: "PAPER";
   provenance: "SIMULATED";
 };
@@ -369,6 +405,14 @@ export type WorkSite = {
   stockId: InvKind | null;
   games: string[];
   unitsSold: number;
+  unitId?: string;
+  buildingId?: string;
+  floor?: number;
+  room?: number;
+  packerHired?: boolean;
+  tillHired?: boolean;
+  packerStaffId?: string | null;
+  packerStaffName?: string | null;
   mode: "PAPER";
   provenance: "SIMULATED";
 };
@@ -380,6 +424,8 @@ export type PlayState = {
   salesRing: number[];
   warehouse: Warehouse;
   workSites: WorkSite[];
+  units: HarbourUnit[];
+  buildingLands: BuildingLand[];
   gameBank: number;
   nextId: number;
   salesTaxRate: number;
@@ -387,7 +433,7 @@ export type PlayState = {
 };
 
 export function createPlayState(): PlayState {
-  return {
+  return seedUnits({
     inventory: [],
     deliveries: [],
     stands: [],
@@ -399,11 +445,13 @@ export function createPlayState(): PlayState {
       lastRentDay: -1,
     },
     workSites: [],
+    units: [],
+    buildingLands: [],
     gameBank: 0,
     nextId: 1,
     salesTaxRate: LAUNCH_SALES_TAX,
     salesTaxCollected: 0,
-  };
+  });
 }
 
 export function ensurePlay(visitor: Visitor): PlayState {
@@ -421,6 +469,7 @@ export function ensurePlay(visitor: Visitor): PlayState {
   if (!Number.isFinite(play.salesTaxRate)) play.salesTaxRate = LAUNCH_SALES_TAX;
   if (!Number.isFinite(play.salesTaxCollected)) play.salesTaxCollected = 0;
   if (!play.workSites) play.workSites = [];
+  seedUnits(play);
   for (const stand of play.stands) {
     const mapped = KIND_FIX[String(stand.kind)];
     if (mapped) stand.kind = mapped;
@@ -437,6 +486,8 @@ export function ensurePlay(visitor: Visitor): PlayState {
     if (site.upgraded == null) site.upgraded = false;
     if (!Array.isArray(site.upgrades)) site.upgrades = site.upgraded ? ["fridge"] : [];
     if (!Number.isFinite(site.unitsSold)) site.unitsSold = 0;
+    if (site.packerHired == null) site.packerHired = false;
+    if (site.tillHired == null) site.tillHired = Boolean(site.unitId) ? site.hired : false;
   }
   return play;
 }
@@ -499,6 +550,33 @@ export function rivalsOnStreet(land: LandBoard, play: PlayState, plotId: string,
   return n;
 }
 
+function trafficForWork(
+  land: LandBoard,
+  play: PlayState,
+  row: { id: string; plotId: string },
+): TrafficBand {
+  const plot = getPlot(land, row.plotId);
+  if (plot) return plotTrafficBand(land, plot);
+  const unitSite = play.workSites.find((s) => s.id === row.id && s.unitId);
+  if (!unitSite?.unitId) return "red";
+  const unit = play.units.find((u) => u.id === unitSite.unitId);
+  const building = unit ? buildingById(unit.buildingId) : undefined;
+  if (!unit || !building) return "red";
+  return pointTrafficBand(land, "south", building.x, building.z);
+}
+
+function kitUpgradesForWork(
+  play: PlayState,
+  row: { id: string; upgraded?: boolean; upgrades?: string[] },
+): string[] {
+  const unitSite = play.workSites.find((s) => s.id === row.id && s.unitId);
+  if (unitSite?.unitId) {
+    const unit = play.units.find((u) => u.id === unitSite.unitId);
+    return unit ? [...unit.kit] : [];
+  }
+  return ownedUpgrades(row);
+}
+
 function scoreWork(
   land: LandBoard,
   play: PlayState,
@@ -513,14 +591,15 @@ function scoreWork(
     kind?: string;
   },
 ): SiteScore {
-  const plot = getPlot(land, row.plotId);
-  const band = plot ? plotTrafficBand(land, plot) : "red";
+  const unitSite = play.workSites.find((s) => s.id === row.id && s.unitId);
+  const band = trafficForWork(land, play, row);
   const kind = cartKindById(row.kind) ? row.kind : "fruit";
+  const upgrades = kitUpgradesForWork(play, row);
   return scoreSite({
-    hired: row.hired,
+    hired: unitSite ? Boolean(unitSite.tillHired) : row.hired,
     stocked: row.stock >= 1,
-    upgraded: row.upgraded,
-    upgrades: ownedUpgrades(row),
+    upgraded: upgrades.length > 0,
+    upgrades,
     traffic: band,
     rivalsOnStreet: rivalsOnStreet(land, play, row.plotId, row.id),
     boostLeft: row.boostLeft,
@@ -588,7 +667,7 @@ export function syncWorkSites(play: PlayState, land: LandBoard): WorkSite[] {
       if (!Number.isFinite(site.boostLeft)) site.boostLeft = 0;
     }
   }
-  play.workSites = play.workSites.filter((s) => live.has(s.plotId));
+  play.workSites = play.workSites.filter((s) => Boolean(s.unitId) || live.has(s.plotId));
   return play.workSites;
 }
 
@@ -680,6 +759,7 @@ function autoStockStand(play: PlayState, stand: Stand, visitor?: Visitor): void 
 }
 
 function autoStockWork(play: PlayState, site: WorkSite, visitor?: Visitor): void {
+  if (site.unitId) return;
   if (!site.hired) return;
   let room = Math.max(0, site.storageCap - site.stock);
   if (room <= 0) return;
@@ -807,7 +887,12 @@ export function sellShiftBurst(
 
 function siteNeeds(site: WorkSite, today = TODAY_PRICE): CartNeed[] {
   const needs: CartNeed[] = [];
-  if (!site.hired) needs.push({ id: "hire", label: "Hire" });
+  if (site.unitId) {
+    if (!site.packerHired) needs.push({ id: "packer", label: "Hire a packer" });
+    if (!site.tillHired) needs.push({ id: "till", label: "Hire a till worker" });
+  } else if (!site.hired) {
+    needs.push({ id: "hire", label: "Hire" });
+  }
   if (site.siteClass === "shop" && Number(site.stock) < 1) needs.push({ id: "stock", label: "Stock" });
   if (!site.upgraded) needs.push({ id: "fridge", label: "Fridge" });
   if (Math.abs(Number(site.stickerPrice) - today) > 0.01) {
@@ -883,11 +968,13 @@ export function orderMarket(
   if (island !== "south") return fail("south_only");
 
   const destRaw = body.dest != null ? String(body.dest) : "";
-  const dest: "warehouse" | "road" | "cart" =
+  const dest: "warehouse" | "road" | "cart" | "unit" =
     destRaw === "cart" || destRaw === "pocket" || destRaw === "inventory"
       ? "cart"
       : destRaw === "warehouse" || destRaw === "store"
         ? "warehouse"
+        : destRaw === "unit"
+          ? "unit"
         : destRaw === "road"
           ? "road"
           : body.plotId
@@ -914,6 +1001,7 @@ export function orderMarket(
   const dropX = Number(body.x);
   const dropZ = Number(body.z);
   let plot: Parcel | null = null;
+  let unitTarget: ReturnType<typeof unitDeliveryTarget> = null;
   if (dest === "road") {
     const named = body.plotId != null && String(body.plotId) !== "" ? String(body.plotId) : "";
     if (named) {
@@ -922,6 +1010,10 @@ export function orderMarket(
     } else {
       plot = nearestVisitorPlot(land, dropX, dropZ);
     }
+  }
+  if (dest === "unit") {
+    unitTarget = unitDeliveryTarget(play, String(body.unitId ?? body.plotId ?? ""));
+    if (!unitTarget) return fail("not_yours");
   }
 
   if (visitor.cash < paid) return fail("no_cash");
@@ -961,8 +1053,20 @@ export function orderMarket(
     return ok({ delivery, paid, stored: true as const });
   }
 
-  const atX = Number.isFinite(dropX) ? dropX : plot ? plot.x : ISLANDS.south.port.x;
-  const atZ = Number.isFinite(dropZ) ? dropZ : plot ? plot.z : ISLANDS.south.port.z;
+  const atX = Number.isFinite(dropX)
+    ? dropX
+    : dest === "unit" && unitTarget
+      ? unitTarget.x
+      : plot
+        ? plot.x
+        : ISLANDS.south.port.x;
+  const atZ = Number.isFinite(dropZ)
+    ? dropZ
+    : dest === "unit" && unitTarget
+      ? unitTarget.z
+      : plot
+        ? plot.z
+        : ISLANDS.south.port.z;
   const drop = roadsideDrop(land.roads, "south", atX, atZ);
   if (!drop) {
     visitor.cash = roundMoney(visitor.cash + paid);
@@ -971,12 +1075,13 @@ export function orderMarket(
   const delivery: Delivery = {
     id: `del-${play.nextId++}`,
     island: "south",
-    plotId: plot?.id ?? "road",
+    plotId: dest === "unit" && unitTarget ? unitTarget.plotId : plot?.id ?? "road",
     items,
     status: "en_route",
     drop,
     arrivedAtMs: null,
-    dest: "road",
+    dest: dest === "unit" ? "unit" : "road",
+    unitId: dest === "unit" && unitTarget ? unitTarget.unitId : undefined,
     mode: "PAPER",
     provenance: "SIMULATED",
   };
@@ -1166,6 +1271,7 @@ export function placeStand(
   const play = ensurePlay(visitor);
   const plot = plotForPlace(land, plotId, pose?.x, pose?.z);
   if (!plot) return fail("not_yours");
+  if (plot.buildingId) return fail("building_lot");
   if (play.stands.some((s) => s.plotId === plot.id)) return fail("already_placed");
   const wanted = pose?.kitId ? CART_KINDS.filter((row) => row.kitId === pose.kitId) : CART_KINDS;
   const peek = wanted.find((cart) => (play.inventory.find((r) => r.kind === cart.kitId)?.qty ?? 0) >= 1);
@@ -1303,6 +1409,7 @@ export function hireStand(
   const play = ensurePlay(visitor);
   const found = findStandOrSite(play, standId);
   if (!found) return fail("no_stand");
+  if (found.kind === "site" && found.row.unitId) return fail("unit_role");
   if (found.row.hired) return fail("already_hired");
   if (visitor.cash < HIRE_COST) return fail("no_cash");
   visitor.cash = roundMoney(visitor.cash - HIRE_COST);
@@ -1324,6 +1431,7 @@ export function fireStand(
   const play = ensurePlay(visitor);
   const found = findStandOrSite(play, standId);
   if (!found) return fail("no_stand");
+  if (found.kind === "site" && found.row.unitId) return fail("unit_role");
   if (!found.row.hired) return fail("not_hired");
   found.row.hired = false;
   found.row.staffId = null;
@@ -1373,7 +1481,7 @@ export function upgradeStand(
   }
   if (found.row.hired) {
     if (found.kind === "stand") autoStockStand(play, found.row, visitor);
-    else autoStockWork(play, found.row, visitor);
+    else if (!found.row.unitId) autoStockWork(play, found.row, visitor);
   }
   if (found.kind === "stand") return ok({ stand: found.row });
   return ok({ site: found.row });
@@ -1427,9 +1535,12 @@ export function tickHotdogSales(visitor: Visitor, land: LandBoard): number {
   }
 
   for (const site of play.workSites) {
-    autoStockWork(play, site, visitor);
-    if (site.stock < 1 || !site.hired) continue;
-    if (!getPlot(land, site.plotId)) continue;
+    if (!site.unitId) autoStockWork(play, site, visitor);
+    if (site.stock < 1) continue;
+    if (site.unitId) {
+      if (!site.tillHired) continue;
+    } else if (!site.hired) continue;
+    if (!site.unitId && !getPlot(land, site.plotId)) continue;
     site.sellAcc += 1;
     while (site.stock >= 1) {
       const need = sellTicksAt(
@@ -1492,6 +1603,7 @@ export function tickPlay(
   play.salesTaxRate = taxRate;
   recallStaleDeliveries(visitor, nowMs);
   tickWarehouseRent(visitor, tick);
+  tickUnits(visitor, tick);
   return tickHotdogSales(visitor, land);
 }
 
@@ -1528,8 +1640,8 @@ export type SiteBookRow = {
   stock: number;
   unitsSold: number;
   perMinute: number;
-  projHour: number;
-  projDay: number;
+  vacantNote?: string | null;
+  rentNote?: string | null;
 };
 
 export type BusinessBooks = {
@@ -1571,10 +1683,16 @@ export function siteWorthPaper(stand: Stand): number {
 }
 
 function kitStacks(rows: InvItem[]): { kind: InvKind; label: string; qty: number }[] {
-  return CART_KINDS.map((cart) => {
-    const qty = rows.find((r) => r.kind === cart.kitId)?.qty ?? 0;
-    return { kind: cart.kitId, label: cart.kitLabel, qty };
-  }).filter((row) => row.qty > 0);
+  const kinds = [
+    ...CART_KINDS.map((cart) => ({ kind: cart.kitId, label: cart.kitLabel })),
+    ...UNIT_KIT.map((row) => ({ kind: row.id as InvKind, label: row.label })),
+  ];
+  return kinds
+    .map((row) => {
+      const qty = rows.find((r) => r.kind === row.kind)?.qty ?? 0;
+      return { kind: row.kind, label: row.label, qty };
+    })
+    .filter((row) => row.qty > 0);
 }
 
 function priceTrendOf(sticker: number, today: number): "up" | "flat" | "down" {
@@ -1639,6 +1757,74 @@ export function buildBusinessBooks(
     const extra = standRows.find((r) => r.id === stand.id);
     if (!extra) continue;
     sites.push(siteBookFromStand(stand, land, play, extra));
+  }
+  for (const site of play.workSites || []) {
+    if (!site.unitId) continue;
+    const tax = cartTaxRate(play);
+    const cogsEst = packUnitCost("fruit");
+    const unitsSold = Number(site.unitsSold) || 0;
+    const perMinute = 0;
+    sites.push({
+      standId: site.id,
+      kind: "shop",
+      label: site.label,
+      siteClass: "shop",
+      lotName: site.label,
+      plotClass: null,
+      staffName: site.tillHired ? site.staffName : site.packerHired ? site.packerStaffName : null,
+      hired: Boolean(site.tillHired),
+      attending: false,
+      sticker: site.stickerPrice,
+      todayPrice: TODAY_PRICE,
+      stickerBand: stickerBand(site.stickerPrice),
+      priceTrend: priceTrendOf(site.stickerPrice, TODAY_PRICE),
+      cogsEst,
+      cogsSold: roundMoney(unitsSold * cogsEst),
+      taxRate: tax,
+      netPerSale: roundMoney(site.stickerPrice * (1 - tax)),
+      worthPaper: UNIT_ROOM_PRICE.shop,
+      stock: site.stock,
+      unitsSold,
+      perMinute,
+      projHour: 0,
+      projDay: 0,
+    });
+  }
+  for (const unit of play.units || []) {
+    if (unit.owner !== "visitor") continue;
+    if (unit.use === "shop") continue;
+    const lease = unit.lease;
+    const hoursPaid = lease && lease.lastPaidHour >= 0 ? lease.lastPaidHour : 0;
+    const rent = lease ? lease.rentPerHour : 0;
+    sites.push({
+      standId: `unit-${unit.id}`,
+      kind: unit.use,
+      label: unit.label,
+      siteClass: unit.use,
+      lotName: unit.label,
+      plotClass: null,
+      staffName: lease ? lease.tenantName : null,
+      hired: Boolean(lease),
+      attending: false,
+      sticker: rent,
+      todayPrice: rent,
+      stickerBand: lease ? "green" : "red",
+      priceTrend: "flat",
+      cogsEst: 0,
+      cogsSold: 0,
+      taxRate: 0,
+      netPerSale: rent,
+      worthPaper: UNIT_ROOM_PRICE[unit.use],
+      stock: 0,
+      unitsSold: hoursPaid,
+      perMinute: 0,
+      projHour: lease ? rent : 0,
+      projDay: lease ? roundMoney(rent * 24) : 0,
+      vacantNote: lease ? null : "Empty room · $0 until a tenant signs.",
+      rentNote: lease
+        ? `${lease.tenantName} · ${lease.hours} sim hours · $${lease.rentPerHour.toFixed(2)}/hour`
+        : "No tenant. Scout from the room.",
+    });
   }
   return {
     mode: "PAPER",
@@ -1726,7 +1912,7 @@ export function playSnapshot(visitor: Visitor, land: LandBoard, taxRate?: number
       boostLeft: s.boostLeft || 0,
       stickerBand: band,
       stickerMul: stickerSellMul(band),
-      trafficBand: plot ? plotTrafficBand(land, plot) : "red",
+      trafficBand: trafficForWork(land, play, { id: s.id, plotId: s.plotId }),
     };
   });
   return {
@@ -1763,6 +1949,7 @@ export function playSnapshot(visitor: Visitor, land: LandBoard, taxRate?: number
     stands,
     sites: [...stands, ...work],
     workSites: work,
+    units: unitsSnapshot(play),
     leases: land.plots.filter((p) => p.owner === "visitor").map((p) => ({
       id: p.id,
       name: p.name,
@@ -1782,6 +1969,7 @@ export function playSnapshot(visitor: Visitor, land: LandBoard, taxRate?: number
         (p) =>
           p.island === "south" &&
           !p.owner &&
+          !p.buildingId &&
           (p.class === "by_right" || p.class === "cart_pad") &&
           (p.band === "street" || p.class === "cart_pad"),
       )

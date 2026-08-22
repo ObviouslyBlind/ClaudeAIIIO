@@ -7,7 +7,8 @@ PAPER / SIMULATED. Grep these `kind` / `layer` / `.name` strings. Source of trut
 | Viewer | `data-overlay` | What you see | What a tap hits |
 | --- | --- | --- | --- |
 | World | `world` | the islands | walk. buildings / stands / port. **$ tags buy** |
-| Lots | `lots` | boundary outlines | click the **$ title** or a lot to buy |
+| Lots | `lots` | boundary outlines + vacant $ | click the **$ title** or a lot to buy |
+| Properties | `data-toggle="properties"` | $ / YOURS above buildings | tap a property sign / shell to open the sheet. Off: walk only |
 | Foot traffic | `foot` | High / Moderate / Low ribbons + road names | walk only |
 | Logistics | `logistics` | van + roadside crate pads | crate / van / walk |
 | Minerals | `minerals` | empty on South v1 | walk only |

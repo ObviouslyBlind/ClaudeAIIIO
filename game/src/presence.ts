@@ -35,6 +35,7 @@ const NOTE =
   "PAPER outdoor presence. Interest cells, HTTP poll. SIMULATED. Not live multiplayer. Not Colyseus. Not Earth/OSM.";
 
 const northPort = ISLANDS.north.port;
+const southPort = ISLANDS.south.port;
 
 /** Four named NPC walkers on the north quay apron. Local metres. */
 export const NORTH_QUAY_WALKERS: OutdoorActor[] = [
@@ -42,6 +43,14 @@ export const NORTH_QUAY_WALKERS: OutdoorActor[] = [
   { id: "npc:tomas", name: "Tomas Crane", x: northPort.x + 14, z: northPort.z + 24, island: "north" },
   { id: "npc:isla", name: "Isla Bollard", x: northPort.x - 6, z: northPort.z + 38, island: "north" },
   { id: "npc:reed", name: "Reed Cart", x: northPort.x + 20, z: northPort.z - 8, island: "north" },
+];
+
+/** South spawn currently saw cars, not people. Same presence clock as north. */
+export const SOUTH_QUAY_WALKERS: OutdoorActor[] = [
+  { id: "npc:cale", name: "Cale Drift", x: southPort.x + 8, z: southPort.z + 14, island: "south" },
+  { id: "npc:brine", name: "Brine Pallet", x: southPort.x - 10, z: southPort.z + 28, island: "south" },
+  { id: "npc:lolo", name: "Lolo Kettle", x: southPort.x + 18, z: southPort.z - 6, island: "south" },
+  { id: "npc:pike", name: "Pike Quay", x: southPort.x - 4, z: southPort.z + 42, island: "south" },
 ];
 
 export function createPresence(cellSize = CELL_SIZE_M): PresenceGrid {
@@ -132,9 +141,13 @@ export function seedNorthQuayWalkers(grid: PresenceGrid): OutdoorActor[] {
   return NORTH_QUAY_WALKERS.map((walker) => register(grid, walker));
 }
 
-function seedNorthQuayWalkersOnce(grid: PresenceGrid): void {
-  if (grid.actors.has(NORTH_QUAY_WALKERS[0]!.id)) return;
-  seedNorthQuayWalkers(grid);
+export function seedSouthQuayWalkers(grid: PresenceGrid): OutdoorActor[] {
+  return SOUTH_QUAY_WALKERS.map((walker) => register(grid, walker));
+}
+
+function seedQuayWalkersOnce(grid: PresenceGrid): void {
+  if (!grid.actors.has(NORTH_QUAY_WALKERS[0]!.id)) seedNorthQuayWalkers(grid);
+  if (!grid.actors.has(SOUTH_QUAY_WALKERS[0]!.id)) seedSouthQuayWalkers(grid);
 }
 
 function parseCoord(raw: string | null | undefined, fallback: number): number {
@@ -183,7 +196,7 @@ export function presenceQuery(
   grid: PresenceGrid,
   params: { x?: string | null; z?: string | null; radius?: string | null },
 ): PresenceSnapshot {
-  seedNorthQuayWalkersOnce(grid);
+  seedQuayWalkersOnce(grid);
   const { x, z } = resolvePresenceQuery(params);
   const radius = parseCoord(params.radius, DEFAULT_RADIUS_M);
   return toSnapshot(grid, { x, z, radius: radius > 0 ? radius : DEFAULT_RADIUS_M });

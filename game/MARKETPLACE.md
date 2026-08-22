@@ -204,9 +204,10 @@ Trucks that “park and run a route” are this same system: a node with a sched
 
 1. **Done.** Center **2Isles Marketplace** shell: search, South / North, aisles. **Street** lists real carts. Other aisles say coming soon (honest empty, not fake SKUs). Hire lists your businesses.
 2. Hire actions grow as fleet and plant exist on a site.
-3. **Shop fit** when small buildings exist.
-4. **Plant + aggregates** (~20 SKUs) when a quarry lot type exists.
-5. **Farming** orchard kit when a farm lot type exists.
-6. Split fry stock (fish / chips / oil) when we are ready — that is Street stock, not a new aisle.
+3. **Units** — rooms inside a building (shop / apartment / office). Placeholder kit. Spec: [`docs/UNITS.md`](docs/UNITS.md). Shopfit / Hospitality SKUs only when those rooms exist.
+4. **Shop fit** when small buildings exist beyond the test stack.
+5. **Plant + aggregates** (~20 SKUs) when a quarry lot type exists.
+6. **Farming** orchard kit when a farm lot type exists.
+7. Split fry stock (fish / chips / oil) when we are ready — that is Street stock, not a new aisle.
 
 Street is live in the HUD. Other aisles stay empty until those lot types exist. Do not fake a quarry you cannot place.

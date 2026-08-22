@@ -223,6 +223,15 @@ describe("RMB-hold orbit camera", () => {
     expect(ride).not.toContain("force: true");
   });
 
+  it("pauses harbour follow so the dollhouse can own RMB", () => {
+    const src = readFileSync(new URL("../public/harbour/camera.js", import.meta.url), "utf8");
+    expect(src).toContain("function pause");
+    expect(src).toContain("paused");
+    const main = readFileSync(new URL("../public/harbour/main.js", import.meta.url), "utf8");
+    expect(main).toContain("playCam.pause");
+    expect(main).toContain("dollhouseCam");
+  });
+
   it("ride orbit is pulled back to show the cab, not spawn look-at", () => {
     const ride = rideOrbitState("south");
     expect(ride.orbited).toBe(true);

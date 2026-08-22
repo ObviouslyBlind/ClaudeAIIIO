@@ -25,6 +25,7 @@ import { buildSouthLand, southTaxiStops } from "./southLand.ts";
 import type { RoadGraph } from "./roadGraph.ts";
 import { inflateAsksAfterLease, pinCartPadAsks, plotAsk } from "./landPrice.ts";
 import { CART_PAD_MAX, CART_PAD_PRICE } from "./economy.ts";
+import { isBuildingLot } from "./unitPrecinct.ts";
 
 export { BUILDING_CATALOG, DEVELOP_COST };
 export type { LandUseId };
@@ -70,6 +71,8 @@ export type Parcel = {
   deposit: MineralId | null;
   /** Street = commercial. Fields / shore = residential. High density is government-locked. */
   zone: ZoneId;
+  /** Authored harbour building sitting on this dirt. Rooms are a separate buy. */
+  buildingId?: string;
 };
 
 export type Road = {
@@ -135,7 +138,7 @@ export const ISLANDS: Record<IslandId, IslandSpec> = {
 export const ROAD_CLEAR = 11;
 /** First-frame lots. Keep in sync with public/harbour/main.js */
 export const SPAWN_PARCEL_M = 420;
-export const STARTER_CASH = 1_000;
+export const STARTER_CASH = 10_000;
 /** Metres. Tap this close to a starter street centroid to select it. */
 export const STARTER_SNAP_M = 40;
 
@@ -792,6 +795,7 @@ export function leasePlot(
   if (plot.class === "reserved") return { ok: false, reason: "reserved" };
   if (plot.owner) return { ok: false, reason: "owned" };
   if (!zoneUnlocked(plot.zone)) return { ok: false, reason: "zone_locked" };
+  if (isBuildingLot(plot)) return { ok: false, reason: "building_lot" };
   if (isCartPad(plot) && visitorCartPadCount(board, owner) >= CART_PAD_MAX) {
     return { ok: false, reason: "pad_cap" };
   }

@@ -4,9 +4,17 @@
  */
 
 import { plotDisplayName } from "./parcel-map.js";
-import { buyAskModel } from "./buy-ask.js";
+import { buyAskModel, unitAskModel, landAskModel } from "./buy-ask.js";
 import { playPaperBuy } from "./paper-sfx.js";
-import { toggleViewer, isLotsViewer, footLevel } from "./overlays.js";
+import {
+  toggleViewer,
+  isLotsViewer,
+  footLevel,
+  viewerCaption,
+  viewerHint,
+  cycleProperties,
+  propertiesCaption,
+} from "./overlays.js";
 import { mountPackShift } from "./pack.js";
 import { formatBooksBody } from "./books-hud.js";
 import { formatInventoryBody } from "./inventory-hud.js";
@@ -22,6 +30,7 @@ import {
 } from "./marketplace.js";
 import { formatHireSheet } from "./hire-sheet.js";
 import { formatAccountSheet } from "./account-sheet.js";
+import { findBuilding, findUnit, formatBuildingSheet, formatOrderDests, ownedShopUnits, ownsBuildingDirt } from "./units-hud.js";
 
 export const POLL_MS = 1000;
 
@@ -83,6 +92,12 @@ export function mountChrome(opts) {
   const packShift = mountPackShift();
   let siteTab = "stock";
   let openSiteId = null;
+  let unitBuildingId = "";
+  let unitView = "sale";
+  let unitFloor = 0;
+  let unitRoomId = "";
+  let roomLocked = false;
+  let marketUnitId = "";
   let orderSku = null;
   let orderQty = 1;
   const orderAsk = document.getElementById("order-ask");
@@ -99,29 +114,105 @@ export function mountChrome(opts) {
   const HINTS = {
     world: "World: tap the dirt to walk. Green line is the path.",
     lots: "Lots to buy. Vacant $ bars. Click Lots again for your lots.",
-    yours: "Your lots and buildings. Click Lots again to hide.",
+    yours: "Your Lots. Click Lots again to hide.",
     foot: "Foot traffic: High (green) / Moderate (yellow) / Low (red) on each named road.",
-    minerals: "Minerals are not in yet.",
+    landlord: "Buy the dirt under a building for $15,000. You do not need this to run a room.",
   };
 
-  function setOverlay(id) {
-    overlay = id;
+  let propertiesMode = "off";
+
+  function paintLandlordChip() {
+    root.querySelectorAll('[data-overlay="landlord"]').forEach((b) => {
+      const show = ownsBuildingDirt(play);
+      b.hidden = !show;
+      b.setAttribute("aria-label", "Landlord");
+      b.setAttribute("data-tip", "Landlord");
+      if (!show && overlay === "landlord") overlay = "world";
+    });
+  }
+
+  function paintViewerChrome() {
     root.querySelectorAll("[data-overlay]").forEach((b) => {
       const key = b.getAttribute("data-overlay");
-      const on = key === "lots" ? isLotsViewer(id) : key === id;
+      const on = key === "lots" ? isLotsViewer(overlay) : key === overlay;
       b.classList.toggle("is-on", on);
       if (key === "lots") {
-        b.classList.toggle("is-yours", id === "yours");
-        const label = id === "yours" ? "Your lots" : id === "lots" ? "Lots to buy" : "Lots";
+        b.classList.toggle("is-yours", overlay === "yours");
+        const label = isLotsViewer(overlay) ? viewerCaption(overlay, propertiesMode) : "Lots";
         b.setAttribute("aria-label", label);
         b.setAttribute("data-tip", label);
       }
+      if (key === "landlord") {
+        const show = ownsBuildingDirt(play);
+        b.hidden = !show;
+        b.setAttribute("aria-label", "Landlord");
+        b.setAttribute("data-tip", "Landlord");
+        if (!show && overlay === "landlord") overlay = "world";
+      }
     });
+    const propBtn = root.querySelector('[data-toggle="properties"]');
+    if (propBtn) {
+      const on = propertiesMode !== "off";
+      propBtn.classList.toggle("is-on", on);
+      propBtn.classList.toggle("is-yours", propertiesMode === "yours");
+      propBtn.setAttribute("aria-pressed", on ? "true" : "false");
+      const label = propertiesCaption(propertiesMode);
+      propBtn.setAttribute("aria-label", label);
+      propBtn.setAttribute("data-tip", label);
+    }
+    const text = viewerHint(overlay, propertiesMode) || HINTS[overlay] || HINTS.world;
     const hint = document.getElementById("viewer-hint");
-    if (hint) hint.textContent = HINTS[id] || HINTS.world;
-    if (opts.setStatus) opts.setStatus(HINTS[id] || HINTS.world);
+    if (hint) hint.textContent = text;
+    if (opts.setStatus) opts.setStatus(text);
+  }
+
+  function setOverlay(id) {
+    if (id === "landlord" && !ownsBuildingDirt(play)) {
+      if (opts.setStatus) opts.setStatus("Buy the dirt under a building first.");
+      return;
+    }
+    overlay = id;
+    paintViewerChrome();
     if (opts.onOverlay) opts.onOverlay(id);
     paintFootLegend();
+    if (id === "landlord" && !roomLocked) {
+      unitView = "landlord";
+      unitBuildingId = "landlord";
+      paintBuildingSheet("landlord");
+    }
+  }
+
+  function emitProperties() {
+    if (opts.onProperties) {
+      opts.onProperties(propertiesMode !== "off", propertiesMode);
+    }
+  }
+
+  function setPropertiesOn(on) {
+    const want = Boolean(on);
+    const next = want ? (propertiesMode === "off" ? "sale" : propertiesMode) : "off";
+    if (next === propertiesMode) return;
+    propertiesMode = next;
+    if (propertiesMode === "off" && !roomLocked) dismissStandMenu();
+    paintViewerChrome();
+    emitProperties();
+  }
+
+  function cyclePropertiesChip() {
+    propertiesMode = cycleProperties(propertiesMode);
+    paintViewerChrome();
+    emitProperties();
+    if (propertiesMode === "off") {
+      if (!roomLocked) dismissStandMenu();
+      return;
+    }
+    if (propertiesMode === "yours") {
+      unitView = "yours-all";
+      unitBuildingId = "yours";
+      paintBuildingSheet("yours");
+      return;
+    }
+    if (opts.setStatus) opts.setStatus("Properties for sale. Tap a house $ or a vacant room.");
   }
 
   function syncSheetVeil() {
@@ -146,12 +237,67 @@ export function mountChrome(opts) {
     syncSheetVeil();
   }
 
+  function leaveDollhouse(force) {
+    if (roomLocked && !force) return;
+    roomLocked = false;
+    paintExitRoom();
+    if (typeof opts.onDollhouse === "function") opts.onDollhouse(null);
+  }
+
+  /** Unlocked sale preview dumps when you walk. Locked rooms stay until Exit room. */
+  function dumpPreview() {
+    if (roomLocked) return false;
+    leaveDollhouse();
+    return true;
+  }
+
+  function enterDollhouse(lock) {
+    if (!unitBuildingId || typeof opts.onDollhouse !== "function") return;
+    if (unitBuildingId === "landlord" || unitBuildingId === "yours") return;
+    const building = findBuilding(play, unitBuildingId);
+    const room = building && unitRoomId ? (building.rooms || []).find((r) => r.id === unitRoomId) : null;
+    if (lock) roomLocked = true;
+    opts.onDollhouse({
+      buildingId: unitBuildingId,
+      floor: unitFloor,
+      building,
+      unitId: unitRoomId || "",
+      room,
+      locked: roomLocked,
+    });
+    paintExitRoom();
+  }
+
+  function exitRoom() {
+    const building = findBuilding(play, unitBuildingId);
+    roomLocked = false;
+    unitRoomId = "";
+    unitView = propertiesMode === "yours" ? "yours-all" : "sale";
+    if (typeof opts.onExitRoom === "function") opts.onExitRoom(building);
+    leaveDollhouse(true);
+    dismissStandMenu();
+    paintExitRoom();
+    if (opts.setStatus) opts.setStatus("Back on the kerb.");
+  }
+
+  function paintExitRoom() {
+    const btn = document.getElementById("exit-room");
+    if (!btn) return;
+    btn.hidden = !roomLocked;
+  }
+
   function dismissStandMenu() {
     if (standMenu) standMenu.hidden = true;
     if (standVeil) standVeil.hidden = true;
-    const wasOpen = openSiteId != null;
+    const wasOpen = openSiteId != null || unitBuildingId;
     openSiteId = null;
-    if (wasOpen && typeof opts.onCloseStand === "function") opts.onCloseStand();
+    if (!roomLocked) {
+      unitBuildingId = "";
+      unitView = "sale";
+      unitRoomId = "";
+      leaveDollhouse();
+    }
+    if (wasOpen && typeof opts.onCloseStand === "function" && !roomLocked) opts.onCloseStand();
   }
 
   function open(id) {
@@ -164,7 +310,7 @@ export function mountChrome(opts) {
       return;
     }
     closePanels();
-    dismissStandMenu();
+    if (!roomLocked) dismissStandMenu();
     openPanel = id;
     const panel = document.getElementById("panel-" + id);
     if (panel) {
@@ -202,6 +348,7 @@ export function mountChrome(opts) {
     play = data;
     paintTop();
     paintPanels();
+    paintLandlordChip();
     if (typeof opts.onPlay === "function") opts.onPlay(play);
     return true;
   }
@@ -241,6 +388,10 @@ export function mountChrome(opts) {
   function destLabel() {
     if (marketDest === "road") return "Comes to you on the kerb";
     if (marketDest === "warehouse") return "South warehouse";
+    if (marketDest === "unit") {
+      const shop = ownedShopUnits(play).find((r) => r.id === marketUnitId);
+      return shop ? "This room · " + shop.label : "This room";
+    }
     return "Pick warehouse or bring to me";
   }
 
@@ -373,7 +524,10 @@ export function mountChrome(opts) {
     const total = basketMode ? null : unit * orderQty;
     const loc = destLabel();
     const waitS = Math.round(Number(play.deliveryWaitMs || 60000) / 1000);
-    const canPay = marketDest === "road" || marketDest === "warehouse";
+    const canPay =
+      marketDest === "road" ||
+      marketDest === "warehouse" ||
+      (marketDest === "unit" && Boolean(marketUnitId));
     orderAsk.hidden = false;
     if (orderVeil) orderVeil.hidden = false;
     const title = basketMode ? "Where should this go?" : "Buy " + row.label;
@@ -394,8 +548,7 @@ export function mountChrome(opts) {
       ${qtyBlock}
       <p class="order-label">Where</p>
       <div class="dest-row">
-        <button type="button" class="dest ${marketDest === "road" ? "is-on" : ""}" data-order-dest="road">Bring to me</button>
-        <button type="button" class="dest ${marketDest === "warehouse" ? "is-on" : ""}" data-order-dest="warehouse">Warehouse</button>
+        ${formatOrderDests(play, marketDest, marketUnitId)}
       </div>
       <div class="order-pay">
         <p class="buy-loc is-ask">${loc}${marketDest === "road" ? " · " + waitS + "s on the kerb" : ""}</p>
@@ -406,8 +559,34 @@ export function mountChrome(opts) {
     if (canPay) orderAsk.querySelector("#order-pay")?.focus();
   }
 
+  function orderDestBody(extra) {
+    const pose = typeof opts.getPose === "function" ? opts.getPose() : {};
+    const selectedId = typeof opts.getPlotId === "function" ? opts.getPlotId() : "";
+    const leases = (play && play.leases) || [];
+    const ownedId = leases.some((l) => l.id === selectedId)
+      ? selectedId
+      : (leases[0] && leases[0].id) || "";
+    return {
+      island: "south",
+      dest: marketDest,
+      x: pose && pose.x,
+      z: pose && pose.z,
+      plotId: marketDest === "road" ? ownedId || undefined : undefined,
+      unitId: marketDest === "unit" ? marketUnitId || undefined : undefined,
+      ...extra,
+    };
+  }
+
+  function destPicked() {
+    return (
+      marketDest === "road" ||
+      marketDest === "warehouse" ||
+      (marketDest === "unit" && Boolean(marketUnitId))
+    );
+  }
+
   async function submitOrder() {
-    if (marketDest !== "road" && marketDest !== "warehouse") {
+    if (!destPicked()) {
       paintOrderAsk();
       return;
     }
@@ -417,24 +596,10 @@ export function mountChrome(opts) {
       return;
     }
     if (!orderSku) return;
-    const pose = typeof opts.getPose === "function" ? opts.getPose() : {};
-    const selectedId = typeof opts.getPlotId === "function" ? opts.getPlotId() : "";
-    const leases = (play && play.leases) || [];
-    const ownedId = leases.some((l) => l.id === selectedId)
-      ? selectedId
-      : (leases[0] && leases[0].id) || "";
     const { ok, data } = await readJson("/api/market/order", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        skus: [orderSku],
-        island: "south",
-        dest: marketDest,
-        qty: orderQty,
-        x: pose && pose.x,
-        z: pose && pose.z,
-        plotId: marketDest === "road" ? ownedId || undefined : undefined,
-      }),
+      body: JSON.stringify(orderDestBody({ skus: [orderSku], qty: orderQty })),
     });
     hideOrderAsk();
     if (!ok) {
@@ -445,7 +610,7 @@ export function mountChrome(opts) {
     marketBasket = removeBasketLine(marketBasket, orderSku, "order");
     await refreshPlay(data);
     const delivery = data && data.delivery;
-    if (delivery && delivery.dest === "road") {
+    if (delivery && (delivery.dest === "road" || delivery.dest === "unit")) {
       closePanels();
       if (typeof opts.onOrder === "function") opts.onOrder(delivery);
     } else {
@@ -453,7 +618,7 @@ export function mountChrome(opts) {
     }
     if (opts.setStatus) {
       opts.setStatus(
-        marketDest === "road"
+        marketDest === "road" || marketDest === "unit"
           ? "Yellow van from the port."
           : "Paid. In the South warehouse.",
       );
@@ -461,18 +626,12 @@ export function mountChrome(opts) {
   }
 
   async function submitBasket() {
-    if (marketDest !== "road" && marketDest !== "warehouse") {
+    if (!destPicked()) {
       pendingBasketPay = true;
       paintOrderAsk();
       return;
     }
     if (!marketBasket.length) return;
-    const pose = typeof opts.getPose === "function" ? opts.getPose() : {};
-    const selectedId = typeof opts.getPlotId === "function" ? opts.getPlotId() : "";
-    const leases = (play && play.leases) || [];
-    const ownedId = leases.some((l) => l.id === selectedId)
-      ? selectedId
-      : (leases[0] && leases[0].id) || "";
     const skus = [];
     for (const row of marketBasket.filter((r) => r.via !== "good")) {
       const q = Math.max(1, Math.min(10, Number(row.qty) || 1));
@@ -483,15 +642,7 @@ export function mountChrome(opts) {
       const { ok, data } = await readJson("/api/market/order", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          skus,
-          island: "south",
-          dest: marketDest,
-          qty: 1,
-          x: pose && pose.x,
-          z: pose && pose.z,
-          plotId: marketDest === "road" ? ownedId || undefined : undefined,
-        }),
+        body: JSON.stringify(orderDestBody({ skus, qty: 1 })),
       });
       if (!ok) {
         if (opts.setStatus) opts.setStatus("Order failed: " + (data && data.reason));
@@ -524,7 +675,7 @@ export function mountChrome(opts) {
     marketBasket = [];
     marketView = "shop";
     const delivery = last && last.delivery;
-    if (marketDest === "road") {
+    if (marketDest === "road" || marketDest === "unit") {
       closePanels();
       if (delivery && typeof opts.onOrder === "function") opts.onOrder(delivery);
     } else {
@@ -532,7 +683,7 @@ export function mountChrome(opts) {
     }
     if (opts.setStatus) {
       opts.setStatus(
-        marketDest === "road" ? "Yellow van from the port." : "Paid. In the South warehouse.",
+        marketDest === "road" || marketDest === "unit" ? "Yellow van from the port." : "Paid. In the South warehouse.",
       );
     }
   }
@@ -567,11 +718,30 @@ export function mountChrome(opts) {
     body.innerHTML = formatBooksBody(play, booksExpanded);
   }
 
+  function isFurnitureKind(kind) {
+    const row = ((play && play.catalog) || []).find((s) => s.id === kind);
+    if (row) return row.aisle === "shopfit" || row.aisle === "hospitality";
+    return ["shelf", "till", "fridge", "bed", "shower", "sink", "desk", "cabinet"].includes(kind);
+  }
+
   function beginPlace(kitId) {
     placing = true;
     placingKit = kitId || "";
     if (landCard) landCard.hidden = true;
     if (buyAsk) buyAsk.hidden = true;
+    if (isFurnitureKind(kitId)) {
+      if (!roomLocked || !unitRoomId) {
+        placing = false;
+        placingKit = "";
+        if (opts.setStatus) opts.setStatus("Enter a room you own, then Place from inventory.");
+        return;
+      }
+      closePanels();
+      setPlaceHint("Tap this room's floor. Hold R to rotate.", true);
+      if (opts.setStatus) opts.setStatus("Green ghost is the kit. Hold R to rotate, then tap the floor.");
+      if (opts.onPlaceMode) opts.onPlaceMode(true);
+      return;
+    }
     setOverlay("yours");
     closePanels();
     setPlaceHint("Tap your pad or YOURS lot. Hold R to rotate.", true);
@@ -706,8 +876,175 @@ export function mountChrome(opts) {
       ((play.sites || []).find((s) => s.id === id)) ||
       ((play.stands || []).find((s) => s.id === id)) ||
       ((play.workSites || []).find((s) => s.id === id)) ||
+      ((play.workSites || []).find((s) => s.unitId === id)) ||
       null
     );
+  }
+
+  async function postUnit(path, body) {
+    const { ok, data } = await readJson(path, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (data && data.play) stampPlay(data.play);
+    return { ok, data };
+  }
+
+  function bindUnitSheet(root) {
+    root.querySelector("#stand-close")?.addEventListener("click", () => dismissStandMenu());
+    root.querySelectorAll("[data-unit-view]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (btn.disabled) return;
+        unitView = btn.getAttribute("data-unit-view") || "root";
+        paintBuildingSheet(unitBuildingId);
+      });
+    });
+    root.querySelectorAll("[data-floor-dir]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (btn.disabled) return;
+        const dir = Number(btn.getAttribute("data-floor-dir"));
+        if (!Number.isFinite(dir) || dir === 0) return;
+        const building = findBuilding(play, unitBuildingId);
+        const floors = [...new Set((building?.rooms || []).map((r) => Number(r.floor) || 0))].sort((a, b) => a - b);
+        const min = floors[0] ?? 0;
+        const max = floors[floors.length - 1] ?? 0;
+        unitFloor = Math.max(min, Math.min(max, unitFloor + dir));
+        paintBuildingSheet(unitBuildingId);
+      });
+    });
+    root.querySelectorAll("[data-ask-unit], [data-buy-unit]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (btn.disabled) return;
+        const id = btn.getAttribute("data-ask-unit") || btn.getAttribute("data-buy-unit");
+        unitRoomId = id || "";
+        const found = findUnit(play, id);
+        if (found) {
+          unitBuildingId = found.building.id;
+          unitFloor = Number(found.unit.floor) || 0;
+        }
+        unitView = "sale";
+        paintBuildingSheet(unitBuildingId);
+        paintUnitAsk(found && found.unit);
+        enterDollhouse(false);
+        if (opts.onHighlight) opts.onHighlight(id);
+      });
+    });
+    root.querySelectorAll("[data-ask-land], [data-buy-land]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (btn.disabled) return;
+        const id = btn.getAttribute("data-ask-land") || btn.getAttribute("data-buy-land");
+        const building = findBuilding(play, id);
+        paintLandAsk(building);
+      });
+    });
+    root.querySelectorAll("[data-enter-unit], [data-unit-room]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        unitRoomId = btn.getAttribute("data-enter-unit") || btn.getAttribute("data-unit-room") || "";
+        const found = findUnit(play, unitRoomId);
+        if (found) {
+          unitBuildingId = found.building.id;
+          unitFloor = Number(found.unit.floor) || 0;
+        }
+        unitView = "room";
+        paintBuildingSheet(unitBuildingId);
+        enterDollhouse(true);
+        if (opts.onHighlight) opts.onHighlight(unitRoomId);
+      });
+    });
+    root.querySelectorAll("[data-exit-room]").forEach((btn) => {
+      btn.addEventListener("click", () => exitRoom());
+    });
+    root.querySelectorAll("[data-pickup-kit]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const { ok, data } = await postUnit("/api/unit/pickup", {
+          unitId: btn.getAttribute("data-unit-id"),
+          kitId: btn.getAttribute("data-pickup-kit"),
+        });
+        if (opts.setStatus) opts.setStatus(ok ? "Packed to the warehouse." : "Could not pick up: " + ((data && data.reason) || "fail"));
+        paintBuildingSheet(unitBuildingId);
+      });
+    });
+    root.querySelectorAll("[data-fit-kit]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        if (btn.disabled) return;
+        const { ok, data } = await postUnit("/api/unit/kit", {
+          unitId: btn.getAttribute("data-unit-id"),
+          kitId: btn.getAttribute("data-fit-kit"),
+        });
+        if (opts.setStatus) opts.setStatus(ok ? "Kit in the room." : "Could not fit: " + ((data && data.reason) || "fail"));
+        paintBuildingSheet(unitBuildingId);
+      });
+    });
+    root.querySelectorAll("[data-scout-unit]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const { ok, data } = await postUnit("/api/unit/scout", { unitId: btn.getAttribute("data-scout-unit") });
+        if (opts.setStatus) {
+          opts.setStatus(ok ? "Tenant profiles." : "No tenants.");
+        }
+        paintBuildingSheet(unitBuildingId);
+      });
+    });
+    root.querySelectorAll("[data-sign-lease]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const { ok, data } = await postUnit("/api/unit/lease", {
+          unitId: btn.getAttribute("data-sign-lease"),
+          tenantId: btn.getAttribute("data-tenant"),
+        });
+        if (opts.setStatus) opts.setStatus(ok ? "Lease signed." : "Could not sign: " + ((data && data.reason) || "fail"));
+        paintBuildingSheet(unitBuildingId);
+      });
+    });
+    root.querySelectorAll("[data-unit-hire]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        if (btn.disabled) return;
+        const { ok, data } = await postUnit("/api/unit/hire", {
+          unitId: btn.getAttribute("data-unit-hire"),
+          role: btn.getAttribute("data-unit-role"),
+        });
+        if (opts.setStatus) opts.setStatus(ok ? "Hired." : "Could not hire: " + ((data && data.reason) || "fail"));
+        paintBuildingSheet(unitBuildingId);
+      });
+    });
+    root.querySelectorAll("[data-unit-fire]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        if (btn.disabled) return;
+        const { ok, data } = await postUnit("/api/unit/fire", {
+          unitId: btn.getAttribute("data-unit-fire"),
+          role: btn.getAttribute("data-unit-role"),
+        });
+        if (opts.setStatus) opts.setStatus(ok ? "Fired." : "Could not fire: " + ((data && data.reason) || "fail"));
+        paintBuildingSheet(unitBuildingId);
+      });
+    });
+  }
+
+  function paintBuildingSheet(buildingId, quiet) {
+    if (!standMenu) return;
+    const id = buildingId || unitBuildingId;
+    if (!id || !play) {
+      dismissStandMenu();
+      return;
+    }
+    if (!quiet) closePanels();
+    openSiteId = null;
+    unitBuildingId = id;
+    standMenu.hidden = false;
+    if (standVeil) standVeil.hidden = true;
+    standMenu.innerHTML = formatBuildingSheet(play, {
+      buildingId: id,
+      view: unitView,
+      floor: unitFloor,
+      unitId: unitRoomId,
+    });
+    bindUnitSheet(standMenu);
+    enterDollhouse(unitView === "room");
+    standMenu.querySelectorAll("[data-open-stand]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const site = findSite(btn.getAttribute("data-open-stand"));
+        if (site) paintStandMenu(site);
+      });
+    });
   }
 
   function paintStandMenu(stand, onStock, onHire) {
@@ -717,6 +1054,8 @@ export function mountChrome(opts) {
       return;
     }
     closePanels();
+    if (unitBuildingId) leaveDollhouse();
+    unitBuildingId = "";
     openSiteId = stand.id;
     standMenu.hidden = false;
     if (standVeil) standVeil.hidden = false;
@@ -850,6 +1189,30 @@ export function mountChrome(opts) {
         if (ok && opts.onFired) opts.onFired(id);
       });
     }
+    standMenu.querySelectorAll("[data-unit-hire]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const { ok, data } = await postUnit("/api/unit/hire", {
+          unitId: btn.getAttribute("data-unit-hire"),
+          role: btn.getAttribute("data-unit-role"),
+        });
+        const fresh = findSite(live.id);
+        paintStandMenu(fresh, onStock, onHire);
+        if (ok && opts.onHired) opts.onHired(live.id);
+        if (opts.setStatus) opts.setStatus(ok ? "Hired." : "Could not hire: " + ((data && data.reason) || "fail"));
+      });
+    });
+    standMenu.querySelectorAll("[data-unit-fire]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const { ok, data } = await postUnit("/api/unit/fire", {
+          unitId: btn.getAttribute("data-unit-fire"),
+          role: btn.getAttribute("data-unit-role"),
+        });
+        const fresh = findSite(live.id);
+        paintStandMenu(fresh, onStock, onHire);
+        if (ok && opts.onFired) opts.onFired(live.id);
+        if (opts.setStatus) opts.setStatus(ok ? "Fired." : "Could not fire: " + ((data && data.reason) || "fail"));
+      });
+    });
     const pickupBtn = standMenu.querySelector("[data-pickup-stand]");
     if (pickupBtn) {
       pickupBtn.addEventListener("click", async () => {
@@ -1045,8 +1408,24 @@ export function mountChrome(opts) {
         return;
       }
       if (hit.hasAttribute("data-order-dest")) {
-        marketDest = hit.getAttribute("data-order-dest") === "road" ? "road" : "warehouse";
+        const dest = hit.getAttribute("data-order-dest");
+        if (dest === "unit") {
+          marketDest = "unit";
+          marketUnitId = hit.getAttribute("data-order-unit") || "";
+        } else {
+          marketDest = dest === "road" ? "road" : "warehouse";
+          marketUnitId = "";
+        }
         paintOrderAsk();
+        return;
+      }
+      if (hit.hasAttribute("data-unit-hire")) {
+        const unitId = hit.getAttribute("data-unit-hire");
+        const role = hit.getAttribute("data-unit-role");
+        const { ok, data } = await postUnit("/api/unit/hire", { unitId, role });
+        paintStaff();
+        if (ok && opts.onHired) opts.onHired(unitId);
+        if (opts.setStatus) opts.setStatus(ok ? "Hired." : "Could not hire: " + ((data && data.reason) || "fail"));
         return;
       }
       if (hit.id === "order-cancel") {
@@ -1220,6 +1599,11 @@ export function mountChrome(opts) {
       setOverlay(toggleViewer(overlay, btn.getAttribute("data-overlay")));
     });
   });
+  root.querySelectorAll('[data-toggle="properties"]').forEach((btn) => {
+    btn.addEventListener("click", () => {
+      cyclePropertiesChip();
+    });
+  });
 
   async function poll() {
     const gen = playGen;
@@ -1244,6 +1628,8 @@ export function mountChrome(opts) {
           const fresh = findSite(openSiteId);
           if (fresh) paintStandMenu(fresh);
         }
+      } else if (unitBuildingId && standMenu && !standMenu.hidden) {
+        paintBuildingSheet(unitBuildingId, true);
       }
     }
   }
@@ -1280,6 +1666,67 @@ export function mountChrome(opts) {
         if (opts.onCloseLand) opts.onCloseLand();
       });
     }
+  }
+
+  function paintAsk(model, onYes) {
+    if (!buyAsk || !model) {
+      if (buyAsk) buyAsk.hidden = true;
+      return;
+    }
+    buyAsk.hidden = false;
+    if (landCard) landCard.hidden = true;
+    buyAsk.innerHTML = `
+      <h2>${model.question}</h2>
+      <p class="buy-ask-name">${model.name}</p>
+      <p class="price">${model.priceLabel}</p>
+      <div class="land-row">
+        <button type="button" class="take-all" id="buy-ask-yes" ${model.disabled ? "disabled" : ""}>${model.yes}</button>
+        <button type="button" class="take-all" id="buy-ask-no">${model.no}</button>
+      </div>
+    `;
+    const yes = buyAsk.querySelector("#buy-ask-yes");
+    const no = buyAsk.querySelector("#buy-ask-no");
+    if (yes && !model.disabled) yes.addEventListener("click", onYes);
+    if (no) {
+      no.addEventListener("click", () => {
+        buyAsk.hidden = true;
+        if (opts.onCloseLand) opts.onCloseLand();
+      });
+    }
+  }
+
+  function paintUnitAsk(room) {
+    const model = unitAskModel(room);
+    if (!model) return;
+    paintAsk(model, async () => {
+      buyAsk.hidden = true;
+      const { ok, data } = await postUnit("/api/unit/buy", { unitId: room.id });
+      if (!ok) {
+        if (opts.setStatus) opts.setStatus("Could not buy: " + ((data && data.reason) || "fail"));
+        return;
+      }
+      unitRoomId = room.id;
+      unitView = "room";
+      unitFloor = Number(room.floor) || 0;
+      paintBuildingSheet(room.buildingId || unitBuildingId);
+      enterDollhouse(true);
+      if (opts.onHighlight) opts.onHighlight(room.id);
+      if (opts.setStatus) opts.setStatus("Room is yours. Place furniture from inventory.");
+    });
+  }
+
+  function paintLandAsk(building) {
+    const model = landAskModel(building, play && play.cash);
+    if (!model) return;
+    paintAsk(model, async () => {
+      buyAsk.hidden = true;
+      const { ok, data } = await postUnit("/api/building/land", { buildingId: building.id });
+      if (opts.setStatus) opts.setStatus(ok ? "You own the dirt." : "Could not buy land: " + ((data && data.reason) || "fail"));
+      if (!ok) return;
+      paintLandlordChip();
+      if (unitView === "landlord" || unitBuildingId === "landlord") paintBuildingSheet("landlord");
+      else if (unitBuildingId) paintBuildingSheet(unitBuildingId);
+    });
   }
 
   function hideSellAsk() {
@@ -1423,6 +1870,14 @@ export function mountChrome(opts) {
       if (opts.setStatus) opts.setStatus("Place cancelled.");
     });
   }
+  const exitRoomBtn = document.getElementById("exit-room");
+  if (exitRoomBtn) {
+    exitRoomBtn.addEventListener("click", (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      if (roomLocked) exitRoom();
+    });
+  }
   function bindCashDock() {
     if (!cashDock || !cashPlate) return;
     function setOpen(on) {
@@ -1496,6 +1951,15 @@ export function mountChrome(opts) {
     },
     getPlay: () => play,
     setOverlay,
+    isPropertiesOn: () => propertiesMode !== "off",
+    propertiesMode: () => propertiesMode,
+    isRoomLocked: () => roomLocked,
+    getPlaceUnitId: () => (roomLocked ? unitRoomId : ""),
+    setPropertiesOn,
+    cycleProperties: cyclePropertiesChip,
+    dumpPreview,
+    exitRoom,
+    paintLandAsk,
     open,
     closePanels,
     hideBuyAsk() {
@@ -1508,8 +1972,33 @@ export function mountChrome(opts) {
     paintBuyAsk,
     paintLand,
     paintStandMenu,
+    paintBuildingSheet,
+    openBuildingSheet(buildingId) {
+      unitView = propertiesMode === "yours" ? "yours" : "sale";
+      unitFloor = 0;
+      unitRoomId = "";
+      paintBuildingSheet(buildingId);
+    },
+    openUnitSheet(buildingId, unitId) {
+      const building = findBuilding(play, buildingId);
+      const room = building && (building.rooms || []).find((r) => r.id === unitId);
+      unitView = room && room.owner === "visitor" ? "room" : "sale";
+      unitFloor = room ? Number(room.floor) || 0 : 0;
+      unitRoomId = unitId || "";
+      paintBuildingSheet(buildingId);
+      if (unitView === "sale" && room && !room.owner) paintUnitAsk(room);
+      enterDollhouse(unitView === "room");
+    },
+    openLandlordSheet() {
+      unitView = "landlord";
+      unitBuildingId = "landlord";
+      paintBuildingSheet("landlord");
+    },
     hideStandMenu() {
       dismissStandMenu();
+    },
+    isDollhouseOpen() {
+      return Boolean(unitBuildingId && standMenu && !standMenu.hidden);
     },
   };
 }

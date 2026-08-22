@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { ISLANDS } from "./land.ts";
 import {
   NORTH_QUAY_WALKERS,
+  SOUTH_QUAY_WALKERS,
   createPresence,
   nearby,
   register,
@@ -46,14 +47,15 @@ describe("PAPER seeded north-quay presence walk", () => {
     expect(far.z).not.toBe(6950);
   });
 
-  it("moves the four seeded walkers so nearby() coords are not statues", () => {
+  it("moves the seeded walkers so nearby() coords are not statues", () => {
     const grid = createPresence();
     seedNorthQuayWalkers(grid);
     const port = ISLANDS.north.port;
     const before = nearby(grid, port.x, port.z).map((a) => ({ id: a.id, x: a.x, z: a.z }));
     const moved = walkSeededPresence(grid);
-    expect(moved).toHaveLength(4);
-    expect(moved.every((a) => a.island === "north")).toBe(true);
+    expect(moved).toHaveLength(8);
+    expect(moved.filter((a) => a.island === "north")).toHaveLength(4);
+    expect(moved.filter((a) => a.island === "south")).toHaveLength(4);
     const after = nearby(grid, port.x, port.z);
     expect(after).toHaveLength(4);
     expect(after.map((a) => a.name).sort()).toEqual(
@@ -67,14 +69,18 @@ describe("PAPER seeded north-quay presence walk", () => {
       expect(dz + dx).toBeGreaterThanOrEqual(STEP_M);
       expect(Math.hypot(actor.x - port.x, actor.z - port.z)).toBeLessThan(80);
     }
+    const southPort = ISLANDS.south.port;
+    const south = nearby(grid, southPort.x, southPort.z);
+    expect(south).toHaveLength(4);
+    expect(south.map((a) => a.name).sort()).toEqual(SOUTH_QUAY_WALKERS.map((w) => w.name).sort());
   });
 
   it("seeds on first tick if the grid is empty", () => {
     const grid = createPresence();
     const moved = walkSeededPresence(grid);
-    expect(moved).toHaveLength(4);
+    expect(moved).toHaveLength(8);
     expect(moved.map((a) => a.id).sort()).toEqual(
-      NORTH_QUAY_WALKERS.map((w) => w.id).sort(),
+      [...NORTH_QUAY_WALKERS, ...SOUTH_QUAY_WALKERS].map((w) => w.id).sort(),
     );
   });
 

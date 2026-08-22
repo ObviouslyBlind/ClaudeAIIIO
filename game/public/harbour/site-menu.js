@@ -247,6 +247,15 @@ function paintRun(site, play) {
   const names = Array.isArray(site.games) && site.games.length ? site.games : ["Fruit slice"];
   const cost = Number(play && play.hireCost != null ? play.hireCost : 300);
   const last = play && play.lastShiftLine ? `<p class="pack-result">${esc(play.lastShiftLine)}</p>` : "";
+  if (site.unitId) {
+    const packer = site.packerHired
+      ? `<div class="inv-row"><span>${esc(site.packerStaffName || "Packer")}</span><button type="button" class="ghost" data-unit-fire="${esc(site.unitId)}" data-unit-role="packer">Fire packer</button></div>`
+      : `<button type="button" class="go hire-site" data-unit-hire="${esc(site.unitId)}" data-unit-role="packer">Hire a packer ${money(cost)}</button>`;
+    const till = site.tillHired
+      ? `<div class="inv-row"><span>${esc(site.staffName || "Till worker")}</span><button type="button" class="ghost" data-unit-fire="${esc(site.unitId)}" data-unit-role="till">Fire till worker</button></div>`
+      : `<button type="button" class="go hire-site" data-unit-hire="${esc(site.unitId)}" data-unit-role="till">Hire a till worker ${money(cost)}</button>`;
+    return `${last}${packer}${till}<p class="whisper">A packer and a till worker are people ($300), not Shopfit furniture. Packer unpacks the crate. Till worker sells. Unhired packer = crate sits.</p>`;
+  }
   if (site.hired) {
     return `
       ${last}

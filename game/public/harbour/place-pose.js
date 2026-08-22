@@ -19,6 +19,11 @@ export const PLACE_GHOST_CORRIDOR_M = 22;
 /** Pointer this close to a pad centroid binds to that pad, not a nearby lot. */
 export const SNAP_PAD_M = 5.5;
 
+export function ghostFitsRoom(x, z, yaw, w, d, room) {
+  if (!room || !room.ring) return false;
+  return footprintInRing(x, z, yaw, w, d, room.ring);
+}
+
 export function isPlaceRotateKey(ev) {
   if (!ev) return false;
   const k = ev.key || "";
@@ -73,6 +78,7 @@ export function ghostFitsPlot(x, z, yaw, w, d, plot) {
   if (plot.class === "cart_pad") {
     return footprintInRing(x, z, yaw, w, d, plot.ring);
   }
+  if (plot.buildingId) return false;
   if (plot.ring && footprintInRing(x, z, yaw, w, d, plot.ring)) return true;
   const px = Number(plot.x);
   const pz = Number(plot.z);

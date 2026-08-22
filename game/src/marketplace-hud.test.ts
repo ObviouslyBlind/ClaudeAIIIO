@@ -90,6 +90,31 @@ describe("2Isles Marketplace sheet", () => {
     expect(html).not.toContain("data-order=");
   });
 
+  it("sells Shopfit furniture when the catalog has SKUs", () => {
+    const empty = formatMarketplace(play, { aisle: "shopfit", island: "south", query: "" });
+    expect(empty).toContain("Nothing in Shopfit matches that search.");
+    expect(empty).not.toContain("not for sale yet");
+    const fitted = formatMarketplace(
+      {
+        ...play,
+        catalog: [
+          ...play.catalog,
+          {
+            id: "shelf",
+            aisle: "shopfit",
+            role: "kit",
+            label: "Shelf",
+            paperPrice: 70,
+            note: "Place in a shop room you own.",
+          },
+        ],
+      },
+      { aisle: "shopfit", island: "south", query: "" },
+    );
+    expect(fitted).toContain("Shelf");
+    expect(fitted).toContain('data-add-cart="shelf"');
+  });
+
   it("filters Street by search and opens matching folds", () => {
     const html = formatMarketplace(play, { aisle: "street", island: "south", query: "hotdog_cart" });
     expect(html).toContain("Fruit cart");

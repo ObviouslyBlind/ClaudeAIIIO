@@ -31,3 +31,30 @@ export function buyAskModel(plot) {
     no: "No",
   };
 }
+
+/** Room buy is a confirm, same shape as the lot ask. Green tile must not debit. */
+export function unitAskModel(room) {
+  if (!room || room.owner) return null;
+  return {
+    question: `Buy ${room.label} for ${askMoney(room.price)}?`,
+    name: room.use ? `${room.use} · vacant` : "Vacant room",
+    priceLabel: askMoney(room.price),
+    yes: "Yes, buy",
+    no: "No",
+  };
+}
+
+/** Dirt under a shell. Spawn cannot afford it and does not need it to run a room. */
+export function landAskModel(building, cash) {
+  if (!building || building.landOwner) return null;
+  const price = Number(building.landPrice);
+  const can = Number(cash) >= price;
+  return {
+    question: `Buy the dirt under ${building.name} for ${askMoney(price)}?`,
+    name: "You do not need this to run a room. Spawn cannot afford it.",
+    priceLabel: askMoney(price),
+    yes: can ? "Yes, buy" : "Need " + askMoney(price),
+    no: "No",
+    disabled: !can,
+  };
+}

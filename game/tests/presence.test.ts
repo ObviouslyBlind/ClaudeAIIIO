@@ -4,6 +4,7 @@ import {
   CELL_SIZE_M,
   DEFAULT_RADIUS_M,
   NORTH_QUAY_WALKERS,
+  SOUTH_QUAY_WALKERS,
   cellIndex,
   cellKey,
   createPresence,
@@ -118,6 +119,8 @@ describe("PAPER outdoor presence cells", () => {
       x: String(ISLANDS.south.port.x),
       z: String(ISLANDS.south.port.z),
     });
-    expect(south.actors).toEqual([]);
+    expect(south.actors).toHaveLength(4);
+    expect(south.actors.every((a) => a.island === "south")).toBe(true);
+    expect(south.actors.map((a) => a.id).sort()).toEqual(SOUTH_QUAY_WALKERS.map((w) => w.id).sort());
   });
 });

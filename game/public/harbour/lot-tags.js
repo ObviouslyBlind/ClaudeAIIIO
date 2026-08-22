@@ -27,6 +27,7 @@ export const TAG_W_MAX_M = 88;
 export function tagKindFor(plot) {
   if (!plot) return "none";
   if (plot.class === "reserved") return "none";
+  if (plot.buildingId) return "none";
   if (plot.owner === "visitor") return "yours";
   if (plot.owner) return "taken";
   return "buy";

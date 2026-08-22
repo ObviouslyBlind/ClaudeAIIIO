@@ -2,7 +2,7 @@
 
 **Mid-alpha.** The harbour loop (land → pad → fruit cart → hire → sticker → Books) is the ratchet base. Next pieces are **features on that base**, not a new foundation.
 
-Last logged piece: **sticker price selector** (Stock tab). Politics frozen. Street carts grind (warehouse buy, scores, games, account, look) remains the prior ratchet.
+Last logged piece: **buildings push (Alpha 0.5.1) systems**. Politics frozen. Street carts grind remains the prior camera ratchet. No pixel-critic swarm.
 
 Live map: [`../docs/HANDOVER.md`](../docs/HANDOVER.md). Do not restart the pixel-critic swarm unless a named piece is in a real Gauntlet Loop.
 
@@ -37,5 +37,20 @@ One bar. Hard red / yellow / green / yellow / red. Cream pip. Optimal under toda
 | 10 | Desktop + phone 390px | **PASS** |
 
 Ratchet: one-bar Price set with Optimal on today’s green.
+
+## Buildings push (Alpha 0.5.1)
+
+Headless bar: buy one Quay Shops room, sibling vacant, packer fills from the crate, till sells, fire packer and the crate sits. **PASS**.
+
+Systems camera bar: 13 placeholder boxes, Manage grey until owned, dest This room, shop Run has packer + till. **Dollhouse:** open a floor, see inside, RMB-hold 360 around the box. Not Blender. Spec: [`../docs/UNITS.md`](../docs/UNITS.md).
+
+| Round | Bar | Result |
+|---|---|---|
+| U1 | Quay left buy, right vacant, packer then till, fire packer crate sits; cart fruit still sells | **PASS** (tests) |
+| U2 | Flat/office need full kit before scout; rent on sim-hour clock; ground rent $8 or skip if you own dirt | **PASS** (tests) |
+| U3 | Shop kit is siteScore parts (shelf/till/fridge). Ground-floor traffic band. Two quay shops = two Books rows. Stale unit crate warehouses. | **PASS** (tests) |
+| U5 | Spawn look: Strand Flats $900 tag, tap, buy a room | **PASS** (live harbour) |
+| U6 | Four distinct shells inland of Island Hwy in the spawn look; floor chips on the building sheet | **PASS** (live harbour) |
+| U7 | Dollhouse of a floor: open-top rooms, floors above hidden, RMB-hold orbit 360 around the box, not interior.js | **PASS** (live harbour, Strand Flats) |
 
 Operator is the brake.

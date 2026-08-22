@@ -131,7 +131,7 @@ describe("harbour land board", () => {
     const starters = board.plots.filter((p) => isStarterPlot(p, spec));
     expect(starters.length).toBeGreaterThanOrEqual(2);
     expect(starters.every((p) => p.band === "street")).toBe(true);
-    expect(starters.every((p) => p.price + DEVELOP_COST > STARTER_CASH)).toBe(true);
+    expect(starters.every((p) => p.price + DEVELOP_COST > 1_000)).toBe(true);
     expect(starters.every((p) => p.area < 2000)).toBe(true);
     expect(starters.every((p) => p.price >= 6_800)).toBe(true);
 
@@ -198,7 +198,7 @@ describe("harbour land board", () => {
   it("refuses a lease that would leave too little PAPER to develop", () => {
     const board = createLandBoard();
     const visitor = createVisitor(1_000);
-    const plot = board.plots.find((p) => !p.owner && p.class === "by_right")!;
+    const plot = board.plots.find((p) => !p.owner && !p.buildingId && p.class === "by_right")!;
     plot.price = 1_000 - DEVELOP_COST + 1;
     const result = leasePlot(board, visitor, plot.id);
     expect(result.ok).toBe(false);
@@ -248,7 +248,9 @@ describe("harbour land board", () => {
   });
   it("names every lot as a house number on the street it fronts", () => {
     const board = createLandBoard();
-    const numbered = board.plots.filter((p) => p.class !== "reserved" && p.class !== "cart_pad");
+    const numbered = board.plots.filter(
+      (p) => p.class !== "reserved" && p.class !== "cart_pad" && !p.buildingId,
+    );
     expect(numbered.every((p) => /^\d+ .+$/.test(p.name))).toBe(true);
     expect(board.plots.filter((p) => p.class === "reserved").every((p) => /Green$/.test(p.name))).toBe(true);
     expect(board.plots.some((p) => p.street === "Harbour Rd")).toBe(true);

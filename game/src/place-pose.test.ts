@@ -72,6 +72,15 @@ describe("place pose", () => {
         z: 0,
       }),
     ).toBe(true);
+    expect(
+      ghostFitsPlot(10, 0, 0, CART_FOOTPRINT_M.w, CART_FOOTPRINT_M.d, {
+        class: "by_right",
+        buildingId: "quay-shops",
+        ring: padRing,
+        x: 0,
+        z: 0,
+      }),
+    ).toBe(false);
   });
 });
 

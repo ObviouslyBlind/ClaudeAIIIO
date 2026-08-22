@@ -26,6 +26,8 @@ export function listBusinesses(play) {
 export function businessType(site) {
   if (!site) return "Business";
   if (site.siteClass === "shop") return "Shop";
+  if (site.siteClass === "apartment") return "Flat";
+  if (site.siteClass === "office") return "Office";
   if (site.siteClass === "mine" || site.kind === "quarry" || site.kind === "aggregates") {
     return "Aggregates";
   }
@@ -35,6 +37,7 @@ export function businessType(site) {
 }
 
 function plotNameFor(play, site) {
+  if (site && site.unitId) return site.label || "room";
   const lease = ((play && play.leases) || []).find((l) => l.id === site.plotId);
   return (lease && lease.name) || site.where || "your lot";
 }
@@ -51,7 +54,13 @@ function plantLine(site) {
   return rows.map((r) => r.label || r.kind || "Machine").join(", ");
 }
 
-function peopleLine(site) {
+export function peopleLine(site) {
+  if (site && site.unitId) {
+    const bits = [];
+    if (site.packerHired) bits.push(site.packerStaffName || "Packer");
+    if (site.tillHired) bits.push(site.staffName || "Till worker");
+    return bits.length ? bits.join(" · ") : "No one hired";
+  }
   if (site && site.hired) return site.staffName || "Vendor";
   return "No one hired";
 }
@@ -74,14 +83,14 @@ function listBody(play, sites) {
     .map((s) => {
       const where = plotNameFor(play, s);
       const type = businessType(s);
-      const state = s.hired ? peopleLine(s) : "Needs hire";
+      const state = s.unitId || s.hired ? peopleLine(s) : "Needs hire";
       return `
         <button type="button" class="biz-row" data-hire-pick="${esc(s.id)}">
           <span class="biz-copy">
             <strong>${esc(s.label || "Site")}</strong>
             <span>${esc(type)} · ${esc(where)}</span>
           </span>
-          <span class="biz-state${s.hired ? " is-hired" : ""}">${esc(state)}</span>
+          <span class="biz-state${s.hired || s.packerHired || s.tillHired ? " is-hired" : ""}">${esc(state)}</span>
         </button>`;
     })
     .join("");
@@ -91,9 +100,17 @@ function detailBody(play, site) {
   const where = plotNameFor(play, site);
   const type = businessType(site);
   const cost = hireCost(play);
-  const hireBtn = site.hired
-    ? ""
-    : `<button type="button" class="go" data-sheet-hire="${esc(site.id)}">Hire ${money(cost)}</button>`;
+  let hireBtn = "";
+  if (site.unitId) {
+    if (!site.packerHired) {
+      hireBtn += `<button type="button" class="go" data-unit-hire="${esc(site.unitId)}" data-unit-role="packer">Hire a packer ${money(cost)}</button>`;
+    }
+    if (!site.tillHired) {
+      hireBtn += `<button type="button" class="go" data-unit-hire="${esc(site.unitId)}" data-unit-role="till">Hire a till worker ${money(cost)}</button>`;
+    }
+  } else if (!site.hired) {
+    hireBtn = `<button type="button" class="go" data-sheet-hire="${esc(site.id)}">Hire ${money(cost)}</button>`;
+  }
   return `
     <button type="button" class="ghost hire-back" data-hire-back>All businesses</button>
     <h3 class="hire-site-name">${esc(site.label || "Site")}</h3>

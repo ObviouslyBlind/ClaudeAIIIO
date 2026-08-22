@@ -24,19 +24,24 @@ describe("PAPER land asks and lease inflation", () => {
   it("leaves $1000 PAPER on the street cart, not a vacant lease", () => {
     const board = createLandBoard();
     const kit = CART_PAPER_PRICE + HIRE_COST + HOTDOG_PACK_PRICE;
-    expect(kit).toBeLessThan(STARTER_CASH);
+    expect(kit).toBeLessThan(1_000);
     expect(LAUNCH_SALES_TAX).toBeCloseTo(0.08);
     const vacant = board.plots.filter((p) => !p.owner && p.class === "by_right");
     expect(vacant.length).toBeGreaterThan(10);
-    expect(vacant.every((p) => p.price + DEVELOP_COST > STARTER_CASH)).toBe(true);
-    expect(leasePlot(board, createVisitor(STARTER_CASH), vacant[0]!.id).ok).toBe(false);
+    expect(vacant.every((p) => p.price + DEVELOP_COST > 1_000)).toBe(true);
+    expect(leasePlot(board, createVisitor(1_000), vacant[0]!.id).ok).toBe(false);
   });
 
   it("does not inflate street asks when someone buys a $750 cart pad", () => {
     const board = createLandBoard();
     const pad = board.plots.find((p) => p.class === "cart_pad" && !p.owner)!;
     const street = board.plots.find(
-      (p) => p.island === "south" && p.band === "street" && p.class === "by_right" && !p.owner,
+      (p) =>
+        p.island === "south" &&
+        p.band === "street" &&
+        p.class === "by_right" &&
+        !p.owner &&
+        !p.buildingId,
     )!;
     const frozen = street.price;
     const otherPad = board.plots.find((p) => p.class === "cart_pad" && p.id !== pad.id && !p.owner)!;
@@ -53,7 +58,12 @@ describe("PAPER land asks and lease inflation", () => {
     expect(pads.length).toBeGreaterThan(2);
     expect(pads.every((p) => p.price === 750 && p.seedPrice === 750)).toBe(true);
     const street = board.plots.find(
-      (p) => p.island === "south" && p.band === "street" && p.class === "by_right" && !p.owner,
+      (p) =>
+        p.island === "south" &&
+        p.band === "street" &&
+        p.class === "by_right" &&
+        !p.owner &&
+        !p.buildingId,
     )!;
     expect(leasePlot(board, createVisitor(80_000), street.id).ok).toBe(true);
     const still = board.plots.filter((p) => p.class === "cart_pad");
@@ -70,7 +80,12 @@ describe("PAPER land asks and lease inflation", () => {
     const board = createLandBoard();
     const visitor = createVisitor(80_000);
     const southStreet = board.plots.filter(
-      (p) => p.island === "south" && p.band === "street" && !p.owner && p.class === "by_right",
+      (p) =>
+        p.island === "south" &&
+        p.band === "street" &&
+        !p.owner &&
+        !p.buildingId &&
+        p.class === "by_right",
     );
     const byStreet = new Map<string, typeof southStreet>();
     for (const p of southStreet) {
@@ -102,7 +117,7 @@ describe("PAPER land asks and lease inflation", () => {
     const board = createLandBoard();
     const visitor = createVisitor(80_000);
     const plot = board.plots.find(
-      (p) => p.island === "south" && !p.owner && p.class === "by_right",
+      (p) => p.island === "south" && !p.owner && !p.buildingId && p.class === "by_right",
     )!;
     const other = board.plots.find((p) => p.id !== plot.id && !p.owner)!;
     const frozen = other.price;

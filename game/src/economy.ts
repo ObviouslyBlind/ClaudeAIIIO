@@ -1,9 +1,8 @@
 /**
  * Launch PAPER prices. SIMULATED. The sim owns these numbers.
  *
- * Land is scarce and generally expensive. $1000 buys a highway pad and a
- * fruit cart, not a street lease and not the dearer carts.
- * Sales tax is one statute rate for books, stalls, and carts.
+ * Land is scarce. Live spawn is $10,000: rooms and kit fit; $15,000 dirt does not.
+ * A highway pad is still $750. Sales tax is one statute rate for books, stalls, and carts.
  */
 
 /** Launch sales-tax statute. PLAN §3.4 sink. NPC-NPC fills recycle as wages. */
@@ -26,8 +25,8 @@ export const LAND_GLOBAL_BUMP = 0.004;
 export const LAND_ASK_CAP_MUL = 4;
 
 /**
- * Fruit is the start. Watermelon and fry kits sit above starter cash so the
- * first pad + fruit shift is required. Fry stays under the South street floor.
+ * Fruit is the cheap first cart. Watermelon and fry kits also fit $10,000 spawn.
+ * Fry stays under the South street floor. Building dirt does not fit spawn.
  */
 export const CART_PRICES = {
   fruit: { kit: 90, pack: 14, sale: 6 },
@@ -73,3 +72,25 @@ export const STORAGE_UPGRADE_COST = CART_UPGRADES[0]!.cost;
 
 export const OWNER_ACCOUNT_NO = 1;
 export const VISITOR_ACCOUNT_NO = 2;
+
+/** Live spawn / reset. $10,000 buys one or two rooms and kit, not $15,000 dirt. */
+export const UNIT_SLICE_FAUCET = 10_000;
+export const UNIT_ROOM_PRICE = { shop: 1_200, apartment: 900, office: 1_100 } as const;
+export const BUILDING_LAND_PRICE = 15_000;
+export const GROUND_RENT_PER_UNIT_DAY = 8;
+export const PACKER_MOVE_PER_TICK = 2;
+/** Tenant term is a profile roll, not a 3/6/24/48 picker. 1 sim week = 168 hours. */
+export const LEASE_HOURS_MIN = 3;
+export const LEASE_HOURS_MAX = 168;
+export const TICKS_PER_SIM_HOUR = 150;
+/** Shop kit feeds the same 0–10 siteScore as cart fridge/sign. Not a second meter. */
+export const UNIT_KIT = [
+  { id: "shelf", label: "Shelf", use: "shop", cost: 70, appeal: 1.0, aisle: "shopfit" },
+  { id: "till", label: "Till", use: "shop", cost: 90, appeal: 1.0, aisle: "shopfit" },
+  { id: "fridge", label: "Fridge", use: "shop", cost: 180, appeal: 1.5, aisle: "shopfit" },
+  { id: "bed", label: "Bed", use: "apartment", cost: 80, appeal: 1.2, aisle: "hospitality" },
+  { id: "shower", label: "Shower", use: "apartment", cost: 90, appeal: 1.2, aisle: "hospitality" },
+  { id: "sink", label: "Sink", use: "apartment", cost: 60, appeal: 1.0, aisle: "hospitality" },
+  { id: "desk", label: "Desk", use: "office", cost: 100, appeal: 1.5, aisle: "hospitality" },
+  { id: "cabinet", label: "Filing cabinet", use: "office", cost: 80, appeal: 1.2, aisle: "hospitality" },
+] as const;

@@ -43,19 +43,29 @@ export function roadTrafficBand(road: Road): TrafficBand {
   return "red";
 }
 
-/** Nearest paved road to a plot, then that road's band. Vacant dirt → red. */
-export function plotTrafficBand(board: LandBoard, plot: Parcel): TrafficBand {
+/** Nearest named/paved road to a point, then that road's band. Far dirt → red. */
+export function pointTrafficBand(
+  board: LandBoard,
+  island: IslandId,
+  x: number,
+  z: number,
+): TrafficBand {
   let best: { dist: number; band: TrafficBand } | null = null;
   for (const road of board.roads) {
-    if (road.island !== plot.island || road.points.length < 2) continue;
+    if (road.island !== island || road.points.length < 2) continue;
     if (road.kind !== "paved" && !(road.kind === "dirt" && road.name)) continue;
     if (road.roundabout) continue;
     for (const p of road.points) {
-      const dist = Math.hypot(p.x - plot.x, p.z - plot.z);
+      const dist = Math.hypot(p.x - x, p.z - z);
       if (!best || dist < best.dist) best = { dist, band: roadTrafficBand(road) };
     }
   }
   return best && best.dist < 80 ? best.band : "red";
+}
+
+/** Nearest paved road to a plot, then that road's band. Vacant dirt → red. */
+export function plotTrafficBand(board: LandBoard, plot: Parcel): TrafficBand {
+  return pointTrafficBand(board, plot.island as IslandId, plot.x, plot.z);
 }
 
 export function footTrafficSnapshot(board: LandBoard) {

@@ -1,14 +1,16 @@
 /**
- * Each tick, stroll the four seeded north-quay PAPER actors a few metres
- * so nearby() names are not frozen statues. Clamp to the north port apron.
+ * Each tick, stroll the seeded quay PAPER actors a few metres
+ * so nearby() names are not frozen statues. North and South aprons.
  * PAPER. SIMULATED. Not live multiplayer. Not Colyseus.
  */
 
 import { ISLANDS } from "./land.ts";
 import {
   NORTH_QUAY_WALKERS,
+  SOUTH_QUAY_WALKERS,
   register,
   seedNorthQuayWalkers,
+  seedSouthQuayWalkers,
   type OutdoorActor,
   type PresenceGrid,
 } from "./presence.ts";
@@ -17,7 +19,7 @@ export const MODE = "PAPER" as const;
 export const PROVENANCE = "SIMULATED" as const;
 
 export const WALK_NOTE =
-  "PAPER. Seeded north-quay walkers stroll a few metres per tick. SIMULATED. Not live multiplayer.";
+  "PAPER. Seeded north- and south-quay walkers stroll a few metres per tick. SIMULATED. Not live multiplayer.";
 
 /** Metres per tick along the quay apron (z). A few metres, not a sprint. */
 export const STEP_M = 2;
@@ -25,10 +27,11 @@ export const STEP_M = 2;
 /** Same along-quay band as public/harbour/pedestrians.js. */
 export const QUAY_ALONG_MIN_M = -22;
 export const QUAY_ALONG_MAX_M = 64;
-/** Land-ish x pad around the seeded walkers / north port. */
+/** Land-ish x pad around the seeded walkers / port. */
 export const QUAY_X_PAD_M = 28;
 
 const northPort = ISLANDS.north.port;
+const southPort = ISLANDS.south.port;
 
 type Dir = 1 | -1;
 
@@ -52,13 +55,29 @@ function clamp(n: number, lo: number, hi: number): number {
   return Math.min(hi, Math.max(lo, n));
 }
 
-export function clampToNorthQuay(
+export function clampToQuay(
   x: number,
   z: number,
   port = northPort,
 ): { x: number; z: number } {
   const b = quayBounds(port);
   return { x: clamp(x, b.xMin, b.xMax), z: clamp(z, b.zMin, b.zMax) };
+}
+
+export function clampToNorthQuay(
+  x: number,
+  z: number,
+  port = northPort,
+): { x: number; z: number } {
+  return clampToQuay(x, z, port);
+}
+
+export function clampToSouthQuay(
+  x: number,
+  z: number,
+  port = southPort,
+): { x: number; z: number } {
+  return clampToQuay(x, z, port);
 }
 
 function dirBag(grid: PresenceGrid): Map<string, Dir> {
@@ -81,35 +100,45 @@ function dirOf(grid: PresenceGrid, id: string, index: number): Dir {
 }
 
 function ensureSeeded(grid: PresenceGrid): void {
-  if (grid.actors.has(NORTH_QUAY_WALKERS[0]!.id)) return;
-  seedNorthQuayWalkers(grid);
+  if (!grid.actors.has(NORTH_QUAY_WALKERS[0]!.id)) seedNorthQuayWalkers(grid);
+  if (!grid.actors.has(SOUTH_QUAY_WALKERS[0]!.id)) seedSouthQuayWalkers(grid);
 }
 
-/**
- * Move the four seeded north-quay PAPER NPCs a few metres along z.
- * Leaves any other registered actor (visitor, etc.) alone.
- */
-export function walkSeededPresence(grid: PresenceGrid, stepM = STEP_M): OutdoorActor[] {
-  ensureSeeded(grid);
-  const port = northPort;
+function stroll(
+  grid: PresenceGrid,
+  seeds: OutdoorActor[],
+  port: { x: number; z: number },
+  step: number,
+  indexBase: number,
+): OutdoorActor[] {
   const b = quayBounds(port);
-  const step = Number.isFinite(stepM) && stepM > 0 ? stepM : STEP_M;
   const bag = dirBag(grid);
   const moved: OutdoorActor[] = [];
-
-  NORTH_QUAY_WALKERS.forEach((seed, i) => {
+  seeds.forEach((seed, i) => {
     const actor = grid.actors.get(seed.id);
     if (!actor) return;
-    let dir = dirOf(grid, seed.id, i);
+    let dir = dirOf(grid, seed.id, indexBase + i);
     let z = actor.z + dir * step;
     if (z < b.zMin || z > b.zMax) {
       dir = (dir === 1 ? -1 : 1) as Dir;
       bag.set(seed.id, dir);
       z = actor.z + dir * step;
     }
-    const next = clampToNorthQuay(actor.x, z, port);
+    const next = clampToQuay(actor.x, z, port);
     moved.push(register(grid, { ...actor, x: next.x, z: next.z }));
   });
-
   return moved;
+}
+
+/**
+ * Move the seeded quay PAPER NPCs a few metres along z.
+ * Leaves any other registered actor (visitor, etc.) alone.
+ */
+export function walkSeededPresence(grid: PresenceGrid, stepM = STEP_M): OutdoorActor[] {
+  ensureSeeded(grid);
+  const step = Number.isFinite(stepM) && stepM > 0 ? stepM : STEP_M;
+  return [
+    ...stroll(grid, NORTH_QUAY_WALKERS, northPort, step, 0),
+    ...stroll(grid, SOUTH_QUAY_WALKERS, southPort, step, NORTH_QUAY_WALKERS.length),
+  ];
 }

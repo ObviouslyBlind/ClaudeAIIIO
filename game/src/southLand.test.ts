@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { createLandBoard, heightAt, ISLANDS } from "./land.ts";
-import { SOUTH_PORT, SOUTH_RAB, SOUTH_TOWNS, SOUTH_VOLCANO, volcanoDist, distToPolyline } from "./southGeom.ts";
+import { SOUTH_PORT, SOUTH_RAB, SOUTH_TOWNS, SOUTH_VOLCANO, volcanoDist, distToPolyline, southSpawnPad } from "./southGeom.ts";
 import { CART_PAD_DEPTH_M, CART_PAD_FRONT_M } from "./southLand.ts";
 import { canWalk } from "./walk.ts";
 import { carriagewayWidthM } from "./roadGraph.ts";
 
-describe("South land (no buildings)", () => {
+describe("South land (harbour lots)", () => {
   it("puts the South port on the west channel shore", () => {
     expect(ISLANDS.south.port).toEqual(SOUTH_PORT);
     expect(ISLANDS.south.port.x).toBeLessThan(-1500);
@@ -97,6 +97,24 @@ describe("South land (no buildings)", () => {
     expect(near[0]!.zone).toBe("commercial");
     expect(near[0]!.price).toBeGreaterThanOrEqual(2400);
     expect(near[0]!.street).toBe("Island Hwy");
+  });
+
+  it("seeds three buyable building lots next to the $750 spawn pads", () => {
+    const board = createLandBoard();
+    const spawn = southSpawnPad();
+    const lots = board.plots.filter((p) => p.buildingId);
+    expect(lots).toHaveLength(3);
+    expect(lots.map((p) => p.buildingId).sort()).toEqual(["mixed-house", "quay-shops", "strand-flats"]);
+    expect(lots.every((p) => p.price === 15_000)).toBe(true);
+    expect(lots.every((p) => p.street === "Island Hwy")).toBe(true);
+    expect(lots.every((p) => p.zone === "commercial")).toBe(true);
+    expect(lots.every((p) => p.class === "by_right")).toBe(true);
+    expect(lots.every((p) => Math.hypot(p.x - spawn.x, p.z - spawn.z) < 80)).toBe(true);
+    const quay = lots.find((p) => p.buildingId === "quay-shops")!;
+    expect(Math.hypot(quay.x - spawn.x, quay.z - spawn.z)).toBeLessThan(40);
+    const pads = board.plots.filter((p) => p.class === "cart_pad");
+    expect(pads.some((p) => Math.hypot(p.x - quay.x, p.z - quay.z) < 50)).toBe(true);
+    expect(lots.every((p) => p.id === "south-unit-" + p.buildingId)).toBe(true);
   });
 
   it("seeds tiny $750 cart pads on both sides of Island Hwy", () => {
