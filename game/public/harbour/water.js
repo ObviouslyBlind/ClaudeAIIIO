@@ -115,9 +115,12 @@ function stashRest(mesh) {
  * Cheap harbour chop. Far ocean is a tessellated quad below the basins.
  * Live patches stay on the water, not over the town dirt.
  */
+let waterFrame = 0;
 export function tickHarbourWater(meshes, t) {
   if (!meshes || !meshes.length) return;
   const time = Number(t) || 0;
+  const recomputeNormals = waterFrame % 4 === 0;
+  waterFrame += 1;
   for (const mesh of meshes) {
     const rest = mesh.userData && mesh.userData.waterRest;
     const pos = mesh.geometry && mesh.geometry.attributes && mesh.geometry.attributes.position;
@@ -134,7 +137,9 @@ export function tickHarbourWater(meshes, t) {
         amp * 0.55 * Math.sin(y * 0.09 - time * 1.05);
     }
     pos.needsUpdate = true;
-    mesh.geometry.computeVertexNormals();
+    // Wave amplitude is tiny relative to basin size, so per-frame normal
+    // rebuilds were pure CPU waste — refresh them a few times a second.
+    if (recomputeNormals) mesh.geometry.computeVertexNormals();
   }
 }
 

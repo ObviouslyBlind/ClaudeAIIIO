@@ -913,7 +913,7 @@ export function createTaxi({
     attachPlayer();
     openOverlay();
     setRide(true);
-    setStatus("Taxi collected you. Tap a stop, or Exit taxi..");
+    setStatus("Taxi collected you. Tap a stop, or Exit taxi.");
     return true;
   }
 
@@ -1009,7 +1009,7 @@ export function createTaxi({
     }
     if (mode === "boarded" || mode === "hauling") {
       openOverlay();
-      setStatus("Still in the taxi. Tap a stop, or Exit taxi..");
+      setStatus("Still in the taxi. Tap a stop, or Exit taxi.");
       return;
     }
     if (mode === "coming" || mode === "waiting") return;
@@ -1164,7 +1164,7 @@ export function createTaxi({
   if (overlayExit) {
     overlayExit.addEventListener("click", () => {
       hopOut();
-      setStatus("Out of the taxi..");
+      setStatus("Out of the taxi.");
     });
   }
 

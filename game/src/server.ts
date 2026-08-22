@@ -1,6 +1,6 @@
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
-import { extname, join } from "node:path";
+import { extname, join, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { GOOD_IDS } from "./goods.ts";
 import { createLandBoard, developPlot, leasePlot, STARTER_CASH } from "./land.ts";
@@ -163,7 +163,14 @@ async function readJsonBody(req: { [Symbol.asyncIterator]: () => AsyncIterator<u
 }
 
 const server = createServer(async (req, res) => {
-  const url = new URL(req.url ?? "/", `http://${req.headers.host ?? "localhost"}`);
+  let url: URL;
+  try {
+    url = new URL(req.url ?? "/", `http://${req.headers.host ?? "localhost"}`);
+  } catch {
+    res.writeHead(400);
+    res.end("bad request");
+    return;
+  }
 
   if (req.method === "GET" && url.pathname === "/api/statutes") {
     json(res, 200, {
@@ -716,7 +723,7 @@ const server = createServer(async (req, res) => {
   const pathname = resolvePublicPath(url.pathname);
 
   let filePath = join(publicDir, pathname);
-  if (!filePath.startsWith(publicDir)) {
+  if (!filePath.startsWith(publicDir + sep) && filePath !== publicDir) {
     res.writeHead(403);
     res.end("forbidden");
     return;

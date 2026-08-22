@@ -25,7 +25,7 @@ import {
   WALK_SPEED_MPS,
 } from "./walk-plan.js";
 import { makeStreetCart, makeCrate, makeVendor, detachVendor, findVendor, VENDOR_LOCAL } from "./cart.js";
-import { playPaperBuy } from "./paper-sfx.js";
+import { playPaperBuy, playClick, playStart, unlockAudio } from "./paper-sfx.js";
 import { createWalkPath } from "./walk-path.js";
 import { mountChrome } from "./chrome.js";
 import { siteClassForUse } from "./site-menu.js";
@@ -85,6 +85,10 @@ if (btnExit) btnExit.hidden = true;
 function bootFail(err) {
   const msg = err && err.message ? err.message : String(err);
   if (statusEl) statusEl.textContent = "BOOT FAIL: " + msg;
+  const veilHint = document.getElementById("boot-hint");
+  const playBtn = document.getElementById("boot-play");
+  if (veilHint) veilHint.textContent = "Boot failed: " + msg;
+  if (playBtn) playBtn.textContent = "Error — reload";
   console.error(err);
 }
 
@@ -1136,8 +1140,12 @@ function catalogLabel(id) {
   return hit ? hit.label : id;
 }
 
+let lastHudPaintMs = 0;
 function refreshHud() {
   if (!map) return;
+  const now = performance.now();
+  if (now - lastHudPaintMs < 200) return;
+  lastHudPaintMs = now;
   cashEl.textContent = "Cash $" + money(map.visitor.cash);
   if (staffHud) staffHud.sync();
   const inside = interior && interior.isInside();
@@ -1804,9 +1812,9 @@ function showLandCard(p) {
     onSell: p.owner === "visitor" ? () => sellOwnedPlot(p.id) : null,
     onPickup: stand ? () => pickupCart(stand.id) : null,
   });
-  if (!p.owner) setStatus((p.name || "This lot") + " · do you want to buy it?.");
-  else if (p.owner === "visitor") setStatus("Yours..");
-  else setStatus("This land is taken..");
+  if (!p.owner) setStatus((p.name || "This lot") + " · want to buy it?");
+  else if (p.owner === "visitor") setStatus("Yours.");
+  else setStatus("This land is taken.");
   return true;
 }
 
@@ -2129,7 +2137,7 @@ function onPointer(ev) {
     if (id && showCrateCard(id)) return;
   }
   if (vanHit && viewer === "logistics") {
-    setStatus("Van on the paved road. Crate drops on the kerb..");
+    setStatus("Van on the paved road. Crate drops on the kerb.");
     return;
   }
   if (buildingHit && viewer === "world") {
@@ -2400,13 +2408,36 @@ function tick(dt) {
 }
 
 let loopStarted = false;
+/**
+ * Weak-laptop adaptive resolution. EMA of frame time steers the render
+ * scale between 1.5 and 0.75; a 60 fps-class GPU never leaves full res.
+ */
+const RES_MAX = Math.min(window.devicePixelRatio || 1, 1.5);
+const RES_MIN = 0.75;
+let resScale = RES_MAX;
+let frameEmaMs = 16.7;
+function adaptResolution(dt) {
+  frameEmaMs = frameEmaMs * 0.92 + dt * 1000 * 0.08;
+  if (!renderer) return;
+  if (frameEmaMs > 34 && resScale > RES_MIN) {
+    resScale = Math.max(RES_MIN, resScale - 0.125);
+    renderer.setPixelRatio(resScale);
+    frameEmaMs = 24;
+  } else if (frameEmaMs < 17.5 && resScale < RES_MAX) {
+    resScale = Math.min(RES_MAX, resScale + 0.125);
+    renderer.setPixelRatio(resScale);
+    frameEmaMs = 22;
+  }
+}
 function startLoop() {
   if (!renderer || loopStarted) return;
   loopStarted = true;
+  renderer.setPixelRatio(RES_MAX);
   renderer.setAnimationLoop(() => {
     const dt = Math.min(0.05, clock.getDelta());
     try {
       tick(dt);
+      adaptResolution(dt);
     } catch (err) {
       console.error(err);
     }
@@ -2886,10 +2917,20 @@ async function boot() {
   }
   void loadSheetHuds();
   void loadTrickleDressing();
+  harbourBootReady();
+}
+
+/** Flip the loading veil from "Loading…" to a clickable Play button. */
+function harbourBootReady() {
+  const btn = document.getElementById("boot-play");
+  if (!btn || !btn.disabled) return;
+  btn.disabled = false;
+  btn.textContent = "Play";
+  const hint = document.getElementById("boot-hint");
+  if (hint) hint.textContent = "The harbour is ready.";
 }
 
 canvas.addEventListener("pointerup", onPointer);
-canvas.addEventListener("click", onPointer);
 canvas.addEventListener("pointermove", (ev) => {
   aimPointer(ev);
   if (chromeHud && chromeHud.isPlacing && chromeHud.isPlacing()) {
@@ -2960,16 +3001,32 @@ if (btnLease) {
     if (p) askToBuy(p);
   });
 }
-btnDevelop.addEventListener("click", openCatalog);
+btnDevelop.addEventListener("click", () => {
+  playClick();
+  openCatalog();
+});
 if (btnTaxi) {
   btnTaxi.addEventListener("click", async () => {
+    playClick();
     const t = await ensureTaxi();
     if (t && typeof t.call === "function") t.call();
+  });
+}
+const bootPlayBtn = document.getElementById("boot-play");
+if (bootPlayBtn) {
+  bootPlayBtn.addEventListener("click", () => {
+    if (bootPlayBtn.disabled) return;
+    unlockAudio();
+    playStart();
+    const veil = document.getElementById("boot-veil");
+    if (veil) veil.classList.add("is-hidden");
+    setStatus("Welcome to 2Isles. Tap the dirt to walk.");
   });
 }
 if (btnEnter) {
   btnEnter.addEventListener("click", () => {
     if (!selected || !map) return;
+    playClick();
     const p = map.plots.find((x) => x.id === selected);
     if (p) enterPlot(p);
   });
@@ -2982,11 +3039,14 @@ if (btnExit) {
     }
     if (taxi && typeof taxi.hopOut === "function" && taxi.riding && taxi.riding()) {
       taxi.hopOut();
-      setStatus("Out of the taxi..");
+      setStatus("Out of the taxi.");
     }
   });
 }
-btnFerry.addEventListener("click", ferry);
+btnFerry.addEventListener("click", () => {
+  playClick();
+  ferry();
+});
 window.addEventListener("resize", onResize);
 scene.add(sun.target);
 

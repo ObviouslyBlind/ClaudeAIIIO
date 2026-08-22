@@ -16,6 +16,72 @@
         height: 100%;
         background: #7ec8d4;
       }
+      #boot-veil {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        background: linear-gradient(180deg, #0e4a55 0%, #10525c 55%, #1d7a86 100%);
+        color: #f4efe4;
+        font-family: "Big Shoulders", "Red Hat Text", system-ui, sans-serif;
+        text-align: center;
+        transition: opacity 0.45s ease;
+      }
+      #boot-veil.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+      #boot-veil .boot-mark {
+        width: 84px;
+        height: 48px;
+        opacity: 0.9;
+      }
+      #boot-veil h1.boot-title {
+        margin: 0;
+        font-size: clamp(44px, 8vw, 88px);
+        letter-spacing: 0.04em;
+        line-height: 1;
+      }
+      #boot-veil .boot-sub {
+        margin: 0;
+        font-size: clamp(12px, 2vw, 15px);
+        letter-spacing: 0.28em;
+        text-transform: uppercase;
+        opacity: 0.75;
+      }
+      #boot-play {
+        margin-top: 18px;
+        min-width: 220px;
+        padding: 14px 44px;
+        font: inherit;
+        font-size: clamp(20px, 3vw, 28px);
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #0e4a55;
+        background: #f4efe4;
+        border: none;
+        border-radius: 999px;
+        cursor: pointer;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+      }
+      #boot-play:disabled {
+        opacity: 0.45;
+        cursor: wait;
+      }
+      #boot-play:not(:disabled):hover {
+        transform: translateY(-1px);
+      }
+      #boot-hint {
+        margin: 4px 0 0;
+        min-height: 1.2em;
+        font-size: 13px;
+        letter-spacing: 0.08em;
+        opacity: 0.7;
+      }
     </style>
   </head>
   <body>
@@ -141,6 +207,16 @@
     </div>
     <p id="taxi-eta" class="taxi-eta" hidden aria-live="polite"></p>
 
+    <div id="boot-veil">
+      <svg class="boot-mark" viewBox="0 0 28 16" aria-hidden="true">
+        <path fill="currentColor" d="M2 14 9 3.5 14 14H2zm10 0 8-12 8 12H12z"/>
+      </svg>
+      <h1 class="boot-title">2Isles</h1>
+      <p class="boot-sub">PAPER · SIMULATED · HARBOUR</p>
+      <button type="button" id="boot-play" disabled>Loading…</button>
+      <p id="boot-hint">Building the harbour…</p>
+    </div>
+
     <div id="taxi-map" class="taxi-map" hidden>
       <p class="taxi-map-badge">Taxi</p>
       <p class="taxi-map-hint">Tap a rough point. Ride stays on paved. Dirt forbidden.</p>
@@ -196,6 +272,10 @@
         }
         function fail(msg) {
           if (status && stillBooting()) status.textContent = "BOOT FAIL: " + msg;
+          var hint = document.getElementById("boot-hint");
+          var btn = document.getElementById("boot-play");
+          if (hint) hint.textContent = "Boot failed: " + msg;
+          if (btn) btn.textContent = "Error — reload";
         }
         window.addEventListener(
           "error",

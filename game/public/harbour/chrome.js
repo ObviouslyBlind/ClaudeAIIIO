@@ -664,13 +664,13 @@ export function mountChrome(opts) {
           if (opts.setStatus) opts.setStatus("Buy failed: " + (data && data.reason));
           return;
         }
-        playPaperBuy();
         if (data && data.snapshot && data.snapshot.visitor) {
           playGen += 1;
           play.cash = data.snapshot.visitor.cash;
           play.cart = data.snapshot.visitor.cart || [];
         }
       }
+      playPaperBuy();
     }
     marketBasket = [];
     marketView = "shop";
